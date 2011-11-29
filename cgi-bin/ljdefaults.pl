@@ -392,6 +392,7 @@ use strict;
                        delcomment     => "delcomment.bml",
                        talkscreen     => "talkscreen.bml",
                        spamcomment    => "spamcomment.bml",
+                       talkmulti      => "talkmulti.bml",
                        controlstrip   => "tools/endpoints/controlstrip.bml",
                        ctxpopup       => "tools/endpoints/ctxpopup.bml",
                        changerelation => "tools/endpoints/changerelation.bml",

@@ -12,9 +12,15 @@
     my $u = LJ::User->remote;
 
     LJ::need_res('stc/lj_base-app.css',
-                 'stc/imgupload.css',
                  'stc/display_none.css',
                  'js/photobucket_jw.js');
+
+    if ($GET{new_comments}) {
+        LJ::need_res('stc/imgupload_schemius.css');
+    } else {
+        LJ::need_res('stc/imgupload.css');
+    }
+
 
     if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";

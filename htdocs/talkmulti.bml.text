@@ -20,7 +20,11 @@ if you would like to screen, unscreen, or delete the comments.
 
 .error.privs.delete=You do not have permission to delete these comments.
 
+.error.privs.freeze=You do not have permission to freeze these comments.
+
 .error.privs.screen=You do not have permission to screen these comments.
+
+.error.privs.unfreeze=You do not have permission to unfreeze these comments.
 
 .error.privs.unscreen=You do not have permission to unscreen these comments.
 

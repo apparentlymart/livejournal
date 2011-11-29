@@ -1198,14 +1198,17 @@ sub fixup_logitem_replycount {
     LJ::MemCache::set($rp_memkey, int($ct));
 }
 
-# LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)
+# LJ::Talk::load_comments_tree($u, $remote, $nodetype, $nodeid, $opts)
 #
 # nodetype: "L" (for log) ... nothing else has been used
 # noteid: the jitemid for log.
 # opts keys:
 #   thread -- jtalkid to thread from ($init->{'thread'} or int($GET{'thread'} / 256))
 #   page -- $GET{'page'}
+#   page_size
 #   view -- $GET{'view'} (picks page containing view's ditemid)
+#   viewall
+#   showspam
 #   flat -- boolean:  if set, threading isn't done, and it's just a flat chrono view
 #   up -- [optional] hashref of user object who posted the thing being replied to
 #         only used to make things visible which would otherwise be screened?
@@ -1219,9 +1222,6 @@ sub fixup_logitem_replycount {
 #   out_pagesize:  size of each page
 #   out_items:  number of total top level items
 #
-#   userpicref -- hashref to load userpics into, or undef to
-#                 not load them.
-#   userref -- hashref to load users into, keyed by userid
 #   init_comobj -- init or not LJ::Comment object for every loaded raw data of a comment.
 #                  by default it is On (true), but in this case it produces a huge overhead:
 #                       LJ::Comment class stores in memory all comment instances and when load 
@@ -1231,33 +1231,37 @@ sub fixup_logitem_replycount {
 #                       To disable this unexpected changes set this option to true value.
 #
 # returns:
-#   array of hashrefs containing keys:
-#      - talkid (jtalkid)
-#      - posterid (or zero for anon)
-#      - userpost (string, or blank if anon)
-#      - upost    ($u object, or undef if anon)
-#      - datepost (mysql format)
-#      - parenttalkid (or zero for top-level)
-#      - parenttalkid_actual (set when the $flat mode is set, in which case parenttalkid is always faked to be 0)
-#      - state ("A"=approved, "S"=screened, "D"=deleted stub)
-#      - userpic number
-#      - picid   (if userpicref AND userref were given)
-#      - subject
-#      - body
-#      - props => { propname => value, ... }
-#      - children => [ hashrefs like these ]
-#      - _loaded => 1 (if fully loaded, subject & body)
-#        unknown items will never be _loaded
-#      - _show => {0|1}, if item is to be ideally shown (0 if deleted or screened)
-sub load_comments
+#   ( $posts, $top_replies, $children ), where
+#
+#   $posts       - hashref {
+#                      talkid => {
+#                          talkid        => integer (jtalkid),
+#                          parenttalkid  => integer (zero for top-level),
+#                          posterid      => integer (zero for anon),
+#                          datepost_unix => integer unix timestamp  1295268144,
+#                          datepost      => string 'YYYY-MM-DD hh:mm:ss',
+#                          state         => char ("A"=approved, "S"=screened, "D"=deleted stub, "B"=spam)
+#                          has_children  => boolean - true, if comment has children (need for 'flat' mode)
+#                          children      => arrayref of hashrefs like this,
+#                          _show         => boolean (if item is to be ideally shown, 0 - if deleted or screened),
+#                     }
+#                 }
+#   $top_replies - arrayref [ comment ids on the top level at the same page, ... ]
+#   $children    - hashref { talkid => [ list of childred ids ] }
+sub load_comments_tree
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
 
     my $n = $u->{'clusterid'};
     my $viewall = $opts->{viewall};
 
-    my $gtd_opts = {init_comobj => $opts->{init_comobj}};
+    my $gtd_opts = { init_comobj => $opts->{init_comobj} };
     my $posts = get_talk_data($u, $nodetype, $nodeid, $gtd_opts);  # hashref, talkid -> talk2 row, or undef
+
+    unless ($posts) {
+        $opts->{'out_error'} = "nodb";
+        return;
+    }
 
     if (LJ::is_enabled('spam_button') && $opts->{showspam}) {
         while ( my ($commentid, $comment) = each %$posts ) {
@@ -1269,13 +1273,8 @@ sub load_comments
         }
     }
     
-    unless ($posts) {
-        $opts->{'out_error'} = "nodb";
-        return;
-    }
-    my %users_to_load;  # userid -> 1
-    my %posts_to_load;  # talkid -> 1 
-    my %children;       # talkid -> [ childenids+ ]
+    my %children; # talkid -> [ childenids+ ]
+    my %has_children; # talkid -> 1 or undef
 
     my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
 
@@ -1284,6 +1283,9 @@ sub load_comments
         my %showable_children;  # $id -> $count
 
         foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %$posts) {
+
+            $has_children{$post->{'parenttalkid'}} = 1;
+            $post->{'has_children'} = $has_children{$post->{'talkid'}};
 
             # kill the threading in flat mode
             if ($opts->{'flat'}) {
@@ -1340,7 +1342,6 @@ sub load_comments
     }
 
     my $page_size = $opts->{page_size} || $LJ::TALK_PAGE_SIZE || 25;
-    my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
     my $threading_point = $LJ::TALK_THREAD_POINT || 50;
 
     # we let the page size initially get bigger than normal for awhile,
@@ -1373,11 +1374,92 @@ sub load_comments
     $page = $page < 1 ? 1 : $page > $pages ? $pages : $page;
 
     my $itemfirst = $page_size * ($page-1) + 1;
-    my $itemlast = $page==$pages ? $top_replies : ($page_size * $page);
+    my $itemlast = $page == $pages ? $top_replies : ($page_size * $page);
 
     @top_replies = @top_replies[$itemfirst-1 .. $itemlast-1];
 
-    map { $posts_to_load{$_} = 1 } @top_replies;
+    $opts->{'out_pages'} = $pages;
+    $opts->{'out_page'} = $page;
+    $opts->{'out_itemfirst'} = $itemfirst;
+    $opts->{'out_itemlast'} = $itemlast;
+    $opts->{'out_pagesize'} = $page_size;
+    $opts->{'out_items'} = $top_replies;
+
+    return ( $posts, \@top_replies, \%children );
+}
+
+# LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)
+#
+# nodetype: "L" (for log) ... nothing else has been used
+# noteid: the jitemid for log.
+# opts keys:
+#   thread -- jtalkid to thread from ($init->{'thread'} or int($GET{'thread'} / 256))
+#   page -- $GET{'page'}
+#   view -- $GET{'view'} (picks page containing view's ditemid)
+#   flat -- boolean:  if set, threading isn't done, and it's just a flat chrono view
+#   up -- [optional] hashref of user object who posted the thing being replied to
+#         only used to make things visible which would otherwise be screened?
+#   show_parents : boolean, if thread is specified, then also show it's parents.
+#   out_error -- set by us if there's an error code:
+#        nodb:  database unavailable
+#        noposts:  no posts to load
+#   out_pages:  number of pages
+#   out_page:  page number being viewed
+#   out_itemfirst:  first comment number on page (1-based, not db numbers)
+#   out_itemlast:  last comment number on page (1-based, not db numbers)
+#   out_pagesize:  size of each page
+#   out_items:  number of total top level items
+#
+#   userpicref -- hashref to load userpics into, or undef to
+#                 not load them.
+#   userref -- hashref to load users into, keyed by userid
+#   init_comobj -- init or not LJ::Comment object for every loaded raw data of a comment.
+#                  by default it is On (true), but in this case it produces a huge overhead:
+#                       LJ::Comment class stores in memory all comment instances and when load
+#                       property for any of a comment LJ::Comment loads all properties for ALL inited comments.
+#                  (!) provide 'init_comobj => 0' wherever it is possible
+#   strict_page_size -- under some circumstances page size (defined in 'page_size' option') may be changed.
+#                       To disable this unexpected changes set this option to true value.
+#
+# returns:
+#   array of hashrefs containing keys:
+#      - talkid (jtalkid)
+#      - posterid (or zero for anon)
+#      - userpost (string, or blank if anon)
+#      - upost    ($u object, or undef if anon)
+#      - datepost (mysql format)
+#      - parenttalkid (or zero for top-level)
+#      - parenttalkid_actual (set when the $flat mode is set, in which case parenttalkid is always faked to be 0)
+#      - state ("A"=approved, "S"=screened, "D"=deleted stub)
+#      - userpic number
+#      - picid   (if userpicref AND userref were given)
+#      - subject
+#      - body
+#      - props => { propname => value, ... }
+#      - children => [ hashrefs like these ]
+#      - _loaded => 1 (if fully loaded, subject & body)
+#        unknown items will never be _loaded
+#      - _show => {0|1}, if item is to be ideally shown (0 if deleted or screened)
+sub load_comments
+{
+    my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
+
+    # paranoic code
+    $opts->{'out_error'} = undef;
+
+    my ($posts, $top_replies, $children) = load_comments_tree($u, $remote, $nodetype, $nodeid, $opts);
+
+    if ($opts->{'out_error'}) {
+        return;
+    }
+
+    # TODO: remove this
+    my $page_size = $opts->{'out_pagesize'};
+
+    my %users_to_load;  # userid -> 1
+    my %posts_to_load;  # talkid -> 1
+
+    map { $posts_to_load{$_} = 1 } @$top_replies;
 
     # mark child posts of the top-level to load, deeper
     # and deeper until we've hit the page size.  if too many loaded,
@@ -1387,9 +1469,9 @@ sub load_comments
     unless ($opts->{expand_strategy}) {
         # the default strategy is to show first replies to top-level
         # comments
-        foreach my $itemid (@top_replies) {
-            next unless $children{$itemid};
-            $posts_to_load{$children{$itemid}->[0]} = 1;
+        foreach my $itemid (@$top_replies) {
+            next unless $children->{$itemid};
+            $posts_to_load{$children->{$itemid}->[0]} = 1;
         }
     }
 
@@ -1402,18 +1484,18 @@ sub load_comments
 
             foreach my $itemid (@$item_ids){
                 $posts_to_load{$itemid} = 1;
-                next unless $children{$itemid};
+                next unless $children->{$itemid};
 
                 ## expand next level it there are comments
-                $fun->($fun, $cur_level+1, $children{$itemid});
+                $fun->($fun, $cur_level+1, $children->{$itemid});
             }
         };
 
         ## go through first level
-        foreach my $itemid (@top_replies){
-            next unless $children{$itemid};
+        foreach my $itemid (@$top_replies){
+            next unless $children->{$itemid};
             ## expand next (second) level
-            $expand->($expand, 2, $children{$itemid});
+            $expand->($expand, 2, $children->{$itemid});
         }
     }
 
@@ -1422,11 +1504,11 @@ sub load_comments
     # we only expand five first replies to every first reply to
     # any top-level comment (yeah, this is tricky, watch me)
     if ($opts->{'expand_strategy'} eq 'detailed') {
-        foreach my $itemid_l1 (@top_replies) {
-            next unless $children{$itemid_l1};
+        foreach my $itemid_l1 (@$top_replies) {
+            next unless $children->{$itemid_l1};
 
             my $counter_l2 = 1;
-            foreach my $itemid_l2 (@{$children{$itemid_l1}}) {
+            foreach my $itemid_l2 (@{$children->{$itemid_l1}}) {
                 # we're handling a second-level comment here
 
                 # the comment itself is always shown
@@ -1437,12 +1519,12 @@ sub load_comments
                 next if $counter_l2 > 1;
 
                 # if there is no children at all, we don't care either
-                next unless $children{$itemid_l2};
+                next unless $children->{$itemid_l2};
 
                 # well, let's handle children now
                 # we're copying a list here deliberately, so that
                 # later on, we can splice() to modify the copy
-                my @children = @{$children{$itemid_l2}};
+                my @children = @{$children->{$itemid_l2}};
                 map { $posts_to_load{$_} = 1 } splice(@children, 0, 5);
 
                 $counter_l2++;
@@ -1453,9 +1535,9 @@ sub load_comments
     # load first level and 3 first replies(or replies to replies)
     if ($opts->{'expand_strategy'} eq 'mobile') {
         undef @check_for_children;
-        foreach my $first_itemid (@top_replies) {
-            next unless $children{$first_itemid};
-            my @childrens = @{ $children{$first_itemid} };
+        foreach my $first_itemid (@$top_replies) {
+            next unless $children->{$first_itemid};
+            my @childrens = @{ $children->{$first_itemid} };
             my $load = $opts->{'expand_child'} || 3;
             while( @childrens && $load > 0 ){
                 if ( @childrens >= $load ){
@@ -1464,17 +1546,31 @@ sub load_comments
                 }else{
                     map { $posts_to_load{$_} = 1 }  @childrens;
                     $load -= @childrens;
-                    @childrens = map {$children{$_}?@{$children{$_}}:()} @childrens;
+                    @childrens = map { $children->{$_} ? @{$children->{$_}} : () } @childrens;
                 }
             }
         }        
     }
     
+    my $thread = $opts->{'thread'}+0;
+    if ($thread && $opts->{show_parents}) {
+        while (my $parent_thread = $posts->{$thread}->{'parenttalkid'}) {
+            $children->{$parent_thread} = [ $thread ];
+            $posts->{$parent_thread}->{'children'} = [ $posts->{$thread} ];
+            $posts->{$parent_thread}->{'_collapsed'} = 1;
+            $posts_to_load{$parent_thread} = 1;
+            $thread = $parent_thread;
+        }
+        $top_replies = [ $thread ];
+    }
+
+    my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
+
     my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
-        next unless defined $children{$cfc};
-        foreach my $child (@{$children{$cfc}}) {
+        next unless defined $children->{$cfc};
+        foreach my $child (@{$children->{$cfc}}) {
             if (scalar(keys %posts_to_load) < $page_size || $opts->{expand_all}) {
                 $posts_to_load{$child} = 1;
             }
@@ -1490,13 +1586,6 @@ sub load_comments
             push @check_for_children, $child;
         }
     }
-
-    $opts->{'out_pages'} = $pages;
-    $opts->{'out_page'} = $page;
-    $opts->{'out_itemfirst'} = $itemfirst;
-    $opts->{'out_itemlast'} = $itemlast;
-    $opts->{'out_pagesize'} = $page_size;
-    $opts->{'out_items'} = $top_replies;
 
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
@@ -1597,7 +1686,7 @@ sub load_comments
             LJ::load_userpics($opts->{'userpicref'}, \@load_pic);
         }
     }
-    return map { $posts->{$_} } @top_replies;
+    return map { $posts->{$_} } @$top_replies;
 }
 
 # XXX these strings should be in talk, but moving them means we have
@@ -1606,7 +1695,19 @@ my $SC = '/talkpost_do.bml';
 
 sub resources_for_talkform {
     LJ::need_res('stc/display_none.css');
-    LJ::need_res('js/jquery/jquery.lj.authtype.js');
+    LJ::need_res(qw(
+        js/jquery/jquery.lj.subjecticons.js
+        js/jquery/jquery.lj.commentator.js
+        js/jquery/jquery.lj.quotescreator.js
+    ));
+    LJ::need_res(qw(
+        js/jquery/jquery.lj.authtype.js
+        js/jquery/jquery.lj.userpicker.js
+        js/jquery/jquery.lj.commentform.js
+        js/jquery/jquery.easing.js
+    ));
+    LJ::need_res( {condition => 'IE'}, 'js/jquery/jquery.ie6multipleclass.min.js');
+    LJ::need_string(qw(/talkpost_do.bml.quote.info.message));
 }
 
 sub talkform {

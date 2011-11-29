@@ -31,6 +31,7 @@ LiveJournal.run_hook = function () {
 LiveJournal.initPage = function () {
 	//register system hooks
 	LiveJournal.register_hook( 'update_wallet_balance', LiveJournal.updateWalletBalance );
+	LiveJournal.register_hook( 'xdr/message', LiveJournal.processXdr );
 
 	// set up various handlers for every page
 	LiveJournal.initInboxUpdate();
@@ -87,6 +88,27 @@ LiveJournal.initNotificationStream = function(force) {
 	}
 
 	requestRound();
+};
+
+/**
+ * Translate message from xdreceiver. The function will eventually be run
+ *    from xdreceiver.html helper frame to send messages between different domains.
+ *
+ * @param {Object} message Object with the message. Object should always contain type field with event name
+ */
+LiveJournal.processXdr = function(message) {
+	if (message.type) {
+		var type = decodeURIComponent(message.type);
+	} else {
+		return;
+	}
+
+	var messageCopy = {};
+	for (var name in message) if (message.hasOwnProperty(name) && name !== 'type') {
+		messageCopy[name] = decodeURIComponent(message[name]);
+	}
+
+	LiveJournal.run_hook(type, messageCopy);
 };
 
 // Set up a timer to keep the inbox count updated

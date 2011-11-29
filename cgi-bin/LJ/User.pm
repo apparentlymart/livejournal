@@ -7677,6 +7677,13 @@ sub set_email {
     $cache->{'_email'} = $email;
 }
 
+sub get_uids {
+    my @friends_names = @_;
+    my @ret;
+    push @ret, grep { $_ } map { LJ::load_user($_) } @friends_names;
+    return @ret;
+}
+
 sub set_password {
     my ($userid, $password) = @_;
 

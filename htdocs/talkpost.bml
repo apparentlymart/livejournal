@@ -11,7 +11,11 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    LJ::Talk::resources_for_talkform();
+    if ( LJ::is_enabled('new_comments') ) {
+        LJ::need_res( LJ::Widget::Form->need_res() );
+    } else {
+        LJ::Talk::resources_for_talkform();
+    }
 
     my $remote = LJ::get_remote();
     my $errtxt;
@@ -140,6 +144,43 @@ body<=
     my $ditemid = $init->{'ditemid'};
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
     my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+
+    my $get_styleinfo = sub {
+        my $journal = shift;
+
+        ### Load necessary props
+        my @needed_props = ("stylesys", "s2_style");
+        LJ::load_user_props($journal, @needed_props);
+
+        my $forceflag = 0;
+        LJ::run_hooks("force_s1", $journal, \$forceflag);
+        if ( !$forceflag && $journal->{'stylesys'} == 2 ) {
+            return (2, $journal->{'s2_style'});
+        }
+        # no special case and not s2, fall through to s1
+        return (1, 0);
+    };
+
+    my $remote = LJ::get_remote();
+    my $style_u = $u;
+    my $stylemine = $GET{'style'} eq "mine" ? "style=mine" : "";
+
+    if ($remote && ($stylemine || $remote->opt_stylealwaysmine)) {
+        $style_u = $remote;
+    }
+
+    my ($stylesys, $styleid) = $get_styleinfo->($style_u);
+
+    my $use_s1 = 1;
+    my $ctx = undef;
+    if ($stylesys == 2) {
+        $ctx = LJ::S2::s2_context('UNUSED', $styleid);
+        $LJ::S2::CURR_CTX = $ctx;
+
+        $use_s1 = 0 if !$ctx->[S2::PROPS]->{'view_entry_disabled'} &&
+                       LJ::get_cap($style_u, "s2viewentry");
+    }
+
 
     $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
@@ -375,13 +416,16 @@ body<=
         $ret .= "<font face=\"Arial,Helvetica\" size='+1'><i><b>$cleansubject</b></i></font><br />\n";
     }
 
+    my $new_comments = ($use_s1 and LJ::is_enabled('new_comments'))? 1 : 0;
+
     $ret .= $event;
     $ret .= "</div>";
 
-    $ret .= "<br clear='both' /><hr size='2' align='center' />";
+    $ret .= "<br clear='both' />". ($new_comments? "" : "<hr size='2' align='center' />");
 
     my $qotd = 0;
     $qotd = $entry->prop("qotdid") if $entry;
+
 
     my @verticals = $entry->verticals_list_for_ad;
     if (@verticals) {
@@ -396,7 +440,7 @@ body<=
     });
     if ($ad) {
         $ret .= $ad;
-        $ret .= "<hr width='100%' size='2' align='center' />";
+        $ret .= "<hr width='100%' size='2' align='center' />" unless $new_comments;
     }
 
     my $jarg = "journal=$u->{'user'}&amp;";
@@ -410,10 +454,10 @@ body<=
 		$readlink_text = BML::ml("talk.commentsread.nocomments");
 	}
 
-    $ret .= "<p align='center' class='lesstop' id='add_comment'><b>(<a href=\"$readurl#comments\">$readlink_text</a>)</b></p>";
+    $ret .= "<p align='center' class='lesstop' id='add_comment'><b>(<a href=\"$readurl#comments\">$readlink_text</a>)</b></p>" unless $new_comments;
 
     my $h1title = $editid ? $ML{'.editresponse'} : $ML{'.postresponse'};
-    $ret .= BML::fill_template("H1", { DATA => $h1title });
+    $ret .= BML::fill_template("H1", { DATA => $h1title }) unless $new_comments;
 
     my $talkformprops = {
         'remote'    => $remote,
@@ -425,13 +469,27 @@ body<=
         'form'      => \%FORM,
         'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $FORM{body}, $ditemid),
     };
-    $ret .= LJ::Talk::talkform($talkformprops);
+
+    if ( $new_comments ) {
+        $ret .= LJ::Widget::Form->render_body(
+            entry        => $entry,
+            standalone   => 1,
+            stylemine    => $GET{'style'} eq 'mine'? 1 : 0,
+            replyto      => $init->{'replyto'},
+            editid       => $editid,
+            form         => \%FORM,
+            parpost      => $parpost,
+            parenttalkid => $init->{'replyto'}, #ref $parpost eq 'HASH'? $init->{'ditemid'} : 0,
+        );
+    } else {
+        $ret .= LJ::Talk::talkform($talkformprops);
+    }
 
     return $ret if ($talkformprops->{'err'});
 
     my $ad = LJ::get_ads({ location => 'bml.talk.bottom', journalu => $u, s1_view => 'reply', });
     if ($ad) {
-        $ret .= "<hr width='100%' size='2' align='center' />";
+        $ret .= "<hr width='100%' size='2' align='center' />" unless $new_comments;
         $ret .= qq[<div style='width:728px; margin: auto;'>$ad</div>];
     }
 

@@ -279,3 +279,28 @@ jQuery.fn.overlay = function(opts){
 		}
 	});
 };
+
+/**
+ * Function assures that callback will run not faster then minDelay.
+ *
+ * @param {Function} callback A callback to run.
+ * @param {Number} minDelay Minimum delay in ms.
+ *
+ * @return {Function} Callback wrapper to use as a collback in your code.
+ */
+jQuery.delayedCallback = function(callback, minDelay) {
+	var callCount = 2,
+		results,
+		checkFinish = function() {
+			callCount--;
+			if (callCount === 0) {
+				callback.apply(null, results);
+			}
+		}
+
+	setTimeout(checkFinish, minDelay);
+	return function() {
+		results = [].slice.apply(arguments);
+		checkFinish();
+	};
+};

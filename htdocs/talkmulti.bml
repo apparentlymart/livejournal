@@ -123,6 +123,10 @@
         if $mode eq "delete" && ! LJ::Talk::can_delete($remote, $u, $up);
     return $err->($ML{'.error.privs.delete'})
         if $mode eq 'deletespam' && ! LJ::Talk::can_mark_spam($remote, $u, $up);
+    return $err->($ML{'.error.privs.freeze'})
+        if $mode eq 'freeze' && ! LJ::Talk::can_freeze($remote, $u, $up);
+    return $err->($ML{'.error.privs.unfreeze'})
+        if $mode eq 'unfreeze' && ! LJ::Talk::can_unfreeze($remote, $u, $up);
 
     # filter our talkids down to those that are actually attached to the log2
     # specified.  also, learn the state and poster of all the items.
@@ -183,6 +187,14 @@
         LJ::Talk::screen_comment($u, $itemid, @talkids);
     } elsif ($mode eq "unspam") {
         LJ::Talk::unspam_comment($u, $itemid, @talkids);
+    } elsif ($mode eq "freeze") {
+        foreach my $comment (@talkids) {
+            LJ::Talk::freeze_thread($u, $itemid, $comment);
+        }
+    } elsif ($mode eq "unfreeze") {
+        foreach my $comment (@talkids) {
+            LJ::Talk::unfreeze_thread($u, $itemid, $comment);
+        }
     }
 
     return $ok->() if $json;

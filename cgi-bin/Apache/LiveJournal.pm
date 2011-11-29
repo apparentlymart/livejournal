@@ -1850,15 +1850,11 @@ sub journal_content
                     if ( $LJ::DISABLED{'new_comments'} ) {
                         $filename = $LJ::HOME. '/htdocs/talkread.bml';
                     } else {
-                        $filename = $LJ::HOME. '/htdocs/talkread_new.bml';
+                        $filename = $LJ::HOME. '/htdocs/talkread_v2.bml';
                     }
                 } 
             } else {
-                if ( $LJ::DISABLED{'new_comments'} ) {
-                    $filename = $LJ::HOME. '/htdocs/talkpost.bml';
-                } else {
-                    $filename = $LJ::HOME. '/htdocs/talkpost_new.bml';
-                }
+                $filename = $LJ::HOME. '/htdocs/talkpost.bml';
             }
             LJ::Request->notes("_journal" => $RQ{'user'});
             LJ::Request->notes("bml_filename" => $filename);

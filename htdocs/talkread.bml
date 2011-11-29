@@ -112,16 +112,16 @@ body<=
         $entry = LJ::DelayedEntry->get_entry_by_id($u, $delayedid);
     }
 
-    $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag") if $u->is_visible;
-    if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
-        $$head .= LJ::robot_meta_tags();
-    }
-
     unless ( ($entry && $entry->valid) || ($item && $item->{'anum'} == $init->{'anum'}) ) {
         LJ::Request->pnotes ('error' => 'e404');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
         BML::return_error_status(404);
         return;
+    }
+
+    $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag") if $u->is_visible;
+    if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
+        $$head .= LJ::robot_meta_tags();
     }
 
     my %meta = %{ $entry->extract_metadata };
