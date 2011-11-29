@@ -6,12 +6,12 @@ package Apache::LiveJournal;
 use strict;
 no warnings 'uninitialized';
 
-use LJ::Request;
-use lib "$ENV{LJHOME}/cgi-bin";
-
 use Compress::Zlib;
 use Digest::MD5 qw( md5_base64 md5_hex );
+use Carp();
 
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Request;
 use Apache::LiveJournal::Interface::Blogger;
 use Apache::LiveJournal::Interface::AtomAPI;
 use Apache::LiveJournal::Interface::S2;
@@ -76,6 +76,20 @@ foreach my $file ('redirect.dat', 'redirect-local.dat') {
     close REDIR;
 }
 
+##
+## The code below is a bit rough, it was written during DDoS attacks.
+## If $LJ::SHOW_SLOW_QUERIES is true, slow (>10 secs) requests are
+## interrupted and stacktrace is sent to error log.
+##
+$LJ::SHOW_SLOW_QUERIES = 1;
+my ($request_str, $request_start_time);
+if ($LJ::SHOW_SLOW_QUERIES) {
+    $SIG{'ALRM'} = sub {
+        my $d = time() - $request_start_time;
+        Carp::cluck("Slow request ($d): $request_str");
+    };
+}
+
 my @req_hosts;  # client IP, and/or all proxies, real or claimed
 
 # init handler (PostReadRequest)
@@ -86,6 +100,15 @@ sub handler
 
     LJ::Request->free();
     LJ::Request->init($r);
+
+    if ($LJ::SHOW_SLOW_QUERIES) {
+        my $method = LJ::Request->method;
+        my $host = LJ::Request->header_in('Host');
+        my $uri  = LJ::Request->uri;
+        $request_str = "$method http://$host$uri";
+        $request_start_time = time();
+        alarm(10);
+    }
 
     BML::current_site('livejournal');
 
@@ -104,12 +127,15 @@ sub handler
     # only perform this once in case of internal redirects
     if (LJ::Request->is_initial_req) {
         LJ::Request->set_handlers(PerlCleanupHandler => [
-                                                            sub { %RQ = () },
-                                                            "Apache::LiveJournal::db_logger",
-                                                            "LJ::end_request",
-                                                            "Apache::DebateSuicide",
-                                                            sub { LJ::run_hooks("clenaup_end_request") },
-                                                        ]);
+            "Apache::LiveJournal::db_logger",
+            sub { 
+                %RQ = (); 
+                LJ::end_request();
+                LJ::run_hooks("clenaup_end_request");
+                alarm(0) if $LJ::SHOW_SLOW_QUERIES; 
+            },
+            "Apache::DebateSuicide",
+        ]);
 
         if ($LJ::TRUST_X_HEADERS) {
             # if we're behind a lite mod_proxy front-end, we need to trick future handlers
@@ -203,7 +229,6 @@ sub handler
 sub redir {
     # TODO: remove debug code
     if (@_ == 3){
-        require Carp;
         Carp::cluck("get 3 args instead of 2");
         shift @_; # assumes the first arg is a Apache->request obj.
     }
@@ -278,6 +303,7 @@ sub blocked_bot
     return LJ::Request::HTTP_PRECONDITION_FAILED;
 }
 
+ 
 sub trans {
     {
         my $r = shift;
