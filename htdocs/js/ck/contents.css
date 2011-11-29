@@ -80,10 +80,10 @@ HTML {
 	height: 78px;
 	}
 .lj-poll {
-	width:100%;
 	border: #000 1px dotted;
 	background-color: #D2D2D2;
 	font-style: italic;
+	padding:0 1em;
 	}
 .lj-like-wrap {
 	height: 44px !important;
@@ -257,3 +257,22 @@ lj\:cut {
 	font-size: 12px;
 	color: #FF0000;
 	}
+
+.rte-poll-form {
+	font-size: 13px;
+	}
+	.lj-poll-close .rte-poll {
+		display: none;
+		}
+	.lj-poll-open .rte-poll {
+		display:block;
+		}
+		.rte-poll-form H1 {
+			font-size:15px;
+			}
+		.rte-poll-form H2 {
+			font-size:14px;
+			}
+		.rte-poll-form UL {
+			list-style:none;
+			}

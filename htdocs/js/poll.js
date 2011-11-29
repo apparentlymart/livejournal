@@ -72,41 +72,43 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 
 // Poll method to generate HTML for RTE
 Poll.prototype.outputHTML = function(){
-	var html = '<form action="#"><b>Poll #xxxx</b>';
+	var html = '<form action="#" class="rte-poll-form"><h1>Poll #xxxx';
 
 	if(this.name){
 		html += ' <i>' + this.name + '</i>';
 	}
-	html += '<br />Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b>';
+	html += '</h1><p>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b></p><div class="rte-poll">';
 	for(var i = 0; i < this.questions.length; i++){
-		html += '<br /><p>' + this.questions[i].name + '</p>';
+		html += '<h2>' + this.questions[i].name + '</h2>';
 		if(this.questions[i].type == 'radio' || this.questions[i].type == 'check'){
 			var type = this.questions[i].type == 'check' ? 'checkbox' : this.questions[i].type;
+			html += '<ul>';
 			for(var j = 0; j < this.questions[i].answers.length; j++){
-				html += '<input type="' + type + '">' + this.questions[i].answers[j] + '<br />';
+				html += '<li><input type="' + type + '">' + this.questions[i].answers[j] + '</li>';
 			}
+			html += '</ul>';
 		} else if(this.questions[i].type == 'drop'){
-			html += '<select name="select_' + i + '">' + '<option value=""></option>';
+			html += '<p><select name="select_' + i + '">' + '<option value=""></option>';
 			for(var j = 0; j < this.questions[i].answers.length; j++){
 				html += '<option value="">' + this.questions[i].answers[j] + '</option>';
 			}
-			html += '</select>';
+			html += '</select></p>';
 		} else if(this.questions[i].type == 'text'){
-			html += '<input maxlength="' + this.questions[i].maxlength + '" size="' + this.questions[i]
-				.size + '" type="text"/>';
+			html += '<p><input maxlength="' + this.questions[i].maxlength + '" size="' + this.questions[i]
+				.size + '" type="text"/></p>';
 		} else if(this.questions[i].type == 'scale'){
 			html += '<table><tbody><tr align="center" valign="top">';
 			var from = Number(this.questions[i].from),
 				to = Number(this.questions[i].to),
 				by = Number(this.questions[i].by);
 			for(var j = from; j <= to; j = j + by){
-				html += '<td><input type="radio"/><br />' + j + '</td>';
+				html += '<td><input type="radio" id=' + RTEPollScaleRadio + 'j/><br /><label for=RTEPollScaleRadio' + j + '>' + j + '</label></td>';
 			}
 			html += '</tr></tbody></table>';
 		}
 	}
 
-	html += '<input type="submit" value="Submit Poll"/></form>';
+	html += '</div><p><input type="submit" value="Submit Poll"/></p></form>';
 	return encodeURIComponent(html);
 };
 
