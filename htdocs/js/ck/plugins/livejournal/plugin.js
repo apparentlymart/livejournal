@@ -196,6 +196,7 @@
 			if (!window.switchedRteOn) {
 				CKEDITOR.note.hide(true);
 			}
+
 			if (state) {
 				currentData = tempData;
 				tempData = null;
@@ -227,7 +228,7 @@
 
 		CKEDITOR.note = {
 			show: function(data, isNow) {
-				if ((!isNow && data == tempData) || window.swi) {
+				if ((!isNow && data == tempData) || window.switchedRteOn) {
 					return;
 				}
 
@@ -263,7 +264,7 @@
 		init: function(editor) {
 			function onClickFrame(evt) {
 				if (this.$ != editor.document.$) {
-					this.className = 'lj-selected';
+					this.className = (this.frame.getAttribute('lj-class') || '') + ' lj-selected';
 					new CKEDITOR.dom.selection(editor.document).selectElement(this.frame);
 				}
 
@@ -281,13 +282,10 @@
 			}
 
 			function onLoadFrame() {
-				var win = this.$.contentWindow;
-				var doc = win.document;
-				if (this.getAttribute('lj-cmd') && doc.body.scrollHeight) {
-					this.setStyle('height', doc.body.scrollHeight + 'px');
-				}
+				var win = this.$.contentWindow,
+					doc = win.document,
+					iframeBody = new CKEDITOR.dom.element.get(doc.body);
 
-				var iframeBody = new CKEDITOR.dom.element.get(doc.body);
 				if(iframeBody.on) {
 					iframeBody.on('dblclick', onDoubleClick);
 					iframeBody.on('click', onClickFrame);
@@ -295,7 +293,6 @@
 				}
 
 				doc = new CKEDITOR.dom.element.get(doc);
-
 				doc.frame = iframeBody.frame = this;
 			}
 
@@ -304,21 +301,16 @@
 				var frames = editor.document.getElementsByTag('iframe');
 				var length = frames.count();
 				while (length--) {
-					var iFrameCss = 'widht: 100%; margin: 0; padding 0; overflow-y: hidden;',
-						frame = frames.getItem(length),
+					var frame = frames.getItem(length),
 						cmd = frame.getAttribute('lj-cmd'),
 						frameWin = frame.$.contentWindow,
 						doc = frameWin.document,
 						ljStyle = frame.getAttribute('lj-style');
 
-					if (ljStyle) {
-						iFrameCss += ljStyle;
-					}
-
 					frame.removeListener('load', onLoadFrame);
 					frame.on('load', onLoadFrame);
 					doc.open();
-					doc.write('<!DOCTYPE html><html style="' + iFrameCss + '"><head><style type="text/css">' + styleSheet + '</style></head><body style="' + iFrameCss + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '') + '</body></html>');
+					doc.write('<!DOCTYPE html><html style="' + ljStyle + '"><head><style type="text/css">' + styleSheet + '</style></head><body class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '') + '</body></html>');
 					doc.close();
 				}
 			}
@@ -346,13 +338,15 @@
 				node = target;
 
 				if (isSelection) {
-					var frames = editor.document.getElementsByTag('iframe');
+					var frames = editor.document.getElementsByTag('iframe'),
+						frame;
 					for (var i = 0, l = frames.count(); i < l; i++) {
-						frames.getItem(i).$.contentWindow.document.body.className = '';
+						frame = frames.getItem(i);
+						frame.$.contentWindow.document.body.className = frame.getAttribute('lj-class') || '';
 					}
 
 					if (node.is('iframe')) {
-						node.$.contentWindow.document.body.className = 'lj-selected';
+						node.$.contentWindow.document.body.className = (node.getAttribute('lj-class') || '') + ' lj-selected';
 					}
 				}
 
@@ -398,9 +392,9 @@
 				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />').replace(/(<lj-map[^>]+)(?!\/)>/gi, '$1 />').replace(/(<lj-template[^>]*)(?!\/)>/gi, '$1 />').replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>').replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi,
 					function(ljtags) {
 						var poll = new Poll(ljtags);
-						return '<iframe class="lj-poll" frameborder="0" allowTransparency="true" ' + 'lj-cmd="LJPollLink" lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
+						return '<iframe lj-class="lj-poll" frameborder="0" allowTransparency="true" ' + 'lj-cmd="LJPollLink" lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
 					}).replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, function(result, attrs, data) {
-						return '<iframe' + attrs + ' class="lj-embed" lj-data="' + encodeURIComponent(data) + '" lj-style="height: 100%;" frameborder="0" allowTransparency="true"></iframe>';
+						return '<iframe' + attrs + ' lj-class="lj-embed" class="lj-embed-wrap" lj-data="' + encodeURIComponent(data) + '" frameborder="0" allowTransparency="true"></iframe>';
 					});
 
 				if (!$('event_format').checked) {
@@ -482,59 +476,6 @@
 				editor.document.getBody().on('keyup', onKeyUp);
 				updateFrames();
 			});
-
-			//////////  CSS for inner editor's elements  //////////////
-			editor.addCss('.lj-cut {\
-				margin: 5px 0;\
-				width: 100%;\
-				cursor: pointer;\
-				height: 9px!important;\
-				background-color: #FFF;\
-				border: 0 dashed #BCBCBC;\
-				background: url(/js/ck/images/ljcut.png) no-repeat 0 0;\
-			}');
-			editor.addCss('.lj-cut-open {\
-				background-position: 0 2px;\
-				border-width: 0 0 1px;\
-			}');
-			editor.addCss('.lj-cut-close {\
-				border-width: 1px 0 0;\
-				background-position: 0 -8px;\
-			}');
-			editor.addCss('.lj-embed {\
-				background: #CCCCCC url(' + CKEDITOR.getUrl(this.path + 'images/placeholder_flash.png') + ') no-repeat center center;\
-				border: 1px dotted #000000;\
-				height: 80px;\
-				width: 100%;\
-			}');
-			editor.addCss('.lj-poll {\
-				width:100%;\
-				border: #000 1px dotted;\
-				background-color: #d2d2d2;\
-				font-style: italic;\
-			}');
-			editor.addCss('.lj-like {\
-				width: 100%;\
-				height: 44px !important;\
-				overflow: hidden;\
-				padding: 0;\
-				margin: 0;\
-				background: #D2D2D2;\
-				border: 1px dotted #000;\
-			}');
-			editor.addCss('.lj-map, .lj-iframe {\
-				width: 100%;\
-				overflow: hidden;\
-				min-height: 13px;\
-				margin-top: 20px;\
-				background: #D2D2D2;\
-				border: 1px dotted #000;\
-				text-align: center;\
-			}');
-			editor.addCss('.lj-selected {\
-				background-color: #C4E0F7;\
-				border: 1px solid #6EA9DF;\
-			}');
 
 			//////////  LJ User Button //////////////
 			var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml';
@@ -658,8 +599,8 @@
 					if (window.switchedRteOn) {
 						var iframe = new CKEDITOR.dom.element('iframe', editor.document);
 						iframe.setAttribute('lj-data', encodeURIComponent(content));
-						iframe.setAttribute('lj-style', 'height: 100%;');
-						iframe.setAttribute('class', 'lj-embed');
+						iframe.setAttribute('lj-class', 'lj-embed');
+						iframe.setAttribute('class', 'lj-embed-wrap');
 						iframe.setAttribute('frameBorder', 0);
 						iframe.setAttribute('allowTransparency', 'true');
 						editor.insertElement(iframe);
@@ -691,16 +632,16 @@
 								iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
 
 							iframeOpen.setAttribute('lj-cmd', 'LJCut');
-							iframeOpen.setAttribute('lj-style', 'height: 100%;');
-							iframeOpen.addClass('lj-cut lj-cut-open');
+							iframeOpen.setAttribute('lj-class', 'lj-cut lj-cut-open');
+							iframeOpen.setAttribute('class', 'lj-cut-wrap');
 							iframeOpen.setAttribute('frameBorder', 0);
 							iframeOpen.setAttribute('allowTransparency', 'true');
 							if (text != top.CKLang.ReadMore) {
 								iframeOpen.setAttribute('text', text);
 							}
 
-							iframeClose.addClass('lj-cut lj-cut-close');
-							iframeClose.setAttribute('lj-style', 'height: 100%;');
+							iframeClose.setAttribute('lj-class', 'lj-cut lj-cut-close');
+							iframeClose.setAttribute('class', 'lj-cut-wrap');
 							iframeClose.setAttribute('frameBorder', 0);
 							iframeClose.setAttribute('allowTransparency', 'true');
 
@@ -983,7 +924,8 @@
 									node.setAttribute('lj-content', pollSource);
 									node.setAttribute('lj-cmd', 'LJPollLink');
 									node.setAttribute('lj-data', pollLJTags);
-									node.setAttribute('class', 'lj-poll');
+									node.setAttribute('lj-class', 'lj-poll');
+									node.setAttribute('class', 'lj-poll-wrap');
 									node.setAttribute('frameBorder', 0);
 									node.setAttribute('allowTransparency', 'true');
 									editor.insertElement(node);
@@ -1129,7 +1071,8 @@
 								ljTagsData.LJLike.node.setAttribute('lj-content', encodeURIComponent(likeHtml));
 							} else {
 								likeNode = new CKEDITOR.dom.element('iframe', editor.document);
-								likeNode.setAttribute('class', 'lj-like');
+								likeNode.setAttribute('lj-class', 'lj-like');
+								likeNode.setAttribute('class', 'lj-like-wrap');
 								likeNode.setAttribute('buttons', attr.join(','));
 								likeNode.setAttribute('lj-content', encodeURIComponent(likeHtml));
 								likeNode.setAttribute('lj-cmd', 'LJLike');
@@ -1212,9 +1155,9 @@
 
 			function createLJCut(element) {
 				var openFrame = new CKEDITOR.htmlParser.element('iframe');
-				openFrame.attributes['class'] = 'lj-cut lj-cut-open';
+				openFrame.attributes['lj-class'] = 'lj-cut lj-cut-open';
+				openFrame.attributes['class'] = 'lj-cut-wrap';
 				openFrame.attributes['lj-cmd'] = 'LJCut';
-				openFrame.attributes['lj-style'] = 'height: 100%;';
 				openFrame.attributes['frameBorder'] = 0;
 				openFrame.attributes['allowTransparency'] = 'true';
 
@@ -1225,8 +1168,8 @@
 				element.children.unshift(openFrame);
 
 				var closeFrame = new CKEDITOR.htmlParser.element('iframe');
-				closeFrame.attributes['class'] = 'lj-cut lj-cut-close';
-				closeFrame.attributes['lj-style'] = 'height: 100%;';
+				closeFrame.attributes['lj-class'] = 'lj-cut lj-cut-close';
+				closeFrame.attributes['class'] = 'lj-cut-wrap';
 				closeFrame.attributes['frameBorder'] = 0;
 				closeFrame.attributes['allowTransparency'] = 'true';
 				element.children.push(closeFrame);
@@ -1240,7 +1183,8 @@
 						var attr = [];
 
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
-						fakeElement.attributes['class'] = 'lj-like';
+						fakeElement.attributes['lj-class'] = 'lj-like';
+						fakeElement.attributes['class'] = 'lj-like-wrap';
 						if (element.attributes.hasOwnProperty('style')) {
 							fakeElement.attributes['lj-style'] = element.attributes.style;
 						}
@@ -1346,9 +1290,9 @@
 						fakeElement.attributes.style = 'width:' + (isNaN(element.attributes.width) ? 500 : element.attributes.width) + 'px;' + 'height:' + (isNaN(element.attributes.height) ? 350 : element.attributes.height) + 'px;';
 
 						fakeElement.attributes['lj-url'] = element.attributes.url ? encodeURIComponent(element.attributes.url) : '';
-						fakeElement.attributes['class'] = 'lj-map';
+						fakeElement.attributes['lj-class'] = 'lj-map';
+						fakeElement.attributes['class'] = 'lj-map-wrap';
 						fakeElement.attributes['lj-content'] = '<p class="lj-map">map</p>';
-						fakeElement.attributes['lj-style'] = ' height: 100%; text-align: center;';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1373,16 +1317,16 @@
 					},
 					'lj-cut': createLJCut,
 					'iframe': function(element) {
-						if (element.attributes['class'] && element.attributes['class'].indexOf('lj-') + 1 == 1) {
+						if (element.attributes['lj-class'] && element.attributes['lj-class'].indexOf('lj-') + 1 == 1) {
 							return element;
 						}
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
 						fakeElement.attributes.style = 'width:' + (isNaN(element.attributes.width) ? 500 : element.attributes.width) + 'px;' + 'height:' + (isNaN(element.attributes.height) ? 350 : element.attributes.height) + 'px;';
 
 						fakeElement.attributes['lj-url'] = element.attributes.src ? encodeURIComponent(element.attributes.src) : '';
-						fakeElement.attributes['class'] = 'lj-iframe';
+						fakeElement.attributes['lj-class'] = 'lj-iframe';
+						fakeElement.attributes['class'] = 'lj-iframe-wrap';
 						fakeElement.attributes['lj-content'] = '<p class="lj-iframe">iframe</p>';
-						fakeElement.attributes['lj-style'] = ' height: 100%; text-align: center;';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1411,7 +1355,7 @@
 				elements: {
 					iframe: function(element) {
 						var newElement = element;
-						var className = /lj-[a-z]+/i.exec(element.attributes['class']);
+						var className = /lj-[a-z]+/i.exec(element.attributes['lj-class']);
 						if (className) {
 							className = className[0];
 						} else {
@@ -1457,7 +1401,7 @@
 								newElement = new CKEDITOR.htmlParser.fragment.fromHtml(decodeURIComponent(element.attributes['lj-data'])).children[0];
 								break;
 							case 'lj-cut':
-								if (element.attributes['class'].indexOf('lj-cut-open') + 1) {
+								if (element.attributes['lj-class'].indexOf('lj-cut-open') + 1) {
 									var node = element.next;
 									newElement = new CKEDITOR.htmlParser.element('lj-cut');
 
@@ -1467,7 +1411,7 @@
 
 									while (node) {
 										if (node.name == 'iframe') {
-											var ljCutclassName = node.attributes['class'];
+											var ljCutclassName = node.attributes['lj-class'];
 											if (ljCutclassName.indexOf('lj-cut-close') + 1) {
 												newElement.next = node;
 												break;
