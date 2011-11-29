@@ -6467,7 +6467,10 @@ sub load_user_props {
         }
     };
 
-    @props = grep { ! exists $u->{$_} } @props;
+    unless ( $opts->{'reload'} ) {
+        @props = grep { ! exists $u->{$_} } @props;
+    }
+
     return unless @props;
 
     my $groups = LJ::User::PropStorage->get_handler_multi(\@props);
