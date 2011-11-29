@@ -855,14 +855,6 @@ function EntryPage::print_body ()
     }
 }
 
-function EntryPage::print_comments (Comment[] cs) {
-    if (size $cs == 0) { return; }
-    foreach var Comment c ($cs) {
-        $this->print_comment($c);
-        $this->print_comments($c.replies);
-    }
-}
-
 function EntryPage::print_comment (Comment c) {
     var Page p = get_page();
     var int indent = ($c.depth - 1) * 25;

@@ -1400,14 +1400,6 @@ function EntryPage::print_comment(Comment c) {
   """</div>""";
 }
 
-function EntryPage::print_comments (Comment[] cs) {
-    if (size $cs == 0) { return; }
-    foreach var Comment c ($cs) {
-        $this->print_comment($c);
-        $this->print_comments($c.replies);
-    }
-}
-
 function ReplyPage::print_body() {
   $this->print_entry($.entry);
   if($.replyto.depth > 0) { # If we're replying to a comment
