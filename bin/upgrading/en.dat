@@ -3114,6 +3114,18 @@ fotki.photo.edit.title=Photo edit
 fotki.photo.edit.update.button|staleness=1
 fotki.photo.edit.update.button=Update
 
+fotki.migration.conditions=Before the end of the transfer process you have access to all FotoBilder's features
+
+fotki.migration.button=Start
+
+fotki.migration.decline=You are not have access to FotoBilder
+
+fotki.migration.label=Select this checkbox if you want migrate to new LJ PhotoHosting
+
+fotki.migration.started.text=Migration was started
+
+fotki.migration.title=Promo page
+
 fotki.photo.recover|staleness=1
 fotki.photo.recover=You can recover it, before you clicking "Save all" button
 
