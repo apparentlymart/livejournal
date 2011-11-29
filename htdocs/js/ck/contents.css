@@ -15,91 +15,178 @@ BODY {
 	font: 13px/18px 'Arial', sans-serif;
 	color: #222;
 	}
+IFRAME {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	}
 
 ol, ul, dl {
 /* IE7: reset rtl list margin. (#7334) */
 	*margin-right: 0px; /* preserved spaces for rtl list item bullets. (#6249)*/
 	padding-right: 40px;
-}
+	}
 
 pre {
 	display: block;
 	margin: 0;
-}
+	}
 
 /* LJ CSS */
+HTML {
+	height:100%;
+	}
+.lj-cut-wrap,
+.lj-embed-wrap,
+.lj-poll-wrap,
+.lj-like-wrap,
+.lj-map-wrap,
+.lj-iframe-wrap {
+	width: 100%;
+	}
+.lj-cut,
+.lj-embed,
+.lj-poll,
+.lj-like,
+.lj-map,
+.lj-iframe {
+	margin: 0;
+	}
+.lj-cut-wrap {
+	height: 9px!important;
+	margin: 5px 0;
+	}
+.lj-cut {
+	height: 7px!important;
+	cursor: pointer;
+	background-color: #FFF;
+	border: 0 dashed #BCBCBC;
+	background: url(/js/ck/images/ljcut.png) no-repeat 0 0;
+	}
+.lj-cut-open {
+	background-position: 0 2px;
+	border-width: 0 0 1px;
+	}
+.lj-cut-close {
+	border-width: 1px 0 0;
+	background-position: 0 -8px;
+	}
+.lj-embed-wrap {
+	height: 80px;
+	}
+.lj-embed {
+	background: #CCC url(http://ljdev10.livejournal.ru/js/ck/plugins/livejournal/images/placeholder_flash.png) no-repeat center center;
+	border: 1px dotted #000;
+	height: 78px;
+	}
+.lj-poll {
+	width:100%;
+	border: #000 1px dotted;
+	background-color: #D2D2D2;
+	font-style: italic;
+	}
+.lj-like-wrap {
+	height: 44px !important;
+	margin: 0;
+	}
+.lj-like {
+	height: 42px !important;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	background: #D2D2D2;
+	border: 1px dotted #000;
+	}
+.lj-map,
+.lj-iframe {
+	min-height: 13px;
+	margin-top: 20px;
+	}
+.lj-map,
+.lj-iframe {
+	overflow: hidden;
+	min-height: 11px;
+	background: #D2D2D2;
+	border: 1px dotted #000;
+	text-align: center;
+	}
+.lj-selected {
+	background-color: #C4E0F7;
+	border: 1px solid #6EA9DF;
+	}
+
 lj\:template {
 	background-color: #000;
 	color: #fff;
 	display: none;
-}
+	}
 
 lj|template {
 	background-color: #000;
 	color: #fff;
 	display: none;
-}
+	}
 
 lj\:wishlist {
 	display: block;
 	width: 212px;
 	height: 212px;
 	border: 1px solid #d2d2d2;
-	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
-}
+	background: url(http://l-stat.livejournal.com/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
+	}
 lj|wishlist {
 	display: block;
 	width: 212px;
 	height: 212px;
 	border: 1px solid #d2d2d2;
 	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
-}
+	}
 
 lj\:raw {
 	border: #000000 1px dotted;
 	display:block;
-}
+	}
 lj|raw {
 	border: #000000 1px dotted;
 	display: block;
-}
+	}
 
 lj|cut {
 	display: block;
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
 	min-height: 14px;
-}
+	}
 
 lj\:cut {
 	display: block;
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
 	min-height: 14px;
-}
+	}
 
 /* fix inline behavior, for no IE */
 .lj|cut ul, .lj|cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
-}
+	}
 
 .lj\:cut ul, .lj\:cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
-}
+	}
 
 .ljuser {
 	white-space: nowrap;
 	color: #00C;
 	font-weight: bold;
-}
+	}
 
 .ljvideo {
 	padding: 5px;
 	width: 8px;
 	height: 8px;
-}
+	}
 
 /* Note popup */
 .note {
