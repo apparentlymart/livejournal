@@ -12,9 +12,9 @@
         my $remote = LJ::get_remote();
 
         # restore previous login
-        if ( $remote ) {
-            $remote->restore();
-        }
+        #if ( $remote ) {
+        #    $remote->restore();
+        #}
     };
 
     my $error = sub {
