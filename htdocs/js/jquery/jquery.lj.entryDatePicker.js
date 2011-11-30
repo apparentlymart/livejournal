@@ -119,8 +119,8 @@
 				this.currentDate = new Date;
 				this._startTimer();
 			} else {
-				var timeParts = inputs.time.val().match(/([0-9]{1,2}):([0-9]{1,2})/),
-					inputs = this._dateInputs;
+				var inputs = this._dateInputs,
+					timeParts = inputs.time.val().match(/([0-9]{1,2}):([0-9]{1,2})/);
 
 				this.currentDate = new Date(
 					Number(inputs.date_ymd_yyyy.val()),
