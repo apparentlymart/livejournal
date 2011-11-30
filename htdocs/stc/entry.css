@@ -220,7 +220,7 @@
 				cursor: pointer;
 				}
 			#updateForm #metainfo LI .datetime {
-				margin-left: 10px;
+				/*margin-left: 10px;*/
 				vertical-align: middle;
 				}
 				#updateForm #metainfo LI .datetime .de {
@@ -230,6 +230,15 @@
 			#updateForm #metainfo LI .timezone {
 				display: block;
 				padding-top: 5px;
+				}
+			.entrydate-until .wrap-calendar,
+			.entrydate-changeit .wrap-calendar {
+				display: block;
+				overflow: hidden;
+				}
+			.entrydate-changeit .entrydate-wrap-until,
+			.entrydate-until .entrydate-wrap-until {
+				line-height: 10px;
 				}
 			#updateForm #metainfo .entrydate .entrydate-title-until,
 			#updateForm #metainfo .entrydate .entrydate-wrap-date,
