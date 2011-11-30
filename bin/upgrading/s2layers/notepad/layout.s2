@@ -780,7 +780,7 @@ function EntryPage::print_body ()
     }
 }
 
-function EntryPage::print_comment (Comment c) {
+function EntryPage::print_comment_full (Comment c) {
     var Color barlight = $*color_comment_bar->clone();
     $barlight->lightness(($barlight->lightness() + 255) / 2);
     var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
@@ -853,9 +853,8 @@ function EntryPage::print_comment (Comment c) {
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
     if ($c.thread_url != "") {
         "(<a href='$c.thread_url'>$*text_comment_thread</a>) ";
-        var Link expand_link = $c->get_link("expand_comments");
-        if (defined $expand_link) {
-            "(" + $c->expand_link() + ") ";
+        if ($c.parent_url != "") {
+            $c->print_expand_collapse_links({ "expand"=>"(%_)", "collapse"=>"(%_)"}); 
         }
     }
     if (not $c.frozen) {

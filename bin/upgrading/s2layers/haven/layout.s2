@@ -1529,7 +1529,7 @@ function EntryPage::print_body () {
     }
 }
 
-function EntryPage::print_comment(Comment c)
+function EntryPage::print_comment_full(Comment c)
 {
     var string class = "";
     if ($c.screened) {
@@ -1606,9 +1606,8 @@ function EntryPage::print_comment(Comment c)
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
     if ($c.thread_url != "") {
         println """(<a href="$c.thread_url">Thread</a>) """;
-        var Link expand_link = $c->get_link("expand_comments");
-        if (defined $expand_link) {
-            println "(" + $c->expand_link() + ") ";
+        if ($c.parent_url != "") {
+            $c->print_expand_collapse_links({ "expand"=>" %_", "collapse"=>" %_"}); 
         }
     }
     if (not $c.frozen) {

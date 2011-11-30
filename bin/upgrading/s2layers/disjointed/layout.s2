@@ -1091,7 +1091,6 @@ function EntryLite::print_linkbar() {
       $btwn_comments = "$*text_comment_divider";
   }
 
-  var string expand = "";
   if($this isa Comment) {
     var Comment c      = $this as Comment;
     var string  reply  = "";
@@ -1113,10 +1112,6 @@ function EntryLite::print_linkbar() {
       $url    = $c.thread_url;
       $text   = $*text_comment_thread;
       $thread = """<a href="$url">$text</a>$btwn_comments""";
-      var Link expand_link = $c->get_link("expand_comments");
-      if (defined $expand_link) {
-        $expand = $c->expand_link();
-      }
     }
     $linkbar = $linkbar + $parent + $thread;
     ###$c->print_reply_link({"linktext" => "$*text_comment_reply"}); 
@@ -1190,10 +1185,11 @@ if (not $en.comments.locked) {
   $url     = $.permalink_url;
   $text    = $*text_permalink;
   print safe """<a href="$url">$text</a>""";
-
-  if ($expand != "") {
-    print safe $btwn_comments;
-    print $expand;
+  if($this isa Comment) {
+    var Comment c = $this as Comment;
+    if($c.parent_url != "") {
+      $c->print_expand_collapse_links({ "expand"=>" $btwn_comments %_", "collapse"=>" $btwn_comments %_"}); 
+    }
   }
   print safe $*text_right_comments;
 }
@@ -1769,7 +1765,7 @@ function EntryPage::print_body() {
   }
 }
 
-function EntryPage::print_comment(Comment c) {
+function EntryPage::print_comment_full(Comment c) {
   print_entry($c, null Color, null Color);
 }
 
@@ -1977,4 +1973,3 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc tincidunt sollici
 </div>
 """;
 }
-

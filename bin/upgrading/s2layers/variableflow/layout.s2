@@ -794,9 +794,8 @@ if ($e.spam and not $p.showspam) {
     }
     if ($e.thread_url != "") {
         println """<li><a href="$e.thread_url">$*text_comment_thread</a></li>""";
-        var Link expand_link = $e->get_link("expand_comments");
-        if (defined $expand_link) {
-            println "<li>" + $e->expand_link() + "</li>";
+        if ($e.parent_url != "") {
+            $e->print_expand_collapse_links({ "expand"=>"<li>%_</li>", "collapse"=>"<li>%_</li>"}); 
         }
     }
     if ($e.reply_url != "") {
