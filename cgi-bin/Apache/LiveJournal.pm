@@ -78,7 +78,7 @@ foreach my $file ('redirect.dat', 'redirect-local.dat') {
 
 ##
 ## The code below is a bit rough, it was written during DDoS attacks.
-## If $LJ::SHOW_SLOW_QUERIES is true, slow (>10 secs) requests are
+## If $LJ::SHOW_SLOW_QUERIES is true, slow (>20 secs) requests are
 ## interrupted and stacktrace is sent to error log.
 ##
 $LJ::SHOW_SLOW_QUERIES = 1;
@@ -107,7 +107,7 @@ sub handler
         my $uri  = LJ::Request->uri;
         $request_str = "$method http://$host$uri";
         $request_start_time = time();
-        alarm(10);
+        alarm(20);
     }
 
     BML::current_site('livejournal');
