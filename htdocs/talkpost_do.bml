@@ -311,25 +311,6 @@
             return LJ::Talk::talkform_mobile($talkform_opts)
                 if $POST{'mobile_domain'} =~ qr/^\w\.$LJ::DOMAIN$/;
 
-<<<<<<< .working
-
-            if ( $use_s1 and not $external_site_case and LJ::is_enabled('new_comments') ) {
-                return LJ::Widget::Form->render_body(
-                    entry        => $entry,
-                    standalone   => 1,
-                    stylemine    => $GET{'style'} eq 'mine'? 1 : 0,
-                    replyto      => $talkform_opts->{'replyto'},
-                    editid       => $editid,
-                    form         => \%POST,
-                    parpost      => $parpost,
-                    errors       => [ map { error => $_ }, @errors ],
-                    parenttalkid => $talkform_opts->{'replyto'}, #ref $parpost eq 'HASH'? $init->{'ditemid'} : 0,
-                );
-            } else {
-                return LJ::Talk::talkform($talkform_opts);
-            }
-=======
-
             if ( $use_s1 and not $external_site_case and LJ::is_enabled('new_comments') ) {
                 return LJ::Widget::Form->render_body(
                     entry        => $entry,
@@ -345,7 +326,6 @@
             } else {
                 return LJ::Talk::talkform($talkform_opts);
             }
->>>>>>> .merge-right.r20657
         }
 
         # checked $POST{agree_tos} was checked above if it was necessary,
