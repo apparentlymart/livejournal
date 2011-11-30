@@ -573,23 +573,6 @@ sub render_metainfo_block {
         <label class="title entrydate-title-until">$BML::ML{'entryform.postponed.until'}</label>
     };
     
-    if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
-        $out .= qq{
-            <span class="wrap entrydate-wrap-date">
-                <span class="entrydate-string">$monthlong, $mday, $year, $hour:$min</span>
-                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                $help_icon
-            </span>
-        };
-    } else {
-        $out .= qq{
-            <span class="wrap entrydate-wrap-post">
-                <span class="entrydate-string">$monthlong $mday, $year, $hour:$min</span>
-                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                $help_icon
-            </span>
-        };
-    }
     my $backdateout = "";
     if (!LJ::is_enabled("delayed_entries")) {
         my $backdate_check = LJ::html_check({
@@ -613,6 +596,25 @@ sub render_metainfo_block {
             $help_icon
             $backdateout
         </span>
+    };
+    if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
+        $out .= qq{
+            <span class="wrap entrydate-wrap-date">
+                <span class="entrydate-string">$monthlong, $mday, $year, $hour:$min</span>
+                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                $help_icon
+            </span>
+        };
+    } else {
+        $out .= qq{
+            <span class="wrap entrydate-wrap-post">
+                <span class="entrydate-string">$monthlong $mday, $year, $hour:$min</span>
+                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                $help_icon
+            </span>
+        };
+    }
+    $out .= qq{
         </li>
         
         <li>
