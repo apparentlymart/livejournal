@@ -15,6 +15,7 @@ sub _format_one_message {
 
     my $lang;
     my $remote = LJ::get_remote();
+    return unless $remote;
     $lang = $remote->prop("browselang") if $remote; # exlude s2 context language from opportunities,
         # because S2 journal code executes BML::set_language($lang, \&LJ::Lang::get_text) with its own language
 
@@ -26,6 +27,10 @@ sub _format_one_message {
     LJ::CleanHTML::clean_event(\$text, { 'lj_sys_message_id' => $mid });
 
     my $is_office = LJ::SiteMessages->has_mask('OfficeOnly', $message->{accounts}) ? '<b>[Only for office]</b> ' : '';
+    if (LJ::SiteMessages->has_mask('NewPhotohosting', $message->{accounts}))  {
+        my $url = $remote->journal_base . "/pics/new_photo_service";
+        $text = "<a href=$url>$text</a>"
+    }
 
     return 
         "<p class='b-message b-message-suggestion b-message-system'>" .
