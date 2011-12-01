@@ -476,17 +476,24 @@ body<=
         }
 
         my $view_history = LJ::check_priv($remote, 'historyview');
-        my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || LJ::check_priv($remote, 'canview', '*');
+        my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || 
+                           LJ::check_priv($remote, 'canview', 'userloglight') ||
+                           LJ::check_priv($remote, 'canview', '*');
         my $view_money = LJ::check_priv($remote, 'moneysearch') || LJ::check_priv($remote, 'moneyview');
+        my $view_props = LJ::check_priv($remote, 'siteadmin', 'propview') || 
+                         LJ::check_priv($remote, 'siteadmin', 'propedit') ||
+                         LJ::check_priv($remote, 'siteadmin', '*');
 
-        if ($view_history || $view_userlog || $view_money) {
+        if ($view_history || $view_userlog || $view_money || $view_props) {
             $ret .= "<br />$ML{'.view'}: ";
-            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a> "
+            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a>&nbsp;&nbsp;&nbsp;"
                 if $view_history;
-            $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a> "
+            $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a>&nbsp;&nbsp;&nbsp;"
                 if $view_userlog;
-            $ret .= "<a href='$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$u->{user}'>payments</a> "
+            $ret .= "<a href='$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$u->{user}'>payments</a>&nbsp;&nbsp;&nbsp;"
                 if $view_money;
+            $ret .= "<a href='$LJ::SITEROOT/admin/propedit.bml?user=$u->{user}'>props</a>"
+                if $view_props;				
         }
 
         $ret .= "</td></tr>\n";
