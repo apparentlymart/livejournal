@@ -554,6 +554,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			// attach to all ljuser head icons
 			var rex_userid = /\?userid=(\d+)/,
 				rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/,
+				class_nopopup = 'noctxpopup',
 				ljusers = jQuery('span.ljuser>a>img', node),
 				i = -1, userid, ljuser, parent;
 
@@ -562,7 +563,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				ljuser = ljusers[i];
 				parent = ljuser.parentNode;
 
-				if (parent.href && (userid = parent.href.match(rex_userid))) {
+				if (parent.href && (userid = parent.href.match(rex_userid)) && !(parent.className.indexOf(class_nopopup) >= 0)) {
 					ljuser.userid = userid[1];
 				} else if (parent.parentNode.getAttribute('lj:user')) {
 					ljuser.username = parent.parentNode.getAttribute('lj:user');
@@ -580,7 +581,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			i = -1;
 			while (ljusers[++i]) {
 				ljuser = ljusers[i];
-				if (ljuser.src.match(rex_userpic)) {
+				if (ljuser.src.match(rex_userpic) && !(ljuser.className.indexOf(class_nopopup) >= 0)) {
 					ljuser.up_url = ljuser.src;
 					if (ljuser.parentNode.getAttribute('data-journal')) {
 						ljuser.posted_in = ljuser.parentNode.getAttribute('data-journal');
