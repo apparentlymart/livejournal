@@ -8,6 +8,7 @@ use LJ::Fotki::Photo;
 use LJ::Fotki::Album;
 use LJ::Widget::Fotki::Upload;
 
+use LJ::GeoLocation;
 
 sub set_data {
     my ($self, $opts, $head, $onload, $errors, $js) = @_;
