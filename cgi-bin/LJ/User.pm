@@ -3824,12 +3824,7 @@ sub can_use_ljphoto {
 
     return 0 if $LJ::DISABLED{'new_ljphoto'};
 
-    ## For beta-testers only.
-    foreach my $community (@LJ::LJPHOTO_ALLOW_FROM_COMMUNITIES){
-        my $comm = LJ::load_user($community);
-        next unless $comm;
-        return 1 if $u->can_manage ($comm) or $comm->is_friend($u);
-    }
+    return 1 if $u->prop ('fotki_migration_status');
 
     return 0;
 }
