@@ -5596,6 +5596,8 @@ talk.error.suspendedentryreply=This entry is suspended. You cannot reply to it. 
 
 talk.expandall=Expand All
 
+talk.expandchilds=Expand Childs
+
 talk.expandlink|staleness=1
 talk.expandlink=Expand
 
