@@ -172,10 +172,6 @@ sub common_template_params {
         $site_messages_html = LJ::Widget::SiteMessages->render;
     }
 
-    if ( LJ::Widget::SGMessages->should_render ) {
-        $site_messages_html .= LJ::Widget::SGMessages->render;    
-    }
-
     my @navbar = LJ::Nav->navbar($remote);
 
     # apparently our HTML::Template doesn't support __index__,
