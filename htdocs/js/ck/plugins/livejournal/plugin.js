@@ -1338,7 +1338,7 @@
 						}
 					},
 					img: function(element) {
-						var parent = element.parent.parent;
+						var parent = element.parent && element.parent.parent;
 						if (!parent || !parent.attributes || !parent.attributes['lj:user']) {
 							element.attributes['lj-cmd'] = 'image';
 						}
