@@ -2032,7 +2032,7 @@ sub talkform {
             ? '/talkpost.bml.logyourip'
             : '/talkpost.bml.loganonip';
 
-        $show_logips      = 1;
+        $show_logips      = $logips;
         $ml_logcommentips = LJ::Lang::ml($mlkey);
     }
 
@@ -2152,6 +2152,7 @@ sub talkform {
         'basesubject'           => $basesubject,
         'author_options'        => \@author_options,
         'usertype_default'      => $usertype_default,
+        'usertype'              => $usertype_default,
 
         'extra_rows'            => LJ::run_hook('extra_talkform_rows', {
             'entry'     => $entry,
