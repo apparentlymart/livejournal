@@ -438,7 +438,7 @@ body<=
         );
     }
 
-    $ret .= "<div style='margin-left: 30px'>";
+    $ret .= "<div>";
 
     ### copyright
     if (LJ::is_enabled('show_copyright', $u)) {
