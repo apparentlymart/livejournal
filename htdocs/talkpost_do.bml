@@ -46,6 +46,7 @@
     # since talklib.pl's LJ::Talk::Post::init checks for $POST{'ecphash'}
     # and requires it to be correct.  if it's not, the page fails.
     %POST = %GET if $GET{'ecphash'};
+    my $init;
 
     my $ajax = $POST{'json'} || 0;
     my $render_body = sub {
@@ -228,7 +229,7 @@
         }
 
         ## init.  this handles all the error-checking, as well.
-        my $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
+        $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
         return $error->($errors[-1]) if $ajax && int(@errors);
         return if LJ::Request->redirected;
@@ -507,9 +508,13 @@
         : '';
 
     if ( $ajax ) {
+        my $user = LJ::load_user($POST{'journal'});
+        my $parent = $init->{'parent'};
+        my $comment = $init->{'comment'};
         $result = LJ::eurl($result);
         $add .= '&need_captcha=1' if $need_captcha;
-        my $user = LJ::load_user($POST{'journal'});
+        $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
+        $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
         $user_url = $user? $user->journal_base : '';
         return qq(
 <!DOCTYPE html>

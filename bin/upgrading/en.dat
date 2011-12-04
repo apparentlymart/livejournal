@@ -5549,6 +5549,10 @@ talk.error.cantedit.notyours=You cannot edit this comment because you did not po
 
 talk.error.comm_deleted=This comment has been deleted.
 
+talk.error.commentscreened=Your comment was screened according to journal settings
+
+talk.error.commentspammed=Your comment was marked as spam according to system-wide policies
+
 talk.error.deleted=This journal is deleted.
 
 talk.error.deleted.title=Deleted
