@@ -186,6 +186,16 @@ Object.extend(Function.prototype, {
 	}
 });
 
+Object.extend(Function, {
+	defer: function(func, args/*, more than one*/) {
+		var args = [].slice.call(arguments, 1);
+
+		setTimeout(function() {
+			func.apply(null, args);
+		}, 0);
+	}
+});
+
 
 
 /* class helpers */
