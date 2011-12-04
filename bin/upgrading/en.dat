@@ -5555,6 +5555,8 @@ talk.error.deleted.title=Deleted
 
 talk.error.mustlogin=You must be logged in to view this protected entry.
 
+talk.error.noaccess=Access denied
+
 talk.error.noanonpost=Anonymous comments are disabled in this journal
 
 talk.error.nocomment=The comment does not exist.
