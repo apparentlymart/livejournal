@@ -5505,6 +5505,8 @@ talk.deleteduser=<i>Deleted user: [[username]]</i>
 
 talk.edit=Edit
 
+talk.editcomment=Save comment
+
 talk.edited=Edited:
 
 talk.emptypostalert=You need to write something first
@@ -5648,6 +5650,8 @@ talk.photo.insert=Insert
 talk.placeholder.username=Username
  
 talk.placeholder.userpass=Password
+
+talk.postcomment=Add a comment
 
 talk.prev=Previous
 
