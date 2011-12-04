@@ -2124,6 +2124,12 @@ sub talkform {
         'helpicon_noautoformat'  => LJ::help_icon_html( "noautoformat", " " ),
         'helpicon_iplogging'     => LJ::help_icon_html( "iplogging",    " " ),
 
+        # Captcha keys
+        captcha_private          => LJ::conf_test( $LJ::RECAPTCHA{'private_key'} ),
+        captcha_public           => LJ::conf_test( $LJ::RECAPTCHA{'public_key'} ),
+
+        need_captcha             => $opts->{'do_captcha'},
+
         'captcha_html'              => $captcha_html,
         'comment_length_cap'        => LJ::CMAX_COMMENT,
         'show_spellcheck'           => $LJ::SPELLER ? 1 : 0,
