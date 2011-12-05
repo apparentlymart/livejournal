@@ -2103,6 +2103,7 @@ sub talkform {
         'is_person'              => $is_person,
         'is_identity'            => $remote && $remote->is_identity,
         'remote_can_comment'     => $remote_can_comment,
+        whocanreply              => $journalu->prop('opt_whocanreply'),
 
         # ml variables. it is weird that we've got to pass these to
         # the template, but well, the logic here is considered too
@@ -2129,6 +2130,7 @@ sub talkform {
         captcha_public           => LJ::conf_test( $LJ::RECAPTCHA{'public_key'} ),
 
         need_captcha             => $opts->{'do_captcha'},
+        commentcaptcha           => $journalu->prop("opt_show_captcha_to"),
 
         'captcha_html'              => $captcha_html,
         'comment_length_cap'        => LJ::CMAX_COMMENT,
