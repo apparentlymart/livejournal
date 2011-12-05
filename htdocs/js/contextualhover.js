@@ -695,6 +695,21 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			LJ_IPPU.showNote(note, ele);
 		},
 
+		cleanCache: function(keys) {
+			var self = this;
+
+			keys = keys || [];
+			if (typeof keys === 'string') {
+				keys = [ keys ];
+			}
+
+			keys.forEach(function(key) {
+				if (self.cachedResults[key]) {
+					delete self.cachedResults[key];
+				}
+			});
+		},
+
 		// do ajax request of user info
 		getInfo: function(target, popup_id) {
 			var t = this;
