@@ -88,18 +88,18 @@
                     <input class="textbox" type="text" size="60" maxlength="100" name="subject" id="subject" value="<TMPL_VAR basesubject>" tabindex="20" />
                     <input type="hidden" id="subjectIconField" name="subjecticon" value="<TMPL_VAR subjicon>">
                     <TMPL_IF subjicon_none>
-                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="15" height="15" valign="middle" id="subjectIconImage" align="absmiddle" title="Click to change the subject icon" class="b-subjecticon b-subjecticons-default" />
+                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif?v=13339" border="0" width="15" height="15" valign="middle" id="subjectIconImage" align="absmiddle" title="Click to change the subject icon" class="b-subjecticon b-subjecticons-default" />
                     <TMPL_ELSE>
-                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="<TMPL_VAR subjicon_current_w>" height="<TMPL_VAR subjicon_current_h>" valign="middle" id="subjectIconImage" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_current_id>" />
+                        <img src="<TMPL_VAR lj_imgprefix>/spacer.gif?v=13339" border="0" width="<TMPL_VAR subjicon_current_w>" height="<TMPL_VAR subjicon_current_h>" valign="middle" id="subjectIconImage" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_current_id>" />
                     </TMPL_IF>
                     <div class="b-subjecticons">
                         <ul class="b-subjecticons-items">
                             <TMPL_LOOP subjicon_types>
                                 <TMPL_IF __first__>
-                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="15" height="15" id="none" title="No subject icon" class="b-subjecticon b-subjecticons-default" /></li>
+                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif?v=13339" border="0" width="15" height="15" id="none" title="No subject icon" class="b-subjecticon b-subjecticons-default" /></li>
                                 </TMPL_IF>
                                 <TMPL_LOOP subjicons>
-                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif" border="0" width="<TMPL_VAR subjicon_w>" height="<TMPL_VAR subjicon_h>" id="<TMPL_VAR subjicon_id>" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_id>" /></li>
+                                    <li class="b-subjecticons-item"><img src="<TMPL_VAR lj_imgprefix>/spacer.gif?v=13339" border="0" width="<TMPL_VAR subjicon_w>" height="<TMPL_VAR subjicon_h>" id="<TMPL_VAR subjicon_id>" class="b-subjecticon b-subjecticons-<TMPL_VAR subjicon_id>" /></li>
                                 </TMPL_LOOP>
                             </TMPL_LOOP>
                         </ul>
