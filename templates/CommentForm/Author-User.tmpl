@@ -37,8 +37,8 @@
     <input type="radio" name="usertype" value="user" id="talkpostfromlj" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_ljuser>checked="checked"</TMPL_IF> />
     <label for="talkpostfromlj" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></label>
     <div class="b-postform-login-opts">
-        <input class="textbox" name="userpost" size="13" maxlength="15" id="username" value="<TMPL_VAR username_default>" placeholder="<TMPL_VAR expr="ml('Username')">" tabindex="12" />
-        <input class="textbox" name="password" type="password" maxlength="30" size="18" id="password" placeholder="<TMPL_VAR expr="ml('Password')">" tabindex="13" />
+        <input class="textbox auth-input" name="userpost" size="13" maxlength="15" id="username" value="<TMPL_VAR username_default>" placeholder="<TMPL_VAR expr="ml('Username')">" tabindex="12" autocomplete="off" />
+        <input class="textbox auth-input" name="password" type="password" maxlength="30" size="18" id="password" placeholder="<TMPL_VAR expr="ml('Password')">" tabindex="13" autocomplete="off" />
         <TMPL_IF is_person><span class="b-postform-login-opts-lj"><a href="#cookieuser" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.back.to')">&nbsp;<em><TMPL_VAR username_default></em></a></span></TMPL_IF>
         <TMPL_VAR ml_willscreen>
         <TMPL_VAR ml_willscreenfriend>
