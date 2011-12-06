@@ -13,6 +13,11 @@
     my $mode = $GET{'mode'} || 'lj-embed';
     if ($mode eq 'lj-map') {
         return LJ::Maps->get_iframe_source(%GET);
+    } elsif ($mode eq 'tackthis'){
+        ##
+        my $api = $GET{api};
+        return qq|<script src="http://www.tackthis.com/widget-validate.php?api=$api" type="text/javascript"></script>|;
+
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
         my $journalid = $GET{journalid}+0 or return "No journalid specified";
