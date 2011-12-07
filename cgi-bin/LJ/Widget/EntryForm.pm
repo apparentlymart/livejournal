@@ -523,6 +523,7 @@ sub render_metainfo_block {
     my $datetimeonly = LJ::html_datetime({
         'name' => "date_ymd",
         'notime' => 1,
+        'tabindex' => '53',
         'default' => "$year-$mon-$mday",
         'disabled' => $opts->{'disabled_save'}
     });
@@ -532,7 +533,7 @@ sub render_metainfo_block {
         maxlength => 5,
         value => "$hour:$min",
         name => "time",
-        tabindex => $self->tabindex,
+        tabindex => '55',
         disabled => $opts->{'disabled_save'}
     });
 
@@ -582,7 +583,7 @@ sub render_metainfo_block {
             'name' => "prop_opt_backdated",
             "value" => 1,
             'selected' => $opts->{'prop_opt_backdated'},
-            'tabindex' => $self->tabindex
+            'tabindex' => '57'
         });
         my $backdate_help_icon = LJ::help_icon_html("backdate", "", "");
         $backdateout = '<span class="backdate">' . $backdate_check . "<label for='prop_opt_backdated'>$BML::ML{'entryform.backdated3'}</label>" . $backdate_help_icon . "</span>";
@@ -807,6 +808,7 @@ sub render_htmltools_block {
         'value' => 'preformatted',
         'name' => 'event_format',
         'id' => 'event_format',
+        'tabindex' => '95',
         'selected' => 
             $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
         'label' => BML::ml('entryform.format3'),
