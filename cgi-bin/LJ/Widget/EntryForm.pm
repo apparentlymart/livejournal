@@ -1043,7 +1043,7 @@ sub render_options_block {
                     'id' => 'comment_settings',
                     'class' => 'select',
                     'selected' => $comment_settings_selected->(),
-                    'tabindex' => '190'
+                    'tabindex' => '140'
                 },
                 @options
             );
@@ -1064,7 +1064,7 @@ sub render_options_block {
                 'class' => 'text',
                 'size' => '35',
                 'maxlength' => '60',
-                'tabindex' => '140',
+                'tabindex' => '150',
                 $self->lastfm_geolocation_width,
             });
 
@@ -1082,7 +1082,7 @@ sub render_options_block {
                     <span class="detect_btn">
                         <input
                             type="button"
-                            tabindex="150"
+                            tabindex="160"
                             value="$BML::ML{'entryform.location.detect'}"
                             onclick="detectLocation()"
                         >
@@ -1112,7 +1112,7 @@ sub render_options_block {
                 'id' => 'prop_opt_screening',
                 'class' => 'select',
                 'selected' => $opts->{'prop_opt_screening'},
-                'tabindex' => '200',
+                'tabindex' => '170',
             }, @levels);
 
             $out .= LJ::help_icon_html("screening", "", " ");
@@ -1134,7 +1134,7 @@ sub render_options_block {
                 'class' => 'text',
                 'size' => '35',
                 'maxlength' => LJ::std_max_length(),
-                'tabindex' => '170',
+                'tabindex' => '180',
                 $self->lastfm_geolocation_width,
             });
 
@@ -1184,7 +1184,7 @@ sub render_options_block {
                 id => 'prop_adult_content',
                 class => 'select',
                 selected => $opts->{prop_adult_content} || "",
-                tabindex => '210',
+                tabindex => '190',
             }, @adult_content_menu);
 
             $out .= LJ::help_icon_html("adult_content", "", " ");
@@ -1245,7 +1245,7 @@ sub render_options_block {
                 $out .= LJ::html_submit(
                     'action:spellcheck',
                     BML::ml('entryform.spellcheck'),
-                    { 'tabindex' => '180' }
+                    { 'tabindex' => '210' }
                 ) . "&nbsp;";
             }
             
