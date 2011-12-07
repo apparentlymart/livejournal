@@ -1855,6 +1855,9 @@ sub talkform {
         $usertype_default ||= $author_class->usertype_default($remote);
     }
 
+    # LJSUP-10674
+    $usertype_default = 'openid' if $usertype_default eq 'openid_cookie';
+
     # from registered user or anonymous?
     my $screening = LJ::Talk::screening_level( $journalu, $entry->jitemid );
 
