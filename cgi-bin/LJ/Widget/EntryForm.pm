@@ -473,7 +473,7 @@ sub render_metainfo_block {
                     'name' => 'usejournal',
                     'id' => 'usejournal',
                     'selected' => $usejournal,
-                    'tabindex' => $self->tabindex,
+                    'tabindex' => '50',
                     'class' => 'select',
                     "onchange" => "changeSubmit('" . $submitprefix . "',this[this.selectedIndex].value, '$BML::ML{'entryform.update4'}');".
                         "getUserTags(this[this.selectedIndex].value);".
@@ -602,7 +602,7 @@ sub render_metainfo_block {
         $out .= qq{
             <span class="wrap entrydate-wrap-date">
                 <span class="entrydate-string">$monthlong, $mday, $year, $hour:$min</span>
-                <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
+                <a $hide_link href='javascript:void(0)' tabindex='60' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
                 $help_icon
             </span>
         };
@@ -636,7 +636,7 @@ sub render_metainfo_block {
                 'class' => 'select',
                 'selected' => $opts->{'prop_picture_keyword'},
                 'onchange' => "userpic_preview()",
-                'tabindex' => $self->tabindex
+                'tabindex' => '70'
             },
             (
                 "" => BML::ml('entryform.opt.defpic'),
@@ -710,7 +710,7 @@ sub render_subject_block {
         'id' => 'subject',
         'size' => '43',
         'maxlength' => '100',
-        'tabindex' => $self->tabindex,
+        'tabindex' => '90',
         'disabled' => $opts->{'disabled_save'}
     });
 
@@ -912,7 +912,7 @@ sub render_options_block {
                 'class'     => 'text',
                 'size'      => '35',
                 'value'     => $opts->{'prop_taglist'},
-                'tabindex'  => $self->tabindex,
+                'tabindex'  => '110',
                 'raw'       => "autocomplete='off'",
             });
 
@@ -983,7 +983,7 @@ sub render_options_block {
                 'selected' => $sel,
                 'onchange' => $remote ? 'mood_preview()' : '',
                 'class' => 'select',
-                'tabindex' => $self->tabindex,
+                'tabindex' => '120',
             }, @moodlist);
             
             my $textfield = LJ::html_text({
@@ -994,7 +994,7 @@ sub render_options_block {
                 'onchange' => $remote ? 'mood_preview()' : '',
                 'size' => '15',
                 'maxlength' => '30',
-                'tabindex' => $self->tabindex
+                'tabindex' => '130'
             });
 
             return qq{
@@ -1039,7 +1039,7 @@ sub render_options_block {
                     'id' => 'comment_settings',
                     'class' => 'select',
                     'selected' => $comment_settings_selected->(),
-                    'tabindex' => $self->tabindex
+                    'tabindex' => '190'
                 },
                 @options
             );
@@ -1060,7 +1060,7 @@ sub render_options_block {
                 'class' => 'text',
                 'size' => '35',
                 'maxlength' => '60',
-                'tabindex' => $self->tabindex,
+                'tabindex' => '140',
                 $self->lastfm_geolocation_width,
             });
 
@@ -1078,6 +1078,7 @@ sub render_options_block {
                     <span class="detect_btn">
                         <input
                             type="button"
+                            tabindex="150"
                             value="$BML::ML{'entryform.location.detect'}"
                             onclick="detectLocation()"
                         >
@@ -1107,7 +1108,7 @@ sub render_options_block {
                 'id' => 'prop_opt_screening',
                 'class' => 'select',
                 'selected' => $opts->{'prop_opt_screening'},
-                'tabindex' => $self->tabindex,
+                'tabindex' => '200',
             }, @levels);
 
             $out .= LJ::help_icon_html("screening", "", " ");
@@ -1129,7 +1130,7 @@ sub render_options_block {
                 'class' => 'text',
                 'size' => '35',
                 'maxlength' => LJ::std_max_length(),
-                'tabindex' => $self->tabindex,
+                'tabindex' => '170',
                 $self->lastfm_geolocation_width,
             });
 
@@ -1141,6 +1142,7 @@ sub render_options_block {
                 $out .= qq{
                     <input
                         type="button" value="$button_label"
+                        tabindex="175"
                         style="float: left"
                         onclick="lastfm_current('$last_fm_user', true);"
                     >
@@ -1178,7 +1180,7 @@ sub render_options_block {
                 id => 'prop_adult_content',
                 class => 'select',
                 selected => $opts->{prop_adult_content} || "",
-                tabindex => $self->tabindex,
+                tabindex => '210',
             }, @adult_content_menu);
 
             $out .= LJ::help_icon_html("adult_content", "", " ");
@@ -1239,7 +1241,7 @@ sub render_options_block {
                 $out .= LJ::html_submit(
                     'action:spellcheck',
                     BML::ml('entryform.spellcheck'),
-                    { 'tabindex' => $self->tabindex }
+                    { 'tabindex' => '180' }
                 ) . "&nbsp;";
             }
             
@@ -1362,7 +1364,7 @@ sub render_security_container_block {
         'include_ids' => 1,
         'class' => 'select',
         'selected' => $opts->{'security'},
-        'tabindex' => $self->tabindex,
+        'tabindex' => "280",
         @secopts
     }, @secs) . "\n";
 
@@ -1387,7 +1389,7 @@ sub render_submitbar_block {
             BML::ml('entryform.delete'),
             {
                 'disabled' => $opts->{'disabled_delete'},
-                'tabindex' => $self->tabindex,
+                'tabindex' => '310',
                 'class' => "post-delete",
                 'onclick' => "return confirm('" .
                     LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
@@ -1414,7 +1416,7 @@ sub render_submitbar_block {
     my $preview_tabindex = $self->tabindex;
     my $preview = qq{
         <a class="post-preview"
-        tabindex="$preview_tabindex"
+        tabindex="290"
         onclick="return entryPreview(\$(\\'updateForm\\'));"
         href="#">
         $BML::ML{'entryform.preview'}
@@ -1468,7 +1470,7 @@ sub render_submitbar_block {
                 'onclick' => $onclick,
                 'class' => 'submit',
                 'id' => 'formsubmit',
-                'tabindex' => $self->tabindex,
+                'tabindex' => '300',
                 'disabled' => $disabled,
             }
         ) . "&nbsp;\n";
@@ -1491,7 +1493,7 @@ sub render_submitbar_block {
             {
                 'onclick' => $onclick,
                 'disabled' => $opts->{'disabled_save'},
-                'tabindex' => $self->tabindex,
+                'tabindex' => '300'
             }
         ) . "&nbsp;\n";
 
@@ -1746,7 +1748,7 @@ sub render_body {
     $out .= LJ::html_textarea({
         'name' => 'event',
         'value' => $opts->{'event'},
-        'tabindex' => $self->tabindex,
+        'tabindex' => '100',
         'disabled' => $opts->{'disabled_save'},
         'id' => 'draft'
     });
