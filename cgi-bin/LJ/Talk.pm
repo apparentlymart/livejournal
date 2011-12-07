@@ -2109,6 +2109,7 @@ sub talkform {
         'is_person'              => $is_person,
         'is_identity'            => $remote && $remote->is_identity,
         'remote_can_comment'     => $remote_can_comment,
+        is_friend                => $is_friend,
         whocanreply              => $journalu->prop('opt_whocanreply'),
 
         # ml variables. it is weird that we've got to pass these to
