@@ -16,7 +16,7 @@ sub usage { '<url>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "siteadmin", "userpics");
+    return LJ::check_priv($remote, "siteadmin", "userpics") || $LJ::IS_DEV_SERVER;
 }
 
 sub execute {

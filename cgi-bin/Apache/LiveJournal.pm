@@ -1487,7 +1487,12 @@ sub userpic_content
     my %upics;
     LJ::load_userpics(\%upics, [ $u, $picid ]);
     my $pic = $upics{$picid} or return LJ::Request::NOT_FOUND;
-    return LJ::Request::NOT_FOUND if $pic->{'userid'} != $userid || $pic->{state} eq 'X';
+    return LJ::Request::NOT_FOUND if $pic->{'userid'} != $userid;
+
+    if ($pic->{state} eq 'X') {
+        LJ::Request->pnotes(error => 'expunged_userpic');
+        return LJ::Request::NOT_FOUND;
+    }
 
     # Read the mimetype from the pichash if dversion 7
     $mime = { 'G' => 'image/gif',

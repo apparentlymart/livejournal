@@ -266,6 +266,12 @@ sub expunge_userpic {
 
     # now clear the user's memcache picture info
     LJ::Userpic->delete_cache($u);
+    LJ::MemCache::delete([$picid, "userpic.$picid"]);
+
+    ## if this was the default userpic, "undefault" it
+    if ($u->{'defaultpicid'} && $u->{'defaultpicid'}==$picid) {
+        LJ::update_user($u, { defaultpicid => 0 });
+    }
 
     # call the hook and get out of here
     my @rval = LJ::run_hooks('expunge_userpic', $picid, $u->{'userid'});
@@ -534,20 +540,9 @@ sub get_picid_from_keyword
 
     return $default unless $kw;
 
-    my $info = LJ::get_userpic_info($u);
-    return $default unless $info;
-
-    my $pr = $info->{'kw'}{$kw};
-    # normal keyword
-    return $pr->{picid} if $pr->{'picid'};
-
-    # the lame "pic#2343" thing when they didn't assign a keyword
-    if ($kw =~ /^pic\#(\d+)$/) {
-        my $picid = $1;
-        return $picid if $info->{'pic'}{$picid};
-    }
-
-    return $default;
+    my $pic = LJ::get_pic_from_keyword($u, $kw)
+        or return $default;
+    return $pic->{'picid'};
 }
 
 # this will return a user's userpicfactory image stored in mogile scaled down.
