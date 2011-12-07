@@ -1393,7 +1393,7 @@ sub render_submitbar_block {
             BML::ml('entryform.delete'),
             {
                 'disabled' => $opts->{'disabled_delete'},
-                'tabindex' => '310',
+                'tabindex' => '270',
                 'class' => "post-delete",
                 'onclick' => "return confirm('" .
                     LJ::ejs(BML::ml('entryform.delete.confirm')) . "')",
