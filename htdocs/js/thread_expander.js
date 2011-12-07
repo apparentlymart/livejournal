@@ -182,4 +182,4 @@ Expander.prototype.get = function(){
     document.body.appendChild(iframe);
     this.iframe=iframe;
     return true;
-}
+};
