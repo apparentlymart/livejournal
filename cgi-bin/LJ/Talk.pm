@@ -1855,8 +1855,11 @@ sub talkform {
         $usertype_default ||= $author_class->usertype_default($remote);
     }
 
+    # LJSUP-10659
+    @author_options = sort { $LJ::FORM_AUTH_PRIORITY{ lc $a->{'short_code'} } <=> $LJ::FORM_AUTH_PRIORITY{ lc $b->{'short_code'} } } @author_options;
+
     # LJSUP-10674
-    $usertype_default = 'openid' if $usertype_default eq 'openid_cookie';
+    $usertype_default = $1 if $usertype_default =~ m/^(\w+)_cookie$/;
 
     # from registered user or anonymous?
     my $screening = LJ::Talk::screening_level( $journalu, $entry->jitemid );
