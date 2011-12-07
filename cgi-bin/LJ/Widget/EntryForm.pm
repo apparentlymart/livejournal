@@ -592,10 +592,12 @@ sub render_metainfo_block {
         <span class="wrap entrydate-wrap-until">
             $date_diff_input
             <span class="wrap-calendar">$datetimeonly<i class='i-calendar'></i></span>
-            <span class='datetime'>
-                $time <?de $BML::ML{'entryform.date.24hournote'} de?>
+            <span class="wrap-time">
+                <span class='datetime'>
+                    $time <?de $BML::ML{'entryform.date.24hournote'} de?>
+                </span>
+                $help_icon
             </span>
-            $help_icon
             $backdateout
         </span>
     };

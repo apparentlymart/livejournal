@@ -180,7 +180,8 @@
 				vertical-align: top;
 				text-align: right;
 				line-height: 20px;
-			    font-size: 14px;
+				font-size: 14px;
+				white-space: nowrap;
 				}
 			#updateForm #metainfo LI .wrap {
 				display: table-cell;
@@ -233,8 +234,11 @@
 				}
 			.entrydate-until .wrap-calendar,
 			.entrydate-changeit .wrap-calendar {
-				display: block;
 				overflow: hidden;
+				white-space: nowrap;
+				}
+			.wrap-time {
+				white-space: nowrap;
 				}
 			.entrydate-changeit .entrydate-wrap-until,
 			.entrydate-until .entrydate-wrap-until {
@@ -255,6 +259,9 @@
 				*zoom: 1;
 				}
 			#js #updateForm #metainfo LI .i-calendar {
+				vertical-align: middle;
+				margin-top: 7px;
+				margin-bottom: 7px;
 				display: inline-block;
 				*display: inline;
 				*zoom: 1;
