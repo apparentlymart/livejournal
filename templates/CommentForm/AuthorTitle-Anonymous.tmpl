@@ -1,11 +1,11 @@
 <TMPL_IF everyone_can_comment>
     <TMPL_UNLESS is_public>
-        <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')">" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
+        <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost.nonpublic')">"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
     <TMPL_ELSE>
         <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" tabindex="11"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
     </TMPL_IF>
 <TMPL_ELSIF registered_can_comment>
-    <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')">" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
+    <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')">"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
 <TMPL_ELSIF friends_can_comment>
-    <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR ml_friendsonly>" class="b-postform-login-services-disabled"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
+    <span class="b-postform-login-services-item b-postform-login-services-anonymous"><a href="#anonymous" title="<TMPL_VAR ml_friendsonly>"><img src="<TMPL_VAR lj_imgprefix>/anonymous.gif?v=5110" /><span class="b-postform-login-services-name"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></span></a></span>
 </TMPL_IF>

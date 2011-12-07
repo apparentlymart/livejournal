@@ -1796,17 +1796,6 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			.b-postform-login-services-show .b-postform-login-services-item {
 				display: block;
 				}
-			/*
-			.b-postform-user-cookie .b-postform-login-services-show .b-postform-login-services-user,
-			.b-postform-useranonymous-cookie .b-postform-login-services-show .b-postform-login-services-user,
-			.b-postform-anonymous-cookie .b-postform-login-services-show .b-postform-login-services-cookieuser {
-				display: none;
-				}
-			.b-postform-useranonymous-cookie .b-postform-login-services-show .b-postform-login-services-cookieuser,
-			.b-postform-user-cookie.b-postform-ability-disabled-anonymous.b-postform-ability-disabled-user .b-postform-login-services-show .b-postform-login-services-user {
-				display: block;
-				}
-			*/
 				BODY .b-postform-login-services-item A:link,
 				BODY .b-postform-login-services-item A:visited {
 					display: block;
