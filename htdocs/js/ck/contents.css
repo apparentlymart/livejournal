@@ -79,11 +79,14 @@ HTML {
 	border: 1px dotted #000;
 	height: 78px;
 	}
+.lj-poll-wrap {
+	height: 68px;
+	}
 .lj-poll {
+	padding: 0 10px;
 	border: #000 1px dotted;
 	background-color: #D2D2D2;
 	font-style: italic;
-	padding:0 1em;
 	}
 .lj-like-wrap {
 	height: 44px !important;
@@ -261,16 +264,22 @@ lj\:cut {
 .rte-poll-form {
 	font-size: 13px;
 	}
-	.lj-poll-close .rte-poll {
+	.rte-poll-head {
+		height:58px;
+		}
+	.rte-poll {
+		overflow:hidden;
 		display: none;
 		}
-	.lj-poll-open .rte-poll {
+	.lj-selected .rte-poll {
 		display:block;
 		}
 		.rte-poll-form H1 {
 			font-size:15px;
+			margin:5px 0;
 			}
 		.rte-poll-form H2 {
+			margin:5px 0;
 			font-size:14px;
 			}
 		.rte-poll-form UL {

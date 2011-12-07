@@ -72,12 +72,12 @@ function Poll(selectPoll, qDoc, sDoc, qNum){
 
 // Poll method to generate HTML for RTE
 Poll.prototype.outputHTML = function(){
-	var html = '<form action="#" class="rte-poll-form"><h1>Poll #xxxx';
+	var html = '<form action="#" class="rte-poll-form"><div class="rte-poll-head"><h1>Poll #xxxx';
 
 	if(this.name){
 		html += ' <i>' + this.name + '</i>';
 	}
-	html += '</h1><p>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b></p><div class="rte-poll">';
+	html += '</h1><p>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b></p></div><div class="rte-poll">';
 	for(var i = 0; i < this.questions.length; i++){
 		html += '<h2>' + this.questions[i].name + '</h2>';
 		if(this.questions[i].type == 'radio' || this.questions[i].type == 'check'){
@@ -108,7 +108,7 @@ Poll.prototype.outputHTML = function(){
 		}
 	}
 
-	html += '</div><p><input type="submit" value="Submit Poll"/></p></form>';
+	html += '<p><input type="submit" value="Submit Poll"/></p></div></form>';
 	return encodeURIComponent(html);
 };
 
