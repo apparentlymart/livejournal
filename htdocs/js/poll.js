@@ -14,150 +14,188 @@
  ], ...}
  */
 
-function Poll(selectPoll, qDoc, sDoc, qNum){
-	if(typeof selectPoll == 'string'){
-		// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
-		selectPoll = jQuery(selectPoll.replace(/<(\/?)lj-(poll|pq|pi)(>| )/gi, '<$1lj:$2$3'));
-		var tagPrefix = jQuery.browser.msie && Number(jQuery.browser.version) < 9 ? '' : 'lj\\:';
+var Poll = (function(){
+	// Answer Object Constructor
+	function Answer(doc, id) {
+		var form = doc.poll,
+			answer = this;
 
-		this.name = selectPoll.attr('name');
-		this.whovote = selectPoll.attr('whovote');
-		this.whoview = selectPoll.attr('whoview');
-		this.questions = [];
+		this.name = form['question_' + id].value;
+		this.type = jQuery(form['type_' + id]).val();
+		this.answers = [];
 
-		selectPoll.find(tagPrefix + 'pq').each(function(i, pq){
-			var question = {
-				name: pq.firstChild.nodeValue || '',
-				type: pq.getAttribute('type'),
-				answers: []
-			};
-
-			if(!/^check|drop|radio|scale|text$/.test(question.type)){
-				return;
-			}
-			pq = jQuery(pq);
-			if(/^check|drop|radio$/.test(question.type)){
-				pq.find(tagPrefix + 'pi').each(function(){
-					question.answers.push(jQuery(this).html())
+		switch (this.type) {
+			case 'check':
+			case 'drop':
+			case 'radio':
+				jQuery('#QandA_' + id + ' input[name^="answer_' + id + '_"][value!=""]', form).each(function(i, node) {
+					answer.answers.push(node.value);
 				});
-			}
-			if(question.type == 'text'){
-				question.size = pq.attr('size');
-				question.maxlength = pq.attr('maxlength');
-			}
-			if(question.type == 'scale'){
-				question.from = pq.attr('from');
-				question.to = pq.attr('to');
-				question.by = pq.attr('by');
-			}
-			this.questions.push(question);
-		}.bind(this));
-	} else if(selectPoll != void 0) {
-		this.name = sDoc.poll.name.value || '';
-		this.whovote = jQuery(sDoc.poll.whovote).filter(':checked').val();
-		this.whoview = jQuery(sDoc.poll.whoview).filter(':checked').val();
-		// Array of Questions and Answers
-		// A single poll can have multiple questions
-		// Each question can have one or several answers
-		this.questions = [];
-		for(var i = 0; i < qNum; i++){
-			this.questions[i] = new Answer(qDoc, i);
-		}
-	} else {
-		this.name = '';
-		this.whoview = this.whovote = 'all';
-		this.questions = [];
-	}
-}
-
-// Poll method to generate HTML for RTE
-Poll.prototype.outputHTML = function(){
-	var html = '<form action="#" class="rte-poll-form"><div class="rte-poll-head"><h1>Poll #xxxx';
-
-	if(this.name){
-		html += ' <i>' + this.name + '</i>';
-	}
-	html += '</h1><p>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b></p></div><div class="rte-poll">';
-	for(var i = 0; i < this.questions.length; i++){
-		html += '<h2>' + this.questions[i].name + '</h2>';
-		if(this.questions[i].type == 'radio' || this.questions[i].type == 'check'){
-			var type = this.questions[i].type == 'check' ? 'checkbox' : this.questions[i].type;
-			html += '<ul>';
-			for(var j = 0; j < this.questions[i].answers.length; j++){
-				html += '<li><input type="' + type + '">' + this.questions[i].answers[j] + '</li>';
-			}
-			html += '</ul>';
-		} else if(this.questions[i].type == 'drop'){
-			html += '<p><select name="select_' + i + '">' + '<option value=""></option>';
-			for(var j = 0; j < this.questions[i].answers.length; j++){
-				html += '<option value="">' + this.questions[i].answers[j] + '</option>';
-			}
-			html += '</select></p>';
-		} else if(this.questions[i].type == 'text'){
-			html += '<p><input maxlength="' + this.questions[i].maxlength + '" size="' + this.questions[i]
-				.size + '" type="text"/></p>';
-		} else if(this.questions[i].type == 'scale'){
-			html += '<table><tbody><tr align="center" valign="top">';
-			var from = Number(this.questions[i].from),
-				to = Number(this.questions[i].to),
-				by = Number(this.questions[i].by);
-			for(var j = from; j <= to; j = j + by){
-				html += '<td><input type="radio" id=' + RTEPollScaleRadio + 'j/><br /><label for=RTEPollScaleRadio' + j + '>' + j + '</label></td>';
-			}
-			html += '</tr></tbody></table>';
+				break;
+			case 'text':
+				this.size = form['pq_' + id + '_size'].value;
+				this.maxlength = form['pq_' + id + '_maxlength'].value;
+				break;
+			case 'scale':
+				this.from = form['pq_' + id + '_from'].value;
+				this.to = form['pq_' + id + '_to'].value;
+				this.by = form['pq_' + id + '_by'].value;
+				break;
 		}
 	}
 
-	html += '<p><input type="submit" value="Submit Poll"/></p></div></form>';
-	return encodeURIComponent(html);
-};
+	function Constructor(selectPoll, qDoc, sDoc, qNum) {
+		if (typeof selectPoll == 'string') {
+			// IE custom tags. http://msdn.microsoft.com/en-us/library/ms531076%28VS.85%29.aspx
+			selectPoll = jQuery(selectPoll.replace(/<(\/?)lj-(poll|pq|pi)(>| )/gi, '<$1lj:$2$3'));
+			var tagPrefix = jQuery.browser.msie && Number(jQuery.browser.version) < 9 ? '' : 'lj\\:',
+				poll = this;
 
-// Poll method to generate LJ Poll tags
-Poll.prototype.outputLJtags = function(){
-	var tags = '';
+			this.name = selectPoll.attr('name');
+			this.whovote = selectPoll.attr('whovote');
+			this.whoview = selectPoll.attr('whoview');
+			this.questions = [];
 
-	tags += '<lj-poll name="' + this.name + '" whovote="' + this.whovote + '" whoview="' + this.whoview + '"><br />';
+			selectPoll.find(tagPrefix + 'pq').each(function(i, pq) {
+				var question = {
+					name: pq.firstChild.nodeValue || '',
+					type: pq.getAttribute('type'),
+					answers: []
+				};
 
-	for(var i = 0; i < this.questions.length; i++){
-		var extrargs = '';
-		if(this.questions[i].type == 'text'){
-			extrargs = ' size="' + this.questions[i].size + '"' + ' maxlength="' + this.questions[i].maxlength + '"';
-		} else if(this.questions[i].type == 'scale'){
-			extrargs = ' from="' + this.questions[i].from + '"' + ' to="' + this.questions[i].to + '"' + ' by="' + this
-				.questions[i].by + '"';
+				if (!/^check|drop|radio|scale|text$/.test(question.type)) {
+					return;
+				}
+
+				pq = jQuery(pq);
+
+				switch (question.type) {
+					case 'check':
+					case 'drop':
+					case 'radio':
+						pq.find(tagPrefix + 'pi').each(function() {
+							question.answers.push(jQuery(this).html());
+						});
+						break;
+					case 'text':
+						question.size = pq.attr('size');
+						question.maxlength = pq.attr('maxlength');
+						break;
+					case 'scale':
+						question.from = pq.attr('from');
+						question.to = pq.attr('to');
+						question.by = pq.attr('by');
+						break;
+				}
+
+				poll.questions.push(question);
+			});
+
+		} else if (selectPoll != void 0) {
+			this.name = sDoc.poll.name.value || '';
+			this.whovote = jQuery(sDoc.poll.whovote).filter(':checked').val();
+			this.whoview = jQuery(sDoc.poll.whoview).filter(':checked').val();
+			this.questions = [];
+			for (var i = 0; i < qNum; i++) {
+				this.questions[i] = new Answer(qDoc, i);
+			}
+		} else {
+			this.name = '';
+			this.whoview = this.whovote = 'all';
+			this.questions = [];
 		}
-		tags += '<lj-pq type="' + this.questions[i].type + '"' + extrargs + '>' + this.questions[i].name + '<br />';
-		if(/^check|drop|radio$/.test(this.questions[i].type)){
-			for(var j = 0; j < this.questions[i].answers.length; j++){
-				tags += '<lj-pi>' + this.questions[i].answers[j] + '</lj-pi><br />';
+	}
+
+	// Poll method to generate HTML for RTE
+	Constructor.prototype.outputHTML = function() {
+		var html = '<form action="#" class="rte-poll-form"><div class="rte-poll-head"><h1>Poll #xxxx';
+
+		if (this.name) {
+			html += ' <i>' + this.name + '</i>';
+		}
+
+		html += '</h1><p>Open to: ' + '<b>' + this.whovote + '</b>, results viewable to: ' + '<b>' + this.whoview + '</b></p></div><div class="rte-poll">';
+
+		for (var i = 0; i < this.questions.length; i++) {
+			var question = this.questions[i],
+				j;
+
+			html += '<h2>' + question.name + '</h2>';
+
+			switch (question.type) {
+				case 'drop':
+					html += '<p><select name="select_' + i + '">' + '<option value=""></option>';
+
+					for (j = 0; j < question.answers.length; j++) {
+						html += '<option value="">' + question.answers[j] + '</option>';
+					}
+
+					html += '</select></p>';
+					break;
+				case 'text':
+					html += '<p><input maxlength="' + question.maxlength + '" size="' + question.size + '" type="text"/></p>';
+					break;
+				case 'scale':
+					var from = Number(question.from),
+						to = Number(question.to),
+						by = Number(question.by);
+
+					html += '<table><tbody><tr align="center" valign="top">';
+
+					for (j = from; j <= to; j = j + by) {
+						html += '<td><input type="radio" id=' + RTEPollScaleRadio + 'j/><br /><label for=RTEPollScaleRadio' + j + '>' + j + '</label></td>';
+					}
+
+					html += '</tr></tbody></table>';
+					break;
+				case 'radio':
+				case 'check':
+					var type = question.type == 'check' ? 'checkbox' : question.type;
+
+					html += '<ul>';
+
+					for (j = 0; j < question.answers.length; j++) {
+						html += '<li><input type="' + type + '">' + question.answers[j] + '</li>';
+					}
+
+					html += '</ul>';
+					break;
 			}
 		}
-		tags += '</lj-pq><br />';
-	}
 
-	tags += '</lj-poll>';
+		html += '<p><input type="submit" value="Submit Poll"/></p></div></form>';
+		return encodeURIComponent(html);
+	};
 
-	return encodeURIComponent(tags);
-};
+	// Poll method to generate LJ Poll tags
+	Constructor.prototype.outputLJtags = function() {
+		var html = '<lj-poll name="' + this.name + '" whovote="' + this.whovote + '" whoview="' + this.whoview + '"><br />';
 
-// Answer Object Constructor
-function Answer(doc, id){
-	var form = doc.poll;
-	this.name = form['question_' + id].value;
-	this.type = jQuery(form['type_' + id]).val();
+		for (var i = 0; i < this.questions.length; i++) {
+			var extrargs = '',
+				question = this.questions[i];
 
-	this.answers = [];
-	if(/^check|drop|radio$/.test(this.type)){
+			if (question.type == 'text') {
+				extrargs = ' size="' + question.size + '"' + ' maxlength="' + question.maxlength + '"';
+			} else if (question.type == 'scale') {
+				extrargs = ' from="' + question.from + '"' + ' to="' + question.to + '"' + ' by="' + question.by + '"';
+			}
 
-		jQuery('#QandA_' + id + ' input[name^="answer_' + id + '_"][value!=""]', form).each(function(i, node){
-			this.answers.push(node.value);
-		}.bind(this));
-	} else if(this.type == 'text'){
-		this.size = form['pq_' + id + '_size'].value;
-		this.maxlength = form['pq_' + id + '_maxlength'].value;
-	} else if(this.type == 'scale'){
-		this.from = form['pq_' + id + '_from'].value;
-		this.to = form['pq_' + id + '_to'].value;
-		this.by = form['pq_' + id + '_by'].value;
-	}
-}
+			html += '<lj-pq type="' + question.type + '"' + extrargs + '>' + question.name + '<br />';
+
+			if (/^check|drop|radio$/.test(question.type)) {
+				for (var j = 0; j < question.answers.length; j++) {
+					html += '<lj-pi>' + question.answers[j] + '</lj-pi><br />';
+				}
+			}
+
+			html += '</lj-pq><br />';
+		}
+
+		html += '</lj-poll>';
+
+		return encodeURIComponent(html);
+	};
+
+	return Constructor;
+})();
