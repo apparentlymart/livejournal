@@ -4,7 +4,6 @@
             <div class="b-postform-login-opts">
                 <TMPL_VAR ml_loggedin>
                 <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
-                <TMPL_VAR ml_banned>
             </div>
         </div>
     <TMPL_ELSE>
@@ -16,18 +15,15 @@
                     <TMPL_VAR ml_loggedin>
                     <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
                     <input type='hidden' name='cookieuser' value='<TMPL_VAR remote_username>' id='cookieuser' />
-                    <TMPL_VAR ml_willscreen>
                 </div>
             </div>
         <TMPL_ELSE>
-            <div class="b-postform-login-item b-postform-login-cookieuser b-postform-login-disabled">
+            <div class="b-postform-login-item b-postform-login-cookieuser">
                 <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.livejournal')"></span>
                 <div class="b-postform-login-opts">
                     <TMPL_VAR ml_loggedin>
                     <span class="b-postform-login-opts-lj"><a href="#user" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.other.user')"></a></span>
-                    <TMPL_VAR ml_notafriend>
                     <input type="hidden" name="cookieuser" value="<TMPL_VAR remote_username>" id="cookieuser" />
-                    <TMPL_VAR ml_willscreen>
                 </div>
             </div>
         </TMPL_IF>
@@ -40,8 +36,6 @@
         <input class="textbox auth-input" name="userpost" size="13" maxlength="15" id="username" value="<TMPL_VAR username_default>" placeholder="<TMPL_VAR expr="ml('Username')">" tabindex="12" autocomplete="off" />
         <input class="textbox auth-input" name="password" type="password" maxlength="30" size="18" id="password" placeholder="<TMPL_VAR expr="ml('Password')">" tabindex="13" autocomplete="off" />
         <TMPL_IF is_person><span class="b-postform-login-opts-lj"><a href="#cookieuser" class="b-postform-notselect"><TMPL_VAR expr="ml('/talkpost.bml.back.to')">&nbsp;<em><TMPL_VAR username_default></em></a></span></TMPL_IF>
-        <TMPL_VAR ml_willscreen>
-        <TMPL_VAR ml_willscreenfriend>
         <input type="hidden" name="do_login" id="logincheck" />
         <TMPL_UNLESS create_link>
             <TMPL_UNLESS is_person>
@@ -52,5 +46,5 @@
 </div>
 
 <script type="text/javascript">
-	jQuery('#cookieusername').placeholder();
+    jQuery('#cookieusername').placeholder();
 </script>

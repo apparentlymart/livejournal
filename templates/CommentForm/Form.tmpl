@@ -79,6 +79,16 @@
                     <TMPL_IF EXPR="whocanreply eq 'reg'">
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
                     </TMPL_IF>
+
+                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
+
+                    <TMPL_IF errors>
+                    <div class="b-postform-user-errors">
+                        <TMPL_LOOP errors>
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><TMPL_VAR error></p>
+                        </TMPL_LOOP>
+                    </div>
+                    </TMPL_IF>
                 </td>
             </tr>
 
@@ -105,39 +115,39 @@
                         </ul>
                     </div>
 
-					<script type="text/javascript">
-					    jQuery('div.b-subjecticons').subjecticons();
-					</script>
+                    <script type="text/javascript">
+                        jQuery('div.b-subjecticons').subjecticons();
+                    </script>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
 
                     <TMPL_IF text_hint>
                         <div id="subjectCaptionText"><TMPL_VAR text_hint></div>
                     </TMPL_IF>
-					
-					<div>
-	                    <TMPL_IF show_userpics>
+                    
+                    <div>
+                        <TMPL_IF show_userpics>
 
-		                <script type="text/javascript"> 
-		                    var userpicmap=<TMPL_VAR userpicmap>; 
-		                    var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
-		                </script> 
-						
-						<span id="userpics">
-	                        <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
-	                        <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
-	                            <TMPL_LOOP userpics>
-	                                <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
-	                            </TMPL_LOOP>
-	                        </select>
-	                        <TMPL_VAR helpicon_userpics>
-	                        &nbsp;&nbsp;
-	                    </span>
-	                    </TMPL_IF>
-						
-						<input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
-						&nbsp;&nbsp;<input type="button" value="<TMPL_VAR expr="ml('/talkpost.bml.btn.quote')">" class="b-postform-quote" tabindex="23" />
-					</div>
+                        <script type="text/javascript"> 
+                            var userpicmap=<TMPL_VAR userpicmap>; 
+                            var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
+                        </script> 
+                        
+                        <span id="userpics">
+                            <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
+                            <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
+                                <TMPL_LOOP userpics>
+                                    <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
+                                </TMPL_LOOP>
+                            </select>
+                            <TMPL_VAR helpicon_userpics>
+                            &nbsp;&nbsp;
+                        </span>
+                        </TMPL_IF>
+                        
+                        <input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
+                        &nbsp;&nbsp;<input type="button" value="<TMPL_VAR expr="ml('/talkpost.bml.btn.quote')">" class="b-postform-quote" tabindex="23" />
+                    </div>
                 </td>
             </tr>
 
@@ -153,7 +163,7 @@
             <tr class="b-postform-submitbox b-postform-captchabox <TMPL_IF need_captcha>b-postform-captchabox-active</TMPL_IF>">
                 <td>&nbsp;</td>
                 <td id="captcha-container">
-               		<TMPL_IF need_captcha><noscript><TMPL_VAR captcha_html></noscript></TMPL_IF>
+                    <TMPL_IF need_captcha><noscript><TMPL_VAR captcha_html></noscript></TMPL_IF>
                 </td>
             </tr>
 
@@ -180,16 +190,6 @@
             <tr class="b-postform-alertbox">
                 <td>&nbsp;</td>
                 <td>
-                    <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
-
-                    <TMPL_IF errors>
-                    <div class="b-postform-user-errors">
-                        <TMPL_LOOP errors>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><TMPL_VAR error></p>
-                        </TMPL_LOOP>
-                    </div>
-                    </TMPL_IF>
-
                     <TMPL_IF warnscreened>
                         <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext b-postform-alert-warnscreened"><TMPL_VAR expr="ml('/talkpost.bml.warnscreened')"></p>
                     </TMPL_IF>
@@ -209,6 +209,11 @@
 
 <script type="text/javascript">
     jQuery('#postform-wrapper')
+        .commentator({
+            publicKey: '<TMPL_VAR captcha_public>',
+            captchaContainerId: 'captcha-container',
+            needCaptcha: !!(Number('<TMPL_VAR need_captcha>'))
+        })
         .authtype({
             classNames: {
                 startAuthTypePrefix: 'b-postform-authtype-'
@@ -217,11 +222,6 @@
             }
         })
         .quotescreator()
-        .commentator({
-            publicKey: '<TMPL_VAR captcha_public>',
-            captchaContainerId: 'captcha-container',
-            needCaptcha: !!(Number('<TMPL_VAR need_captcha>'))
-        });
 </script>
 
 <TMPL_ELSE>
