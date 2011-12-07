@@ -271,6 +271,7 @@ lj\:cut {
 		overflow:hidden;
 		display: none;
 		}
+	.lj-poll-open .rte-poll,
 	.lj-selected .rte-poll {
 		display:block;
 		}
