@@ -388,6 +388,7 @@
             my %opts = (
                 view        => $dtalkid,
                 init_comobj => 0,
+                strict_page_size => 1,
             );
             # Skip results of sub, need only 'out_page'.
             LJ::Talk::load_comments_tree($journalu, $remote, "L", $item->{itemid}, \%opts);
