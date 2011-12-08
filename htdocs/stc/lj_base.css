@@ -1212,11 +1212,9 @@ HTML BODY.logged-out {
 .b-postform-alert-notafriend,
 .b-postform-alert-notreg,
 .b-postform-alert-regonly,
-.b-postform-alert-ajax {
-	display: none;
-	width: 70%;
-	}
+.b-postform-alert-ajax,
 .b-postform-alert-errors {
+	display: none;
 	width: 70%;
 	}
 
@@ -1597,6 +1595,19 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-ajax {
 	display: none;
 	}
+
+/* talkpost_do.bml page */
+.b-postform-realauth-anonymous.b-postform-authtype-anonymous .b-postform-alert-errors,
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser .b-postform-alert-errors,
+.b-postform-realauth-facebook.b-postform-authtype-facebook .b-postform-alert-errors,
+.b-postform-realauth-twitter.b-postform-authtype-twitter .b-postform-alert-errors,
+.b-postform-realauth-google.b-postform-authtype-google .b-postform-alert-errors,
+.b-postform-realauth-openid.b-postform-authtype-openid .b-postform-alert-errors,
+.b-postform-realauth-mailru.b-postform-authtype-mailru .b-postform-alert-errors,
+.b-postform-realauth-vkontakte.b-postform-authtype-vkontakte .b-postform-alert-errors {
+	display: block;
+	}
+
 
 .b-postform-captchabox {
 	display: none;

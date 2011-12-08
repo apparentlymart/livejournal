@@ -14,7 +14,8 @@
         <TMPL_IF EXPR="will_be_screened eq 'R' and !email_active">b-postform-user-screened b-postform-user-screened-anon</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'R'">b-postform-captcha-anon</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'A'">b-postform-captcha-all</TMPL_IF>
-        b-postform-realauth-<TMPL_VAR authtype>
+        b-postform-trueauth-<TMPL_VAR authtype>
+        b-postform-realauth-<TMPL_VAR usertype>
         b-postform-authtype-<TMPL_VAR usertype>
         ">
     <form method="post" action="<TMPL_VAR lj_siteroot>/talkpost_do.bml" id="postform" >
