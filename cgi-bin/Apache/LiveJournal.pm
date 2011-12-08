@@ -1490,8 +1490,11 @@ sub userpic_content
     return LJ::Request::NOT_FOUND if $pic->{'userid'} != $userid;
 
     if ($pic->{state} eq 'X') {
-        LJ::Request->pnotes(error => 'expunged_userpic');
-        return LJ::Request::NOT_FOUND;
+        my %args = LJ::Request->args;
+        if (!$args{'viewall'}) {
+            LJ::Request->pnotes(error => 'expunged_userpic');
+            return LJ::Request::NOT_FOUND;
+        }
     }
 
     # Read the mimetype from the pichash if dversion 7

@@ -135,6 +135,12 @@ sub inactive {
     return $self->state eq 'I';
 }
 
+sub expunged {
+    my $self = shift;
+    return $self->state eq 'X';
+}
+
+
 sub state {
     my $self = shift;
     return $self->{state} if defined $self->{state};
@@ -469,12 +475,18 @@ sub set_cache {
 }
 
 sub load_user_userpics {
-    my ($class, $u) = @_;
+    my ($class, $u, $opts) = @_;
     local $LJ::THROW_ERRORS = 1;
     my @ret;
 
     my $cache = $class->get_cache($u);
-    return @$cache if $cache;
+    if ($cache) {
+        if ($opts && $opts->{'load_expunged'}) {
+            return @$cache;
+        } else {
+            return grep { $_->{'state'} ne 'X' } @$cache;
+        }
+    }
 
     # select all of their userpics and iterate through them
     my $sth;
@@ -491,15 +503,18 @@ sub load_user_userpics {
     die "Error loading userpics: clusterid=$u->{clusterid}, errstr=" . $sth->errstr if $sth->err;
 
     while (my $rec = $sth->fetchrow_hashref) {
-        # ignore anything expunged
-        next if $rec->{state} eq 'X';
         push @ret, $rec;
     }
 
     # set cache if reasonable
     $class->set_cache($u, \@ret);
     
-    return map { LJ::Userpic->new_from_row($_) } @ret;
+    @ret = map { LJ::Userpic->new_from_row($_) } @ret;
+    if ($opts && $opts->{'load_expunged'}) {
+        return @ret;
+    } else {
+        return grep { $_->{'state'} ne 'X' } @ret;
+    }
 }
 
 sub create {

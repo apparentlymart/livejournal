@@ -74,7 +74,8 @@
     $u->activate_userpics;
 
     # get userpics and count 'em
-    my @userpics = LJ::Userpic->load_user_userpics($u);
+    my @userpics = LJ::Userpic->load_user_userpics($u, { load_expunged => 1 });
+    warn scalar @userpics;
 
     # get maximum number of userpics and expiring dates of its for this user
     my %cap_opts = ();
@@ -118,7 +119,7 @@
                 }
 
                 # we're only going to modify keywords/comments on active pictures
-                if ($up->inactive) {
+                if ($up->inactive || $up->expunged) {
                     # use 'orig' because we don't POST disabled fields
                     $count_keywords->($POST{"kw_orig_$picid"});
                     next;
@@ -184,14 +185,13 @@
                 my ($up) = grep { $_->id == $new_default } @userpics;
 
                 # see if they are trying to make an inactive userpic their default
-                if ($up && !$up->inactive) {
+                if ($up && !$up->inactive && !$up->expunged) {
                     $up->make_default;
                 }
             } elsif ($new_default eq '0' && $u->{'defaultpicid'}) {
                 # selected the "no default picture" option
                 LJ::update_user($u, { defaultpicid => 0 });
-                  $u->{'defaultpicid'} = 0;
-              }
+            }
 
             # reload the pictures to account for deleted
             @userpics = LJ::Userpic->load_user_userpics($u) if scalar @delete;
@@ -522,9 +522,15 @@
         $body .= "<div id='list_userpics' style='width: 100%; float: left;'>";
         foreach my $pic (@userpics) {
             my $pid = $pic->id;
-
+            my $url = "$LJ::USERPIC_ROOT/$pid/$u->{'userid'}";
+            my $extra_class = "";
+ 
+            if ($pic->expunged) {
+                $url .= "?viewall=1";
+                $extra_class = " EditPicsUserpicSuspended";
+            }
             $body .= "<div class='pkg userpic_wrapper'>";
-            $body .= "<span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span>\n";
+            $body .= "<span class='EditPicsUserpic$extra_class'><img src='$url' width='$pic->{'width'}' height='$pic->{'height'}' /></span>\n";
 
             # TODO: if no keywords then light grey text and empty out when you click in it
             my $keywords = $pic->keywords;
@@ -534,7 +540,7 @@
             $body .= "<label class='left' for='kw_$pid'>$ML{'.label.keywords'}</label>\n ";
             $body .= LJ::html_text({'name' => "kw_$pid", 'class' => "text", 'id' => "kw_$pid",
                                     'value' => $keywords,
-                                    'disabled' => $pic->inactive }) . "\n";
+                                    'disabled' => $pic->inactive || $pic->expunged }) . "\n";
             $body .= LJ::html_hidden({ 'name' => "kw_orig_$pid",
                                        'value' => $keywords }) . "\n";
             $body .= "</div>\n";
@@ -545,7 +551,7 @@
                 $body .= LJ::html_text({ 'name' => "com_$pid", 'class' => "text", 'id' => "com_$pid",
                                          'value' => $comment,
                                          'maxlength' => LJ::CMAX_UPIC_COMMENT,
-                                         'disabled' => $pic->inactive }) . "\n";
+                                         'disabled' => $pic->inactive || $pic->expunged }) . "\n";
                 $body .= LJ::html_hidden({ 'name' => "com_orig_$pid",
                                            'value' => $comment }) . "\n";
 
@@ -556,7 +562,7 @@
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'class' => "radio", 'value' => $pid,
                                       'selected' => $pic->is_default ? 1 : 0,
                                       'id' => "def_$pid",
-                                      'disabled' => $pic->inactive });
+                                      'disabled' => $pic->inactive || $pic->expunged});
             $body .= "<label class='userpic_default_label' for='def_$pid'>$ML{'.label.default'}</label> ";
             $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid", 'class' => "checkbox",
                                       'id' => "del_$pid", 'value' => 1,
@@ -565,6 +571,11 @@
             if ($pic->inactive) {
                 $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
             }
+            if ($pic->expunged) {
+                $body .= " &nbsp;<i>[$ML{'userpic.suspended'}]</i> " . LJ::help_icon('userpic_suspended');
+            }
+
+
             $body .= "</div>";
             $body .= "</div>";
             $body .= "</div>";

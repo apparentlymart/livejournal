@@ -64,6 +64,13 @@ hr {
     clear: left;
     margin-bottom: 10px;
 }
+
+.EditPicsUserpicSuspended img {
+    opacity : 0.4;
+    filter: alpha(opacity=40); // msie
+    background-color: #000;
+}
+
 .userpic_defaultdelete input.radio,
 .userpic_defaultdelete input.checkbox,
 .userpic_defaultdelete label {

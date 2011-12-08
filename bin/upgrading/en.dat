@@ -5912,6 +5912,8 @@ userpic.inactive=Inactive
 
 userpic.link=userpic
 
+userpic.suspended=Suspended
+
 userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
 vertical.admin.add_category.btn|staleness=1
