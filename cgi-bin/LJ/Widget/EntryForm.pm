@@ -449,7 +449,7 @@ sub render_metainfo_block {
             });
 
             $out .= LJ::html_hidden( usejournal_set => 'true' );
-            $out .= "<span></li>";
+            $out .= "</span></li>";
         } elsif ($login_data && ref $login_data->{'usejournals'} eq 'ARRAY') {
             my $submitprefix = BML::ml('entryform.update3');
             $out .= "<li id='usejournal_list' class='pkg'>\n";
