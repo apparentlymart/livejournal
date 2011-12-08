@@ -2167,7 +2167,8 @@ sub talkform {
         'basesubject'           => $basesubject,
         'author_options'        => \@author_options,
         'usertype_default'      => $usertype_default,
-        'usertype'              => $usertype_default,
+        usertype                => $usertype_default,
+        authtype                => $remote? ($remote->is_identity? lc $remote->identity->short_code : 'cookieuser') : 'anonymous',
 
         'extra_rows'            => LJ::run_hook('extra_talkform_rows', {
             'entry'     => $entry,
