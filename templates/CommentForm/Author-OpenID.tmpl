@@ -4,7 +4,7 @@
             <div class="b-postform-login-item b-postform-login-openid">
                 <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="14" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
                 <label for="talkpostfromoid" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
-                <strong><TMPL_VAR remote_display_name></strong>
+                <strong class="b-postform-login-username"><TMPL_VAR remote_display_name></strong>
             </div>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-openid">
@@ -19,17 +19,17 @@
         <TMPL_IF is_trusted_identity>
             <div class="b-postform-login-item b-postform-login-openid">
                 <TMPL_IF remote_banned>
-                    <strong><TMPL_VAR expr="ml('/talkpost.bml.openid')"></strong>
+                    <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></strong>
                 <TMPL_ELSE>
                     <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="14" <TMPL_IF whocheck_openid_cookie>checked='checked'</TMPL_IF> />
                     <label for="talkpostfromoidli" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
-                    <strong><TMPL_VAR remote_display_name></strong>
+                    <strong class="b-postform-login-username"><TMPL_VAR remote_display_name></strong>
                 </TMPL_IF>
             </div>
         <TMPL_ELSIF is_identity>
             <div class="b-postform-login-item b-postform-login-openid">
                 <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span>
-                <strong><TMPL_VAR expr="ml('/talkpost.bml.openid')"></strong>
+                <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></strong>
             </div>
         <TMPL_ELSE>
             <div class="b-postform-login-item b-postform-login-openid">
@@ -46,12 +46,12 @@
                 <div class="b-postform-login-item b-postform-login-openid">
                     <input type="radio" name="usertype" value="openid_cookie" id="talkpostfromoidli" class="b-postform-login-radio" tabindex="14" <TMPL_IF whocheck_openid_cookie>checked="checked"</TMPL_IF> />
                     <label for="talkpostfromoidli" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></label>
-                    <strong><TMPL_VAR remote_display_name></strong>
+                    <strong class="b-postform-login-username"><TMPL_VAR remote_display_name></strong>
                 </div>
             <TMPL_ELSE>
                 <div class="b-postform-login-item b-postform-login-openid b-postform-login-disabled">
                     <span class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.openid')"></span>
-                    <strong><TMPL_VAR remote_display_name></strong>
+                    <strong class="b-postform-login-username"><TMPL_VAR remote_display_name></strong>
                 </div>
             </TMPL_IF>
         <TMPL_ELSE>

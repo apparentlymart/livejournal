@@ -1,21 +1,21 @@
 <TMPL_IF everyone_can_comment>
     <TMPL_UNLESS is_public>
         <div class="b-postform-login-item b-postform-login-anonymous">
-            <strong><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
+            <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
         </div>
     <TMPL_ELSE>
         <div class="b-postform-login-item b-postform-login-anonymous">
             <input type="radio" name="usertype" value="anonymous" id="talkpostfromanon" class="b-postform-login-radio" tabindex="11" <TMPL_IF whocheck_anonymous>checked="checked"</TMPL_IF> />
             <label for="talkpostfromanon" class="b-postform-login-service"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></label>
-            <strong><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
+            <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
         </div>
     </TMPL_IF>
 <TMPL_ELSIF registered_can_comment>
     <div class="b-postform-login-item b-postform-login-anonymous">
-        <strong><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
+        <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
     </div>
 <TMPL_ELSIF friends_can_comment>
     <div class="b-postform-login-item b-postform-login-anonymous">
-        <strong><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
+        <strong class="b-postform-login-username"><TMPL_VAR expr="ml('/talkpost.bml.opt.anonymous')"></strong>
     </div>
 </TMPL_IF>
