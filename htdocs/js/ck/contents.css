@@ -37,6 +37,7 @@ HTML {
 	height:100%;
 	}
 .lj-cut-wrap,
+.lj-iframe-wrap,
 .lj-embed-wrap,
 .lj-poll-wrap,
 .lj-like-wrap,
@@ -45,6 +46,7 @@ HTML {
 	width: 100%;
 	}
 .lj-cut,
+.lj-iframe,
 .lj-embed,
 .lj-poll,
 .lj-like,
@@ -71,11 +73,12 @@ HTML {
 	border-width: 1px 0 0;
 	background-position: 0 -8px;
 	}
+.lj-iframe-wrap,
 .lj-embed-wrap {
 	height: 80px;
 	}
 .lj-embed {
-	background: #CCC url(http://ljdev10.livejournal.ru/js/ck/plugins/livejournal/images/placeholder_flash.png) no-repeat center center;
+	background: #CCC url(http://livejournal.com/js/ck/plugins/livejournal/images/placeholder_flash.png) no-repeat 50% 50%;
 	border: 1px dotted #000;
 	height: 78px;
 	}
@@ -100,20 +103,15 @@ HTML {
 	background: #D2D2D2;
 	border: 1px dotted #000;
 	}
-.lj-map,
-.lj-iframe {
-	min-height: 13px;
-	margin-top: 20px;
-	}
-.lj-map,
-.lj-iframe {
-	overflow: hidden;
-	min-height: 11px;
-	background: #D2D2D2;
+BODY.lj-map,
+BODY.lj-iframe {
+	background: #CCC;
 	border: 1px dotted #000;
+	height: 78px;
 	text-align: center;
 	}
-.lj-selected {
+.lj-selected,
+BODY.lj-selected {
 	background-color: #C4E0F7;
 	border: 1px solid #6EA9DF;
 	}
@@ -246,7 +244,8 @@ lj\:cut {
 		background-position: 0 -21px;
 		}
 /* LJ map */
-.lj-map, .lj-iframe {
+P.lj-map,
+P.lj-iframe {
 	position: relative;
 	top: 45%;
 	display: inline-block;
@@ -259,6 +258,8 @@ lj\:cut {
 	line-height: 12px;
 	font-size: 12px;
 	color: #FF0000;
+	*display: inline;
+	*zoom: 1;
 	}
 
 .rte-poll-form {
