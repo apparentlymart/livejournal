@@ -5689,6 +5689,8 @@ talk.spam=Spam
 
 talk.spamcount=[[count]] suspicious comments
 
+talk.spammed=Replies disabled
+
 talk.spammedpost=Spammed post
 
 talk.spellcheck=Check spelling during preview
