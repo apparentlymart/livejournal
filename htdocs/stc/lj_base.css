@@ -1491,6 +1491,10 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 .b-postform-realauth-anonymous.b-postform-authtype-anonymous.b-postform-user-regonly.b-postform-user-screened-nonf .b-postform-alert-screened,
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-logcommentips,
 
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notreg .b-postform-alert-screened,
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notreg .b-postform-alert-logcommentips,
+
 .b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-notreg .b-postform-alert-screened,
 .b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-notreg.b-postform-user-screened-nonf .b-postform-alert-screened,
 .b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-notreg .b-postform-alert-logcommentips,
@@ -1518,6 +1522,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 	}
 
 .b-postform-authtype-anonymous.b-postform-user-regonly .b-postform-alert-regonly,
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notreg .b-postform-alert-notreg,
 .b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-notreg .b-postform-alert-notreg,
 .b-postform-realauth-twitter.b-postform-authtype-twitter.b-postform-user-notreg .b-postform-alert-notreg,
 .b-postform-realauth-google.b-postform-authtype-google.b-postform-user-notreg .b-postform-alert-notreg,
