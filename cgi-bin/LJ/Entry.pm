@@ -2328,14 +2328,12 @@ sub get_before_item_link {
                                         'before',
                                         $skip_sticky );
         }
-
+    } elsif ($opts->{'_preview'}) {
+        ## special case
     } else {
         die "Error: item id is not set at all";
     }
 
-    if (!$jumpid) {
-        return undef;
-    }
     if (!$jumpid) {
         return undef;
     }

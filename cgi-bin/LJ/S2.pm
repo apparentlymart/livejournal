@@ -240,6 +240,9 @@ sub s2_run
     eval {
         S2::run_code($ctx, $entry, $page, @args);
     };
+    if ($@) {
+        warn $@;
+    }
 
     # real work for header generating, now all res in NEED_RES
     LJ::S2::subst_header($page);
@@ -2003,6 +2006,7 @@ sub Entry
         $e->{'delayed'} = 1;
         $e->{'delayed_icon'} = Image_std("delayed-entry");
     }
+    $e->{'_preview'} = $arg->{'_preview'};
     return $e;
 }
 
@@ -4027,6 +4031,7 @@ sub _Entry__get_link
     if ($key eq "nav_prev") {
         my $options = { 'use_sticky' => 1,
                         'itemid'     => int($this->{'itemid'}/256),
+                        '_preview'   => $this->{'_preview'},
                       };
 
         if ($entry->is_delayed) {

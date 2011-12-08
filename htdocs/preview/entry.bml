@@ -285,6 +285,7 @@
             'permalink_url' => "#",
             'sticky_type' =>  $POST{'sticky_type'} || $GET{'sticky_type'},
             'delayed' => $custom_time ?  LJ::DelayedEntry::is_future_date(\%req) : 0,
+            '_preview' => 1,
          }); 
     
         $p->{'multiform_on'} = 0;
