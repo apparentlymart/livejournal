@@ -548,7 +548,7 @@ sub render_metainfo_block {
     $date_diff_input .= "<noscript>" .  LJ::html_hidden("date_diff_nojs", "1") .
         "</noscript>";
 
-    my $help_icon = LJ::help_icon("24hourshelp");
+    my $help_icon = LJ::help_icon_html("24hourshelp");
     my $hide_link = $can_edit_date ? '' : 'style="display: none;"'; 
 
     $out .= qq{
@@ -1445,7 +1445,7 @@ sub render_submitbar_block {
         my $onclick = "";
         $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
         
-        my $help_icon = LJ::help_icon("security",
+        my $help_icon = LJ::help_icon_html("security",
             "<span id='security-help'>\n", "\n</span>\n");
         $out .= $help_icon;
         
@@ -1487,7 +1487,7 @@ sub render_submitbar_block {
     
     if ($opts->{'mode'} eq "edit") {
         my $onclick = $LJ::IS_SSL ? '' : 'return true;';
-        my $help_icon = LJ::help_icon("security",
+        my $help_icon = LJ::help_icon_html("security",
             "<span id='security-help'>\n", "\n</span>\n");
         $out .= $help_icon;
         $out .= qq{ <div id="entryform-update-and-edit" class="submit-options"> };

@@ -208,6 +208,9 @@
 				border: none;
 				vertical-align: top;
 				}
+			#updateForm .helplink {
+				border: none;
+				}
 			#updateForm #metainfo #modifydate .wrap {
 				padding-top: 1px;
 				}
