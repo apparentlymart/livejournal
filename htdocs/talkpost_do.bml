@@ -73,6 +73,13 @@
             if $LJ::SERVER_DOWN;
 
         my $journal = LJ::load_user($POST{journal});
+
+        # Indetities are supported using hacks below
+        # and POST hash is empty at this moment
+        if ( $GET{'jid'} && $GET{'pendcid'} ) {
+            $journal = LJ::load_userid($GET{'jid'});
+        }
+
         my $get_styleinfo = sub {
             my $journal = shift;
 
