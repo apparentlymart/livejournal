@@ -644,6 +644,8 @@
 							if (range.collapsed === true) {
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(iframeOpen);
+								iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
+								iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
 							} else {
 								selection.lock();
 								startContainer = range.getTouchedStartNode();
