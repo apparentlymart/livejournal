@@ -288,6 +288,7 @@
                 'stylemine'   => $GET{'style'} eq "mine",
                 'errors'      => \@errors,
                 'form'        => \%POST,
+                'talkpost_do' => 1,
             };
 
             if ( $external_site_case ) {

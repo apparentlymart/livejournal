@@ -2181,6 +2181,8 @@ sub talkform {
         'resources_html'        => $opts->{'resources_html'},
         'partner_domain'        => $opts->{'partner_domain'},
         'partner_remote_ljuser' => $opts->{'partner_remote_ljuser'},
+
+        'talkpost_do' => $opts->{'talkpost_do'}? 1 : 0,
     );
 
     return $template->output;

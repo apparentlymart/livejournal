@@ -57,6 +57,7 @@
                         </div>
                     </TMPL_IF>
 
+                    <TMPL_UNLESS talkpost_do>
                     <TMPL_IF suspended>
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
                     </TMPL_IF>
@@ -79,6 +80,7 @@
 
                     <TMPL_IF EXPR="whocanreply eq 'reg'">
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
+                    </TMPL_IF>
                     </TMPL_IF>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
