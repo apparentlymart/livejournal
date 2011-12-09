@@ -596,7 +596,6 @@ sub render_metainfo_block {
                 <span class='datetime'>
                     $time <?de $BML::ML{'entryform.date.24hournote'} de?>
                 </span>
-                $help_icon
             </span>
             $backdateout
         </span>
@@ -606,7 +605,6 @@ sub render_metainfo_block {
             <span class="wrap entrydate-wrap-date">
                 <span class="entrydate-string">$monthlong, $mday, $year, $hour:$min</span>
                 <a $hide_link href='javascript:void(0)' tabindex='60' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                $help_icon
             </span>
         };
     } else {
@@ -614,7 +612,6 @@ sub render_metainfo_block {
             <span class="wrap entrydate-wrap-post">
                 <span class="entrydate-string">$monthlong $mday, $year, $hour:$min</span>
                 <a $hide_link href='javascript:void(0)' id='currentdate-edit'>$BML::ML{'entryform.date.edit'}</a>
-                $help_icon
             </span>
         };
     }
