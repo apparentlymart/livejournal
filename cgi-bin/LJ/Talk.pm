@@ -1757,6 +1757,7 @@ sub talkform {
     my $entry = LJ::Entry->new( $journalu, ditemid => $opts->{ditemid} );
 
     my $is_person = $remote && $remote->is_person;
+    my $personal  = $journalu->is_person? 1 : 0;
     my $is_friend = LJ::is_friend( $journalu, $remote );
     my $remote_can_comment = $entry->registered_can_comment
         || ( $remote and $is_friend );
@@ -2061,12 +2062,12 @@ sub talkform {
         ),
         'friendsonly' => LJ::Lang::ml(
             '/talkpost.bml.opt.'
-                . ( $is_person ? 'friends' : 'members' ) . 'only',
+                . ( $personal ? 'friends' : 'members' ) . 'only',
             { 'username' => '<b>' . $journalu->username . '</b>', }
         ),
         'notafriend' => LJ::Lang::ml(
             '/talkpost_do.bml.error.nota'
-                . ( $is_person ? 'friend' : 'member' ),
+                . ( $personal ? 'friend' : 'member' ),
             { 'user' => $journalu->username, }
         ),
         'noaccount' => LJ::Lang::ml(
