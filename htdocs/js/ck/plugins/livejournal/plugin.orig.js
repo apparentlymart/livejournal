@@ -352,7 +352,7 @@
 						if(frame.$ != node.$) {
 							body = frame.$.contentWindow.document.body;
 							body.className = frame.getAttribute('lj-class') || '';
-							if(isClick && frame.getAttribute('lj-cmd') == 'LJPollLink' && body.className == 'lj-poll') {
+							if(frame.getAttribute('lj-cmd') == 'LJPollLink' && body.className == 'lj-poll') {
 								frame.removeAttribute('style');
 							}
 						}
