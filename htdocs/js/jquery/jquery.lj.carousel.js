@@ -21,7 +21,7 @@
 			slideEffect: 'fade',
 			enableSlideEvent: 'mouseout',
 			disableSlideEvent: 'mouseover',
-			delay: 3000,
+			delay: 5000,
 			currentIndex: 0,
 			classNames: {
 				activeContent: 'w-wave-up'
@@ -82,11 +82,13 @@
 			}
 
 			return function () {
-				var options = this.options;
+				var options = this.options,
+					selectors = options.selectors,
+					resultSelector = selectors.caption + ', ' + selectors.content;
 
 				this.element
-					.delegate(options.selectors.caption, options.enableSlideEvent, this, onStartSlide)
-					.delegate(options.selectors.caption, options.disableSlideEvent, this, onStopSlide);
+					.delegate(resultSelector, options.enableSlideEvent, this, onStartSlide)
+					.delegate(resultSelector, options.disableSlideEvent, this, onStopSlide);
 			}
 		})(),
 
