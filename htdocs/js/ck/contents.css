@@ -37,7 +37,7 @@ HTML {
 	height:100%;
 	}
 .lj-cut-wrap,
-.lj-iframe-wrap,
+.lj-map-wrap,
 .lj-embed-wrap,
 .lj-poll-wrap,
 .lj-like-wrap,
@@ -46,7 +46,7 @@ HTML {
 	width: 100%;
 	}
 .lj-cut,
-.lj-iframe,
+.lj-map,
 .lj-embed,
 .lj-poll,
 .lj-like,
@@ -73,6 +73,7 @@ HTML {
 	border-width: 1px 0 0;
 	background-position: 0 -8px;
 	}
+.lj-map-wrap,
 .lj-iframe-wrap,
 .lj-embed-wrap {
 	height: 80px;
