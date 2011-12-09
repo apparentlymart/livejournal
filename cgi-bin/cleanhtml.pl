@@ -631,7 +631,8 @@ sub clean
                 next TOKEN if $ljcut_disable;
                 $cutcount++;
                 my $link_text = sub {
-                    my $text = "Read more...";
+                    my $text =  BML::ml('fcklang.readmore');
+                    $text = Encode::decode_utf8($text) if $text;
                     if ($attr->{'text'}) {
                         $text = $attr->{'text'};
                         $text =~ s/</&lt;/g;
