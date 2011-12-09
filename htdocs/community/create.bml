@@ -99,6 +99,12 @@ SUBMIT:
                                             );
         }
 
+        LJ::run_hooks("social_influence",
+                         {
+                            'u'                => $u,
+                             'social_influence' => 'create_community',
+                         });
+
         # local sites may want to override what happens at this point
         my $ret;
         my $redirect;

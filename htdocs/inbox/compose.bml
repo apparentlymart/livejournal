@@ -130,6 +130,12 @@ body<=
                 }
 
                 unless (@errors) {
+                    LJ::run_hooks("social_influence",
+                                        {
+                                            'u'                => $u,
+                                            'social_influence' => 'sent_a_private_message',
+                                        });
+
                     $body .= $ML{'.sent.title'};
                     $body .= "<?p " . $ML{'.sent.nowyoucan'} . " <ul>";
                     $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>" . $ML{'.sent.new'} . "</a></li>";

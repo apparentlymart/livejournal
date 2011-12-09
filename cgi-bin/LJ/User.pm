@@ -6269,6 +6269,33 @@ sub set_sticky_id {
     $self->set_prop( sticky_entry_id => $itemid );
 }
 
+# set socical influence  information
+sub set_social_influence {
+    my ($self, $social_influence_infornation) = @_;
+
+    # update user cached 'social_influence_info'
+    $self->{'__social_influence_info'} = $social_influence_infornation;
+
+    my $new_prop_value = LJ::JSON->to_json($social_influence_infornation) ;
+    $self->set_prop( 'social_influence_info' => $new_prop_value);
+}
+
+# get socical influence  information
+sub get_social_influence {
+    my ($self) = @_;
+
+    # Does user contains cache?
+    if ( !$self->{'__social_influence_info'} ) {
+        my $prop_value = $self->prop("social_influence_info");
+        if (!$prop_value) {
+            return {};
+        }
+
+        $self->{'__social_influence_info'} = LJ::JSON->from_json($prop_value);
+    }
+    return $self->{'__social_influence_info'};
+}
+
 package LJ;
 
 use Carp;
