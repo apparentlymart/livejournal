@@ -1753,4 +1753,10 @@ userproplist.sticky_entry_id:
   indexed: 0
   prettyname: Sticky entry id
 
-
+userproplist.social_influence_info:
+  datatype: blobchar
+  des: Data stucture that countains 'social influence' information
+  indexed: 0
+  multihomed: 0
+  prettyname: Social Influence information
+  cldversion: 8
