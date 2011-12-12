@@ -524,7 +524,8 @@
         $add .= '&need_captcha=1' if $need_captcha;
         $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
         $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
-        $user_url = $user? $user->journal_base : '';
+        # LJSUP-10671
+        $user_url = $GET{'mode'} eq 'reply'? $user? $user->journal_base : '' : $LJ::SITEROOT;
         return qq(
 <!DOCTYPE html>
 <html>
