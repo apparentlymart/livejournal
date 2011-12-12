@@ -132,7 +132,7 @@ body<=
                 unless (@errors) {
                     LJ::run_hooks("social_influence",
                                         {
-                                            'u'                => $u,
+                                            'u'                => $remote,
                                             'social_influence' => 'sent_a_private_message',
                                         });
 
