@@ -70,6 +70,7 @@ sub EntryPage
                     js/quickreply.js
                     js/md5.js
                     js/thread_expander.js
+                    js/thread_expander.ex.js
                     ));
 
     if($remote) {
