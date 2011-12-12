@@ -1940,7 +1940,14 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			#js .b-postform-realauth-google.b-postform-authtype-google.b-postform-user-deleted .b-postform-login-username,
 			#js .b-postform-realauth-openid.b-postform-authtype-openid.b-postform-user-deleted .b-postform-login-username,
 			#js .b-postform-realauth-mailru.b-postform-authtype-mailru.b-postform-user-deleted .b-postform-login-username,
-			#js .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-deleted .b-postform-login-username {
+			#js .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-deleted .b-postform-login-username,
+			#js .b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-suspended .b-postform-login-cookieuser I,
+			#js .b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-suspended .b-postform-login-username,
+			#js .b-postform-realauth-twitter.b-postform-authtype-twitter.b-postform-user-suspended .b-postform-login-username,
+			#js .b-postform-realauth-google.b-postform-authtype-google.b-postform-user-suspended .b-postform-login-username,
+			#js .b-postform-realauth-openid.b-postform-authtype-openid.b-postform-user-suspended .b-postform-login-username,
+			#js .b-postform-realauth-mailru.b-postform-authtype-mailru.b-postform-user-suspended .b-postform-login-username,
+			#js .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-suspended .b-postform-login-username {
 				text-decoration: line-through;
 				}
 			.b-postform-login-item .i-bubble {
