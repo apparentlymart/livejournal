@@ -3,7 +3,7 @@
 #line 3
     use strict;
 
-    our ( %ML, %GET, %POST, $title, $body );
+    our ( %ML, %GET, %POST, %RQ, $title, $body );
     my ( $status, $result, $answer, $redirected, $user_url );
     my $add = '';
     my $need_captcha = 0;
@@ -525,7 +525,7 @@
         $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
         $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
         # LJSUP-10671
-        $user_url = $GET{'mode'} eq 'reply'? $user? $user->journal_base : '' : $LJ::SITEROOT;
+        $user_url = $RQ{'ljentry'}? $user? $user->journal_base : '' : $LJ::SITEROOT;
         return qq(
 <!DOCTYPE html>
 <html>
