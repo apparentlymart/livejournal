@@ -6,7 +6,8 @@
         <TMPL_IF EXPR="whocanreply eq 'friends'">b-postform-user-friendonly</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'friends' && !is_friend">b-postform-user-notafriend</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'reg'">b-postform-user-regonly</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">b-postform-user-notreg</TMPL_IF>
+        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous' && usertype ne 'cookieuser'">b-postform-user-notreg</TMPL_IF>
+        <TMPL_IF EXPR="!email_active && usertype eq 'cookieuser'">b-postform-user-notmail</TMPL_IF>
         <TMPL_IF EXPR="show_logips eq 'S'">b-postform-user-logips b-postform-user-logips-anon</TMPL_IF>
         <TMPL_IF EXPR="show_logips eq 'A'">b-postform-user-logips b-postform-user-logips-all</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'A'">b-postform-user-screened b-postform-user-screened-all</TMPL_IF>
@@ -74,8 +75,12 @@
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><TMPL_VAR ml_notafriend></p>
                     </TMPL_IF>
 
-                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous'">
+                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous' && usertype ne 'cookieuser'">
                         <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><TMPL_VAR ml_noopenidpost></p>
+                    </TMPL_IF>
+
+                    <TMPL_IF EXPR="!email_active && usertype eq 'cookieuser'">
+                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notmail"><TMPL_VAR expr="ml('/talkpost_do.bml.error.noverify2')"></p>
                     </TMPL_IF>
 
                     <TMPL_IF EXPR="whocanreply eq 'reg'">
