@@ -110,6 +110,13 @@
 
 		if (!window.switchedRteOn) {
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
+				$.ajax({
+					url: '/js/ck/contents.css?t=' + CKEDITOR.timestamp,
+					success: function (data) {
+						CKEDITOR.styleText = data;
+					}
+				});
+
 				CKEDITOR.basePath = statPrefix + '/ck/';
 
 				CKEDITOR.replace('draft', {
