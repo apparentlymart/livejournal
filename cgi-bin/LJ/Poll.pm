@@ -12,7 +12,7 @@ sub _memcache_key_prefix            { "poll" }
 sub _memcache_stored_props          {
     # first element of props is a VERSION
     # next - allowed object properties
-    return qw/ 2
+    return qw/ 3
                ditemid itemid
                pollid journalid posterid whovote whoview name status questions props
                results
@@ -926,7 +926,6 @@ sub question {
 
 sub load_aggregated_results {
     my $self = shift;
-
     my %aggr_results;
     my $aggr_users;
 
@@ -950,12 +949,11 @@ sub load_aggregated_results {
         }
     }
 
-    if (scalar keys %aggr_results) {
+    #if (scalar keys %aggr_results) {
         $self->{results} = { counts => \%aggr_results, users => $aggr_users};
-    } else {
-        $self->{results} = 'no'; # we tryed - there are no aggregated results in DB => save negative status to prevent new attempts
-    }
-
+    #} else {
+    #    $self->{results} = 'no'; # we tryed - there are no aggregated results in DB => save negative status to prevent new attempts
+    #}
     # store poll data with loaded results
     $self->_store_to_memcache;
     $LJ::REQ_CACHE_POLL{ $self->id } = $self;
@@ -1617,7 +1615,6 @@ sub aggr_results {
     my $self = shift;
     my $qid  = shift;
 
-
     $self->load_aggregated_results
         unless ref $self->{results};
 
@@ -1626,6 +1623,7 @@ sub aggr_results {
 
 sub aggr_users {
     my $self = shift;
+
     my $qid  = shift;
 
     $self->load_aggregated_results
