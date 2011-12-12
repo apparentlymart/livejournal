@@ -794,7 +794,7 @@ sub s2_context
         S2::set_output(sub {});  # printing suppressed
         S2::set_output_safe(sub {});
         eval { S2::run_code($ctx, "prop_init()"); };
-        escape_all_props($ctx, \@layers);
+        escape_all_props($ctx, \@layers, $u);
 
         return $ctx unless $@;
     }
@@ -811,7 +811,7 @@ sub s2_context
 }
 
 sub escape_all_props {
-    my ($ctx, $lids) = @_;
+    my ($ctx, $lids, $u) = @_;
 
     foreach my $lid (@$lids) {
         foreach my $pname (S2::get_property_names($lid)) {
@@ -819,7 +819,7 @@ sub escape_all_props {
 
             my $prop = S2::get_property($lid, $pname);
             my $mode = $prop->{string_mode} || "plain";
-            escape_prop_value($ctx->[S2::PROPS]{$pname}, $mode);
+            escape_prop_value($ctx->[S2::PROPS]{$pname}, $mode, $u);
         }
     }
 }
@@ -832,6 +832,7 @@ sub _css_cleaner {
 sub escape_prop_value {
     my $mode = $_[1];
     my $css_c = _css_cleaner();
+    my $u = $_[2];
 
     # This function modifies its first parameter in place.
 
@@ -847,11 +848,11 @@ sub escape_prop_value {
     }
     elsif (! ref $_[0]) {
         if ($mode eq 'simple-html' || $mode eq 'simple-html-oneline') {
-            LJ::CleanHTML::clean_subject(\$_[0]);
+            LJ::CleanHTML::clean_subject(\$_[0], {posterid => $u->userid});
             $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
         }
         elsif ($mode eq 'html' || $mode eq 'html-oneline') {
-            LJ::CleanHTML::clean_event(\$_[0]);
+            LJ::CleanHTML::clean_event(\$_[0], {posterid => $u->userid});
             $_[0] =~ s!\n!<br />!g if $mode eq 'html';
         }
         elsif ($mode eq 'css') {

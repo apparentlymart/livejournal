@@ -1815,6 +1815,7 @@ sub clean_event
         'wordlength'    => $wordlength,
         'addbreaks'     => $opts->{'preformatted'} ? 0 : 1,
         'cutpreview'    => $opts->{'cutpreview'},
+        'posterid'      => $opts->{'posterid'},
         'eat'           => $event_eat,
         'mode'          => 'allow',
         'remove'        => $event_remove,
