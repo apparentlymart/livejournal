@@ -1800,6 +1800,7 @@ sub talkform {
         'journal'      => $journalu->username,
         'stylemine'    => $opts->{'stylemine'},
         'editid'       => $editid,
+        'talkpost_do'  => $opts->{'talkpost_do'}? 1 : 0,
     );
 
     # rate limiting challenge

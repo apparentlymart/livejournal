@@ -525,12 +525,15 @@
         $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
         $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
         # LJSUP-10671
-        $user_url = $RQ{'ljentry'}? $user? $user->journal_base : '' : $LJ::SITEROOT;
+        if ( $POST{'talkpost_do'} ) {
+            $user_url = $LJ::SITEROOT;
+        } else {
+            $user_url = $user? $user->journal_base : '';
+        }
         return qq(
 <!DOCTYPE html>
 <html>
 <head></head>
-<body>
 <iframe src="$user_url/xdreceiver.html?type=commentator%2Fsubmit&status=$status&result=$result$add" />
 </body>
 </html>
