@@ -248,7 +248,7 @@
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
-			var styleSheet = '';
+			var styleSheet;
 
 			CKEDITOR.ajax.load(editor.config.contentsCss, function(data) {
 				styleSheet = data;
@@ -305,7 +305,7 @@
 					doc.write('<!DOCTYPE html>' +
 						'<html style="' + ljStyle + '">' +
 							'<head><style type="text/css">' + styleSheet + '</style></head>' +
-							'<body class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '') + '</body>' +
+							'<body scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' + decodeURIComponent(frame.getAttribute('lj-content') || '') + '</body>' +
 						'</html>');
 					doc.close();
 				}
