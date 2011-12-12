@@ -36,7 +36,8 @@ sub _as_email {
     my $other_u     = $msg->other_u;
     my $sender      = $other_u->user;
     my $msgid       = $msg->msgid;
-    my $inbox       = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid;
+    my $qid         = $msg->qid;
+    my $inbox       = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid";
     $inbox = "<a href=\"$inbox\">" . LJ::Lang::get_text($lang, 'esn.your_inbox') . "</a>" if $is_html;
 
     my $vars = {
@@ -142,8 +143,10 @@ sub as_string {
 
     my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
-    my $msgid = $self->load_message->msgid;
-    my $inbox = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid;
+    my $msgid   = $self->load_message->msgid;
+    my $qid     = $self->load_message->qid;
+
+    my $inbox = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid";
     my $ret = sprintf("You've received a new message \"%s\" from %s. %s",
                    $subject, $other_u->{user},
                    $inbox);
