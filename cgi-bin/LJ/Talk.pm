@@ -2113,6 +2113,7 @@ sub talkform {
         'remote_can_comment'     => $remote_can_comment,
         is_friend                => $is_friend,
         whocanreply              => $journalu->prop('opt_whocanreply'),
+        email_active             => $remote? $remote->is_validated : 0,
 
         # ml variables. it is weird that we've got to pass these to
         # the template, but well, the logic here is considered too
