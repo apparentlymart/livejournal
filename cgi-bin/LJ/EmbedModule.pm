@@ -12,10 +12,13 @@ use Encode;
 use constant {
     # reading plain html without <object>, <embed> or <lj-embed>
     REGULAR => 1,
+
     # inside <object> or <embed> tag
     IMPLICIT => 2,
+
     # inside explicit <lj-embed> tag
     EXPLICIT => 3,
+
     # maximum embed width and height
     MAX_WIDTH => 1100,
     MAX_HEIGHT => 1100,
@@ -211,35 +214,78 @@ sub parse_module_embed {
         my $reconstructed = $class->reconstruct($token);
 
         if ($state == REGULAR) {
-            if ( $tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'}
-                    && !$attr->{'source_user'} ) {
+            if ( $tag eq 'lj-embed' && $type eq 'S' && ! $attr->{'/'} && !$attr->{'source_user'} ) {
                 # <lj-embed ...>, not self-closed
                 # switch to EXPLICIT state
                 $newstate = EXPLICIT;
-                # save embed id, width and height if they do exist in attributes
-                $embed_attrs{id} = $attr->{id} if $attr->{id};
-                $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
-                $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
-            } elsif ( $tag eq 'lj-embed' && $type eq 'S' && $attr->{'source_user'} ) {
 
+                # save embed id, width and height if they do exist in attributes
+                if ($attr->{id}) {
+                    $embed_attrs{id} = $attr->{id};
+                }
+ 
+                if ($attr->{width}) {
+                    if ($attr->{width} > MAX_WIDTH) {
+                        $embed_attrs{width} = MAX_WIDTH
+                    } else {
+                        $embed_attrs{width} = $attr->{width};
+                    }
+                }
+
+                if ($attr->{height}) {
+                    if ($attr->{height} > MAX_HEIGHT) {
+                        $embed_attrs{height} = MAX_HEIGHT;
+                    } else {
+                        $embed_attrs{height} = $attr->{width};
+                    }
+                }
+
+            } elsif ( $tag eq 'lj-embed' && $type eq 'S' && $attr->{'source_user'} ) {
                 my $embed_ext = '';
+
                 my $u = LJ::load_user($attr->{'source_user'});
                 if ($u) {
                     if ($journal->equals($u)) {
                         $embed_attrs{id} = $attr->{id};
-                        $embed_attrs{width} = ($attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width}) if $attr->{width};
-                        $embed_attrs{height} = ($attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height}) if $attr->{height};
-                        $embed_ext = "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
+
+                        if ($attr->{width}) {
+                            if ($attr->{width} > MAX_WIDTH) {
+                                $embed_attrs{width} = MAX_WIDTH;
+                            } else {
+                                $embed_attrs{width} = $attr->{width};
+                            }
+                        }
+
+                        if ($attr->{height}) {
+                            if ($attr->{height} > MAX_HEIGHT) {
+                                $embed_attrs{height} = MAX_HEIGHT;
+                            } else {
+                                $embed_attrs{height} = $attr->{height};
+                            }
+                        }
+
+                        my @embed_attributes
+                            = map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /;
+                        $embed_ext = "<lj-embed " . join(' ', @embed_attributes) . "/>";
                     } else {
+                        $embed_attrs{id} = undef;
                         $embed_ext = $class->module_content( moduleid  => $attr->{id},
-                                                          journalid => $u->id );
-                        if ($embed ne "") {
+                                                             journalid => $u->userid );
+                        if ($embed_ext ne "") {
                             if ($attr->{width}) {
-                                $embed_attrs{width} = $attr->{width} > MAX_WIDTH ? MAX_WIDTH : $attr->{width};
+                                if ($attr->{width} > MAX_WIDTH) {
+                                    $embed_attrs{width} = MAX_WIDTH;
+                                } else {
+                                    $embed_attrs{width} = $attr->{width};
+                                }
                             }
 
                             if ($attr->{height}) {
-                                $embed_attrs{height} = $attr->{height} > MAX_HEIGHT ? MAX_HEIGHT : $attr->{height};
+                                if ($attr->{height} > MAX_HEIGHT) {
+                                    $embed_attrs{height} = MAX_HEIGHT;
+                                } else {
+                                    $embed_attrs{height} = $attr->{height};
+                                }
                             }
                         }
                     }
@@ -293,7 +339,7 @@ sub parse_module_embed {
                 # </lj-embed> - that's the end of explicit embed block, switch to REGULAR
                 $newstate = REGULAR;
             } else {
-                # continue appending contents to embed buffer
+                # continue appending cwontents to embed buffer
                 $embed .= $reconstructed;
             }
         } else {
@@ -305,12 +351,14 @@ sub parse_module_embed {
         # so let's save buffer as an embed module and start all over again
         if ($newstate == REGULAR && $embed) {
             $embed = Encode::encode_utf8($embed);
-            $embed_attrs{id} = $class->save_module(
-                id => ($preview ? $next_preview_id++ : $embed_attrs{id}),
-                contents => $embed,
-                journal  => $journal,
-                preview => $preview,
-            );
+            if (!$embed_attrs{id} || $preview) {
+                $embed_attrs{id} = $class->save_module(
+                                            id => ($preview ? $next_preview_id++ : $embed_attrs{id}),
+                                            contents => $embed,
+                                            journal  => $journal,
+                                            preview => $preview,
+                );
+            }
 
             $newtxt .= "<lj-embed " . join(' ', map { exists $embed_attrs{$_} ? "$_=\"$embed_attrs{$_}\"" : () } qw / id width height /) . "/>";
             $embed = '';
@@ -319,7 +367,6 @@ sub parse_module_embed {
 
         # switch the state if we have a new one
         $state = $newstate if defined $newstate;
-
     }
 
     # update passed text
