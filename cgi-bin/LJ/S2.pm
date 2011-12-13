@@ -852,7 +852,8 @@ sub escape_prop_value {
             $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
         }
         elsif ($mode eq 'html' || $mode eq 'html-oneline') {
-            LJ::CleanHTML::clean_event(\$_[0], {posterid => $u->userid});
+            my $userid = $u ? $u->userid : undef;
+            LJ::CleanHTML::clean_event(\$_[0], {posterid => $userid});
             $_[0] =~ s!\n!<br />!g if $mode eq 'html';
         }
         elsif ($mode eq 'css') {
