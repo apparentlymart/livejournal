@@ -195,7 +195,7 @@ EMBED
 
             unless ($event) {
                 $event = $entry->event_raw;
-                LJ::EmbedModule->add_user_to_embed($entry->poster->username, \$event);
+                LJ::EmbedModule->add_user_to_embed($entry->journal->username, \$event);
 
                 $event = LJ::Lang::ml(
                     "repost.wrapper",
