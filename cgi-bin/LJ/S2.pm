@@ -3451,6 +3451,8 @@ sub _print_quickreply_link
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
     $onclick = "" if $LJ::DISABLED{'s2quickreply'};
     $onclick = "" if $page->{'_u'}->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($page->{'_u'}, $remote);
+    $onclick = "" if $remote and $remote->is_deleted || $remote->is_suspended || $remote->is_expunged;
+    $onclick = "" if $remote and LJ::is_banned($page->{'_u'}, $remote);
 
     # See if we want to force them to change their password
     my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
