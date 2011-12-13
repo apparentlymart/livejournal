@@ -2098,7 +2098,7 @@ sub talkform {
         'editid'                 => $editid,
         'entry_url'              => $entry->url,
         'nocomments'             => $entry->prop('opt_nocomments'),
-        'suspended'              => $entry->is_suspended_for($remote),
+        'suspended'              => $remote? $remote->is_suspended : 0,
         'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
         'will_be_screened'       => $entry->prop('opt_screening'),
 
