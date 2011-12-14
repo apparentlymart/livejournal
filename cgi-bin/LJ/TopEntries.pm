@@ -91,7 +91,7 @@ sub domains {
     my $class = shift;
     my $u = shift;
 
-    return () unless LJ::check_priv($u, "siteadmin", "topentries");
+    return @order if LJ::check_priv($u, "siteadmin", "topentries");
 
     my @result;
 
@@ -100,8 +100,7 @@ sub domains {
         $comm_name = $candidate unless $comm_name;
         my $comm = LJ::load_user($comm_name);
         my $allow_access = LJ::check_rel($comm, $u, 'S') || 
-                           LJ::check_rel($comm, $u, 'A') || 
-                           LJ::check_rel($comm, $u, 'M');
+                           LJ::check_rel($comm, $u, 'A'); 
 
         next unless $allow_access;
         next unless $comm;
