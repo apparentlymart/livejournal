@@ -1656,7 +1656,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 	*display: block;
 	}
 	.b-postform-captchabox-active #captcha-container {
-		background: url(/img/preloader-s.gif?v=1) no-repeat 0 50%;
+		background: url(/img/preloader-s.gif?v=1) no-repeat 5px 50%;
 		}
 
 
