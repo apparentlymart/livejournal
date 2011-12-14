@@ -104,7 +104,12 @@
 			var spinner = (!spinnerImage ? null : $('<span class="dateEntry_control" style="display: inline-block; ' + 'background: url(\'' + spinnerImage + '\') 0 0 no-repeat; ' + 'width: ' + spinnerSize[0] + 'px; height: ' + spinnerSize[1] + 'px;' + ($.browser.mozilla && $.browser.version < '1.9' ? // FF 2- (Win)
 				' padding-left: ' + spinnerSize[0] + 'px; padding-bottom: ' + (spinnerSize[1] - 18) + 'px;' : '') + '"></span>'));
 			input.wrap('<span class="dateEntry_wrap"></span>').after(appendText ? '<span class="dateEntry_append">' + appendText + '</span>' : '').after(spinner || '');
-			input.addClass(this.markerClassName).bind('focus.dateEntry', this._doFocus).bind('blur.dateEntry', this._doBlur).bind('click.dateEntry', this._doClick).bind('keydown.dateEntry', this._doKeyDown).bind('keypress.dateEntry', this._doKeyPress);
+			input.addClass(this.markerClassName)
+				.bind('focus.dateEntry', this._doFocus)
+				.bind('blur.dateEntry', this._doBlur)
+				.bind('click.dateEntry', this._doClick)
+				.bind('keydown.dateEntry', this._doKeyDown)
+				.bind('keypress.dateEntry', this._doKeyPress);
 			// Check pastes
 			if ($.browser.mozilla) {
 				input.bind('input.dateEntry', function(event) {
@@ -113,10 +118,10 @@
 			}
 			if ($.browser.msie) {
 				input.bind('paste.dateEntry', function(event) {
-						setTimeout(function() {
-							$.dateEntry._parseDate(inst);
-						}, 1);
-					});
+					setTimeout(function() {
+						$.dateEntry._parseDate(inst);
+					}, 1);
+				});
 			}
 			// Allow mouse wheel usage
 			if (this._get(inst, 'useMouseWheel') && $.fn.mousewheel) {
@@ -152,8 +157,8 @@
 				$.dateEntry._changeSpinner(inst, input.nextSibling, (disable ? 5 : -1));
 			}
 			$.dateEntry._disabledInputs = $.map($.dateEntry._disabledInputs, function(value) {
-					return (value == input ? null : value);
-				}); // Delete entry
+				return (value == input ? null : value);
+			}); // Delete entry
 			if (disable) {
 				$.dateEntry._disabledInputs.push(input);
 			}
@@ -200,8 +205,8 @@
 				$input.unmousewheel();
 			}
 			this._disabledInputs = $.map(this._disabledInputs, function(value) {
-					return (value == input ? null : value);
-				}); // Delete entry
+				return (value == input ? null : value);
+			}); // Delete entry
 			$input.parent().replaceWith($input);
 			$.removeData(input, PROP_NAME);
 		},
@@ -308,9 +313,12 @@
 			var inst = $.data(event.target, PROP_NAME);
 			switch (event.keyCode) {
 				case 9:
+				return true;
+					/*
 					return (event.shiftKey ? // Move to previous date field, or out if at the beginning
 						$.dateEntry._changeField(inst, -1, true) : // Move to next date field, or out if at the end
 						$.dateEntry._changeField(inst, +1, true));
+					*/
 				case 35:
 					if (event.ctrlKey) { // Clear date on ctrl+end
 						$.dateEntry._setValue(inst, '');
@@ -440,8 +448,8 @@
 			var spinnerRepeat = $.dateEntry._get(inst, 'spinnerRepeat');
 			if (region >= 3 && spinnerRepeat[0]) { // Repeat increment/decrement
 				$.dateEntry._timer = setTimeout(function() {
-						$.dateEntry._repeatSpinner(inst, region);
-					}, spinnerRepeat[0]);
+					$.dateEntry._repeatSpinner(inst, region);
+				}, spinnerRepeat[0]);
 				$(spinner).one('mouseout', $.dateEntry._releaseSpinner).one('mouseup', $.dateEntry._releaseSpinner);
 			}
 		},
@@ -482,8 +490,8 @@
 			$.dateEntry._lastInput = $.dateEntry._blurredInput;
 			this._actionSpinner(inst, region);
 			this._timer = setTimeout(function() {
-					$.dateEntry._repeatSpinner(inst, region);
-				}, this._get(inst, 'spinnerRepeat')[1]);
+				$.dateEntry._repeatSpinner(inst, region);
+			}, this._get(inst, 'spinnerRepeat')[1]);
 		},
 
 		/* Stop a spinner repeat.
