@@ -1983,7 +1983,7 @@ sub talkform {
             my $apikey = LJ::conf_test( $LJ::RECAPTCHA{public_key} );
 
             $captcha_html .= $c->get_options_setter(
-                {   'theme' => 'white',
+                {   'theme' => 'clean',
                     'lang'  => BML::get_language(),
                 }
             );
