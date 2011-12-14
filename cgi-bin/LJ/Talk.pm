@@ -2121,7 +2121,7 @@ sub talkform {
         'ml_banned'              => $ml{'banned'},
         'ml_friendsonly'         => $ml{'friendsonly'},
         'ml_logcommentips'       => $ml{'logcommentips'},
-        'ml_loggedin'            => $ml{'loggedin'},
+        'ml_loggedin'            => $remote? LJ::ljuser($remote) : undef,
         'ml_noaccount'           => $ml{'noaccount'},
         'ml_noopenidpost'        => $ml{'noopenidpost'},
         'ml_notafriend'          => $ml{'notafriend'},
