@@ -390,13 +390,18 @@
 			}
 
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
-				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />').replace(/(<lj-map[^>]+)(?!\/)>/gi, '$1 />').replace(/(<lj-template[^>]*)(?!\/)>/gi, '$1 />').replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>').replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi,
-					function(ljtags) {
-						var poll = new Poll(ljtags);
-						return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" allowTransparency="true" ' + 'lj-cmd="LJPollLink" lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
-					}).replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, function(result, attrs, data) {
-						return '<iframe' + attrs + ' lj-class="lj-embed" class="lj-embed-wrap" lj-data="' + encodeURIComponent(data) + '" frameborder="0" allowTransparency="true"></iframe>';
-					});
+				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
+					.replace(/(<lj-map[^>]+)(?!\/)>/gi, '$1 />')
+					.replace(/(<lj-template[^>]*)(?!\/)>/gi, '$1 />')
+					.replace(/(<lj-cut.*?)\/>/gi, '$1>')
+					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
+					.replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi, function(ljtags) {
+							var poll = new Poll(ljtags);
+							return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" allowTransparency="true" ' + 'lj-cmd="LJPollLink" lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
+						})
+					.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, function(result, attrs, data) {
+							return '<iframe' + attrs + ' lj-class="lj-embed" class="lj-embed-wrap" lj-data="' + encodeURIComponent(data) + '" frameborder="0" allowTransparency="true"></iframe>';
+						});
 
 				if (!$('event_format').checked) {
 					html = html.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, function(result, open, content, close) {
