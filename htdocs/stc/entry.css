@@ -218,7 +218,8 @@
 				display: inline-block;
 				width: 10px;
 				height: 10px;
-				margin-left: 5px;
+				margin-left: 3px;
+				margin-right: 12px;
 				background: url(/img/widget/wishlist/date-icon.gif?ver=1) no-repeat;
 				vertical-align: moddle;
 				cursor: pointer;
