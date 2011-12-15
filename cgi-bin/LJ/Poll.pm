@@ -926,10 +926,13 @@ sub question {
 
 sub load_aggregated_results {
     my $self = shift;
+    
     my %aggr_results;
     my $aggr_users;
 
     if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
+        $self->{results}{counts} = {};
+        $self->{results}{users} = {};
         return;
     } elsif (not $self->{results}) { # not loaded
         my $sth = $self->journal->prepare("SELECT what, value FROM pollresultaggregated2 WHERE pollid=? AND journalid=?");
@@ -1066,7 +1069,6 @@ sub render_ans {
 #
 sub render {
     my ($self, %opts) = @_;
-
     my $remote = LJ::get_remote();
 
     my $ditemid   = $self->ditemid;
@@ -1616,9 +1618,11 @@ sub aggr_results {
     my $qid  = shift;
 
     $self->load_aggregated_results
-        unless ref $self->{results};
+        unless ref $self->{results} && $self->{results}{counts};
+   
+    my $results  = $qid ? $self->{results}{counts}{$qid} : $self->{results}{counts};
 
-    return $qid ? %{$self->{results}{counts}{$qid}} : %{$self->{results}{counts}};
+    return $results ? %$results : ();
 }
 
 sub aggr_users {
@@ -1657,7 +1661,6 @@ sub participants {
 
 sub render_new {
     my ($self, %opts) = @_;
-
     my $remote = LJ::get_remote();
 
     my $ditemid   = $self->ditemid;
@@ -1733,6 +1736,7 @@ sub render_new {
 
         my $q = $self->question($qid)
             or return $render->error('poll.error.questionnotfound');
+
 
         my $text = $q->text;
         LJ::Poll->clean_poll(\$text);
@@ -2352,7 +2356,6 @@ sub make_polls_clustered {
             }
         }
 
-        # copy submissions
         my $ssth = $dbhslo->prepare("SELECT userid, datesubmit FROM pollsubmission WHERE pollid=?");
         $ssth->execute($pollid);
         die $ssth->errstr if $ssth->err;
