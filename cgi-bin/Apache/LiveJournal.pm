@@ -860,11 +860,7 @@ sub trans {
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
 
-            if ( $GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'} ) {
-                $mode = "reply";
-            } else {
-                $mode = "entry";
-            }
+            $mode = "entry";
 
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
