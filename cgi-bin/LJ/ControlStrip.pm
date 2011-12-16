@@ -357,7 +357,16 @@ sub render
         my @last_date = @{$daycounts->[-1]};
         pop @early_date;
         pop @last_date;
-    
+
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            gmtime();
+        if ( @last_date[0] < ($year + 1900) ||
+             @last_date[1] < ($mon + 1)     ||
+             @last_date[2] < $mday )
+        {
+            @last_date = ($year + 1900, $mon + 1, $mday);
+        }
+
         $tmpl->param( 'EARLY_DATE' => join(',', @early_date),
                       'LAST_DATE'  => join(',', @last_date));
     }
