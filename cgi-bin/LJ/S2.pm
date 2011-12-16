@@ -3437,6 +3437,7 @@ sub _print_quickreply_link
 
     my $page = get_page();
     my $remote = LJ::get_remote();
+    my $noremote = $remote? 0 : 1;
     LJ::load_user_props($remote, "opt_no_quickreply");
     my $onclick = "";
     unless ($remote->{'opt_no_quickreply'}) {
@@ -3451,9 +3452,14 @@ sub _print_quickreply_link
 
     $onclick = "" unless $page->{'_type'} eq 'EntryPage';
     $onclick = "" if $LJ::DISABLED{'s2quickreply'};
-    $onclick = "" if $page->{'_u'}->{'opt_whocanreply'} eq 'friends' and $remote and not LJ::is_friend($page->{'_u'}, $remote);
-    $onclick = "" if $remote and $remote->is_deleted || $remote->is_suspended || $remote->is_expunged;
-    $onclick = "" if $remote and LJ::is_banned($remote, $page->{'_u'});
+
+    if ( $noremote ) {
+        $onclick = "";
+    } else {
+        $onclick = "" if $page->{'_u'}->{'opt_whocanreply'} eq 'friends' and not LJ::is_friend($page->{'_u'}, $remote);
+        $onclick = "" if $remote->is_deleted || $remote->is_suspended || $remote->is_expunged;
+        $onclick = "" if LJ::is_banned($remote, $page->{'_u'});
+    }
 
     # See if we want to force them to change their password
     my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
