@@ -533,7 +533,7 @@
         $add .= '&need_captcha=1' if $need_captcha;
         $add .= '&hidden=screened' if $comment->{'state'} eq 'S';
         $add .= '&hidden=spammed'  if $comment->{'state'} eq 'B';
-        $add .= '&redirect='. $url if $status eq 'error' and not $result;
+        $add .= '&redirect='. LJ::eurl($url) if $status eq 'error' and not $result;
         $add .= '&message='. $message if $message;
         # LJSUP-10671
         if ( $POST{'talkpost_do'} ) {
