@@ -55,23 +55,28 @@ HTML {
 	margin: 0;
 	}
 .lj-cut-wrap {
-	height: 9px!important;
-	margin: 5px 0;
+	height: 18px!important;
 	}
 .lj-cut {
-	height: 7px!important;
-	cursor: pointer;
+	height: 16px!important;
 	background-color: #FFF;
 	border: 0 dashed #BCBCBC;
-	background: url(/js/ck/images/ljcut.png) no-repeat 0 0;
+	background: url(/js/ck/images/ljcut.png?v=2) no-repeat 0 0;
 	}
 .lj-cut-open {
-	background-position: 0 2px;
+	background-position: 0 10px;
 	border-width: 0 0 1px;
 	}
 .lj-cut-close {
 	border-width: 1px 0 0;
-	background-position: 0 -8px;
+	background-position: 0 -19px;
+	height: 7px!important;
+	margin: 9px 0 0;
+	}
+.lj-selected.lj-cut-close {
+	height: 16px!important;
+	background-position: 0 -27px;
+	margin: 0;
 	}
 .lj-map-wrap,
 .lj-iframe-wrap,
