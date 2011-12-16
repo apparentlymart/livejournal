@@ -354,18 +354,27 @@ sub render
     my $daycounts = LJ::get_daycounts($journal, $remote);
     if (@$daycounts) {
         my @early_date = @{$daycounts->[0]};
-        my @last_date = @{$daycounts->[-1]};
+        my @last_date  = @{$daycounts->[-1]};
         pop @early_date;
         pop @last_date;
+
+        if (@last_date[1] != 0) {
+            @last_date[1] -= 1;
+        }
+
+        if (@early_date[1] != 0) {
+            @early_date[1] -= 1;
+        }
 
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
             gmtime();
         if ( @last_date[0] < ($year + 1900) ||
-             @last_date[1] < ($mon + 1)     ||
+             @last_date[1] < $mon     ||
              @last_date[2] < $mday )
         {
-            @last_date = ($year + 1900, $mon + 1, $mday);
+            @last_date = ($year + 1900, $mon, $mday);
         }
+
 
         $tmpl->param( 'EARLY_DATE' => join(',', @early_date),
                       'LAST_DATE'  => join(',', @last_date));
