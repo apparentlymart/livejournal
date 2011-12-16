@@ -7332,7 +7332,7 @@ sub alloc_user_counter
         $newmax = $u->selectrow_array("SELECT MAX(delayedid) FROM delayedlog2 WHERE journalid=?",
                                       undef, $uid);
     } elsif ( $dom eq 'I' ) {
-        $newmax = $u->selectrow_array("SELECT MAX(logid) FROM fotki_migrate_log WHERE userid=?",
+        $newmax = $u->selectrow_array("SELECT MAX(logid) FROM fotki_migration_log WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
