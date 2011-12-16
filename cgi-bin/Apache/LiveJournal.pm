@@ -860,7 +860,11 @@ sub trans {
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
 
-            $mode = "entry";
+            if ( $GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'} ) {
+                $mode = "reply";
+            } else {
+                $mode = "entry";
+            }
 
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
@@ -1886,7 +1890,11 @@ sub journal_content
                     }
                 } 
             } else {
-                $filename = $LJ::HOME. '/htdocs/talkpost.bml';
+                if ( $LJ::DISABLED{'new_comments'} ) {
+                    $filename = $LJ::HOME. '/htdocs/talkpost.bml';
+                } else {
+                    $filename = $LJ::HOME. '/htdocs/talkread_v2.bml';
+                }
             }
             LJ::Request->notes("_journal" => $RQ{'user'});
             LJ::Request->notes("bml_filename" => $filename);
