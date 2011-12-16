@@ -931,8 +931,6 @@ sub load_aggregated_results {
     my $aggr_users;
 
     if (ref $self->{results} eq 'HASH') { # if poll is new and have aggregated results
-        $self->{results}{counts} = {};
-        $self->{results}{users} = {};
         return;
     } elsif (not $self->{results}) { # not loaded
         my $sth = $self->journal->prepare("SELECT what, value FROM pollresultaggregated2 WHERE pollid=? AND journalid=?");
@@ -1619,7 +1617,7 @@ sub aggr_results {
 
     $self->load_aggregated_results
         unless ref $self->{results} && $self->{results}{counts};
-   
+  
     my $results  = $qid ? $self->{results}{counts}{$qid} : $self->{results}{counts};
 
     return $results ? %$results : ();
