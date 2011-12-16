@@ -12,7 +12,7 @@ sub _memcache_key_prefix            { "poll" }
 sub _memcache_stored_props          {
     # first element of props is a VERSION
     # next - allowed object properties
-    return qw/ 3
+    return qw/ 4
                ditemid itemid
                pollid journalid posterid whovote whoview name status questions props
                results
