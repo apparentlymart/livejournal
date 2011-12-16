@@ -4,7 +4,7 @@
     use strict;
 
     our ( %ML, %GET, %POST, %RQ, $title, $body );
-    my ( $status, $result, $answer, $redirected, $user_url );
+    my ( $status, $result, $answer, $redirected, $user_url, $message );
     my $add = '';
     my $need_captcha = 0;
 
@@ -476,13 +476,15 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.comm.anon2'
                     : '.success.screened.comm2';
-                return $ok->($mlcode) if $ajax;
+                $message = $mlcode;
+                return $redirect->($commentlink) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon2'
                     : '.success.screened.user2';
-                return $ok->($mlcode) if $ajax;
+                $message = $mlcode;
+                return $redirect->($commentlink) if $ajax;
             }
         }
 
@@ -503,7 +505,8 @@
         # Sucessful!
         $title = $ML{'.title'};
 
-        return $ok->($ret) if $ajax;
+        $message = $ret;
+        return $redirect->($commentlink) if $ajax;
 
         return $ret;
 
@@ -528,9 +531,10 @@
         my $comment = $init->{'comment'};
         $result = LJ::eurl($result);
         $add .= '&need_captcha=1' if $need_captcha;
-        $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
-        $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
+        $add .= '&hidden=screened' if $comment->{'state'} eq 'S';
+        $add .= '&hidden=spammed'  if $comment->{'state'} eq 'B';
         $add .= '&redirect='. $url if $status eq 'error' and not $result;
+        $add .= '&message='. $message if $message;
         # LJSUP-10671
         if ( $POST{'talkpost_do'} ) {
             $user_url = $LJ::SITEROOT;
