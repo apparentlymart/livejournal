@@ -314,6 +314,13 @@ sub init {
 
     $up = $author_class->handle_user_input( $form, $remote, $need_captcha,
                                             $errret, $init );
+
+    # User is disabled and checks below are not needed
+    # return with empty errret (this case is handled correctly by talkpost_do.bml)
+    if ( $up and $up->is_suspended || $up->is_deleted || $up->is_expunged ) {
+        @$errret = ('');
+    } 
+
     return if @$errret or LJ::Request->redirected;
     
     # validate the challenge/response value (anti-spammer)

@@ -238,7 +238,7 @@
         ## init.  this handles all the error-checking, as well.
         $init = LJ::Talk::Post::init(\%POST, $remote, \$need_captcha, \@errors);
 
-        return $error->($errors[-1]) if $ajax && int(@errors);
+        return $error->($errors[-1]) if $ajax && int(@errors) or defined @errors[0] and not @errors[0];
         return if LJ::Request->redirected;
 
         # Report errors in a friendly manner by regenerating the field.
@@ -517,14 +517,20 @@
         ? $LJ::COMMON_CODE{'chalresp_js'}
         : '';
 
+    my $talkurl;
+    my $user = LJ::load_user($POST{'journal'});
+    my $entry = $user? LJ::Entry->new( $user, ditemid => $POST{'itemid'} ) : undef;
+    my $args = $POST{'replyto'}? '?replyto='. ($POST{'replyto'} * 256 + ($entry? $entry->anum : 0)) : '?mode=reply';
+    my $url = $entry? $entry->url. $args : $LJ::SITEROOT;
+
     if ( $ajax ) {
-        my $user = LJ::load_user($POST{'journal'});
         my $parent = $init->{'parent'};
         my $comment = $init->{'comment'};
         $result = LJ::eurl($result);
         $add .= '&need_captcha=1' if $need_captcha;
         $add .= '&hidden=screened&message='. $ML{'talk.error.commentscreened'} if $comment->{'state'} eq 'S';
         $add .= '&hidden=spammed&message='.  $ML{'talk.error.commentspammed'}  if $comment->{'state'} eq 'B';
+        $add .= '&redirect='. $url if $status eq 'error' and not $result;
         # LJSUP-10671
         if ( $POST{'talkpost_do'} ) {
             $user_url = $LJ::SITEROOT;
@@ -541,6 +547,10 @@
 );
     }
     elsif ($site_scheme_wrap) {
+        if ( $status eq 'error' and not $result ) {
+            return BML::redirect($url);
+        }
+
         return BML::render_page({
             'body'  => $body,
             'title' => $title,
@@ -548,6 +558,7 @@
         });
     }
     else {
+
         return $body;
     }
 }
