@@ -223,9 +223,7 @@
             needCaptcha: !!(Number('<TMPL_VAR need_captcha>'))
         })
         .authtype({
-            classNames: {
-                startAuthTypePrefix: 'b-postform-authtype-'
-            }, selectors: {
+            selectors: {
                 authTypeRadios: '.b-postform-login-{authType} .b-postform-login-radio'
             }
         })
