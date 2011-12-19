@@ -1760,3 +1760,17 @@ userproplist.social_influence_info:
   multihomed: 0
   prettyname: Social Influence information
   cldversion: 8
+
+logproplist.crosspost_fb:
+  datatype: char
+  des: crosspost to facebook information
+  prettyname: Crosspost to Facebook 
+  sortorder: 111
+
+logproplist.crosspost_tw:
+  datatype: char
+  des: crosspost to twitter information
+  prettyname: Crosspost to Twitter
+  sortorder: 112
+
+
