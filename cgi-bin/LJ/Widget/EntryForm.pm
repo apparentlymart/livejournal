@@ -2,10 +2,9 @@ package LJ::Widget::EntryForm;
 
 use strict;
 use base 'LJ::Widget';
-use LJ::Widget::Calendar;
 
-use LJ::Fotki::Photo;
-use LJ::Fotki::Album;
+use LJ::Pics;
+use LJ::Widget::Calendar;
 use LJ::Widget::Fotki::Upload;
 
 use LJ::GeoLocation;
@@ -1571,51 +1570,51 @@ sub render_ljphoto_block {
     my $photos_id = $opts->{'photos_id'};
 
     my @photos = grep { $_ } map {
-        my $photo = LJ::Fotki::Photo->new ( url_id => $_, userid => $remote->userid );
+        my $photo = LJ::Pics::Photo->load_and_check_auth( $remote, $_ );
         $photo;
     } split (/,/, $photos_id);
 
     foreach my $album_id (split /,/, $albums_id) {
-        my $album = LJ::Fotki::Album->new ( url_id => $album_id, userid => $remote->userid );
+        my $album = LJ::Pics::Album->load_and_check_auth( $remote, $album_id );
         next unless $album;
-        push @photos, @{$album->get_all_photos() || []};
+        push @photos, $album->photos;
     }
 
     $insert_photos = [ grep { $_ } map {
             my $photo = $_;
 
             my $res = $photo->is_valid ? {
-                photo_desc  => $photo->desc,
-                photo_title => $photo->title,
-                photo_url   => @photos > 1 ? $photo->u100_url : $photo->u600_url,
-                photo_id    => $photo->url_id,
+                photo_desc  => $photo->prop('description'),
+                photo_title => $photo->prop('title'),
+                photo_url   => $photo->image_url( 'size' => @photos > 1 ? 100 : 600 ),
+                photo_id    => $photo->photo_id_displayed,
             } : undef;
             $res;
         } @photos ];
 
-    my @photo_sizes = map {
-        my $size = $_;
-        $size->{'text'} = $BML::ML{$_->{'text'}};
-        $size;
-    } @{LJ::Fotki::Photo->get_photo_sizes()};
+    my @photo_sizes = map { {
+        'size'       => $_,
+        'text'       => LJ::Lang::ml("fotki.size.$_.text"),
+        'is_default' => ( $_ == $LJ::Pics::Photo::DEFAULT_SIZE ) ? 1 : 0,
+    } } @LJ::Pics::Photo::SUPPORTED_SIZES;
 
     my $photo_sizes_json = LJ::JSON->to_json ( \@photo_sizes );
     my $album_list = [];
     my $album_list_json = '';
     my $available_space = '';
-    $album_list = LJ::Fotki::Album->get_albums ($remote->userid);
+    $album_list = [ LJ::Pics::Album->list( 'userid' => $remote->userid ) ];
     $album_list = [
         map {
             my $album = $_;
-            my $main_photo = $album->main_photo_url;
             {
-                album_title     => $album->title,
-                album_id        => $album->url_id,
+                album_title     => $album->album_title,
+                album_id        => $album->album_id_displayed,
             }
         } @$album_list
     ];
     $album_list_json = LJ::JSON->to_json ( $album_list );
-    my $available_space = LJ::Fotki::UserSpace->get_available_space();
+    my $available_space = LJ::Widget::Fotki::UserSpace->display_space(
+        LJ::Pics->get_free_space($remote) );
 
     my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
     my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));

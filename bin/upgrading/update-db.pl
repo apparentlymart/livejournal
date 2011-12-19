@@ -122,6 +122,7 @@ my %table_status    = (); # $table -> { SHOW TABLE STATUS ... row }
 my %post_create     = (); # $table -> [ [ $action, $what ]* ]
 my %coltype         = (); # $table -> { $col -> [ $type, $null ] }
 my %indexname       = (); # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
+my %primarykey      = (); # $table -> "INDEX:col1-col2-col3"
 my @alters          = ();
 my $dbh;
 my $sth;
@@ -143,7 +144,7 @@ CLUSTER: foreach my $cluster ( @clusters ) {
     # reset everything
     %clustered_table = %table_exists = %table_unknown =
         %table_create = %table_drop = %post_create =
-        %coltype = %indexname = %table_status = ();
+        %coltype = %indexname = %primarykey = %table_status = ();
     @alters = ();
 
     ## figure out what tables already exist (but not details of their structure)
@@ -1092,6 +1093,7 @@ sub clear_table_info {
     my $table = shift;
     delete $coltype{$table};
     delete $indexname{$table};
+    delete $primarykey{$table};
     delete $table_status{$table};
 }
 
@@ -1144,6 +1146,10 @@ sub load_table_info {
     foreach my $idx (keys %idx_type) {
         my $val = "$idx_type{$idx}:" . join("-", @{$idx_parts{$idx}});
         $indexname{$table}->{$val} = $idx;
+
+        if ( $idx eq 'PRIMARY' ) {
+            $primarykey{$table} = $val;
+        }
     }
 }
 
@@ -1152,6 +1158,12 @@ sub index_name
     my ($table, $idx) = @_;  # idx form is:  INDEX:col1-col2-col3
     load_table_info($table) unless $indexname{$table};
     return $indexname{$table}->{$idx} || "";
+}
+
+sub primary_key {
+    my ($table) = @_;
+    load_table_info($table) unless $indexname{$table};
+    return $primarykey{$table} || '';
 }
 
 sub table_relevant

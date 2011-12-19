@@ -9,10 +9,7 @@ body<=
     use vars qw(%GET %POST $title);
     BML::decl_params(_default => qr/./);
 
-    use LJ::Fotki::Photo;
     use LJ::DelayedEntry;
-    use LJ::Fotki::Album;
-    use LJ::Fotki::UserSpace;
     use LJ::Widget::Fotki::Upload;
     use LJ::Widget::Calendar;
     use List::Util;
