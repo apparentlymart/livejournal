@@ -4,7 +4,7 @@
         <TMPL_IF deleted>b-postform-user-deleted</TMPL_IF>
         <TMPL_IF EXPR="remote_banned && email_active">b-postform-user-banned</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'friends'">b-postform-user-friendonly</TMPL_IF>
-        <TMPL_IF EXPR="whocanreply eq 'friends' && !is_friend">b-postform-user-notafriend</TMPL_IF>
+        <TMPL_IF EXPR="!is_friend">b-postform-user-notafriend</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'reg'">b-postform-user-regonly</TMPL_IF>
         <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous' && usertype ne 'cookieuser'">b-postform-user-notreg</TMPL_IF>
         <TMPL_IF EXPR="!email_active && usertype eq 'cookieuser'">b-postform-user-notmail</TMPL_IF>
@@ -14,6 +14,7 @@
         <TMPL_IF EXPR="will_be_screened eq 'F' && !is_friend">b-postform-user-screened b-postform-user-screened-nonf</TMPL_IF>
         <TMPL_IF EXPR="will_be_screened eq 'R' and !email_active">b-postform-user-screened b-postform-user-screened-anon</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'R'">b-postform-captcha-anon</TMPL_IF>
+        <TMPL_IF EXPR="commentcaptcha eq 'F'">b-postform-captcha-nonfriend</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'A'">b-postform-captcha-all</TMPL_IF>
         b-postform-trueauth-<TMPL_VAR authtype>
         b-postform-realauth-<TMPL_VAR usertype>

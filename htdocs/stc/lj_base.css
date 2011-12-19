@@ -1506,13 +1506,13 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 
 .b-postform-authtype-anonymous.b-postform-user-friendonly .b-postform-alert-notafriend,
 .b-postform-authtype-anonymous.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-twitter.b-postform-authtype-twitter.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-google.b-postform-authtype-google.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-openid.b-postform-authtype-openid.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-mailru.b-postform-authtype-mailru.b-postform-user-notafriend .b-postform-alert-notafriend,
-.b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-notafriend .b-postform-alert-notafriend {
+.b-postform-realauth-cookieuser.b-postform-authtype-cookieuser.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-facebook.b-postform-authtype-facebook.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-twitter.b-postform-authtype-twitter.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-google.b-postform-authtype-google.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-openid.b-postform-authtype-openid.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-mailru.b-postform-authtype-mailru.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend,
+.b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-user-friendonly.b-postform-user-notafriend .b-postform-alert-notafriend {
 	display: block;
 	}
 
