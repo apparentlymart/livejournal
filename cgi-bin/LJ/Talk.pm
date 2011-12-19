@@ -2100,7 +2100,7 @@ sub talkform {
         'nocomments'             => $entry->prop('opt_nocomments'),
         'suspended'              => $remote? $remote->is_suspended : 0,
         'deleted'                => $remote ? $remote->is_deleted || $remote->is_expunged : 0,
-        'will_be_screened'       => $entry->prop('opt_screening'),
+        will_be_screened         => $entry->prop('opt_screening')  || ($journalu? $journalu->prop("opt_whoscreened")  : 0),
 
         # various checks
         'remote_banned'          => LJ::is_banned( $remote, $journalu ),
