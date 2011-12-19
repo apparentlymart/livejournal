@@ -474,16 +474,16 @@
             # otherwise, it's a screened comment.
             if ($journalu->{'journaltype'} eq 'C') {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
-                    ? '.success.screened.comm.anon2'
-                    : '.success.screened.comm2';
-                $message = $mlcode;
+                    ? '.success.screened.comm.anon3'
+                    : '.success.screened.comm3';
+                $message = $ML{$mlcode};
                 return $redirect->($commentlink) if $ajax;
             }
             else {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
-                    ? '.success.screened.user.anon2'
-                    : '.success.screened.user2';
-                $message = $mlcode;
+                    ? '.success.screened.user.anon3'
+                    : '.success.screened.user3';
+                $message = $ML{$mlcode};
                 return $redirect->($commentlink) if $ajax;
             }
         }
