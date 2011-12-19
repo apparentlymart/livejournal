@@ -655,7 +655,7 @@ sub render_metainfo_block {
                 </label>
                 <span class='wrap'>
                     $pickw_select
-                    <a href='javascript:void(0);' id='lj_userpicselect'> </a>
+                    <a href='javascript:void(0);' id='lj_userpicselect'>$BML::ML{'entryform.view_thumbnails'}</a>
                     $userpics_help
                 </span>
             </li>

@@ -1496,6 +1496,8 @@ entryform.userpic.choose=Choose userpic
 
 entryform.userpics=User Picture Icon:
 
+entryform.view_thumbnails=View Thumbnails
+
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
