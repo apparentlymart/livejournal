@@ -1147,6 +1147,12 @@ sub clean
                     }
                 }
 
+                ## LJSUP-10811: due to security issue only Flash is allowed
+                if ($tag eq 'embed' or $tag eq 'object'){
+                   $hash->{type} = 'application/x-shockwave-flash'; 
+                   push @$attrs => 'type';
+                }
+
                 # Through the xsl namespace in XML, it is possible to embed scripting lanaguages
                 # as elements which will then be executed by the browser.  Combining this with
                 # customview.cgi makes it very easy for someone to replace their entire journal
