@@ -73,6 +73,16 @@ sub memcache_key {
     Carp::croak $class . 'does not have a "memcache_key" method defined';
 }
 
+sub delete_prop_memcache {
+    my ( $class, $u, $props ) = @_;
+
+    my $memkey = $class->memcache_key ($u, $props);
+
+    my $userid = int $u->userid;
+
+    LJ::MemCache::delete ([ $userid, $memkey ]);
+}
+
 sub fetch_props_memcache {
     my ( $class, $u, $props ) = @_;
 

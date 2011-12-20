@@ -3008,9 +3008,11 @@ sub revert_style {
 
 sub uncache_prop {
     my ($u, $name) = @_;
-    my $prop = LJ::get_prop("user", $name) or die; # FIXME: use exceptions
-    LJ::MemCache::delete([$u->{userid}, "uprop:$u->{userid}:$prop->{id}"]);
+    
+    my $handler = LJ::User::PropStorage->get_handler ($name);
+    $handler->delete_prop_memcache ($u, $name);
     delete $u->{$name};
+
     return 1;
 }
 
