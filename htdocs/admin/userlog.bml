@@ -33,6 +33,7 @@ body<=
     };
     my $can_view =  LJ::check_priv($remote, 'canview', '*') || 
                     LJ::check_priv($remote, 'canview', 'userlog');
+    my $can_view_uniq = LJ::check_priv($remote, 'canview', 'uniq');
     return $err->("You do not have the necessary privilege to view this page.")
         unless $can_view || 
                 LJ::check_priv($remote, 'canview', 'userloglight') ||
@@ -171,9 +172,12 @@ FORM
         my ($ip, $uniq);
         if (!$can_view) {
             $ip = '***';
-            $uniq = '***';
         } else {
-            $ip = $row->{ip} || "<em>not recorded</em>";
+            $ip = $row->{ip} || "<em>not recorded</em>"; 
+        }			
+        if (!$can_view && !$can_view_uniq) {
+               $uniq = '***';
+        } else {
             $uniq = ($row->{uniq}) 
                 ? qq{<a href='$LJ::SITEROOT/admin/uniq.bml?what=$row->{uniq}'> $row->{uniq} </a>} 
                 : "<em>not recorded</em>";

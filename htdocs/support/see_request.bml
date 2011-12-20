@@ -370,9 +370,11 @@ body<=
     $ret .= "</td></tr>\n";
 
     # uniq
-    if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv($remote, "canview", "userlog")) {
-        my $uniq = $props->{'uniq'} || "<i>$ML{'.none'}</i>";
-        $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td><a href='$LJ::SITEROOT/admin/uniq.bml?what=$uniq'>$uniq</a></td></tr>\n";
+    if (LJ::check_priv($remote, 'sysban', 'uniq') ||
+        LJ::check_priv($remote, "canview", "userlog") ||
+        LJ::check_priv($remote, 'canview', 'uniq')) { 
+          my $uniq = $props->{'uniq'} || "<i>$ML{'.none'}</i>";
+          $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td><a href='$LJ::SITEROOT/admin/uniq.bml?what=$uniq'>$uniq</a></td></tr>\n";
     }
 
     # account type
