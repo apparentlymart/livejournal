@@ -221,9 +221,9 @@
         .commentator({
             publicKey: '<TMPL_VAR captcha_public>',
             captchaContainerId: 'captcha-container',
-            needCaptcha: !!(Number('<TMPL_VAR need_captcha>'))
         })
         .authtype({
+            forceStartupCaptcha: !!(Number('<TMPL_VAR need_captcha>')),
             selectors: {
                 authTypeRadios: '.b-postform-login-{authType} .b-postform-login-radio'
             }
