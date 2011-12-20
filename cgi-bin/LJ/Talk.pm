@@ -1873,6 +1873,9 @@ sub talkform {
     elsif ( $screening eq 'F' ) {
         $willscreen = !( $remote && $is_person && $is_friend );
     }
+    elsif ( $screening eq 'R' ) {
+        $willscreen = !($remote? $remote->is_validated : 0);
+    }
 
     my ( $ml_willscreen, $ml_willscreenfriend );
     if ($willscreen) {
