@@ -450,11 +450,6 @@ function insertFormHints(){
 	// remove this function after changes to weblib.pl go live
 }
 
-function insertViewThumbs(){
-	var lj_userpicselect = $('lj_userpicselect');
-	lj_userpicselect.innerHTML = 'View Thumbnails';
-}
-
 function mood_preview(){
 	if(! document.getElementById){
 		return false;
