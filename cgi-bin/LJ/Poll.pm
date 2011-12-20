@@ -948,6 +948,23 @@ sub load_aggregated_results {
                 warn "Unknown key in pollresultaggrepated2: '$key'" if $LJ::IS_DEV_SERVER;
             }
         }
+
+        unless(%aggr_results) {
+            my $sth;
+            #if ($self->is_clustered) {
+            $sth = $self->journal->prepare("SELECT pollqid, value, userid FROM pollresult2 WHERE pollid=? AND journalid=?");
+            $sth->execute($self->pollid, $self->journalid);
+            my %users = ();
+            while (my $row = $sth->fetchrow_arrayref) {
+                
+                $aggr_results{$row->[0]}{$row->[1]}++;
+                $users{$row->[2]} = 1;
+                
+            }
+            $aggr_users = keys %users;
+
+        }
+
     }
 
     #if (scalar keys %aggr_results) {
