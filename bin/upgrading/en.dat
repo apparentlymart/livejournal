@@ -5648,6 +5648,8 @@ talk.next=Next
 talk.nextshortcut=Ctrl →
 
 talk.nextshortcutmac=Alt →
+ 
+talk.no.default.userpic=no default
 
 talk.parentlink=Parent
 
