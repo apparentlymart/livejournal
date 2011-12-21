@@ -126,7 +126,7 @@ function deleteComment (ditemid, action) {
 		postdata += '&ban=1&spam=1&delauthor=1';
 	}
 	
-    postdata += '&lj_form_auth=' + LJ_cmtinfo.form_auth;
+    postdata += '&lj_form_auth=' + decodeURIComponent(LJ_cmtinfo.form_auth);
 
     var opts = {
         url: url,
@@ -369,7 +369,7 @@ function createModerationFunction(control, dItemid, action) {
 		function sendModerateRequest() {
 			var	bmlName = (action == 'unspam') ? 'spamcomment' : 'talkscreen',
 				postUrl = control.href.replace(new RegExp('.+' + bmlName + '\.bml'), LiveJournal.getAjaxUrl(bmlName)),
-				postParams = { 'confirm': 'Y', lj_form_auth: LJ_cmtinfo.form_auth };
+				postParams = { 'confirm': 'Y', lj_form_auth: decodeURIComponent(LJ_cmtinfo.form_auth) };
 				
 			if (action == 'unspam') {
 				postUrl += '&jsmode=1';
