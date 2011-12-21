@@ -106,7 +106,7 @@ jQuery.fn.labeledPlaceholder = function(){
 	}
 
 	function blur_action(input, label){
-		if(input.val().length === 0 && input.is(':visible')){
+		if (input.val().length === 0) {
 			label.show();
 		}
 	}
