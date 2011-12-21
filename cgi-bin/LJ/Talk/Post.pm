@@ -385,7 +385,7 @@ sub init {
         # with a reply from email. so use $up instead of $remote
         # in the call below.
 
-        if ($parpost && $parpost->{'state'} eq "S" &&
+        if ($parpost && !$form->{'editid'} && $parpost->{'state'} eq "S" &&
             !LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{'user'})) {
             $bmlerr->("$SC.error.screened");
         }
