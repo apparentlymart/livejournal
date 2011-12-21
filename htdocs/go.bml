@@ -45,7 +45,6 @@
                      'use_sticky' => 1 };
      
      if ($GET{'dir'} eq "next") {
-         warn "itemid = " . LJ::get_itemid_after2($u, $itemid);
          $jumplink = LJ::get_after_item_link($u, $options);
          $body = $ML{'.error.noentry.next'};
      } elsif ($GET{'dir'} eq "prev") {
