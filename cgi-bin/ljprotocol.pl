@@ -2560,6 +2560,7 @@ sub postevent {
 
     $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
+    $res->{'ditemid'} = $ditemid;
     $res->{'url'} = $entry->url;
 
     push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
@@ -2621,6 +2622,8 @@ sub editevent {
     my $sth;
 
     my $itemid = $req->{'itemid'}+0;
+    
+    $itemid ||= int( $req->{'ditemid'}+0 / 256);
 
     # underage users can't do this
     return fail($err,310) if $u->underage;
@@ -2707,6 +2710,7 @@ sub editevent {
                 $res->{type}   = 'posted';
                 $res->{itemid} = $out->{res}->{itemid};
                 $res->{anum}   = $out->{res}->{anum};
+                $res->{'ditemid'} = $out->{res}->{itemid} * 256 + $out->{res}->{anum};
 
                 $res->{'url'} = LJ::item_link(  $uowner,
                                                 $res->{itemid},
@@ -2799,17 +2803,17 @@ sub editevent {
         # delete is initiated.
         $uowner->log_event('delete_entry', {
                 remote => $u,
-                actiontarget => ($req->{itemid} * 256 + $oldevent->{anum}),
+                actiontarget => ($itemid * 256 + $oldevent->{anum}),
                 method => 'protocol',
             })
             unless $flags->{noauth};
 
         # We must use property 'dupsig_post' in author of entry to be deleted, not in
         # remote user or journal owner!
-        my $item = LJ::get_log2_row($uowner, $req->{'itemid'});
+        my $item = LJ::get_log2_row($uowner, $itemid);
         my $poster = $item ? LJ::want_user($item->{'posterid'}) : '';
 
-        LJ::delete_entry($uowner, $req->{'itemid'}, 'quick', $oldevent->{'anum'});
+        LJ::delete_entry($uowner, $itemid, 'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
@@ -3079,6 +3083,7 @@ sub editevent {
     if (defined $oldevent->{'anum'}) {
         $res->{'anum'} = $oldevent->{'anum'};
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
+        $res->{'ditemid'} = $itemid * 256 + $oldevent->{'anum'};
     }
 
     my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
@@ -3350,12 +3355,13 @@ sub getevents {
             $where .= "OR ( journalid=$ownerid $secwhere $where AND jitemid=$sticky_id)" if defined $sticky_id;
         }
     }
-    elsif ($req->{'selecttype'} eq "one" && $req->{'itemid'} eq "-1") {
+    elsif ($req->{'selecttype'} eq "one" && ($req->{'itemid'} eq "-1" || $req->{'ditemid'} eq "-1")) {
         $use_master = 1;  # see note above.
         $limit = "LIMIT 1";
         $orderby = "ORDER BY rlogtime";
     }
     elsif ($req->{'selecttype'} eq "one") {
+        $req->{'itemid'} = int(($req->{'ditemid'} + 0) / 256)  unless($req->{'itemid'});
         my $id = $req->{'itemid'} + 0;
         $where = "AND jitemid=$id";
     }
@@ -3423,10 +3429,16 @@ sub getevents {
     }
     elsif ($req->{'selecttype'} eq "multiple") {
         my @ids;
-
-        foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
-            return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
-            push @ids, $num;
+        if ($req->{'ditemids'}) {
+            foreach my $num (split(/\s*,\s*/, $req->{'ditemids'})) {
+                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
+                push @ids, int(($num+0)/256);
+            }
+        } elsif($req->{'itemids'}) {
+            foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
+                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
+                push @ids, $num;
+            }
         }
 
         my $limit = 100;
@@ -3546,6 +3558,7 @@ sub getevents {
         }
 
         $evt->{'anum'} = $anum;
+        $evt->{'ditemid'} = $itemid * 256 + $anum;
 
         if ($jposterid != $ownerid) {
             my $uposter = LJ::load_userid($jposterid);
