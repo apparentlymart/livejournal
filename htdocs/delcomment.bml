@@ -17,9 +17,7 @@ _info?><?_code
     if ( LJ::is_enabled('new_comments') ) {
         my $format = $GET{'format'} || $POST{'format'};
         $check_form_auth = 1;
-        if ( $format eq 'json' ) {
-            $mode = 'json';
-        }
+        $mode = 'json' if $format and $format eq 'json';
     }
 
     # helper subroutines
