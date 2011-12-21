@@ -864,6 +864,8 @@ my %PLURAL_FORMS_HANDLERS = (
 sub plural_form {
     my ( $lang, $count ) = @_;
 
+    $count ||= 0;
+
     my $lang_short = substr( $lang, 0, 2 );
     my $handler = $PLURAL_FORMS_HANDLERS{$lang_short} || \&plural_form_en;
 
