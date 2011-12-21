@@ -246,29 +246,31 @@ LiveJournal.getAjaxUrl = function(action, params) {
 
 // generic handler for ajax errors
 LiveJournal.ajaxError = function (err) {
-    if (LJ_IPPU) {
-        LJ_IPPU.showNote("Error: " + err);
-    } else {
-        alert("Error: " + err);
-    }
+	if (LJ_IPPU) {
+		LJ_IPPU.showNote("Error: " + err);
+	} else {
+		alert("Error: " + err);
+	}
 };
 
 // given a URL, parse out the GET args and return them in a hash
 LiveJournal.parseGetArgs = function (url) {
-    url = url || window.location.href;
-    var getArgsHash = {};
+	url = url || window.location.href;
+	url = url.replace(/#.*$/,'');
 
-    var urlParts = url.split("?");
-    if (!urlParts[1]) return getArgsHash;
-    var getArgs = urlParts[1].split("&");
-    
-    for(var arg=0;arg<getArgs.length;arg++){
-    	var pair = getArgs[arg].split("=");
-        getArgsHash[pair[0]] = pair[1];
+	var getArgsHash = {};
 
-    }
+	var urlParts = url.split("?");
+	if (!urlParts[1]) return getArgsHash;
+	var getArgs = urlParts[1].split("&");
+	
+	for (var arg=0; arg<getArgs.length; arg++) {
+		var pair = getArgs[arg].split("=");
+		getArgsHash[pair[0]] = pair[1];
 
-    return getArgsHash;
+	}
+
+	return getArgsHash;
 };
 
 
