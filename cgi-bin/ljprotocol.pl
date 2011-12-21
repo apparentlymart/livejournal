@@ -3429,18 +3429,17 @@ sub getevents {
     }
     elsif ($req->{'selecttype'} eq "multiple") {
         my @ids;
-        if ($req->{'ditemids'}) {
-            foreach my $num (split(/\s*,\s*/, $req->{'ditemids'})) {
-                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
-                push @ids, int(($num+0)/256);
-            }
-        } elsif($req->{'itemids'}) {
+        if($req->{'itemids'}) {
             foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
                 return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
                 push @ids, $num;
             }
+        } elsif ($req->{'ditemids'}) {
+            foreach my $num (split(/\s*,\s*/, $req->{'ditemids'})) {
+                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
+                push @ids, int(($num+0)/256);
+            }
         }
-
         my $limit = 100;
         return fail($err, 209, "Can't retrieve more than $limit entries at once") if @ids > $limit;
 
