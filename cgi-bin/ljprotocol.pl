@@ -1306,8 +1306,11 @@ sub login
 {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
+    my $uowner = $flags->{'u_owner'} || $u;
+
     my $res = {
         xc3 => {
             u => $u
@@ -1329,14 +1332,21 @@ sub login
     LJ::text_out(\$res->{'message'}) if $ver>=1 and defined $res->{'message'};
 
     ## report what shared journals this user may post in
-    $res->{'usejournals'} = list_usejournals($u);
+    $res->{'usejournals'} = list_usejournals($u) if (LJ::u_equals($u, $uowner));
+
+    # identity users can only post to communities
+    # return fail( $err, 150 )
+    #    if $u->is_identity and LJ::u_equals( $u, $uowner );
+
 
     ## return their friend groups
-    $res->{'friendgroups'} = list_friendgroups($u);
-    return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
-    if ($ver >= 1) {
-        foreach (@{$res->{'friendgroups'}}) {
-            LJ::text_out(\$_->{'name'});
+    if (LJ::u_equals($u, $uowner)) {
+        $res->{'friendgroups'} = list_friendgroups($u);
+        return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
+        if ($ver >= 1) {
+            foreach (@{$res->{'friendgroups'}}) {
+                LJ::text_out(\$_->{'name'});
+            }
         }
     }
 
@@ -1351,15 +1361,15 @@ sub login
 
     ### picture keywords, if they asked for them.
     if ($req->{'getpickws'} || $req->{'getpickwurls'}) {
-        my $pickws = list_pickws($u);
+        my $pickws = list_pickws($uowner);
         @$pickws = sort { lc($a->[0]) cmp lc($b->[0]) } @$pickws;
         $res->{'pickws'} = [ map { $_->[0] } @$pickws ] if $req->{'getpickws'};
         if ($req->{'getpickwurls'}) {
-            if ($u->{'defaultpicid'}) {
-                 $res->{'defaultpicurl'} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}";
+            if ($uowner->{'defaultpicid'}) {
+                 $res->{'defaultpicurl'} = "$LJ::USERPIC_ROOT/$uowner->{'defaultpicid'}/$uowner->{'userid'}";
             }
             $res->{'pickwurls'} = [ map {
-                "$LJ::USERPIC_ROOT/$_->[1]/$u->{'userid'}"
+                "$LJ::USERPIC_ROOT/$_->[1]/$uowner->{'userid'}"
             } @$pickws ];
         }
         if ($ver >= 1) {
@@ -1370,13 +1380,13 @@ sub login
         }
     }
     ## return caps, if they asked for them
-    if ($req->{'getcaps'}) {
-        $res->{'caps'} = $u->caps;
+    if ($req->{'getcaps'} && $u->can_manage($uowner)) {
+        $res->{'caps'} = $uowner->caps;
     }
 
     ## return client menu tree, if requested
-    if ($req->{'getmenus'}) {
-        $res->{'menus'} = hash_menus($u);
+    if ($req->{'getmenus'} ) {
+        $res->{'menus'} = hash_menus($uowner);
         if ($ver >= 1) {
             # validate all text, just in case, even though currently
             # it's all English
@@ -1388,11 +1398,11 @@ sub login
     }
 
     ## tell some users they can hit the fast servers later.
-    $res->{'fastserver'} = 1 if LJ::get_cap($u, "fastserver");
+    $res->{'fastserver'} = 1 if LJ::get_cap($uowner, "fastserver");
 
     ## user info
-    $res->{'userid'} = $u->{'userid'};
-    $res->{'fullname'} = $u->{'name'};
+    $res->{'userid'} = $uowner->{'userid'};
+    $res->{'fullname'} = $uowner->{'name'};
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
@@ -2646,7 +2656,7 @@ sub editevent {
     # never gets set in the "flat" protocol path
     return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
     
-    if ( $req->{ver} > 1 ) {
+    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
         my $delayedid = delete $req->{delayedid};
         my $res = {};
 
@@ -4295,16 +4305,17 @@ sub syncitems {
     }
 
     my $LIMIT = 500;
+    my $type = $req->{type} || 'posted';
     my ( $table, $idfield ) = ( '', 'jitemid');
 
     my $external_ids = $req->{'use_external_ids'};
 
-    if ( $req->{ver} > 1 ) {
-        if ( $req->{type} eq 'posted' ) {
+    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
+        if ( $type eq 'posted' ) {
             $table   = '';
             $idfield = 'jitemid';
         }
-        elsif ( $req->{type} eq 'delayed' ) {
+        elsif ( $type eq 'delayed' ) {
             $table = 'delayed';
             $idfield = 'delayedid';
         } else {
@@ -4322,7 +4333,7 @@ sub syncitems {
 
     my %cmt;
 
-    unless ( $req->{type} eq 'delayed' ) {
+    unless ( $type eq 'delayed' ) {
         my $p_calter  = LJ::get_prop("log", "commentalter");
         my $p_revtime = LJ::get_prop("log", "revtime");
         $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
@@ -4364,7 +4375,6 @@ sub syncitems {
             'item'   => "$ev->[0]-$ev->[1]",
             'time'   => $ev->[2],
             'action' => $ev->[3],
-            'type'   => $req->{type},
             ( $external_ids ? (ditemid => $ev->[1]*256 + $ev->[4]) : () )
         };
         last if $ct >= $LIMIT;
