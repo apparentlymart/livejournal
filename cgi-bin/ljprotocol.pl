@@ -536,6 +536,8 @@ sub getcomments {
     return fail($err,200,"ditemid") unless($req->{ditemid});
     my $itemid = int($req->{ditemid} / 256);
 
+    $itemid ||= $req->{itemid} + 0;
+
     # load root post
     my $jitem = LJ::Talk::get_journal_item($journal, $itemid);
     return fail($err,203,"ditemid (specified post doesn't exist in requested journal)") unless($jitem);
@@ -649,7 +651,8 @@ sub getcomments {
             my $comment = LJ::Comment->new($journal, dtalkid => $item_data->{dtalkid});
 
             my $userpic = $comment->userpic;
-            $item_data->{userpic} = $userpic && $userpic->url;
+            $item_data->{userpic} = $userpic && $userpic->url;          # left here forawhile
+            $item_data->{poster_userpic_url} = $item_data->{userpic};
 
             $item_data->{props} = { map {$item->{props}->{$_} ? ($_ => $item->{props}->{$_}) : ()}
                      qw(edit_time deleted_poster picture_keyword opt_preformatted) };
@@ -888,13 +891,25 @@ sub getrecentcomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
+
+    my $journal;
+    if($req->{journal}) {
+        return fail($err,100) unless LJ::canonical_username($req->{journal});
+        $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
+    } elsif ( $req->{journalid} ) {
+        $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
+    } else {
+        $journal = $u;
+    }
+    return fail($err,200,"journal") unless($journal);
+
     my $count = $req->{itemshow};
     $count = 10 if !$count || ($count > 100) || ($count < 0);
 
-    my @recv = $u->get_recent_talkitems($count);
+    my @recv = $journal->get_recent_talkitems($count, remote => $u);
     my @recv_talkids = map { $_->{'jtalkid'} } @recv;
     my %recv_userids = map { $_->{'posterid'} => 1} @recv;
-    my $comment_text = LJ::get_talktext2($u, @recv_talkids);
+    my $comment_text = LJ::get_talktext2($journal, @recv_talkids);
     my $users = LJ::load_userids(keys(%recv_userids));
     foreach my $comment ( @recv ) {
         $comment->{subject} = $comment_text->{$comment->{jtalkid}}[0];
@@ -918,8 +933,21 @@ sub getrecentcomments {
                 embed_url => $comment->url );
         }
 
-        $comment->{postername} = $users->{$comment->{posterid}}
-            && $users->{$comment->{posterid}}->username;
+        my $poster = $users->{$comment->{posterid}};
+        $comment->{postername} = $poster->username if $poster;
+
+        if ($poster && $poster->identity ) {
+            my $i = $poster->identity;
+            $comment->{'identity_type'} = $i->pretty_type;
+            $comment->{'identity_value'} = $i->value;
+            $comment->{'identity_url'} = $i->url($poster);
+            $comment->{'identity_display'} = $poster->display_name;
+        }
+
+        my $comm_obj = LJ::Comment->new($journal, jtalkid => $comment->{jtalkid});
+        my $userpic = $comm_obj->userpic;
+        $comment->{poster_userpic_url} = $userpic->url if $userpic;
+        
     }
 
     return {
