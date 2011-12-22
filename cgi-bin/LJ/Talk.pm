@@ -1762,8 +1762,8 @@ sub talkform {
     my $remote_can_comment = $entry->registered_can_comment
         || ( $remote and $is_friend );
 
-    return "You cannot edit this comment."
-        if $editid && !$is_person;
+    #return "You cannot edit this comment."
+    #    if $editid && !$is_person;
 
     my $filename = $opts->{embedable_form} 
         ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
