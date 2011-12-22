@@ -1876,7 +1876,7 @@ set use_shared_pic = false;
 property bool view_entry_disabled {
     des = "Disable customized comment pages for your journal";
 }
-set view_entry_disabled = true;
+set view_entry_disabled = false;
 
 property bool tags_aware {
     des = "When enabled, style is responsible for handling tags.  When disabled, tags are automatically inserted into entry bodies.";
