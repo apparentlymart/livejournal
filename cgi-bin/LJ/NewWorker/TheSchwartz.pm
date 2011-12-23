@@ -55,6 +55,8 @@ sub _init {
 
 sub run {
     my $class = shift;
+    my $opts = shift;
+
     my $sleep = 0;
 
     $verbose = $class->verbose;
@@ -90,6 +92,7 @@ sub run {
             LJ::end_request();
         };
         warn $@ if $@;
+        last if $opts->{'run_once'};
     }
 }
 

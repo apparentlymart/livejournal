@@ -66,6 +66,7 @@ sub print_help {
         "-d | --daemon n    start as daemon\n" .
         "-v | --verbose     increase verbose level\n" .
         "-m | --memory n    set memory limit to n megabytes\n",
+        "-o | --once        run only once and exit",
         $self->help(),
         "\n";
         exit 0;
@@ -83,12 +84,14 @@ sub start {
 
     $0 =~ m|([^/]*)$|;
     $name = $1;
+    my $run_once;
 
     # Get command line
     die "Wrong options" unless GetOptions(  'daemons|d=i'   => \$quantity,
                                             'verbose|v+'    => \$verbose,
                                             'help|h'        => sub { $self->print_help() },
                                             'memory|m=i'    => sub { $self->set_memory_limit(1024 * 1024 * $_[1]) },
+                                            'once'          => \$run_once,
                                             $self->options()
                                             );
 
@@ -106,6 +109,8 @@ sub start {
     my $bin  = "$ljhome/bin/worker";
     die "LJHOME/bin/worker directory doesn't exist" unless -d $bin;
     die "piddir $piddir doesn't exist" unless -d $piddir;
+    
+    my $opts = { run_once => $run_once };
 
     # Start
     if ($quantity) {
@@ -155,7 +160,7 @@ sub start {
                 $self->catch_output();
 
                 # And finally go to work.
-                $self->run();
+                $self->run($opts);
 
                 # Before exit from child, call at_exit() and remove pid file
                 $self->at_exit(); 
@@ -204,7 +209,7 @@ sub start {
         $self->after_fork();
 
         # Run at console
-        $self->run();
+        $self->run($opts);
 
         # Before exit, call at_exit()
         $self->at_exit();
