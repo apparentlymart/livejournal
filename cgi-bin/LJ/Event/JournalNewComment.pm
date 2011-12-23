@@ -114,13 +114,6 @@ sub as_email_subject {
     my $key = 'esn.mail_comments.subject.';
     if ( my $comment_subject = $self->comment->subject_orig ) {
         return LJ::strip_html($comment_subject);
-    } elsif ( my $entry_subject = $self->comment->entry->subject_raw ) {
-        return LJ::Lang::get_text(
-            $lang,
-            'esn.mail_comments.subject.entry_subject',
-            undef,
-            { 'subject' => LJ::strip_html($entry_subject) },
-        );
     } elsif (LJ::u_equals($self->comment->poster, $u)) {
         $key .= $edited ? 'comment_you_edited' : 'comment_you_posted';
     } elsif ($self->comment->parent) {
@@ -136,7 +129,14 @@ sub as_email_subject {
             $key .= LJ::u_equals($self->comment->entry->poster, $u) ? 'reply_to_your_entry' : 'reply_to_an_entry';
         }
     }
-    return LJ::Lang::get_text($lang, $key);
+
+    my $ml_params = {};
+    if ( my $entry_subject = $self->comment->entry->subject_raw ) {
+        $key .= '.entry_subject';
+        $ml_params->{'subject'} = LJ::strip_html($entry_subject);
+    };
+
+    return LJ::Lang::get_text( $lang, $key, undef, $ml_params );
 }
 
 sub as_email_string {
