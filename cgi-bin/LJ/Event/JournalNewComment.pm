@@ -112,8 +112,15 @@ sub as_email_subject {
     }
 
     my $key = 'esn.mail_comments.subject.';
-    if ($self->comment->subject_orig) {
-        return LJ::strip_html($self->comment->subject_orig);
+    if ( my $comment_subject = $self->comment->subject_orig ) {
+        return LJ::strip_html($comment_subject);
+    } elsif ( my $entry_subject = $self->comment->entry->subject_raw ) {
+        return LJ::Lang::get_text(
+            $lang,
+            'esn.mail_comments.subject.entry_subject',
+            undef,
+            { 'subject' => LJ::strip_html($entry_subject) },
+        );
     } elsif (LJ::u_equals($self->comment->poster, $u)) {
         $key .= $edited ? 'comment_you_edited' : 'comment_you_posted';
     } elsif ($self->comment->parent) {
