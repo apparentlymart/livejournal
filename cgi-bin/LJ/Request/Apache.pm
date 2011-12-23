@@ -89,7 +89,9 @@ sub LJ::Request::init {
 
 sub LJ::Request::prev {
     my $class = shift;
-    return LJ::Request->_new($class->r()->prev(@_));
+    my $prev_handle = $class->r()->prev(@_);
+    return unless $prev_handle;
+    return LJ::Request->_new($prev_handle);
 }
 
 sub LJ::Request::is_inited {
