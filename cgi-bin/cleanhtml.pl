@@ -1148,9 +1148,14 @@ sub clean
                 }
 
                 ## LJSUP-10811: due to security issue only Flash is allowed
-                if ($tag eq 'embed' or $tag eq 'object'){
+                ## LJSV-1995: Embedded video from http://video.yandex.ru doesn't shown
+                if ($tag eq 'embed'){
                    $hash->{type} = 'application/x-shockwave-flash'; 
-                   push @$attrs => 'type';
+                   push @$attrs => 'type' unless grep { $_ eq 'type' } @$attrs;
+                }
+                if ($tag eq 'object' and ($hash->{data} || $hash->{src})){
+                   $hash->{type} = 'application/x-shockwave-flash'; 
+                   push @$attrs => 'type' unless grep { $_ eq 'type' } @$attrs;
                 }
 
                 # Through the xsl namespace in XML, it is possible to embed scripting lanaguages
