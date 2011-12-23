@@ -18,7 +18,7 @@ our @FIELDS;
 my ( @metadata_fields, %metadata_fields );
 
 BEGIN {
-    @metadata_fields = qw( title description image );
+    @metadata_fields = qw( title description image og_url );
     @metadata_fields{@metadata_fields} = ();
     @FIELDS = ( qw( url html ua ), @metadata_fields );
 }
@@ -64,6 +64,11 @@ my %EXTRACTED_DATA = (
             'require_attr' => { 'property' => 'og:image' },
             'extract_attr' => 'content',
             'fill'         => 'og_image'
+        },
+        {
+            'require_attr' => { 'property' => 'og:url' },
+            'extract_attr' => 'content',
+            'fill'         => 'og_url'
         },
     ],
 );
@@ -250,6 +255,8 @@ sub _extract_metadata {
     $self->image( $extracted_data{'og_image'}
           || $extracted_data{'link_image'}
           || $extracted_data{'html_image'} );
+    
+    $self->og_url($extracted_data{'og_url'});
 
     $self->{'_html_parsed'} = 1;
 
