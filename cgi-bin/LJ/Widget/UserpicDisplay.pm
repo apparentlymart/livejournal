@@ -191,8 +191,6 @@ sub render_body {
                        <script type="text/javascript" language="JavaScript">
                        userpic_preview();
                  };
-        $$picform .= "insertViewThumbs()"
-            if (!$LJ::DISABLED{userpicselect} && $u->get_cap('userpicselect'));
         $$picform .= "</script>\n";
 
     } elsif (!$u)  {

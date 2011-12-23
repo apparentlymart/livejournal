@@ -659,8 +659,6 @@ sub render_metainfo_block {
                 </span>
             </li>
         };
-
-        $$onload .= " insertViewThumbs();" if $self->should_show_userpicselect;
     }
 
     $out .= "</ul></div>";
