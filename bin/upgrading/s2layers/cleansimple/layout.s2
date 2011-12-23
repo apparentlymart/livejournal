@@ -1087,7 +1087,7 @@ function EntryPage::print_body () {
 }
 
 # Clean style. Hate to clutter it up with this:
-function EntryPage::print_comment (Comment c) {
+function EntryPage::print_comment_full (Comment c) {
     var Color background; var Color color;
     if ($c.screened) {
         $background = $*comment_bar_screened_bgcolor;
@@ -1172,9 +1172,8 @@ function EntryPage::print_comment (Comment c) {
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") {
         "(<a href='$c.thread_url'>Thread</a>) ";
-        var Link expand_link = $c->get_link("expand_comments");
-        if (defined $expand_link) {
-            "(" + $c->expand_link() + ") ";
+        if ($c.parent_url != "") {
+            $c->print_expand_collapse_links({ "expand"=>" %_", "collapse"=>" %_"}); 
         }
     }
     if (not $c.frozen) {
