@@ -8,7 +8,9 @@
     return "<?needlogin?>" unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
+    my $mode = $GET{get};
+    my $can_view = LJ::check_priv($remote, "siteadmin", "commentview") && ($mode ne 'comment_body');
+    my $u = $can_view ? LJ::load_user($authas) : LJ::get_authas_user($authas);
     return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
 
     my @errors = ();
@@ -20,7 +22,7 @@
     push @errors, "This page can't be viewed except via POST."
         if BML::get_client_header('Referer') && !LJ::did_post();
 
-    my $mode = $GET{get};
+    #mode check
     push @errors, "Invalid mode."
         unless $mode =~ m/^comment_(?:meta|body)$/;
 
