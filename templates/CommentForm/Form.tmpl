@@ -16,6 +16,7 @@
         <TMPL_IF EXPR="commentcaptcha eq 'R'">b-postform-captcha-anon</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'F'">b-postform-captcha-nonfriend</TMPL_IF>
         <TMPL_IF EXPR="commentcaptcha eq 'A'">b-postform-captcha-all</TMPL_IF>
+        <TMPL_IF notaspammer>b-postform-notaspammer</TMPL_IF>
         b-postform-trueauth-<TMPL_VAR authtype>
         b-postform-realauth-<TMPL_VAR usertype>
         b-postform-authtype-<TMPL_VAR usertype>

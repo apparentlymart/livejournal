@@ -2144,6 +2144,7 @@ sub talkform {
 
         need_captcha             => $opts->{'do_captcha'},
         commentcaptcha           => $journalu->prop("opt_show_captcha_to"),
+        notaspammer              => $remote? LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $remote) : 0,
 
         'captcha_html'              => $captcha_html,
         'comment_length_cap'        => LJ::CMAX_COMMENT,
