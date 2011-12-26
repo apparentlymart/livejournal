@@ -116,6 +116,10 @@ my %e = (
      "320" => [ E_TEMP, "Sorry, there was a problem with content of the entry" ],
      "321" => [ E_TEMP, "Sorry, deleting is temporary disabled. Entry is 'private' now" ],
      "322" => [ E_PERM, "Not allowed to post to community with moderation queue"],
+     "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
+     "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
+     "325" => [ E_PERM, "Error editing comment."],
+
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -471,19 +475,27 @@ sub addcomment
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
+    return fail($err,200,"body") unless($req->{body});
+    return fail($err,200,"ditemid") unless($req->{ditemid});
+
     my $journal;
-    if( $req->{journal} ){
+    if ($req->{journal}) {
         return fail($err,100) unless LJ::canonical_username($req->{journal});
         $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
         return fail($err,214)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
-    }else{
+    } elsif ( $req->{journalid} ) {
+        $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
+        return fail($err,214)
+            if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
+    } else {
         $journal = $u;
     }
 
     # some additional checks
-#    return fail($err,314) unless $u->get_cap('paid');
     return fail($err,214) if LJ::Comment->is_text_spam( \ $req->{body} );
+
+    my $pk = $req->{prop_picture_keyword} || $req->{picture_keyword};
 
     # create
     my $comment = LJ::Comment->create(
@@ -496,7 +508,7 @@ sub addcomment
         body         => $req->{body},
         subject      => $req->{subject},
 
-        props        => { picture_keyword => $req->{prop_picture_keyword} }
+        props        => { picture_keyword => $pk }
     );
 
     # OK
@@ -534,8 +546,8 @@ sub getcomments {
     return fail($err,200,"journal") unless($journal);
 
     return fail($err,200,"ditemid") unless($req->{ditemid});
-    my $itemid = int($req->{ditemid} / 256);
 
+    my $itemid = int($req->{ditemid} / 256);
     $itemid ||= $req->{itemid} + 0;
 
     # load root post
@@ -854,28 +866,32 @@ sub unfreezecomments {
     };
 }
 
+=head editcommnt
+    Edit one single commens
+=cut
 sub editcomment {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
 
     my $remote = $flags->{'u'};
-    return fail($err, 300) if $remote && $remote->is_readonly;
+    return fail($err, 318) if $remote && $remote->is_readonly;
 
-    my $journal = $req->{journalid}?LJ::load_userid($req->{journalid}):$remote;
-    return fail($err, 300) if $journal && $journal->is_readonly;
+    my $journal = $req->{journalid} ? LJ::load_userid($req->{journalid}) : $remote;
+    return fail($err, 319) if $journal && $journal->is_readonly;
 
     my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
     my $entry = $comment->entry;
-    return fail($err, 300) if $entry && $entry->is_suspended;
+    return fail($err, 323) if $entry && $entry->is_suspended;
+
     my $up = $comment->entry->poster;
     my $parent = $comment->parent;
-    return fail($err, 300) if $parent->{state} eq 'F';
+    return fail($err, 324) if $parent->{state} eq 'F';
 
-    my $new_comment = { map {$_ => $req->{$_}} qw( picture_keyword preformat subject body) };
+    my $new_comment = { map {$_ => $req->{$_}} qw( picture_keyword preformat subject body state) };
     $new_comment->{editid} = $req->{dtalkid};
 
     my $errref;
-    return fail($err, 300, $errref)
+    return fail($err, 325, $errref)
         unless LJ::Talk::Post::edit_comment(
             $up, $journal, $new_comment, $parent, {itemid => $entry->jitemid}, \$errref, $remote);
 
