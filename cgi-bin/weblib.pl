@@ -1410,6 +1410,7 @@ sub res_includes {
                 server_time              => time(),
                 remoteJournalBase        => $remote && $remote->journal_base,
                 remoteUser               => $remote && $remote->user,
+                remoteLocale             => LJ::lang_to_locale( LJ::Lang::get_remote_lang() ),
         );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
