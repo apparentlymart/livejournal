@@ -544,7 +544,6 @@ sub getcomments {
     }
 
     return fail($err,200,"journal") unless($journal);
-
     return fail($err,200,"ditemid") unless($req->{ditemid});
 
     my $itemid = int($req->{ditemid} / 256);
@@ -866,8 +865,8 @@ sub unfreezecomments {
     };
 }
 
-=head editcommnt
-    Edit one single commens
+=head editcomment
+    Edit one single comment
 =cut
 sub editcomment {
     my ($req, $err, $flags) = @_;
@@ -876,19 +875,35 @@ sub editcomment {
     my $remote = $flags->{'u'};
     return fail($err, 318) if $remote && $remote->is_readonly;
 
-    my $journal = $req->{journalid} ? LJ::load_userid($req->{journalid}) : $remote;
+    my $journal;
+    if($req->{journal}) {
+        return fail($err, 100) unless LJ::canonical_username($req->{journal});
+        $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
+    } elsif($req->{journalid}) {
+        $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
+    } else {
+        $journal = $remote;
+    }
     return fail($err, 319) if $journal && $journal->is_readonly;
 
-    my $comment = LJ::Comment->new( $journal , dtalkid => $req->{dtalkid} );
+    return fail($err, 200, "dtalkid") unless($req->{dtalkid});
+    
+    my $comment = LJ::Comment->new($journal, dtalkid => $req->{dtalkid});
+    return fail($err, 203, 'dtalkid and journal(id)') unless $comment;
+
     my $entry = $comment->entry;
+    return fail($err, 203, 'dtalkid and journal(id)') unless $entry;;
     return fail($err, 323) if $entry && $entry->is_suspended;
 
-    my $up = $comment->entry->poster;
+    my $up = $entry->poster;
     my $parent = $comment->parent;
-    return fail($err, 324) if $parent->{state} eq 'F';
+    return fail($err, 324) if $parent && $parent->{state} eq 'F';
 
-    my $new_comment = { map {$_ => $req->{$_}} qw( picture_keyword preformat subject body state) };
+    my $new_comment = { map {$_ => $req->{$_}} grep { $req->{$_} } qw( picture_keyword preformat subject body) };
     $new_comment->{editid} = $req->{dtalkid};
+    $new_comment->{body} = $comment->body_orig() unless(defined $new_comment->{body});
+    $new_comment->{subject} = $comment->subject_orig() unless(defined $new_comment->{subject});
+    $new_comment->{preformat} = $comment->prop('opt_preformatted') unless(defined $new_comment->{preformat});
 
     my $errref;
     return fail($err, 325, $errref)
@@ -897,6 +912,8 @@ sub editcomment {
 
     return {
         status => 'OK',
+        commentlink => $comment->url,
+        dtalkid     => $comment->dtalkid,
         xc3 => {
             u => $flags->{'u'}
         }
