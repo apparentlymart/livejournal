@@ -218,7 +218,7 @@ body<=
 
             LJ::update_user($cu, { journaltype => 'C', password => '' });
             if ($mode eq 'create') {
-                LJ::set_rel($cu, $remote, 'A');
+                LJ::set_rel($cu, $remote, 'S');
 
                 # delete existing friends
                 my $friends = LJ::get_friends($cid, undef, undef, 'force') || {};
