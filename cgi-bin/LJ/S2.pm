@@ -134,14 +134,33 @@ sub make_journal
         $page = $cv->($u, $remote, $opts);
     }
 
-    return if $opts->{'suspendeduser'};
+    return if $opts->{'badfriendgroup'};
     return if $opts->{'handler_return'};
+    return if $opts->{'readonlyremote'};
+    return if $opts->{'readonlyjournal'};
+    return if $opts->{'redir'};
+    return if $opts->{'suspendeduser'};
+    return if $opts->{'suspendedentry'};
 
     # the friends mode=live returns raw HTML in $page, in which case there's
     # nothing to "run" with s2_run.  so $page isn't runnable, return it now.
     # but we have to make sure it's defined at all first, otherwise things
     # like print_stylesheet() won't run, which don't have an method invocant
     return $page if $page && ref $page ne 'HASH';
+
+    if ( $entry =~ /::/ && !$page ) {
+        # object methods 
+        my $url = 'http://' . LJ::Request->hostname . LJ::Request->uri;
+        if ( my $args = LJ::Request->args ) {
+            $url .= '?' . $args;
+        }
+
+        my $opts_keys = join( q{, }, sort keys %$opts );
+
+        die "no page object for $entry, url=$url, opts keys=$opts_keys " . 
+            '(check Perl constructor in the relevant LJ::S2::*Page ' .
+            'class first)';
+    }
 
     s2_run($r, $ctx, $opts, $entry, $page);
 
@@ -2081,10 +2100,10 @@ sub Page
         'views_order' => [ 'recent', 'archive', 'friends', 'userinfo' ],
         'global_title' =>  LJ::ehtml($u->{'journaltitle'} || $u->{'name'}),
         'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
-        'head_content' => LJ::S2::HeadContent::->new({ u      => $u,
-                                                       remote => $remote,
-                                                       type   => 'Page',
-                                                       opts   => $opts, }),
+        'head_content' => LJ::S2::HeadContent->new({ u      => $u,
+                                                     remote => $remote,
+                                                     type   => 'Page',
+                                                     opts   => $opts, }),
         'data_link' => {},
         'data_links_order' => [],
         'showspam' => $get->{mode} eq 'showspam' && LJ::is_enabled('spam_button')
