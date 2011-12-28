@@ -1553,13 +1553,15 @@ sub load_comments
     }
     
     my $thread = $opts->{'thread'}+0;
-    if ($thread && $opts->{show_parents}) {
+    my $show_parents = int $opts->{'show_parents'};
+    if ($thread && $show_parents) {
         while (my $parent_thread = $posts->{$thread}->{'parenttalkid'}) {
             $children->{$parent_thread} = [ $thread ];
             $posts->{$parent_thread}->{'children'} = [ $posts->{$thread} ];
             $posts->{$parent_thread}->{'_collapsed'} = 1;
             $posts_to_load{$parent_thread} = 1;
             $thread = $parent_thread;
+            --$show_parents or last;
         }
         $top_replies = [ $thread ];
     }
