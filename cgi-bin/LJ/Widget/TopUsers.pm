@@ -18,13 +18,23 @@ my $use_debug_data  = 0;
 my %debug_data = (
     'ontd_authors'      => '[{"count":"2","userid":"3"},{"count":"1","userid":"4"}]',
     'ontd_commenters'   => '[{"count":"276","userid":"2"},{"count":"170","userid":"3"},{"count":"139","userid":"4"},{"count":"124","userid":"5"},{"count":"123","userid":"6"},{"count":"120","userid":"6"}]',
+    'adisney_comm' => '[{"count":"2","userid":"3"},{"count":"1","userid":"4"}]',
+
 );
 
 sub _fetch_data {
-    %keys = (
-        #'ontd_authors'      => { title => "widget.topusers.top5posters.title",   order => 1, data => [] },
-        'ontd_commenters'   => { title => "widget.topusers.top5commenters.title", order => 2, data => [] },
-    );
+    my $domain = shift;
+
+    if ( $domain eq 'anythingdisney' ) {
+        %keys = (
+            'adisney_comm'    => { title => "widget.topusers.top5commenters.title", order => 1, data => [] },
+        );
+    } else {
+        %keys = (
+            #'ontd_authors'      => { title => "widget.topusers.top5posters.title",   order => 1, data => [] },
+            'ontd_commenters' => { title => "widget.topusers.top5commenters.title", order => 2, data => [] },
+        );
+    }
 
     foreach my $key (keys %keys) {
 
@@ -71,16 +81,17 @@ sub _fetch_data {
 sub render_body {
     my $class = shift;
     my %opts = @_;
+    my $domain = $opts{'domain'} || '';
 
     return '' unless LJ::is_enabled('widget_top_users');
 
-    $class->_fetch_data();
+    $class->_fetch_data($domain);
 
     my $ret = '';
 
     my @keys = sort { $keys{$a}->{'order'} <=> $keys{$b}->{'order'} } keys %keys;
 
-    $ret .= "<div class='w-topcommenters w-ontd'>";
+    $ret .= sprintf '<div class=\'w-topcommenters %s\'>', $domain eq 'anythingdisney'? '' : 'w-ontd';
     $ret .= "<div class='w-head'>";
     $ret .= "<h2><span class='w-head-in'>Top commenters</span></h2>";
     $ret .= "<i class='w-head-corner'></i>";
