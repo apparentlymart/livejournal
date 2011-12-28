@@ -23,18 +23,11 @@ my %debug_data = (
 );
 
 sub _fetch_data {
-    my $domain = shift;
-
-    if ( $domain eq 'anythingdisney' ) {
-        %keys = (
-            'adisney_comm'    => { title => "widget.topusers.top5commenters.title", order => 1, data => [] },
-        );
-    } else {
-        %keys = (
-            #'ontd_authors'      => { title => "widget.topusers.top5posters.title",   order => 1, data => [] },
-            'ontd_commenters' => { title => "widget.topusers.top5commenters.title", order => 2, data => [] },
-        );
-    }
+    %keys = (
+        #'ontd_authors'      => { title => "widget.topusers.top5posters.title",   order => 1, data => [] domain => 'ontd' },
+        'ontd_commenters' => { title => "widget.topusers.top5commenters.title", order => 2, data => [], domain => 'hmp_ontd' },
+        'adisney_comm'    => { title => "widget.topusers.top5commenters.title", order => 3, data => [], domain => 'anythingdisney' },
+    );
 
     foreach my $key (keys %keys) {
 
@@ -81,15 +74,17 @@ sub _fetch_data {
 sub render_body {
     my $class = shift;
     my %opts = @_;
-    my $domain = $opts{'domain'} || '';
+    my $domain = $opts{'domain'} || 'hmp_ontd';
 
     return '' unless LJ::is_enabled('widget_top_users');
 
-    $class->_fetch_data($domain);
+    $class->_fetch_data();
 
     my $ret = '';
 
-    my @keys = sort { $keys{$a}->{'order'} <=> $keys{$b}->{'order'} } keys %keys;
+    my @keys = sort { $keys{$a}->{'order'} <=> $keys{$b}->{'order'} }
+               grep { $keys{$_}->{'domain'} eq $domain }
+               keys %keys;
 
     $ret .= sprintf '<div class=\'w-topcommenters %s\'>', $domain eq 'anythingdisney'? '' : 'w-ontd';
     $ret .= "<div class='w-head'>";
