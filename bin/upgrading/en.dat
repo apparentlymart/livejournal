@@ -5601,6 +5601,8 @@ talk.error.notauthorised=You are not authorized to view this protected entry.
 
 talk.error.notafriend=Comments allowed for friends only
 
+talk.error.notamember=Comments allowed for members only
+
 talk.error.purged|staleness=1
 talk.error.purged=This journal has been deleted and purged.
 
