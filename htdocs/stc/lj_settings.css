@@ -98,6 +98,62 @@ DIV.lc_detect {
 	margin-bottom: 5px;
 }
 DIV.lc_detect INPUT {
-	zoom: 1; margin: 0px;
-	
+	margin: 0px;
+	zoom: 1; 
 	}
+
+/* Custom Userheads in Edit Profile Page
+--------------------------- */
+.i-manage-userhead {
+	width: 16px;
+	height: 16px;
+	border: 0;
+	vertical-align: -2px;
+	}
+.b-manage-userheads-desc {
+	margin: 0 0 1em;
+	}
+.b-manage-userheads {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+.b-manage-userheads:after {
+	content: "";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+	}
+	.b-manage-userheads LI {
+		position: relative;
+		overflow: hidden;
+		float: left;
+		width: 25%;
+		margin: 0 1em 0.5em 0;
+		padding: 0;
+		list-style: none;
+		white-space: nowrap;
+		}
+		.b-manage-userheads LI LABEL {
+			display: block;
+			padding: 3px 5px;
+			border: 1px solid #FFF;
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			border-radius: 5px;
+			}
+		.b-manage-userheads LI.hover LABEL,
+		.b-manage-userheads LI.active LABEL,
+		.b-manage-userheads LI:hover LABEL {
+			border: 1px solid #CCC;
+			background: #F5F5F5;
+			}
+			.b-manage-userheads LI INPUT {
+				position: absolute;
+				left:-99px;
+				}
+
+
+
