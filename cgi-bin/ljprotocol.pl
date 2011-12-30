@@ -119,6 +119,7 @@ my %e = (
      "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
      "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
      "325" => [ E_PERM, "Error editing comment."],
+     "326" => [ E_PERM, "Can't delete specified comment."],
 
 
      # Limit errors
@@ -171,7 +172,7 @@ my %HANDLERS = (
     checksession      => \&checksession,
     getrecentcomments => \&getrecentcomments,
     getcomments       => \&getcomments,
-    delcomments       => \&delcomments,
+    deletecomments    => \&deletecomments,
     screencomments    => \&screencomments,
     unscreencomments  => \&unscreencomments,
     freezecomments    => \&unfreezecomments,
@@ -672,10 +673,10 @@ sub getcomments {
                 if $item->{'props'}->{'poster_ip'} && $u && ( $u->{'user'} eq $up->{'user'} || $u->can_manage($journal) );
 
             $item_data->{privileges} = {};
-            $item_data->{privileges}->{delete}   = LJ::Talk::can_delete($u, $journal, $up, $item->{userpost});
-            $item_data->{privileges}->{edit}     = $comment->user_can_edit($u);
-            $item_data->{privileges}->{freeze}   = (!$comment->is_frozen && LJ::Talk::can_freeze($u, $journal, $up, $item->{userpost}));
-            $item_data->{privileges}->{unfreeze} = ($comment->is_frozen && LJ::Talk::can_unfreeze($u, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{'delete'}   = LJ::Talk::can_delete($u, $journal, $up, $item->{userpost});
+            $item_data->{privileges}->{'edit'}     = $comment->user_can_edit($u);
+            $item_data->{privileges}->{'freeze'}   = (!$comment->is_frozen && LJ::Talk::can_freeze($u, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{'unfreeze'} = ($comment->is_frozen && LJ::Talk::can_unfreeze($u, $journal, $up, $item->{userpost}));
             my $pu = $comment->poster;
             unless ($pu && $pu->is_suspended){
                 $item_data->{privileges}->{screen}   = (!$comment->is_screened && LJ::Talk::can_screen($u, $journal, $up, $item->{userpost}));
@@ -727,33 +728,74 @@ sub getcomments {
     };
 }
 
-sub delcomments {
+=head deletecomments
+    Delete specified comment, comments or thread(s) of comments in specified journal that current use
+    Parameters:
+        journal/journalid or current user's journal
+        dtalkid/dtalkids - ids of current
+        thread  - bool
+
+=cut
+sub deletecomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
 
-    my $comment = LJ::Comment->new( $req->{journalid} || $flags->{'u'} , dtalkid => $req->{dtalkid} );
-    return fail($err, 300) unless $comment->user_can_delete($flags->{'u'});
+    my $u = $flags->{'u'};
+    my $journal;
+    if($req->{journal}) {
+        return fail($err,100) unless LJ::canonical_username($req->{journal});
+        $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
+    } elsif($req->{journalid}) {
+        $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
+    } else {
+        $journal = $u;
+    }
+
+    return fail($err, 200, "dtalkid or dtalkids") unless($req->{dtalkid} || $req->{dtalkids});
+    my @ids;
+    if ($req->{dtalkids}) {
+        foreach my $num (split(/\s*,\s*/, $req->{'dtalkids'})) {
+            return fail($err, 203, "Non-numeric dtalkid '$num'") unless $num =~ /^\d+$/;
+            push @ids, $num;
+        }
+    } else {
+        my $num = $req->{dtalkid};
+        return fail($err, 203, "Non-numeric dtalkid") unless $num =~ /^\d+$/;
+        push @ids, $num;
+    }
+
+    my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
+
+    foreach my $comm (@comments) { 
+        return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
+    }   
 
     my @to_delete;
-
-    if( !$req->{recursive}){
-        push @to_delete, $comment;
-    }else{
-        my @comment_tree = $comment->entry->comment_list;
-        my @children = ($comment);
-        while(my $item = shift @children){
-            return fail($err, 300) unless $item->user_can_delete($flags->{'u'});
-            push @to_delete, $item;
-            push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+    if(!$req->{thread}){
+        push @to_delete, @comments;
+    } else {
+        my %map_delete;
+        foreach my $comment (@comments) {
+            my @comment_tree = $comment->entry->comment_list;
+            my @children = ($comment);
+            while(my $item = shift @children){
+                return fail($err, 326, 'dtalkid:'.$item->dtalkid) unless $item->user_can_delete($u);
+                $map_delete{$item->dtalkid} = $item;
+                push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+            }
         }
+        push @to_delete, values %map_delete;
     }
+
+    # delete all comments
     $_->delete for @to_delete;
 
     return {
         status => 'OK',
         result => @to_delete + 0,
+        dtalkids => [ map {$_->dtalkid} @to_delete ], 
         xc3 => {
-            u => $flags->{'u'}
+            u => $u,
         }
     };
 }
@@ -843,7 +885,6 @@ sub freezecomments {
         }
     };
 }
-
 
 sub unfreezecomments {
     my ($req, $err, $flags) = @_;
@@ -991,7 +1032,6 @@ sub getrecentcomments {
         }
     };
 }
-
 
 sub getfriendspage
 {
