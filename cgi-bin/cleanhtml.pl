@@ -1324,8 +1324,9 @@ sub clean
                                                 username => $poster_username,
                                                 url      => $entry->url,
                                                 subject  => $subject,
-                                                text     => $captured,
+                                                text     => Encode::encode_utf8($captured),
                                                 });
+                    $captured = Encode::decode_utf8($captured);
                 }
                 $captured = LJ::ehtml($captured);
 
