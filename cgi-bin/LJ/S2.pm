@@ -97,6 +97,13 @@ sub make_journal
             ${$opts->{'handle_with_bml_ref'}} = 1;
             return;
         }
+
+        if ( LJ::is_enabled('commentsstylemine') and $view eq 'entry' || $view eq 'reply' ) {
+            if ( $remote and not $remote->opt_stylealwaysmine and $remote->opt_commentsstylemine ) {
+                ${$opts->{'handle_with_bml_ref'}} = 1;
+                return;
+            }
+        }
     }
 
     # setup tags backwards compatibility
