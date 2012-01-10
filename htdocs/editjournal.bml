@@ -30,7 +30,7 @@ body<=
 
     my $skip = $GET{'skip'} || $POST{'skip'} || 0;
     my $mode = $GET{'mode'} || $POST{'mode'} || "init";
-    my $only_me_checked = LJ::did_post() ? $POST{'only_me'} : $GET{'only_me'};
+    my $only_me_checked = (LJ::did_post() ? $POST{'only_me'} : $GET{'only_me'}) ? 1 : 0;
 
     if ( $GET{'itemid'} || $POST{'itemid'} ) { $mode = "edit"; }
     if ( $GET{'delayedid'} || $POST{'delayedid'} ) { $mode = "edit"; }
@@ -71,17 +71,23 @@ body<=
 
     # are we modify a community post?
     my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};
+    undef $usejournal unless LJ::load_user($usejournal);   # ignore unknown journals
     undef $usejournal if $usejournal eq $remote->{'user'}; # ignore if it's the user
     my $usejournal_u = LJ::load_user ($usejournal) || $remote;
+    undef $usejournal unless $usejournal_u;
 
     my ($year, $month, $day) = ($POST{'year'} || $GET{'year'}, $POST{'month'} || $GET{'month'}, $POST{'day'} || $GET{'day'});
     my $ymd = join "-", ($year, $month, $day);
+    ## check income parameters.
+    if ($ymd !~ /^[\d\-]+$/){
+        $year = $month = $day = $ymd = undef;
+    }
 
     my $show = $GET{'show'} || undef;
 
     # extra get arguments
     my $getextra;
-    $getextra .= "usejournal=$usejournal&" if $usejournal;
+    $getextra .= "usejournal=$usejournal&" if $usejournal; 
     $getextra .= "year=$year&month=$month&day=$day&" if $year && $month && $day;
     $getextra .= "only_me=$only_me_checked&" if $only_me_checked;
     chop $getextra;
@@ -694,7 +700,6 @@ LIKE_FAQ
         $ret .= $editprivacy_link if !$ad;
 
         # edit form
-
 
         $ret .= "<form action='editjournal.bml$getextra' method='get' class='b-editentries-form";
         if ($day) {
