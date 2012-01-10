@@ -4102,7 +4102,7 @@ sub opt_commentsstylemine {
 }
 
 sub can_use_commentsstylemine {
-    return 0 unless LJ::is_enabled('commentsstylemine');
+    return 0 unless LJ::is_enabled('comments_style_mine');
     return 1;
 }
 
