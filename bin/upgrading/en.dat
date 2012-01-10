@@ -4710,6 +4710,9 @@ setting.commentscreening.option.select.nonfriends=comments from non-friends
 setting.commentscreening.option.select.nonmembers|staleness=1
 setting.commentscreening.option.select.nonmembers=comments from non-members
 
+setting.commentsstylemine.label=Comments style
+setting.commentsstylemine.option=View comments in my style
+
 setting.contentpromotion.label|staleness=1
 setting.contentpromotion.label=Content Promotion
 

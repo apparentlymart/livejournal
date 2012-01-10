@@ -798,6 +798,14 @@ userproplist.opt_stylealwaysmine:
   multihomed: 0
   prettyname: Always my Style
 
+userproplist.opt_commentsstylemine:
+  cldversion: 8
+  datatype: char
+  des: 1: always use user style when viewing comments in any journal
+  indexed: 0
+  multihomed: 0
+  prettyname: Comments always in my Style
+
 userproplist.opt_stylemine:
   cldversion: 4
   datatype: bool

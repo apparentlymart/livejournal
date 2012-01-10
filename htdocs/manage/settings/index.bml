@@ -58,6 +58,7 @@ body<=
                 LJ::Setting::EmailFormat
                 LJ::Setting::EntryEditor
                 LJ::Setting::StyleAlwaysMine
+                LJ::Setting::CommentsStyleMine
                 LJ::Setting::StyleMine
                 LJ::Setting::GettingStarted
                 LJ::Setting::SiteScheme

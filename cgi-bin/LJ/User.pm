@@ -4094,6 +4094,18 @@ sub can_use_stylealwaysmine {
     return $ret;
 }
 
+sub opt_commentsstylemine {
+    my $u = shift;
+
+    return 0 unless $u->can_use_commentsstylemine;
+    return $u->raw_prop('opt_commentsstylemine') eq 'Y'? 1 : 0;
+}
+
+sub can_use_commentsstylemine {
+    return 0 unless LJ::is_enabled('commentsstylemine');
+    return 1;
+}
+
 sub has_enabled_getting_started {
     my $u = shift;
 
