@@ -3,6 +3,7 @@ package LJ;
 use strict;
 no warnings 'uninitialized';
 use lib "$ENV{LJHOME}/cgi-bin";
+use lib "$ENV{LJHOME}/src/s2";
 
 BEGIN {
     # ugly hack to shutup dependent libraries which sometimes want to bring in

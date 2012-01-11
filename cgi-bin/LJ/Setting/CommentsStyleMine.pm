@@ -3,6 +3,8 @@ use base 'LJ::Setting';
 use strict;
 use warnings;
 
+use S2;
+
 sub should_render {
     my ($class, $u) = @_;
     return 0 unless $u;

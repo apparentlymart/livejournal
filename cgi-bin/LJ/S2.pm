@@ -5,7 +5,6 @@ use Storable;
 use POSIX ();
 use Encode;
 
-use lib "$ENV{'LJHOME'}/src/s2";
 use S2;
 use S2::Color;
 use S2::Checker;
