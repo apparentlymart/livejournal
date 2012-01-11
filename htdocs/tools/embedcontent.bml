@@ -16,7 +16,7 @@
     } elsif ($mode eq 'tackthis'){
         ##
         my $api = $GET{api};
-        return qq|<script src="http://www.tackthis.com/widget-validate.php?api=$api" type="text/javascript"></script>|;
+        return qq|<script src="http://www.tackthis.com/widget-validate-iframe.php?api=$api" type="text/javascript"></script>|;
 
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
