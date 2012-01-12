@@ -1,0 +1,12 @@
+To generate documentation you will need some java VM:
+sudo yum install java-1.6.0-openjdk
+
+We do not want to explode documentation with bad docs from files
+that are not ready for jsdoc, so we explicitly define the list
+of files that will get into docs is defined in file docs_source.txt
+If files belong to repository different than livejournal add a suffix
+and create another file, e.g.:  docs_source_ljcom.txt and commit it to
+that repository.
+
+To generate docs simply run gendoc.sh script from any location.
+Ready docs will be availible at $LJ_ROOT/jsdocs/

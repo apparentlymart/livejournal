@@ -1,0 +1,1 @@
+  jquery/jquery.lj.basicWidget.js
