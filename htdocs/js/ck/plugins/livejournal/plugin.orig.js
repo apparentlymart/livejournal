@@ -246,8 +246,6 @@
 		};
 	}
 
-	var styleSheet;
-
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
 
@@ -653,6 +651,8 @@
 								}
 								editor.insertElement(iframeClose);
 								iframeClose.insertBeforeMe(fragment);
+								range.setStartAfter(iframeOpen);
+								range.setEndBefore(iframeClose);
 								selection.unlock();
 							}
 
@@ -660,8 +660,6 @@
 							new CKEDITOR.dom.element('br', editor.document).insertAfter(iframeClose);
 
 							ranges.length = 1;
-							range.setStartAfter(iframeOpen);
-							range.setEndBefore(iframeClose);
 							selection.selectRanges(ranges);
 						}
 
@@ -1237,7 +1235,7 @@
 									},
 									onData: function(data) {
 										if (data.error) {
-											return alert(data.error + ' "' + username + '"');
+											return alert(data.error + ' "' + ljUserName + '"');
 										}
 
 										if (!data.success) {
