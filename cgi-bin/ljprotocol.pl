@@ -848,7 +848,7 @@ sub updatecomments {
     }   
 
     # get first entry
-    my $jitemid = @comments[0]->entry->jitemid;
+    my $jitemid = $comments[0]->entry->jitemid;
 
     # get list of comments to process
     my @to_update;
