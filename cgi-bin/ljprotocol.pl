@@ -118,7 +118,7 @@ my %e = (
      "322" => [ E_PERM, "Not allowed to post to community with moderation queue"],
      "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
      "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
-     "325" => [ E_PERM, "Error editing comment."],
+     "325" => [ E_PERM, "Can't edit that comment."],
      "326" => [ E_PERM, "Can't delete specified comment."],
 
 
@@ -170,13 +170,13 @@ my %HANDLERS = (
     setmessageread    => \&setmessageread,
     addcomment        => \&addcomment,
     checksession      => \&checksession,
+
     getrecentcomments => \&getrecentcomments,
     getcomments       => \&getcomments,
     deletecomments    => \&deletecomments,
-    screencomments    => \&screencomments,
-    unscreencomments  => \&unscreencomments,
-    freezecomments    => \&unfreezecomments,
+    updatecomments    => \&updatecomments,
     editcomment       => \&editcomment,
+
     getuserpics       => \&getuserpics,
     createpoll        => \&createpoll,
     getpoll           => \&getpoll,
@@ -800,6 +800,94 @@ sub deletecomments {
     };
 }
 
+=head updatecomments
+    Use that function to update comments statuses:
+        single or  multiple
+        complete thread or root ony
+=cut
+
+sub updatecomments {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{'u'};
+    my $journal;
+    if($req->{journal}) {
+        return fail($err,100) unless LJ::canonical_username($req->{journal});
+        $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
+    } elsif($req->{journalid}) {
+        $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
+    } else {
+        $journal = $u;
+    }
+
+    return fail($err, 200, "dtalkid or dtalkids") unless($req->{dtalkid} || $req->{dtalkids});
+
+    my @ids;
+    if ($req->{dtalkids}) {
+        foreach my $num (split(/\s*,\s*/, $req->{'dtalkids'})) {
+            return fail($err, 203, "Non-numeric dtalkid '$num'") unless $num =~ /^\d+$/;
+            push @ids, $num;
+        }
+    } else {
+        my $num = $req->{dtalkid};
+        return fail($err, 203, "Non-numeric dtalkid") unless $num =~ /^\d+$/;
+        push @ids, $num;
+    }
+
+    my $action = $req->{action};
+    return fail($err, 200, "action") unless($action);
+    return fail($err, 203, "action") unless($action =~ /^screen|unscreen|freeze|unfreeze|spam|unspam$/);
+
+    my $can_method = ($action =~ /spam|unspam/ ? ($action eq 'spam' ? "LJ::Talk::can_marked_as_spam" : "LJ::Talk::can_unmark_spam") :  "LJ::Talk::can_$action");
+    $can_method = \&{$can_method};
+
+    my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
+    foreach my $comm (@comments) {
+        return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $can_method->($u, $journal, $comm->entry->poster, $comm->poster);
+    }   
+
+    # get first entry
+    my $jitemid = @comments[0]->entry->jitemid;
+
+    # get list of comments to process
+    my @to_update;
+    if(!$req->{thread} || $action =~ /freeze|unfreeze/) {
+        push @to_update, @comments;
+    } else {    # get all elements from threads
+        my %map_update;
+        foreach my $comment (@comments) {
+            my @comment_tree = $comment->entry->comment_list;
+            my @children = ($comment);
+            while(my $item = shift @children){
+                return fail($err, 326, 'dtalkid:'.$item->dtalkid) unless $can_method->($u, $journal, $item->entry->poster, $item->poster);
+                $map_update{$item->dtalkid} = $item;
+                push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
+            }
+        }
+        push @to_update, values %map_update;
+    }
+
+    # process comments
+    my $method;
+    if ($action =~ /screen|unscreen|spam|unspam/) {
+        $method = \&{"LJ::Talk::$action".'_comment'};
+        $method->($journal, $jitemid, map { $_->{jtalkid} } @to_update);
+    } elsif ($action =~ /freeze|unfreeze/) {
+        $method = \&{"LJ::Talk::$action".'_thread'};
+        $method->($journal, $jitemid, map { $_->{jtalkid} } @to_update);
+    }
+
+    return {
+        status => 'OK',
+        result => @to_update + 0,
+        dtalkids => [ map {$_->dtalkid} @to_update ], 
+        xc3 => {
+            u => $u,
+        }
+    };
+}
+
 sub screencomments {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags);
@@ -907,7 +995,8 @@ sub unfreezecomments {
 }
 
 =head editcomment
-    Edit one single comment
+    Edit one single comment, just content.
+    To change statuses use other API functions.
 =cut
 sub editcomment {
     my ($req, $err, $flags) = @_;
