@@ -5648,6 +5648,12 @@ talk.frozen=Replies frozen
 
 talk.help=Help
 
+talk.insertbold=Insert Bold
+
+talk.insertitalic=Insert Italic
+
+talk.insertunderline=Insert Underline
+
 talk.insertlink=Insert Link
 
 talk.insertphoto=Insert Photo
