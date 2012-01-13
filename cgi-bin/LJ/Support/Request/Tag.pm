@@ -203,11 +203,10 @@ sub rename_tag {
                   $sptagid );
     } elsif ($name_exists && $allowmerge) {
         my ($current_spid) = $dbh->selectrow_array( 'SELECT spid ' .
-                                               'FROM supporttagmap ' .
-                                               'WHERE sptagid = ?',
-                                               undef,
-                                               $source_id);
-
+                                                    'FROM supporttagmap ' .
+                                                    'WHERE sptagid = ?',
+                                                    undef,
+                                                    $sptagid);
 
         my $spid = $dbh->selectrow_array( 'SELECT spid ' .
                                           'FROM supporttagmap '.
