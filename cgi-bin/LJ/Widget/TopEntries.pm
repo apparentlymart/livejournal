@@ -151,7 +151,7 @@ sub render_anythingdisney {
                     : $class->ml('widget.officialjournals.nosubject');
 
         ## Spotlight row
-        $ret .= qq(<li><dl><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data"><span class="i-posts-user">$post->{poster}$comments</p></dd></dl></li>);
+        $ret .= qq(<li><dl><dt><img src="$post->{userpic}" /></dt><dd><h3 class="b-posts-head"><a href="$post->{url}">$subj</a></h3><p class="b-posts-data"><span class="i-posts-user">$post->{poster}$comments</p></dd></dl></li>);
     }
 
     $ret .= '</ul></div></div>';
