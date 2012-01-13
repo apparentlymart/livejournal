@@ -93,6 +93,146 @@ sub get_request_tags {
     return $tags->{$spid};
 }
 
+
+# rename_tag() : rename tag
+# calling format
+# rename_tag($tagid, $new_tag_name, $everywhere)
+sub rename_tag {
+    my ($opts) = @_;
+
+    my $sptagid     = $opts->{'sptagid'};
+    my $spcatid     = $opts->{'spcatid'};
+    my $new_name    = $opts->{'new_name'};
+    my $everywhere  = $opts->{'everywhere'};
+    my $allowmerge  = $opts->{'allowmerge'};
+
+    my $dbh = LJ::get_db_writer();
+    my $old_name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
+
+    if ($everywhere) {
+        # receive all categories where rename is expected 
+        my $source
+            = $dbh->selectall_hashref( "SELECT sptagid, spcatid FROM supporttag " .
+                                       "WHERE name=?",
+                                       'spcatid',
+                                       undef,
+                                       $old_name );
+
+        my @old_spcatids = keys %$source;
+        my $old_spcatids_str = join(',', @old_spcatids);
+
+        # receive exists tags
+        my $destination
+            = $dbh->selectall_hashref( "SELECT sptagid, spcatid FROM supporttag " .
+                                       "WHERE name=? AND spcatid IN ($old_spcatids_str)",
+                                       'spcatid',
+                                       undef,
+                                       $new_name );
+
+        # Does name exist already?
+        if (!$destination) {
+            # just rename 
+            my $row = $dbh->do( "UPDATE supporttag SET name=? WHERE name=?",
+                                undef,
+                                $new_name,
+                                $old_name );
+        } elsif ($allowmerge) {
+
+            # update all in 'supporttag'
+            foreach my $spcatid (keys %$source) {
+                my $source_hash       = delete $source->{$spcatid};
+                my $source_id         = $source_hash->{'sptagid'};
+                my $destination_hash  = $destination->{$spcatid};
+                my $destination_id    = $destination_hash->{'sptagid'};
+
+                my ($current_spid) = $dbh->selectrow_array( 'SELECT spid ' .
+                                                       'FROM supporttagmap ' .
+                                                       'WHERE sptagid = ?',
+                                                       undef,
+                                                       $source_id);
+
+
+                my $spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
+                                                      'FROM supporttagmap ' .
+                                                      'WHERE sptagid = ?',
+                                                      undef,
+                                                      $sptagid );
+
+                $dbh->do( "DELETE FROM supporttag WHERE sptagid = $source_id");
+                $dbh->do( "DELETE FROM supporttagmap WHERE sptagid = $source_id");
+
+                foreach my $spid (@$spids) {
+                    if ($spid == $current_spid) {
+                        next;
+                    }
+
+                    $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
+                              'VALUES (?, ?) ',
+                              undef,
+                              $spid,
+                              $destination_id );
+                }
+
+                my $update_list = join(',', keys %$source);
+                $dbh->do( 'UPDATE supporttag ' . 
+                          'SET name=? ' .
+                          "WHERE sptagid IN ($update_list)",
+                          undef,
+                          $new_name,
+                          $sptagid );
+            }
+        } else {
+            return 0;
+        }
+        return 1;
+    }
+
+    my ($exists_stagid)
+            = $dbh->selectrow_array( "SELECT sptagid FROM supporttag " .
+                                     "WHERE name=? AND spcatid = ?",
+                                     undef,
+                                     $new_name,
+                                     $spcatid );
+
+    my $name_exists = !!$exists_stagid;
+
+    if (!$name_exists) {
+        $dbh->do( 'UPDATE supporttag SET name=? WHERE sptagid=?',
+                  undef,
+                  $new_name,
+                  $sptagid );
+    } elsif ($name_exists && $allowmerge) {
+        my ($current_spid) = $dbh->selectrow_array( 'SELECT spid ' .
+                                               'FROM supporttagmap ' .
+                                               'WHERE sptagid = ?',
+                                               undef,
+                                               $source_id);
+
+
+        my $spid = $dbh->selectrow_array( 'SELECT spid ' .
+                                          'FROM supporttagmap '.
+                                          'WHERE sptagid=?',
+                                          undef,
+                                          $sptagid );
+
+        $dbh->do( "DELETE FROM supporttag WHERE sptagid = $sptagid" );
+        $dbh->do( "DELETE FROM supporttagmap WHERE sptagid = $sptagid" );
+
+        # if duplicate entry
+        if ($current_spid != $spid) {
+            $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
+                      'VALUES (?, ?)',
+                      undef,
+                      $spid,
+                      $exists_stagid );
+        }
+    } else {
+        return 0;
+    }
+
+    return 1;
+}
+
 # set_request_tags(): sets tags for a given request
 # calling format:
 # set_request_tags($spid, $sptagid1, $sptag2, ...)
