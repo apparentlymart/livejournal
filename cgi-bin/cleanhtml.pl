@@ -1311,7 +1311,10 @@ sub clean
 
                     unless ($subject){
                         $subject = LJ::ehtml($entry->subject_raw || LJ::Lang::ml("repost.default_subject"));
-                        $subject = Encode::decode_utf8($subject) if $subject;
+                    }
+
+                    if ($subject && Encode::is_utf8($subject)) {
+                        $subject = Encode::encode_utf8($subject);
                     }
 
                     ## 'posterid' property of a removed (is_valied eq 'false') entry is empty.
@@ -1326,7 +1329,9 @@ sub clean
                                                 subject  => $subject,
                                                 text     => Encode::encode_utf8($captured),
                                                 });
+
                     $captured = Encode::decode_utf8($captured);
+                    $subject  = Encode::decode_utf8($subject) if $subject;
                 }
                 $captured = LJ::ehtml($captured);
 
