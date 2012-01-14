@@ -12,7 +12,7 @@
 #  * leading and trailing whitespace is removed
 #  * all the other whitespace is collapsed
 #  * uppercase letters are converted to lowercase; specific code is added
-#    to ensure that this works for non-EBCDIC characters (e.g. Cyrillic)
+#    to ensure that this works for non-ASCII characters (e.g. Cyrillic)
 #
 # On development servers, when a request tag name is requested, indication
 # of what supportcat that tag belongs to is appended to the name itself;
