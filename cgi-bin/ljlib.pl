@@ -3239,8 +3239,14 @@ sub get_secret
     return undef if $time % 3600;
 
     $secret = LJ::rand_chars(32);
+
+    ## put it to memcache first
+    LJ::MemCache::add($memkey, $secret);
+
+    ## save it to db
     $dbh->do("INSERT IGNORE INTO secrets SET stime=?, secret=?",
              undef, $time, $secret);
+
     # check for races:
     $secret = get_secret($time);
     return ($time, $secret);
