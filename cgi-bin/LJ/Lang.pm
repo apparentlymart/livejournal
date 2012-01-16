@@ -893,7 +893,10 @@ sub plural_form_fr {
 sub plural_form_ru {
     my ($count) = @_;
     $count = 0 unless defined $count;
- 
+    
+    ## remove the gaps from numbers: 25 500 -> 25500
+    $count =~ s/\s+//g;
+
     return 0 if ( $count % 10 == 1 && $count % 100 != 11 );
     return 1
         if ( $count % 10 >= 2 && $count % 10 <= 4 )
