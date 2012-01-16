@@ -1581,7 +1581,7 @@ sub render_ljphoto_block {
     $insert_photos = [ grep { $_ } map {
             my $photo = $_;
 
-            my $res = $photo && $photo->is_valid ? {
+            my $res = $photo ? {
                 photo_desc  => $photo->prop('description'),
                 photo_title => $photo->prop('title'),
                 photo_url   => $photo->image_url( 'size' => @photos > 1 ? 100 : 600 ),
