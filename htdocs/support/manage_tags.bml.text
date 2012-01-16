@@ -14,3 +14,12 @@
 .title|staleness=1
 .title=Manage Support Tags
 
+.rename.link|staleness=1
+.rename.link=Rename
+
+.rename.everywhere|staleness=1
+.rename.everywhere=Rename everywhere
+
+.rename.merge|staleness=1
+.rename.merge=Merge tags
+

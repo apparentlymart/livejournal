@@ -106,6 +106,10 @@ sub rename_tag {
     my $everywhere  = $opts->{'everywhere'};
     my $allowmerge  = $opts->{'allowmerge'};
 
+    if ( !$sptagid || !$spcatid || !$new_name ) {
+        return 0;
+    }
+
     my $dbh = LJ::get_db_writer();
     my $old_name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
 
@@ -130,27 +134,30 @@ sub rename_tag {
                                        $new_name );
 
         # Does name exist already?
-        if (!$destination) {
+        if (!%$destination) {
             # just rename 
-            my $row = $dbh->do( "UPDATE supporttag SET name=? WHERE name=?",
-                                undef,
-                                $new_name,
-                                $old_name );
+            $dbh->do( "UPDATE supporttag SET name=? WHERE name=?",
+                      undef,
+                      $new_name,
+                      $old_name );
         } elsif ($allowmerge) {
-
             # update all in 'supporttag'
             foreach my $spcatid (keys %$source) {
-                my $source_hash       = delete $source->{$spcatid};
-                my $source_id         = $source_hash->{'sptagid'};
+                if (!$destination->{$spcatid}) {
+                    next;
+                }
+
                 my $destination_hash  = $destination->{$spcatid};
                 my $destination_id    = $destination_hash->{'sptagid'};
+
+                my $source_hash       = delete $source->{$spcatid};
+                my $source_id         = $source_hash->{'sptagid'};
 
                 my ($current_spid) = $dbh->selectrow_array( 'SELECT spid ' .
                                                        'FROM supporttagmap ' .
                                                        'WHERE sptagid = ?',
                                                        undef,
                                                        $source_id);
-
 
                 my $spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
                                                       'FROM supporttagmap ' .
@@ -172,17 +179,37 @@ sub rename_tag {
                               $spid,
                               $destination_id );
                 }
+            }
 
-                my $update_list = join(',', keys %$source);
+            foreach my $spcatid (keys %$source) {
+
+                my $source_hash = delete $source->{$spcatid};
+                my $source_id   = $source_hash->{'sptagid'};
+
                 $dbh->do( 'UPDATE supporttag ' . 
                           'SET name=? ' .
-                          "WHERE sptagid IN ($update_list)",
+                          "WHERE sptagid = ?",
                           undef,
                           $new_name,
-                          $sptagid );
+                          $source_id );
             }
         } else {
-            return 0;
+            foreach my $spcatid (keys %$source) {
+
+                if (exists $destination->{$spcatid}) {
+                    next;
+                }
+                my $source_hash = delete $source->{$spcatid};
+                my $source_id   = $source_hash->{'sptagid'};
+
+                $dbh->do( 'UPDATE supporttag ' . 
+                          'SET name=? ' .
+                          "WHERE sptagid = ?",
+                          undef,
+                          $new_name,
+                          $source_id );
+            }
+            return 1;
         }
         return 1;
     }
@@ -368,10 +395,10 @@ sub tag_id_to_name {
     return undef unless $tag;
     LJ::MemCache::set("sptagid:$id", $tag->{'name'}, 86400) unless ($LJ::IS_DEV_SERVER);
     my $name = $tag->{'name'};
-    if ($LJ::IS_DEV_SERVER) {
-        my $spcats = LJ::Support::load_cats($tag->{'spcatid'});
-        $name .= ' ('.$spcats->{$tag->{'spcatid'}}->{'catkey'}.')';
-    }
+    #if ($LJ::IS_DEV_SERVER) {
+    #    my $spcats = LJ::Support::load_cats($tag->{'spcatid'});
+    #    $name .= ' ('.$spcats->{$tag->{'spcatid'}}->{'catkey'}.')';
+    #}
 
     return $name;
 }

@@ -2,35 +2,6 @@
 title=><?_ml .title _ml?>
 head<=
 <?_code return LJ::robot_meta_tags(); _code?>
-<script type="text/javascript" charset="UTF-8">
-
-function rename_support_tag(sptagid, spcatid, text) {
-    var wopts = 'width=200,height=130';
-    var redirect_url = "<?_code return $LJ::SITEROOT.'/support/manage_tags.bml'; _code?>";
-    var new_window = window.open('', "Rename: " + text, wopts)
-    with(new_window) {
-        document.body.innerHTML= ""
-        document.write('<html><head>');
-        document.write('<meta http-equiv="content-type" content="text/html; charset=utf-8">');
-        document.write('</head><body>');
-        document.write('<form>New name: <input id="new_name" type="text" value="' + text +'"/><br/>');
-        document.write('rename everywhere <input id="everywhere" type="checkbox"/><br/>');
-        document.write('<input id="rename" type="button" value="rename" onclick="javascript:void(0)"/>');
-        document.write('<input type="button" value="cancel" onclick="javascript:window.close()"/>');
-        document.write('</form>');
-        document.write('</body></html>');;
-    }
-
-    jQuery(new_window.document).contents().find("#rename").click( function() {
-        var every = new_window.document.getElementById('everywhere').checked;
-        var name = new_window.document.getElementById('new_name').value;
-        new_window.close();
-
-        jQuery.post(redirect_url, {renamed: sptagid, catid: spcatid, new_name: name, everywhere: every});
-        location.reload();
-    });
-}
-</script>
 <=head
 body<=
 <?_code
@@ -71,9 +42,34 @@ body<=
     my %can_see_cats = map { $_ => 1 } @can_see_cats;
     my %can_manage_cats = map { $_ => 1 } @can_manage_cats;
 
+    if ($FORM{'rename'}) {
+        my $sptagid = $FORM{'sptagid'};
+        my $spcatid = $FORM{'spcatid'};
+        my $name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
+
+        my $ret = '<form method="POST">';
+        $ret .= qq{New name: <input name="new_name" type="text" value="$name"/>};
+        $ret .= '<br/>';
+        $ret .= qq{<label for="everywhere">$ML{'.rename.everywhere'}</label>};
+        $ret .= qq{<input id="everywhere" type="checkbox" name="everywhere"/>};
+        $ret .= '<br/>';
+        $ret .= qq{<label for="merge">$ML{'.rename.merge'}</label>};
+        $ret .= qq{<input id="merge" type="checkbox" name="allowmerge"/>};
+        $ret .= '<br/>';
+        $ret .= qq{<input id="rename" type="submit" value="rename"/>};
+        $ret .= '<br/>';
+        $ret .= qq{<input type="button" value="cancel"
+                    onclick="javascript:new_window.location($LJ::SITEROOT . '/support/manage_tags.bml')"/>};
+        $ret .= qq{<input type="hidden" value="$sptagid" name="sptagid"/>};
+        $ret .= qq{<input type="hidden" value="$spcatid" name="spcatid"/>};
+        $ret .= qq{<input type="hidden" value="1" name="renamed"/>};
+        $ret .= '</form>';
+        return $ret;
+    }
+
     if (LJ::did_post() && $FORM{'renamed'}) {
-        my $sptagid     = int($FORM{'renamed'});
-        my $spcatid     = int($FORM{'catid'});
+        my $sptagid     = int($FORM{'sptagid'});
+        my $spcatid     = int($FORM{'spcatid'});
         my $everywhere  = $FORM{'everywhere'};
         my $allowmerge  = $FORM{'allowmerge'};
         my $new_name    = $FORM{'new_name'};
@@ -81,8 +77,8 @@ body<=
         LJ::Support::Request::Tag::rename_tag( {'sptagid'    => $sptagid,
                                                 'spcatid'    => $spcatid,
                                                 'new_name'   => $new_name,
-                                                'everywhere' => $everywhere eq 'true',
-                                                'allowmerge' => 1} );
+                                                'everywhere' => $everywhere,
+                                                'allowmerge' => $allowmerge } );
 
         return BML::redirect($LJ::SITEROOT . '/support/manage_tags.bml');
     }
@@ -92,18 +88,16 @@ body<=
         foreach my $k (keys %FORM) {
             push @delete, $1 if ($k =~ /^delete-(\d+)$/ && $FORM{$k});
         }
-        
+
         LJ::Support::Request::Tag::drop_tags(\@delete, \@can_manage_cats);
         return BML::redirect($LJ::SITEROOT . '/support/manage_tags.bml');
     }
-
-
 
     my $ret;
     $ret .= '<form action="" method="post">';
 
     foreach my $spcat (values %$cats) {
-        my $catkey = $spcat->{'catkey'};
+        my $catkey  = $spcat->{'catkey'};
         my $spcatid = $spcat->{'spcatid'};
         my $catname = $spcat->{'catname'};
 
@@ -131,10 +125,11 @@ body<=
                         'tags=' . $name . '">' . $ML{'.requests'} . '</a>]';
 
                     $ret .= 
-                        '<a href="javascript:rename_support_tag('.
-                        $sptagid . ','.
-                        $spcatid . ',\''.
-                        $name . '\')">[rename]</a>';
+                        '[<a href="'.$LJ::SITEROOT.'/support/manage_tags.bml?' .
+                        'rename=1&' .
+                        'sptagid='. $sptagid . '&' .
+                        'spcatid=' . $spcatid . '">' .
+                        $ML{'.rename.link'} . '</a>]';
                 } else {
                     $ret .= '<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
                         'tags=' . $name . '">' . $name . '</a>';
