@@ -1041,6 +1041,7 @@ function EntryPage::print_comment (Comment c) {
     var int indent = ($c.depth - 1) * 25;
 
     """<div id="$c.dom_id" style="margin-left:${indent}px;">""";
+    """<a name="$c.anchor"></a>""";
 
     if ($c.screened and not $c.full and not viewer_is_owner()) {
         """<strong>$*text_comment_screened</strong>""";
