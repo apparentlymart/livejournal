@@ -5648,11 +5648,11 @@ talk.frozen=Replies frozen
 
 talk.help=Help
 
-talk.insertbold=Insert Bold
+talk.insertbold=Insert Bold (Ctrl+B)
 
-talk.insertitalic=Insert Italic
+talk.insertitalic=Insert Italic (Ctrl+I)
 
-talk.insertunderline=Insert Underline
+talk.insertunderline=Insert Underline (Ctrl+U)
 
 talk.insertlink=Insert Link
 
