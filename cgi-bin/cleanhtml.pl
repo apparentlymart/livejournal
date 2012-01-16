@@ -1000,7 +1000,11 @@ sub clean
                         }
                     }
 
-                    if (($attr eq 'class' || $attr eq 'id') && $opts->{'strongcleancss'}) {
+                    if (
+                        lc $tag ne 'lj-embed' &&
+                        ( $attr eq 'class' || $attr eq 'id' ) &&
+                        $opts->{'strongcleancss'} )
+                    {
                         delete $hash->{$attr};
                         next;
                     }
