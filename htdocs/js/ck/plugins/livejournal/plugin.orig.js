@@ -387,11 +387,15 @@
 				noteData ? CKEDITOR.note.show(noteData) : CKEDITOR.note.hide();
 			}
 
+			function closeTag(result) {
+				return result.slice(-2) == '/>' ? result : result.slice(0, -1) + '/>';
+			}
+
 			editor.dataProcessor.toHtml = function(html, fixForBody) {
-				html = html.replace(/(<lj [^>]+)(?!\/)>/gi, '$1 />')
-					.replace(/(<lj-map[^>]+)(?!\/)>/gi, '$1 />')
-					.replace(/(<lj-template[^>]*)(?!\/)>/gi, '$1 />')
-					.replace(/(<lj-cut.*?)\/>/gi, '$1>')
+				html = html.replace(/<lj [^>]*?>/gi, closeTag)
+					.replace(/<lj-map [^>]*?>/gi, closeTag)
+					.replace(/<lj-template[^>]*?>/gi, closeTag)
+					.replace(/(<lj-cut[^>]*?)\/>/gi, '$1>')
 					.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
 					.replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi, function(ljtags) {
 							var poll = new Poll(ljtags);
