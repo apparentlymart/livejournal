@@ -1161,7 +1161,6 @@ function make_poster(EntryLite e) : string {
 
   if($e isa Comment) {
     if (defined $e.poster) {
-    #if($e.poster.username != "") {
       $user = $e.poster + "";
     } else {
       $user = """<em class="noposter">$*text_poster_anonymous</em>""";
@@ -1172,10 +1171,6 @@ function make_poster(EntryLite e) : string {
     $return = $return + """
       <td class="dateheader"$screenedfg>$*text_user</td>
       <td class="datecontent"$screenedfg>$user""";
-    #if($poster != "") {
-    if (defined $e.poster) {
-      $return = $return + " (posted by $poster)";
-    }
     $return = $return + """</td>
     """;
   }
