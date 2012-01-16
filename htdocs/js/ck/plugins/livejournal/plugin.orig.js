@@ -472,6 +472,12 @@
 					createNote(editor);
 				}
 
+				if (CKEDITOR.env.ie) {
+					editor.document.getBody().on('dragend', updateFrames);
+					editor.document.getBody().on('paste', function () {
+						setTimeout(updateFrames, 0);
+					});
+				}
 				editor.document.on('click', findLJTags);
 				editor.document.on('mouseout', CKEDITOR.note.hide);
 				editor.document.on('mouseover', findLJTags);
