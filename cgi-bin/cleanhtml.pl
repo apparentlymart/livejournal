@@ -1826,6 +1826,9 @@ sub clean_event
         return;
     }
 
+    my $cleancss = $opts->{'journalid'} ?
+        ! $LJ::STYLE_TRUSTED{ $opts->{'journalid'} } : 0;
+
     # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify'       => 1,
@@ -1837,7 +1840,8 @@ sub clean_event
         'mode'          => 'allow',
         'remove'        => $event_remove,
         'autoclose'     => \@comment_close,
-        'cleancss'      => !$LJ::STYLE_TRUSTED{ $opts->{journalid} },
+        'cleancss'      => $cleancss,
+        'strongcleancss' => $cleancss,
         'noearlyclose'  => 1,
         'tablecheck'    => 1,
         'ljrepost_allowed' => 1,
