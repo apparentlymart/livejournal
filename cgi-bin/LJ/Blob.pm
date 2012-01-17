@@ -7,7 +7,6 @@ use Class::Autouse qw(
                       BlobClient
                       BlobClient::Local
                       );
-
 my %bc_cache = ();
 my %bc_reader_cache = ();
 my %bc_path_reader_cache = ();
@@ -134,13 +133,28 @@ sub get_disk_usage {
     shift @_ unless LJ::isu($_[0]);  # let it be called as class method (LJ::Blob->get_disk_usage($u,...))
     my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
+    my $udbh = FB::get_db_writer();
     if ($domain) {
-        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
-                                      "WHERE journalid=? AND domain=?", undef,
-                                      $u->{userid}, LJ::get_blob_domainid($domain));
+        if ($domain eq 'fotobilder') {
+            my $diskusage_Kb = $udbh->selectrow_array(qq{
+                     SELECT Kibused FROM diskusage
+                     WHERE userid = ?
+                     }, undef, $u->{'userid'});
+            return $diskusage_Kb * 1024;
+        } else {
+            return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                          "WHERE journalid=? AND domain=?", undef,
+                                          $u->{userid}, LJ::get_blob_domainid($domain));
+        }
     } else {
-        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
-                                      "WHERE journalid=?", undef, $u->{userid});
+        my $diskusage_without_fotobilder = $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                                                  "WHERE journalid=? AND domain<>?", undef, 
+                                                                  $u->{userid}, LJ::get_blob_domainid('fotobilder'));
+        my $diskusage_fotobilder_Kb = $udbh->selectrow_array(qq{
+                     SELECT Kibused FROM diskusage
+                     WHERE userid = ?
+                     }, undef, $u->{'userid'});
+        return $diskusage_without_fotobilder+$diskusage_fotobilder_Kb*1024;
     }
 }
 
