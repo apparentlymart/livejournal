@@ -587,6 +587,10 @@ sub handle_post {
         });
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
 
+        $nu->revert_style;
+        my $style = LJ::S2::load_style($nu->prop('s2_style'));
+        LJ::Customize->save_s2_props($nu, $style, {'view_entry_disabled' => 1});
+
         # set gender
         $nu->set_prop(gender => $post->{gender});
 
