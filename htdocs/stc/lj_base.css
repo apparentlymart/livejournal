@@ -3718,3 +3718,15 @@ A.lj-button-link:active {
 .i-posticon-flip {
 	margin: 0 0 0 .5em;
 	}
+
+
+/* New badge */
+.b-thisisnew {
+	display: inline;
+	padding: 1px 4px 2px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: #FFF0A6;
+	color: #94938E;
+	font-size: 0.65em;
+	}
