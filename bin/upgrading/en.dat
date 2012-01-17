@@ -3181,6 +3181,8 @@ fotki.photo.upload.error.no_access_rpc=Internal Error
 fotki.photo.upload.error.no_access_to_storage_media|staleness=1
 fotki.photo.upload.error.no_access_to_storage_media=No access to storage media
 
+fotki.photo.upload.error.not_enough_space=Insufficient disk space
+
 fotki.photo.upload.photo_desc|staleness=1
 fotki.photo.upload.photo_desc=Photo description
 

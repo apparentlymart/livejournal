@@ -1594,7 +1594,7 @@ sub render_ljphoto_block {
         'size'       => $_,
         'text'       => LJ::Lang::ml("fotki.size.$_.text"),
         'is_default' => ( $_ == $LJ::Pics::Photo::DEFAULT_SIZE ) ? 1 : 0,
-    } } @LJ::Pics::Photo::SUPPORTED_SIZES;
+    } } @LJ::Pics::Photo::DISPLAYED_SIZES;
 
     my $photo_sizes_json = LJ::JSON->to_json ( \@photo_sizes );
     my $album_list = [];
@@ -1614,7 +1614,9 @@ sub render_ljphoto_block {
     my $available_space = LJ::Widget::Fotki::UserSpace->display_space(
         LJ::Pics->get_free_space($remote) );
 
-    my $auth_token = LJ::Auth->sessionless_auth_token ($LJ::DOMAIN_WEB."/pics/upload", user => $remote ? $remote->user : undef);
+    my $auth_token =
+        LJ::Auth->sessionless_auth_token( '/' . $remote->username );
+
     my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
     my $ljphoto_enabled = $remote->can_upload_photo();
 

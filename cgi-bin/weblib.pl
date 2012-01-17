@@ -1396,6 +1396,7 @@ sub res_includes {
                 imgprefix                => "$imgprefix",
                 siteroot                 => "$siteroot",
                 statprefix               => "$statprefix",
+                picsUploadDomain         => $LJ::PICS_UPLOAD_DOMAIN,
                 currentJournalBase       => "$journal_base",
                 currentJournal           => "$journal",
                 currentEntry             => $ljentry,
