@@ -33,6 +33,7 @@ use POSIX qw/ENOENT/;
                'delcomment' => ['Delete Comment', '/delcomment.bml', 'home'],
                'editentries' => ['Edit Entries', '/editjournal.bml', 'manage'],
                'editentries_do' => ['Edit Entry', '/editjournal_do.bml', 'editentries'],
+               'scheduledposts' => ['Edit Scheduled Entries', '/manage/scheduled_posts.bml', 'manage'],
                'editinfo' => ['Personal Info', '/manage/profile/', 'manage'],
                'editprofile' => ['Edit Profile', '/manage/profile/', 'manage'],
                'editsettings' => ['Viewing Options', '/manage/profile/', 'manage'],
