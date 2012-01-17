@@ -35,7 +35,7 @@ JSDOC="$SCRIPTPATH/../../../htdocs/jsdoc" #we choose relative dir to allow to ru
 JSDOCTEMPLATEDIR="$JSDOCDIR/templates/jsdoc"
 JSDIR="$SCRIPTPATH/../../../htdocs/js"
 
-FILES=`cat docs_source*.txt`
+FILES=`cat ${SCRIPTPATH}/docs_source*.txt`
 OUTFILES=""
 
 for jsfile in $FILES
