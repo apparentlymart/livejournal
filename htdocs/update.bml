@@ -503,10 +503,12 @@ LIKE_FAQ
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
-        my $sticky = $POST{'sticky_type'} || $GET{'sticky_type'};
-        my $timezone = $POST{'timezone'} || $GET{'timezone'};
+        my $sticky      = $POST{'sticky_type'} || $GET{'sticky_type'};
+        my $type        = $POST{'type'} || $GET{'type'};
+        my $timezone    = $POST{'timezone'} || $GET{'timezone'};
         my $custom_time = $POST{'custom_time'} || $GET{'custom_time'};
-        $timezone =  sprintf("%+.4d", $timezone);
+        $timezone       =  sprintf("%+.4d", $timezone);
+
         my %req = (
                     'ver'         => 2,
                     'username'    => $user,
@@ -514,7 +516,8 @@ LIKE_FAQ
                     'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
                     'sticky'      => $sticky,
                     'custom_time' => $custom_time,
-                    'tz'          => $timezone, 
+                    'tz'          => $timezone,
+                    'posttype'    => $type,
                     );
 
         $flags->{'use_custom_time'} = 1; 

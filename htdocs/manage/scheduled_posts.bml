@@ -19,6 +19,9 @@ body<=
                     js/photobucket_jw.js
                     ));
 
+    if (!LJ::is_enabled("delayed_entries")) {
+          return LJ::error_list("This feature is disabled.");
+    }
 
     my $page_name = 'scheduled_posts.bml';
     my $items_per_page = 20;
@@ -107,10 +110,8 @@ body<=
                             'anum'        => 0,
                            };
         }
-        
         return @ordered;
     };
-
 
     my $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u,
                                                                    { 'skip'    => $skip,
@@ -123,9 +124,8 @@ body<=
     }
     my @recent_entries = $append_delayed->($usejournal_u, $delayed_entries);
 
-
     # draw the page
-    LJ::set_active_crumb('editentries');
+    LJ::set_active_crumb('scheduledposts');
 
     $ret .= "<table style='width: 100%;'><tr><td>";
 
@@ -133,30 +133,34 @@ body<=
     $ret .= "<div class='b-editentries-header'>";
     $ret .= "<h1>" . BML::ml('.title') . "</h1>";
 
+    $ret .= '<a href="/update.bml?type=scheduled">';
+    $ret .= BML::ml('.newpost') . '</a>';
+
     $ret .= "<form action='$page_name$getextra' method='get' class='b-editentries-form'>\n";
-    $ret .= "<p>" . LJ::html_text({ 'name'        => 'usejournal', 
-                                    'size'        => '20', 
-                                    'mfaxlength'  => '15', 
-                                    'value'       => $GET{'usejournal'} || $POST{'usejournal'}, 
-                                    'class'       => 'b-editentries-comm', 
-                                    'placeholder' => BML::ml('.input.journal') });
+    $ret .= "<p>" . LJ::html_text( { 'name'        => 'usejournal', 
+                                     'size'        => '20', 
+                                     'mfaxlength'  => '15', 
+                                     'value'       => $GET{'usejournal'} || $POST{'usejournal'}, 
+                                     'class'       => 'b-editentries-comm', 
+                                     'placeholder' => BML::ml('.input.journal') } );
 
     $ret .= LJ::html_submit(undef, $ML{'.btn.search'}) . "</p>";
-    $ret .= "<p>" . LJ::html_check({ 'name'     => 'only_me', 
-                                     'id'       => 'only_me',
-                                     'value'    => '1', 
-                                     'selected' =>  $only_me_checked });
+    $ret .= "<p>" . LJ::html_check( { 'name'     => 'only_me', 
+                                      'id'       => 'only_me',
+                                      'value'    => '1', 
+                                      'selected' =>  $only_me_checked } );
 
     $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>";
     $ret .= "</form>\n";
-    if (!$usejournal_u || $usejournal_u->is_community) {
+
+    if ( !$usejournal_u || $usejournal_u->is_community ) {
         $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";
     }
 
-    $ret .= $entry_chooser->(\@recent_entries,
+    $ret .= $entry_chooser->( \@recent_entries,
                                 first_page   => $skip ? 0 : 1,
                                 prev         => $skip > $items_per_page ? $skip - $items_per_page : 0,
-                                next         => $have_next_page         ? $skip + $items_per_page : 0);
+                                next         => $have_next_page         ? $skip + $items_per_page : 0 );
 
     $ret .= "</div></td></tr></table>";
     return $ret;    

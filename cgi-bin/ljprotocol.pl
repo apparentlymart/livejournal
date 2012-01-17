@@ -2352,9 +2352,7 @@ sub postevent {
     }
 
     if ( $req->{ver} > 1  && LJ::is_enabled("delayed_entries") ) {
-        my $use_delayed = ($req->{'custom_time'} && $flags->{'use_custom_time'}) ||
-                            !(exists $flags->{'use_custom_time'});
-        if ( $use_delayed && LJ::DelayedEntry::is_future_date($req) ) {
+        if ( $req->{'posttype'} eq 'scheduled' ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here

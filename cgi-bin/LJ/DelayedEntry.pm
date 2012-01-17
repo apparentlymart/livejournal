@@ -75,13 +75,24 @@ sub create {
                   "logtime, posttime, security, allowmask, year, month, day, rlogtime, revptime, is_sticky) " .
                   "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                   undef, 
-                  $journalid, $delayedid, $posterid, LJ::text_trim($req->{'subject'}, 30, 0), 
-                  $posttime, $security, $allowmask,
+                  $journalid,
+                  $delayedid,
+                  $posterid,
+                  LJ::text_trim($req->{'subject'}, 30, 0), 
+                  $posttime,
+                  $security,
+                  $allowmask,
                   $req->{year}, $req->{mon}, $req->{day},
-                  $rlogtime, $rposttime, $sticky_type);
-    
+                  $rlogtime,
+                  $rposttime,
+                  $sticky_type );
+
     $journal->do( "INSERT INTO delayedblob2 ".
-                  "VALUES (?, ?, ?)", undef, $journalid, $delayedid, $data_ser);
+                  "VALUES (?, ?, ?)",
+                  undef,
+                  $journalid,
+                  $delayedid,
+                  $data_ser );
 
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
@@ -94,7 +105,6 @@ sub create {
     $self->{delayed_id} = $delayedid;
 
     $self->{default_dateformat} = $opts->{'dateformat'} || 'S2';
-    
     __statistics_absorber($journal, $poster);
 
     return $self;
@@ -162,12 +172,12 @@ sub system_posttime {
 sub posttime_as_unixtime {
     my ($self) = @_;
     my $req = $self->data;
-    my $dt = DateTime->new(  year       => $req->{year},
-                             month      => $req->{mon},
-                             day        => $req->{day},
-                             hour       => $req->{hour},
-                             minute     => $req->{min},
-                             time_zone  => $req->{tz} );
+    my $dt = DateTime->new( year       => $req->{year},
+                            month      => $req->{mon},
+                            day        => $req->{day},
+                            hour       => $req->{hour},
+                            minute     => $req->{min},
+                            time_zone  => $req->{tz} );
     return $dt->epoch;
 }
 
