@@ -5658,6 +5658,8 @@ talk.insertitalic=Insert Italic (Ctrl+I)
 
 talk.insertunderline=Insert Underline (Ctrl+U)
 
+talk.insertstrikethrough=Insert Strikethrough
+
 talk.insertlink=Insert Link
 
 talk.insertphoto=Insert Photo
