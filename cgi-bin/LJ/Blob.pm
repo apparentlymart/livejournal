@@ -133,9 +133,9 @@ sub get_disk_usage {
     shift @_ unless LJ::isu($_[0]);  # let it be called as class method (LJ::Blob->get_disk_usage($u,...))
     my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
-    my $udbh = FB::get_db_writer();
     if ($domain) {
         if ($domain eq 'fotobilder') {
+            my $udbh = FB::get_db_writer();
             my $diskusage_Kb = $udbh->selectrow_array(qq{
                      SELECT Kibused FROM diskusage
                      WHERE userid = ?
@@ -147,6 +147,7 @@ sub get_disk_usage {
                                           $u->{userid}, LJ::get_blob_domainid($domain));
         }
     } else {
+        my $udbh = FB::get_db_writer();
         my $diskusage_without_fotobilder = $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
                                                                   "WHERE journalid=? AND domain<>?", undef, 
                                                                   $u->{userid}, LJ::get_blob_domainid('fotobilder'));
