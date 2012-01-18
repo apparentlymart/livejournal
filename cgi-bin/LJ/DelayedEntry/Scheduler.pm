@@ -34,13 +34,13 @@ sub __send_error {
     my $email = $poster->email_raw;
     
     LJ::send_mail({
-        'to' => $email,
-        'from' => $LJ::ADMIN_EMAIL,
-        'fromname' => $LJ::SITENAME,
-        'charset' => 'utf-8',
-        'subject' => LJ::Lang::get_text($poster->prop('browselang'),
+        'to'        => $email,
+        'from'      => $LJ::ADMIN_EMAIL,
+        'fromname'  => $LJ::SITENAME,
+        'charset'   => 'utf-8',
+        'subject'   => LJ::Lang::get_text($poster->prop('browselang'),
                                         'email.delayed_error.subject'),
-        'body' =>  LJ::Lang::get_text($poster->prop('browselang'),
+        'body'      =>  LJ::Lang::get_text($poster->prop('browselang'),
                                         'email.delayed_error.body',
         {subject => $subject, reason=>$error}),
     });    

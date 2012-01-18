@@ -1,37 +1,37 @@
 <TMPL_IF expr="link_prev || link_next">
-    <p class='i-qotd-nav'>
-        <TMPL_IF link_prev>
-            <a class='i-qotd-nav-prev' href='<TMPL_VAR link_prev>'>prev</a>
-        <TMPL_ELSE>
-            <span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>
-        </TMPL_IF>
+	<p class='i-qotd-nav'>
+		<TMPL_IF link_prev>
+			<a class='i-qotd-nav-prev' href='<TMPL_VAR link_prev>'>prev</a>
+		<TMPL_ELSE>
+			<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>
+		</TMPL_IF>
 
-        <TMPL_IF link_next>
-            <a class='i-qotd-nav-next' href='<TMPL_VAR link_next>'>next</a>
-        <TMPL_ELSE>
-            <span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>
-        </TMPL_IF>
-    </p>
+		<TMPL_IF link_next>
+			<a class='i-qotd-nav-next' href='<TMPL_VAR link_next>'>next</a>
+		<TMPL_ELSE>
+			<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>
+		</TMPL_IF>
+	</p>
 </TMPL_IF>
 
 <TMPL_UNLESS entries>
-    <p class='i-bubble b-bubble-warning b-bubble-noarrow'><TMPL_VAR expr="ml('/editjournal.bml.no_entries_to_edit')"></p>
+	<p class='i-bubble b-bubble-warning b-bubble-noarrow'><TMPL_VAR expr="ml('/editjournal.bml.no_entries_to_edit')"></p>
 </TMPL_UNLESS>
 
 <TMPL_IF entries>
-    <ul class='b-editentries'>
-        <TMPL_LOOP entries>
-            <li class='b-editentry'>
+	<ul class='b-editentries'>
+		<TMPL_LOOP entries>
+			<li class='b-editentry'>
 
-                <p class='b-editentry-ctrls'>
-                    <TMPL_IF entry_can_edit>
-                        <a href='<TMPL_VAR edit_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
-                    <TMPL_ELSE>
-                        <a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>
-                    </TMPL_IF>
-                </p>
+				<p class='b-editentry-ctrls'>
+					<TMPL_IF entry_can_edit>
+						<a href='<TMPL_VAR edit_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
+					<TMPL_ELSE>
+						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>
+					</TMPL_IF>
+				</p>
 
-                <h2>
+				<h2>
 					<TMPL_IF entry_is_delayed>
 						<img src="<TMPL_VAR lj_imgprefix>/icon_delayed.png?v=11043" width=13 height=15 align=absmiddle class="i-posticon">
 					</TMPL_IF>
@@ -56,45 +56,45 @@
 					</a>
 				</h2>
 
-                <p class='date'>
-                    <TMPL_VAR poster_ljuser>
-                    <TMPL_VAR date_display>
-                </p>
+				<p class='date'>
+					<TMPL_VAR poster_ljuser>
+					<TMPL_VAR date_display>
+				</p>
 
-                <TMPL_VAR entry_text_display>
+				<TMPL_VAR entry_text_display>
 
-                <TMPL_IF entry_taglist>
-                    <p>
-                        <b>Tags:</b>
-                        <TMPL_VAR entry_taglist ESCAPE=HTML>
-                    </p>
-                </TMPL_IF>
-            </li>
-        </TMPL_LOOP>
-    </ul>
+				<TMPL_IF entry_taglist>
+					<p>
+						<b>Tags:</b>
+						<TMPL_VAR entry_taglist ESCAPE=HTML>
+					</p>
+				</TMPL_IF>
+			</li>
+		</TMPL_LOOP>
+	</ul>
 
-    <TMPL_IF adhtml>
-        <td valign='top'><TMPL_VAR adhtml></td>
-    </TMPL_IF>
+	<TMPL_IF adhtml>
+		<td valign='top'><TMPL_VAR adhtml></td>
+	</TMPL_IF>
 </TMPL_IF>
 
 <TMPL_UNLESS entries>
-    <td valign='top'><TMPL_VAR adhtml></td>
+	<td valign='top'><TMPL_VAR adhtml></td>
 </TMPL_UNLESS>
 
 <TMPL_IF expr="link_prev || link_next">
-    <p class='i-qotd-nav'>
-        <TMPL_IF link_prev>
-            <a class='i-qotd-nav-prev' href='<TMPL_VAR link_prev>'>prev</a>
-        <TMPL_ELSE>
-            <span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>
-        </TMPL_IF>
+	<p class='i-qotd-nav'>
+		<TMPL_IF link_prev>
+			<a class='i-qotd-nav-prev' href='<TMPL_VAR link_prev>'>prev</a>
+		<TMPL_ELSE>
+			<span class='i-qotd-nav-prev i-qotd-nav-prev-dis'>prev</span>
+		</TMPL_IF>
 
-        <TMPL_IF link_next>
-            <a class='i-qotd-nav-next' href='<TMPL_VAR link_next>'>next</a>
-        <TMPL_ELSE>
-            <span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>
-        </TMPL_IF>
-    </p>
+		<TMPL_IF link_next>
+			<a class='i-qotd-nav-next' href='<TMPL_VAR link_next>'>next</a>
+		<TMPL_ELSE>
+			<span class='i-qotd-nav-next i-qotd-nav-next-dis'>next</span>
+		</TMPL_IF>
+	</p>
 </TMPL_IF>
 

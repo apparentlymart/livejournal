@@ -9,9 +9,17 @@
 
 .date.scheduled=Schedule for:
 
+.date.gmt=Date are displayed in the GMT format.
+
+.date.set_time_zone=Set your time zone now.
+
+.date.your_time_zone=Dates are displayed in your timezone 
+
 .btn.search=Search
 
 .input.journal=Show entries from community
 
 .newpost=New Sheduled Entry
+
+.postpone.entry=Postponed to 
 

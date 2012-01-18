@@ -5,7 +5,7 @@ use warnings;
 use base qw( LJ::Widget::Template );
 
 sub need_res {
-	qw(stc/widgets/entrychooser.css);
+    qw(stc/widgets/entrychooser.css);
 }
 
 sub template_filename {
@@ -31,7 +31,8 @@ sub prepare_template_params {
             : '';
 
         my $entry_is_delayed = $entry->is_delayed;
-        my $entry_is_sticky  = $entry->is_sticky;
+        my $entry_is_sticky  = ($entry->is_sticky
+                                    && LJ::is_enabled('sticky_entries'));
 
         ### security indicator
         my $entry_security = 'public';
@@ -72,10 +73,11 @@ sub prepare_template_params {
         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $alldateparts);
         my $monthlong = BML::ml(LJ::Lang::month_long_langcode($mon));
 
-        my $date_display = "$monthlong $mday, $year, $hour:$min";
+        my $datetext = $entry->is_delayed ? BML::ml('.postpone.entry') : '';
+        my $date_display = "$datetext $monthlong $mday, $year, $hour:$min";
 
         my $entry_text_display =
-            LJ::ehtml( LJ::durl( $entry->event_raw ) );
+            LJ::ehtml( LJ::durl( $entry->event ) );
         $entry_text_display =~ s{\n}{<br />}g;
 
         my $entry_taglist = '';
