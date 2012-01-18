@@ -133,9 +133,6 @@ body<=
     $ret .= "<div class='b-editentries-header'>";
     $ret .= "<h1>" . BML::ml('.title') . "</h1>";
 
-    $ret .= '<a href="/update.bml?type=scheduled">';
-    $ret .= BML::ml('.newpost') . '</a>';
-
     $ret .= "<form action='$page_name$getextra' method='get' class='b-editentries-form'>\n";
     $ret .= "<p>" . LJ::html_text( { 'name'        => 'usejournal', 
                                      'size'        => '20', 
@@ -152,6 +149,10 @@ body<=
 
     $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>";
     $ret .= "</form>\n";
+
+    my $usejournal_text = $usejournal ? 'usejournal=mojo&' : '';
+    $ret .= "<a href=\"/update.bml?${usejournal_text}type=scheduled\">";
+    $ret .= BML::ml('.newpost') . '</a>';
 
     if ( !$usejournal_u || $usejournal_u->is_community ) {
         $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";
