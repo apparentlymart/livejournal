@@ -447,8 +447,8 @@ sub get_lock
 
     # get a lock from mysql
     $wait_time ||= 10;
-    $db->do("SELECT GET_LOCK(?,?)", undef, $lockname, $wait_time)
-        or return undef;
+    my ($got) = $db->selectrow_array( 'SELECT GET_LOCK(?,?)', undef, $lockname, $wait_time );
+    return undef unless $got;
 
     # successfully got a lock
     $LJ::LOCK_OUT{$dbrole} = $curr_sub;
