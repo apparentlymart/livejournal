@@ -447,6 +447,7 @@ sub get_lock
 
     # get a lock from mysql
     $wait_time ||= 10;
+    # NOTE: we have to get the result of GET_LOCK, so do NOT use $db->do()
     my ($got) = $db->selectrow_array( 'SELECT GET_LOCK(?,?)', undef, $lockname, $wait_time );
     return undef unless $got;
 
