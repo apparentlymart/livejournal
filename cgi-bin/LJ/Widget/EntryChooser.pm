@@ -73,7 +73,7 @@ sub prepare_template_params {
         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $alldateparts);
         my $monthlong = BML::ml(LJ::Lang::month_long_langcode($mon));
 
-        my $datetext = $entry->is_delayed ? BML::ml('.postpone.entry') : '';
+        my $datetext = $opts->{'scheduled'};
         my $date_display = "$datetext $monthlong $mday, $year, $hour:$min";
 
         my $entry_text_display =
