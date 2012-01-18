@@ -1593,7 +1593,7 @@ sub render_ljphoto_block {
     my @photo_sizes = map { {
         'size'       => $_,
         'text'       => LJ::Lang::ml("fotki.size.$_.text"),
-        'is_default' => ( $_ == $LJ::Pics::Photo::DEFAULT_SIZE ) ? 1 : 0,
+        'is_default' => ( $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
     } } @LJ::Pics::Photo::DISPLAYED_SIZES;
 
     my $photo_sizes_json = LJ::JSON->to_json ( \@photo_sizes );
