@@ -235,11 +235,11 @@ sub rename_tag {
                                                     undef,
                                                     $sptagid);
 
-        my $spid = $dbh->selectrow_array( 'SELECT spid ' .
-                                          'FROM supporttagmap '.
-                                          'WHERE sptagid=?',
-                                          undef,
-                                          $sptagid );
+        my ($spid) = $dbh->selectrow_array( 'SELECT spid ' .
+                                            'FROM supporttagmap '.
+                                            'WHERE sptagid = ?',
+                                            undef,
+                                            $exists_stagid );
 
         $dbh->do( "DELETE FROM supporttag WHERE sptagid = $sptagid" );
         $dbh->do( "DELETE FROM supporttagmap WHERE sptagid = $sptagid" );
