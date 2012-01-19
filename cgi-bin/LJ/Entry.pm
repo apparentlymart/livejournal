@@ -2244,46 +2244,15 @@ sub get_latest_item {
 sub get_after_item_link {
     my ($u, $opts) = @_;
 
-    my $jumpid;
     my $sticky_id =  $u->get_sticky_entry_id;
-    my $use_sticky = $opts->{'use_sticky'};
+    my $use_sticky = $opts->{'use_sticky'} && LJ::is_enabled('sticky_entries');
 
     my $itemid = $opts->{'itemid'};
-    my $delayed_id = $opts->{'delayedid'};
-
-    if ($opts->{'delayedid'}) {
-        # get next delayed entry
-        my $after_id = LJ::DelayedEntry::get_itemid_after2($u, $delayed_id);
-
-        # does entry exists ?
-        if ($after_id) {
-            # append prefix to delayed entries
-            $jumpid = 'd' . $after_id;
-        } elsif ($use_sticky && $sticky_id) {
-            my $sticky_entry = LJ::Entry->new( $u, jitemid => $sticky_id);
-            if ($sticky_entry && $sticky_entry->valid) {
-                $jumpid = $sticky_entry->ditemid;
-            }
-        }
-    } elsif ($opts->{'itemid'} && $opts->{'itemid'} != $sticky_id) {
-
-        $jumpid = get_itemid_near2( $u,
-                                    $itemid,
-                                     'after',
-                                     { 'skip_sticky' => $use_sticky } );
-        LJ::DelayedEntry::get_itemid_after2($u, 0);
-        if ( !$jumpid ) {
-            my $after_id = LJ::DelayedEntry::get_first_entry($u);
-            if ($after_id) {
-                $jumpid = 'd' . $after_id;
-            } elsif ($use_sticky && $sticky_id) {
-                my $sticky_entry = LJ::Entry->new( $u, jitemid => $sticky_id);
-                if ($sticky_entry && $sticky_entry->valid) {
-                    $jumpid = $sticky_entry->ditemid;
-                }
-            }
-        }
-    }
+    my $jumpid = get_itemid_near2( $u,
+                                   $itemid,
+                                   'after',
+                                   { 'skip_sticky' => $use_sticky } );
+    
     if (!$jumpid) {
         return undef;
     }
@@ -2294,46 +2263,15 @@ sub get_after_item_link {
 sub get_before_item_link {
     my ($u, $opts) = @_;
 
-    my $jumpid;
     my $sticky_id = $u->get_sticky_entry_id;
-    my $use_sticky = $opts->{'use_sticky'};
-    my $skip_sticky = { 'skip_sticky' => 1 };
+    my $use_sticky = $opts->{'use_sticky'} && LJ::is_enabled('sticky_entries');
 
     my $itemid = $opts->{'itemid'};
 
-    if ($opts->{'delayedid'}) {
-        my $delayed_id = $opts->{'delayedid'};
-        my $prev_id = LJ::DelayedEntry::get_itemid_before2($u, $delayed_id);
-
-        # does delayed entry exists?
-        if ($prev_id) {
-            # append prefix to delayed entries
-            $jumpid = 'd' . $prev_id;
-        } else {
-            # select usual entry
-            $jumpid = get_latest_item( $u, $skip_sticky );
-        }
-    } elsif ($opts->{itemid}) {
-        my $item_id = $opts->{itemid};
-        if ( $use_sticky && ( $item_id == $sticky_id ) ) {
-            my $prev_id = LJ::DelayedEntry::get_last_entry($u);
-            if ($prev_id) {
-                $jumpid = 'd' . $prev_id;
-            } else {
-                $jumpid = get_latest_item( $u, $skip_sticky );
-            }
-        } else {
-            $jumpid = get_itemid_near2( $u,
-                                        $item_id,
-                                        'before',
-                                        $skip_sticky );
-        }
-    } elsif ($opts->{'_preview'}) {
-        ## special case
-    } else {
-        die "Error: item id is not set at all";
-    }
-
+    my $jumpid = get_itemid_near2( $u,
+                                   $itemid,
+                                   'before',
+                                   { 'skip_stucky' => $use_sticky });
     if (!$jumpid) {
         return undef;
     }
