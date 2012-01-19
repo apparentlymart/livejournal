@@ -136,6 +136,7 @@ sub get_disk_usage {
     if ($domain) {
         if ($domain eq 'fotobilder') {
             my $udbh = FB::get_db_writer();
+            return 0 unless $udbh;
             my $diskusage_Kb = $udbh->selectrow_array(qq{
                      SELECT Kibused FROM diskusage
                      WHERE userid = ?
@@ -148,13 +149,14 @@ sub get_disk_usage {
         }
     } else {
         my $udbh = FB::get_db_writer();
+        my $diskusage_fotobilder_Kb = 0;
         my $diskusage_without_fotobilder = $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
                                                                   "WHERE journalid=? AND domain<>?", undef, 
                                                                   $u->{userid}, LJ::get_blob_domainid('fotobilder'));
-        my $diskusage_fotobilder_Kb = $udbh->selectrow_array(qq{
+        if ($udbh) { $diskusage_fotobilder_Kb = $udbh->selectrow_array(qq{
                      SELECT Kibused FROM diskusage
                      WHERE userid = ?
-                     }, undef, $u->{'userid'});
+                     }, undef, $u->{'userid'});}
         return $diskusage_without_fotobilder+$diskusage_fotobilder_Kb*1024;
     }
 }
