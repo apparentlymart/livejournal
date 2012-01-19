@@ -61,7 +61,13 @@ sub prepare_template_params {
         my $edit_link   = $edit_link_base . 'mode=edit';
         my $delete_link = $edit_link_base . 'mode=delete';
 
-        my $entry_url     = $entry->url;
+        my $entry_url;
+        if (!$entry->is_delayed) {
+            $entry_url = $entry->url;
+        } else {
+            my $delayed_id = $entry->delayedid;
+            $entry_url = "javascript:showEntry($delayed_id);";
+        }
         my $entry_subject = $entry->subject_text;
 
         my $alldateparts;
@@ -70,14 +76,15 @@ sub prepare_template_params {
         } else {
             $alldateparts = LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'});
         }
+
         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $alldateparts);
         my $monthlong = BML::ml(LJ::Lang::month_long_langcode($mon));
 
         my $datetext = $opts->{'scheduled'};
         my $date_display = "$datetext $monthlong $mday, $year, $hour:$min";
 
-        my $entry_text_display =
-            LJ::ehtml( LJ::durl( $entry->event ) );
+        my $event_raw = $entry->is_delayed ? $entry->event : $entry->event_raw;
+        my $entry_text_display = LJ::ehtml( LJ::durl( $event_raw ) );
         $entry_text_display =~ s{\n}{<br />}g;
 
         my $entry_taglist = '';
