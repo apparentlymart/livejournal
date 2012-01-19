@@ -2369,6 +2369,7 @@ sub postevent {
             return fail($err, 507) unless $entry;
             $res->{delayedid} = $entry->delayedid;
             $res->{type}      = 'delayed';
+
             return $res;
         }
         else {
@@ -2879,31 +2880,9 @@ sub editevent {
                 return $res;
             }
 
-
             # updating an entry:
             return undef
                 unless common_event_validation($req, $err, $flags);
-
-            if ( LJ::DelayedEntry::is_future_date($req) ) {
-                $entry->update($req);
-                $res->{type} = 'delayed';   
-                $res->{delayedid} = $delayedid;
-            } else {
-                my $out = $entry->convert_from_data($req);
-
-                if ( $out->{delete_entry} ) {
-                    $entry->delete();
-                }
-
-                $res->{type}   = 'posted';
-                $res->{itemid} = $out->{res}->{itemid};
-                $res->{anum}   = $out->{res}->{anum};
-                $res->{'ditemid'} = $out->{res}->{itemid} * 256 + $out->{res}->{anum};
-
-                $res->{'url'} = LJ::item_link(  $uowner,
-                                                $res->{itemid},
-                                                $res->{anum} );
-            }
         }
 
         return $res if $res->{type};

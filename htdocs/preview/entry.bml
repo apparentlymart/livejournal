@@ -6,7 +6,7 @@
     my $ret;
     my $remote = LJ::get_remote();
     my $styleid; my $stylesys = 1;
-   
+
     ## This header is to pass page content through IE8 XSS Filter.
     ## Use-case: 
     ##  (1) gazeta.ru has POST form with destination http://www.livejournal.com/preview/entry.bml
@@ -29,11 +29,26 @@
     $up = $u unless $up;
 
     return $ML{'.error.no_user'} unless $up and $u;
+    my $delayed_id = $POST{'delayed_id'};
+    my $sticky = $POST{'sticky_type'} && LJ::is_enabled('sticky_entries');
 
     ### Set up preview variables
     my ($ditemid, $anum, $itemid);
     my %req = ( 'usejournal' => $POST{'usejournal'}, );
-    LJ::entry_form_decode(\%req, \%POST);
+
+    my $delayed_obj; 
+    if (!$delayed_id) {
+        LJ::entry_form_decode(\%req, \%POST);
+    } else {
+        $delayed_obj
+            = LJ::DelayedEntry->get_entry_by_id($remote, $delayed_id);
+
+        if (!$delayed_obj) {
+            return "unknown error";
+        }
+
+        %req = %{$delayed_obj->data};
+    }
 
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
     LJ::CleanHTML::clean_subject(\$subject);
@@ -265,7 +280,7 @@
 
         my $custom_time = $POST{'custom_time'} || $GET{'custom_time'};
         my $timezone = $POST{'timezone'} || $GET{'timezone'};
-        $req{'tz'} =  sprintf("%+.4d", $timezone); 
+        $req{'tz'} =  sprintf("%+.4d", $timezone);
 
         my $s2entry = LJ::S2::Entry($u, {
             'subject' => $subject,
@@ -283,8 +298,8 @@
             'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => "#",
-            'sticky_type' =>  $POST{'sticky_type'} || $GET{'sticky_type'},
-            'delayed' => $custom_time ?  LJ::DelayedEntry::is_future_date(\%req) : 0,
+            'sticky_type' =>  $sticky,
+            'delayed' => $delayed_obj,
             '_preview' => 1,
          }); 
     

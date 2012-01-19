@@ -1,6 +1,28 @@
 <?page
 title=><?_code return $title; _code?>
 windowtitle=><?_ML .title _ML?>
+head<=
+<script type="text/javascript">
+function showEntry(delayedId) {
+    preview = window.open('', 'preview', 'width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
+    preview.document.writeln("<html><body></body></html>");
+    entryForm = preview.document.createElement("form");
+    entryForm.method = 'POST';
+    entryForm.action = '/preview/entry.bml';
+    
+    newInput = preview.document.createElement("input");
+    newInput.name = "delayed_id";
+    newInput.value = delayedId;
+    newInput.type = 'hidden';
+    entryForm.appendChild(newInput);
+    preview.document.getElementsByTagName('body')[0].appendChild(entryForm);
+    entryForm.submit();
+    return false;
+}
+
+</script>
+
+<=head
 body<=
 <?_code
 {
@@ -97,17 +119,17 @@ body<=
             my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
 
             push @ordered, {
-                            'alldatepart' => $entry->alldatepart ,
+                            'alldatepart'        => $entry->alldatepart ,
                             'system_alldatepart' => $entry->system_alldatepart,
-                            'allowmask'   => $entry->allowmask,
-                            'posterid'    => $entry->posterid,
-                            'eventtime'   => $entry->posttime,
-                            'security'    => $entry->security,
-                            'logtime'     => $entry->logtime,
-                            'delayed_obj' => $entry,
-                            'delayedid'   => $ditem,
-                            'itemid'      => 0,
-                            'anum'        => 0,
+                            'allowmask'          => $entry->allowmask,
+                            'posterid'           => $entry->posterid,
+                            'eventtime'          => $entry->posttime,
+                            'security'           => $entry->security,
+                            'logtime'            => $entry->logtime,
+                            'delayed_obj'        => $entry,
+                            'delayedid'          => $ditem,
+                            'use_js_function'
+                                => "javascript:showDelayedEntry($ditem);"
                            };
         }
         return @ordered;
@@ -152,7 +174,7 @@ body<=
 
     my $usejournal_text = $usejournal ? 'usejournal=mojo&' : '';
     $ret .= "<a href=\"/update.bml?${usejournal_text}type=scheduled\">";
-    $ret .= BML::ml('.newpost') . '</a>';
+    $ret .= BML::ml('.newpost') . '</a><br/>';
 
     if ( !$usejournal_u || $usejournal_u->is_community ) {
         $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";

@@ -258,9 +258,9 @@ body<=
                 $res{'events_1_allowmask'} = $entry_obj->allowmask;
                 $res{'events_1_security'} = $entry_obj->security;            
                 $res{'events_1_eventtime'} = $entry_obj->posttime;
-                $res{'events_1_'} = $entry_obj->mood;
-                $res{'events_1_itemid'} = $entry_obj->jitemid;
-                $res{'events_1_anum'} = $entry_obj->correct_anum;
+                $res{'events_1_'} = $entry_obj->prop("current_mood");
+                $res{'events_1_itemid'} = 0; # has no itemid
+                $res{'events_1_anum'} = 0;# has no anum
                 
                 my @prop_keys = keys %{$entry_obj->props};
                 $res{'prop_count'} = scalar @prop_keys; 
@@ -342,7 +342,6 @@ body<=
                             'itemid'     => $itemid,
                             'delayedid'  => $delayedid,
                             'sticky'     => $sticky,
-                            'custom_time' => $custom_time,
                             );
                 LJ::entry_form_decode(\%req, \%POST);
 
