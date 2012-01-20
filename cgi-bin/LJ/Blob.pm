@@ -133,32 +133,15 @@ sub get_disk_usage {
     shift @_ unless LJ::isu($_[0]);  # let it be called as class method (LJ::Blob->get_disk_usage($u,...))
     my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
-    my $udbh;
     if ($domain) {
-        if ($domain eq 'fotobilder') {
-            eval{$udbh = FB::get_db_writer()};
-            return 0 unless $udbh;
-            my $diskusage_Kb = $udbh->selectrow_array(qq{
-                     SELECT Kibused FROM diskusage
-                     WHERE userid = ?
-                     }, undef, $u->{'userid'});
-            return $diskusage_Kb * 1024;
-        } else {
-            return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
-                                          "WHERE journalid=? AND domain=?", undef,
-                                          $u->{userid}, LJ::get_blob_domainid($domain));
-        }
+        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                      "WHERE journalid=? AND domain=?", undef,
+                                      $u->{userid}, LJ::get_blob_domainid($domain));
+        
     } else {
-        eval {$udbh = FB::get_db_writer()};
-        my $diskusage_fotobilder_Kb = 0;
-        my $diskusage_without_fotobilder = $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
-                                                                  "WHERE journalid=? AND domain<>?", undef, 
-                                                                  $u->{userid}, LJ::get_blob_domainid('fotobilder'));
-        if ($udbh) { $diskusage_fotobilder_Kb = $udbh->selectrow_array(qq{
-                     SELECT Kibused FROM diskusage
-                     WHERE userid = ?
-                     }, undef, $u->{'userid'});}
-        return $diskusage_without_fotobilder+$diskusage_fotobilder_Kb*1024;
+        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                      "WHERE journalid=? AND domain<>?", undef, 
+                                      $u->{userid}, LJ::get_blob_domainid('fotobilder'));
     }
 }
 
