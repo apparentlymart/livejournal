@@ -85,6 +85,9 @@ a:active {
 	.comment-wrap.spam .comment-head {
 		background: #CCC;
 		}
+		.comment-head-in {
+			padding-top: 1em;
+			}
 
 .b-postform TABLE {
 	width: 750px;
