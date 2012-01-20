@@ -82,12 +82,27 @@ a:active {
 .comment-wrap {
 	margin-top: 1.9em;
 	}
+.comment-wrap.partial {
+	margin-top: 0.3em;
+	}
 	.comment-wrap.spam .comment-head {
 		background: #CCC;
 		}
 		.comment-head-in {
 			padding-top: 1em;
+			padding-bottom: 0.3em;
 			}
+
+.comments-pages TABLE {
+	width: auto;
+	margin: 0 auto;
+	padding: 7px;
+	border: 1px solid #8FC3F7;
+	border-collapse: separate;
+	background-color: #C5DFF9;
+	text-align: left;
+	color: #000;
+	}
 
 .b-postform TABLE {
 	width: 750px;

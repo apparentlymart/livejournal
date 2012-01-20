@@ -1551,6 +1551,11 @@ property string text_multiform_check {
 }
 set text_multiform_check = "Select:";
 
+property string text_multiform_check_clean {
+    des = "Text beside a comment multi-action checkbox without colon";
+}
+set text_multiform_check_clean = "Select";
+
 property string text_multiform_des {
     des = "Text on the multiform action line.";
 }
