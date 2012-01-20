@@ -331,20 +331,29 @@ sub journalid {
 sub entry {
     my $self = shift;
 
-    return undef unless $self && $self->valid;
-    return LJ::Entry->new($self->journal, jitemid => $self->nodeid);
+    unless ( $self->{'entry'} ) {
+        return undef unless $self && $self->valid;
+        $self->{'entry'} = LJ::Entry->new($self->journal, jitemid => $self->nodeid);
+    }
+
+    return $self->{'entry'};
 }
 
 sub jtalkid {
     my $self = shift;
-    return $self->{jtalkid};
+    return $self->{'jtalkid'};
 }
 
 sub dtalkid {
     my $self = shift;
-    my $entry = $self->entry; # may return undef for non valid comment
-    return undef unless $entry;
-    return ($self->jtalkid * 256) + $entry->anum;
+
+    unless ( $self->{'dtalkid'} ) {
+        my $entry = $self->entry; # may return undef for non valid comment
+        return undef unless $entry;
+        $self->{'dtalkid'} = ($self->jtalkid * 256) + $entry->anum;
+    }
+
+    return $self->{'dtalkid'};
 }
 
 sub nodeid {
@@ -1785,6 +1794,88 @@ sub select {
     }
 
     return \@ret;
+}
+
+# URL makers for make_url subroutine
+my $thread_url = sub {
+    my ($base, $args) = @_;
+    return join('', $base, '?', join('&amp;', @$args));
+};
+
+my $screen_url = sub {
+    my ($base, $args) = @_;
+    return join('', $LJ::SITEROOT, '/talkscreen.bml?', join('&amp;', @$args));
+};
+
+my $delete_url = sub {
+    my ($base, $args) = @_;
+    return join('', $LJ::SITEROOT, '/delcomment.bml?', join('&amp;', @$args));
+};
+
+my $track_url = sub {
+    my ($base, $args) = @_;
+    return join('', $LJ::SITEROOT, '/manage/subscriptions/comments.bml?', join('&amp;', @$args));
+};
+
+# Mappings
+# type => maker
+my $urls = {
+    reply    => $thread_url,
+    thread   => $thread_url,
+    edit     => $thread_url,
+
+    screen   => $screen_url,
+    unscreen => $screen_url,
+    freeze   => $screen_url,
+    unfreeze => $screen_url,
+    unspam   => $screen_url,
+
+    delete   => $delete_url,
+    spam     => $delete_url,
+
+    track    => $track_url,
+};
+
+# Lightweight url creation subroutine
+# Can be used as singleton or object method
+sub make_url {
+    my ($self, $type, $opts) = @_;
+    my $entry   = delete $opts->{'entry'};
+    my $dtalkid = delete $opts->{'dtalkid'};
+    my $params  = delete $opts->{'params'} || [];
+
+    if ( ref $self ) {
+        $entry ||= $self->entry;
+        $dtalkid ||= $self->dtalkid;
+    }
+
+    my $cb = $urls->{$type};
+
+    croak 'Unknown URL type '. $type unless $cb;
+
+    if ( $type eq 'reply' ) {
+        unshift @$params, 'replyto='. $dtalkid;
+    } elsif ( $type eq 'edit' ) {
+        unshift @$params, 'edit='. $dtalkid;
+    } elsif ( $type eq 'thread' ) {
+        unshift @$params, 'thread='. $dtalkid;
+    } else {
+        unshift @$params, 'journal='. $entry->journal->user;
+        unshift @$params, 'talkid='. $dtalkid;
+    }
+
+    if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
+        unshift @$params, 'mode='. $type;
+    }
+
+    if ( $type eq 'spam' ) {
+        unshift @$params, 'spam=1';
+    }
+
+    my $url = $cb->($entry->url, $params);
+    $url .= '#t'. $dtalkid if $type eq 'thread';
+
+    return $url;
 }
 
 1;

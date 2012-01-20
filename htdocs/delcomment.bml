@@ -86,7 +86,7 @@ _info?><?_code
 
     # basic initialization: who is working with us, and which comment
     # they are working with
-    my $dtalkid             = LJ::Request->get_param('id');
+    my $dtalkid             = LJ::Request->get_param('id') || LJ::Request->get_param('talkid');
     my $journal_username    = LJ::Request->get_param('journal');
     return $error->('Missing parameters.')
         unless $dtalkid and $journal_username ne '';
