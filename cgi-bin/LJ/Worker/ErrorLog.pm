@@ -64,7 +64,7 @@ sub PRINT {
     my $now = time();
     my $ltime = localtime($now);
     foreach my $k ( keys %{$self->{handles}} ) {
-        print { $self->{handles}->{$k} } $ltime, ': ', $str, ('stderr' eq $k ? "\n" : "");
+        print { $self->{handles}->{$k} } 'ap_wrk:', $ltime, ': ', $str, ('stderr' eq $k ? "\n" : "");
     }
 }
 
