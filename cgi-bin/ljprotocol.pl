@@ -545,7 +545,7 @@ sub getcomments {
     }
 
     return fail($err,200,"journal") unless($journal);
-    return fail($err,200,"ditemid") unless($req->{ditemid});
+    return fail($err,200,"ditemid or itemid") unless($req->{ditemid} || $req->{itemid});
 
     my $itemid = int($req->{ditemid} / 256);
     $itemid ||= $req->{itemid} + 0;
