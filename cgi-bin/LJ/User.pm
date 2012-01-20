@@ -3828,9 +3828,10 @@ sub can_use_ljphoto {
 
     foreach my $comm_name (@LJ::LJPHOTO_ALLOW_FROM_COMMUNITIES) {
         my $comm = LJ::load_user ($comm_name);
-        next unless $comm;
+        next unless $comm && $comm->is_visible;
         return 1 if $u->can_manage ($comm) or $comm->is_friend($u); 
     }
+
     return 1 if $u->prop ('fotki_migration_status');
 
     return 0;
