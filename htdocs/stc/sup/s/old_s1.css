@@ -82,5 +82,16 @@ a:active {
 .comment-wrap {
 	margin-top: 1.9em;
 	}
+	.comment-wrap.spam .comment-head {
+		background: #CCC;
+		}
 
+.b-postform TABLE {
+	width: 750px;
+	}
 
+#qrdiv form {
+	width: 700px;
+	margin-right: auto;
+	margin-left: auto;
+	}
