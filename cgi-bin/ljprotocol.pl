@@ -1109,7 +1109,7 @@ sub getrecentcomments {
 
         my $comm_obj = LJ::Comment->new($journal, jtalkid => $comment->{jtalkid});
         my $userpic = $comm_obj->userpic;
-        $comment->{poster_userpic_url} = $userpic->url if $userpic;
+        $comment->{poster_userpic_url} = $userpic && $userpic->url;
         
     }
 
