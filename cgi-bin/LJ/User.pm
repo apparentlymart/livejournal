@@ -1345,14 +1345,14 @@ sub openid_identity {
     return $ident->value;
 }
 
-# returns username or identity display name, not escaped
+# returns username or identity display name 
 sub display_name {
     my $u = shift;
     return $u->username unless $u->is_identity;
 
     my $id = $u->identity;
     return "[ERR:unknown_identity]" unless $id;
-    return $id->display_name($u);
+    return LJ::ehtml( $id->display_name($u) );
 }
 
 sub ljuser_display {
@@ -3876,17 +3876,20 @@ sub display_username {
     my $u = shift;
     my $need_cut = shift || 0;
 
-    if ($u->is_identity && $need_cut) {
-        my $name = $u->display_name;
-        my $short_name = substr ($name, 0, 16);
-        if ($name ne $short_name) {
-            $short_name .= "...";
+    my $username = $u->{user};
+    if ($u->is_identity){
+        $username = $u->display_name;
+        if ($need_cut){
+            my $short_name = substr ($username, 0, 16);
+            if ($username eq $short_name) {
+                $username = $short_name;
+            } else {
+                $username = $short_name . "...";
+            }
         }
-        return $short_name;
     }
 
-    return $u->display_name if $u->is_identity;
-    return $u->{user};
+    return LJ::ehtml($username);
 }
 
 # returns the user-specified name of a journal exactly as entered
