@@ -24,7 +24,8 @@ sub instance {
     my $singletonkey = $qid;
 
     $u->{_inbox_items} ||= {};
-    return $u->{_inbox_items}->{$singletonkey} if $u->{_inbox_items}->{$singletonkey};
+    return $u->{_inbox_items}->{$singletonkey}
+        if defined $u->{_inbox_items}->{$singletonkey} && $u->{_inbox_items}->{$singletonkey};
 
     my $self = {
         userid  => $u->id,
