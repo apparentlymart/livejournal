@@ -598,7 +598,7 @@ sub get_text {
 
     my $from_db = sub {
         my $text = get_text_multi( $lang, $dmid, [$code] );
-        return $text->{$code};
+        return defined $text->{$code} ? $text->{$code} : undef;
     };
 
     my $_from_files = sub {
@@ -714,7 +714,7 @@ sub get_text_multi {
         my $text      = undef;
         $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
 
-        if ( defined $text ) {
+        if ( defined $text && defined $lc_codes{$code} ) {
             $strings{ $lc_codes{$code} } = $text;
             $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
         } else {
@@ -1059,7 +1059,7 @@ sub ml {
         return $code;
     }
 
-    if ( $code =~ /^[.]/ ) {
+    if ( $code && $code =~ /^[.]/ ) {
         $code = current_scope() . $code;
     }
 
