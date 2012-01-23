@@ -203,7 +203,6 @@ sub create {
 
 }
 
-
 sub absorb_row {
     my ($self, $row) = @_;
 
@@ -214,42 +213,32 @@ sub absorb_row {
 sub url {
     my ($self, $extra)    = @_;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $url     = $entry->url;
+    $extra =~ s{^&} {};
 
     if ($self->state eq 'B') {
-        return "$url?mode=showspam&thread=$dtalkid$extra#t$dtalkid";
+        return $self->make_url(thread => { params => [ $extra, 'mode=showspam' ] });
     } else {
-        return "$url?thread=$dtalkid$extra#t$dtalkid";
+        return $self->make_url(thread => { params => [ $extra ] });
     }
 }
 
 sub reply_url {
     my $self    = shift;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $url     = $entry->url;
-
     if ($self->state eq 'B') {
-        return "$url?mode=showspam&replyto=$dtalkid";
+        return $self->make_url(reply => { params => [ 'mode=showspam' ] });
     } else {
-        return "$url?replyto=$dtalkid";
+        return $self->make_url('reply');
     }
 }
 
 sub thread_url {
     my $self    = shift;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $url     = $entry->url;
-
     if ($self->state eq 'B') {
-        return "$url?mode=showspam&thread=$dtalkid";
+        return $self->make_url(thread => { params => [ 'mode=showspam' ] });
     } else {
-        return "$url?thread=$dtalkid";
+        return $self->make_url('thread');
     }
 }
 
@@ -265,36 +254,19 @@ sub parent_url {
 sub unscreen_url {
     my $self    = shift;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $journal = $entry->journal->{user};
-
-    return
-        "$LJ::SITEROOT/talkscreen.bml" .
-        "?mode=unscreen&journal=$journal" .
-        "&talkid=$dtalkid";
+    return $self->make_url('unscreen');
 }
 
 sub delete_url {
     my $self    = shift;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $journal = $entry->journal->{user};
-
-    return
-        "$LJ::SITEROOT/delcomment.bml" .
-        "?journal=$journal&id=$dtalkid";
+    return $self->make_url('delete');
 }
 
 sub edit_url {
     my $self    = shift;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $url     = $entry->url;
-
-    return "$url?edit=$dtalkid";
+    return $self->make_url('edit');
 }
 
 # return img tag of userpic that the comment poster used
@@ -1796,62 +1768,37 @@ sub select {
     return \@ret;
 }
 
-# URL makers for make_url subroutine
-my $thread_url = sub {
-    my ($base, $args) = @_;
-    return join('', $base, '?', join('&amp;', @$args));
-};
-
-my $screen_url = sub {
-    my ($base, $args) = @_;
-    return join('', $LJ::SITEROOT, '/talkscreen.bml?', join('&amp;', @$args));
-};
-
-my $delete_url = sub {
-    my ($base, $args) = @_;
-    return join('', $LJ::SITEROOT, '/delcomment.bml?', join('&amp;', @$args));
-};
-
-my $track_url = sub {
-    my ($base, $args) = @_;
-    return join('', $LJ::SITEROOT, '/manage/subscriptions/comments.bml?', join('&amp;', @$args));
-};
-
 # Mappings
-# type => maker
+# type => base url
 my $urls = {
-    reply    => $thread_url,
-    thread   => $thread_url,
-    edit     => $thread_url,
+    unspam   => $LJ::SITEROOT. '/talkscreen.bml?',
+    unfreeze => $LJ::SITEROOT. '/talkscreen.bml?',
+    freeze   => $LJ::SITEROOT. '/talkscreen.bml?',
+    unscreen => $LJ::SITEROOT. '/talkscreen.bml?',
+    screen   => $LJ::SITEROOT. '/talkscreen.bml?',
 
-    screen   => $screen_url,
-    unscreen => $screen_url,
-    freeze   => $screen_url,
-    unfreeze => $screen_url,
-    unspam   => $screen_url,
+    spam     => $LJ::SITEROOT. '/delcomment.bml?',
+    delete   => $LJ::SITEROOT. '/delcomment.bml?',
 
-    delete   => $delete_url,
-    spam     => $delete_url,
-
-    track    => $track_url,
+    track    => $LJ::SITEROOT. '/manage/subscriptions/comments.bml?',
 };
 
 # Lightweight url creation subroutine
 # Can be used as singleton or object method
 sub make_url {
     my ($self, $type, $opts) = @_;
-    my $entry   = delete $opts->{'entry'};
-    my $dtalkid = delete $opts->{'dtalkid'};
-    my $params  = delete $opts->{'params'} || [];
+    my $entry   = $opts->{'entry'};
+    my $dtalkid = $opts->{'dtalkid'};
+    my $params  = $opts->{'params'} || [];
+    my $journal = $opts->{'journal'};
+    my $base    = $opts->{'base'};
+
+    return unless $type;
 
     if ( ref $self ) {
-        $entry ||= $self->entry;
+        $entry   ||= $self->entry;
         $dtalkid ||= $self->dtalkid;
     }
-
-    my $cb = $urls->{$type};
-
-    croak 'Unknown URL type '. $type unless $cb;
 
     if ( $type eq 'reply' ) {
         unshift @$params, 'replyto='. $dtalkid;
@@ -1860,19 +1807,30 @@ sub make_url {
     } elsif ( $type eq 'thread' ) {
         unshift @$params, 'thread='. $dtalkid;
     } else {
-        unshift @$params, 'journal='. $entry->journal->user;
+        $journal ||= $entry->journal->user;
+        unshift @$params, 'journal='. $journal;
         unshift @$params, 'talkid='. $dtalkid;
     }
 
+    my $url;
     if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
+        $url = $urls->{$type};
         unshift @$params, 'mode='. $type;
+    } elsif ( grep { $type eq $_ } qw{ reply thread edit } ) {
+        $base ||= $entry->url;
+        $base =~ s{[?/]+$} {}g;
+        $url  = $base. '?'; 
+    } else {
+        # delete and track
+        $url = $urls->{$type};
     }
 
     if ( $type eq 'spam' ) {
         unshift @$params, 'spam=1';
     }
 
-    my $url = $cb->($entry->url, $params);
+    $url .= join('&amp;', @$params); 
+
     $url .= '#t'. $dtalkid if $type eq 'thread';
 
     return $url;

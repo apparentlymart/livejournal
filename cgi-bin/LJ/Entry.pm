@@ -233,7 +233,9 @@ sub url {
     my $override = LJ::run_hook("entry_permalink_override", $self, %opts);
     return $override if $override;
 
-    my $url = $u->journal_base . "/" . $self->ditemid . ".html";
+    $self->{'url'} ||= $u->journal_base . "/" . $self->ditemid . ".html";
+    my $url = $self->{'url'};
+
     delete $args{anchor};
     if (%args) {
         $url .= "?";
