@@ -161,6 +161,7 @@ sub need_res {
     push @ret, qw(
         js/ippu.js
         js/lj_ippu.js
+        js/ljapp_ippu.js
         js/ck/ckeditor.js
         js/rte.js
         js/jquery/jquery.lj.basicWidget.js
@@ -769,19 +770,17 @@ sub render_htmltools_block {
     };
 
     my $remote = LJ::get_remote();
-    if ($remote and $remote->can_upload_photo){
-        $insert_image .= qq{
-        <li class='image-beta'>
-            <a
-                href='javascript:void(0);'
-                onclick='InOb.handleInsertImageBeta();'
-                title='$BML::ML{'ljimage.beta'}'
-            >
-                $BML::ML{'entryform.insert.image2'}
-            </a>
-        </li>
-        };
-    }
+    $insert_image .= qq{
+    <li class='image-beta'>
+        <a
+            href='javascript:void(0);'
+            onclick='InOb.handleInsertImageBeta();'
+            title='$BML::ML{'ljimage.beta'}'
+        >
+            $BML::ML{'entryform.insert.image2'}
+        </a>
+    </li>
+    };
 
     my $insert_media = '';
     unless ($LJ::DISABLED{embed_module}) {
@@ -1622,7 +1621,7 @@ sub render_ljphoto_block {
 
     LJ::Widget::Fotki::Upload->render();
  
-    $out .= <<JS;
+    $out .= $ljphoto_enabled ? <<JS : "";
 <script type="text/javascript">
     window.ljphotoEnabled = $ljphoto_enabled;
     jQuery('#updateForm').photouploader({
@@ -1641,40 +1640,9 @@ JS
         my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
         $out .= <<JS;
 <script type="text/javascript">
-		var jSortable,
-			jPhotoUploader = jQuery('#updateForm');
-
-		jPhotoUploader.photouploader({
-					insertPhotosData: $insert_photos_json,
-					type: 'add'
-			})
-			.bind('htmlready', function (event) {
-					var html = event.htmlStrings,
-							editor;
-
-					if (window.switchedRteOn) {
-							editor = CKEDITOR.instances.draft;
-
-							for (var i = 0, l = html.length; i < l; i++) {
-									editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
-							}
-					} else {
-							jQuery('#draft').val(jQuery('#draft').val() + html.join(' '));
-					}
-			})
-			.bind('removeitem', function () {
-				jSortable.sortable('refresh');
-			})
-			.photouploader('show');
-
-		jSortable = jQuery('.b-popup-pics-gallery-list');
-		jSortable.sortable({
-			stop: function() {
-				jPhotoUploader.photouploader('update');
-			}
-		});
-
-		jSortable.disableSelection();
+	jQuery(function () {
+		InOb.handleInsertImageBeta('add', $insert_photos_json);
+	});
 </script>
 JS
     }
