@@ -3653,7 +3653,8 @@ sub compact_dumper {
 
     require Data::Dumper;
 
-    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Indent   = 0;
+    local $Data::Dumper::Sortkeys = 1;
 
     if ( @args <= 1 ) {
         local $Data::Dumper::Terse = 1;
