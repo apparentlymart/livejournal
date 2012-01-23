@@ -769,7 +769,7 @@ sub render_htmltools_block {
     };
 
     my $remote = LJ::get_remote();
-    if ($remote and $remote->can_use_ljphoto){
+    if ($remote and $remote->can_upload_photo){
         $insert_image .= qq{
         <li class='image-beta'>
             <a
