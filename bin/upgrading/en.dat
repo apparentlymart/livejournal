@@ -5677,6 +5677,8 @@ talk.loading=Loading...
 talk.loginafterpost=We will log you in after post
 
 talk.manageuserpic=Manage userpics
+
+talk.more=...and [[count]] more [[?count|comment|comments]]...
  
 talk.new=New comment
  

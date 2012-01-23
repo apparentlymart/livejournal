@@ -1553,17 +1553,29 @@ sub load_comments
     }
     
     my $thread = $opts->{'thread'}+0;
-    my $show_parents = int $opts->{'show_parents'};
-    if ($thread && $show_parents) {
+    my $visible_parents = int $opts->{'visible_parents'};
+
+    if ( $thread and $visible_parents ) {
+        my $parents = $opts->{'parents_counter'};
+        my $go_up_to = $opts->{'parents_talkid'};
+        my $real_thread;
+
         while (my $parent_thread = $posts->{$thread}->{'parenttalkid'}) {
             $children->{$parent_thread} = [ $thread ];
             $posts->{$parent_thread}->{'children'} = [ $posts->{$thread} ];
             $posts->{$parent_thread}->{'_collapsed'} = 1;
-            $posts_to_load{$parent_thread} = 1;
+            $posts_to_load{$parent_thread} = 1 if $visible_parents;
+            $real_thread = $parent_thread if $visible_parents == 1;
             $thread = $parent_thread;
-            --$show_parents or last;
+            $$go_up_to = $thread if ref $go_up_to and $thread;
+            if ( defined $visible_parents ) {
+                --$visible_parents if $visible_parents;
+                $$parents += 1     if ref $parents and $thread;
+            }
         }
-        $top_replies = [ $thread ];
+
+        $$parents -= $LJ::S1_FOLDED_PARENTS if $$parents;
+        $top_replies = [ $real_thread || $thread ];
     }
 
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
