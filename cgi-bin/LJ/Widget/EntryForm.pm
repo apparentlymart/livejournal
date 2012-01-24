@@ -1799,6 +1799,27 @@ sub render_body {
         }
         $$js .= 'initEntryDate();';
         my $ljphoto_enabled = $remote ? $remote->can_upload_photo() : 0;
+        unless ($ljphoto_enabled) {
+            $out .= <<DISABLE_HTML;
+
+<div class="b-popup b-popup-pics" id="pics-error-upgrade" style="display: none;">
+    <div class="b-popup-outer">
+        <div class="b-popup-inner">
+            <div class="popup-inner">
+                <div class="b-popup-state-container b-popup-pics-upload b-popup-pics-upload-error">
+                    <h2 class="b-popup-pics-upload-header"><tmpl_var expr="ml('fotki.error.upgrade.title')"></h2>
+                    <p class="i-bubble b-bubble-lite b-bubble-noarrow"><tmpl_var expr="ml('fotki.error.upgrade.description')"></p>
+                    <p><a href="/manage/account/"><tmpl_var expr="ml('fotki.error.upgrade.link')"></a></p>
+                    <i class="i-popup-close"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+DISABLE_HTML
+
+        }
         $$js .= "window.ljphotoEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
