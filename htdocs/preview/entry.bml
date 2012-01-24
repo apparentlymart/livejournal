@@ -41,7 +41,7 @@
         LJ::entry_form_decode(\%req, \%POST);
     } else {
         $delayed_obj
-            = LJ::DelayedEntry->get_entry_by_id($remote, $delayed_id);
+            = LJ::DelayedEntry->get_entry_by_id($u, $delayed_id);
 
         if (!$delayed_obj) {
             return "unknown error";

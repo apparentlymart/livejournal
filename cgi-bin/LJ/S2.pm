@@ -685,7 +685,7 @@ sub get_style
     my $have_style = 0;
 
     if ($verify && $styleid) {
-        #my $dbr = LJ::S2::get_s2_reader();       LJSV-1375
+        #my $dbr = LJ::S2::get_s2_reader();       LJSVD375
         my $dbr = LJ::get_db_writer();
         my $style = $dbr->selectrow_hashref("SELECT * FROM s2styles WHERE styleid=$styleid");
         die "ERROR: " . $dbr->errstr if $dbr->err;
@@ -2029,11 +2029,6 @@ sub Entry
         }
     }
 
-    if ($arg->{'delayed'}) {
-        $e->{'delayed'} = 1;
-        $e->{'delayed_icon'} = Image_std("delayed-entry"); 
-    }
-
     if (!$e->{delayedid}) {
         # custom friend groups
         my $entry = LJ::Entry->new($e->{journal}->{_u}, ditemid => $e->{itemid});
@@ -2053,9 +2048,9 @@ sub Entry
    
      } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
-                                                        $e->{delayedid} );
+                                                       $e->{delayedid} );
         
-       if ( $entry->is_sticky || $arg->{'sticky_type'}) {
+        if ( $entry->is_sticky || $arg->{'sticky_type'}) {
             $e->{'sticky'} = 1;
             $e->{'sticky_icon'} = Image_std("sticky-entry");
         }
@@ -3978,10 +3973,11 @@ sub _Entry__get_link
     my $journalu = LJ::load_user($journal);
     my $entry;
 
-    if ( $this->{itemid} ) {
+    if ( $this->{itemid} && !$this->{delayedid}) {
         $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
-    } else {
-        $entry = LJ::DelayedEntry->get_entry_by_id($journalu, $this->{delayedid});
+    } if ($this->{delayedid}) {
+        $entry = LJ::DelayedEntry->get_entry_by_id( $this->{journal}->{_u}, 
+                                                    $this->{delayedid} );
     }
 
     if ($key eq "edit_entry") {
@@ -3990,31 +3986,19 @@ sub _Entry__get_link
                                       LJ::u_equals( $remote, $posteru ) ||
                                       $remote->can_manage($journalu)
                                     );
-        
-        if ($entry->is_delayed) {
-            return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;delayedid=" . $entry->delayedid,
+
+        return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                         $ctx->[S2::PROPS]->{"text_edit_entry"},
-                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));  
-        } else {
-            return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            $ctx->[S2::PROPS]->{"text_edit_entry"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
-        }
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
 
     if ($key eq "edit_tags") {
         return $null_link 
             unless $remote && LJ::Tags::can_add_entry_tags( $remote, $entry );
-        if ($entry->is_delayed) {
-            return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;delayedid=" . $entry->delayedid,
-                                $ctx->[S2::PROPS]->{"text_edit_tags"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 24, 24));
 
-        } else {
-            return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            $ctx->[S2::PROPS]->{"text_edit_tags"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 24, 24));
-        }
+        return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                        $ctx->[S2::PROPS]->{"text_edit_tags"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 24, 24));
     }
 
     if ($key eq "tell_friend") {
@@ -4038,7 +4022,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "share_facebook") {
-        return $null_link if $entry->is_delayed;
 
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -4049,7 +4032,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "share_twitter") {
-        return $null_link if $entry->is_delayed;
 
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -4061,7 +4043,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "share_email") {
-        return $null_link if $entry->is_delayed;
 
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -4073,7 +4054,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "facebook_like") {
-        return $null_link if $entry->is_delayed;
 
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link unless $entry->security eq 'public';
@@ -4085,7 +4065,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "mem_add") {
-        return $null_link if $entry->is_delayed;
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_mem_add"},
@@ -4097,10 +4076,6 @@ sub _Entry__get_link
                         'itemid'     => int($this->{'itemid'}/256),
                         '_preview'   => $this->{'_preview'},
                       };
-
-        if ($entry->is_delayed) {
-            $options->{'delayedid'} = $entry->delayedid;
-        }
 
         my $jumplink = LJ::get_before_item_link($journalu, $options);
 
@@ -4118,10 +4093,6 @@ sub _Entry__get_link
                         'itemid'     => int($this->{'itemid'}/256),
                       };
 
-        if ($entry->is_delayed) {
-            $options->{'delayedid'} = $entry->delayedid;
-        }
-
         my $jumplink = LJ::get_after_item_link($journalu, $options);
 
         if ($jumplink) {
@@ -4134,7 +4105,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "flag") {
-        return $null_link if $entry->is_delayed;
         return $null_link unless LJ::is_enabled("content_flag");
         return $null_link unless $remote && $remote->can_see_content_flag_button( content => $entry );
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
@@ -4169,7 +4139,6 @@ sub _Entry__get_link
     }
 
     if ($key eq "watch_comments") {
-        return $null_link if $entry->is_delayed;
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
         return $null_link if $remote->has_subscription(
@@ -4201,7 +4170,6 @@ sub _Entry__get_link
                                           'class'               => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
-        return $null_link if $entry->is_delayed;
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
         my @subs = $remote->has_subscription(

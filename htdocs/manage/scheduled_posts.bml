@@ -3,18 +3,25 @@ title=><?_code return $title; _code?>
 windowtitle=><?_ML .title _ML?>
 head<=
 <script type="text/javascript">
-function showEntry(delayedId) {
+function showEntry(journal, delayedId) {
     preview = window.open('', 'preview', 'width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
     preview.document.writeln("<html><body></body></html>");
     entryForm = preview.document.createElement("form");
     entryForm.method = 'POST';
     entryForm.action = '/preview/entry.bml';
     
-    newInput = preview.document.createElement("input");
-    newInput.name = "delayed_id";
-    newInput.value = delayedId;
-    newInput.type = 'hidden';
-    entryForm.appendChild(newInput);
+    delayedInput = preview.document.createElement("input");
+    delayedInput.name = "delayed_id";
+    delayedInput.value = delayedId;
+    delayedInput.type = 'hidden';
+    entryForm.appendChild(delayedInput);
+
+    journalInput = preview.document.createElement("input");
+    journalInput.name = "usejournal";
+    journalInput.value = journal;
+    journalInput.type = 'hidden';
+    entryForm.appendChild(journalInput);
+
     preview.document.getElementsByTagName('body')[0].appendChild(entryForm);
     entryForm.submit();
     return false;
