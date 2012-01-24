@@ -3068,6 +3068,7 @@ DIV.lj_ippu_app {
 		background-position: 0 -11px;
  		}
 
+	.i-thumb-close,
 	.i-popup-close {
 		overflow: hidden;
 		display: block;
