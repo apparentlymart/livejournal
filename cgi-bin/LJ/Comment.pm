@@ -411,12 +411,7 @@ sub posterid {
     return $self->{posterid};
 }
 
-sub all_singletons {
-    my $self = shift;
-    my @singletons;
-    push @singletons, values %{$singletons{$_}} foreach keys %singletons;
-    return @singletons;
-}
+sub all_singletons { map { values %$_ } values %singletons }
 
 # returns an array of unloaded comment singletons
 sub unloaded_singletons {
@@ -1783,6 +1778,12 @@ my $urls = {
     track    => $LJ::SITEROOT. '/manage/subscriptions/comments.bml?',
 };
 
+my %modes = (
+    reply  => 'replyto=',
+    edit   => 'edit=',
+    thread => 'thread=',
+);
+
 # Lightweight url creation subroutine
 # Can be used as singleton or object method
 sub make_url {
@@ -1791,7 +1792,6 @@ sub make_url {
     my $dtalkid = $opts->{'dtalkid'};
     my $params  = $opts->{'params'} || [];
     my $journal = $opts->{'journal'};
-    my $base    = $opts->{'base'};
 
     return unless $type;
 
@@ -1800,33 +1800,21 @@ sub make_url {
         $dtalkid ||= $self->dtalkid;
     }
 
-    if ( $type eq 'reply' ) {
-        unshift @$params, 'replyto='. $dtalkid;
-    } elsif ( $type eq 'edit' ) {
-        unshift @$params, 'edit='. $dtalkid;
-    } elsif ( $type eq 'thread' ) {
-        unshift @$params, 'thread='. $dtalkid;
+    my $url = $urls->{$type} || $opts->{'base'} || $entry->url;
+
+    if ( $modes{$type} ) {
+        $url .= '?' unless $url =~ /\?$/; 
+
+        unshift @$params, $modes{$type}. $dtalkid;
     } else {
-        $journal ||= $entry->journal->user;
-        unshift @$params, 'journal='. $journal;
+        unshift @$params, 'journal='. $opts->{'journal'} || $entry->journal->user;
         unshift @$params, 'talkid='. $dtalkid;
-    }
 
-    my $url;
-    if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
-        $url = $urls->{$type};
-        unshift @$params, 'mode='. $type;
-    } elsif ( grep { $type eq $_ } qw{ reply thread edit } ) {
-        $base ||= $entry->url;
-        $base =~ s{[?/]+$} {}g;
-        $url  = $base. '?'; 
-    } else {
-        # delete and track
-        $url = $urls->{$type};
-    }
-
-    if ( $type eq 'spam' ) {
-        unshift @$params, 'spam=1';
+        if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
+            unshift @$params, 'mode='. $type;
+        } elsif ( $type eq 'spam' ) {
+            unshift @$params, 'spam=1';
+        }
     }
 
     $url .= join('&amp;', @$params); 

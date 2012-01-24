@@ -151,10 +151,20 @@ sub subscriptions_of_user {
 # Look for a subscription matching the parameters: journalu/journalid,
 #   ntypeid/method, event/etypeid, arg1, arg2
 # Returns a list of subscriptions for this user matching the parameters
+# 
+# For pages with tons of comments search is divided in two stages:
+#   I  prefetch    => 1
+#   II postprocess => [$a, $b, $c]
+# First stage is done once for request and is needed to fetch and filter out
+# active user subscriptions in current journal
+# Second stage is done for every comment on page and contains all additional filtering conditions
 sub find {
     my ($class, $u, %params) = @_;
 
-    my ($etypeid, $ntypeid, $arg1, $arg2, $flags);
+    my ($etypeid, $ntypeid, $arg1, $arg2, $flags, $prefetch, $postprocess);
+
+    $prefetch    = delete $params{'prefetch'};
+    $postprocess = delete $params{'postprocess'};
 
     if (my $evt = delete $params{event}) {
         $etypeid = LJ::Event->event_to_etypeid($evt);
@@ -183,12 +193,25 @@ sub find {
     return () if defined $arg2 && $arg2 =~ /\D/;
 
     my @subs;
-    @subs = $class->subscriptions_of_user($u);
+    if ( $postprocess ) {
+        @subs = @$postprocess;
+    } else {
+        @subs = $class->subscriptions_of_user($u);
+    }
 
-    @subs = grep { $_->active } @subs if $require_active;
+    unless ( $postprocess ) {
+        # This filter should be at first place because we need not to check
+        # subscriptions in other journals and this can save us from tons of work later
+        # Matters on pages with comments, when both journalid and require_active
+        # conditions are active
+        @subs = grep { $_->journalid == $journalid } @subs if defined $journalid;
+
+        @subs = grep { $_->active } @subs if $require_active;
+    }
+
+    return @subs if $prefetch;
 
     # filter subs on each parameter
-    @subs = grep { $_->journalid == $journalid } @subs if defined $journalid;
     @subs = grep { $_->ntypeid   == $ntypeid }   @subs if $ntypeid;
     @subs = grep { $_->etypeid   == $etypeid }   @subs if $etypeid;
     @subs = grep { $_->flags     == $flags }     @subs if defined $flags;
