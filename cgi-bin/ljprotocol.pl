@@ -2854,7 +2854,7 @@ sub editevent {
 
         if ( $delayedid ) {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
-            return fail( $err, 215 ) unless $req->{tz};                        
+            return fail( $err, 215 ) unless $req->{tz};
 
             $req->{ext}->{flags} = $flags;
             $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
@@ -2867,7 +2867,6 @@ sub editevent {
             );
 
             return fail($err, 508) unless $entry;
-
             if ($req->{'event'} !~ /\S/ ) {
                 $entry->delete();
                 $res->{delayedid} = $delayedid;
@@ -2877,12 +2876,17 @@ sub editevent {
                                             actiontarget => $delayedid,
                                             method => 'protocol', })
                         unless $flags->{noauth};
+
                 return $res;
             }
 
             # updating an entry:
             return undef
                 unless common_event_validation($req, $err, $flags);
+
+            $entry->update($req);
+            $res->{type} = 'delayed';
+            $res->{delayedid} = $delayedid;
         }
 
         return $res if $res->{type};

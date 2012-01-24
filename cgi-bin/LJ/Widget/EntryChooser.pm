@@ -21,7 +21,7 @@ sub prepare_template_params {
     my @entries_display;
 
     foreach my $entry (@$entries) {
-        my $entry_id = $entry->is_delayed ? $entry->delayedid : $entry->itemid ;
+        my $entry_id = $entry->is_delayed ? $entry->delayedid : $entry->ditemid ;
         my $entry_can_edit = 
             $entry->poster->equals($remote) &&
             ! $entry->journal->is_readonly &&
