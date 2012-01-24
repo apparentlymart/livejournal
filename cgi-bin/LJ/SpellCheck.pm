@@ -140,10 +140,10 @@ sub check {
     my $handler_misspelled = sub {
         my ($word, $suggestions_str) = @_;
 
-        return unless $suggestions_str;
+        # return unless $suggestions_str;
         return if exists $words{$word};
 
-        my @suggestions = split qr/,\s*/, $suggestions_str;
+        my @suggestions = split qr/,\s*/, ($suggestions_str || '');
         if ($limit && @suggestions > $limit) {
             @suggestions = @suggestions[0 .. $limit - 1];
         }
