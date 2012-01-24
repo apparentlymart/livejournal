@@ -17,7 +17,7 @@
 package LJ::SpellCheck;
 
 use strict;
-use IPC::Run qw/run timeout/;
+use IPC::Run;
 
 use vars qw($VERSION);
 $VERSION = '1.0';
@@ -26,27 +26,54 @@ $VERSION = '1.0';
 #    ispell -a -h  (default)
 #    /usr/local/bin/aspell pipe -H --sug-mode=fast --ignore-case
 
+my @DEFAULT_COMMAND = qw/aspell -a -H --ignore-case --sug-mode=fast --encoding=utf-8/;
+
+my $LANGUAGES = {
+    'ru'    => 'ru',
+    'en_lj' => 'en',    # lower case of 'en_LJ'
+    'en_gb' => 'en_GB',
+    'de'    => 'de',
+};
+
 sub new {
     my ($class, $args) = @_;
     my $self = {};
     bless $self, ref $class || $class;
 
-    $self->{'command'} = $args->{'spellcommand'} || [qw/ispell -a -h/];
-    $self->{'color'} = $args->{'color'} || "#FF0000";
+    $self->{command} = $args->{spellcommand} || [ @DEFAULT_COMMAND ];
+    $self->{color} = $args->{color} || "#FF0000";
     return $self;
 }
 
-# This function takes a block of text to spell-check and returns HTML 
-# to show suggesting correction, if any.  If the return from this 
-# function is empty, then there were no misspellings found.
+sub run_aspell {
+    my ($text_ref, $opts, $handler_misspelled, $handler_text) = @_;
 
-sub check_html {
-    my $self = shift;
-    my $journal = shift;
- 
-    my @in_lines    = split /[\r\n]+/, $$journal;
-    my @out_lines; 
-    my $color = $self->{'color'};
+    if (ref($handler_misspelled) ne 'CODE') {
+        die "Invalid handler_misspelled parameter - need coderef";
+    }
+
+    $handler_text = undef unless defined $handler_text && ref($handler_text) eq 'CODE';
+
+    $opts = {} unless defined($opts) && ref($opts) eq 'HASH';
+
+    my $command = $opts->{command};
+    if ($command) {
+        if (ref($command) ne 'ARRAY') {
+            die "Invalid parameter 'command' - need arrayref";
+        }
+    }
+    else {
+        $command = [ @DEFAULT_COMMAND ];
+        if (my $language = $opts->{language}) {
+            $language = $LANGUAGES->{lc($language)};
+            return (0, 'unsupported_language') unless $language;
+
+            push @$command, "--lang=$language";
+        }
+    }
+
+    my @in_lines = split qr/[\r\n]+/, $$text_ref;
+    my @out_lines;
 
     {
         my ($in, $out, $err);
@@ -55,53 +82,133 @@ sub check_html {
         ## ^ = escape each line (i.e. each line is text, not control command for aspell)
         $in = "!\n" . join("\n", map { "^$_" } @in_lines);
 
-        run($self->{'command'}, \$in, \$out, \$err, timeout(10))
-            or die "Can't run spellchecker: $?";
+        warn join(' ', @$command), "\n";
+
+        IPC::Run::run($command, \$in, \$out, \$err, IPC::Run::timeout(10))
+            or die "Can't run spellchecker: $? ($err)";
+
         @out_lines = split /\n/, $out;
-        
+
         warn "Spellchecker warning: $err" 
             if $err;
-        
+
         my $signature = shift @out_lines;
         die "Invalid spellchecker reply: $signature"
             unless $signature && $signature =~ /^@\(#\)/;
     }
 
-    my ($output, $footnotes, $has_errors, %seen_mispelled_words);
-
     INPUT_LINE:
     foreach my $input_line (@in_lines) {
-        my $pos = 0;
+        my $text_pos = 0;
         ASPELL_LINE: 
         while (my $aspell_line = shift @out_lines) {
-            my ($word, $offset, $suggestions_list);
+            my ($word, $offset, $suggestions_str);
+
             if (!$aspell_line) {
                 next INPUT_LINE;
-            } elsif ($aspell_line =~ /^& (\S+) \d+ (\d+): (.*)$/) {
-                ($word, $offset, $suggestions_list) = ($1, $2, $3);
-            } elsif ($aspell_line =~ /^\# (\S+) (\d+)/) {
-                my ($word, $offset, $suggestions_list) = ($1, $2, undef);
-            } else {
+            }
+            elsif ($aspell_line =~ /^& (\S+) \d+ (\d+): (.*)$/) {
+                ($word, $offset, $suggestions_str) = ($1, $2, $3);
+            }
+            elsif ($aspell_line =~ /^\# (\S+) (\d+)/) {
+                ($word, $offset, $suggestions_str) = ($1, $2, undef);
+            }
+            else {
                 next ASPELL_LINE;
             }
 
-            $output .= LJ::ehtml(substr($input_line, $pos, $offset-$pos-1));
-            $output .= "<font color='$color'>".LJ::ehtml($word)."</font>";
+            $offset--; # due to escaping each line by char '^'
 
-            if ($suggestions_list && !$seen_mispelled_words{$word}++) {
-                $footnotes .= 
-                    "<tr valign=top><td align=right><font color='$color'>".LJ::ehtml($word).
-                    "</font></td><td>".LJ::ehtml($suggestions_list)."</td></tr>\n";
-            }
-            $pos = $offset + length($word) - 1;
-            $has_errors++;
+            $handler_text->(substr($input_line, $text_pos, $offset - $text_pos)) if $handler_text && $text_pos < $offset;
+            $handler_misspelled->($word, $suggestions_str);
+            $text_pos = $offset + length($word);
         }
-        $output .= LJ::ehtml(substr($input_line, $pos, length($input_line)-$pos)) . "<br>\n";
+
+        $handler_text->(substr($input_line, $text_pos, length($input_line) - $text_pos) . "\n") if $handler_text && $text_pos < length($input_line);
     }
-   
-    return ($has_errors) 
-            ? "$output<p><b>Suggestions:</b><table cellpadding=3 border=0>$footnotes</table>"
-            : "";
+  
+    return (1, 'ok');
+}
+
+sub check {
+    my ($text_ref, $opts) = @_;
+
+    $opts = {} unless defined $opts && ref($opts) eq 'HASH';
+    my $limit = 0 + $opts->{limit};
+
+    my %words;
+    my $handler_misspelled = sub {
+        my ($word, $suggestions_str) = @_;
+
+        return unless $suggestions_str;
+        return if exists $words{$word};
+
+        my @suggestions = split qr/,\s*/, $suggestions_str;
+        if ($limit && @suggestions > $limit) {
+            @suggestions = @suggestions[0 .. $limit - 1];
+        }
+        $words{$word} = [ @suggestions ];
+    };
+
+    my ($result, $status) = run_aspell($text_ref, $opts, $handler_misspelled, undef);
+
+    if ($result) {
+        return {
+            status   => 'ok',
+            words    => \%words,
+            language => $opts->{language},
+        };
+    }
+    else {
+        return {
+            status   => 'status',
+            language => $opts->{language},
+        }
+    }
+}
+
+# This function takes a block of text to spell-check and returns HTML 
+# to show suggesting correction, if any.  If the return from this 
+# function is empty, then there were no misspellings found.
+
+sub check_html {
+    my ($self, $text_ref) = @_;
+
+    my $color = $self->{'color'};
+
+    my ($output, $footnotes, %seen_mispelled_words);
+    my $pos = 0;
+
+    my $handler_misspelled = sub {
+        my ($word, $suggestions_str) = @_;
+
+        $output .= "<font color='$color'>" . LJ::ehtml($word) . "</font>";
+
+        if ($suggestions_str && !$seen_mispelled_words{$word}++) {
+            $footnotes .= 
+                "<tr valign=top>" .
+                    "<td align=right>" . 
+                        "<font color='$color'>" . LJ::ehtml($word) . "</font>" . 
+                    "</td>" .
+                    "<td>" .
+                        LJ::ehtml($suggestions_str) .
+                    "</td>" .
+                "</tr>\n";
+        }
+    };
+
+    my $handler_text = sub {
+        my $text = LJ::ehtml(shift);
+        $text =~ s/[\r\n]+/<br>/g;
+        $output .= $text;
+    };
+
+    my ($result, $status) = run_aspell($text_ref, {language => 'ru'}, $handler_misspelled, $handler_text);
+
+    return '' unless $result;
+
+    $output .= "<p><b>Suggestions:</b><table cellpadding=3 border=0>$footnotes</table>" if $footnotes;
+    return $output;
 }
 
 1;
