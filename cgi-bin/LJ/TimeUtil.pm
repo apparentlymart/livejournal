@@ -254,23 +254,49 @@ sub statushistory_time {
 sub ago_text {
     my ($class, $secondsold) = @_;
     return $BML::ML{'time.ago.never'} unless $secondsold > 0;
-    my $num;
-    my $unit;
-    if ($secondsold >= 60*60*24*7) {
-        $num = int($secondsold / (60*60*24*7));
-        return LJ::Lang::ml('time.ago.week', {'num' => $num});
-    } elsif ($secondsold >= 60*60*24) {
-        $num = int($secondsold / (60*60*24));
-        return LJ::Lang::ml('time.ago.day', {'num' => $num});
-    } elsif ($secondsold >= 60*60) {
-        $num = int($secondsold / (60*60));
-        return LJ::Lang::ml('time.ago.hour', {'num' => $num});
-    } elsif ($secondsold >= 60) {
-        $num = int($secondsold / (60));
-        return LJ::Lang::ml('time.ago.minute', {'num' => $num});
+
+    my ($num, $unit);
+    use integer;
+
+    # One star, two starts, three stars...
+    # Five are better, anyway
+
+    if ( $secondsold >= 60 * 60 * 24 * 7 * 30 * 12 ) {
+
+        $secondsold /= (60 * 60 * 24 * 7 * 30 * 12);
+        return LJ::Lang::ml('time.ago.year', { num => $secondsold });
+
+    } elsif ( $secondsold >= 60 * 60 * 24 * 7 * 30 ) {
+
+        $secondsold /= (60 * 60 * 24 * 7 * 30);
+        return LJ::Lang::ml('time.ago.month', { num => $secondsold });
+
+    } elsif ( $secondsold >= 60 * 60 * 24 * 7 ) {
+
+        $secondsold /= (60 * 60 * 24 * 7);
+        return LJ::Lang::ml('time.ago.week', { num => $secondsold });
+
+    } elsif ( $secondsold >= 60 * 60 * 24 ) {
+
+        $secondsold /= (60 * 60 * 24);
+        return LJ::Lang::ml('time.ago.day', { num => $secondsold });
+
+    } elsif ( $secondsold >= 60 * 60 ) {
+
+        $secondsold /= (60 * 60);
+        return LJ::Lang::ml('time.ago.hour', { num => $secondsold });
+
+    } elsif ( $secondsold >= 60 * 30 ) {
+
+        return LJ::Lang::ml('time.ago.halfhour');
+
+    } elsif ( $secondsold >= 60 ) {
+
+        $secondsold /= 60;
+        return LJ::Lang::ml('time.ago.minute', { num => $secondsold });
+
     } else {
-        $num = $secondsold;
-        return LJ::Lang::ml('time.ago.second', {'num' => $num});
+        return LJ::Lang::ml('time.ago.second', { num => $secondsold });
     }
 }
 
@@ -330,8 +356,10 @@ sub fancy_time_format {
     $precision ||= 'sec';
     $timezone ||= 'UTC';
 
+    local $Params::Validate::NO_VALIDATION = 1;
+
     my $dt = DateTime->from_epoch(
-        'epoch'     => $timestamp,
+        'epoch'     => int $timestamp,
         'time_zone' => $timezone,
     );
 
