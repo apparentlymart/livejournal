@@ -119,7 +119,7 @@ body<=
                                };
             }
         };
- 
+
         if ( scalar @$items == 0 ) {
             $insert->();
             return @ordered;
@@ -365,9 +365,10 @@ body<=
 
                 # check response
                 unless ($res) {
-                    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>" . LJ::Protocol::error_message($err) . "</b></li></ul> p?>";
+                    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>" .
+                            LJ::Protocol::error_message($err) .
+                            "</b></li></ul> p?>";
                 }
-               
 
                 my $deleted = $req{event} ? 0 : 1;
                 my $journalu = $usejournal ? $usejournal_u : $remote;
@@ -375,7 +376,8 @@ body<=
                 my $entry_url = '';
                 if ($entry_obj->is_delayed) {
                     if (!$res->{itemid}) {
-                        $entry_url = $entry_obj->url;
+                        $entry_url = "$LJ::SITEROOT/manage/scheduled_posts.bml" .
+                                     "#entry_" . $entry_obj->delayedid;
                     } else {
                         $entry_url = $res->{url};
                     }
@@ -572,7 +574,7 @@ body<=
             </script>
 LIKE_FAQ
             $ret .= $js;
-	
+
             $ret .= "</td>";
             my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             if ($ad) {
