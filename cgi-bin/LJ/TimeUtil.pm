@@ -356,6 +356,8 @@ sub fancy_time_format {
     $precision ||= 'sec';
     $timezone ||= 'UTC';
 
+    # DateTime heavily uses Params::Validate to validate incoming parameters,
+    # but it gives significant overhead
     local $Params::Validate::NO_VALIDATION = 1;
 
     my $dt = DateTime->from_epoch(
