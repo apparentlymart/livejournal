@@ -2812,7 +2812,7 @@ sub editevent {
 
     my $itemid = $req->{'itemid'}+0;
     
-    $itemid ||= int( $req->{'ditemid'}+0 / 256);
+    $itemid ||= int( ($req->{'ditemid'} + 0) / 256);
 
     # underage users can't do this
     return fail($err,310) if $u->underage;
