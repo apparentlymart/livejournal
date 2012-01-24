@@ -21,6 +21,7 @@ sub prepare_template_params {
     my @entries_display;
 
     foreach my $entry (@$entries) {
+        my $entry_id = $entry->is_delayed ? $entry->delayedid : $entry->itemid ;
         my $entry_can_edit = 
             $entry->poster->equals($remote) &&
             ! $entry->journal->is_readonly &&
@@ -48,16 +49,12 @@ sub prepare_template_params {
             }
         }
 
-        my ($edittags_link, $entry_can_edittags);
         my $edit_link_base = "$LJ::SITEROOT/editjournal.bml?";
         my $usejournal = $entry->journal->username;
         $edit_link_base .= 'usejournal=' . $usejournal . '&';
 
         if ( $entry->is_delayed ) {
             $edit_link_base .= 'delayedid=' . $entry->delayedid . '&';
-            $edittags_link  = "$LJ::SITEROOT/edittags.bml?" .
-                              "journal=$usejournal&delayedid=" .
-                              $entry->delayedid;
         } else {
             $edit_link_base .= 'itemid=' . $entry->ditemid . '&';
         }
@@ -96,19 +93,14 @@ sub prepare_template_params {
             $entry_taglist = join( ', ', @taglist );
         }
 
-        if ( $entry->is_delayed ) {
-            $entry_can_edittags = $entry_can_edit;
-        }
-
         push @entries_display, {
+            'entry_id'           => $entry_id,
             'entry_can_edit'     => $entry_can_edit,
-            'entry_can_edittags' => $entry_can_edittags,
             'poster_ljuser'      => $poster_ljuser,
             'entry_is_delayed'   => $entry_is_delayed,
             'entry_is_sticky'    => $entry_is_sticky,
             'entry_security'     => $entry_security,
             'edit_link'          => $edit_link,
-            'edittags_link'      => $edittags_link,
             'delete_link'        => $delete_link,
             'entry_url'          => $entry_url,
             'entry_subject'      => $entry_subject,

@@ -34,20 +34,8 @@ body<=
 
     return $err->($ML{'.invalid.entry'}) unless ($jitemid || $delayedid);
 
-    my $entry;
-    if ($delayedid) {
-        $entry = LJ::DelayedEntry->get_entry_by_id($u, $delayedid);
-    } else {
-        $entry = LJ::Entry->new($u, ditemid=>$ditemid);
-    }
-
-    my $logrow;
-
-    if ($delayedid) {
-        $logrow = $entry->get_log2_row();
-    } else {
-        $logrow = LJ::get_log2_row($u, $jitemid);
-    }
+    my $entry = LJ::Entry->new($u, ditemid=>$ditemid);
+    my $logrow = LJ::get_log2_row($u, $jitemid);
 
     return $err->($ML{'.invalid.entry'}) unless $logrow;
     return $err->($ML{'.invalid.entry'}) 
@@ -71,30 +59,20 @@ body<=
 
         my $tagerr = "";
         my $skipped_tags = [];
-        my $rv;
-        if ($delayedid) {
-            $rv = $entry->update_tags($POST{edittags});
-            $ditemid = "$delayedid";
-        } else {
-            $rv = LJ::Tags::update_logtags($u, $jitemid, {
-                                    set_string => $POST{edittags},
-                                    remote => $remote,
-                                    err_ref => \$tagerr,
-                                    skipped_tags => $skipped_tags, # do all possible and report impossible
-                                });
-        }
+
+        my $rv = LJ::Tags::update_logtags($u, $jitemid, {
+                                            set_string => $POST{edittags},
+                                            remote => $remote,
+                                            err_ref => \$tagerr,
+                                            skipped_tags => $skipped_tags, # do all possible and report impossible
+                                        });
+
         return $err->($tagerr) unless $rv;
         return "<?h1 $ML{'.warning.title'} h1?><?p " . LJ::Lang::ml('/update.bml.tags.skipped', { 'tags' => join(', ', @$skipped_tags),
                                                              'limit' => $u->get_cap('tags_max') } ) . " p?>"
             if @$skipped_tags;
 
-        my $redirect_url = '';
-        if ($entry->is_delayed) {
-            $redirect_url = $entry->url;
-        } else {
-            $redirect_url = LJ::journal_base($u) . "/$ditemid.html";
-        }
-
+        my $redirect_url = LJ::journal_base($u) . "/$ditemid.html";
         BML::redirect( $redirect_url );
         #$msg = "<div class='update_good'>Tags successfully updated.</div>";
     }
@@ -125,12 +103,7 @@ body<=
     $evt =~ s/<\?/&lt;?/g;
     $evt =~ s/\?>/?&gt;/g;
 
-    my $logtags;
-    if ($delayedid) { 
-        $logtags = $entry->get_tags();
-    } else {
-        $logtags = LJ::Tags::get_logtags($u, $jitemid);
-    }
+    my $logtags = LJ::Tags::get_logtags($u, $jitemid);
 
     my $usertags = LJ::Tags::get_usertags($u, { remote => $remote }) || {};
     $logtags = $logtags->{$jitemid} || $logtags->{$delayedid} || {};
@@ -191,17 +164,12 @@ body<=
         $view_url = LJ::journal_base($u) . "/$ditemid.html";
     }
 
-
     $ret .= BML::ml('.view', { aopts => 'href="' . $view_url  . '"' });
     $ret .= "</td></tr>";
 
     $ret .= '</table>';
     $ret .= LJ::html_hidden('journal', $journal);
-    if ($delayedid) {
-        $ret .= LJ::html_hidden('delayedid', $GET{delayedid} || $POST{delayedid});
-    } else {
-        $ret .= LJ::html_hidden('itemid', $GET{itemid} || $POST{itemid});
-    }
+    $ret .= LJ::html_hidden('itemid', $GET{itemid} || $POST{itemid});
 
     $ret .= '</form>';
 
