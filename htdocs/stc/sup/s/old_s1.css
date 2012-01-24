@@ -108,7 +108,8 @@ a:active {
 	width: 750px;
 	}
 
-.comments-links ~ #qrdiv form {
+.comments-links ~ #qrdiv form,
+.comment-wrap ~ .comments-links ~ #qrdiv form {
 	width: 700px;
 	margin-right: auto;
 	margin-left: auto;
