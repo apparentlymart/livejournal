@@ -24,14 +24,13 @@
 			<li class='b-editentry'>
 
 				<p class='b-editentry-ctrls'>
+					<TMPL_IF entry_can_edittags>
+						<a href='<TMPL_VAR edittags_link ESCAPE=HTML>' class='b-editentry-edittags-btn b-editentry-ctrl-btn'></a>
+					</TMPL_IF>
 					<TMPL_IF entry_can_edit>
 						<a href='<TMPL_VAR edit_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
 					<TMPL_ELSE>
 						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>
-					</TMPL_IF>
-
-					<TMPL_IF entry_can_edittags>
-						<a href='<TMPL_VAR edittags_link ESCAPE=HTML>' class='b-editentry-edittags-btn b-editentry-ctrl-btn'></a>
 					</TMPL_IF>
 				</p>
 
