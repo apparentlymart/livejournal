@@ -923,6 +923,22 @@ sub get_talk_data {
     return $result;
 }
 
+
+sub make_comment_singleton {
+    my ($jtalkid, $row, $u, $nodeid) = @_;
+
+    # at this point we have data for this comment loaded in memory
+    # -- instantiate an LJ::Comment object as a singleton and absorb
+    #    that data into the object
+    my $comment = LJ::Comment->new($u, jtalkid => $jtalkid);
+    # add important info to row
+    $row->{'nodetype'} = 'L';
+    $row->{'nodeid'}   = $nodeid;
+    $comment->absorb_row($row);
+
+    return 1;
+}
+
 # retrieves data from the talk2 table (but preferably memcache)
 # returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 'datepost_unix',
 #                             'parenttalkid', 'state' } , or undef on failure
@@ -978,21 +994,6 @@ sub get_talk_data_do
         }
     };
 
-    my $make_comment_singleton = sub {
-        my ($jtalkid, $row) = @_;
-        return 1 unless $init_comobj;
-        return 1 unless $nodetype eq 'L';
-        # at this point we have data for this comment loaded in memory
-        # -- instantiate an LJ::Comment object as a singleton and absorb
-        #    that data into the object
-        my $comment = LJ::Comment->new($u, jtalkid => $jtalkid);
-        # add important info to row
-        $row->{nodetype} = $nodetype;
-        $row->{nodeid}   = $nodeid;
-        $comment->absorb_row($row);
-
-        return 1;
-    };
 
     # This is a bit tricky.  Since we just loaded and instantiated all comment singletons for this
     # entry (journalid, jitemid) we'll instantiate a skeleton LJ::Entry object (probably a singleton
@@ -1026,12 +1027,12 @@ sub get_talk_data_do
                 state => $state,
                 posterid => $poster,
                 datepost_unix => $time,
-                datepost => LJ::TimeUtil->mysql_time($time),  # timezone surely fucked.  deprecated.
+                #datepost => LJ::TimeUtil->mysql_time($time),  # timezone surely fucked.  deprecated.
                 parenttalkid => $par,
             };
 
             # instantiate comment singleton
-            $make_comment_singleton->($talkid, $ret->{$talkid});
+            make_comment_singleton($talkid, $ret->{$talkid}, $u, $nodeid) if $init_comobj and $nodetype eq 'L';
 
             # comments are counted if they're 'A'pproved or 'F'rozen
             $rp_ourcount++ if $state eq "A" || $state eq "F";
@@ -1111,7 +1112,7 @@ sub get_talk_data_do
             $row_arg{nodetype} = $nodetype;
 
             # instantiate comment singleton
-            $make_comment_singleton->($r->{talkid}, \%row_arg);
+            make_comment_singleton($r->{talkid}, \%row_arg, $u, $nodeid) if $init_comobj and $nodetype eq 'L';
 
             # set talk2row memcache key for this bit of data
             LJ::Talk::add_talk2row_memcache($u->id, $r->{talkid}, \%row_arg);
