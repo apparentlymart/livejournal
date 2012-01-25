@@ -2351,12 +2351,13 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ( $req->{ver} > 1  && LJ::is_enabled("delayed_entries") ) {
-        if ( $req->{'posttype'} eq 'scheduled' ) {
+    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
+        if ( $flags->{noauth} && LJ::DelayedEntry::is_future_date($req) &&
+             $req->{'custom_time'} ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
-            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) && !$flags->{'nomod'} ) {
+            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) ) {
                 return fail($err, 322);
             }
 
@@ -2841,14 +2842,15 @@ sub editevent {
         if ($LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $uowner->{user} } &&
             !LJ::is_friend($uowner, $u));
 
-
     # make sure the new entry's under the char limit
     # NOTE: as in postevent, this requires $req->{event} to be binary data
     # but we've already removed the utf-8 flag in the XML-RPC path, and it
     # never gets set in the "flat" protocol path
     return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
     
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
+    if ( $req->{ver} > 1 && $flags->{noauth} &&
+            LJ::is_enabled("delayed_entries") &&
+            LJ::DelayedEntry::is_future_date($req) ) {
         my $delayedid = delete $req->{delayedid};
         my $res = {};
 
