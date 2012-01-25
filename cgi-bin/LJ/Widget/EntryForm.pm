@@ -418,11 +418,7 @@ sub render_metainfo_block {
         value => 'guess',
         id => 'journal_timezone',
     });
-    $out .= LJ::html_hidden({
-        name => 'custom_time',
-        value => '0',
-        id => 'journal_time_edited',
-    });
+
     $out .= "<script>try { \$('journal_timezone').value = - (new Date).getTimezoneOffset()/0.6; } catch(e) {} </script>";
     $out .= "<div id='metainfo-wrap'><ul id='metainfo'>";
 
@@ -549,6 +545,12 @@ sub render_metainfo_block {
     # but if we don't have JS, give a signal to trust the given time
     $date_diff_input .= "<noscript>" .  LJ::html_hidden("date_diff_nojs", "1") .
         "</noscript>";
+
+    $date_diff_input .= LJ::html_hidden({
+        name => 'custom_time',
+        value => '0',
+        id => 'journal_time_edited',
+    });
 
     my $help_icon = LJ::help_icon_html("24hourshelp");
     my $hide_link = $can_edit_date ? '' : 'style="display: none;"'; 
