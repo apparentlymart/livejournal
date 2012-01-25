@@ -376,8 +376,7 @@ body<=
                 my $entry_url = '';
                 if ($entry_obj->is_delayed) {
                     if (!$res->{itemid}) {
-                        $entry_url = "$LJ::SITEROOT/manage/scheduled_posts.bml" .
-                                     "#entry_" . $entry_obj->delayedid;
+                        $entry_url = $entry_obj->url;
                     } else {
                         $entry_url = $res->{url};
                     }
