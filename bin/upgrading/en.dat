@@ -5793,6 +5793,8 @@ time.ago.month=[[num]] [[?num|month|month]] ago
 
 time.ago.never=Never.
 
+time.ago.rightnow=few seconds ago
+
 time.ago.second=[[num]] [[?num|second|seconds]] ago
 
 time.ago.week=[[num]] [[?num|week|weeks]] ago
