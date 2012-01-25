@@ -358,13 +358,19 @@ body<=
                                             'Type'    => 'text/plain',
                                             'Data'    => $plain
                                         );
-                    
+
                     $msg->attr("content-type.charset" => $encoding);
                 }
 
                 LJ::send_mail($msg);
             }
         };
+
+        # delete members
+        if (%{$delete{'member'}}) {
+            # TAG:FR:bml_comm_members:del_members
+            LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
+        }
 
         # get all the users who were removed
         my $changedusers = LJ::load_userids(keys %{$delete{'member'}});
@@ -402,7 +408,6 @@ body<=
                                     sitename        => $LJ::SITENAME,
                                     siteroot        => $LJ::SITEROOT,
                                 });
-
 
                 my $subject = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_subject', undef,
                                 { mailusercname => $mailusercname }
