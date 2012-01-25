@@ -971,7 +971,7 @@ InOb.handleInsertEmbed = function () {
 };
 
 InOb.handleInsertImageBeta = (function () {
-	var ippu;
+	var ippu, contentElement;
 
 	function onHtmlReady(event) {
 		if (window.switchedRteOn) {
@@ -992,12 +992,9 @@ InOb.handleInsertImageBeta = (function () {
 	if (!window.ljphotoEnabled) {
 		jQuery(function () {
 			ippu = new LJAPP_IPPU(window.fotkiErrorUpgradeTitle);
-			ippu.contentElement = $('pics-error-upgrade');
-
 			ippu.setCancelledCallback(function () {
 				ippu.contentElement.style.display = 'none';
 			});
-			ippu.setContentElement(ippu.contentElement);
 			ippu.setModal(true);
 			ippu.setOverlayVisible(true);
 			ippu.setClickToClose(true);
@@ -1017,6 +1014,8 @@ InOb.handleInsertImageBeta = (function () {
 
 			jPhotoUploader.photouploader('option', 'type', type || 'upload').bind('htmlready', onHtmlReady).photouploader('show');
 		} else {
+			ippu.contentElement = $('pics-error-upgrade');
+			ippu.setContentElement(ippu.contentElement);
 			ippu.show();
 			ippu.contentElement.style.display = 'block';
 		}
