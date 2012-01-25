@@ -9,6 +9,8 @@ use LJ::Widget::Fotki::Upload;
 
 use LJ::GeoLocation;
 
+use LJ::Lang qw/ml/;
+
 sub set_data {
     my ($self, $opts, $head, $onload, $errors, $js) = @_;
     $self->{'opts'} = $opts;
@@ -1800,22 +1802,16 @@ sub render_body {
         $$js .= 'initEntryDate();';
         my $ljphoto_enabled = $remote ? $remote->can_upload_photo() : 0;
         unless ($ljphoto_enabled) {
+            my $fotki_error_upgrade_link = ml('fotki.error.upgrade.link');
+            my $fotki_error_upgrade_description = ml('fotki.error.upgrade.description');
+            my $fotki_error_upgrade_title = ml('fotki.error.upgrade.title');
+            $$js .= "window.fotkiErrorUpgradeTitle = '$fotki_error_upgrade_title';";
             $out .= <<DISABLE_HTML;
 
-<div class="b-popup b-popup-pics" id="pics-error-upgrade" style="display: none;">
-    <div class="b-popup-outer">
-        <div class="b-popup-inner">
-            <div class="popup-inner">
-                <div class="b-popup-state-container b-popup-pics-upload b-popup-pics-upload-error">
-                    <h2 class="b-popup-pics-upload-header"><tmpl_var expr="ml('fotki.error.upgrade.title')"></h2>
-                    <p class="i-bubble b-bubble-lite b-bubble-noarrow"><tmpl_var expr="ml('fotki.error.upgrade.description')"></p>
-                    <p><a href="/manage/account/"><tmpl_var expr="ml('fotki.error.upgrade.link')"></a></p>
-                    <i class="i-popup-close"></i>
-                </div>
+            <div id="pics-error-upgrade" style="display: none;">
+                <p class="i-bubble b-bubble-lite b-bubble-noarrow">$fotki_error_upgrade_description</p>
+                <p><a href="/manage/account/">$fotki_error_upgrade_link</a></p>
             </div>
-        </div>
-    </div>
-</div>
 
 DISABLE_HTML
 
