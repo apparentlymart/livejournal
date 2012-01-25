@@ -238,6 +238,8 @@
 				this._setState('edit');
 				this._stopTimer(true);
 			}
+
+			this._dateInputs.date_diff.val(1);
 		},
 
 		_setState: function(state) {
@@ -291,8 +293,6 @@
 				if(!this._isCalendarOpen) {
 					this._calendar.calendar('option', 'currentDate', date);
 				}
-
-				inputs.date_diff.val(1);
 
 				if(this.options.state == 'default') {
 					this._dateString.text(this.options.monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ', ' + twodigit(date.getHours()) + ':' + twodigit(date.getMinutes()));
