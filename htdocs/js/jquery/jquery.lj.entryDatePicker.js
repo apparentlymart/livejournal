@@ -238,8 +238,6 @@
 				this._setState('edit');
 				this._stopTimer(true);
 			}
-
-			this._dateInputs.date_diff.val(1);
 		},
 
 		_setState: function(state) {
@@ -255,6 +253,7 @@
 						this._stopTimer(true);
 					} else {
 						this._startTimer();
+						this._dateInputs.custom_time.val(1);
 					}
 					break;
 				case 'infutureedit':
@@ -293,6 +292,8 @@
 				if(!this._isCalendarOpen) {
 					this._calendar.calendar('option', 'currentDate', date);
 				}
+
+				inputs.date_diff.val(1);
 
 				if(this.options.state == 'default') {
 					this._dateString.text(this.options.monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ', ' + twodigit(date.getHours()) + ':' + twodigit(date.getMinutes()));
