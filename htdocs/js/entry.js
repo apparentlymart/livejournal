@@ -991,7 +991,7 @@ InOb.handleInsertImageBeta = (function () {
 
 	if (!window.ljphotoEnabled) {
 		jQuery(function () {
-			ippu = new LJAPP_IPPU('Insert image');
+			ippu = new LJAPP_IPPU(window.fotkiErrorUpgradeTitle);
 			ippu.contentElement = $('pics-error-upgrade');
 
 			ippu.setCancelledCallback(function () {
