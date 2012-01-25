@@ -373,16 +373,16 @@ body<=
         }
 
         # get all the users who were removed
-        my $changedusers = LJ::load_userids(keys %{$delete{'member'}});
+        my $changedusers = LJ::load_userids(keys %{$delete{'post'}});
         # delete members
         if (%{$delete{'post'}}) {
             # TAG:FR:bml_comm_members:del_members
-            for my $uid (keys %{$delete{'member'} || {} }) {
+            for my $uid (keys %{$delete{'post'}}) {
                 my $delu = $changedusers->{$uid};
 
                 next unless $delu;
                 next unless LJ::DelayedEntry::entries_exists($c, $delu);
-                next if LJ::DelayedEntry::can_post_to($c, $delu);
+                next if  LJ::DelayedEntry::can_post_to($c, $delu);
 
                 my $mailusername = $delu->{user};
                 my $mailusercname = $c->{name};
@@ -415,7 +415,6 @@ body<=
 
                 $sendmail->($delu, $html, $plain, $subject); 
             } 
-            LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
 
         # get all the maintainers who were removed
