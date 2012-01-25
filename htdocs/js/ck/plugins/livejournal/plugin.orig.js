@@ -550,26 +550,15 @@
 				command: 'image'
 			});
 
-			if (window.ljphotoEnabled) {
-				editor.addCommand('LJImage_beta', {
-					exec: function(editor) {
-						jQuery('#updateForm').photouploader({
-							type: 'upload'
-						}).photouploader('show').bind('htmlready', function (event) {
-								var html = event.htmlStrings;
-								for (var i = 0, l = html.length; i < l; i++) {
-									editor.insertElement(new CKEDITOR.dom.element.createFromHtml(html[i], editor.document));
-								}
-							});
-					},
-					editorFocus: false
-				});
+			editor.addCommand('LJImage_beta', {
+				exec: InOb.handleInsertImageBeta,
+				editorFocus: false
+			});
 
-				editor.ui.addButton('LJImage_beta', {
-					label: editor.lang.common.imageButton,
-					command: 'LJImage_beta'
-				});
-			}
+			editor.ui.addButton('LJImage_beta', {
+				label: editor.lang.common.imageButton,
+				command: 'LJImage_beta'
+			});
 
 			// LJ Link Button
 			editor.addCommand('LJLink', {
@@ -1299,6 +1288,7 @@
 						var fakeElement = new CKEDITOR.htmlParser.element('input');
 						fakeElement.attributes.type = 'button';
 						fakeElement.attributes.value = (element.attributes && element.attributes.button) || top.CKLang.LJRepost_Value;
+						console.log(element);
 						fakeElement.attributes['class'] = 'lj-repost';
 						return fakeElement;
 					},

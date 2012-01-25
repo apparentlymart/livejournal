@@ -56,12 +56,9 @@ CKEDITOR.editorConfig = function(config) {
 			'-',
 			'LJLink',
 			'LJUserLink',
-			'image']
+			'image',
+			'LJImage_beta']
 	];
-
-	if (window.ljphotoEnabled) {
-		config.toolbar_Full[0].push('LJImage_beta');
-	}
 
 	if (top.Site.media_embed_enabled) {
 		config.toolbar_Full[0].push('LJEmbedLink');
@@ -110,5 +107,4 @@ CKEDITOR.editorConfig = function(config) {
 	config.extraPlugins = 'livejournal';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
-
 };

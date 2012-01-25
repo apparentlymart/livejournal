@@ -691,6 +691,14 @@ IPPUSelectTags = {
 		$('selecttags-all').value = $('prop_taglist').value.split(/ *, */).join(', ');
 
 		this.checkboxes = jQuery('div.b-selecttags-tags input:checkbox', ippu_node);
+		this.boxesCache = {};
+		this.checkboxes.each(function() {
+			this.boxes[this.value] = {
+				value: this.value,
+				node: this,
+				checked: this.checked
+			};
+		});
 
 		jQuery('#selecttags-all').input(this.input).input();
 	},
@@ -722,7 +730,7 @@ IPPUSelectTags = {
 		});
 		checkboxes.attr('checked', false);
 		while (ary.length) {
-			checkboxes.filter('[value=' + ary.pop() + ']').attr('checked', true);
+			checkboxes.filter('[value="' + ary.pop().escapeJS() + '"]').attr('checked', true);
 		}
 	},
 
@@ -962,41 +970,60 @@ InOb.handleInsertEmbed = function () {
 	});
 };
 
-InOb.handleInsertImageBeta = function () {
-	var jSortable, jPhotoUploader = jQuery('#updateForm');
+InOb.handleInsertImageBeta = (function () {
+	var ippu;
 
-	jPhotoUploader.photouploader('option', 'type', 'upload').bind('htmlready',
-		function (event) {
+	function onHtmlReady(event) {
+		if (window.switchedRteOn) {
+			var editor = CKEDITOR.instances.draft;
+			for (var i = 0, l = event.htmlStrings.length; i < l; i++) {
+				editor.insertElement(new CKEDITOR.dom.element.createFromHtml(event.htmlStrings[i], editor.document));
+			}
+		} else {
 			var selection = DOM.getSelectedRange($('draft'));
 			var node = $('draft');
 			var value = node.value;
 			var start = value.substring(0, selection.start);
 			var end = value.substring(selection.end);
 			node.value = start + event.htmlStrings.join('') + end;
-		}).bind('endupload',
-		function() {
-			jSortable.sortable('enable').sortable('refresh');
-		}).bind('uploading',
-		function() {
-			jSortable.sortable('disable');
-		}).bind('removeitem',
-		function () {
-			jSortable.sortable('refresh');
-		}).photouploader('show');
-
-	jSortable = jQuery('.b-popup-pics-gallery-list');
-	jSortable.sortable({
-		axis: 'x',
-		disabled: true,
-		stop: function() {
-			jPhotoUploader.photouploader('update');
 		}
-	});
+	}
 
-	jSortable.disableSelection();
+	if (!window.ljphotoEnabled) {
+		jQuery(function () {
+			ippu = new LJAPP_IPPU('Insert image');
+			ippu.contentElement = $('pics-error-upgrade');
 
-	return true;
-};
+			ippu.setCancelledCallback(function () {
+				ippu.contentElement.style.display = 'none';
+			});
+			ippu.setContentElement(ippu.contentElement);
+			ippu.setModal(true);
+			ippu.setOverlayVisible(true);
+			ippu.setClickToClose(true);
+			ippu.setDimensions(300, 'auto');
+			ippu.setAutoCenter(true, true);
+			ippu.center();
+		});
+	}
+
+	return function (type, data) {
+		if (window.ljphotoEnabled) {
+			var jPhotoUploader = jQuery('#updateForm');
+
+			if (type == 'add' && data) {
+				jPhotoUploader.photouploader('option', 'insertPhotosData', data);
+			}
+
+			jPhotoUploader.photouploader('option', 'type', type || 'upload').bind('htmlready', onHtmlReady).photouploader('show');
+		} else {
+			ippu.show();
+			ippu.contentElement.style.display = 'block';
+		}
+
+		return true;
+	}
+})();
 
 InOb.handleInsertImage = function () {
 	onInsertObject('/imgupload.bml');
