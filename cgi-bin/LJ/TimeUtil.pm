@@ -254,10 +254,14 @@ sub statushistory_time {
 # Time formatting rules explained here: LJSUP-11003
 sub ago_text {
     my ($class, $secondsold) = @_;
-    return $BML::ML{'time.ago.never'} unless $secondsold > 0;
+    return LJ::Lang::ml('time.ago.never') unless $secondsold >= 0;
 
     my ($num, $unit);
-    my $mlcache = $LJ::REQ_GLOBAL{'ago_text_ml_cache'};
+
+    my $mlcache = $LJ::REQ_GLOBAL{'ago_text_ml_cache'} ||= {
+        map { $_ => [] } qw{ year month week day hour halfhour minute rightnow }
+    };
+
     use integer;
 
     # Year
@@ -266,45 +270,45 @@ sub ago_text {
         $secondsold /= (60 * 60 * 24 * 365 );
         # Array $mlcache->{'time.ago.year'}[] is autovivified on first pass
         # same trick below
-        return ($mlcache->{'year'}[$secondsold] ||= LJ::Lang::ml('time.ago.year', { num => $secondsold }));
+        return $mlcache->{'year'}[$secondsold] ||= LJ::Lang::ml('time.ago.year', { num => $secondsold });
 
     # Month
     } elsif ( $secondsold >= 60 * 60 * 24 * 30 ) {
 
         $secondsold /= (60 * 60 * 24 * 30);
-        return ($mlcache->{'month'}[$secondsold] ||= LJ::Lang::ml('time.ago.month', { num => $secondsold }));
+        return $mlcache->{'month'}[$secondsold] ||= LJ::Lang::ml('time.ago.month', { num => $secondsold });
 
     # Week
     } elsif ( $secondsold >= 60 * 60 * 24 * 7 ) {
 
         $secondsold /= (60 * 60 * 24 * 7);
-        return ($mlcache->{'week'}[$secondsold] ||= LJ::Lang::ml('time.ago.week', { num => $secondsold }));
+        return $mlcache->{'week'}[$secondsold] ||= LJ::Lang::ml('time.ago.week', { num => $secondsold });
 
     # Day
     } elsif ( $secondsold >= 60 * 60 * 24 ) {
 
         $secondsold /= (60 * 60 * 24);
-        return ($mlcache->{'day'}[$secondsold] ||= LJ::Lang::ml('time.ago.day', { num => $secondsold }));
+        return $mlcache->{'day'}[$secondsold] ||= LJ::Lang::ml('time.ago.day', { num => $secondsold });
 
     # Hour
     } elsif ( $secondsold >= 60 * 60 ) {
 
         $secondsold /= (60 * 60);
-        return ($mlcache->{'hour'}[$secondsold] ||= LJ::Lang::ml('time.ago.hour', { num => $secondsold }));
+        return $mlcache->{'hour'}[$secondsold] ||= LJ::Lang::ml('time.ago.hour', { num => $secondsold });
 
     # Half hour
     } elsif ( $secondsold >= 60 * 30 ) {
 
-        return ($mlcache->{'halfhour'} ||= LJ::Lang::ml('time.ago.halfhour'));
+        return $mlcache->{'halfhour'} ||= LJ::Lang::ml('time.ago.halfhour');
 
     # Minute
     } elsif ( $secondsold >= 60 ) {
 
         $secondsold /= 60;
-        return ($mlcache->{'minute'}[$secondsold] ||= LJ::Lang::ml('time.ago.minute', { num => $secondsold }));
+        return $mlcache->{'minute'}[$secondsold] ||= LJ::Lang::ml('time.ago.minute', { num => $secondsold });
 
     } else {
-        return ($mlcache->{'rightnow'} ||= LJ::Lang::ml('time.ago.rightnow'));
+        return $mlcache->{'rightnow'} ||= LJ::Lang::ml('time.ago.rightnow');
     }
 }
 
