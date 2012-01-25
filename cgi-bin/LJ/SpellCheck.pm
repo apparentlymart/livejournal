@@ -82,8 +82,6 @@ sub run_aspell {
         ## ^ = escape each line (i.e. each line is text, not control command for aspell)
         $in = "!\n" . join("\n", map { "^$_" } @in_lines);
 
-        warn join(' ', @$command), "\n";
-
         IPC::Run::run($command, \$in, \$out, \$err, IPC::Run::timeout(10))
             or die "Can't run spellchecker: $? ($err)";
 
