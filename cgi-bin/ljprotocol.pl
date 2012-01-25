@@ -2847,8 +2847,7 @@ sub editevent {
     # never gets set in the "flat" protocol path
     return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
     
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") &&
-            LJ::DelayedEntry::is_future_date($req) ) {
+    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") && $req->{delayedid} ) {
         my $delayedid = delete $req->{delayedid};
         my $res = {};
 
