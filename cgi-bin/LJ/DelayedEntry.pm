@@ -460,7 +460,8 @@ sub prop {
 sub url {
     my ($self) = @_;
     my $journal = $self->journal;
-    my $url = $journal->journal_base . "/d" . $self->delayedid . ".html";
+    my $url = "$LJ::SITEROOT/manage/scheduled_posts.bml?usejournal=" .
+              $journal->username . "#entry_" . $self->delayedid;
     return $url;
 }
 
@@ -972,7 +973,8 @@ sub item_link {
     # XXX: should have an option of returning a url with escaped (&amp;)
     #      or non-escaped (&) arguments.  a new link object would be best.
     my $args = @args ? "?" . join("&amp;", @args) : "";
-    return LJ::journal_base($u) . "/d$delayedid.html$args";
+    return "$LJ::SITEROOT/manage/scheduled_posts.bml?usejournal=" . $u->username . 
+           "#entry_$delayedid";
 }
 
 sub __delayed_entry_secwhere {
@@ -1132,6 +1134,27 @@ sub __get_datetime {
                                                 $dt->hour,
                                                 $dt->minute );
 }
+
+sub __get_now {
+    my $dt = DateTime->now->set_time_zone('UTC');
+
+    # make the proper date format
+    return sprintf("%04d-%02d-%02d %02d:%02d",  $dt->year, 
+                                                $dt->month,
+                                                $dt->day, 
+                                                $dt->hour,
+                                                $dt->minute );
+}
+
+
+sub is_future_date {
+    my ($req) = @_;
+    my $now = __get_now();
+    my $request_time = __get_datetime($req);
+
+    return $request_time ge $now;
+}
+
 
 sub __assert {
     my ($statement, $error) = @_;
