@@ -179,8 +179,8 @@ body<=
     $ret .= "<label for='only_me'>".$ML{'.only_my_entries'}."</label></p>";
     $ret .= "</form>\n";
 
-    my $usejournal_text = $usejournal ? "usejournal=$usejournal&" : '';
-    $ret .= "<a href=\"/update.bml?${usejournal_text}type=scheduled\">";
+    my $usejournal_text = $usejournal ? "?usejournal=$usejournal&" : '';
+    $ret .= "<a href=\"/update.bml${usejournal_text}\">";
     $ret .= BML::ml('.newpost') . '</a><br/>';
 
     if ( !$usejournal_u || $usejournal_u->is_community ) {
