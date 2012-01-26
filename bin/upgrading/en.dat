@@ -53,6 +53,9 @@ comment.delete=Delete comment?
 comment.delete.all|staleness=1
 comment.delete.all=Delete all %username% comments in this post
 
+comment.delete.all.my|staleness=1
+comment.delete.all.my=Delete all <b>my</b> comments in this post
+
 comment.delete.all.sub|staleness=1
 comment.delete.all.sub=Delete thread (all subcomments)
 

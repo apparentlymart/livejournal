@@ -79,6 +79,7 @@ sub EntryPage
                             comment.delete
                             comment.delete.q
                             comment.delete.all
+                            comment.delete.all.my
                             comment.delete.all.sub
                             comment.delete.no.options
                             comment.ban.user
