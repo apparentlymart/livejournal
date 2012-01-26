@@ -190,12 +190,12 @@ body<=
     my $timezone = $remote->prop("timezone");
     if ($timezone) {
         $ret .= BML::ml('.date.your_time_zone');
-        $ret .= '<a href="http://www.ljdev16.livejournal.ru/manage/settings/?cat=display">(';
+        $ret .= "<a href=\"$LJ::SITEROOT/manage/settings/?cat=display\">(";
         $ret .= $timezone;
         $ret .= ')</a>';
     } else {
         $ret .= BML::ml('.date.gmt');
-        $ret .= '<a href="http://www.ljdev16.livejournal.ru/manage/settings/?cat=display">';
+        $ret .= "<a href=\"$LJ::SITEROOT/manage/settings/?cat=display\">";
         $ret .= BML::ml('.date.set_time_zone');
         $ret .= '</a>';
     }
