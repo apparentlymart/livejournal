@@ -49,9 +49,10 @@ sub matches_filter {
 
     # all posts by friends
     return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->event_journal);
-
     # a post on a specific journal
-    return LJ::u_equals($subscr->journal, $evtju);
+    my $journal = LJ::load_userid($subscr->journal);
+
+    return LJ::u_equals($journal, $evtju);
 }
 
 sub content {
@@ -427,5 +428,19 @@ sub eventtime_unix {
 }
 
 sub zero_journalid_subs_means { undef }
+
+sub as_push {
+    my ($self,$u) = @_;
+
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackjournalpostsentry", { user => $u->user }) . 
+    ($self->entry->tags 
+       ? LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackjournalpostsentry.tagged", { tag => join(', ', $self->entry->tags )})
+       : '' );
+}
+
+sub as_push_payload {
+    my ($self,$u) = @_;
+    return '"t":19,"j":"'.$u->user.'","p":'.$self->entry->ditemid;
+}
 
 1;

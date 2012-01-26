@@ -182,4 +182,17 @@ sub is_tracking { 0 }
 
 sub is_subscription_visible_to { 1 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.offcialpost", 1, {
+        community => $self->event_journal->user,
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+    return '"t":1,"p":'.$self->arg1;
+}
+
 1;

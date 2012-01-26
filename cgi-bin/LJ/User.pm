@@ -3505,6 +3505,7 @@ sub can_add_inbox_subscription {
 sub subscribe {
     my ($u, %opts) = @_;
     croak "No subscription options" unless %opts;
+
     return LJ::Subscription->create($u, %opts);
 }
 
@@ -3515,11 +3516,16 @@ sub unsubscribe {
 
     # find all matching subscriptions
     my @subs = LJ::Subscription->find($u, %opts);
+    
+    return 0 
+        unless @subs;
 
     foreach (@subs) {
         # run delete method on each subscription
         $_->delete();
     }
+
+    return 1;
 }
 
 
@@ -6319,6 +6325,23 @@ sub get_social_influence {
     return $self->{'__social_influence_info'};
 }
 
+sub push_subscriptions {
+    my $u    = shift;
+    my %opts = @_;
+
+    $u->{push_subscriptions} = LJ::PushNotification::Storage->get_all($u)
+        if !$u->{push_subscriptions} || $opts{flush};
+
+    return keys %{$u->{push_subscriptions}};
+}
+
+sub push_subscription {
+    my $u = shift;
+    my $key = shift;
+    return $u->{push_subscriptions}{$key} || {};
+}
+
+
 package LJ;
 
 use Carp;
@@ -8693,7 +8716,6 @@ sub remove_friend {
     }
     
     my $sclient = LJ::theschwartz();
-
     # part of the criteria for whether to fire defriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify} && $u->is_visible && $u->is_person;
 
@@ -10331,5 +10353,3 @@ sub country_of_remote_ip {
 }
 
 1;
-
-

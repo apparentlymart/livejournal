@@ -188,4 +188,19 @@ sub is_subscription_visible_to  {
 
 sub is_tracking { 0 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.pollvote", 1, {
+        user    => $self->voter->user,
+        journal => $u->user,
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+
+    return '"t":6,"j":"'.$self->entry->poster->user.'","p":'.$self->entry->ditemid.',"pl":'.$self->arg2;
+}
+
 1;

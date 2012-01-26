@@ -201,29 +201,13 @@ sub as_alert {
 sub as_push {
     my $self = shift;
     my $u = shift;
-    my %args = @_;
 
-    my $message ;
-    if($args{from}) {
-        $message = LJ::Lang::get_text($u->prop('browselang'), 'esn.push.notification.usermessagerecvd.from', 1, { user => $u->{user}});
-    } else {
-        $message = LJ::Lang::get_text($u->prop('browselang'), 'esn.push.notification.usermessagerecvd');
-    }
-
-    return $message;
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.usermessagerecvd", 1, {
+        user => $self->load_message->other_u->{user},
+    })
 }
 
-sub as_push_title {
-    my $self = shift;
-    my $u = shift;
-    my %args = @_;
-
-    my $message = LJ::Lang::get_text($u->prop('browselang'), 'esn.push.notification.usermessagerecvd.title');
-
-    return $message;
-}
-
-
+sub as_push_payload { '"t":9,"m":'.shift->arg1 }
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;

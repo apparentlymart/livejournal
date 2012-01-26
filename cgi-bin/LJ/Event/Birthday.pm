@@ -30,6 +30,19 @@ sub bday {
     return "$months[$mon-1] $day";
 }
 
+sub next_bday {
+    my $self = shift;
+
+    my ($year, $mon, $day) = split(/-/, $self->bdayuser->{bdate});
+    
+    $year = (localtime())[5] + 1900;
+
+    $year++
+        if $mon == 1 && $day < 3;
+
+    return join '-',($year, $mon, $day)
+}
+
 sub matches_filter {
     my ($self, $subscr) = @_;
 
@@ -192,6 +205,21 @@ sub is_tracking {
     my ($self, $u) = @_;
 
     return $self->userid ? 1 : 0;
+}
+
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.birthday", 1, {
+        user    => $self->bdayuser->user(),
+        date    => $self->email_bday($u->prop('browselang'))
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+    return '"t":17,"j":"'.$self->bdayuser->user().'","b":"'. $self->next_bday().'"';
 }
 
 1;

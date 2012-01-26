@@ -153,4 +153,18 @@ sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 1 }
 sub is_tracking { 0 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.invitedfriendjoins", 1, {
+        journal => $self->friend->user,
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+    return '"t":13,"j":"'.$self->friend->user.'"';
+}
+
 1;

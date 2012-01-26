@@ -184,4 +184,18 @@ sub is_subscription_visible_to  {
 
 sub is_tracking { 0 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.befriended", 1, {
+        user => $self->friend->user,
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+    return '"t":7,"j":"'.$self->friend->user.'"';
+}
+
 1;

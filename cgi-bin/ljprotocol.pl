@@ -184,6 +184,9 @@ my %HANDLERS = (
     votepoll          => \&votepoll,
     registerpush      => \&registerpush,
     unregisterpush    => \&unregisterpush,
+    pushsubscriptions => \&pushsubscriptions,
+    resetpushcounter  => \&resetpushcounter,
+    getpushlist       => \&getpushlist,
 );
 
 sub translate
@@ -5014,6 +5017,107 @@ sub unregisterpush {
     return { status => 'OK' };
 }
 
+sub pushsubscriptions {
+    my ($req, $err, $flags) = @_;
+    return undef
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{u};
+    my @errors;
+    foreach my $event (@{$req->{events}}) {
+        if($event->{action} =~ /^(un)?subscribe$/) {
+
+            my $res = eval{ 
+                LJ::PushNotification->manage(
+                    $u,
+                    platform        => $req->{platform},
+                    deviceid        => $req->{deviceid},
+                    registrationid  => $req->{registrationid},
+                    %$event,
+                )
+            };
+
+            push @errors, $@
+                if $@;
+            
+        } else {
+            push @errors, "wrong action '$event->{action}'";
+        }
+    } 
+
+    return { status => 'Has errors', errors => join "; ", @errors  }
+        if @errors;
+    
+    return { status => 'OK' };
+
+}
+
+sub resetpushcounter {
+    my ($req, $err, $flags) = @_;
+    return undef
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{u};
+
+    return fail($err,200)
+        unless $req->{platform} && $req->{deviceid};
+
+    return fail($err,200)
+        if $req->{platform} eq 'android';
+
+
+    if(LJ::PushNotification::Storage->reset_counter($u, $req->{platform}, $req->{deviceid})) {
+        return { status => 'OK' }
+    }
+
+    return { status => 'Error', error => "Can't reset counter"}
+
+}
+
+sub getpushlist {
+    my ($req, $err, $flags) = @_;
+    return undef
+        unless authenticate($req, $err, $flags);
+
+    my $u = $flags->{u};
+
+    return fail($err,200)
+        unless $req->{platform} && $req->{deviceid};
+
+    my @subs = grep { $_->{ntypeid} == LJ::NotificationMethod::Push->ntypeid } ($u->subscriptions);
+
+    my @events;
+    foreach my $s (@subs) {
+
+        my ($event) = $s->event_class =~ /LJ::Event::(.*)/;
+
+        my $journal = LJ::load_userid($s->{journalid});
+
+        my %event = (
+            event   => $event,
+        );
+
+        $event{journal} = LJ::load_userid($s->{journalid})->user
+            if $s->{journalid} != $s->{userid};
+
+        if($event eq 'JournalNewComment' && $s->arg1) {
+            $event{ditemid} = $s->arg1;
+        }
+
+        if($event eq 'JournalNewComment' && $s->arg2) {
+            my $comment = LJ::Comment->instance($s->{journalid}, jtalkid => $s->arg2);
+            $event{dtalkid} = $comment->dtalkid;
+        }
+
+        push @events, \%event;
+    }
+
+    return { 
+        status  => 'OK',
+        events  => \@events,
+    }
+
+}
 
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol

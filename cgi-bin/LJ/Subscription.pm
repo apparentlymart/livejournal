@@ -181,7 +181,7 @@ sub find {
 
     my $journalid = delete $params{journalid};
     $journalid ||= LJ::want_userid(delete $params{journal}) if defined $params{journal};
-
+    
     $arg1 = delete $params{arg1};
     $arg2 = delete $params{arg2};
 
@@ -349,7 +349,8 @@ sub create {
 
     # easier way to specify journal
     if (my $ju = delete $args{'journal'}) {
-        $args{journalid} = $ju->{userid} if $ju;
+        $args{journalid} = $ju->{userid} 
+            if !$args{journalid} && $ju;
     }
 
     $args{arg1} ||= 0;

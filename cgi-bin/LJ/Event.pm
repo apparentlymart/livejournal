@@ -219,7 +219,12 @@ sub etypeid {
 # my $etypeid = LJ::Event->event_to_etypeid('LJ::Event::ExampleEvent');
 sub event_to_etypeid {
     my ($class, $evt_name) = @_;
+
     $evt_name = "LJ::Event::$evt_name" unless $evt_name =~ /^LJ::Event::/;
+
+    return undef
+        unless $class->typemap->class_to_typeid($evt_name);
+
     my $tm = $class->typemap
         or return undef;
     return $tm->class_to_typeid($evt_name);
@@ -487,6 +492,12 @@ sub as_sms {
         'ellipsis' => '...',
     );
 }
+
+sub as_push { warn "method 'as_push' has to be overriden in ".ref(shift)."!"; return '' }
+
+sub as_push_payload { warn "method 'as_push_payload' has to be overriden in ".ref(shift)."!"; return ''}
+
+
 
 # Returns a string representing a Schwartz role [queue] used to handle this event
 # By default returns undef, which is ok for most cases.

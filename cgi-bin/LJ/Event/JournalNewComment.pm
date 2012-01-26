@@ -833,6 +833,7 @@ sub subscriptions {
 
         !$entry->prop('opt_noemail')
     ) {
+
         if (!LJ::u_equals($entry_author, $entry_journal)) {
             # community journal
             my @subs2 = LJ::Subscription->find($entry_author,
@@ -874,5 +875,123 @@ sub is_tracking {
 
     return 0;
 }
+
+
+sub as_push {
+    my $self = shift;
+    my $u    = shift;
+    my %opts = @_;
+
+    my $parent = $self->comment->parent;
+    my $entry = $self->comment->entry;
+
+    my $subject;
+    if($subject = $entry->subject_text) {
+
+        $subject = (substr $subject, 0, $opts{cut})."..."
+            if $opts{cut} && length($subject) > $opts{cut};
+
+    } else {
+        $subject = LJ::Lang::get_text($u->prop('browselang'), "widget.officialjournals.nosubject")
+    }
+
+    # tracking event
+    unless($u->equals($self->event_journal)) {
+
+        if($self->event_journal->journaltype eq 'C') {
+
+            if($self->comment->parent) {
+warn 01;
+                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetstreadinentrytitle", 1, {
+                    user    => $self->comment->poster->user,
+                    subject => $subject, 
+                    poster  => $self->comment->parent->poster->user,
+                    journal => $self->event_journal->user,
+                });
+
+            } else {
+warn 11;
+                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
+                    user    => $self->comment->poster->user,
+                    subject => $subject,
+                    journal => $self->event_journal->user,
+                });
+            }
+        } else {
+warn 2;
+                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
+                user    => $self->comment->poster->user,
+                subject => $subject,
+                journal => $self->event_journal->user,
+            });
+        }
+
+    } else {
+
+        if($parent && LJ::u_equals($parent->poster, $u)) {
+warn 3;
+            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.commentreply", 1, {
+                user    => $self->comment->poster->user,
+                journal => $self->event_journal->user,
+            });
+
+        } elsif($self->event_journal->journaltype eq 'C') {
+warn 4;
+            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.communityentryreply", 1, {
+                user        => $self->comment->poster->user,
+                community   => $self->event_journal->user,
+            })
+
+        } else {
+warn 5;
+            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.journalnewcomment", 1, {
+                user => $self->comment->poster->user,
+            })
+        }
+    }
+}   
+    
+sub as_push_payload {
+    my $self = shift;
+    my $u = shift;
+
+    my $entry = $self->comment->entry;
+    my $parent = $self->comment->parent;
+
+
+    unless($u->equals($self->event_journal)) {
+
+        if($self->event_journal->journaltype eq 'C') {
+
+            if($parent) {
+                return '"t":26, "j":"'.$self->event_journal->user.'",'.
+                    '"p":'.$entry->ditemid.', "r":'.$self->comment->parent->dtalkid.', "c":'.$self->comment->dtalkid
+            } else {
+                return '"t":25,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
+            }
+
+        } else {
+            return '"t": "eventEntryCommunityReply","j":"'.$self->event_journal->user .'","p":'.$entry->ditemid.'","c":'.$self->comment->dtalkid
+        }
+    } else {
+        if($parent && LJ::u_equals($parent->poster, $u)) {
+            return  '"t":5,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid .',"c":'.$self->comment->dtalkid;
+        } elsif($self->event_journal->journaltype eq 'C') {
+warn 2;
+            return '"type": "eventEntryCommunityReply", '
+            . '"journalName": "'.$self->event_journal->user .'", '
+            . '"postid": "'.$entry->ditemid.'", '
+            . '"commentid": '.$self->comment->dtalkid;
+
+        } else {
+warn 3;
+            return "\"type\": \"eventEntryReply\", "
+            . "\"journalName\": \"".$self->event_journal->user."\" " 
+            . "\"postid\": ".$entry->ditemid.", "
+            . "\"commentid\": ".$self->comment->dtalkid; 
+        }
+
+    }
+}  
 
 1;

@@ -165,6 +165,22 @@ sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 1 }
 sub is_tracking { 0 }
 
+sub as_push {
+    my $self = shift;
+    my $u = shift;
+
+    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.communityjoinrequest", 1, {
+        user        => $self->requestor->user(),
+        community   => $self->comm->user(),
+    })
+}
+
+sub as_push_payload {
+    my $self = shift;
+    return '"t":15,"j":"'.$self->comm->user().'","u":"'.$self->requestor->user().'"';
+}
+
+
 package LJ::Error::Event::CommunityJoinRequest;
 sub fields { 'u' }
 sub as_string {
