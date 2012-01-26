@@ -1452,7 +1452,7 @@ sub prop {
 
 sub raw_prop {
     my ($u, $prop) = @_;
-    $u->preload_props($prop);
+    $u->preload_props($prop) unless exists $u->{$prop};
     return $u->{$prop};
 }
 
@@ -6628,6 +6628,114 @@ sub load_user_props {
         $u->{$propname} = $LJ::USERPROP_DEF{$propname};
     }
 }
+
+sub load_user_props_multi {
+    my ($class, $users, $props, $opts) = @_;
+    my $use_master = $opts->{'use_master'};
+
+    $props = [grep { defined and not ref } @$props];
+    return unless @$props;
+
+    $users = { map { $_->{'userid'} => $_ } grep { ref } @$users };
+    return unless %$users;
+
+    my $groups = LJ::User::PropStorage->get_handler_multi(\@$props);
+    my $memcache_available = @LJ::MEMCACHE_SERVERS;
+    my $use_master = $memcache_available || $use_master;
+    my $memc_expire = time() + 3600 * 24;
+
+    foreach my $handler (keys %$groups) {
+        # if there is no memcache, or if the handler doesn't wish to use
+        # memcache, hit the storage directly, update the user object,
+        # and get straight to the next handler
+        if ( not $memcache_available or not defined $handler->use_memcache ) {
+            foreach my $u (values %$users) {
+                my $propmap = $handler->get_props(
+                    $u,
+                    $groups->{$handler},
+                    {
+                        use_master => $use_master
+                    }
+                );
+
+                _extend_user_object->($u, $propmap);
+            }
+
+            next;
+        }
+
+        # now let's find out what we're going to do with memcache
+        my $memcache_policy = $handler->use_memcache;
+
+        if ( $memcache_policy eq 'lite' ) {
+            my %memkeys;
+            my $propmaps = LJ::MemCache::get_multi(map {
+                [
+                    ($_ => ($memkeys{$_} = $handler->memcache_key($users->{$_})))
+                ]
+            } keys %$users);
+
+            my ($userid, $v);
+            my $rmemkeys = { map { $memkeys{$_} => $_ } keys %memkeys };
+
+            while (($userid, $v) = each %$propmaps) {
+                next unless $v;
+                $userid = $rmemkeys->{$userid};
+
+                delete $memkeys{$userid}; # Loading is successfull
+
+                _extend_user_object($users->{$userid},
+                    LJ::User::PropStorage->unpack_from_memcache($v)
+                );
+            }
+
+            while (($userid, $v) = each %memkeys) {
+                my $propmap = $handler->get_props(
+                    $users->{$userid}, [],
+                    { 'use_master' => $use_master }
+                );
+
+                my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
+                LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
+                _extend_user_object($users->{$userid}, $packed);
+            }
+        } elsif ( $memcache_policy eq 'blob' ) {
+            my $handled_props = $groups->{$handler};
+
+            foreach my $u (values %$users) {
+                my $propmap_memc = $handler->fetch_props_memcache($u, $handled_props);
+
+                _extend_user_object($u, $propmap_memc);
+
+                my @load_from_db = grep { !exists $propmap_memc->{$_} }
+                                   @$handled_props;
+
+                # if we can avoid hitting the db, avoid it
+                next unless @load_from_db;
+
+                my $propmap_db = $handler->get_props(
+                    $u, \@load_from_db,
+                    { 'use_master' => $use_master }
+                );
+
+                _extend_user_object($u, $propmap_db);
+
+                # now, update memcache
+                $handler->store_props_memcache( $u, $propmap_db );
+            }
+        }
+    }
+}
+
+sub _extend_user_object {
+    my ($u, $propmap) = @_;
+    return unless ref $u;
+    return unless ref $propmap eq 'HASH';
+    my ($k, $v);
+
+    $u->{$k} = $v while ($k, $v) = each %$propmap;
+}
+
 
 # <LJFUNC>
 # name: LJ::load_userids
