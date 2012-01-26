@@ -639,22 +639,23 @@ LIKE_FAQ
                     my $after_entry_post_extra_options = join('', map {$_->[0]} @after_entry_post_extra_options) || '';
 
                     $$body .= " p?><?p $ML{'.success.links'} p?><ul>" . $writersblocklink.
-                        "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>";
-                        my $item_text;
-                        if ($itemid) {
-                            $item_text = "journal=$juser&itemid=$itemid";
-                        } elsif ($delayedid) {
-                            $item_text = "?usejournal=$juser" .
-                                        "#entry_$delayedid";
-                        } else { return "unknown error"; }
+                              "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>";
 
-                        $$body .= "<li><a href=\"/editjournal.bml?$item_text\">$ML{'.success.links.edit'}</a></li>";
-                        if ($itemid) {
-                            $$body .= "<li><a href=\"/tools/memadd.bml?$item_text\">$ML{'.success.links.memories'}</a></li>";
-                        }
-                        $$body .= "<li><a href=\"/edittags.bml?$item_text\">$ML{'.success.links.tags'}</a></li>" .
-                        $after_entry_post_extra_options .
-                        "</ul>";
+                    my $item_text;
+                    if ($itemid) {
+                        $item_text = "journal=$juser&itemid=$itemid";
+                    } elsif ($delayedid) {
+                        $item_text = "usejournal=$juser&delayedid=$delayedid";
+                    } else { return "unknown error"; }
+
+                    $$body .= "<li><a href=\"/editjournal.bml?$item_text\">$ML{'.success.links.edit'}</a></li>";
+                    if ($itemid) {
+                        $$body .= "<li><a href=\"/tools/memadd.bml?$item_text\">$ML{'.success.links.memories'}</a></li>";
+                    }
+                    if (!$delayedid) {
+                        $$body .= "<li><a href=\"/edittags.bml?$item_text\">$ML{'.success.links.tags'}</a></li>";
+                    }
+                    $$body .= $after_entry_post_extra_options . "</ul>";
 
                     $$body .= '<div class="b--getstart">' . LJ::Widget::Trynbuy->render(stage => 'simple') if ($show_trynbuy);
                     $$body .= LJ::Widget::GettingStarted->render;
