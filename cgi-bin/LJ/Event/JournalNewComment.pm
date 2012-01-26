@@ -901,7 +901,6 @@ sub as_push {
         if($self->event_journal->journaltype eq 'C') {
 
             if($self->comment->parent) {
-warn 01;
                 return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetstreadinentrytitle", 1, {
                     user    => $self->comment->poster->user,
                     subject => $subject, 
@@ -910,7 +909,6 @@ warn 01;
                 });
 
             } else {
-warn 11;
                 return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
                     user    => $self->comment->poster->user,
                     subject => $subject,
@@ -918,7 +916,6 @@ warn 11;
                 });
             }
         } else {
-warn 2;
                 return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
                 user    => $self->comment->poster->user,
                 subject => $subject,
@@ -929,21 +926,18 @@ warn 2;
     } else {
 
         if($parent && LJ::u_equals($parent->poster, $u)) {
-warn 3;
             return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.commentreply", 1, {
                 user    => $self->comment->poster->user,
                 journal => $self->event_journal->user,
             });
 
         } elsif($self->event_journal->journaltype eq 'C') {
-warn 4;
             return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.communityentryreply", 1, {
                 user        => $self->comment->poster->user,
                 community   => $self->event_journal->user,
             })
 
         } else {
-warn 5;
             return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.journalnewcomment", 1, {
                 user => $self->comment->poster->user,
             })
@@ -966,31 +960,18 @@ sub as_push_payload {
             if($parent) {
                 return '"t":26, "j":"'.$self->event_journal->user.'",'.
                     '"p":'.$entry->ditemid.', "r":'.$self->comment->parent->dtalkid.', "c":'.$self->comment->dtalkid
-            } else {
-                return '"t":25,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
-            }
-
         } else {
-            return '"t": "eventEntryCommunityReply","j":"'.$self->event_journal->user .'","p":'.$entry->ditemid.'","c":'.$self->comment->dtalkid
+            return '"t":25,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
         }
+
     } else {
         if($parent && LJ::u_equals($parent->poster, $u)) {
-            return  '"t":5,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid .',"c":'.$self->comment->dtalkid;
+            return '"t":5,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
         } elsif($self->event_journal->journaltype eq 'C') {
-warn 2;
-            return '"type": "eventEntryCommunityReply", '
-            . '"journalName": "'.$self->event_journal->user .'", '
-            . '"postid": "'.$entry->ditemid.'", '
-            . '"commentid": '.$self->comment->dtalkid;
-
+            return '"t":4,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
         } else {
-warn 3;
-            return "\"type\": \"eventEntryReply\", "
-            . "\"journalName\": \"".$self->event_journal->user."\" " 
-            . "\"postid\": ".$entry->ditemid.", "
-            . "\"commentid\": ".$self->comment->dtalkid; 
+            return '"t":3,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid; 
         }
-
     }
 }  
 
