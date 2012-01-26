@@ -64,18 +64,17 @@ a:active {
 			padding: 0;
 			}
 
-.entry-comments {
-	border-top: 2px solid #369;
+.content .entry-comments .entry {
+	margin-top: 0;
 	}
-	.content .entry-comments .entry {
-		margin-top: 0;
+	.content .entry-comments .entry .entry-text {
+		padding-top: 0;
 		}
-		.content .entry-comments .entry .entry-text {
-			padding-top: 0;
-			}
 
 .comments-links {
-	margin: 0.5em 0 2em;
+	margin: 0 0 2em;
+	padding: 0.5em 0 0;
+	border-top: 2px solid #369;
 	font-weight: bold;
 	}
 
@@ -85,6 +84,7 @@ a:active {
 .comment-wrap.partial {
 	margin-top: 0.3em;
 	}
+	.comment-wrap.screened .comment-head,
 	.comment-wrap.spam .comment-head {
 		background: #CCC;
 		}
