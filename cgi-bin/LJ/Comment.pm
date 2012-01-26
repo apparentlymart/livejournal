@@ -1766,7 +1766,7 @@ sub select {
 # Mappings
 # type => base url
 my $urls = {
-    unspam   => $LJ::SITEROOT. '/talkscreen.bml?',
+    unspam   => $LJ::SITEROOT. '/spamcomment.bml?',
     unfreeze => $LJ::SITEROOT. '/talkscreen.bml?',
     freeze   => $LJ::SITEROOT. '/talkscreen.bml?',
     unscreen => $LJ::SITEROOT. '/talkscreen.bml?',
@@ -1810,7 +1810,7 @@ sub make_url {
         unshift @$params, 'journal='. $opts->{'journal'} || $entry->journal->user;
         unshift @$params, 'talkid='. $dtalkid;
 
-        if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
+        if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen } ) {
             unshift @$params, 'mode='. $type;
         } elsif ( $type eq 'spam' ) {
             unshift @$params, 'spam=1';
