@@ -10,31 +10,23 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::Manual';
 require 'ljlib.pl';
 require 'ljdb.pl';
+use LJ::DBUtil;
 
 use LJ::DelayedEntry::Scheduler;
-
-my $cluster;
 
 sub options {
     my $self = shift;
     return (
-        'cluster=i'  => \$cluster,
         $self->SUPER::options(),
     );
 }
 
-sub call_for_cluster {
-    my $coderef = shift;
-    my $opts = shift || {};
-
-    my $dbr = ($LJ::IS_DEV_SERVER) ?
-            LJ::get_cluster_reader($cluster) : LJ::DBUtil->get_inactive_db($cluster, $opts->{verbose});
-    $coderef->($cluster, $dbr);
-}
-
-
 sub work {
-    call_for_cluster( sub { LJ::DelayedEntry::Scheduler::on_pulse(@_); } );
+    foreach my $cluster_id (@LJ::CLUSTERS) {
+        my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, __PACKAGE__->verbose);
+        LJ::DelayedEntry::Scheduler::on_pulse($cluster_id, $dbr);
+    }
+
     return 1 if __PACKAGE__->should_quit;
     return 0;
 }
