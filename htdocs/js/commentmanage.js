@@ -406,7 +406,7 @@ function createModerationFunction(control, dItemid, action) {
 		function handleNew() {
 			var newNode, showExpand, j, children,
 				threadId = dItemid,
-				threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full);
+				threadExpanded = !!(LJ_cmtinfo[ threadId ].oldvars && LJ_cmtinfo[ threadId ].full),
 				populateComments = function (result) {
 					LiveJournal.CommentManager.processThreadJSON( result, function( dtid, html ) {
 						if( LJ_cmtinfo[ dtid ].full ){
