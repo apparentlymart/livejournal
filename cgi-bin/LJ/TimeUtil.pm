@@ -259,7 +259,7 @@ sub ago_text {
     my ($num, $unit);
 
     my $mlcache = $LJ::REQ_GLOBAL{'ago_text_ml_cache'} ||= {
-        map { $_ => [] } qw{ year month week day hour halfhour minute rightnow }
+        map { $_ => [] } qw{ year month week day hour minute }
     };
 
     use integer;
