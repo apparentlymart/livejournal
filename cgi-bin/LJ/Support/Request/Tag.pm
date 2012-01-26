@@ -176,7 +176,7 @@ sub rename_tag {
                     $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
                               'VALUES (?, ?) ',
                               undef,
-                              $spid,
+                              $current_spid,
                               $destination_id );
                 }
             }
@@ -214,6 +214,9 @@ sub rename_tag {
         return 1;
     }
 
+    # one cat. case
+
+    #does exist tag name?
     my ($exists_stagid)
             = $dbh->selectrow_array( "SELECT sptagid FROM supporttag " .
                                      "WHERE name=? AND spcatid = ?",
@@ -223,12 +226,14 @@ sub rename_tag {
 
     my $name_exists = !!$exists_stagid;
 
+    # The name does not exist. Just update.
     if (!$name_exists) {
         $dbh->do( 'UPDATE supporttag SET name=? WHERE sptagid=?',
                   undef,
                   $new_name,
                   $sptagid );
     } elsif ($name_exists && $allowmerge) {
+        #recv. current spid for tag id
         my ($current_spid) = $dbh->selectrow_array( 'SELECT spid ' .
                                                     'FROM supporttagmap ' .
                                                     'WHERE sptagid = ?',
@@ -249,7 +254,7 @@ sub rename_tag {
             $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
                       'VALUES (?, ?)',
                       undef,
-                      $spid,
+                      $current_spid,
                       $exists_stagid );
         }
     } else {
