@@ -793,12 +793,12 @@ sub get_entries_by_journal {
         $sql_limit = "LIMIT $skip, $show";
     }
 
-    my $sticky_sql = $sticky_on_top ? 'is_sticky DESC, ' : '';
+    my $sticky_sql = $sticky_on_top ? 'is_sticky ASC, ' : '';
 
     my $journalid = $journal->userid;
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
                                      "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
-                                     "ORDER BY $sticky_sql revptime ASC $sql_limit");
+                                     "ORDER BY $sticky_sql revptime DESC $sql_limit");
 }
 
 sub get_first_entry {
