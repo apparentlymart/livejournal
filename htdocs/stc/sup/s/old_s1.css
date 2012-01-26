@@ -64,18 +64,24 @@ a:active {
 			padding: 0;
 			}
 
-.content .entry-comments .entry {
-	margin-top: 0;
+.entry-comments {
+	padding-top: 1em;
+	border-top: 2px solid #369;
 	}
-	.content .entry-comments .entry .entry-text {
-		padding-top: 0;
+	.content .entry-comments .entry {
+		margin-top: 0;
 		}
+		.content .entry-comments .entry .entry-text {
+			padding-top: 0;
+			}
 
 .comments-links {
 	margin: 0 0 2em;
-	padding: 0.5em 0 0;
-	border-top: 2px solid #369;
+	padding: 0;
 	font-weight: bold;
+	}
+.comments-footer .comments-links {
+	margin-bottom: 0.5em;
 	}
 
 .comment-wrap {
@@ -92,27 +98,44 @@ a:active {
 			padding-top: 1em;
 			padding-bottom: 0.3em;
 			}
-
-.comments-pages TABLE {
-	width: auto;
-	margin: 0 auto;
-	padding: 7px;
-	border: 1px solid #8FC3F7;
-	border-collapse: separate;
-	background-color: #C5DFF9;
-	text-align: left;
-	color: #000;
+.comments-pages {
+	margin: 0 0 1em;
 	}
+	.comments-pages TABLE {
+		width: auto;
+		margin: 0 auto;
+		padding: 7px;
+		border: 1px solid #8FC3F7;
+		border-collapse: separate;
+		background-color: #C5DFF9;
+		text-align: left;
+		color: #000;
+		}
+
+.comments-footer {
+	margin: 0 0 1em;
+	padding: 0.5em 0;
+	border-top: 2px solid #369;
+	border-bottom: 2px solid #369;
+	}
+
 
 .b-postform TABLE {
 	width: 750px;
 	}
 
 .comments-links ~ #qrdiv form,
-.comment-wrap ~ .comments-links ~ #qrdiv form {
+.comment-wrap ~ .comments-footer #qrdiv form {
 	width: 700px;
 	margin-right: auto;
 	margin-left: auto;
+	}
+.comments-links ~ #qrdiv form {
+	margin-top: -1em;
+	}
+.comment-wrap ~ .comments-footer #qrdiv form {
+	margin-top: 0;
+	margin-bottom: 1em;
 	}
 .comment-wrap ~ #qrdiv form {
 	width: auto;
