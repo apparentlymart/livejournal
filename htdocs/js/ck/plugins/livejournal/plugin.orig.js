@@ -551,7 +551,9 @@
 			});
 
 			editor.addCommand('LJImage_beta', {
-				exec: InOb.handleInsertImageBeta,
+				exec: function () {
+					InOb.handleInsertImageBeta('upload');
+				},
 				editorFocus: false
 			});
 
