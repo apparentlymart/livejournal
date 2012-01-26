@@ -254,23 +254,25 @@ function createDeleteFunction(ae, dItemid, action) {
 
 			return true;
 		} else if (action == 'delete') {
-	        var inHTML = [ "<form id='ljdelopts" + dItemid + "'><div class='b-popup-group'><div class='b-popup-row b-popup-row-head'><strong>" + getLocalizedStr( 'comment.delete.q', comUser ) + "</strong></div>" ];
-	        var lbl;
-	        if (com.username !== "" && com.username != remoteUser && canAdmin) {
-	            lbl = "ljpopdel" + dItemid + "ban";
-	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', comUser ) + "</label></div>");
-	        }
-	
-	        if (com.rc && com.rc.length && canAdmin) {
-	            lbl = "ljpopdel" + dItemid + "thread";
-	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', comUser ) + "</label></div>");
-	        }
-	        if (canAdmin&&com.username) {
-	            lbl = "ljpopdel" + dItemid + "author";
-	            inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all', "<b>" + ( (com.username == remoteUser ? 'my' : comUser) ) + "</b>" ) + "</label></div>");
-	        }
-	
-	        inHTML.push("<div class='b-popup-row'><input class='delete-comment-button' type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
+			var inHTML = [ "<form id='ljdelopts" + dItemid + "'><div class='b-popup-group'><div class='b-popup-row b-popup-row-head'><strong>" + getLocalizedStr( 'comment.delete.q', comUser ) + "</strong></div>" ];
+			var lbl;
+			if (com.username !== "" && com.username != remoteUser && canAdmin) {
+				lbl = "ljpopdel" + dItemid + "ban";
+				inHTML.push("<div class='b-popup-row'><input type='checkbox' name='ban' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.ban.user', comUser ) + "</label></div>");
+			}
+
+			if (com.rc && com.rc.length && canAdmin) {
+				lbl = "ljpopdel" + dItemid + "thread";
+				inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delthread' id='" + lbl + "'> <label for='" + lbl + "'>" + getLocalizedStr( 'comment.delete.all.sub', comUser ) + "</label></div>");
+			}
+			if (canAdmin&&com.username) {
+				lbl = "ljpopdel" + dItemid + "author";
+				inHTML.push("<div class='b-popup-row'><input type='checkbox' name='delauthor' id='" + lbl + "'> <label for='" + lbl + "'>" +
+						(com.username == remoteUser ? getLocalizedStr( 'comment.delete.all.my') :
+						getLocalizedStr( 'comment.delete.all', "<b>" + comUser + "</b>" )) + "</label></div>");
+			}
+
+			inHTML.push("<div class='b-popup-row'><input class='delete-comment-button' type='button' value='" + getLocalizedStr( 'comment.delete', comUser ) + "' onclick='deleteComment(" + dItemid + ");' /></div></div><div class='b-bubble b-bubble-alert b-bubble-noarrow'><i class='i-bubble-arrow-border'></i><i class='i-bubble-arrow'></i>" + getLocalizedStr( 'comment.delete.no.options', comUser ) + "</div></form>");
 			
 			if (!window.delPopup) {
 				window.delPopup = jQuery('<div class="b-popup-delcomm" />')
