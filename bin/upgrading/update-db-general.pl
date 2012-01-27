@@ -3460,6 +3460,15 @@ CREATE TABLE `email_status` (
     ) TYPE=InnoDB 
 EOC
 
+register_tablecreate( 'themecustom', <<'EOC');
+        CREATE TABLE `themecustom` (
+            `user` varchar(15) NOT NULL DEFAULT '',
+            `coltype` varchar(30) DEFAULT NULL,
+            `color` varchar(30) DEFAULT NULL,
+            KEY `user` (`user`)
+        ) ENGINE=InnoDB
+EOC
+
 ### changes
 
 register_alter(sub {
