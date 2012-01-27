@@ -7,7 +7,7 @@ my $DELAYED_ENTRIES_LOCK_NAME = 'delayed_entries_lock';
 sub new {
     my ($class, $dbh) = @_;
 
-    if (try_lock($dbh)) {
+    if (!try_lock($dbh)) {
         return undef;
     }
 
@@ -60,13 +60,13 @@ sub __load_delayed_entries {
     my $list = $dbh->selectall_arrayref("SELECT journalid, delayedid, posterid " .
                                         "FROM delayedlog2 ".
                                         "WHERE posttime <= NOW() LIMIT 1000");
-
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
                                                    { journalid  => $tuple->[0],
                                                      delayed_id => $tuple->[1],
                                                      posterid   => $tuple->[2]} );
     }
+    return undef if !scalar @entries;
     return \@entries;
 }
 
@@ -81,10 +81,10 @@ sub __send_error {
         'charset'   => 'utf-8',
         'subject'   => LJ::Lang::get_text($poster->prop('browselang'),
                                         'email.delayed_error.subject'),
-        'body'      =>  LJ::Lang::get_text($poster->prop('browselang'),
+        'body'      => LJ::Lang::get_text($poster->prop('browselang'),
                                         'email.delayed_error.body',
         {subject => $subject, reason=>$error}),
-    });    
+    });
 }
 
 
@@ -99,10 +99,8 @@ sub on_pulse {
     }
 
     eval {
-        my $entries = __load_delayed_entries($dbh);
-
-        do {
-            foreach my $entry(@$entries) {
+        while ( my $entries = __load_delayed_entries($dbh) ) {
+            foreach my $entry (@$entries) {
                 my $post_status = $entry->convert();
         
                 # do we need to send error
@@ -115,7 +113,7 @@ sub on_pulse {
                     $entry->delete();
                 }
             }
-        } while ($entries = __load_delayed_entries($dbh) && @$entries)
+        } 
     };
     if ($@) {
         warn 'worker has failed: ' . $@;
