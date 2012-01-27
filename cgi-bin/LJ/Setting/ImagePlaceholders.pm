@@ -26,33 +26,38 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    my $imgplaceholders = $class->get_arg($args, "imgplaceholders") || $u->prop("opt_imagelinks");
+    my $imgplaceholders = $u->prop("opt_imagelinks") || "0:0";
 
-    my ($maxwidth, $maxheight) = (0, 0);
-    ($maxwidth, $maxheight) = ($1, $2)
-        if $imgplaceholders and $imgplaceholders =~ /^(\d+)\|(\d+)$/;
+    # just for a case
+    $imgplaceholders = "0:0" unless $imgplaceholders;
+    $imgplaceholders = "1:0" unless $imgplaceholders =~ /^\d\:\d$/;
 
-    my $is_stock = grep { $imgplaceholders eq $_ }
-                    (qw/320|240 640|480 0|0/, ''); # standard sizes
+    my( $chk1, $chk2 );
 
-    my $extra = undef;
-    $extra = $class->ml('setting.imageplaceholders.option.select.custom', { width => $maxwidth, height => $maxheight })
-        unless $is_stock;
+    if ( $imgplaceholders =~ /^(\d)\:(\d)$/ ) {
+        $chk1 = $1;
+        $chk2 = $2;
+    }
+    else {
+        $chk1 = 0;
+        $chk2 = 0;
+    }
 
-    my @options = (
-        "0" => $class->ml('setting.imageplaceholders.option.select.none'),
-        "0|0" => $class->ml('setting.imageplaceholders.option.select.all'),
-        "320|240" => $class->ml('setting.imageplaceholders.option.select.medium', { width => 320, height => 240 }),
-        "640|480" => $class->ml('setting.imageplaceholders.option.select.large', { width => 640, height => 480 }),
-        $extra ? ("$maxwidth|$maxheight" => $extra) : ()
-    );
-
-    my $ret = "<label for='${key}imgplaceholders'>" . $class->ml('setting.imageplaceholders.option') . "</label> ";
-    $ret .= LJ::html_select({
-        name => "${key}imgplaceholders",
-        id => "${key}imgplaceholders",
-        selected => $imgplaceholders,
-    }, @options);
+    my $ret = $class->ml('setting.imageplaceholders.option2')
+        . "<label for='${key}check1'>"
+        . LJ::html_check({
+            selected => $chk1,
+            name     => "${key}check1",
+          })
+        . $class->ml('setting.imageplaceholders.option2.checkbox1')
+        . "</label> "
+        . "<label for='${key}check2'>"
+        . LJ::html_check({
+            selected => $chk2,
+            name     => "${key}check2",
+          })
+        . $class->ml('setting.imageplaceholders.option2.checkbox2')
+        . "</label> ";
 
     my $errdiv = $class->errdiv($errs, "imgplaceholders");
     $ret .= "<br />$errdiv" if $errdiv;
@@ -60,21 +65,14 @@ sub option {
     return $ret;
 }
 
-sub error_check {
-    my ($class, $u, $args) = @_;
-    my $val = $class->get_arg($args, "imgplaceholders");
-
-    $class->errors( imgplaceholders => $class->ml('setting.imageplaceholders.error.invalid') )
-        unless !$val || $val =~ /^(\d+)\|(\d+)$/;
-
-    return 1;
-}
-
 sub save {
     my ($class, $u, $args) = @_;
-    $class->error_check($u, $args);
 
-    my $val = $class->get_arg($args, "imgplaceholders");
+    my @val;
+    push @val, $class->get_arg($args, $_) for map { "check$_" } 1..2;
+    @val = map { $_ eq 'on' ? 1 : 0 } @val;
+
+    my $val = join( ':', @val );
     $u->set_prop( opt_imagelinks => $val );
 
     return 1;

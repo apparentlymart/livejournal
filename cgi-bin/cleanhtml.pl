@@ -1092,11 +1092,15 @@ sub clean
                         if (defined $opts->{'maximgwidth'} &&
                             (! defined $hash->{'width'} ||
                              $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
+
                         if (defined $opts->{'maximgheight'} &&
                             (! defined $hash->{'height'} ||
                              $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
                     }
+
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
+
+                    if ($opts->{'img_placeholders'}) { $img_bad = 1; }
 
                     ## Option 'allowed_img_attrs' provides a list of allowed attributes
                     if (my $allowed = $opts->{'allowed_img_attrs'}){
@@ -1961,23 +1965,24 @@ sub clean_comment
 
     # slow path: need to be run it through the cleaner
     return clean($ref, {
-        'linkify' => 1,
-        'wordlength' => 40,
-        'addbreaks' => $opts->{preformatted} ? 0 : 1,
-        'eat' => [qw[head title style layer applet object]],
-        'mode' => 'deny',
-        'allow' => \@comment_all,
-        'autoclose' => \@comment_close,
-        'cleancss' => 1,
-        'strongcleancss' => 1,
-        'extractlinks' => $opts->{'anon_comment'},
-        'extractimages' => $opts->{'anon_comment'},
-        'noearlyclose' => 1,
-        'tablecheck' => 1,
-        'nocss' => $opts->{'nocss'},
-        'textonly' => $opts->{'textonly'} ? 1 : 0,
+        'linkify'            => 1,
+        'wordlength'         => 40,
+        'addbreaks'          => $opts->{preformatted} ? 0 : 1,
+        'eat'                => [qw[head title style layer applet object]],
+        'mode'               => 'deny',
+        'allow'              => \@comment_all,
+        'autoclose'          => \@comment_close,
+        'cleancss'           => 1,
+        'strongcleancss'     => 1,
+        'extractlinks'       => $opts->{'anon_comment'},
+        'extractimages'      => $opts->{'anon_comment'},
+        'noearlyclose'       => 1,
+        'tablecheck'         => 1,
+        'nocss'              => $opts->{'nocss'},
+        'textonly'           => $opts->{'textonly'} ? 1 : 0,
         'remove_positioning' => 1,
-        'posterid' => $opts->{'posterid'},
+        'posterid'           => $opts->{'posterid'},
+        'img_placeholders'   => $opts->{'img_placeholders'},
     });
 }
 

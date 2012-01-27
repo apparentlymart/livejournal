@@ -143,6 +143,18 @@ sub EntryPage
     my $convert_comments = sub {
         my ($self, $destlist, $srclist, $depth) = @_;
 
+        my $replace_images_in_comments = 0;
+
+        if( $remote ) {
+            my $opt = $remote->prop("opt_imagelinks") || "0:0";
+            $opt = "0:0" unless $opt;
+            $opt = "1:0" unless $opt =~ /^\d\:\d$/;
+
+            if ( $opt =~ /^\d\:(\d)$/ ) {
+                $replace_images_in_comments = $1;
+            }
+        }
+
         foreach my $com (@$srclist) {
             my $pu = $com->{'posterid'} ? $user{$com->{'posterid'}} : undef;
 
@@ -152,11 +164,15 @@ sub EntryPage
                 # quote all non-LJ tags
                 $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
-            LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
-                                                   'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
-                                                   'nocss'        => 1,
-                                                   'posterid'     => $com->{'posterid'},
-                                                   });
+
+            LJ::CleanHTML::clean_comment(
+                \$text, {
+                'preformatted'     => $com->{'props'}->{'opt_preformatted'},
+                'anon_comment'     => (!$pu || $pu->{'journaltype'} eq 'I'),
+                'nocss'            => 1,
+                'posterid'         => $com->{'posterid'},
+                'img_placeholders' => $replace_images_in_comments,
+            });
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});

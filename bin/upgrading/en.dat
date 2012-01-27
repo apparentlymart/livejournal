@@ -4968,6 +4968,11 @@ setting.imageplaceholders.label=Image Placeholders
 setting.imageplaceholders.option|staleness=1
 setting.imageplaceholders.option=Replace inline images on your Friends page with a placeholder for
 
+setting.imageplaceholders.option2=Replace inline images with a placeholder:
+
+setting.imageplaceholders.option2.checkbox1=On your Friends page
+setting.imageplaceholders.option2.checkbox2=In comments
+
 setting.imageplaceholders.option.select.all|staleness=1
 setting.imageplaceholders.option.select.all=all images
 

@@ -164,11 +164,11 @@ register_setter("stylesys", sub {
 
 register_setter("maximagesize", sub {
     my ($u, $key, $value, $err) = @_;
-    unless ($value =~ m/^(\d+)[x,|](\d+)$/) {
-        $$err = "Illegal value.  Must be width,height.";
+    unless ($value =~ m/^(0|1)[\:\s](0|1)$/) {
+        $$err = "Illegal value.  Must be 0|1:0|1.";
         return 0;
     }
-    $value = "$1|$2";
+    $value = "$1:$2";
     $u->set_prop("opt_imagelinks", $value);
     return 1;
 });
