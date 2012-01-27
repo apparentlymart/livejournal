@@ -959,7 +959,8 @@ sub as_push_payload {
 
             if($parent) {
                 return '"t":26, "j":"'.$self->event_journal->user.'",'.
-                    '"p":'.$entry->ditemid.', "r":'.$self->comment->parent->dtalkid.', "c":'.$self->comment->dtalkid
+                    '"p":'.$entry->ditemid.', "r":'.$self->comment->parent->dtalkid.', "c":'.$self->comment->dtalki
+            }
         } else {
             return '"t":25,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
         }
