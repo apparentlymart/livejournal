@@ -1782,13 +1782,7 @@ sub create_view_friends {
     # load options for image links
     my $replace_images_in_friendspage = 0;
     if( $u->equals($remote) ) {
-        my $opt = $u->prop("opt_imagelinks") || "0:0";
-        $opt = "0:0" unless $opt;
-        $opt = "1:0" unless $opt =~ /^\d\:\d$/;
-
-        if ( $opt =~ /^(\d)\:\d$/ ) {
-            $replace_images_in_friendspage = $1;
-        }
+        $replace_images_in_friendspage = $remote->opt_placeholders_friendspage;
     }
 
     my %friends_events = ();

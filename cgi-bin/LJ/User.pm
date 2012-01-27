@@ -4071,6 +4071,40 @@ sub opt_embedplaceholders {
     }
 }
 
+# opt_imagelinks format:
+# 0|1 - replace images with placeholders at friends page
+# :   - delimiter
+# 0|1 - replace images with placeholders in comments at entry page
+sub get_opt_imagelinks {
+    my $u = shift;
+    my $opt = $u->prop("opt_imagelinks") || "0:0";
+    $opt = "0:0" unless $opt;
+    $opt = "1:0" unless $opt =~ /^\d\:\d$/;
+    return $opt;
+}
+
+sub opt_placeholders_friendspage {
+    my $u = shift;
+    my $opt = $u->get_imagelinks;
+
+    if ( $opt =~ /^(\d)\:\d$/ ) {
+        return $1;
+    }
+
+    return 0;
+}
+
+sub opt_placeholders_comments {
+    my $u = shift;
+    my $opt = $u->get_imagelinks;
+
+    if ( $opt =~ /^\d\:(\d)$/ ) {
+        return $1;
+    }
+
+    return 0;
+}
+
 sub opt_showmutualfriends {
     my $u = shift;
     return $u->raw_prop('opt_showmutualfriends') ? 1 : 0;

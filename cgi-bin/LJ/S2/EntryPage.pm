@@ -146,13 +146,7 @@ sub EntryPage
         my $replace_images_in_comments = 0;
 
         if( $remote ) {
-            my $opt = $remote->prop("opt_imagelinks") || "0:0";
-            $opt = "0:0" unless $opt;
-            $opt = "1:0" unless $opt =~ /^\d\:\d$/;
-
-            if ( $opt =~ /^\d\:(\d)$/ ) {
-                $replace_images_in_comments = $1;
-            }
+            $replace_images_in_comments = $remote->opt_placeholders_comments;
         }
 
         foreach my $com (@$srclist) {

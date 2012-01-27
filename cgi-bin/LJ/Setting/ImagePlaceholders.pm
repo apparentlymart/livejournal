@@ -26,12 +26,7 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    my $imgplaceholders = $u->prop("opt_imagelinks") || "0:0";
-
-    # just for a case
-    $imgplaceholders = "0:0" unless $imgplaceholders;
-    $imgplaceholders = "1:0" unless $imgplaceholders =~ /^\d\:\d$/;
-
+    my $imgplaceholders = $u->get_opt_imagelinks;
     my( $chk1, $chk2 );
 
     if ( $imgplaceholders =~ /^(\d)\:(\d)$/ ) {
