@@ -135,6 +135,8 @@
 
 .update.success2=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
 
+.update.success3=Update successful. You can view your scheduled entries <a [[aopts]]>here</a>.
+
 .updating=&nbsp;
 
 .username=Username:

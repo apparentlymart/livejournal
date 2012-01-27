@@ -610,7 +610,25 @@ LIKE_FAQ
                     } else {
                         $ju = $remote;                             # posting as remote
                     };
-                    $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
+
+                    my $juser = $ju->{'user'};
+                    my ($itemid, $anum) = ($res->{'itemid'}, $res->{'anum'});
+                    my $delayedid = $res->{'delayedid'};
+                    if ($res->{'itemid'})
+                    {
+                        $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    }
+                    else
+                    {
+                        $itemlink = LJ::DelayedEntry::item_link($ju, $res->{'delayedid'});
+                    }
+                    
+                    if ($itemid) {
+                        $itemid = $itemid * 256 + $anum;
+                        $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
+                    } else {
+                        $$body .= BML::ml('.update.success3', {'aopts' => "href=LJ::SITEROOT/manage/scheduled_posts.bml?usejournal=" . $ju->username});
+                    }
 
                     $$body .= $res->{extra_result_message};
 
