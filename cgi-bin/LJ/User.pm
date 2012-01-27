@@ -6666,9 +6666,12 @@ sub load_user_props {
 sub load_user_props_multi {
     my ($class, $users, $props, $opts) = @_;
     my $use_master = $opts->{'use_master'};
+    my $propkeys;
 
     $props = [grep { defined and not ref } @$props];
     return unless @$props;
+
+    $propkeys = { map { $_ => '' } @$props };
 
     $users = { map { $_->{'userid'} => $_ } grep { ref } @$users };
     return unless %$users;
@@ -6684,13 +6687,15 @@ sub load_user_props_multi {
         # and get straight to the next handler
         if ( not $memcache_available or not defined $handler->use_memcache ) {
             foreach my $u (values %$users) {
-                my $propmap = $handler->get_props(
-                    $u,
-                    $groups->{$handler},
-                    {
-                        use_master => $use_master
-                    }
-                );
+                my $propmap = {
+                    %$propkeys,
+                    %{  $handler->get_props($u, $groups->{$handler},
+                            {
+                                use_master => $use_master
+                            }
+                        ) || {}
+                    },
+                };
 
                 _extend_user_object->($u, $propmap);
             }
@@ -6729,7 +6734,12 @@ sub load_user_props_multi {
                     { 'use_master' => $use_master }
                 );
 
-                my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
+                # Hack to init keys for empty props
+                my $packed = { 
+                    %$propkeys,
+                    %{ LJ::User::PropStorage->pack_for_memcache($propmap) },
+                };
+
                 LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
                 _extend_user_object($users->{$userid}, $packed);
             }
@@ -6737,7 +6747,10 @@ sub load_user_props_multi {
             my $handled_props = $groups->{$handler};
 
             foreach my $u (values %$users) {
-                my $propmap_memc = $handler->fetch_props_memcache($u, $handled_props);
+                my $propmap_memc = {
+                    %$propkeys,
+                    %{ $handler->fetch_props_memcache($u, $handled_props) },
+                };
 
                 _extend_user_object($u, $propmap_memc);
 
