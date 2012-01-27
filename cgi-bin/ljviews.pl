@@ -2013,6 +2013,10 @@ sub create_view_friends {
         if ($security eq "usemask" &&
             $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
 
+        if ($entry_obj->is_sticky) {
+            $var .= '_STICKY';
+        }
+
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
