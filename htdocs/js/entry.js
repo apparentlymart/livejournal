@@ -971,7 +971,7 @@ InOb.handleInsertEmbed = function () {
 };
 
 InOb.handleInsertImageBeta = (function () {
-	var ippu, contentElement;
+	var ippu;
 
 	function onHtmlReady(event) {
 		if (window.switchedRteOn) {
@@ -1014,7 +1014,7 @@ InOb.handleInsertImageBeta = (function () {
 
 			jPhotoUploader.photouploader('option', 'type', type || 'upload').bind('htmlready', onHtmlReady).photouploader('show');
 		} else {
-			ippu.contentElement = $('pics-error-upgrade');
+			ippu.contentElement = ippu.contentElement || $('pics-error-upgrade');
 			ippu.setContentElement(ippu.contentElement);
 			ippu.show();
 			ippu.contentElement.style.display = 'block';
