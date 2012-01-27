@@ -4085,7 +4085,7 @@ sub get_opt_imagelinks {
 
 sub opt_placeholders_friendspage {
     my $u = shift;
-    my $opt = $u->get_imagelinks;
+    my $opt = $u->get_opt_imagelinks;
 
     if ( $opt =~ /^(\d)\:\d$/ ) {
         return $1;
@@ -4096,7 +4096,7 @@ sub opt_placeholders_friendspage {
 
 sub opt_placeholders_comments {
     my $u = shift;
-    my $opt = $u->get_imagelinks;
+    my $opt = $u->get_opt_imagelinks;
 
     if ( $opt =~ /^\d\:(\d)$/ ) {
         return $1;
