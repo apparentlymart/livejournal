@@ -6723,9 +6723,13 @@ sub load_user_props_multi {
 
                 delete $memkeys{$userid}; # Loading is successfull
 
-                _extend_user_object($users->{$userid},
-                    LJ::User::PropStorage->unpack_from_memcache($v)
-                );
+                # Hack to init keys for empty props
+                my $packed = { 
+                    %$propkeys,
+                    %{ LJ::User::PropStorage->unpack_from_memcache($v) },
+                };
+
+                _extend_user_object($users->{$userid}, $packed);
             }
 
             while (($userid, $v) = each %memkeys) {
@@ -6734,13 +6738,14 @@ sub load_user_props_multi {
                     { 'use_master' => $use_master }
                 );
 
-                # Hack to init keys for empty props
-                my $packed = { 
-                    %$propkeys,
-                    %{ LJ::User::PropStorage->pack_for_memcache($propmap) },
+                my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
+                LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
+
+                $packed = {
+                    %$propmap,
+                    %$packed,
                 };
 
-                LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
                 _extend_user_object($users->{$userid}, $packed);
             }
         } elsif ( $memcache_policy eq 'blob' ) {
