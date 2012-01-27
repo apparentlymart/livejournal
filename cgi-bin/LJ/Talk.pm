@@ -1255,6 +1255,8 @@ sub load_comments_tree
 
     my $n = $u->{'clusterid'};
     my $viewall = $opts->{viewall};
+    my $spambutton = LJ::is_enabled('spam_button');
+    my $showspam   = $opts->{'showspam'};
 
     my $gtd_opts = { init_comobj => $opts->{init_comobj} };
     my $posts = get_talk_data($u, $nodetype, $nodeid, $gtd_opts);  # hashref, talkid -> talk2 row, or undef
@@ -1264,7 +1266,7 @@ sub load_comments_tree
         return;
     }
 
-    if (LJ::is_enabled('spam_button') && $opts->{showspam}) {
+    if ( $spambutton and $showspam ) {
         while ( my ($commentid, $comment) = each %$posts ) {
             if ( $comment->{state} eq 'B' ) {
                 $comment->{parenttalkid} = 0;
@@ -1305,7 +1307,7 @@ sub load_comments_tree
                                                               $remote->can_manage($u) ||
                                                               $remote->can_sweep($u)));
             }
-            if (LJ::is_enabled('spam_button') && !$opts->{showspam}) {
+            if ( $spambutton and not $showspam ) {
                 $should_show = 0 if $post->{'state'} eq 'B' && ! ($remote && $remote->{'userid'} == $post->{'posterid'});
             }
             $post->{'_show'} = $should_show;
