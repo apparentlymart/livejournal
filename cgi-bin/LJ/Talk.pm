@@ -1581,7 +1581,7 @@ sub load_comments
 
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
 
-    my (@subjects_to_load, @subjects_ignored);
+    my (%subjects_to_load, $subjcounter);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
         next unless defined $children->{$cfc};
@@ -1592,11 +1592,8 @@ sub load_comments
             elsif (scalar(keys %posts_to_load) < $page_size) {
                 $posts_to_load{$child} = 1;
             } else {
-                if (@subjects_to_load < $max_subjects) {
-                    push @subjects_to_load, $child;
-                } else {
-                    push @subjects_ignored, $child;
-                }
+                $subjcounter++;
+                $subjects_to_load{$child}++ if $subjcounter < $max_subjects;
             }
             push @check_for_children, $child;
         }
@@ -1605,7 +1602,7 @@ sub load_comments
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
     $posts_loaded = LJ::get_talktext2($u, keys %posts_to_load);
-    $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load) if @subjects_to_load;
+    $subjects_loaded = LJ::get_talktext2($u, { onlysubjects => 1 }, keys %subjects_to_load) if $subjcounter;
     foreach my $talkid (keys %posts_to_load) {
         next unless $posts->{$talkid}->{'_show'};
         $posts->{$talkid}->{'_loaded'} = 1;
@@ -1613,16 +1610,14 @@ sub load_comments
         $posts->{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
         $users_to_load{$posts->{$talkid}->{'posterid'}} = 1;
     }
-    foreach my $talkid (@subjects_to_load) {
-        next unless $posts->{$talkid}->{'_show'};
-        $posts->{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
-        $users_to_load{$posts->{$talkid}->{'posterid'}} ||= 0.5;  # only care about username
-    }
-    foreach my $talkid (@subjects_ignored) {
-        next unless $posts->{$talkid}->{'_show'};
-        $posts->{$talkid}->{'subject'} = "...";
-        $users_to_load{$posts->{$talkid}->{'posterid'}} ||= 0.5;  # only care about username
-    }
+
+    while (my ($talkid, $post) = each %$posts) {
+        next unless $post->{'_shown'};
+        $post->{'subject'} = $subjects_loaded->{$talkid}?
+            $subjects_loaded->{$talkid}->[0]:
+            '...';
+        $users_to_load{$post->{'posterid'}} ||= 0.5;  # only care about username
+    } 
 
     # load meta-data
     {
