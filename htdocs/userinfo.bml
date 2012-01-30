@@ -687,7 +687,7 @@
 
     ## fotobilder gallery count
     my $ct_str;
-    if ($u->get_cap('fb_account') && $u->get_cap('fb_can_upload') && $u->{fb_num_pubpics}+0 > 0) {
+    if ($u && $u->can_use_ljphoto && $u->{fb_num_pubpics}+0 > 0) {
         # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
         # estimate in a way that makes it clear it's not an exact number. rules are:
         #
@@ -713,7 +713,7 @@
         unless $u->is_identity || $u->is_syndicated;
     push @view_links, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
         unless $u->is_syndicated;
-    push @view_links, BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='$LJ::FB_SITEROOT/$user/'" })
+    push @view_links, BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" })
         if $ct_str;
     push @view_links, BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" })
         unless $u->is_syndicated;
