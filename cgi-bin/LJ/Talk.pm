@@ -1614,7 +1614,7 @@ sub load_comments
     }
 
     while (my ($talkid, $post) = each %$posts) {
-        next unless $post->{'_shown'};
+        next unless $post->{'_show'};
         $post->{'subject'} = $subjects_loaded->{$talkid}?
             $subjects_loaded->{$talkid}->[0]:
             '...';
