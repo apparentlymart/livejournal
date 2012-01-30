@@ -64,6 +64,7 @@ sub new
         unless $n_arg && ($n_arg % 2 == 0);
 
     my %opts = @_;
+    my $row  = delete $opts{row};
 
     croak("can't supply both anum and ditemid")
         if defined $opts{anum} && defined $opts{ditemid};
@@ -106,7 +107,11 @@ sub new
 
     # no singleton, will load row
     my $anum = $self->{anum}; # caller supplied anum
-    __PACKAGE__->preload_rows([ $self ]);
+    if ($row){
+        $self->absorb_row($row);
+    } else {
+        __PACKAGE__->preload_rows([ $self ]);
+    }
     return undef if $anum and $anum != $self->{anum}; # incorrect anum -> 'no such entry'
 
     $self->{ditemid}  = $self->{jitemid} * 256 + $self->{anum};
@@ -184,9 +189,10 @@ sub new_from_row {
     my %row   = @_;
 
     my $journalu = LJ::load_userid($row{journalid});
-    my $self = $class->new($journalu, jitemid => $row{jitemid});
-    $self->absorb_row(\%row);
-
+    my $self = $class->new($journalu, 
+                           jitemid => $row{jitemid},
+                           row     => \%row, ## absorb row in the constructor.
+                           );
     return $self;
 }
 
