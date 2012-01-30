@@ -134,6 +134,9 @@ a:active {
 .b-postform TABLE {
 	width: 750px;
 	}
+	.b-postform #recaptcha_table {
+		width: auto;
+		}
 
 .comments-links ~ #qrdiv form,
 .comment-wrap ~ .comments-footer #qrdiv form {
