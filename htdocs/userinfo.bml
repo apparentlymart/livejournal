@@ -3,6 +3,7 @@
 {
     use strict;
     use LJ::TimeUtil;
+    use LJ::PersonalStats::DB;
 
     use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
@@ -654,6 +655,29 @@
     $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
     $body .= LJ::run_hook("userinfo_extra_user_details", user => $u);
     $body .= "</div>";
+
+    #LJSUP-10988: Add position and social capital to user profile
+    #==============================================================
+    if ($u->is_personal || $u->is_comm) {
+        my $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
+            func => 'get_value',
+            what => $u->is_personal ? 'users' : 'communities',
+            journal_id => $u->userid,
+            by => 'friends_of',
+            type => 0,
+            sup => LJ::SUP->is_sup_enabled($u),
+        });
+        if (ref $position eq 'HASH') {
+            if ($position->{result}->{position} < 2000) {
+                $body .= "<br>" . 
+                         LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => $position->{result}->{position}, 
+                                                                         url_user_rating => '/ratings/users/friends_of', 
+                                                                         soc_capital => $position->{result}->{value}}) . 
+                        "<br>";
+            }
+        }
+    }
+    #==============================================================
 
     my @view_links;
     my $entry_count = $u->number_of_posts;
