@@ -692,25 +692,34 @@ IPPUSelectTags = {
 
 		this.checkboxes = jQuery('div.b-selecttags-tags input:checkbox', ippu_node);
 		this.boxesCache = {};
+		this.checked = {};
+		var cache = this.boxesCache,
+			checked = this.checked;
+
 		this.checkboxes.each(function() {
-			this.boxes[this.value] = {
-				value: this.value,
-				node: this,
-				checked: this.checked
-			};
+			cache[this.value] = this;
+
+			if (this.checked) {
+				checked[this.value] = true;
+			}
 		});
 
-		jQuery('#selecttags-all').input(this.input).input();
+		jQuery('#selecttags-all').input(this.input.bind(this)).input();
 	},
 
 	change: function(node) {
-		var inp = $('selecttags-all'), ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [], i = -1;
+		var inp = $('selecttags-all'),
+			ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [],
+			i = -1,
+			val = node.value;
 
 		ary = jQuery.map(ary, function (val, idx) {
 			return (val.length > 0) ? val : null
 		});
+
 		if (node.checked) {
-			ary.push(node.value)
+			ary.push(val);
+			this.checked[val] = true;
 		} else {
 			while (ary[++i]) {
 				if (ary[i] == node.value) {
@@ -718,20 +727,35 @@ IPPUSelectTags = {
 					break;
 				}
 			}
+			delete this.checked[val];
 		}
 
 		inp.value = ary.join(', ');
 	},
 
 	input: function() {
-		var ary = $('selecttags-all').value.split(/ *, */), checkboxes = IPPUSelectTags.checkboxes;
-		ary = jQuery.map(ary, function (val, idx) {
-			return (val.length > 0) ? val : null
+		var ary = $('selecttags-all').value.split(/ *, */),
+			checkboxes = IPPUSelectTags.checkboxes,
+			cache = this.boxesCache,
+			newChecked = {},
+			checked = this.checked;
+
+		ary = ary.filter(function (val, idx) { return (val.length > 0); })
+				.map(function(val){ return val.trim(); });
+
+		ary.forEach(function(keyword) {
+			keyword = keyword.trim();
+			if (!cache.hasOwnProperty(keyword)) { return; }
+
+			delete checked[keyword];
+			cache[keyword].checked = true;
+			newChecked[keyword] = true;
 		});
-		checkboxes.attr('checked', false);
-		while (ary.length) {
-			checkboxes.filter('[value="' + ary.pop().escapeJS() + '"]').attr('checked', true);
+
+		for(var keyword in checked) {
+			cache[keyword].checked = false;
 		}
+		this.checked = newChecked;
 	},
 
 	save_click: function() {
@@ -742,6 +766,11 @@ IPPUSelectTags = {
 	reset_click: function() {
 		$('selecttags-all').value = '';
 		IPPUSelectTags.checkboxes.attr('checked', false);
+		this.checked = {};
+
+		for (var keyword in this.boxesCache) {
+			this.boxesCache[keyword].checked = false;
+		}
 	}
 };
 
