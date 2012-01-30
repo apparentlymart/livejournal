@@ -29,14 +29,15 @@ QuickReply = {
 		} else if (QuickReply.lastDiv != dtid) {
 		}
 
-		var comments = $('comments');
+		var comments = $('comments'),
+			targetcomment = $(targetcomment);
 
 		//LJSUP-11059: when we show old style entry page, comment form should be placed under comment with
 		//shift according to its depth.
-		if (!comments || comments.className.indexOf('entry-comments-s1') === -1) {
+		if (!comments || comments.className.indexOf('entry-comments-s1') === -1 || !targetcomment) {
 			cur_div.parentNode.insertBefore(qr_div, cur_div);
 		} else {
-			$(targetcomment).appendChild(qr_div);
+			targetcomment.appendChild(qr_div);
 		}
 		
 		QuickReply.lastDiv = targetname;
