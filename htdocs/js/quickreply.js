@@ -4,6 +4,7 @@ QuickReply = {
 	reply: function(dtid, pid, newsubject)
 	{
 		var targetname = 'ljqrt' + dtid,
+			targetcomment = 'ljcmt' + dtid,
 			qr_ptid = $('parenttalkid'),
 			qr_rto = $('replyto'),
 			qr_dtid = $('dtid'),
@@ -25,9 +26,15 @@ QuickReply = {
 		if (QuickReply.lastDiv == 'qrdiv') {
 			qr_div.style.display = 'inline';
 			// Only one swap
-			cur_div.parentNode.insertBefore(qr_div, cur_div);
 		} else if (QuickReply.lastDiv != dtid) {
+		}
+
+		var comments = $('comments');
+
+		if (!comments || comments.className.indexOf('entry-comments-s1') === -1) {
 			cur_div.parentNode.insertBefore(qr_div, cur_div);
+		} else {
+			$(targetcomment).appendChild(qr_div);
 		}
 		
 		QuickReply.lastDiv = targetname;
