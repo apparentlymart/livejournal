@@ -31,6 +31,8 @@ QuickReply = {
 
 		var comments = $('comments');
 
+		//LJSUP-11059: when we show old style entry page, comment form should be placed under comment with
+		//shift according to its depth.
 		if (!comments || comments.className.indexOf('entry-comments-s1') === -1) {
 			cur_div.parentNode.insertBefore(qr_div, cur_div);
 		} else {
