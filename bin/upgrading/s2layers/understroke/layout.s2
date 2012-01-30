@@ -89,6 +89,11 @@ property string custom_ie_css_variants {
 
 property use include_default_stylesheet;
 
+property string theme_css {
+    noui = 1;
+} set theme_css = "";
+
+
 function _dateTime (DateTime time) : string {
 	var string result = "";
 	var DateTime currentDate = journal_current_datetime();
@@ -374,7 +379,11 @@ function _print_CSS {
 		end_css();
 		""" </style><![endif]-->""";
 	}
-
+    if ($*theme_css) {
+"""        
+    <link rel="stylesheet" type="text/css" href="$*STATDIR/understroke/s/$*theme_css" />
+""";
+    }
 }
 
 function _Header {
