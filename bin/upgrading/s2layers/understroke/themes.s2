@@ -1,0 +1,131 @@
+#NEWLAYER: understroke/tasty-food
+layerinfo "type" = "theme";
+layerinfo "name" = "Tasty Food";
+layerinfo "redist_uniq" = "understroke/tasty-food";
+set theme_css = "tasty-food.css";
+set include_default_stylesheet = false;
+
+set _ = {
+    "HR" => ""
+};
+
+function _print_entry(Entry e, string extraclasses) {
+    var Page p = get_page();
+    var string metadata = _entry_metadata($e);
+    var string entrydate = _dateTime($e.time);
+    var string isodate = $e.system_time -> date_format("%%yyyy%%-%%mm%%-%%dd%%T%%HH%%:%%min%%:%%sec%%-00:00");
+
+    var string security = (defined $e.security_icon)?$e.security_icon -> as_string() : "";
+    var string title = (($e.subject == "") ? """<a href="$e.permalink_url" rel="bookmark">$*text_nosubject</a>""" : ($e.subject->contains("<a ") ? """<a href="$e.permalink_url" class="empty" rel="bookmark"></a>$e.subject""" : """<a href="$e.permalink_url" rel="bookmark">$e.subject</a>"""));
+    var string author = ($p.journal.journal_type != "C" and $p.view != "friends" )?"":(_ljuser($e.poster," author") + (($e.poster.username!=$e.journal.username and not ($p.journal.journal_type == "C" and $p.view == "recent" ))?("""<span class="etc"> $*text_user_posts_in </span>""" + _ljuser($e.journal," journal")):""));
+    var string userpic = $e.userpic?"""<img class="photo" src="${e.userpic.url}" alt="${e.userpic.alttext}" />""":"";
+    var string menu_items = _items(
+        _entry_links($e),
+        {
+            "before" => """<div class="post-menu"><ul>""",
+            "after" => """</ul></div>"""
+        });
+    var string tags = _items(
+        _entry_tags($e),
+        {
+            "before" => """<div class="ljtags">$*text_tags_section_header: """,
+            "after" => "</div>",
+            "tag" => "",
+            "glue" => ", ",
+            "link_extras"=>" rel=\"tag\""
+        });
+
+
+
+#=============== S T A R T ================== Entry
+
+"""
+    <div id="post-$e.journal.username-$e.itemid" class="post$extraclasses">
+        <h1 class="post-title">$security $title</h1>
+        <p class="pubdate" title="$isodate">$entrydate</p>
+        <div class="post-body">
+            """; $e->print_text(); """
+            $tags
+        </div>
+        $menu_items
+    </div>
+""";
+}
+
+
+function _Content {
+    var Page p = get_page();
+    var string title = ($p.global_title) ? "<h1 class=\"title\">" + $p.global_title + "</h1>" : "";
+    var string subtitle = ($p.global_subtitle) ? "<h2 class=\"sub-title\">" + $p.global_subtitle + "</h2>" : "";
+    var string summary = _items(
+        _summary(),
+        {
+            "before" => """<ul>"""
+        });
+
+""" 
+<div class="layout">
+    <div class="layout-inner">
+        <div class="header">
+            <div class="hgroup">
+                $title
+                $subtitle
+            </div>
+            <div class="sub-nav">
+                <ul>
+                    <li><a gref="$*_{"rss_link"}"><img src="http://stat.ljdev5.livejournal.ru/understroke/i/rss.png" /></a><a href="$*_{"rss_link"}">$*_{"rss_text"}</a></li>
+                    <li><a href="$*_{"games_link"}">$*_{"games_text"}</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="posts">
+            """;$p->print_body();"""
+            <div class="pagination">
+            """;print _prevnext();"""
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-block blog-info">
+                <div class="userpic">
+                    <img src="view-source:http://yandex.st/lego/_/pDu9OWAQKB0s2J9IojKpiS_Eho.ico" width="100" height="100" alt="" />
+                </div>
+                <div class="blog-info-body">
+                    <div class="username">
+                        """; print _ljuser($p.journal," "); """
+                    </div>
+                    """;
+                    print _items(
+                        _navlist(),
+                        {
+                            "before" => """<div class="menu"><ul>""",
+                            "after" => """</ul></div>""",
+                            "nolink_before" => "<strong>",
+                            "nolink_after" => "</strong>"
+                        });
+                    """
+                </div>
+            </div>
+            <div class="sidebar-block recent-posts">
+                <h1 class="sidebar-block-title">На этой странице</h1>
+                $summary
+            </div>
+            <div class="sidebar-block tags-cloud">
+                <h1 class="sidebar-block-title">$*text_tags_section_header</h1>
+                """;
+                print _items(
+                    _taglist(1201,270),
+                    {
+                        "before" => """<ul>""",
+                        "after" => """<ul>""",
+                    }
+                );
+                """
+            </div>
+            <div class="sidebar-block powered">
+                <p>Разработано <a href="http://livejournal.com">Livejournal.com</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+""";
+}
