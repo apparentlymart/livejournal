@@ -1429,6 +1429,9 @@ sub remove_identity {
     $dbh->do( 'DELETE FROM identitymap WHERE userid=?', undef, $u->id );
 
     delete $u->{'_identity'};
+    
+     my $memkey = [$u->{userid}, "ident:$u->{userid}"];
+     LJ::MemCache::delete($memkey);     
 }
 
 # instance method:  returns userprop for a user.  currently from cache with no
