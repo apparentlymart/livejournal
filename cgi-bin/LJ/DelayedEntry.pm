@@ -460,8 +460,7 @@ sub prop {
 sub url {
     my ($self) = @_;
     my $journal = $self->journal;
-    my $url = "$LJ::SITEROOT/manage/scheduled_posts.bml?usejournal=" .
-              $journal->username . "#entry_" . $self->delayedid;
+    my $url = $journal->journal_base . "/d" . $self->delayedid . ".html";
     return $url;
 }
 
@@ -970,11 +969,7 @@ sub __delayed_entry_can_see {
 
 sub item_link {
     my ($u, $delayedid, @args) = @_;
-    # XXX: should have an option of returning a url with escaped (&amp;)
-    #      or non-escaped (&) arguments.  a new link object would be best.
-    my $args = @args ? "?" . join("&amp;", @args) : "";
-    return "$LJ::SITEROOT/manage/scheduled_posts.bml?usejournal=" . $u->username . 
-           "#entry_$delayedid";
+    my $url = $u->journal_base . "/d" . $delayedid . ".html";
 }
 
 sub __delayed_entry_secwhere {

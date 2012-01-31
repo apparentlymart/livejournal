@@ -865,7 +865,22 @@ sub trans {
             } else {
                 $mode = "entry";
             }
+        }
+        elsif ($uuri =~ m#^/d(\d+)\.html$#) { #
+            my $delayed_id = $1;
+            my $u = LJ::load_user($user);
 
+            unless ($u) {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
+
+            my $new_uri = "$LJ::SITEROOT/preview/entry.bml";
+            my $bml_file = "$ENV{LJHOME}/htdocs/preview/entry.bml";
+            LJ::Request->uri($new_uri);
+            LJ::Request->notes( 'delayed_id' => $delayed_id);
+            return $bml_handler->($bml_file);
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
 

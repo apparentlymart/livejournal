@@ -62,13 +62,7 @@ sub prepare_template_params {
         my $edit_link   = $edit_link_base . 'mode=edit';
         my $delete_link = $edit_link_base . 'mode=delete';
 
-        my $entry_url;
-        if (!$entry->is_delayed) {
-            $entry_url = $entry->url;
-        } else {
-            my $delayed_id = $entry->delayedid;
-            $entry_url = "javascript:showEntry(\"$usejournal\", $delayed_id);";
-        }
+        my $entry_url =  $entry->url;
         my $entry_subject = $entry->subject_text;
 
         my $alldateparts;
