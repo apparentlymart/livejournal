@@ -1,7 +1,11 @@
 <?_code
 {
     use strict;
-    return "<?requirepost?>" unless LJ::did_post();
+
+    my $delayed_id = $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
+    if (!(LJ::did_post() || $delayed_id)) {
+        return "<?requirepost?>";
+    }
 
     my $ret;
     my $remote = LJ::get_remote();
@@ -15,6 +19,8 @@
     ##  (4) IE8 thinks that LJ.com has XSS vulnerability and rejects to display the page
     ## http://download.microsoft.com/download/6/6/B/66B06981-67F0-4151-B71D-848BEF65F3C7/Developing%20Securely%20with%20Cross%20Site%20Scripting%20Filter%20%20-%20IE8%20Developer%20Series%20Information%20Page.pdf
     LJ::Request->header_out("X-XSS-Protection" => 0);
+    
+
 
     ### Figure out poster/journal
     my ($u, $up);
@@ -29,7 +35,6 @@
     $up = $u unless $up;
 
     return $ML{'.error.no_user'} unless $up and $u;
-    my $delayed_id = $POST{'delayed_id'};
     my $sticky = $POST{'sticky_type'} && LJ::is_enabled('sticky_entries');
 
     ### Set up preview variables
@@ -278,8 +283,8 @@
         # format it
         my $raw_subj = $req{'subject'};
 
-        my $custom_time = $POST{'custom_time'} || $GET{'custom_time'};
-        my $timezone = $POST{'timezone'} || $GET{'timezone'};
+        my $custom_time = $POST{'custom_time'};
+        my $timezone = $POST{'timezone'};
         $req{'tz'} =  sprintf("%+.4d", $timezone);
 
         my $s2entry = LJ::S2::Entry($u, {
