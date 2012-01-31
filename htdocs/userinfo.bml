@@ -679,7 +679,8 @@
     }
     #==============================================================
 
-    my @view_links;
+    my @view_links_l;
+    my @view_links_r;
     my $entry_count = $u->number_of_posts;
     my $tagcount = scalar keys %{$u->tags};
     my $memcount = LJ::Memories::count($userid) || 0;
@@ -707,23 +708,29 @@
         $ct_str = "0";
     }
 
-    push @view_links, BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" })
+    push @view_links_l, BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" })
         unless $u->is_identity;
-    push @view_links, BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" })
+    push @view_links_l, "$num_comments_received comments recieved";
+    push @view_links_l, "$num_comments_posted comments posted";
+    push @view_links_l, BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" })
         unless $u->is_identity || $u->is_syndicated;
-    push @view_links, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
+    push @view_links_r, BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" })
         unless $u->is_syndicated;
-    push @view_links, BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" })
+    push @view_links_r, BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" })
         if $ct_str;
-    push @view_links, BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" })
+    push @view_links_r, BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" })
         unless $u->is_syndicated;
 
-    LJ::run_hook("userinfo_modify_view_links", user => $u, viewlinksref => \@view_links);
+    LJ::run_hook("userinfo_modify_view_links", user => $u, viewlinksref => \@view_links_r);
 
+    #my @details_links = $ML{'.details.viewlinkssep'};
     $body .= "<div class='details_links'>";
-    $body .= "<p>" . join($ML{'.details.viewlinkssep'}, @view_links) . "</p>";
+    $body .= "<p>" . join ( ' ', @view_links_l) . "</p>";
     $body .= "</div>";
 
+    $body .= "<div class='details_links'>";
+    $body .= "<p>" . join ( ' ', @view_links_r) . "</p>";
+    $body .= "</div>";
     {
         my $userinfo_add = '';
         LJ::run_hooks('userinfo_modify_details', journal => $u, ret => \$userinfo_add);
