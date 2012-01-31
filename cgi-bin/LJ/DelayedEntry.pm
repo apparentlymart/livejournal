@@ -8,6 +8,23 @@ use Storable;
 
 #common methodss
 
+sub create_from_url {
+    my ($class, $url, $opts) = @_;
+
+    if ($url =~ m!(.+)/d(\d+)\.html!) {
+        my $username = $1;
+        my $delayed_id = $2;
+        my $u = LJ::User->new_from_url($username) or return undef;
+        return LJ::DelayedEntry->get_entry_by_id($u, $delayed_id, $opts);
+    }
+
+    return undef;
+}
+
+sub valid {
+    return 1;
+}
+
 sub is_delayed {
     return 1;
 }

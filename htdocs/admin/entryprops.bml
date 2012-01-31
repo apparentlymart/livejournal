@@ -24,6 +24,9 @@ body<=
     $ret .= "<?hr?>";
 
     my $entry = LJ::Entry->new_from_url($GET{url});
+    if (!$entry) {
+        $entry = LJ::DelayedEntry->create_from_url($GET{url}, { 'delayed_visibility' => 1});
+    }
 
     unless ($entry && $entry->valid) {
         $ret .= LJ::error_list("$POST{url} is not a valid entry URL.") if LJ::did_post();
@@ -61,7 +64,10 @@ body<=
     $ret .= "<strong>Server Date/Time</strong>: " . $entry->logtime_mysql . "<br />";
     $ret .= "<strong>Journal Adult Content</strong>: " . ($entry->journal->adult_content || "none")
         . " (admin setting: " . ($entry->journal->admin_content_flag || "none") . ")<br />";
-    $ret .= "<strong>Skip/iNclude in recent entries</strong>: " . $entry->get_suspended_mark . "<br />";
+
+    if (!$entry->is_delayed) {
+        $ret .= "<strong>Skip/iNclude in recent entries</strong>: " . $entry->get_suspended_mark . "<br />";
+    }
     $ret .= "<br />";
 
     my %props = %{$entry->props || {}};
