@@ -4472,6 +4472,17 @@ sub number_of_posts {
     }, $expire);
 }
 
+# return the number if public posts
+sub number_of_public_posts {
+    my ($u) = @_;
+    my $memkey = [$u->{userid}, "log2publicct:$u->{userid}"];
+    my $expire = time() + 300;  # 5 min
+    return LJ::MemCache::get_or_set($memkey, sub {
+        return $u->get_post_ids(return => 'count', security => 'public');
+    }, $expire);
+}
+
+
 # return the number of posts that the user actually posted themselves
 sub number_of_posted_posts {
     my $u = shift;
