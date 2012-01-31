@@ -1603,6 +1603,7 @@ sub load_comments
 
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
+    my $no_subject = LJ::is_enabled('new_comments')? '' : '...';
     $posts_loaded = LJ::get_talktext2($u, keys %posts_to_load);
     $subjects_loaded = LJ::get_talktext2($u, { onlysubjects => 1 }, keys %subjects_to_load) if $subjcounter;
     foreach my $talkid (keys %posts_to_load) {
@@ -1617,7 +1618,7 @@ sub load_comments
         next unless $post->{'_show'};
         $post->{'subject'} = $subjects_loaded->{$talkid}?
             $subjects_loaded->{$talkid}->[0]:
-            '...';
+            $no_subject;
         $users_to_load{$post->{'posterid'}} ||= 0.5;  # only care about username
     } 
 
@@ -1664,7 +1665,7 @@ sub load_comments
     if (!$LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $u->{'user'} }) {
         foreach my $post (values %$posts) {
             my $up = $up{ $post->{'posterid'} };
-            if ($up && $up->is_deleted) {
+            if ( $up and $up->{'statusvis'} eq 'D' ) {
                 my ($purge_comments, undef) = split /:/, $up->prop("purge_external_content");
                 if ($purge_comments) {
                     delete @$post{qw/ _loaded subject body /};
