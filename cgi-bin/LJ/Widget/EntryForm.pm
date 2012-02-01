@@ -1625,7 +1625,7 @@ sub render_ljphoto_block {
 
     LJ::Widget::Fotki::Upload->render();
  
-    $out .= $ljphoto_enabled ? <<JS : "";
+    $out .= <<JS ;
 <script type="text/javascript">
     window.ljphotoEnabled = $ljphoto_enabled;
     jQuery('#updateForm').photouploader({
@@ -1639,7 +1639,7 @@ sub render_ljphoto_block {
     });
 </script>
 JS
- 
+
     if (@$insert_photos) {
         my $insert_photos_json = LJ::JSON->to_json ( $insert_photos );
         $out .= <<JS;
@@ -1835,7 +1835,7 @@ DISABLE_HTML
 
     ## Show a new photoalbums interface only for logged-in users
     $out .= $self->render_ljphoto_block
-        if $remote && $remote->can_upload_photo();
+        if $remote && $remote->can_use_ljphoto();
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
 
