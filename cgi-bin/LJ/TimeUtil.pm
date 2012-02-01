@@ -253,7 +253,7 @@ sub statushistory_time {
 # </LJFUNC>
 # Time formatting rules explained here: LJSUP-11003
 sub ago_text {
-    my ($class, $secondsold) = @_;
+    my ($class, $secondsold, $noremote) = @_;
     return LJ::Lang::ml('time.ago.never') unless $secondsold >= 0;
 
     my ($num, $unit);
@@ -289,6 +289,11 @@ sub ago_text {
 
         $secondsold /= (60 * 60 * 24);
         return $mlcache->{'day'}[$secondsold] ||= LJ::Lang::ml('time.ago.day', { num => $secondsold });
+
+    # Today for anon users
+    } elsif ( $noremote ) {
+    
+        return $mlcache->{'today'} ||= LJ::Lang::ml('time.ago.today');
 
     # Hour
     } elsif ( $secondsold >= 60 * 60 ) {
