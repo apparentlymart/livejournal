@@ -1837,6 +1837,19 @@ sub clean_event
     my $cleancss = $opts->{'journalid'} ?
         ! $LJ::STYLE_TRUSTED{ $opts->{'journalid'} } : 0;
 
+    my $strongcleancss = $cleancss;
+
+    my $poster         = LJ::load_userid( $opts->{'posterid'} );
+    my $journal        = LJ::load_userid( $opts->{'journalid'} );
+    my $active_journal = LJ::get_active_journal();
+    if ( $poster &&
+        $poster->get_cap('no_strong_clean_css') &&
+        $poster->equals($journal) &&
+        $poster->equals($active_journal) )
+    {
+        $strongcleancss = 0;
+    }
+
     # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify'          => 1,
@@ -1849,7 +1862,7 @@ sub clean_event
         'remove'           => $event_remove,
         'autoclose'        => \@comment_close,
         'cleancss'         => $cleancss,
-        'strongcleancss'   => $cleancss,
+        'strongcleancss'   => $strongcleancss,
         'noearlyclose'     => 1,
         'tablecheck'       => 1,
         'ljrepost_allowed' => 1,
