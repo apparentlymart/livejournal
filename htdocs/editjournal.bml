@@ -493,7 +493,7 @@ body<=
             my $datetime; my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
             if ($date ne "0000-00-00 00:00:00") {
                 my ($date, $time) = split( / /, $date);
-                $datetime = "$date $POST{'hour'}:$POST{'min'}";
+                $datetime = "$date $POST{'time'}";
             } else {
                 $datetime = "$year-$mon-$mday $hour:$min";
             }
