@@ -81,7 +81,6 @@ foreach my $file ('redirect.dat', 'redirect-local.dat') {
 ## If $LJ::SHOW_SLOW_QUERIES is true, slow (>20 secs) requests are
 ## interrupted and stacktrace is sent to error log.
 ##
-$LJ::SHOW_SLOW_QUERIES = 1;
 my ($request_str, $request_start_time);
 if ($LJ::SHOW_SLOW_QUERIES) {
     $SIG{'ALRM'} = sub {
