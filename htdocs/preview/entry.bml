@@ -304,7 +304,7 @@
             'userpic' => $userpic,
             'permalink_url' => "#",
             'sticky_type' =>  $sticky,
-            'delayed' => $delayed_obj,
+            'delayedid' => $delayed_id,
             '_preview' => 1,
          }); 
     

@@ -3852,7 +3852,7 @@ sub UserLite__ljuser
         $params->{in_journal} = $link_color->{in_journal};
     }
     else {
-    	$params->{link_color} = $link_color->{as_string};
+        $params->{link_color} = $link_color->{as_string};
     }
 
     return LJ::ljuser($UserLite->{_u}, $params );
@@ -3971,14 +3971,6 @@ sub _Entry__get_link
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
     my $journalu = LJ::load_user($journal);
-    my $entry;
-
-    if ( $this->{itemid} && !$this->{delayedid}) {
-        $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
-    } if ($this->{delayedid}) {
-        $entry = LJ::DelayedEntry->get_entry_by_id( $this->{journal}->{_u}, 
-                                                    $this->{delayedid} );
-    }
 
     if ($key eq "edit_entry") {
         return $null_link unless $remote &&
@@ -3987,12 +3979,23 @@ sub _Entry__get_link
                                       $remote->can_manage($journalu)
                                     );
 
+        if ($this->{delayed}) {
+            return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;delayedid=$this->{delayedid}",
+                        $ctx->[S2::PROPS]->{"text_edit_entry"},
+                        LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
+        }
+
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                         $ctx->[S2::PROPS]->{"text_edit_entry"},
                         LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 24, 24));
     }
+    return $null_link if $this->{delayed};
 
     if ($key eq "edit_tags") {
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+
         return $null_link 
             unless $remote && LJ::Tags::can_add_entry_tags( $remote, $entry );
 
@@ -4007,7 +4010,7 @@ sub _Entry__get_link
     }
 
     if ( $key eq 'share') {
-        return $null_link if $entry->is_delayed;
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
         return $null_link
             unless LJ::is_enabled('sharing') && $entry->is_public;
 
@@ -4065,7 +4068,7 @@ sub _Entry__get_link
     }
 
     if ($key eq "mem_add") {
-        return $null_link if $LJ::DISABLED{'memories'};
+        return $null_link if ($LJ::DISABLED{'memories'} || $this->{delayedid});
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_mem_add"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 24, 24));
@@ -4106,6 +4109,8 @@ sub _Entry__get_link
 
     if ($key eq "flag") {
         return $null_link unless LJ::is_enabled("content_flag");
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+
         return $null_link unless $remote && $remote->can_see_content_flag_button( content => $entry );
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
                             $ctx->[S2::PROPS]->{"text_flag"},
