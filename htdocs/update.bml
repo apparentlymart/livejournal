@@ -259,9 +259,7 @@ EMBED
 
         my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
         ($year, $mon, $mday) = split( /\D/, $date);
-        $hour = $POST{'hour'};
-        $min  = $POST{'min'};
-
+        ($hour, $min) = split(/:/, $POST{'time'});
     }
 
     my $print_entry_form = sub {
