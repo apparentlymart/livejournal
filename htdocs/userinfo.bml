@@ -661,18 +661,19 @@
     if ($u->is_personal || $u->is_comm) {
         my $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
             func => 'get_value',
-            what => $u->is_personal ? 'users' : 'communities',
+            what => $u->journaltype eq 'C' ? 'communities' : 'users', 
             journal_id => $u->userid,
-            by => 'friends_of',
+            by => 'friends_weight',
             type => 0,
-            sup => LJ::SUP->is_sup_enabled($u),
+            sup => 1,
         });
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
                 $body .= "<p class='details-rating'><img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> " . 
-                         LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => $position->{result}->{position}, 
-                                                                         url_user_rating => '/ratings/users/friends_of', 
-                                                                         soc_capital => $position->{result}->{value}}) . 
+                         LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => ++$position->{result}->{position}, 
+                                                                         url_user_rating => $LJ::SITEROOT."/ratings/users/", 
+                                                                         soc_capital => $position->{result}->{value}/1000}) . 
+                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> FAQ</a>" .
                         "</p>";
             }
         }
@@ -710,8 +711,8 @@
 
     push @view_links_l, '<li>' . BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" }) . '</li>'
         unless $u->is_identity;
-    push @view_links_l, '<li>' . "$num_comments_received comments recieved" . '</li>';
-    push @view_links_l, '<li>' . "$num_comments_posted comments posted" . '</li>';
+    push @view_links_l, '<li>' . "$num_comments_received " . LJ::Lang::ml('userinfo.bml.comments.received') . '</li>';
+    push @view_links_l, '<li>' . "$num_comments_posted " . LJ::Lang::ml('userinfo.bml.comments.posted') . '</li>';
     push @view_links_l, '<li>' . BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" }) . '</li>'
         unless $u->is_identity || $u->is_syndicated;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
