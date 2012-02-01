@@ -6,8 +6,8 @@ use LJ::WURFL;
 my $wurfl;
 
 sub is_mobile {
-    my $class = shift;
-    my $user_agent = shift || LJ::Request->header_in('User-Agent');
+    my ($class, $user_agent) = @_;
+    $user_agent ||= LJ::Request->header_in('User-Agent');
 
     if ($LJ::WURFL{'ua_keys_mobile'}) {
         my @redir = grep { $user_agent =~ /\Q$_\E/i } @{$LJ::WURFL{'ua_keys_mobile'}};
@@ -24,6 +24,14 @@ sub is_mobile {
 
     return $wurfl->is_mobile($user_agent);
 }
+
+sub is_gsensor {
+    my ($class, $user_agent) = @_;
+    $user_agent ||= LJ::Request->header_in('User-Agent');
+
+    return ($user_agent =~ $LJ::GSENSOR_GADGETS_UA) ? 1 : 0;
+}
+
 
 my $mobile_domain = 'http://m.livejournal.com';
 
