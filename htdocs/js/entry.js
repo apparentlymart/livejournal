@@ -1034,7 +1034,7 @@ InOb.handleInsertImageBeta = (function () {
 	}
 
 	return function (type, data) {
-		if (window.ljphotoEnabled) {
+		if (window.ljphotoEnabled || type == 'add') {
 			var jPhotoUploader = jQuery('#updateForm');
 
 			if (type == 'add' && data) {
