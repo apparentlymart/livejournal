@@ -673,7 +673,7 @@
                          LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => ++$position->{result}->{position}, 
                                                                          url_user_rating => $LJ::SITEROOT."/ratings/users/", 
                                                                          soc_capital => $position->{result}->{value}/1000}) . 
-                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> FAQ</a>" .
+                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'>" . LJ::help_icon_html("profile_faq") . "</a>" .
                         "</p>";
             }
         }
