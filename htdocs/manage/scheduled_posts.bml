@@ -19,7 +19,6 @@ body<=
                     js/scanner.js
                     js/photobucket_jw.js
                     ));
-
     if (!LJ::is_enabled("delayed_entries")) {
           return LJ::error_list("This feature is disabled.");
     }
@@ -36,6 +35,14 @@ body<=
 
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
+    }
+
+    my $is_admin = LJ::check_priv($remote, "canview", "scheduled");
+    my $can_viewall = LJ::check_priv($remote, "canview", "*");
+
+    my $visibility = $is_admin;
+    if ($can_viewall && $GET{'viewall'} == 1) {
+        $visibility = LJ::DelayedEntry::VIEW_ALL;
     }
 
     my $usejournal_u = LJ::load_user ($usejournal || $remote->user);
@@ -95,7 +102,9 @@ body<=
         my @ordered;
 
         foreach my $ditem (@$delayed_entries) {
-            my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
+            my $entry = LJ::DelayedEntry->get_entry_by_id( $u,
+                                                           $ditem,
+                                                           { 'delayed_visibility' => $visibility } );
 
             push @ordered, {
                             'alldatepart'        => $entry->alldatepart ,
@@ -114,7 +123,8 @@ body<=
     my $delayed_entries = LJ::DelayedEntry->get_entries_by_journal($usejournal_u,
                                                                    { 'skip'    => $skip,
                                                                      'show'    => $items_per_page + 1,
-                                                                     'only_my' => $only_me_checked, });
+                                                                     'only_my' => $only_me_checked,
+                                                                     'delayed_visibility' => $visibility });
 
     my $have_next_page =  scalar @$delayed_entries > $items_per_page;
     if ($have_next_page) {

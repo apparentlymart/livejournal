@@ -6,6 +6,10 @@ require 'ljprotocol.pl';
 use LJ::User;
 use Storable;
 
+use constant {
+    VIEW_ALL => 2,
+};
+
 #common methodss
 
 sub create_from_url {
@@ -51,7 +55,7 @@ sub create {
     my $posttime    = __get_datetime($req);
     my $data_ser    = __serialize($req);
     my $delayedid   = LJ::alloc_user_counter( $journal, 
-                                             'Y',
+                                              'Y',
                                               undef);
     my $security    = "public";
     my $uselogsec   = 0;
@@ -287,6 +291,9 @@ sub journalid {
 
 sub timezone {
     my $remote = LJ::get_remote();
+    if (!$remote) {
+        return 0;
+    }
     return $remote->prop("timezone");
 }
 
@@ -580,7 +587,6 @@ sub should_block_robots {
     return 0;
 }
 
-
 sub update_tags {
     my ($self, $tags) = @_;
     $self->props->{taglist} = $tags;
@@ -608,9 +614,9 @@ sub get_log2_row {
 
 sub load_data {
     my ($class, $dbcr, $opts) = @_;
-    __assert($opts->{journalid}, "no journal id");
+    __assert($opts->{journalid},  "no journal id");
     __assert($opts->{delayed_id}, "no delayed id");
-    __assert($opts->{posterid}, "no poster id");
+    __assert($opts->{posterid},   "no poster id");
 
     my $journalid = $opts->{journalid};
     my $delayedid = $opts->{delayed_id};
@@ -620,12 +626,12 @@ sub load_data {
                                             "WHERE journalid=$journalid AND " .
                                             "delayedid = $delayedid" );
 
-    my $self = bless {}, $class; 
-    $self->{journal} = LJ::want_user($opts->{journalid});
-    $self->{data} = __deserialize($data_ser);
-    $self->{poster} = LJ::want_user($opts->{posterid});
+    my $self = bless {}, $class;
     $self->{delayed_id} = $delayedid;
-    $self->{posttime} = __get_datetime($self->{data});
+    $self->{journal}    = LJ::want_user($opts->{journalid});
+    $self->{poster}     = LJ::want_user($opts->{posterid});
+    $self->{data}       = __deserialize($data_ser);
+    $self->{posttime}   = __get_datetime($self->{data});
 
     return $self;
 }
@@ -646,7 +652,9 @@ sub get_entry_by_id {
     my $delayed_visibility = $options->{'delayed_visibility'} || 0;
 
     my $sql_poster = '';
-    if ( !$delayed_visibility && !__delayed_entry_can_see( $journal, $user ) ) {
+    my $can_see = __delayed_entry_can_see( $journal, $user );
+
+    if ( !$delayed_visibility && !$can_see ) {
         $sql_poster = 'AND posterid = ' . $user->userid . " "; 
     }
 
@@ -678,6 +686,13 @@ sub get_entry_by_id {
     $self->{logtime}            = $opts->[4];
     $self->{taglist}            = __extract_tag_list( \$self->prop("taglist") );
     $self->{default_dateformat} = $options->{'dateformat'} || 'S2';
+
+    if (!$can_see && ($delayed_visibility != VIEW_ALL)) {
+        if ($self->security ne "public") {
+            $self->data->{'subject'} = "*private content: subject*";
+            $self->data->{'event'}   = "*private content: event*";
+        }
+    }
 
     __assert( $self->{poster},  "no poster" );
     __assert( $self->{journal}, "no journal" );
@@ -784,7 +799,9 @@ sub get_entries_by_journal {
     my $userid        = $opts->{'userid'};
     my $only_my       = $opts->{'only_my'};
     my $sticky_on_top = $opts->{'sticky_on_top'};
-    
+
+    my $delayed_visibility = $opts->{'delayed_visibility'} || 0;
+
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
 
@@ -798,10 +815,12 @@ sub get_entries_by_journal {
 
     return [] unless $u;
     $userid = $u->userid;
-   
+
     my $sql_poster = ''; 
     if ( !__delayed_entry_can_see( $journal, $u ) || $only_my ) {
-        $sql_poster = 'AND posterid = ' . $u->userid . " ";
+        if (!$delayed_visibility || $only_my) {
+            $sql_poster = 'AND posterid = ' . $u->userid . " ";
+        }
     }
 
     my $sql_limit = '';
@@ -810,10 +829,10 @@ sub get_entries_by_journal {
     }
 
     my $sticky_sql = $sticky_on_top ? 'is_sticky ASC, ' : '';
-
     my $journalid = $journal->userid;
+
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                     "FROM delayedlog2 WHERE journalid=$journalid  $sql_poster".
+                                     "FROM delayedlog2 WHERE journalid=$journalid $sql_poster".
                                      "ORDER BY $sticky_sql revptime DESC $sql_limit");
 }
 

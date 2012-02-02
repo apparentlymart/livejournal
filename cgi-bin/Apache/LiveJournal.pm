@@ -879,6 +879,7 @@ sub trans {
             my $bml_file = "$ENV{LJHOME}/htdocs/preview/entry.bml";
             LJ::Request->uri($new_uri);
             LJ::Request->notes( 'delayed_id' => $delayed_id);
+            LJ::Request->notes( 'usejournal' => $user );
             return $bml_handler->($bml_file);
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
