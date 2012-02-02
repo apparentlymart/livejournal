@@ -24,7 +24,7 @@ sub options {
 sub work {
     foreach my $cluster_id (@LJ::CLUSTERS) {
         my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, __PACKAGE__->verbose);
-        LJ::DelayedEntry::Scheduler::on_pulse($cluster_id, $dbr);
+        LJ::DelayedEntry::Scheduler::on_pulse($cluster_id, $dbr, __PACKAGE__->verbose);
     }
 
     return 1 if __PACKAGE__->should_quit;

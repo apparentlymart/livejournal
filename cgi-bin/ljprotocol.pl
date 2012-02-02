@@ -2366,6 +2366,7 @@ sub postevent {
             $req->{ext}->{flags} = $flags;
             $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
             $req->{usejournal} = $req->{usejournal} || '';
+            delete $req->{'custom_time'};
   
             my $entry = LJ::DelayedEntry->create( $req, { journal => $uowner,
                                                           poster  => $u,} );

@@ -56,7 +56,7 @@ sub pulse_time {
 sub __load_delayed_entries {
     my ($dbh) = @_;
     my @entries;
-    
+
     my $list = $dbh->selectall_arrayref("SELECT journalid, delayedid, posterid " .
                                         "FROM delayedlog2 ".
                                         "WHERE posttime <= NOW() LIMIT 1000");
@@ -73,7 +73,7 @@ sub __load_delayed_entries {
 sub __send_error {
     my ($poster, $subject, $error) = @_;
     my $email = $poster->email_raw;
-    
+
     LJ::send_mail({
         'to'        => $email,
         'from'      => $LJ::ADMIN_EMAIL,
@@ -89,7 +89,7 @@ sub __send_error {
 
 
 sub on_pulse {
-    my ($clusterid, $dbh) = @_;
+    my ($clusterid, $dbh, $verbose) = @_;
     __assert($dbh);
 
     my $lock = new LJ::DelayedEntry::Scheduler::TableLock($dbh);
@@ -102,14 +102,33 @@ sub on_pulse {
         while ( my $entries = __load_delayed_entries($dbh) ) {
             foreach my $entry (@$entries) {
                 my $post_status = $entry->convert();
-        
+
                 # do we need to send error
                 if ( $post_status->{error_message} ) {
                     __send_error($entry->poster, 
                                 $entry->data->{subject},
                                 $post_status->{error_message});
+
+                    if ($verbose) {
+                        print "(posting failed)The entry with subject " . $entry->subject;
+                        print "\ndelayed id = " . $entry->delayedid . 
+                        print " and post date " . $entry->posttime . "\n";
+                    }
+                } elsif ($verbose) {
+                        print "(posting)The entry with subject " . $entry->subject;
+                        print "\ndelayed id = " . $entry->delayedid . 
+                        print " and post date " . $entry->posttime . "\n";
                 }
+
                 if ( $post_status->{delete_entry} ) {
+
+                    if ($verbose) {
+                        print "The entry with subject " . $entry->subject;
+                        print "\ndelayed id = " . $entry->delayedid . 
+                        print " and post date " . $entry->posttime;
+                        print " is deleted\n";
+                    }
+
                     $entry->delete();
                 }
             }
