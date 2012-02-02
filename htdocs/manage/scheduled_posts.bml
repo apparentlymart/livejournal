@@ -33,6 +33,7 @@ body<=
 
     return "<?needlogin?>" unless $remote;
 
+    my $usejournal_u = LJ::load_user ($usejournal || $remote->user);
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
@@ -43,9 +44,12 @@ body<=
     my $visibility = $is_admin;
     if ($can_viewall && $GET{'viewall'} == 1) {
         $visibility = LJ::DelayedEntry::VIEW_ALL;
-    }
 
-    my $usejournal_u = LJ::load_user ($usejournal || $remote->user);
+        LJ::statushistory_add( $usejournal_u->userid,
+                               $remote->userid,
+                               "viewall",
+                               "scheduled: username: $usejournal_u->{'user'}, statusvis: $usejournal_u->{'statusvis'}");
+    }
 
     my $entry_chooser = sub {
         my $ref = shift;
