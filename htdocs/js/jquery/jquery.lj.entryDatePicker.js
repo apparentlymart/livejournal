@@ -50,8 +50,8 @@
 				return;
 			}
 			newDate.setFullYear(self.currentDate.getFullYear());
-			newDate.setMonth(self.currentDate.getMonth());
 			newDate.setDate(self.currentDate.getDate());
+			newDate.setMonth(self.currentDate.getMonth());
 			self._setEditDate(newDate);
 		},
 		onChangeDate: function(evt) {
