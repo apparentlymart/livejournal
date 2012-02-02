@@ -627,23 +627,21 @@
     my @comment_stats;
     my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
     my $num_comments_posted = $u->num_comments_posted( dbh => $dbcr );
-    push @comment_stats, BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) })
-        unless $u->is_identity;
-    push @comment_stats, BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) })
-        if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
 
     my $supportpoints = $u->support_points_count;
     push @comment_stats, BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints })
         if $supportpoints;
-
-    my $comment_stats_string = join(", ", @comment_stats);
 
     my $timecreate = LJ::TimeUtil->mysql_time($u->timecreate);
     my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
 
     $body .= "<div class='details_stats'>";
     $body .= $journal_warnings;
-    $body .= "<p>" . BML::ml('.details.createdon2', { createdate => $timecreate }) . " (#" . $u->id . ")";
+
+    $body .= "<p class='account_level'>";
+    $body .= LJ::run_hook("userinfo_extra_user_details", user => $u);
+
+    $body .= BML::ml('.details.createdon2', { createdate => $timecreate }) . " (#" . $u->id . ")";
     unless ($u->is_identity) {
         if ($u->timeupdate) {
             $body .= ", " . BML::ml('.details.lastupdated2', { timestamp => "<span class='tooltip' title=\"$ago_text\">$lastupdated</span>" }) . " $nudge_link";
@@ -652,8 +650,6 @@
         }
     }
     $body .= "</p>";
-    $body .= "<p>$comment_stats_string</p>" if $comment_stats_string;
-    $body .= LJ::run_hook("userinfo_extra_user_details", user => $u);
     $body .= "</div>";
 
     #LJSUP-10988: Add position and social capital to user profile
@@ -670,10 +666,10 @@
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
                 $body .= "<p class='details-rating'><img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> " . 
-                         LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => ++$position->{result}->{position}, 
+                         LJ::Lang::ml('ljcom.userinfo.account_rating', { rating_place => LJ::commafy(++$position->{result}->{position}), 
                                                                          url_user_rating => $LJ::SITEROOT."/ratings/users/", 
-                                                                         soc_capital => $position->{result}->{value}/1000}) . 
-                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'>" . LJ::help_icon_html("profile_faq") . "</a>" .
+                                                                         soc_capital => LJ::commafy(int($position->{result}->{value}/1000)),}) . 
+                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
                         "</p>";
             }
         }
@@ -711,8 +707,10 @@
 
     push @view_links_l, '<li>' . BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" }) . '</li>'
         unless $u->is_identity;
-    push @view_links_l, '<li>' . "$num_comments_received " . LJ::Lang::ml('userinfo.bml.comments.received') . '</li>';
-    push @view_links_l, '<li>' . "$num_comments_posted " . LJ::Lang::ml('userinfo.bml.comments.posted') . '</li>';
+    push @view_links_l, '<li>'. BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) }). '</li>' unless $u->is_identity; 
+
+    push @view_links_l, '<li>' . BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) }) . '</li>' if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
+
     push @view_links_l, '<li>' . BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" }) . '</li>'
         unless $u->is_identity || $u->is_syndicated;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
