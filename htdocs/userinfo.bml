@@ -592,8 +592,8 @@
     my $title = $u->{journaltitle} ? LJ::ehtml($u->{journaltitle}) : BML::ml('.details.title', { user => $u->display_username });
     my $subtitle = $u->{journalsubtitle} ?  LJ::ehtml($u->{journalsubtitle}) : '';
     $body .= "<div class='details_journal'>";
-    $body .= "<p class='journal_title'>$title</p>";
-    $body .= "<p class='journal_subtitle'>$subtitle</p>" if $subtitle;
+    $body .= "<h2 class='journal_title'>$title</h2>";
+    $body .= "<h3 class='journal_subtitle'>$subtitle</h3>" if $subtitle;
     $body .= "</div>";
 
     ## journal warnings

@@ -126,12 +126,18 @@
 
 .details_journal {
 }
-    .details_journal .journal_title {
-        font-size: 1em;
+    .details_journal H2.journal_title {
+        font-size: 1em !important;
         font-weight: bold;
+        font-style: normal;
+        color: #000;
     }
-    .details_journal .journal_subtitle {
+    .details_journal H3.journal_subtitle {
+        margin: 0 0 0.7em;
         font-style: italic;
+        font-weight: normal;
+        font-size: 1em;
+        color: #000;
     }
         
 .details_stats {
@@ -177,8 +183,8 @@
     padding: 0;
 }
 P.details-rating {
-    padding: 22px 0 10px;
-}
+    padding: 16px 0 10px;
+    }
 .user_details_bottom {
     font-size: 0.85em;
     padding-top: 5px;
