@@ -4,7 +4,7 @@
  */
 
 /**
- * @name $.lj.selfPromoStatsTable
+ * @name $.lj.lazyLoadable
  * @requires $.ui.core, $.ui.widget, $.lj.basicWidget
  * @class Widget represents block that appends itself as user scrolls the page.
  * @extends $.lj.basicWidget
@@ -18,18 +18,28 @@
 	$.widget('lj.lazyLoadable', jQuery.lj.basicWidget, {
 		options: {
 			selectors: {
-				row: '.b-row',
 				container: null, //null means that this.element is the container
-				loadMore: 'b-load-more'
+				loadMore: 'b-load-more' //load more spinner
 			},
 			classNames: {
-				loading: '',
+				//this class is added if ajax endpoint returned less rows than expected
 				noMoreRows: 'b-nomore',
+				//pagination button should appear if widget fetches max number of rows per page
+				showPageControls: '',
+				//class is added to all odd rows
 				oddRow: ''
 			},
 
+			//this value should be filled if we are viewing non-first page
+			startOffset: parseInt(LiveJournal.parseGetArgs().offset, 10) || 0,
+			//initial number of rows on the page
 			pageSize: 10,
+			//max number of rows on the page
+			rowsLimit: 20,
+			//widget will fetch data if bottom of the screen is closer than
+			//this to the end of the widget
 			treshold: 500, //px
+			//an url to fetch more rows
 			url: LiveJournal.constructUrl(location.href, {offset: '{offset}'})
 		},
 
@@ -79,11 +89,17 @@
 			};
 
 			jQuery
-				.getJSON(this.options.url.supplant({offset: this._count}))
+				.getJSON(this.options.url.supplant({offset: this._count + this.options.startOffset}))
 				.success(this._onHandleLoadRows.bind(this))
 				.error(errorHandler);
 		},
 
+		/**
+		 * Handle ajax output.
+		 *
+		 * @param {status: 'ok'|'error', rows: Array.{ id: number, html: string}} ajax response.
+		 *    The answer structure expected is encoded in type.
+		 */
 		_onHandleLoadRows: function(ans) {
 			if (!ans.status === 'ok') { return; }
 
@@ -94,10 +110,21 @@
 			if (ans.rows.length < this.options.pageSize) {
 				this._loadMore.addClass(this.options.classNames.noMoreRows);
 				$window.unbind('scroll' + this._eventNamespace);
+			} else if (this._count >= this.options.rowsLimit) {
+				this.element.addClass(this.options.classNames.showPageControls);
+				this._updatePagination();
+				$window.unbind('scroll' + this._eventNamespace);
 			}
+
 			this._loading = false;
 		},
 
+		/**
+		 * Append new rows at the end of the table. This method should be redefined to add
+		 *     any custom logic.
+		 *
+		 * @param {status: 'ok'|'error', rows: Array.{ id: number, html: string}} ajax response.
+		 */
 		_onLoadRows: function(ans) {
 			var count = this._count,
 				lastOdd = this._lastOdd;
@@ -111,8 +138,11 @@
 			this._container.append(html);
 		},
 
-		_recalcRows: function() {
-			this._setCount(this.container.find(this.options.selectors.row).length);
+		/**
+		 * Method is called when pagination buttons are shown, so developer can update
+		 *     button links.
+		 */
+		_updatePagination: function() {
 		},
 
 		_setCount: function(count) {
