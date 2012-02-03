@@ -715,7 +715,7 @@
         unless $u->is_identity || $u->is_syndicated;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
-    push @view_links_r, '<li>' . BML::ml('.details.fotobilder2', { num => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" }) . '</li>'
+    push @view_links_r, '<li>' . BML::ml('.details.fotobilder', { num => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" }) . '</li>'
         if $ct_str;
     push @view_links_r, '<li>' . BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
