@@ -249,7 +249,9 @@
 
         $p->{head_content}->set_object_type( $p->{_type} );
         # Don't show the navigation strip
-        $p->{head_content}->set_options( { dont_show_nav_strip => 'UNUSED' } );
+        if (!$delayed_id) {
+            $p->{head_content}->set_options( { dont_show_nav_strip => 'UNUSED' } );
+        }
 
         my $userlite_journal = LJ::S2::UserLite($u);
         my $userlite_poster  = LJ::S2::UserLite($up);
