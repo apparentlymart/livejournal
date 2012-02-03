@@ -685,7 +685,7 @@
 
     ## fotobilder gallery count
     my $ct_str;
-    if ($u && $u->can_use_ljphoto && $u->{fb_num_pubpics}+0 > 0) {
+    if ($u && (($u->get_cap('fb_account') && $u->get_cap('fb_can_upload')) || ($u->can_use_ljphoto)) && ($u->{fb_num_pubpics} + $u->prop('fotki_all_photos_count') + 0 > 0)) {
         # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
         # estimate in a way that makes it clear it's not an exact number. rules are:
         #
@@ -693,7 +693,7 @@
         #    * 10..999 == "at least 150" (rounded down to nearest 10)
         #    * 1000+   == "at least 1500" (rounded down to nearest 100)
         #
-        my $ct = $u->{fb_num_pubpics};
+        my $ct = $u->{fb_num_pubpics} + $u->prop('fotki_all_photos_count');
         if ($ct < 10) {
             $ct_str = "<10";
         } else {
