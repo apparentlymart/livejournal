@@ -19,11 +19,14 @@
 		options: {
 			selectors: {
 				container: null, //null means that this.element is the container
+				row: '', //we have to check initial number of content rows on the page
 				loadMore: 'b-load-more' //load more spinner
 			},
 			classNames: {
 				//this class is added if ajax endpoint returned less rows than expected
 				noMoreRows: 'b-nomore',
+				//show only past button
+				past: 'b-past',
 				//pagination button should appear if widget fetches max number of rows per page
 				showPageControls: '',
 				//class is added to all odd rows
@@ -51,12 +54,17 @@
 			this._eventNamespace = '.' + this.widgetName;
 			this._container = selectors.container ? this.element.find(selectors.container) : this.element;
 			this._loadMore = this.element.find(selectors.loadMore);
-			this._count = this.options.pageSize;
+			this._count = this._container.find(selectors.row).length;
 
 			this._firstOdd = true;
 			this._lastOdd = this._count % 2 === 1;
 			this._containerBottom = this._container.offset().top + this._container.height();
 			this._bindControls();
+
+			if (this._count < this.options.pageSize) {
+				this._disableLoader();
+				this._showPagination();
+			}
 		},
 
 		_bindControls: function() {
@@ -65,7 +73,9 @@
 				classNames = this.options.classNames;
 
 			this._loading = false;
-			$window.bind('scroll' + this._eventNamespace, this._onScroll.bind(this));
+			if (this.options.pageSize === this._count) {
+				$window.bind('scroll' + this._eventNamespace, this._onScroll.bind(this));
+			}
 
 			$.lj.basicWidget.prototype._bindControls.apply(this);
 		},
@@ -101,22 +111,36 @@
 		 *    The answer structure expected is encoded in type.
 		 */
 		_onHandleLoadRows: function(ans) {
-			if (!ans.status === 'ok') { return; }
+			if (ans.status === 'ok') {
+				this._onLoadRows(ans);
+				this._setCount(this._count + ans.rows.length);
+				this._containerBottom = this._container.offset().top + this._container.height();
+			}
 
-			this._onLoadRows(ans);
-			this._setCount(this._count + ans.rows.length);
-			this._containerBottom = this._container.offset().top + this._container.height();
-
-			if (ans.rows.length < this.options.pageSize) {
-				this._loadMore.addClass(this.options.classNames.noMoreRows);
+			if (ans.status === 'error' || ans.rows.length < this.options.pageSize) {
+				this._disableLoader();
 				$window.unbind('scroll' + this._eventNamespace);
 			} else if (this._count >= this.options.rowsLimit) {
-				this.element.addClass(this.options.classNames.showPageControls);
-				this._updatePagination();
+				this._disableLoader();
 				$window.unbind('scroll' + this._eventNamespace);
+				this._showPagination(this._count === this.options.rowsLimit);
 			}
 
 			this._loading = false;
+		},
+
+		_disableLoader: function() {
+			this.element.addClass(this.options.classNames.noMoreRows);
+		},
+
+		_showPagination: function(showBothButtons) {
+			this._updatePagination();
+
+			if (this.options.startOffset > 0 && !showBothButtons) {
+				this.element.addClass(this.options.classNames.showPast);
+			} else {
+				this.element.addClass(this.options.classNames.showPageControls);
+			}
 		},
 
 		/**
