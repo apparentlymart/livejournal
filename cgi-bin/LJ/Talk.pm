@@ -2203,6 +2203,7 @@ sub talkform {
         'subjicon_current_w'        => $subicon_current_show{'w'},
         'subjicon_current_h'        => $subicon_current_show{'h'},
         'warnscreened'              => !$editid && $parpost->{'state'} eq "S",
+        parpost                     => $parpost->{'jtalkid'}? 1 : 0,
 
         'form_intro'                => $form_intro,
         'errors'                    => \@errors_show,
