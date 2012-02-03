@@ -869,6 +869,12 @@ sub trans {
             my $delayed_id = $1;
             my $u = LJ::load_user($user);
 
+            if (!LJ::is_enabled("delayed_entries")) {
+                LJ::Request->pnotes ('error' => 'e404');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
+
             unless ($u) {
                 LJ::Request->pnotes ('error' => 'baduser');
                 LJ::Request->pnotes ('remote' => LJ::get_remote());
