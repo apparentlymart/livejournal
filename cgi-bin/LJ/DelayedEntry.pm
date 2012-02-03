@@ -395,7 +395,6 @@ sub props {
 
 sub visible_to {
     my ($self, $remote, $opts) = @_;
-    return 0 unless $self->valid;
 
     # can see anything with viewall
     return 1 if $opts->{'viewall'};
@@ -638,25 +637,34 @@ sub load_data {
 
 sub get_entry_by_id {
     my ($class, $journal, $delayedid, $options) = @_;
-    __assert($journal, "no journal");    
+    __assert($journal, "no journal");
     return undef unless $delayedid;
 
     my $journalid = $journal->userid;
     my $userid    = $options->{userid} || 0;
     my $user      = LJ::get_remote() || LJ::want_user($userid);
+    if ($LJ::IS_DEV_SERVER) {
+        __assert($user, "no user");
+    }
     return undef unless $user;
+
+    # can view entry (with content)
+    my $viewall  = $options->{'viewall'} || 0;
+
+    # can view entry (with content)
+    my $viewsome  = $options->{'viewsome'} || 0;
+
+    # delayed entries visibility
+    my $can_see  = __delayed_entry_can_see( $journal, $user );
+
+    my $sql_poster = '';
+
+    if ( !($can_see || $viewsome || $viewall) ) {
+        $sql_poster = 'AND posterid = ' . $user->userid . " "; 
+    }
 
     my $dbcr = LJ::get_cluster_def_reader($journal)
         or die "get cluster for journal failed";
-
-    my $delayed_visibility = $options->{'delayed_visibility'} || 0;
-
-    my $sql_poster = '';
-    my $can_see = __delayed_entry_can_see( $journal, $user );
-
-    if ( !$delayed_visibility && !$can_see ) {
-        $sql_poster = 'AND posterid = ' . $user->userid . " "; 
-    }
 
     my $opts = $dbcr->selectrow_arrayref( "SELECT journalid, delayedid, posterid, posttime, logtime " .
                                           "FROM delayedlog2 ".
@@ -687,11 +695,15 @@ sub get_entry_by_id {
     $self->{taglist}            = __extract_tag_list( \$self->prop("taglist") );
     $self->{default_dateformat} = $options->{'dateformat'} || 'S2';
 
-    if (!$can_see && ($delayed_visibility != VIEW_ALL)) {
-        if ($self->security ne "public") {
-            $self->data->{'subject'} = "*private content: subject*";
-            $self->data->{'event'}   = "*private content: event*";
-        }
+    # is entry visible to user
+    my $visible = $self->visible_to($user, $options);
+
+    # Does conent need to be hidden?
+    my $hide_content = !($can_see || $viewall) && !$visible;
+
+    if ($hide_content) {
+        $self->data->{'subject'} = "*private content: subject*";
+        $self->data->{'event'}   = "*private content: event*";
     }
 
     __assert( $self->{poster},  "no poster" );
@@ -800,7 +812,11 @@ sub get_entries_by_journal {
     my $only_my       = $opts->{'only_my'};
     my $sticky_on_top = $opts->{'sticky_on_top'};
 
-    my $delayed_visibility = $opts->{'delayed_visibility'} || 0;
+    # can view entry (with content)
+    my $viewall  = $opts->{'viewall'} || 0;
+
+    # can view entry (with content)
+    my $viewsome = $opts->{'viewsome'} || 0;
 
     my $dbcr = LJ::get_cluster_def_reader($journal) 
         or die "get cluster for journal failed";
@@ -818,7 +834,7 @@ sub get_entries_by_journal {
 
     my $sql_poster = ''; 
     if ( !__delayed_entry_can_see( $journal, $u ) || $only_my ) {
-        if (!$delayed_visibility || $only_my) {
+        if ( !($viewall || $viewsome) || $only_my) {
             $sql_poster = 'AND posterid = ' . $u->userid . " ";
         }
     }
