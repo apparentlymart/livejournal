@@ -221,7 +221,7 @@
     jQuery('#postform-wrapper')
         .commentator({
             publicKey: '<TMPL_VAR captcha_public>',
-            captchaContainerId: 'captcha-container',
+            captchaContainerId: 'captcha-container'
         })
         .authtype({
             forceStartupCaptcha: !!(Number('<TMPL_VAR need_captcha>')),
