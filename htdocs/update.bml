@@ -625,7 +625,7 @@ LIKE_FAQ
                         $itemid = $itemid * 256 + $anum;
                         $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
                     } else {
-                        my $ext = $remote->equal($ju) ? '' : "?usejournal=" . $ju->username;
+                        my $ext = $remote->equals($ju) ? '' : "?usejournal=" . $ju->username;
                         $$body .= BML::ml('.update.success3', {'aopts' => "href=$LJ::SITEROOT/manage/scheduled_posts.bml$ext"});
                     }
 
