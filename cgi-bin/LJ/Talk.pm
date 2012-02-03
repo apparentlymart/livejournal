@@ -1280,36 +1280,51 @@ sub load_comments_tree
     my %has_children; # talkid -> 1 or undef
 
     my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
+    my $remote_userid = -1;
+    my $journalid = $u->{'userid'};
+    my ($can_manage, $can_sweep);
+
+    if ( $remote ) {
+        $can_manage = $remote->can_manage($u);
+        $can_sweep = $remote->can_sweep($u);
+        $remote_userid = $remote->{'userid'};
+    }
 
     my $post_count = 0;
+    my $flat = $opts->{'flat'};
+
     {
         my %showable_children;  # $id -> $count
 
-        foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %$posts) {
+        foreach my $post (@$posts{ sort { $b <=> $a } keys %$posts }) {
+            my ($talkid, $parenttalkid, $state, $posterid) = @$post{ qw{ talkid parenttalkid state posterid } };
 
-            $has_children{$post->{'parenttalkid'}} = 1;
-            $post->{'has_children'} = $has_children{$post->{'talkid'}};
+            $has_children{$parenttalkid} = 1;
+            $post->{'has_children'} = $has_children{$talkid};
 
             # kill the threading in flat mode
-            if ($opts->{'flat'}) {
-                $post->{'parenttalkid_actual'} = $post->{'parenttalkid'};
+            if ( $flat ) {
+                $post->{'parenttalkid_actual'} = $parenttalkid;
                 $post->{'parenttalkid'} = 0;
+                $parenttalkid = 0;
             }
 
             # see if we should ideally show it or not.  even if it's
             # zero, we'll still show it if it has any children (but we won't show content)
-            my $should_show = $post->{'state'} eq 'D' ? 0 : 1;
-            unless ($viewall) {
+            my $should_show = $state eq 'D'? 0 : 1;
+
+            unless ( $viewall ) {
                 $should_show = 0 if
-                    $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
-                                                              $remote->{'userid'} == $uposterid ||
-                                                              $remote->{'userid'} == $post->{'posterid'} ||
-                                                              $remote->can_manage($u) ||
-                                                              $remote->can_sweep($u)));
+                    $state eq 'S' && !($remote && ($remote_userid == $journalid ||
+                                                   $remote_userid == $uposterid ||
+                                                   $remote_userid == $posterid  ||
+                                                   $can_manage || $can_sweep));
             }
+
             if ( $spambutton and not $showspam ) {
-                $should_show = 0 if $post->{'state'} eq 'B' && ! ($remote && $remote->{'userid'} == $post->{'posterid'});
+                $should_show = 0 if $state eq 'B' && !($remote && $remote_userid == $posterid);
             }
+
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
@@ -1317,20 +1332,22 @@ sub load_comments_tree
             # loaded yet which means either a) row in database is gone, or b)
             # somebody maliciously/accidentally made their parent be a future
             # post, which could result in an infinite loop, which we don't want.
-            $post->{'parenttalkid'} = 0
-                if $post->{'parenttalkid'} && ! $posts->{$post->{'parenttalkid'}};
+            if ( $parenttalkid && ! $posts->{$parenttalkid} ) {
+                $post->{'parenttalkid'} = 0;
+                $parenttalkid = 0;
+            }
 
-            $post->{'children'} = [ map { $posts->{$_} } @{$children{$post->{'talkid'}} || []} ];
+            $post->{'children'} = [ @$posts{ @{ $children{$talkid} || [] } } ];
 
             # increment the parent post's number of showable children,
             # which is our showability plus all those of our children
             # which were already computed, since we're working new to old
             # and children are always newer.
             # then, if we or our children are showable, add us to the child list
-            my $sum = $should_show + $showable_children{$post->{'talkid'}};
-            if ($sum) {
-                $showable_children{$post->{'parenttalkid'}} += $sum;
-                unshift @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
+            my $sum = $should_show + $showable_children{$talkid};
+            if ( $sum ) {
+                $showable_children{$parenttalkid} += $sum;
+                unshift @{ $children{$parenttalkid} }, $talkid;
             }
         }
     }
@@ -1607,11 +1624,12 @@ sub load_comments
     $posts_loaded = LJ::get_talktext2($u, keys %posts_to_load);
     $subjects_loaded = LJ::get_talktext2($u, { onlysubjects => 1 }, keys %subjects_to_load) if $subjcounter;
     foreach my $talkid (keys %posts_to_load) {
-        next unless $posts->{$talkid}->{'_show'};
-        $posts->{$talkid}->{'_loaded'} = 1;
-        $posts->{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
-        $posts->{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
-        $users_to_load{$posts->{$talkid}->{'posterid'}} = 1;
+        my $post = $posts->{$talkid};
+        next unless $post->{'_show'};
+        $post->{'_loaded'} = 1;
+        $post->{'subject'} = $posts_loaded->{$talkid}->[0];
+        $post->{'body'} = $posts_loaded->{$talkid}->[1];
+        $users_to_load{$post->{'posterid'}} = 1;
     }
 
     while (my ($talkid, $post) = each %$posts) {
