@@ -163,8 +163,6 @@ body<=
     $ret .= "</form>\n";
 
     my $usejournal_text = $usejournal ? "?usejournal=$usejournal&" : '';
-    $ret .= "<a href=\"/update.bml${usejournal_text}\">";
-    $ret .= BML::ml('.newpost') . '</a><br/>';
 
     if ( !$usejournal_u || $usejournal_u->is_community ) {
         $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";
