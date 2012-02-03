@@ -880,6 +880,7 @@ sub trans {
             LJ::Request->uri($new_uri);
             LJ::Request->notes( 'delayed_id' => $delayed_id);
             LJ::Request->notes( 'usejournal' => $user );
+            return remote_domsess_bounce() if LJ::remote_bounce_url();
             return $bml_handler->($bml_file);
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
