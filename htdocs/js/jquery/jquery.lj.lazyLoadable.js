@@ -35,7 +35,7 @@
 			//initial number of rows on the page
 			pageSize: 10,
 			//max number of rows on the page
-			rowsLimit: 20,
+			rowsLimit: 100,
 			//widget will fetch data if bottom of the screen is closer than
 			//this to the end of the widget
 			treshold: 500, //px
