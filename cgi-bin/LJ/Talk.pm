@@ -18,7 +18,10 @@ use LJ::Pay::Wallet;
 use LJ::GeoLocation;
 use LJ::DelayedEntry;
 
-use constant PACK_FORMAT => "NNNNC"; ## $talkid, $parenttalkid, $poster, $time, $state 
+use constant {
+    PACK_FORMAT => "NNNNC",
+    PACK_MULTI  => "C(NNNNC)*",
+}; ## $talkid, $parenttalkid, $poster, $time, $state 
 
 # dataversion for rate limit logging
 our $RATE_DATAVER = "1";
@@ -1017,18 +1020,19 @@ sub get_talk_data_do
     };
 
     my $memcache_decode = sub {
-        my $n = (length($packed) - 1) / $RECORD_SIZE;
-        for (my $i=0; $i<$n; $i++) {
-            my ($talkid, $par, $poster, $time, $state) = unpack(LJ::Talk::PACK_FORMAT, substr($packed,$i*$RECORD_SIZE+1,$RECORD_SIZE));
+        my $n = (length($packed) - 1) / $RECORD_SIZE * 5;
+        my @data = unpack LJ::Talk::PACK_MULTI, $packed;
 
-            $state = chr($state);
+        for (my $i = 1; $i < $n; $i += 5 ) {
+            my ($talkid, $par, $poster, $time) = @data[$i .. ($i + 3)];
+            my $state = chr $data[$i + 4];
+
             $ret->{$talkid} = {
-                talkid => $talkid,
-                state => $state,
-                posterid => $poster,
+                talkid        => $talkid,
+                state         => $state,
+                posterid      => $poster,
                 datepost_unix => $time,
-                #datepost => LJ::TimeUtil->mysql_time($time),  # timezone surely fucked.  deprecated.
-                parenttalkid => $par,
+                parenttalkid  => $par,
             };
 
             # instantiate comment singleton
@@ -1037,6 +1041,7 @@ sub get_talk_data_do
             # comments are counted if they're 'A'pproved or 'F'rozen
             $rp_ourcount++ if $state eq "A" || $state eq "F";
         }
+
         $fixup_rp->();
 
         # set cache in LJ::Entry object for this set of comments
