@@ -117,10 +117,9 @@
 				this._containerBottom = this._container.offset().top + this._container.height();
 			}
 
-			if (ans.status === 'error' || ans.rows.length < this.options.pageSize) {
-				this._disableLoader();
-				$window.unbind('scroll' + this._eventNamespace);
-			} else if (this._count >= this.options.rowsLimit) {
+			if (ans.status === 'error' || 
+					ans.rows.length < this.options.pageSize ||
+					this._count >= this.options.rowsLimit) {
 				this._disableLoader();
 				$window.unbind('scroll' + this._eventNamespace);
 				this._showPagination(this._count === this.options.rowsLimit);
@@ -134,6 +133,8 @@
 		},
 
 		_showPagination: function(showBothButtons) {
+			//we should now show pagination on the first page if we know, that there is no next page
+			if (this._count < this.options.rowsLimit && this.options.startOffset === 0) { return; }
 			this._updatePagination();
 
 			if (this.options.startOffset > 0 && !showBothButtons) {
