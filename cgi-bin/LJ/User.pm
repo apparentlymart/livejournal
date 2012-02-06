@@ -2321,6 +2321,21 @@ sub last_login_time {
     return $time;
 }
 
+sub last_password_change_time {
+    my ($u) = @_;
+
+    my $dbr = LJ::get_db_reader();
+    my ($time) = $dbr->selectrow_array(
+        'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory ' .
+        'WHERE userid=? AND what="password"',
+        undef,
+        $u->userid,
+    );
+
+    $time ||= 0;
+    return $time;
+}
+
 # THIS IS DEPRECATED DO NOT USE
 sub email {
     my ($u, $remote) = @_;
