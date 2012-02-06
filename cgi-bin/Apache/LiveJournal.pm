@@ -2079,7 +2079,9 @@ sub journal_content
     }
 
     # other headers
-    LJ::Request->header_out(ETag => Compress::Zlib::crc32($html));
+    my $html_md5 = md5_base64($html);
+    LJ::Request->header_out(ETag => $html_md5);
+    LJ::Request->header_out('Content-MD5' => $html_md5);
 
     # Let caches know that Accept-Encoding will change content
     LJ::Request->header_out('Vary', 'Accept-Encoding, ETag');
