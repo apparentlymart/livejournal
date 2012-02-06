@@ -452,13 +452,13 @@ sub clean
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
                         $newdata .= LJ::run_hook("transform_embed", [$token],
-                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode) || "";
+                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
                         my $expanded = LJ::run_hook("transform_embed", \@capture,
-                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode);
+                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders});
                         $newdata .= $expanded || "";
                     });
                     next TOKEN;
@@ -1996,6 +1996,7 @@ sub clean_comment
         'remove_positioning' => 1,
         'posterid'           => $opts->{'posterid'},
         'img_placeholders'   => $opts->{'img_placeholders'},
+        'video_placeholders' => $opts->{'video_placeholders'},
     });
 }
 

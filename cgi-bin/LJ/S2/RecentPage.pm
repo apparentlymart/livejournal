@@ -131,24 +131,26 @@ sub RecentPage
     my $tags = LJ::Tags::get_logtagsmulti($idsbyc);
 
     my $userlite_journal = UserLite($u);
-    my $sticky_appended = !$u->has_sticky_entry() || $skip;
+    my $sticky_appended  = !$u->has_sticky_entry() || $skip;
+    my $ljcut_disable    = $remote ? $remote->prop("opt_ljcut_disable_lastn") : undef;
+    my $replace_video    = $remote ? $remote->opt_embedplaceholders : 0;
 
   ENTRY:
-    foreach my $item (@items)
-    {
+    foreach my $item ( @items ) {
         my ($posterid, $itemid, $security, $allowmask, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security allowmask alldatepart);
 
-        my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $ditemid   = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
-        
+
         next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
         my $replycount = $logprops{$itemid}->{'replycount'};
-        my $subject = $logtext->{$itemid}->[0];
-        my $text = $logtext->{$itemid}->[1];
-        if ($get->{'nohtml'}) {
+        my $subject    = $logtext->{$itemid}->[0];
+        my $text       = $logtext->{$itemid}->[1];
+
+        if ( $get->{'nohtml'} ) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -162,8 +164,9 @@ sub RecentPage
 
         my $date = substr($alldatepart, 0, 10);
         my $new_day = 0;
+
         if ($date ne $lastdate) {
-            $new_day = 1;
+            $new_day  = 1;
             $lastdate = $date;
             $lastentry->{'end_day'} = 1 if $lastentry;
         }
@@ -171,19 +174,35 @@ sub RecentPage
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
-        LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                              'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                              'ljcut_disable' => ($remote) ? $remote->prop("opt_ljcut_disable_lastn") : undef,
-                                              'suspend_msg' => $suspend_msg,
-                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
-                                              'journalid' => $entry_obj->journalid,
-                                              'posterid' => $entry_obj->posterid,
-                                           });
-        LJ::expand_embedded($u, $ditemid, $remote, \$text);
+        LJ::CleanHTML::clean_event(
+            \$text,
+            {
+                'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
+                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'ljcut_disable'       => $ljcut_disable,
+                'suspend_msg'         => $suspend_msg,
+                'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                'journalid'           => $entry_obj->journalid,
+                'posterid'            => $entry_obj->posterid,
+                'video_placeholders'  => $replace_video,
+            },
+        );
 
-        $text = LJ::ContentFlag->transform_post(post => $text, journal => $u,
-                                                remote => $remote, entry => $entry_obj);
+        LJ::expand_embedded(
+            $u,
+            $ditemid,
+            $remote,
+            \$text,
+            'video_placeholders' => $replace_video,
+        );
+
+        $text = LJ::ContentFlag->transform_post(
+            'post'    => $text,
+            'journal' => $u,
+            'remote'  => $remote,
+            'entry'   => $entry_obj,
+        );
 
         my @taglist;
         while (my ($kwid, $kw) = each %{$tags->{"$u->{userid} $itemid"} || {}}) {

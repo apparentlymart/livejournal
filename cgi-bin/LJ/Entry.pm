@@ -870,20 +870,20 @@ sub event_html
 
     if($opts->{no_cut_expand}) {
         $opts->{expand_cut} = 0;
-        $opts->{cuturl} = $self->prop('reposted_from') || $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
+        $opts->{cuturl}     = $self->prop('reposted_from') || $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
     } elsif (!$opts->{cuturl}) {
         $opts->{expand_cut} = 1;
         $opts->{cuturl}     = $self->prop('reposted_from') || $self->url;
     }
     $opts->{journalid} = $self->journalid;
-    $opts->{posterid} = $self->posterid;
+    $opts->{posterid}  = $self->posterid;
     $opts->{entry_url} = $self->prop('reposted_from') || $self->url;
-    
+
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
 
-    LJ::expand_embedded($self->{u}, $self->ditemid, LJ::User->remote, \$event);
+    LJ::expand_embedded($self->{u}, $self->ditemid, $remote, \$event, video_placeholders => $opts->{'video_placeholders'} );
     return $event;
 }
 

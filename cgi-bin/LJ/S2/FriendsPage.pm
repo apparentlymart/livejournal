@@ -215,10 +215,12 @@ sub FriendsPage
         return $lite{$id} = UserLite($posters{$id} || $friends{$id});
     };
 
-    my $eventnum = 0;
+    my $eventnum      = 0;
     my $hiddenentries = 0;
+    my $ljcut_disable = $remote ? $remote->{'opt_ljcut_disable_friends'} : undef;
 
     my $replace_images_in_friendspage = 0;
+    my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
 
     if( $u->equals($remote) ) {
         $replace_images_in_friendspage = $remote->opt_placeholders_friendspage;
@@ -293,20 +295,31 @@ sub FriendsPage
                  'preformatted'        => $logprops{$datakey}->{'opt_preformatted'},
                  'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
                  'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                 'ljcut_disable'       => $remote ? $remote->{'opt_ljcut_disable_friends'} : undef,
+                 'ljcut_disable'       => $ljcut_disable,
                  'suspend_msg'         => $suspend_msg,
                  'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
                  'journalid'           => $entry_obj->journalid,
                  'posterid'            => $entry_obj->posterid,
                  'img_placeholders'    => $replace_images_in_friendspage,
+                 'video_placeholders'  => $replace_video,
         });
 
-        LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
+        LJ::expand_embedded(
+            $friends{$friendid},
+            $ditemid,
+            $remote,
+            \$text,
+            'video_placeholders' => $replace_video,
+        );
 
-        $text = LJ::ContentFlag->transform_post(post => $text, journal => $friends{$friendid},
-                                                remote => $remote, entry => $entry_obj);
+        $text = LJ::ContentFlag->transform_post(
+            'post'    => $text,
+            'journal' => $friends{$friendid},
+            'remote'  => $remote,
+            'entry'   => $entry_obj,
+        );
 
-        my $userlite_poster = $get_lite->($posterid);
+        my $userlite_poster  = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);
 
         # get the poster user

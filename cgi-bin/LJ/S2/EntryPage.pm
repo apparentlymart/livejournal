@@ -144,9 +144,11 @@ sub EntryPage
         my ($self, $destlist, $srclist, $depth) = @_;
 
         my $replace_images_in_comments = 0;
+        my $replace_video_in_comments  = 0;
 
         if( $remote ) {
             $replace_images_in_comments = $remote->opt_placeholders_comments;
+            $replace_video_in_comments  = $remote->opt_videoplaceholders_comments;
         }
 
         foreach my $com (@$srclist) {
@@ -161,11 +163,12 @@ sub EntryPage
 
             LJ::CleanHTML::clean_comment(
                 \$text, {
-                'preformatted'     => $com->{'props'}->{'opt_preformatted'},
-                'anon_comment'     => (!$pu || $pu->{'journaltype'} eq 'I'),
-                'nocss'            => 1,
-                'posterid'         => $com->{'posterid'},
-                'img_placeholders' => $replace_images_in_comments,
+                'preformatted'       => $com->{'props'}->{'opt_preformatted'},
+                'anon_comment'       => (!$pu || $pu->{'journaltype'} eq 'I'),
+                'nocss'              => 1,
+                'posterid'           => $com->{'posterid'},
+                'img_placeholders'   => $replace_images_in_comments,
+                'video_placeholders' => $replace_video_in_comments,
             });
 
             # local time in mysql format to gmtime
@@ -536,8 +539,9 @@ sub EntryPage_entry
     my $no_cut_expand = !$get->{cut_expand} && $get->{page} && $get->{page} > 1 ? 1 : 0; 
 
     my $event = $entry->event_html({
-        no_cut_expand   => $no_cut_expand,
-        page            => $get->{page},
+        no_cut_expand      => $no_cut_expand,
+        page               => $get->{page},
+        video_placeholders => $remote ? $remote->opt_embedplaceholders : 0,
     });
     
     if ($get->{'nohtml'}) {

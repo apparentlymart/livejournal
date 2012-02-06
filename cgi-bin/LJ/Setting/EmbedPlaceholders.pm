@@ -26,15 +26,36 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    my $embedplaceholders = $class->get_arg($args, "embedplaceholders") || $u->prop("opt_embedplaceholders") eq "Y";
+    my $imgplaceholders = $u->get_opt_videolinks;
+    my( $chk1, $chk2 );
 
-    my $ret = LJ::html_check({
-        name => "${key}embedplaceholders",
-        id => "${key}embedplaceholders",
-        value => 1,
-        selected => $embedplaceholders ? 1 : 0,
-    });
-    $ret .= " <label for='${key}embedplaceholders'>" . $class->ml('setting.embedplaceholders.option') . "</label>";
+    if ( $imgplaceholders =~ /^(\d)\:(\d)$/ ) {
+        $chk1 = $1;
+        $chk2 = $2;
+    }
+    else {
+        $chk1 = 0;
+        $chk2 = 0;
+    }
+
+    my $ret = $class->ml('setting.videoplaceholders.option2')
+        . "<label for='${key}check1'>"
+        . LJ::html_check({
+            selected => $chk1,
+            name     => "${key}check1",
+          })
+        . $class->ml('setting.videoplaceholders.option2.checkbox1')
+        . "</label> "
+        . "<label for='${key}check2'>"
+        . LJ::html_check({
+            selected => $chk2,
+            name     => "${key}check2",
+          })
+        . $class->ml('setting.videoplaceholders.option2.checkbox2')
+        . "</label> ";
+
+    my $errdiv = $class->errdiv($errs, "vidplaceholders");
+    $ret .= "<br />$errdiv" if $errdiv;
 
     return $ret;
 }
@@ -42,16 +63,14 @@ sub option {
 sub save {
     my ($class, $u, $args) = @_;
 
-    my $val = $class->get_arg($args, "embedplaceholders") ? "Y" : "N";
+    my @val;
+    push @val, $class->get_arg($args, $_) for map { "check$_" } 1..2;
+    @val = map { $_ eq 'on' ? 1 : 0 } @val;
+
+    my $val = join( ':', @val );
     $u->set_prop( opt_embedplaceholders => $val );
 
     return 1;
-}
-
-sub as_html {
-    my ($class, $u, $errs, $args) = @_;
-
-    return $class->option($u, $errs, $args);
 }
 
 1;

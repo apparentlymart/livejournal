@@ -1266,6 +1266,9 @@ sub create_view_lastn
             });
     }
 
+    my $ljcut_disable = $remote ? $remote->prop("opt_ljcut_disable_lastn") : undef;
+    my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
+
     # spit out the S1
 
   ENTRY:
@@ -1334,19 +1337,37 @@ sub create_view_lastn
         $lastn_event{'itemargs'} = $itemargs;
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
-        LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                               'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                               'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
-                                               'suspend_msg' => $suspend_msg,
-                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
-                                               'journalid' => $entry_obj->journalid,
-                                               'posterid' => $entry_obj->posterid,
-                                            });
-        LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
-        $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
-                                                 remote => $remote, entry => $entry_obj);
+        LJ::CleanHTML::clean_event(
+            \$event,
+            {
+                'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
+                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'ljcut_disable'       => $ljcut_disable,
+                'suspend_msg'         => $suspend_msg,
+                'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                'journalid'           => $entry_obj->journalid,
+                'posterid'            => $entry_obj->posterid,
+                'video_placeholders'  => $replace_video,
+            },
+        );
+
+        LJ::expand_embedded(
+            $u,
+            $ditemid,
+            $remote,
+            \$event,
+            'video_placeholders' => $replace_video,
+        );
+
+        $event = LJ::ContentFlag->transform_post(
+            'post'    => $event,
+            'journal' => $u,
+            'remote'  => $remote,
+            'entry'   => $entry_obj,
+        );
+
         $lastn_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";
@@ -1785,6 +1806,9 @@ sub create_view_friends {
         $replace_images_in_friendspage = $remote->opt_placeholders_friendspage;
     }
 
+    my $ljcut_disable = $remote ? $remote->prop("opt_ljcut_disable_lastn") : undef;
+    my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
+
     my %friends_events = ();
     my $events = \$friends_events{'events'};
 
@@ -1827,10 +1851,10 @@ sub create_view_friends {
             $event = LJ::Lang::ml(
                 'friendsposts.reposted',
                 {
-                    'user'    => $logprops{$datakey}->{'repost_author'},
-                    'subject' => $logprops{$datakey}->{'repost_subject'},
+                    'user'     => $logprops{$datakey}->{'repost_author'},
+                    'subject'  => $logprops{$datakey}->{'repost_subject'},
                     'orig_url' => $logprops{$datakey}->{'repost_url'},
-                    'url'     => $entry_obj->url,
+                    'url'      => $entry_obj->url,
             });
         }
 
@@ -1898,17 +1922,30 @@ sub create_view_friends {
                 'preformatted'        => $logprops{$datakey}->{'opt_preformatted'},
                 'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                'ljcut_disable'       => ($remote) ? $remote->{'opt_ljcut_disable_friends'} : undef,
+                'ljcut_disable'       => $ljcut_disable,
                 'suspend_msg'         => $suspend_msg,
                 'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
                 'journalid'           => $entry_obj->journalid,
                 'posterid'            => $entry_obj->posterid,
                 'img_placeholders'    => $replace_images_in_friendspage,
+                'video_placeholders'  => $replace_video,
         });
-        LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
 
-        $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
-                                                 remote => $remote, entry => $entry_obj);
+        LJ::expand_embedded(
+            $friends{$friendid},
+            $ditemid,
+            $remote,
+            \$event,
+            'video_placeholders' => $replace_video,
+        );
+
+        $event = LJ::ContentFlag->transform_post(
+            'post' => $event,
+            'journal' => $friends{$friendid},
+            'remote' => $remote,
+            'entry' => $entry_obj,
+        );
+
         $friends_event{'event'} = $event;
 
         # do the picture
@@ -2576,6 +2613,9 @@ sub create_view_day
     my $events = "";
     my $eventnum = 0;
 
+    my $ljcut_disable = $remote ? $remote->prop("opt_ljcut_disable_lastn") : undef;
+    my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
+
   ENTRY:
     foreach my $item (@items) {
         my ($itemid, $posterid, $security, $alldatepart, $anum) =
@@ -2619,6 +2659,7 @@ sub create_view_day
         my %day_event = ();
         $day_event{'itemid'} = $itemid;
         $day_event{'datetime'} = LJ::fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
+
         if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
             $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', {
@@ -2627,23 +2668,40 @@ sub create_view_day
         }
 
         my $itemargs = "journal=$user&amp;itemid=$ditemid";
-        
+
         $day_event{'itemargs'} = $itemargs;
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
-        LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                              'cuturl' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                              'entry_url' => $entry_obj->prop('reposted_from') || $entry_obj->url,
-                                              'ljcut_disable' => ($remote) ? $remote->{'opt_ljcut_disable_lastn'} : undef,
-                                              'suspend_msg' => $suspend_msg,
-                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
-                                              'journalid' => $entry_obj->journalid,
-                                              'posterid' => $entry_obj->posterid,
-                                            });
-        LJ::expand_embedded($u, $ditemid, $remote, \$event);
-    
-        $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
-                                                 remote => $remote, entry => $entry_obj);
+
+        LJ::CleanHTML::clean_event(
+            \$event,
+            {
+                'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
+                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'ljcut_disable'       => $ljcut_disable,
+                'suspend_msg'         => $suspend_msg,
+                'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,
+                'journalid'           => $entry_obj->journalid,
+                'posterid'            => $entry_obj->posterid,
+                'video_placeholders'  => $replace_video,
+        });
+
+        LJ::expand_embedded(
+            $u,
+            $ditemid,
+            $remote,
+            \$event,
+            'video_placeholders' => $replace_video,
+        );
+
+        $event = LJ::ContentFlag->transform_post(
+            'post'    => $event,
+            'journal' => $u,
+            'remote'  => $remote,
+            'entry'   => $entry_obj,
+        );
+
         $day_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";

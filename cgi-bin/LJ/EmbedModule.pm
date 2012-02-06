@@ -480,29 +480,16 @@ sub module_iframe_tag {
     return $iframe_tag unless $remote;
     return $iframe_tag if $opts{edit};
 
-    # show placeholder instead of iframe?
-    my $placeholder_prop = $remote->prop('opt_embedplaceholders');
-    my $do_placeholder = $placeholder_prop && $placeholder_prop ne 'N';
-
-    # if placeholder_prop is not set, then show placeholder on a friends
-    # page view UNLESS the embedded content is only one embed/object
-    # tag and it's whitelisted video.
-    my $view = LJ::Request->is_inited ? LJ::Request->notes("view") : '';
-    if (! $placeholder_prop && $view eq 'friends') {
-        # show placeholder if this is not whitelisted video
-        $do_placeholder = 1 if $no_whitelist;
-    }
-
-    return $iframe_tag unless $do_placeholder;
+    return $iframe_tag unless $opts{'video_placeholders'};
 
     # placeholder
     return LJ::placeholder_link(
-                                placeholder_html => $iframe_tag,
-                                width            => $width,
-                                height           => $height,
-                                img              => "$LJ::IMGPREFIX/videoplaceholder.png",
-                                link             => $iframe_link,
-                                );
+        placeholder_html => $iframe_tag,
+        width            => $width,
+        height           => $height,
+        img              => "$LJ::IMGPREFIX/videoplaceholder.png",
+        link             => $iframe_link,
+    );
 }
 
 sub module_content {
