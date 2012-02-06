@@ -49,7 +49,10 @@ use Encode();
 #    _loaded_row:    loaded talk2 row
 #    _loaded_props:  loaded props
 
-my %singletons = (); # journalid->jtalkid->singleton
+my %singletons    = (); # journalid->jtalkid->singleton
+my %unloaded      = (); # journalid->jtalkid->singleton
+my %unloaded_text = (); # journalid->jtalkid->singleton
+my %unloaded_prop = (); # journalid->jtalkid->singleton
 
 sub reset_singletons {
     %singletons = ();
@@ -95,8 +98,13 @@ sub instance {
         if $singletons{$journalid}->{$jtalkid};
     
     my $self = bless { journalid => $journalid, jtalkid => $jtalkid };
+
     # save the singleton 
+    my $key = join(':', $journalid, $jtalkid);
     $singletons{$journalid}->{$jtalkid} = $self;
+    $unloaded{$key} = $self;
+    $unloaded_text{$key} = $self;
+    $unloaded_prop{$key} = $self;
 
     return $self;
 }
@@ -206,6 +214,8 @@ sub create {
 sub absorb_row {
     $_[0]->{$_} = $_[1]->{$_} foreach (qw{ nodetype nodeid parenttalkid posterid datepost datepost_unix state });
     $_[0]->{'_loaded_row'} = 1;
+
+    delete $unloaded{ join(':', $_[0]->{'journalid'}, $_[0]->{'jtalkid'}) };
 }
 
 sub url {
@@ -312,19 +322,19 @@ sub nodeid {
     # this sometimes gets called en masse on a bunch of comments, and
     # if there are a lot, the preload_rows calls (which do nothing) cause
     # the apache request to time out.
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'nodeid'};
 }
 
 sub nodetype {
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'nodetype'};
 }
 
 sub parenttalkid {
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons ]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'parenttalkid'};
 }
@@ -358,14 +368,14 @@ sub valid {
     my $u = $_[0]->journal;
     return 0 unless $u && $u->{'clusterid'};
 
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons ]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'_loaded_row'};
 }
 
 # when was this comment left?
 sub unixtime {
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons ]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'datepost_unix'} if $_[0]->{'datepost_unix'};
     return LJ::TimeUtil->mysqldate_to_time($_[0]->{'datepost'}, 0);
@@ -377,7 +387,7 @@ sub poster {
 }
 
 sub posterid {
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons ]) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'posterid'};
 }
@@ -386,26 +396,26 @@ sub all_singletons { map { values %$_ } values %singletons }
 
 # returns an array of unloaded comment singletons
 sub unloaded_singletons {
-    grep { ! $_->{'_loaded_row'} } all_singletons();
+    values %unloaded;
 }
 
 # returns an array of comment singletons which don't have text loaded yet
 sub unloaded_text_singletons {
-    grep { ! $_->{'_loaded_text'} } all_singletons();
+    values %unloaded_text;
 }
 
 # returns an array of comment singletons which don't have prop rows loaded yet
 sub unloaded_prop_singletons {
-    grep { ! $_->{'_loaded_props'} } all_singletons();
+    values %unloaded_prop;
 }
 
 # class method:
 sub preload_rows {
     my ($class, $obj_list) = @_;
+    $obj_list ||= [];
+    @$obj_list  = $class->unloaded_singletons unless @$obj_list;
 
-    my @to_load =
-        (map  { [ $_->journal, $_->jtalkid ] }
-         grep { ! $_->{_loaded_row} } @$obj_list);
+    my @to_load = map  { [ $_->journal, $_->jtalkid ] } @$obj_list;
 
     # already loaded?
     return 1 unless @to_load;
@@ -463,6 +473,7 @@ sub _load_text {
         }
 
         $c_obj->{_loaded_text} = 1;
+        delete $unloaded_text{join(':', $c_obj->journalid, $c_obj->jtalkid)};
     }
 
     return 1;
@@ -533,9 +544,11 @@ sub _set_text {
     if ($doing{subject} && $doing{body}) {
         $self->{$_} = $original{$_} foreach qw(subject body);
         $self->{_loaded_text} = 1;
+        delete $unloaded_text{join(':', $self->journalid, $self->jtalkid)};
     } else {
         $self->{$_} = undef foreach qw(subject body);
         $self->{_loaded_text} = 0;
+        $unloaded_text{join(':', $self->journalid, $self->talkid)} ||= $self;
     }
     # otherwise _loaded_text=0 and we won't do any optimizations
 
@@ -597,6 +610,7 @@ sub _load_props {
     foreach my $c_obj (@to_load) {
         $c_obj->{props} = $prop_ret->{$c_obj->jtalkid} || {};
         $c_obj->{_loaded_props} = 1;
+        delete $unloaded_prop{join(':', $c_obj->journalid, $c_obj->jtalkid)};
     }
 
     return 1;
@@ -753,7 +767,7 @@ sub subject_text {
 }
 
 sub state {
-    __PACKAGE__->preload_rows([ $_[0]->unloaded_singletons] ) unless $_[0]->{'_loaded_row'};
+    $_[0]->preload_rows() unless $_[0]->{'_loaded_row'};
 
     return $_[0]->{'state'};
 }
