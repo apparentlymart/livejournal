@@ -184,33 +184,90 @@ jQuery.fn.disableEnterSubmit = function() {
 	tab container: ul>li
 	tab container current: ul>li.current
 */
-jQuery.fn.tabsChanger = function(container){
-	var links = this.children("li").children("a");
+(function ($) {
+	var supportHistoryAPI = !!window.history.pushState;
+	var dataHistory = {};
 
-	if(container){
-		container = jQuery(container);
-	} else {
-		// next sibling of links
-		container = links.parent().parent().next();
+	function changeTab(containers, links, index) {
+		links
+			.parent()
+			.removeClass('current')
+			.eq(index)
+			.addClass('current');
+
+		containers.removeClass('current')
+			.eq(index)
+			.addClass('current');
 	}
 
-	links.click(function(e){
-		var item = jQuery(this).parent(),
+	function onClick(evt) {
+		var item = $(this).parent(),
 			index = item.index(),
-			containers = container.children("li");
+			data = evt.data;
 
-		if(containers[index]){
-			links.parent().removeClass("current");
-			item.addClass("current");
+		if (data.containers[index]) {
+			changeTab(data.containers, data.links, index);
 
-			containers.removeClass("current").eq(index).addClass("current");
+			if (supportHistoryAPI) {
+				window.history.pushState(null, '', this.href);
+			}
 
-			e.preventDefault();
+			evt.preventDefault();
 		}
-	});
+	}
 
-	return this;
-};
+	if (supportHistoryAPI) {
+		$(window).bind('popstate', function () {
+			var data = dataHistory[location.href];
+
+			if (data && data.length) {
+				var length = data.length;
+				while (length) {
+					var itemData = data[--length];
+					changeTab(itemData.containers, itemData.links, itemData.index);
+				}
+			}
+		});
+	}
+
+	$.fn.tabsChanger = function(container) {
+		var links = this.children('li').children('a');
+
+		if (container) {
+			container = $(container);
+		} else {
+			// next sibling of links
+			container = links.parent().parent().next();
+		}
+
+		container = container.children('li');
+
+		if (supportHistoryAPI) {
+			links.each(function (index) {
+				var urlData = dataHistory[this.href];
+
+				if (!urlData) {
+					urlData = dataHistory[this.href] = [];
+				}
+
+				urlData.push({
+					index: index,
+					links: links,
+					containers: container
+				});
+			});
+		}
+
+		links.bind('click', {
+			containers: container,
+			links: links
+		}, onClick);
+
+		return this;
+	};
+
+})(jQuery);
+
 /** jQuery overlay plugin
  * After creation overlay visibility can be toggled with
  * $( '#selector' ).overlay( 'show' ) and $( '#selector' ).overlay( 'hide' )
