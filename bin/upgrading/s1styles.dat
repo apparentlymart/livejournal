@@ -4108,7 +4108,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%
-<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.gif" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.png" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
 %%friendpic%%%%event%%
 %%currents%%</div>
 %%talklinks%%
@@ -4137,7 +4137,7 @@ FRIENDS_EVENT_STICKY<=
 <div class="entry" id="entry%%itemid%%" clear="all">
 <div class="entrytext">
 <span class="entryheading">%%altposter%%
-<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.gif" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> %%subject%%</span>
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.png" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> %%subject%%</span>
 %%friendpic%%%%event%%
 %%currents%%</div>
 %%talklinks%%
@@ -4414,7 +4414,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%
-<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.gif" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_sticky.png" width=16 height=16 vspace=0 hspace=0 alt="[Sticky]"> <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
 %%friendpic%%%%event%%
 %%currents%%</div>
 %%talklinks%%
@@ -4481,7 +4481,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
-<IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
 <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
@@ -4511,7 +4511,7 @@ FRIENDS_EVENT_STICKY<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I></TD>
-<IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
 <=FRIENDS_EVENT_STICKY
@@ -4632,7 +4632,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
-<IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky">
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
@@ -4721,7 +4721,7 @@ FRIENDS_EVENT_PRIVATE<=
 FRIENDS_EVENT_PRIVATE_STICKY<=
 <table cellspacing=0 class="entries">
  <tr>
-  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.gif" style="float:left"><img src="%%cons:img%%/icon_private.gif" style="float:left">%%subject%%</td>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.png" style="float:left"><img src="%%cons:img%%/icon_private.gif" style="float:left">%%subject%%</td>
   <td class="nopad" valign="bottom">
    <table cellspacing=0 style="float:right">
     <tr>
@@ -4796,7 +4796,7 @@ FRIENDS_EVENT<=
 FRIENDS_EVENT_STICKY<=
 <table cellspacing=0 class="entries">
  <tr>
-  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.gif" style="float:left"> %%subject%%</td>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.png" style="float:left"> %%subject%%</td>
   <td class="nopad" valign="bottom">
    <table cellspacing=0 style="float:right;">
     <tr>
@@ -5053,7 +5053,7 @@ FRIENDS_EVENT_PROTECTED<=
 FRIENDS_EVENT_PROTECTED_STICKY<=
 <table cellspacing=0 class="entries">
  <tr>
-  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.gif" style="float:left"><img src="%%cons:img%%/icon_protected.gif" style="float:left">%%subject%%</td>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_sticky.png" style="float:left"><img src="%%cons:img%%/icon_protected.gif" style="float:left">%%subject%%</td>
   <td class="nopad" valign="bottom">
    <table cellspacing=0 style="float:right">
     <tr>
@@ -5194,7 +5194,7 @@ border="0" summary="" class="entrybox">
 border="0"
 summary="">
 <tr align='left'>
-<td class="caption"><img src="%%cons:img%%/icon_sticky.gif" width="14" height="15"><img src="%%cons:img%%/icon_private.gif" width="14" height="15"> %%subject%%</td>
+<td class="caption"><img src="%%cons:img%%/icon_sticky.png" width="14" height="15"><img src="%%cons:img%%/icon_private.gif" width="14" height="15"> %%subject%%</td>
 <td align="right" class="index">[%%datetime%%]</td>
 </tr>
 <tr align='left'>
@@ -5281,7 +5281,7 @@ border="0" summary="" class="entrybox">
 border="0"
 summary="">
 <tr align='left'>
-<td class="caption"><img src="%%cons:img%%/icon_sticky.gif" width="14" height="15">%%subject%%</td>
+<td class="caption"><img src="%%cons:img%%/icon_sticky.png" width="14" height="15">%%subject%%</td>
 <td align="right" class="index">[%%datetime%%]</td>
 </tr>
 <tr align='left'>
@@ -5615,7 +5615,7 @@ border="0" summary="" class="entrybox">
 border="0"
 summary="">
 <tr align='left'>
-<td class="caption"><img src="%%cons:img%%/icon_sticky.gif" width="14" height="15"><img src="%%cons:img%%/icon_protected.gif" width="14" height="15"> %%subject%%</td>
+<td class="caption"><img src="%%cons:img%%/icon_sticky.png" width="14" height="15"><img src="%%cons:img%%/icon_protected.gif" width="14" height="15"> %%subject%%</td>
 <td align="right" class="index">[%%datetime%%]</td>
 </tr>
 <tr align='left'>
@@ -5718,7 +5718,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_sticky.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_sticky.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -5750,7 +5750,7 @@ FRIENDS_EVENT_STICKY<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span><img src="%%cons:img%%/icon_sticky.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"></h3>
+   <h3><span>%%datetime%%%%subject%%</span><img src="%%cons:img%%/icon_sticky.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -5864,7 +5864,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_sticky.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_sticky.png" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -5919,7 +5919,7 @@ FRIENDS_EVENT_PRIVATE<=
 <=FRIENDS_EVENT_PRIVATE
 
 FRIENDS_EVENT_PRIVATE_STICKY<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -5941,7 +5941,7 @@ FRIENDS_EVENT<=
 <=FRIENDS_EVENT
 
 FRIENDS_EVENT_STICKY<=
-<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -6063,7 +6063,7 @@ FRIENDS_EVENT_PROTECTED<=
 
 
 FRIENDS_EVENT_PROTECTED_STICKY<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -6134,7 +6134,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%%&nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private">
+<B>%%datetime%%</B>%%subject%%&nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private">
 </FONT>
 <BR>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -6183,7 +6183,7 @@ FRIENDS_EVENT_STICKY<=
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
 </FONT>
 <BR>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -6344,7 +6344,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected">
+<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected">
 </FONT>
 <BR>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -6801,7 +6801,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
 </TD>
 <TD VALIGN="top">
 <TABLE BORDER="0">
-<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif"><IMG SRC="%%cons:img%%/icon_private.gif"></TD></TR>
+<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png"><IMG SRC="%%cons:img%%/icon_private.gif"></TD></TR>
 %%subject%%
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
@@ -6875,7 +6875,7 @@ FRIENDS_EVENT_STICKY<=
 </TD>
 <TD VALIGN="top">
 <TABLE BORDER="0">
-<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif"></TD></TR>
+<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png"></TD></TR>
 %%subject%%
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
@@ -7071,7 +7071,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
 </TD>
 <TD VALIGN="top">
 <TABLE BORDER="0">
-<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.gif"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
+<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
 %%subject%%
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
