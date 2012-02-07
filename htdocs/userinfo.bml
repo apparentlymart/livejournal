@@ -668,13 +668,13 @@
                 my $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png' : 'korona.png') . "'/>";
                 my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> ";
                 my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
-                $body .= "<ul>" .
-                         "<li>" .
+                $body .= "<ul class='rating-details'>" .
+                         "<li class='rating-place'>" .
                          $diagram_image .
                          LJ::Lang::ml($href_rating, {rating_place => LJ::commafy(++$position->{result}->{position}), 
                                                      url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users')}) .
                          "</li>" .
-                         "<li>" .
+                         "<li class='rating-social-capital'>" .
                          $soc_image .
                          LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => LJ::commafy(int($position->{result}->{value}/1000))}) . 
                          "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
