@@ -668,14 +668,18 @@
         my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
-                $body .= "<p class='details-rating'>" . 
-                         LJ::Lang::ml($href_rating, {url_image_diagram => $diagram_image,
-                                                     rating_place => LJ::commafy(++$position->{result}->{position}), 
-                                                     url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users'),
-                                                     url_image_soc_cap => $soc_image, 
-                                                     soc_capital => LJ::commafy(int($position->{result}->{value}/1000)),}) . 
-                        "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
-                        "</p>";
+                $body .= "<ul>" .
+                         "<li>" .
+                         $diagram_image .
+                         LJ::Lang::ml($href_rating, {rating_place => LJ::commafy(++$position->{result}->{position}), 
+                                                     url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
+                         "</li>" .
+                         "<li>" .
+                         $soc_image .
+                         LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => LJ::commafy(int($position->{result}->{value}/1000))}) . 
+                         "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
+                         "</li>" .
+                         "</ul>";
             }
         }
     }
