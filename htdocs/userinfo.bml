@@ -663,12 +663,14 @@
             type => 0,
             sup => 1,
         });
+        my $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position} != 0  ? 'social-capital.png' : 'korona.png') . "'/>";
         my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
                 $body .= "<p class='details-rating'><img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> " . 
                          LJ::Lang::ml($href_rating, { rating_place => LJ::commafy(++$position->{result}->{position}), 
-                                                                         url_user_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users'), 
+                                                                         url_user_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users'),
+                                                                         url_image => $soc_image, 
                                                                          soc_capital => LJ::commafy(int($position->{result}->{value}/1000)),}) . 
                         "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
                         "</p>";
