@@ -108,6 +108,50 @@ Event.prep = function(e){
 	return e;
 };
 
+/**
+ * @namespace LiveJournal utility objects
+ */
+LJ = window.LJ || {};
+
+/**
+ * @class Class allows to call a function with  some delay and also prevent
+ *     its execution if needed.
+ * @constructor
+ *
+ * @param {Function} func Function to call.
+ * @param {number} wait Time in ms to wait before function will be called.
+ */
+LJ.DelayedCall = function(func, wait) {
+	this._func = func;
+	this._wait = wait;
+	this._timer = null;
+	this._args = null;
+};
+
+LJ.DelayedCall.prototype._timerCallback = function() {
+	this._timer = null;
+	this._func.apply(null, this._args);
+};
+
+/**
+ * Run function. All arguments that will be passed to this function will be
+ *    passed to the function called.
+ */
+LJ.DelayedCall.prototype.run = function(/* arguments */) {
+	this._args = [].slice.call(arguments, 0);
+	if (this._timer) { return; }
+
+	this._timer = setTimeout(this._timerCallback.bind(this), this._wait);
+};
+
+/**
+ * Prevent function execution.
+ */
+LJ.DelayedCall.prototype.stop = function() {
+	clearTimeout(this._timer);
+	this._timer = null;
+}
+
 
 
 /* object extensions */
