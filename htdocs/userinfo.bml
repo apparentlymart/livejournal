@@ -676,8 +676,8 @@
                          "</li>" .
                          "<li class='rating-social-capital'>" .
                          $soc_image .
-                         LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => LJ::commafy(int($position->{result}->{value}/1000))}) . 
-                         "<a href='http://www.livejournal.com/admin/faq/faqedit.bml?id=359'> " . LJ::help_icon_html("profile_faq") . "</a>" .
+                         LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => LJ::commafy(int($position->{result}->{value}/1000))}) . ' ' .
+                         LJ::help_icon_html("profile_faq") .
                          "</li>" .
                          "</ul>";
             }
