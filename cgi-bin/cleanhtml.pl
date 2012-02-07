@@ -310,6 +310,11 @@ sub clean
     my @lj_lang_otherwise = ( 1 );
 
     my %vkontakte_like_js;
+    my $in_link     = 0;
+    my $img_link    = 0;
+    my $href_b_link = '';
+    my $text_a_link = 0;
+    my $text_b_link = 0;
 
   TOKEN:
     while (my $token = $p->get_token)
@@ -345,6 +350,16 @@ sub clean
                     push @eatuntil, $tag;
                 }
                 next TOKEN;
+            }
+
+            if ( $tag eq 'a' ) {
+                $in_link = 1;
+                $href_b_link = $attr->{href};
+            }
+
+            if ( $tag eq 'img' && $in_link ) {
+                $img_link = 1;
+                $newdata .= '</a>';
             }
 
             if ($tag eq "lj-template" && ! $noexpand_embedded) {
@@ -419,7 +434,7 @@ sub clean
             ##      <lj-userpic> - current journal's default userpic
             ##      <lj-userpic remote> - remote user's default userpic
             ##      <lj-userpic user="test"> - test's default userpic
-            if ($tag eq "lj-userpic" and !$opts->{'textonly'} and $action{$tag} ne 'deny'){
+            if ($tag eq "lj-userpic" and !$opts->{'textonly'} and $action{$tag} ne 'deny') {
                 my $u = '';
                 if ($attr->{user}){
                     $u = LJ::load_user($attr->{user});
@@ -1082,9 +1097,9 @@ sub clean
                     }
                 }
 
-                if ($tag eq "img")
-                {
+                if ($tag eq "img") {
                     my $img_bad = 0;
+
                     if ($opts->{'remove_img_sizes'}) {
                         delete $hash->{'height'};
                         delete $hash->{'width'};
@@ -1100,7 +1115,9 @@ sub clean
 
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
-                    if ($opts->{'img_placeholders'}) { $img_bad = 1; }
+                    if ($opts->{'img_placeholders'}) {
+                        $img_bad = 1;
+                    }
 
                     ## Option 'allowed_img_attrs' provides a list of allowed attributes
                     if (my $allowed = $opts->{'allowed_img_attrs'}){
@@ -1130,8 +1147,8 @@ sub clean
                     }
 
                     if ($img_bad) {
-                        $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
-                            LJ::ehtml($hash->{'src'}) . "\">" .
+                        $newdata .= qq~<a class="ljimgplaceholder" extern_href="$href_b_link" href="~ .
+                            LJ::ehtml($hash->{'src'}) . '">' .
                             LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
                         $opencount{"img"}++;
@@ -1293,6 +1310,14 @@ sub clean
                 next TOKEN;
             }
 
+            if ( $tag eq 'a' && $in_link ) {
+                $in_link     = 0;
+                $text_b_link = 0;
+                $text_b_link = 0;
+                $href_b_link = '';
+                $img_link    = 0;
+            }
+
             my $allow;
             if ($tag eq "lj-raw") {
                 $opencount{$tag}--;
@@ -1433,6 +1458,14 @@ sub clean
 
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
+                next TOKEN;
+            }
+
+            if ( $in_link && $img_link ) {
+                $newdata .= qq~<a href="$href_b_link">~
+                    . $token->[1]
+                    . '</a>';
+                $text_a_link = 1;
                 next TOKEN;
             }
 
