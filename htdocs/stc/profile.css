@@ -162,6 +162,17 @@
         .details_stats .statusvis_msg {
             font-weight: bold;
         }
+.rating-details {
+    margin: 10px 0 0 0;
+    padding: 0;
+    list-style-type: none;
+    }
+    .rating-details LI {
+        padding: 0 0 5px 0;
+        }
+    .rating-social-capital IMG {
+        margin-right: 4px;
+        }
 
 .details_links {
     padding: 12px 0 10px 0;
