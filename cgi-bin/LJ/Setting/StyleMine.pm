@@ -5,7 +5,7 @@ use warnings;
 
 sub should_render {
     my ($class, $u) = @_;
-
+    return 0 if LJ::is_enabled('comments_style_mine');
     return !$u || $u->is_community ? 0 : 1;
 }
 

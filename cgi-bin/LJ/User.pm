@@ -4182,6 +4182,12 @@ sub opt_commentsstylemine {
     my $u = shift;
 
     return 0 unless $u->can_use_commentsstylemine;
+
+    if ( $u->raw_prop('opt_stylemine') ) {
+        $u->set_prop( opt_stylemine => 0 );
+        $u->set_prop( opt_commentsstylemine => 'Y' );
+    }
+
     return $u->raw_prop('opt_commentsstylemine') eq 'Y'? 1 : 0;
 }
 
