@@ -663,11 +663,11 @@
             type => 0,
             sup => 1,
         });
-        my $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position} != 0  ? 'social-capital.png' : 'korona.png') . "'/>";
-        my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> ";
-        my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
+                my $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png' : 'korona.png') . "'/>";
+                my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png'/> ";
+                my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
                 $body .= "<ul>" .
                          "<li>" .
                          $diagram_image .
