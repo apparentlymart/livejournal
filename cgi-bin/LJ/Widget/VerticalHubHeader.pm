@@ -36,7 +36,7 @@ sub render_body {
     if ($parent) {
         $ret .= "<a href='" . $parent->url . "'><strong>" . $parent->display_name . "</strong></a> &gt; ";
     }
-    $ret .= $vertical->display_name . " <img src='$LJ::IMGPREFIX/beta.gif' align='absmiddle' alt='Beta' /></h1>";
+    $ret .= $vertical->display_name . " <img src='$LJ::IMGPREFIX/beta.gif?v=11411' align='absmiddle' alt='Beta' /></h1>";
     if ($show_leaderboard) {
         $ret .= "</td><td class='ad-cell'>";
         $ret .= $ad;

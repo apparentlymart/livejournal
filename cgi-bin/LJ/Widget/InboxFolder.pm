@@ -185,7 +185,7 @@ sub render_body {
                 $expanded = 0 ;
             }
 
-            my $img = $expanded ? "expand.gif" : "collapse.gif";
+            my $img = $expanded ? "expand.gif?v=8234" : "collapse.gif?v=8234";
 
             $expandbtn = qq {
                 <a href="$LJ::SITEROOT/inbox/?page=$page&expand=$qid"><img src="$LJ::IMGPREFIX/$img" class="InboxItem_Expand" border="0" onclick="return false" /></a>

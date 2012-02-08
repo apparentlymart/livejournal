@@ -315,7 +315,7 @@ sub remove_btn {
             onsubmit => "if (confirm('$confirm_text')) { return true; } else { return false; }"
         );
         $ret .= LJ::Widget::VerticalContentControl->html_hidden( remove => 1, entry_url => $entry->url, verticals => $vertical->vertid );
-        $ret .= " <input type='image' src='$LJ::IMGPREFIX/explore/removebutton.gif' alt='$btn_alt' title='$btn_alt' />";
+        $ret .= " <input type='image' src='$LJ::IMGPREFIX/explore/removebutton.gif?v=13528' alt='$btn_alt' title='$btn_alt' />";
         $ret .= LJ::Widget::VerticalContentControl->end_form;
     }
 
@@ -334,7 +334,7 @@ sub cats_btn {
     my $ret;
     $ret .= LJ::Widget::VerticalContentControl->start_form( class => "entry-cats", action => "$LJ::SITEROOT/admin/verticals/?action=cats" );
     $ret .= LJ::Widget::VerticalContentControl->html_hidden( cats => 1, entry_url => $entry->url, return_url => $opts{return_url} );
-    $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_todo.gif' alt='$btn_alt' title='$btn_alt' />";
+    $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_todo.gif?v=16329' alt='$btn_alt' title='$btn_alt' />";
     $ret .= LJ::Widget::VerticalContentControl->end_form;
 
     return $ret;

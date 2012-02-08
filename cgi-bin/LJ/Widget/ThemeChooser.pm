@@ -184,7 +184,7 @@ sub render_body {
         }
         $ret .= "<a href='$preview_redirect_url' target='_blank' class='theme-preview-link' title='" . $class->ml('widget.themechooser.theme.preview') . "'>";
 
-        $ret .= "<img src='$LJ::IMGPREFIX/customize/preview-theme.gif' class='theme-preview-image' alt='' /></a>";
+        $ret .= "<img src='$LJ::IMGPREFIX/customize/preview-theme.gif?v=12565' class='theme-preview-image' alt='' /></a>";
         $ret .= $theme_icons;
 
         my $layout_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg$showarg' class='theme-layout'><em>$theme_layout_name</em></a>";

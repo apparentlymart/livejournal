@@ -194,7 +194,7 @@ sub render_body {
         $$picform .= "</script>\n";
 
     } elsif (!$u)  {
-        $$pic .= "<div id='userpic'><p id='userpic_preview'><img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout'  /></p></div>";
+        $$pic .= "<div id='userpic'><p id='userpic_preview'><img src='/img/userpic_loggedout.gif?v=9533' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout'  /></p></div>";
     } else {
         $$pic .= "<div id='userpic'><p id='userpic_preview' class='userpic_preview_border'><a href='$LJ::SITEROOT/editpics.bml'>Upload a userpic</a></p></div>";
     }

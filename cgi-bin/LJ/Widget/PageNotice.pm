@@ -16,9 +16,9 @@ sub render_body {
 
     if ($content) {
         $ret .= $class->html_hidden({ name => "notice_key", value => $opts{notice_key}, id => "notice_key" });
-        $ret .= "<div class='warningbar' id='page_notice' style=\"background-image: url('$LJ::IMGPREFIX/message-warning.gif');\">";
+        $ret .= "<div class='warningbar' id='page_notice' style=\"background-image: url('$LJ::IMGPREFIX/message-warning.gif?v=4888');\">";
         $ret .= $content;
-        $ret .= "<img src='$LJ::IMGPREFIX/dismiss-page-notice.gif' id='dismiss_notice' alt=\"" . $class->ml('widget.pagenotice.dismiss') . "\" />"
+        $ret .= "<img src='$LJ::IMGPREFIX/dismiss-page-notice.gif?v=14650' id='dismiss_notice' alt=\"" . $class->ml('widget.pagenotice.dismiss') . "\" />"
             if $remote;
         $ret .= "</div>";
     }

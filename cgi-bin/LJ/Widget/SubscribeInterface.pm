@@ -109,7 +109,7 @@ sub render_body {
 
             $event_html = qq{
                 <a href="$link" class="i-basket delete-group">
-                    <img src="$LJ::SITEROOT/img/portal/btn_del.gif">
+                    <img src="$LJ::SITEROOT/img/portal/btn_del.gif?v=5825">
                 </a>
                 $event_html
             };
@@ -145,7 +145,7 @@ sub render_body {
 
     unless ($visible_groups) {
         my $blurb = "<?p <strong>" . LJ::Lang::ml('subscribe_interface.nosubs.title') . "</strong><br />";
-        $blurb .= LJ::Lang::ml('subscribe_interface.nosubs.text', { img => "<img src='$LJ::SITEROOT/img/btn_track.gif' width='22' height='20' align='absmiddle' />" }) . " p?>";
+        $blurb .= LJ::Lang::ml('subscribe_interface.nosubs.text', { img => "<img src='$LJ::SITEROOT/img/btn_track.gif?v=17312' width='22' height='20' align='absmiddle' />" }) . " p?>";
 
         $ret .= "<tr>";
         $ret .= "<td colspan='$colnum'>$blurb</td>";

@@ -61,7 +61,7 @@ sub render_body {
             <a href="$LJ::SITEROOT/inbox/?view=befriended" class="subsubs" id="esn_folder_befriended"><?_ml inbox.menu.new_friends _ml?></a><a href="$LJ::SITEROOT/inbox/?view=entrycomment" class="subs" id="esn_folder_entrycomment"><?_ml inbox.menu.entries_and_comments _ml?>$unread_entrycomment</a>};
     $body .= qq{<a href="$LJ::SITEROOT/inbox/?view=spam" class="subs" id="esn_folder_spam"><?_ml inbox.menu.spam _ml?>$unread_spam</a>} unless $LJ::DISABLED{spam_inbox};
     $body .= qq{<span class="subs">---</span>
-            <a href="$LJ::SITEROOT/inbox/?view=bookmark" class="subs" id="esn_folder_bookmark"><?_ml inbox.menu.bookmarks _ml?> <img src="$LJ::IMGPREFIX/flag_on.gif" width="12" height="14" border="0" /></a>};
+            <a href="$LJ::SITEROOT/inbox/?view=bookmark" class="subs" id="esn_folder_bookmark"><?_ml inbox.menu.bookmarks _ml?> <img src="$LJ::IMGPREFIX/flag_on.gif?v=12109" width="12" height="14" border="0" /></a>};
     $body .= qq{<a href="$LJ::SITEROOT/inbox/?view=usermsg_sent" class="subs" id="esn_folder_usermsg_sent"><?_ml inbox.menu.sent _ml?>$unread_usermsg_sent</a>\n} unless $LJ::DISABLED{user_messaging};
     $body .= qq{<a href="$LJ::SITEROOT/inbox/?view=archived" class="subs" id="esn_folder_archived"><?_ml inbox.menu.archive _ml?></a>\n} unless $LJ::DISABLED{esn_archive};
     $body .= qq{
