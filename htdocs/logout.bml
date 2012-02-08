@@ -125,7 +125,7 @@ head<=
     margin-right: 0;
 }
 .stats-meter td {
-    background: url(<?imgprefix?>/stats_back.gif) repeat-x bottom;
+    background: url(<?imgprefix?>/stats_back.gif?v=2135) repeat-x bottom;
 }
 </style>
 <=head

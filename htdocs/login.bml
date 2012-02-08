@@ -145,7 +145,7 @@
 
             unless ($remote->is_identity) {
                 $body .= "<div style='float: left; padding: 5px 10px 0px 10px;'>";
-                $body .= "<img src='/img/pencil.gif'></div>\n";
+                $body .= "<img src='/img/pencil.gif?v=2135'></div>\n";
                 $body .= "<div style='margin-left: 36px;'>";
                 $body .= "<?h2 <a href='$LJ::SITEROOT/update.bml'>";
                 $body .= "$ML{'.loggedin.suggesthead1'}</a> h2?>\n";
@@ -153,7 +153,7 @@
             }
 
             $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
-            $body .= "<img src='/img/userinfo.gif'></div>\n";
+            $body .= "<img src='/img/userinfo.gif?v=17080'></div>\n";
             $body .= "<div style='margin-left: 36px'>";
             $body .= "<?h2 <a href='$base/friends/'>";
             $body .= "$ML{'.loggedin.suggesthead2'}</a> h2?>\n";
@@ -220,12 +220,12 @@
             $body .= "<form action='<?siteroot?>/create.bml' method='get'><input type='submit' value='$ML{'.createaccount.button'}' class='create-account' /></form>\n";
             $body .= "<p>$ML{'.or.connect.using'}</p>\n";
             $body .= "<p class=\"b-loginpage-btns\">";
-            $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.gif?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=1\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.gif?v=2\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
+            $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.gif?v=18100\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=12457\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=11791\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.gif?v=11792\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
             $body .= "</p>\n";
             $body .= "<ul>\n";
             $body .= "<li>$ML{'.createaccount.whylogin.benefit1'}</li>";
