@@ -220,7 +220,7 @@ body<=
         }
     );
     $ret .= '&nbsp;';
-    $ret .= "<input type='image' name='add' src='/img/rte/post_button_text_larger.gif'
+    $ret .= "<input type='image' name='add' src='/img/rte/post_button_text_larger.gif?v=3348'
                     border='0' align='middle' title='$mo->{create}'
                     onClick='return validate_input(this, \"add_field\", \"$add_text\")'>";
 

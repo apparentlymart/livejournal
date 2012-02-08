@@ -212,7 +212,7 @@ body<=
                     <?h1 $ML{'.help.advanced.header'} h1?><br />
 
                     <a name="pgp"></a>
-                    <fieldset><legend>$ML{'.help.advanced.pgp.header'} <img src="/img/key.gif" width="16" height="16"></legend>
+                    <fieldset><legend>$ML{'.help.advanced.pgp.header'} <img src="/img/key.gif?v=6803" width="16" height="16"></legend>
                     <?p } . BML::ml('.help.advanced.pgp.text1', {'pgp' => "<b>PGP</b>"}) . qq{ p?>
                     <?p } . BML::ml('.help.advanced.pgp.text2', {'aopts' => "href='$LJ::SITEROOT/manage/pubkey.bml'"}) . qq{ p?>
                     <?emailex
@@ -279,16 +279,16 @@ body<=
                     <fieldset><legend>$ML{'.help.images.layout.header'}</legend>
                     <?p } . BML::ml('.help.images.layout.text1', {'header' => "<b>lj-imglayout</b>"}) . qq{ <br /><br />
                     $ML{'.help.images.layout.text2'}<br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'><br />
                     <br />
 
                     } . BML::ml('.help.images.layout.text3', {'horizontal' => "horizontal"}) . qq{ p?>
                     <span style='white-space: nowrap;'>
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'>
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'> 
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'> 
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'>
                     </span>
                     <br /><br />
                     <?emailex
