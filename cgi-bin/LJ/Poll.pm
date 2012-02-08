@@ -1525,15 +1525,15 @@ sub render {
 
                 if ($do_table) {
                     $results_table .= "<tr valign='middle'><td align='right'>$item</td>";
-                    $results_table .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' width='7' alt='' />";
-                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='$width' alt='' />";
-                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> ";
+                    $results_table .= "<td><img src='$LJ::IMGPREFIX/poll/leftbar.gif?v=7017' style='vertical-align:middle' height='14' width='7' alt='' />";
+                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif?v=7017' style='vertical-align:middle' height='14' width='$width' alt='' />";
+                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif?v=6803' style='vertical-align:middle' height='14' width='7' alt='' /> ";
                     $results_table .= "<b>$count</b> ($percent%)</td></tr>";
                 } else {
                     $results_table .= "<p>$item<br />";
-                    $results_table .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' alt='' />";
-                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' height='14' width='$width' alt='' />";
-                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' height='14' width='7' alt='' /> ";
+                    $results_table .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif?v=7017' style='vertical-align:middle' height='14' alt='' />";
+                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif?v=7017' style='vertical-align:middle' height='14' width='$width' alt='' />";
+                    $results_table .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif?v=6803' style='vertical-align:middle' height='14' width='7' alt='' /> ";
                     $results_table .= "<b>$count</b> ($percent%)</span></p>";
                 }
             }

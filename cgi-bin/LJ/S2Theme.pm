@@ -520,7 +520,7 @@ sub preview_imgurl {
     }
     
     ## default "custom layer" icon
-    return "$LJ::IMGPREFIX/customize/previews/custom-layer.png";
+    return "$LJ::IMGPREFIX/customize/previews/custom-layer.png?v=12565";
 }
 
     
