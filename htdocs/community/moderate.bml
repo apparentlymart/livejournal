@@ -301,7 +301,7 @@ body<=
                 my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
                 $ret .= "<tr><td>&nbsp;";
-                $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\">" if $is_adult;
+                $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif?v=14405\" border=\"0\" alt=\"\">" if $is_adult;
                 $ret .= "</td>\n<td>$_->{'logtime'}</td>" .
                     "<td><?ljuser " . $users{$_->{'posterid'}}->{'user'} . " ljuser?></td>" .
                     "<td><a href='$link'>$subject</a></td>" .
@@ -483,10 +483,10 @@ body<=
             LJ::CleanHTML::clean_subject(\$subject);
               BML::ebml(\$subject);
               $ret .= $is_adult
-                        ? "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\">&nbsp;<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n"
+                        ? "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif?v=14405\" border=\"0\" alt=\"\">&nbsp;<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n"
                         : "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
         } else {
-            $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif\" border=\"0\" alt=\"\"><br/>\n"
+            $ret .= "<img src=\"".$LJ::IMGPREFIX."/profile_icons/warning.gif?v=14405\" border=\"0\" alt=\"\"><br/>\n"
                 if $is_adult;
         }
         $ret .= $event;

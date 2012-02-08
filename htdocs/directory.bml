@@ -46,7 +46,7 @@ body<=
                 <?p $ML{'.browse.usa.desc'} p?>
                 <form action='get' name="stateForm">
                 <div>
-                <img id="USMap" alt="$ML{'.us_map'}" src="$LJ::IMGPREFIX/us_map.gif" width='489' height='315' border='0' usemap="#state_test" ismap='ismap' />
+                <img id="USMap" alt="$ML{'.us_map'}" src="$LJ::IMGPREFIX/us_map.gif?v=6803" width='489' height='315' border='0' usemap="#state_test" ismap='ismap' />
                 <div id="StateInfo"></div>
                 </div>
                 </form>
@@ -175,7 +175,7 @@ body<=
 
         $ret .= qq {
             <div id="SearchWaitText" style='text-align: center;'>
-               <b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b>
+               <b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif?v=6803' alt='...' width='18' height='12' /></b>
                <p>$ML{'.search.monkey'}</p>
             </div>
         };

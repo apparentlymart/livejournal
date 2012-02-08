@@ -148,7 +148,7 @@ body<=
 
     $body .= qq{
         </td>
-        <td width="1" height="100%" style="border-left: 1px solid #ccc"><img src="$LJ::IMGPREFIX/spacer.gif"></td>
+        <td width="1" height="100%" style="border-left: 1px solid #ccc"><img src="$LJ::IMGPREFIX/spacer.gif?v=13339"></td>
         <td valign="top" style="padding-left: 10px; width: 100%;">
     };
 

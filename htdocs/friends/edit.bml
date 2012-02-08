@@ -124,8 +124,8 @@ body<=
             my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
             @friends = @{$items{'items'}};
 
-            $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif'>",
-                                                            'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif'>" });
+            $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589'>",
+                                                            'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589'>" });
             $ret .= " p?><div align='center'>";
 
             $ret .= $navbar;
@@ -135,10 +135,10 @@ body<=
             $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
             $ret .= "<th width='3%'>";
             if ($sort eq 'rel') {
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' />";
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' />";
             } else {
                 $ret .= "<a href='". BML::self_link({'sort' => 'rel', 'page' => 1}) . "'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' border='0' /></a>";
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' border='0' /></a>";
             }
             $ret .= "</th>";
 
@@ -184,11 +184,11 @@ body<=
                 }
                 $ret .= "</td>";
                 $ret .= "<td align='center'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friend.gif' alt='friend' title='friend'>"
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589' alt='friend' title='friend'>"
                     if $f->{'rel'} eq 'FR';
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friendof.gif' alt='friend-of' title='friend-of'>"
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589' alt='friend-of' title='friend-of'>"
                     if $f->{'rel'} eq 'FO';
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif' alt='mutual friend' title='mutual friend'>"
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' alt='mutual friend' title='mutual friend'>"
                     if $f->{'rel'} eq 'M';
                 $ret .= "</td>";
 
@@ -274,7 +274,7 @@ body<=
             $ret .= "<tr>\n" if $col == 0;
 
             my $ecolor = LJ::ehtml($_->{'item'});
-            $ret .= "<td bgcolor='$_->{'code'}'><img src='/img/dot.gif' width='14' height='14' title='$ecolor' alt='$ecolor' /></td>\n";
+            $ret .= "<td bgcolor='$_->{'code'}'><img src='/img/dot.gif?v=557' width='14' height='14' title='$ecolor' alt='$ecolor' /></td>\n";
 
             $col++;
             $ret .= "</tr>\n" if $col == 5;

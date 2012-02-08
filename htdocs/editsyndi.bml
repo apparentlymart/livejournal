@@ -16,7 +16,7 @@ body<=
     return "This feature is currently disabled."
         if $LJ::DISABLED{mass_privacy};
 
-   return '<div class="warningbar" style="background: url(' . $LJ::IMGPREFIX . '/message-warning.gif) repeat-x #FFFFDD;">'
+   return '<div class="warningbar" style="background: url(' . $LJ::IMGPREFIX . '/message-warning.gif?v=4888) repeat-x #FFFFDD;">'
           . $ML{'.unable'} . '</div>' 
         unless $u && LJ::is_enabled('default_copyright', $u);
 

@@ -467,7 +467,7 @@ document.write("<a href='javascript:void(0);' style='text-decoration: none;' onc
      $ret .= qq~
 <script type='text/javascript' language='JavaScript'>
 <!--
-document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_fg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_fg.value = '$_->{code}';document.getElementById('preview').style.color = '$_->{code}';\\"><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
+document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_fg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_fg.value = '$_->{code}';document.getElementById('preview').style.color = '$_->{code}';\\"><img src='/img/dot.gif?v=557' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
 // -->
 </script>
 ~;
@@ -489,7 +489,7 @@ document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' 
      }
      my $ecolor = LJ::ehtml($_->{'item'});
      $ret2 .= qq~
-<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' 
+<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif?v=557' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' 
 border='0'></td>
 ~;
      if ($col2==23) { $ret2 .= "</tr>\n"; $col2==0; }
@@ -549,7 +549,7 @@ document.write("<a href='javascript:void(0);' style='text-decoration: none;' onc
      $ret .= qq~
 <script type='text/javascript' language='JavaScript'>
 <!--
-document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_bg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_bg.value = '$_->{code}';setBGColor(findel('preview'),'$_->{code}');\\"><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
+document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' style='text-decoration: none;' onclick=\\"setBGColor(findel('editfriend_add_1_bg_value_disp'),'$_->{code}');document.editFriends.editfriend_add_1_bg.value = '$_->{code}';setBGColor(findel('preview'),'$_->{code}');\\"><img src='/img/dot.gif?v=557' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></a></td>");
 // -->
 </script>
 ~;
@@ -572,7 +572,7 @@ document.write("<td $colspan bgcolor='$_->{code}'><a href='javascript:void(0);' 
      }
      my $ecolor = LJ::ehtml($_->{'item'});
      $ret2 .= qq~
-<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></td>
+<td $colspan bgcolor='$_->{code}'><img src='/img/dot.gif?v=557' width='$wh' height='16' title='$ecolor - $_->{code}' alt='$ecolor - $_->{code}' border='0'></td>
 ~;
      if ($col2==23) { $ret2 .= "</tr>\n"; $col2==0; }
  }
@@ -644,6 +644,6 @@ head<=
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/create.bml, htdocs/friends/edit.bml, htdocs/users
-img: htdocs/img/dot.gif
+img: htdocs/img/dot.gif?v=557
 post: htdocs/friends/add.bml
 </LJDEP> _c?>

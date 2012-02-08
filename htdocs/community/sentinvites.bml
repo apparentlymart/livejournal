@@ -213,7 +213,7 @@ END
     my $can_revoke = 0;
 
     # checkboxes and such
-    my $yes = '<img src="/img/blue_check.gif" width="15" height="15" border="0">';
+    my $yes = '<img src="/img/blue_check.gif?v=927" width="15" height="15" border="0">';
     my $no = '-';
 
     # rows for existing users
