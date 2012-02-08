@@ -77,7 +77,7 @@ sub generate_content {
         my $desc = $item->title;
         my $delrequest = "portalboxaction=$pboxid&delete_note=1&del_note_qid=$qid";
 
-        my $delicon = "<img src=\"$LJ::IMGPREFIX/portal/btn_del.gif\" align=\"center\" />";
+        my $delicon = "<img src=\"$LJ::IMGPREFIX/portal/btn_del.gif?v=5825\" align=\"center\" />";
 
         my $cutoff_date = time() - $daysold * 24 * 60 * 60;
 

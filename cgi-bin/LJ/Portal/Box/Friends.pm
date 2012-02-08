@@ -38,7 +38,7 @@ sub generate_content {
     my $pboxid = $self->{'pboxid'};
     my $u = $self->{'u'};
 
-    my $usericonguy = "<img src=\"$LJ::SITEROOT/img/userinfo.gif\" />";
+    my $usericonguy = "<img src=\"$LJ::SITEROOT/img/userinfo.gif?v=17080\" />";
 
     my $content;
 
@@ -79,7 +79,7 @@ sub generate_content {
         }
     } else {
         # haha they have no friends
-        my $addfriendpic = "<img src=\"$LJ::SITEROOT/img/btn_addfriend.gif\" />";
+        my $addfriendpic = "<img src=\"$LJ::SITEROOT/img/btn_addfriend.gif?v=17312\" />";
         $friendlist .= "To add journals or communities to your Friends list, click the " .
             "$addfriendpic icon on their userinfo page.";
     }
@@ -137,7 +137,7 @@ sub generate_content {
         }
         $content .= qq {
             <div class="FriendsList">
-                <img src="$LJ::SITEROOT/img/community.gif" /> ($commcount): <br />
+                <img src="$LJ::SITEROOT/img/community.gif?v=556" /> ($commcount): <br />
                 $commlist
             </div>
         };
@@ -171,7 +171,7 @@ sub generate_content {
         }
         $content .= qq {
             <div class="FriendsList">
-                <img src="$LJ::SITEROOT/img/syndicated.gif" /> ($syncount): <br />
+                <img src="$LJ::SITEROOT/img/syndicated.gif?v=6283" /> ($syncount): <br />
                 $synlist
             </div>
         };

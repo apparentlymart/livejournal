@@ -589,7 +589,7 @@ sub generate_box_titlebar {
 
     my $closebutton = qq {
         <a onclick="return deletePortalBox($pboxid);" href="$post_url?delbox=1&pboxid=$pboxid">
-            <img src="$LJ::IMGPREFIX/portal/PortalBoxClose.gif" title="Remove this module" />
+            <img src="$LJ::IMGPREFIX/portal/PortalBoxClose.gif?v=5510" title="Remove this module" />
             </a>
         };
 
@@ -598,7 +598,7 @@ sub generate_box_titlebar {
     if ($box->can('can_refresh') && $box->can_refresh) {
         $refreshbutton = qq {
             <a onclick="return reloadPortalBox($pboxid);" href="">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxRefresh.gif" title="Reload the contents of this module" id='refresh$pboxid' />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxRefresh.gif?v=5510" title="Reload the contents of this module" id='refresh$pboxid' />
             </a>
         };
     }
@@ -608,7 +608,7 @@ sub generate_box_titlebar {
     if ($editable) {
         $configlink = qq {
             <a onclick="return showConfigPortalBox($pboxid);" href="$post_url?configbox=1&pboxid=$pboxid">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxConfig.gif" title="Edit this module"
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxConfig.gif?v=5510" title="Edit this module"
                 id = 'edit$pboxid' />
             </a>
         };
@@ -631,14 +631,14 @@ sub generate_box_titlebar {
     if ($leftcol) {
         $moveBoxButtons .= qq{
             <a onclick="return movePortalBoxToCol($pboxid, '$leftcol', $colpos);" href="$post_url?movebox=1&pboxid=$pboxid&boxcol=$leftcol&boxcolpos=$colpos">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowLeft.gif" title="Move this module left" class="toolbutton" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowLeft.gif?v=5510" title="Move this module left" class="toolbutton" />
             </a>
         };
     }
     if ($rightcol) {
         $moveBoxButtons .= qq{
             <a onclick="return movePortalBoxToCol($pboxid, '$rightcol', $colpos);" href="$post_url?movebox=1&pboxid=$pboxid&boxcol=$rightcol&boxcolpos=$colpos">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowRight.gif" title="Move this module right" class="toolbutton" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowRight.gif?v=5510" title="Move this module right" class="toolbutton" />
             </a>
         };
     }
@@ -646,7 +646,7 @@ sub generate_box_titlebar {
     if (!($sort <= $minsort)) {
         $moveBoxButtons .= qq{
             <a onclick="return movePortalBoxUp($pboxid);" href="$post_url?movebox=1&pboxid=$pboxid&up=1">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowUp.gif" title="Move this module up" class="toolbutton" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowUp.gif?v=5510" title="Move this module up" class="toolbutton" />
             </a>
         }
     }
@@ -654,7 +654,7 @@ sub generate_box_titlebar {
     if (!($sort >= $maxsort)) {
         $moveBoxButtons .= qq{
             <a onclick="return movePortalBoxDown($pboxid);" href="$post_url?movebox=1&pboxid=$pboxid&down=1">
-                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowDown.gif" title="Move this module down" class="toolbutton" />
+                <img src="$LJ::IMGPREFIX/portal/PortalBoxArrowDown.gif?v=5510" title="Move this module down" class="toolbutton" />
             </a>
         }
     }

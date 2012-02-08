@@ -94,7 +94,7 @@ sub load_portal_boxes {
 }
 
 sub get_close_button {
-    return qq{<img src="$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif" width=19 height=19 title="Close" title="Close" valign="middle" />};
+    return qq{<img src="$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif?v=5510" width=19 height=19 title="Close" title="Close" valign="middle" />};
 }
 
 # get a little faq link and help icon
@@ -103,7 +103,7 @@ sub get_faq_link {
     my $faqkey = shift;
 
     return qq {
-        <a href="$LJ::HELPURL{$faqkey}"><img src="$LJ::IMGPREFIX/help.gif" class="PortalFaqLink" title="Help" /></a>
+        <a href="$LJ::HELPURL{$faqkey}"><img src="$LJ::IMGPREFIX/help.gif?v=6803" class="PortalFaqLink" title="Help" /></a>
     };
 }
 
@@ -431,7 +431,7 @@ sub getmenu {
                         </td>
                         <td align="center" valign="middle" class="PortalMenuItem">
                           <a $addlink class="PortalMenuItem">
-                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif" title="Add this module" width="25" height="25" class="PortalMenuItem" />
+                              <img src="$LJ::IMGPREFIX/portal/AddIcon.gif?v=5677" title="Add this module" width="25" height="25" class="PortalMenuItem" />
                           </a>
                         </td>
                         </tr>

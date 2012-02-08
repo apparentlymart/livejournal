@@ -68,7 +68,7 @@ sub generate_content {
     # link to friends' page
     my $friendspageurl = $u->journal_base . '/friends/';
 
-    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif' /> <a href=\"$friendspageurl\">Latest Friends page $entrytext: $frpagefaqbtn</a></div>";
+    $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/userinfo.gif?v=17080' /> <a href=\"$friendspageurl\">Latest Friends page $entrytext: $frpagefaqbtn</a></div>";
 
     my $entriescontent;
 
@@ -195,7 +195,7 @@ sub generate_content {
             {$groups->{$a}->{'sortorder'} <=>
                  $groups->{$b}->{'sortorder'}}
             keys %$groups;
-            $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/friendgroup.gif' /> Friend Groups ($groupcount):</div>";
+            $content .= "<div class=\"FriendsPageTitle\"><img src='$LJ::SITEROOT/img/friendgroup.gif?v=5744' /> Friend Groups ($groupcount):</div>";
             $content .= '<div class="FriendsPageEntry">';
 
             foreach my $group (@sortedgroups) {
