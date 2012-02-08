@@ -281,41 +281,9 @@ sub new_from_row {
 sub new_from_url {
     my ($class, $url) = @_;
 
-    # /users, /community, or /~
-    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)([\w-]+)/?!) {
-        return LJ::load_user($1);
-    }
-
-    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
-    if ($url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
-        if ( $LJ::IS_USER_DOMAIN->{$1} ) {
-            return LJ::load_user($2);
-        }
-    }
-
-    # user subdomains
-    my $user_uri_regex = qr{
-        # it all starts with a protocol:
-        ^http://
-
-        # username:
-        ([\w-]+)
-
-        # literal dot separating it from our domain space:
-        [.]
-
-        # our domain space:
-        \Q$LJ::USER_DOMAIN\E
-
-        # either it ends right there, or there is a forward slash character
-        # followed by something (we don't care what):
-        (?:$|/)
-
-    }xo; # $LJ::USER_DOMAIN is basically a constant, let Perl know that
-
-    if ( $LJ::USER_DOMAIN && $url =~ $user_uri_regex ) {
-        my $u = LJ::load_user($1);
-        return $u if $u;
+    my $username = $class->username_from_url($url);
+    if ($username){
+        return LJ::load_user($username);
     }
 
     # domains like 'http://news.independent.livejournal.com' or 'http://some.site.domain.com'
@@ -353,6 +321,47 @@ sub new_from_external_domain {
     my $u = LJ::load_userid($userid);
     return $u if $u;
     return undef;
+}
+
+sub username_from_url {
+    my ($class, $url) = @_;
+
+    # /users, /community, or /~
+    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)([\w-]+)/?!) {
+        return $1;
+    }
+
+    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
+    if ($url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
+        if ( $LJ::IS_USER_DOMAIN->{$1} ) {
+            return $2;
+        }
+    }
+
+    # user subdomains
+    my $user_uri_regex = qr{
+        # it all starts with a protocol:
+        ^http://
+
+        # username:
+        ([\w-]+)
+
+        # literal dot separating it from our domain space:
+        [.]
+
+        # our domain space:
+        \Q$LJ::USER_DOMAIN\E
+
+        # either it ends right there, or there is a forward slash character
+        # followed by something (we don't care what):
+        (?:$|/)
+
+    }xo; # $LJ::USER_DOMAIN is basically a constant, let Perl know that
+
+    if ( $LJ::USER_DOMAIN && $url =~ $user_uri_regex ) {
+        return $1;
+    }
+   
 }
 
 # returns LJ::User class of a random user, undef if we couldn't get one
@@ -7123,6 +7132,29 @@ sub load_user
     }
 
     return undef;
+}
+
+sub load_users {
+    my @users = @_;
+    
+    my %need = map {$_ => 1} @users;
+
+    ## skip loaded
+    my %loaded;
+    foreach my $user (@users){
+        if (my $u = $LJ::REQ_CACHE_USER_NAME{$user}) {
+            $loaded{$u->userid} = $u;
+            delete $need{$u->userid};
+        }
+    }
+
+    ## username to userid
+    my $uids = LJ::MemCache::get_multi([ map {"uidof:$_"} keys %need ]);
+    my $us = LJ::load_userids( values %$uids );
+    while (my ($k, $v) = each %loaded){
+        $us->{$k} = $v;
+    }
+    return $us;
 }
 
 # <LJFUNC>
