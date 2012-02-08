@@ -36,11 +36,11 @@ Profile =
 		
 		if (expand) {
 			DOM.addClassName($(headerid), 'on');
-			$(arrowid).src = Site.imgprefix + '/profile_icons/arrow-down.gif';
+			$(arrowid).src = Site.imgprefix + '/profile_icons/arrow-down.gif?v=14408';
 			body && (body.style.display = 'block');
 		} else { // collapse
 			DOM.removeClassName($(headerid), 'on');
-			$(arrowid).src = Site.imgprefix + '/profile_icons/arrow-right.gif';
+			$(arrowid).src = Site.imgprefix + '/profile_icons/arrow-right.gif?v=14408';
 			body && (body.style.display = 'none');
 		}
 		

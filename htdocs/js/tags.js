@@ -121,16 +121,16 @@ function show_props(div, id)
 
     var secimg = '&nbsp; <img align="middle" src="/img/';
     if (tag[1] == "public") {
-        secimg = secimg + "userinfo.gif";
+        secimg = secimg + "userinfo.gif?v=17080";
     }
     else if (tag[1] == "private") {
-        secimg = secimg + "icon_private.gif";
+        secimg = secimg + "icon_private.gif?v=7017";
     }
     else if (tag[1] == "friends") {
-        secimg = secimg + "icon_protected.gif";
+        secimg = secimg + "icon_protected.gif?v=7017";
     } 
     else {
-        secimg = secimg + "icon_protected.gif";
+        secimg = secimg + "icon_protected.gif?v=7017";
     }
     secimg = secimg + '" />';
     if (tag[1] == "n/a") secimg = "";

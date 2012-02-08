@@ -53,12 +53,12 @@ ExpanderEx.prototype.parseLJ_cmtinfo = function(context,callback){
 }
 
 ExpanderEx.preloadImg = function(){
-    (new Image()).src = Site.imgprefix + '/preloader-s.gif?v=3';
+    (new Image()).src = Site.imgprefix + '/preloader-s.gif?v=9673';
 }
 
 ExpanderEx.prototype.addPreloader = function(){
     this.loader = new Image();
-    this.loader.src = Site.imgprefix + '/preloader-s.gif?v=3';
+    this.loader.src = Site.imgprefix + '/preloader-s.gif?v=9673';
     this.loader.className = 'i-exp-preloader';
     this.__caller__.parentNode.appendChild( this.loader );
 }

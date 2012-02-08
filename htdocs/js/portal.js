@@ -385,7 +385,7 @@ function doDropDownMenu(e, menuHTML) {
 
   /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
   if (addbutton && Site.imgprefix) {
-    addbutton.src = Site.imgprefix + "/portal/PortalAddButtonSelected.gif";
+    addbutton.src = Site.imgprefix + "/portal/PortalAddButtonSelected.gif?v=5616";
     }*/
 
   // keep menu up to date
@@ -408,7 +408,7 @@ function hidePortalMenu(menu) {
 
     /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
     if (addbutton && Site.imgprefix) {
-      addbutton.src = Site.imgprefix + "/portal/PortalAddButton.gif";
+      addbutton.src = Site.imgprefix + "/portal/PortalAddButton.gif?v=5616";
       }*/
   }
 }
