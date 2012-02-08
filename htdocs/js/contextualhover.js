@@ -307,7 +307,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					buildObject.headLinks.push(
 						'<span class="alias-unavailable">'+
 							'<a href="'+Site.siteroot+'/manage/account">'+
-								'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif" width="13" height="16" alt=""/>'+
+								'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif?v=2621" width="13" height="16" alt=""/>'+
 							'</a> '+
 							'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+
 						'</span>');

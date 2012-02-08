@@ -95,7 +95,7 @@ ESN_Inbox.initContentExpandButtons = function (folder) {
         DOM.addEventListener(button, "click", function (evt) {
             if (evt.shiftKey) {
                 // if shift key, make all like inverse of current button
-                var expand = button.src == Site.imgprefix + "/collapse.gif" ? 'collapse' : 'expand';
+                var expand = button.src == Site.imgprefix + "/collapse.gif?v=8234" ? 'collapse' : 'expand';
                 ESN_Inbox.saveDefaultExpanded(expand == 'collapse');
                 buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn, expand) });
             } else {
@@ -121,18 +121,18 @@ ESN_Inbox.toggleExpand = function (button, state) {
     if (state) {
         if (state == "expand") {
             contentContainer.style.display = "none";
-            button.src = Site.imgprefix + "/collapse.gif";
+            button.src = Site.imgprefix + "/collapse.gif?v=8234";
         } else {
             contentContainer.style.display = "block";
-            button.src = Site.imgprefix + "/expand.gif";
+            button.src = Site.imgprefix + "/expand.gif?v=8234";
         }
     } else {
         if (contentContainer.style.display == "none") {
             contentContainer.style.display = "block";
-            button.src = Site.imgprefix + "/expand.gif";
+            button.src = Site.imgprefix + "/expand.gif?v=8234";
         } else {
             contentContainer.style.display = "none";
-            button.src = Site.imgprefix + "/collapse.gif";
+            button.src = Site.imgprefix + "/collapse.gif?v=8234";
         }
     }
     return false;
@@ -388,8 +388,8 @@ ESN_Inbox.finishedUpdate = function ( info, folder ) {
 
         var bookmarks = DOM.getElementsByClassName(rowElement, "InboxItem_Bookmark") || [];
         for (var i=0; i<bookmarks.length; i++) {
-            bookmarks[i].src = bookmarked ? Site.imgprefix + "/flag_on.gif" :
-                                Site.imgprefix + "/flag_off.gif";
+            bookmarks[i].src = bookmarked ? Site.imgprefix + "/flag_on.gif?v=12109" :
+                                Site.imgprefix + "/flag_off.gif?v=12109";
             ESN_Inbox.bookmarked[qid] = bookmarked ? true : false;
         }
 

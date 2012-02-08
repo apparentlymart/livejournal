@@ -389,7 +389,7 @@ function altlogin(e) {
 	var userpic_preview = $('userpic_preview');
 	if (userpic_preview) {
 		userpic_preview.className = "";
-		userpic_preview.innerHTML = "<img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout' />";
+		userpic_preview.innerHTML = "<img src='/img/userpic_loggedout.gif?v=9533' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout' />";
 	}
 
 	var mood_preview = $('mood_preview');

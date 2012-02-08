@@ -223,7 +223,7 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
                 if (dtalkid)
                     ESN.updateThreadIcons(dtalkid, "on");
                 else // not thread tracking button
-                    btn.src = Site.imgprefix + "/btn_tracking.gif";
+                    btn.src = Site.imgprefix + "/btn_tracking.gif?v=17312";
             } else {
                 if (info["event_class"] == "LJ::Event::JournalNewComment")
 					btn.setAttribute('lj_subid', 0);
@@ -255,7 +255,7 @@ ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
                     ESN.updateThreadIcons(dtalkid, state);
                 } else {
                     // not thread tracking button
-                    btn.src = Site.imgprefix + "/btn_track.gif";
+                    btn.src = Site.imgprefix + "/btn_track.gif?v=17312";
                 }
             }
 
@@ -331,13 +331,13 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
     var uri;
     switch (tracking) {
         case "on":
-            uri = "/btn_tracking.gif";
+            uri = "/btn_tracking.gif?v=17312";
             break;
         case "off":
-            uri = "/btn_track.gif";
+            uri = "/btn_track.gif?v=17312";
             break;
         case "parent":
-            uri = "/btn_tracking_thread.gif";
+            uri = "/btn_tracking_thread.gif?v=17312";
             break;
         default:
             alert("Unknown tracking state " + tracking);
