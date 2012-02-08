@@ -1374,8 +1374,10 @@ sub get_recent_items
             $last_time = $li->{alldatepart};
     
             # construct an LJ::Entry singleton
-            my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid}, rlogtime => $li->{rlogtime});
-            $entry->absorb_row($li);
+            my $entry = LJ::Entry->new($userid, 
+                                        jitemid  => $li->{itemid}, 
+                                        rlogtime => $li->{rlogtime},
+                                        row      => $li);
             push @{$opts->{'entry_objects'}}, $entry;
         }
     };
