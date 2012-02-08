@@ -18,7 +18,7 @@ HR=><P ALIGN="CENTER"><FONT COLOR=BLUE>*</FONT></P>
 
 NEWLINE=>{D}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
 P=>{D}<BR>%%DATA%%
-P/FOLLOW_P=>{DRps}<BR><IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
+P/FOLLOW_P=>{DRps}<BR><IMG SRC="<?imgprefix?>/dot.gif?v=557" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
 
 STANDOUTO<=
 {D}<CENTER><FONT SIZE=1><BR></FONT><TABLE ALIGN=CENTER CELLPADDING=8 BORDER=1 BGCOLOR=#CCCCFF BORDERCOLORLIGHT=#DDDDFF
@@ -33,27 +33,27 @@ STANDOUT<=
 <table cellspacing=0 cellpadding=0 border=0 bgcolor="#ccccff">
  <tr>
   <td width=7 align=left valign=top>
-   <img width=7 height=7 src="<?imgprefix?>/corn_nw.gif" alt=""></td>
+   <img width=7 height=7 src="<?imgprefix?>/corn_nw.gif?v=557" alt=""></td>
   <td height=7>
-   <img height=7 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td width=7 valign=top align=right>
-   <img height=7 src="<?imgprefix?>/corn_ne.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/corn_ne.gif?v=557" alt=""></td>
  </tr><tr>
   <td width=7>
-   <img width=7 height=1 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img width=7 height=1 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td valign=top>
 %%DATA%%
 
   </td>
   <td width=7>
-   <img width=7 height=1 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img width=7 height=1 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
  </tr><tr>
   <td width=7 align=left valign=top>
-   <img width=7 height=7 src="<?imgprefix?>/corn_sw.gif" alt=""></td>
+   <img width=7 height=7 src="<?imgprefix?>/corn_sw.gif?v=557" alt=""></td>
   <td height=7>
-   <img height=7 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td width=7 valign=top align=right>
-   <img height=7 src="<?imgprefix?>/corn_se.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/corn_se.gif?v=557" alt=""></td>
  </tr>
 </table>
 
@@ -101,7 +101,7 @@ PAGE<=
       </TD>
     </TR>
     <TR ALIGN=LEFT VALIGN=TOP>
-        <TD WIDTH="520"><IMG SRC="<?imgprefix?>/bluedot.gif" ALT="" WIDTH="520" HEIGHT="4" HSPACE="0" VSPACE="0" BORDER="0"><BR>
+        <TD WIDTH="520"><IMG SRC="<?imgprefix?>/bluedot.gif?v=7017" ALT="" WIDTH="520" HEIGHT="4" HSPACE="0" VSPACE="0" BORDER="0"><BR>
             <TABLE WIDTH="520" CELLSPACING="0" CELLPADDING="0" BORDER="0">
                  <TR ALIGN=CENTER VALIGN=MIDDLE>
 <?_code
@@ -180,7 +180,7 @@ _code?>
 <TABLE WIDTH="630" CELLSPACING="0" CELLPADDING="0" BORDER="0">
 <TR ALIGN=CENTER VALIGN=TOP>
 <TD ALIGN=CENTER>
-	<IMG SRC="<?imgprefix?>/bluedot.gif" ALT="" WIDTH="350" HEIGHT="1" HSPACE="0" VSPACE="2" BORDER="0"><BR>
+	<IMG SRC="<?imgprefix?>/bluedot.gif?v=7017" ALT="" WIDTH="350" HEIGHT="1" HSPACE="0" VSPACE="2" BORDER="0"><BR>
 	<FONT FACE="Arial, Helvetica" SIZE="-2">
 		<A HREF="/privacy.bml">Privacy Policy</A> - 
 		<A HREF="/coppa.bml">COPPA</A><BR>

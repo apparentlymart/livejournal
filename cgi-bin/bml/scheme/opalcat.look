@@ -22,7 +22,7 @@ DE<=
 
 NEWLINE=>{D}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
 P=>{D}<BR>%%DATA%%
-P/FOLLOW_P=>{DRps}<BR><IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
+P/FOLLOW_P=>{DRps}<BR><IMG SRC="<?imgprefix?>/dot.gif?v=557" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
 
 STANDOUTO<=
 {D}<CENTER><FONT SIZE=1><BR></FONT><TABLE ALIGN=CENTER CELLPADDING=8 BORDER=1 BGCOLOR=#CCCCFF BORDERCOLORLIGHT=#DDDDFF
@@ -37,27 +37,27 @@ STANDOUT<=
 <table cellspacing=0 cellpadding=0 border=0 bgcolor="#ccccff">
  <tr>
   <td width=7 align=left valign=top>
-   <img width=7 height=7 src="<?imgprefix?>/corn_nw.gif" alt=""></td>
+   <img width=7 height=7 src="<?imgprefix?>/corn_nw.gif?v=557" alt=""></td>
   <td height=7>
-   <img height=7 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td width=7 valign=top align=right>
-   <img height=7 src="<?imgprefix?>/corn_ne.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/corn_ne.gif?v=557" alt=""></td>
  </tr><tr>
   <td width=7>
-   <img width=7 height=1 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img width=7 height=1 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td valign=top>
 %%DATA%%
 
   </td>
   <td width=7>
-   <img width=7 height=1 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img width=7 height=1 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
  </tr><tr>
   <td width=7 align=left valign=top>
-   <img width=7 height=7 src="<?imgprefix?>/corn_sw.gif" alt=""></td>
+   <img width=7 height=7 src="<?imgprefix?>/corn_sw.gif?v=557" alt=""></td>
   <td height=7>
-   <img height=7 src="<?imgprefix?>/dot.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/dot.gif?v=557" alt=""></td>
   <td width=7 valign=top align=right>
-   <img height=7 src="<?imgprefix?>/corn_se.gif" alt=""></td>
+   <img height=7 src="<?imgprefix?>/corn_se.gif?v=557" alt=""></td>
  </tr>
 </table>
 
@@ -104,13 +104,13 @@ PAGE<=
 </HEAD>
 <BODY BGCOLOR=#FFFFFF TOPMARGIN="0" LEFTMARGIN="0" RIGHTMARGIN="0" BOTTOMMARGIN="0"
       MARGINHEIGHT="0" MARGINWIDTH="0" LINK=#0000C0 VLINK=#0000C0
-      BACKGROUND="<?imgprefix?>/opal/spiral2.jpg" %%bodyopts%%>
+      BACKGROUND="<?imgprefix?>/opal/spiral2.jpg?v=6803" %%bodyopts%%>
 
 <TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=100% HEIGHT=100%>
 <TR VALIGN=TOP>
 <TD WIDTH=128 NOWRAP>
 
-<IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 HEIGHT=15><BR>
+<IMG SRC="<?imgprefix?>/dot.gif?v=557" WIDTH=1 HEIGHT=15><BR>
 
 <FONT FACE="Arial,Helvetica" SIZE=-1>
 <?_code
@@ -124,7 +124,7 @@ PAGE<=
      foreach my $mi (@$listref) 
      {
 	 if ($depth==0) { 
-	     $$ret .= "<P><IMG SRC=\"<?imgprefix?>/opal/bullet.gif\" WIDTH=10 HEIGHT=10 HSPACE=2 ALIGN=ABSMIDDLE>";
+	     $$ret .= "<P><IMG SRC=\"<?imgprefix?>/opal/bullet.gif?v=7017\" WIDTH=10 HEIGHT=10 HSPACE=2 ALIGN=ABSMIDDLE>";
 	 } else {
 	     $$ret .= "&nbsp;" x ($depth*3+1);
 	     $$ret .= $mi->{'cont'} ? "&nbsp;&nbsp;" : "- ";
@@ -180,7 +180,7 @@ _code?>
 $is_home = (BML::get_uri() =~ m!^/(index\.bml)?!);
 if (! $is_home)
 {
-	return '<P><A HREF="/"><IMG SRC="<?imgprefix?>/opal/home.gif" WIDTH=87 HEIGHT=51 BORDER=0 HSPACE=0></A></P>';
+	return '<P><A HREF="/"><IMG SRC="<?imgprefix?>/opal/home.gif?v=6803" WIDTH=87 HEIGHT=51 BORDER=0 HSPACE=0></A></P>';
 } else {
 	return "<P>&nbsp;</P>";
 }
@@ -188,14 +188,14 @@ return "";
 _code?>
 
 <P align=left><FONT SIZE=6 COLOR="#000a3f" FACE="Arial, Helvetica"><B>%%TITLE%%</B></FONT>
-<BR><IMG SRC="<?imgprefix?>/opal/pencil-line.gif" WIDTH=345 HEIGHT=23></P>
+<BR><IMG SRC="<?imgprefix?>/opal/pencil-line.gif?v=6803" WIDTH=345 HEIGHT=23></P>
 
       </TD>
     </TR>
     </TABLE>
 
 
-<IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 HEIGHT=5><BR>
+<IMG SRC="<?imgprefix?>/dot.gif?v=557" WIDTH=1 HEIGHT=5><BR>
 
 <TABLE WIDTH=100%>
 <TR><TD ALIGN=LEFT>
