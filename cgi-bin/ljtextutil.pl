@@ -860,7 +860,7 @@ sub convert_lj_tags_to_links {
         my $user = LJ::load_user($1); 
         my $name = $user->username;
         my $html = '<a href="' . $user->profile_url . '" target="_blank"><img src="' 
-        . $LJ::IMGPREFIX . '/userinfo.gif" alt=""></a><a href="'
+        . $LJ::IMGPREFIX . '/userinfo.gif?v=17080" alt=""></a><a href="'
         . $user->journal_base . '" target="_blank">' . $name . '</a>';
         $args{event} =~ s#<lj\s+user="$name"\s*\/?>#$html#g;
     }

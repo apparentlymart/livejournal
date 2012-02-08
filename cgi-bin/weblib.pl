@@ -263,7 +263,7 @@ sub help_icon_html {
     my $post = shift || "";
     my $title = shift || "";
     # FIXME: use LJ::img() here, not hard-coding width/height
-    return "$pre<a href=\"$url\" class=\"helplink\" target=\"_blank\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width=\"14\" height=\"14\" border=\"0\" />$title</a>$post";
+    return "$pre<a href=\"$url\" class=\"helplink\" target=\"_blank\"><img src=\"$LJ::IMGPREFIX/help.gif?v=6803\" alt=\"Help\" title=\"Help\" width=\"14\" height=\"14\" border=\"0\" />$title</a>$post";
 }
 
 # <LJFUNC>
@@ -2031,7 +2031,7 @@ sub placeholder_link {
     my $width  = delete $opts{width}  || 100;
     my $height = delete $opts{height} || 100;
     my $link   = delete $opts{link}   || '';
-    my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png";
+    my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png?v=8209";
 
     $width -= 2;
     $height -= 2;

@@ -1597,7 +1597,7 @@ sub clean
     $$data = Encode::encode_utf8($$data);
 
     if ($suspend_msg) {
-        my $msg = qq{<div style="color: #000; font: 12px Verdana, Arial, Sans-Serif; background-color: #ffeeee; background-repeat: repeat-x; border: 1px solid #ff9999; padding: 8px; margin: 5px auto; width: auto; text-align: left; background-image: url('$LJ::IMGPREFIX/message-error.gif');">};
+        my $msg = qq{<div style="color: #000; font: 12px Verdana, Arial, Sans-Serif; background-color: #ffeeee; background-repeat: repeat-x; border: 1px solid #ff9999; padding: 8px; margin: 5px auto; width: auto; text-align: left; background-image: url('$LJ::IMGPREFIX/message-error.gif?v=4888');">};
         my $link_style = "color: #00c; text-decoration: underline; background: transparent; border: 0;";
 
         if ($unsuspend_supportid) {
