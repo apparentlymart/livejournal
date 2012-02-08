@@ -7149,7 +7149,7 @@ sub load_users {
     }
 
     ## username to userid
-    my $uids = LJ::MemCache::get_multi([ map {"uidof:$_"} keys %need ]);
+    my $uids = LJ::MemCache::get_multi( map {"uidof:$_"} keys %need );
     my $us = LJ::load_userids( values %$uids );
     while (my ($k, $v) = each %loaded){
         $us->{$k} = $v;
