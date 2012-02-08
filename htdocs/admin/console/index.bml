@@ -36,7 +36,7 @@
      $ret .= "<FORM METHOD=POST>";
      $ret .= LJ::form_auth();
      $ret .= "<TABLE WIDTH=400><TR VALIGN=BOTTOM>";
-     $ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/nerd_small.jpg\" WIDTH=167 HEIGHT=169 HSPACE=2 VSPACE=2></TD>";
+     $ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/nerd_small.jpg?v=6803\" WIDTH=167 HEIGHT=169 HSPACE=2 VSPACE=2></TD>";
      $ret .= "<TD><B><TT>command console.</TT></B>";
      $ret .= "<P>welcome to the livejournal console.  from here administrators can do administrative type things.  you will forget the commands, so there is a <A HREF=\"reference.bml\">reference</A>.</TD>";
      $ret .= "</TR>";
