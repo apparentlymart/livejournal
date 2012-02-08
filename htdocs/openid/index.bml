@@ -9,7 +9,7 @@ head<=
 
 <style>
  input.sexy {
-   background: url(<?imgprefix?>/openid-inputicon.gif) no-repeat;
+   background: url(<?imgprefix?>/openid-inputicon.gif?v=5042) no-repeat;
    background-color: #fff;
    background-position: 0 50%;
    padding-left: 18px;
