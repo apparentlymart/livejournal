@@ -23,7 +23,7 @@ body<=
 
     ## load actual data
     my $top_entries = LJ::TopEntries->new(domain => $domain);
-
+    $top_entries->{_post_loaded} = 0;
     ## Add new entry
     if ($POST{url}) {
         my $entry = LJ::Entry->new_from_url($POST{url});
@@ -122,6 +122,8 @@ body<=
     $ret .= '';
     $ret .= "</table><br />\n";
 
+    $top_entries->{_post_loaded} = 0;
+    $top_entries->{'featured_posts'} = undef;
     if (my @posts = $top_entries->get_featured_posts(raw => 1)){
         $ret .= qq|<h3>Added Posts</h3><ul id="delete-posts">|;
         $ret .= "<li><input type=\"checkbox\" name==\"selectall\" /> - Select all</li>";
