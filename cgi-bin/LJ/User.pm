@@ -6728,12 +6728,9 @@ sub load_user_props {
 sub load_user_props_multi {
     my ($class, $users, $props, $opts) = @_;
     my $use_master = $opts->{'use_master'};
-    my $propkeys;
 
     $props = [grep { defined and not ref } @$props];
     return unless @$props;
-
-    $propkeys = { map { $_ => '' } @$props };
 
     $users = { map { $_->{'userid'} => $_ } grep { ref } @$users };
     return unless %$users;
@@ -6744,13 +6741,15 @@ sub load_user_props_multi {
     my $memc_expire = time() + 3600 * 24;
 
     foreach my $handler (keys %$groups) {
+        my %propkeys = map { $_ => '' } @{ $groups->{$handler} };
+
         # if there is no memcache, or if the handler doesn't wish to use
         # memcache, hit the storage directly, update the user object,
         # and get straight to the next handler
         if ( not $memcache_available or not defined $handler->use_memcache ) {
             foreach my $u (values %$users) {
                 my $propmap = {
-                    %$propkeys,
+                    %propkeys,
                     %{  $handler->get_props($u, $groups->{$handler},
                             {
                                 use_master => $use_master
@@ -6787,7 +6786,7 @@ sub load_user_props_multi {
 
                 # Hack to init keys for empty props
                 my $packed = { 
-                    %$propkeys,
+                    %propkeys,
                     %{ LJ::User::PropStorage->unpack_from_memcache($v) },
                 };
 
@@ -6815,7 +6814,7 @@ sub load_user_props_multi {
 
             foreach my $u (values %$users) {
                 my $propmap_memc = {
-                    %$propkeys,
+                    %propkeys,
                     %{ $handler->fetch_props_memcache($u, $handled_props) },
                 };
 
