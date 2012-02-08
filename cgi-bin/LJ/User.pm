@@ -6055,9 +6055,19 @@ sub get_renamed_user {
             my $rt = $u->prop("renamedto");
             last unless length $rt;
             if ($rt =~ /^https?:\/\//){
-                $u = LJ::User->new_from_url($rt);
+                if ( my $newu = LJ::User->new_from_url($rt) ) {
+                    $u = $newu;
+                } else {
+                    warn $u->username . " links to non-existent user at $rt";
+                    return $u;
+                }
             } else {
-                $u = LJ::load_user($rt);
+                if ( my $newu = LJ::load_user($rt) ) {
+                    $u = $newu;
+                } else {
+                    warn $u->username . " links to non-existent user at $rt";
+                    return $u;
+                }
             }
         }
     }
