@@ -93,7 +93,7 @@
     else {
         # if it's a feed, make their userpic the feed icon
         if ($u->is_syndicated) {
-            $ret{url_userpic} = "$LJ::IMGPREFIX/feed100x100.png";
+            $ret{url_userpic} = "$LJ::IMGPREFIX/feed100x100.png?v=7859";
         }
         elsif ($u->is_identity) {
             ## show OpedID placeholder for OpenID accounts, and
@@ -101,17 +101,17 @@
             my $identity = $u->identity;
 
             if ($identity && $identity->isa("LJ::Identity::OpenID")) {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/profile_icons/openid.gif";
+                $ret{url_userpic} = "$LJ::IMGPREFIX/profile_icons/openid.gif?v=14273";
             }
             else {
-                $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
+                $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif?v=8313";
             }
         }
         elsif ( $u->is_comm ) {
-            $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/comm.gif";
+            $ret{'url_userpic'} = "$LJ::IMGPREFIX/profile_icons/comm.gif?v=14273";
         }
         else {
-            $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif";
+            $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif?v=8313";
         }
 
         $ret{userpic_w} = 100;
