@@ -19,7 +19,7 @@ sub matches_url {
 }
 
 sub icon_url {
-    return "$LJ::IMGPREFIX/vox.gif";
+    return "$LJ::IMGPREFIX/vox.gif?v=9746";
 }
 
 1;

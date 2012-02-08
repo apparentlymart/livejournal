@@ -52,7 +52,7 @@ sub matches_url {
 # 16x16 image to be shown for the LJ user head for this user.
 # unless overridden, external users are just (as default), OpenID-looking users
 sub icon_url {
-    return "$LJ::IMGPREFIX/openid-profile.gif";
+    return "$LJ::IMGPREFIX/openid-profile.gif?v=5044";
 }
 
 1;

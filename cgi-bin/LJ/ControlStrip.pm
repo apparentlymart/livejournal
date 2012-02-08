@@ -117,13 +117,13 @@ sub render
                     my $linkcolor = S2::get_property_value($ctx, "control_strip_linkcolor");
 
                     if ($linkcolor ne "") {
-                        $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
+                        $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif?v=6802", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
                     }
                 }
             }
 
             $data_remote->{userpic} = {
-                src   => $tinted_nouserpic_img || "$LJ::IMGPREFIX/controlstrip/nouserpic.gif",
+                src   => $tinted_nouserpic_img || "$LJ::IMGPREFIX/controlstrip/nouserpic.gif?v=6802",
                 alt   => BML::ml('web.controlstrip.nouserpic.alt'),
                 title => BML::ml('web.controlstrip.nouserpic.title'),
             };

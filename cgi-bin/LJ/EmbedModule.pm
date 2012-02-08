@@ -487,7 +487,7 @@ sub module_iframe_tag {
         placeholder_html => $iframe_tag,
         width            => $width,
         height           => $height,
-        img              => "$LJ::IMGPREFIX/videoplaceholder.png",
+        img              => "$LJ::IMGPREFIX/videoplaceholder.png?v=8209",
         link             => $iframe_link,
     );
 }
