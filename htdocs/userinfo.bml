@@ -655,7 +655,7 @@
     #LJSUP-10988: Add position and social capital to user profile
     #==============================================================
     if ($u->is_personal || $u->is_comm) {
-        my %filter = ( sup => 1 );
+        my $ua_position;
 
         #LJSUP-11197: If user is in two ratings (common and UA) display two strings in profile
         #-------------------------------------------------------------------------------------
@@ -668,7 +668,14 @@
                 my $ua_prop = $u ? ($u->prop('view_ua_ratings') || 'Y') : 'N';
                 $view_ua_ratings = 1 if $ua_cookie eq 'Y' or $ua_prop eq 'Y';
                 if ( $view_ua_ratings ) {
-                    %filter = ( filter => 'UA' );
+                    $ua_position = LJ::PersonalStats::DB->fetch_raw('ratings', {
+                        func => 'get_value',
+                        what => $u->journaltype eq 'C' ? 'communities' : 'users', 
+                        journal_id => $u->userid,
+                        by => 'friends_weight',
+                        type => 0,
+                        filter => 'UA',
+                    });
                 }
             }
         }
@@ -680,27 +687,45 @@
             journal_id => $u->userid,
             by => 'friends_weight',
             type => 0,
-            %filter,
+            sup => 1,
         });
-        if (ref $position eq 'HASH') {
-            if ($position->{result}->{position} < 2000) {
-                my $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
-                my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png?v=11372'/> ";
-                my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
-                $body .= "<ul class='rating-details'>" .
-                         "<li class='rating-place'>" .
+
+        my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png?v=11372'/> ";
+        my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
+        my $ua_href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.ua_community_rating' : 'ljcom.userinfo.ua_account_rating';
+        my $soc_image;
+        my $soc_capital;
+
+        $body .= "<ul class='rating-details'>";
+
+        if (ref $position eq 'HASH' && $position->{result}->{position} < 2000) {
+                $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
+                $soc_capital = LJ::commafy(int($position->{result}->{value}/1000));
+                $body .= "<li class='rating-place'>" .
                          $diagram_image .
                          LJ::Lang::ml($href_rating, {rating_place => LJ::commafy(++$position->{result}->{position}), 
                                                      url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users')}) .
-                         "</li>" .
-                         "<li class='rating-social-capital'>" .
+                         "</li>"; 
+        }          
+        if (ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) {
+                $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($ua_position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
+                $soc_capital = LJ::commafy(int($ua_position->{result}->{value}/1000));
+                $body .= "<li class='rating-place'>" .
+                         $diagram_image .
+                         LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy(++$ua_position->{result}->{position}), 
+                                                     url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users')}) .
+                         "</li>"; 
+        }
+        if ((ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) || (ref $position eq 'HASH' && $position->{result}->{position} < 2000)) {
+                $body .= "<li class='rating-social-capital'>" .
                          $soc_image .
-                         LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => LJ::commafy(int($position->{result}->{value}/1000))}) . ' ' .
+                         LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => $soc_capital}) . ' ' .
                          LJ::help_icon_html("profile_faq") .
                          "</li>" .
-                         "</ul>";
-            }
         }
+
+        $body .= "</ul>";
+
     }
     #==============================================================
 
