@@ -10,6 +10,24 @@ sub should_render {
     return 0 unless $u;
     return 0 unless LJ::is_enabled('comments_style_mine');
     return 0 unless $u->is_personal;
+    return 1;
+}
+
+sub label {
+    my $class = shift;
+
+    return $class->ml('setting.commentsstylemine.label');
+}
+
+sub option {
+    my ($class, $u, $errs, $args) = @_;
+    my $key = $class->pkgkey;
+
+    my $stylealwaysmine = $class->get_arg($args, "stylealwaysmine") || $u->opt_stylealwaysmine;
+    my $commentsstylemine = $class->get_arg($args, "commentsstylemine") || $u->opt_commentsstylemine;
+    my $can_use_commentsstylemine = $u->can_use_commentsstylemine? 1 : 0;
+
+    $can_use_commentsstylemine = 0 if $stylealwaysmine;
 
     my $get_styleinfo = sub {
         my $journal = shift;
@@ -38,31 +56,12 @@ sub should_render {
                        LJ::get_cap($u, "s2viewentry");
     }
 
-    return $use_s1? 1 : 0;
-}
-
-sub label {
-    my $class = shift;
-
-    return $class->ml('setting.commentsstylemine.label');
-}
-
-sub option {
-    my ($class, $u, $errs, $args) = @_;
-    my $key = $class->pkgkey;
-
-    my $stylealwaysmine = $class->get_arg($args, "stylealwaysmine") || $u->opt_stylealwaysmine;
-    my $commentsstylemine = $class->get_arg($args, "commentsstylemine") || $u->opt_commentsstylemine;
-    my $can_use_commentsstylemine = $u->can_use_commentsstylemine? 1 : 0;
-
-    $can_use_commentsstylemine = 0 if $stylealwaysmine;
-
     my $ret = LJ::html_check({
         name => "${key}commentsstylemine",
         id => "${key}commentsstylemine",
         value => 1,
-        selected => $commentsstylemine && $can_use_commentsstylemine? 1 : 0,
-        disabled => $can_use_commentsstylemine? 0 : 1,
+        selected => $commentsstylemine && $can_use_commentsstylemine && $use_s1? 1 : 0,
+        disabled => $can_use_commentsstylemine && $use_s1? 0 : 1,
     });
 
     $ret .= " <label for='${key}commentsstylemine'>" . $class->ml('setting.commentsstylemine.option') . "</label>";
