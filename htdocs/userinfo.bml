@@ -655,7 +655,7 @@
     #LJSUP-10988: Add position and social capital to user profile
     #==============================================================
     if ($u->is_personal || $u->is_comm) {
-        my $ua_position;
+        my ($position, $ua_position, $diagram_image, $href_rating, $ua_href_rating, $soc_image, $soc_capital);
 
         #LJSUP-11197: If user is in two ratings (common and UA) display two strings in profile
         #-------------------------------------------------------------------------------------
@@ -681,7 +681,7 @@
         }
         #-------------------------------------------------------------------------------------
 
-        my $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
+        $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
             func => 'get_value',
             what => $u->journaltype eq 'C' ? 'communities' : 'users', 
             journal_id => $u->userid,
@@ -690,11 +690,11 @@
             sup => 1,
         });
 
-        my $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png?v=11372'/> ";
-        my $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
-        my $ua_href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.ua_community_rating' : 'ljcom.userinfo.ua_account_rating';
-        my $soc_image;
-        my $soc_capital;
+        if ((ref $ua_position eq 'HASH') || (ref $position eq 'HASH')) {
+            $diagram_image = "<img src='$LJ::IMGPREFIX/profile_icons/diagram.png?v=11372'/> ";
+            $href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.community_rating' : 'ljcom.userinfo.account_rating';
+            $ua_href_rating = $u->journaltype eq 'C' ? 'ljcom.userinfo.ua_community_rating' : 'ljcom.userinfo.ua_account_rating';
+        }
 
         $body .= "<ul class='rating-details'>";
 
