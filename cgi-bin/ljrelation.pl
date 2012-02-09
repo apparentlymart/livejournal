@@ -1,6 +1,8 @@
 package LJ;
 use strict;
 
+use LJ::RelationService;
+
 #########################
 # Types of relations:
 # P - poster
@@ -128,22 +130,14 @@ sub get_reluser_id {
 sub load_rel_user
 {
     my $db = isdb($_[0]) ? shift : undef;
-    my ($userid, $type) = @_;
-    return undef unless $type and $userid;
-    my $u = LJ::want_user($userid);
-    $userid = LJ::want_userid($userid);
-    my $typeid = LJ::get_reluser_id($type)+0;
-    if ($typeid) {
-        # clustered reluser2 table
-        $db = LJ::get_cluster_reader($u);
-        return $db->selectcol_arrayref("SELECT targetid FROM reluser2 WHERE userid=? AND type=?",
-                                       undef, $userid, $typeid);
-    } else {
-        # non-clustered reluser global table
-        $db ||= LJ::get_db_reader();
-        return $db->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
-                                       undef, $userid, $type);
-    }
+    my ($u, $type, %args) = @_;
+
+    return undef unless $u and $type;
+
+    my $limit = int(delete $args{limit}) || 50000;
+
+    my @uids = LJ::RelationService->find_relation_destinations($u, $type, limit => $limit, db => $db, %args);
+    return \@uids;
 }
 
 # <LJFUNC>
@@ -192,22 +186,14 @@ sub load_rel_user_cache
 sub load_rel_target
 {
     my $db = isdb($_[0]) ? shift : undef;
-    my ($targetid, $type) = @_;
-    return undef unless $type and $targetid;
-    my $u = LJ::want_user($targetid);
-    $targetid = LJ::want_userid($targetid);
-    my $typeid = LJ::get_reluser_id($type)+0;
-    if ($typeid) {
-        # clustered reluser2 table
-        $db = LJ::get_cluster_reader($u);
-        return $db->selectcol_arrayref("SELECT userid FROM reluser2 WHERE targetid=? AND type=?",
-                                       undef, $targetid, $typeid);
-    } else {
-        # non-clustered reluser global table
-        $db ||= LJ::get_db_reader();
-        return $db->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
-                                       undef, $targetid, $type);
-    }
+    my ($u, $type, %args) = @_;
+
+    return undef unless $u and $type;
+
+    my $limit = int(delete $args{limit}) || 50000;
+
+    my @uids = LJ::RelationService->find_relation_sources($u, $type, limit => $limit, db => $db, %args);
+    return \@uids;
 }
 
 # <LJFUNC>

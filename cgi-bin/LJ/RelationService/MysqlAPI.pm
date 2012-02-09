@@ -6,8 +6,20 @@ use strict;
 sub find_relation_destinations {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
     my %opts  = @_;
-    my $limit     = $opts{limit} || 50000;
+    
+    if ( $type eq 'F' ) {
+        return $class->_find_relation_destinations_type_f($u, %opts);
+    } else {
+        return $class->_find_relation_destinations_type_other($u, $type, %opts);
+    }
+}
+
+sub _find_relation_destinations_type_f {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
     my $nogearman = $opts{nogearman} || 0;
 
     ## stricly disable gearman,
@@ -16,10 +28,43 @@ sub find_relation_destinations {
 
     my $uids = $class->_friend_friendof_uids($u, 
                         %opts,
-                        limit     => $limit, 
+                        limit     => $opts{limit}, 
                         nogearman => $nogearman, 
                         mode      => "friends",
                         );
+    return @$uids;
+}
+
+sub _find_relation_destinations_type_other {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    my $db = LJ::isdb($opts{db}) ? shift : undef;
+
+    my $userid = $u->userid;
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $uids;
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        $uids = $db->selectcol_arrayref("
+            SELECT targetid 
+            FROM reluser2 
+            WHERE userid=? 
+              AND type=?
+        ", undef, $userid, $typeid);
+    } else {
+        # non-clustered reluser global table
+        $db ||= LJ::get_db_reader();
+        $uids = $db->selectcol_arrayref("
+            SELECT targetid 
+            FROM reluser 
+            WHERE userid=? 
+              AND type=?
+        ", undef, $userid, $type);
+    }
     return @$uids;
 }
 
@@ -27,8 +72,20 @@ sub find_relation_destinations {
 sub find_relation_sources {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
     my %opts  = @_;
-    my $limit     = $opts{limit} || 50000;
+
+    if ( $type eq 'F' ) {
+        return $class->_find_relation_sources_type_f($u, %opts);
+    } else {
+        return $class->_find_relation_sources_type_other($u, $type, %opts);
+    }
+}
+
+sub _find_relation_sources_type_f {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
     my $nogearman = $opts{nogearman} || 0;
     
     ## stricly disable gearman
@@ -37,10 +94,43 @@ sub find_relation_sources {
 
     my $uids = $class->_friend_friendof_uids($u, 
                         %opts,
-                        limit     => $limit, 
+                        limit     => $opts{limit}, 
                         nogearman => $nogearman,
                         mode      => "friendofs",
                         );
+    return @$uids;
+}
+
+sub _find_relation_sources_type_other {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    my $db = LJ::isdb($opts{db}) ? shift : undef;
+
+    my $userid = $u->userid;
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $uids;
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        $uids = $db->selectcol_arrayref("
+            SELECT userid 
+            FROM reluser2 
+            WHERE targetid=? 
+              AND type=?
+        ", undef, $userid, $typeid);
+    } else {
+        # non-clustered reluser global table
+        $db ||= LJ::get_db_reader();
+        $uids = $db->selectcol_arrayref("
+            SELECT userid 
+            FROM reluser 
+            WHERE targetid=? 
+              AND type=?
+        ", undef, $userid, $type);
+    }
     return @$uids;
 }
 
@@ -48,6 +138,7 @@ sub find_relation_sources {
 sub load_relation_destinations {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
     my %opts  = @_;
     my $limit     = $opts{limit} || 50000;
     my $nogearman = $opts{nogearman} || 0;

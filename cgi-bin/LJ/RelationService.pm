@@ -7,21 +7,26 @@ use LJ::JSON;
 use LJ::RelationService::RSAPI;
 use LJ::RelationService::MysqlAPI;
 
-my $PARAMS = {};
+use Data::Dumper;
 
 sub _load_alt_api {
     my $class  = shift;
     my $method = shift;
+    my $type   = shift;
 
     return 0 unless LJ::is_enabled('send_test_load_to_rs2');
 
     my $ext_block = LJ::ExtBlock->load_by_id('lj11_params');
     my $values = $ext_block ? LJ::JSON->from_json($ext_block->blocktext) : {};
-    $PARAMS->{rs_ratio_read} = $values->{rs_ratio_read} || 0;
-    $PARAMS->{rs_ratio_update} = $values->{rs_ratio_update} || 0;
     
-    my $rate = ($method eq 'read')   ? $PARAMS->{rs_ratio_read} :
-               ($method eq 'update') ? $PARAMS->{rs_ratio_update} : 0;
+    if ($type eq 'F') {
+        return 0 unless $values->{rs_enable_type_f};
+    } else {
+        return 0 unless $values->{rs_enable_type_other};
+    }
+    
+    my $rate = ($method eq 'read')   ? $values->{rs_ratio_read} :
+               ($method eq 'update') ? $values->{rs_ratio_update} : 0;
     
     return 0 unless $rate;
 
@@ -31,7 +36,6 @@ sub _load_alt_api {
 
     return 0;
 }
-
 
 sub relation_api {
     my $class = shift;
@@ -49,16 +53,21 @@ sub alt_api {
 sub find_relation_destinations {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+    
+    $opts{offset} ||= 0;
+    $opts{limit}  ||= 50000;
 
-    if ($class->_load_alt_api('read')){
+    if ($class->_load_alt_api('read', $type)){
         my $alt = $class->alt_api($u);
-        if ($alt){
-            $alt->find_relation_destinations($u, @_);
+        if ($alt) {
+            $alt->find_relation_destinations($u, $type, %opts);
         }
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->find_relation_destinations($u, @_);
+    return $interface->find_relation_destinations($u, $type, %opts);
    
 }
 
@@ -66,26 +75,50 @@ sub find_relation_destinations {
 sub find_relation_sources {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
 
-    if ($class->_load_alt_api('read')){
+    $opts{offset} ||= 0;
+    $opts{limit}  ||= 50000;
+
+    if ($class->_load_alt_api('read', $type)){
         my $alt = $class->alt_api($u);
-        if ($alt){
-            $alt->find_relation_sources($u, @_);
+        if ($alt) {
+            $alt->find_relation_sources($u, $type, %opts);
         }
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->find_relation_sources($u, @_);
+    return $interface->find_relation_sources($u, $type, %opts);
    
 }
 
 sub load_relation_destinations {
     my $class = shift;
     my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    $opts{offset} ||= 0;
+    $opts{limit}  ||= 50000;
+
+    my $result;
+
+    if ($class->_load_alt_api('read', $type)){
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $result = $alt->load_relation_destinations($u, $type, %opts);
+            warn Dumper({load_relation_destinations_rs2=>$result});
+        }
+    }
+
+
+
 
     my $interface = $class->relation_api($u);
-    return $interface->load_relation_destinations($u, @_);
-   
+    $result = $interface->load_relation_destinations($u, $type, %opts);
+    warn Dumper({load_relation_destinations_mysql=>$result});
+    return $result;
 }
 
 sub create_relation_to {

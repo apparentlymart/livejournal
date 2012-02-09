@@ -3955,7 +3955,7 @@ sub name_html {
 *userid = \&id;
 sub id {
     my $u = shift;
-    return $u->{userid};
+    return int($u->{userid});
 }
 
 sub clusterid {
@@ -4693,7 +4693,7 @@ sub friendof_uids {
     my $limit = int(delete $args{limit}) || 50000;
     Carp::croak("unknown option") if %args;
 
-    return LJ::RelationService->find_relation_sources($u, limit => $limit);
+    return LJ::RelationService->find_relation_sources($u, 'F', limit => $limit);
 }
 
 # returns array of friend uids.  by default, limited at 50,000 items.
@@ -4702,7 +4702,7 @@ sub friend_uids {
     my $limit = int(delete $args{limit}) || 50000;
     Carp::croak("unknown option") if %args;
 
-    return LJ::RelationService->find_relation_destinations($u, limit => $limit);
+    return LJ::RelationService->find_relation_destinations($u, 'F', limit => $limit);
 }
 
 # helper method since the logic for both friends and friendofs is so similar
@@ -9032,7 +9032,8 @@ sub get_friends {
     my $u = LJ::load_userid($userid);
 
     return LJ::RelationService->load_relation_destinations(
-            $u, uuid          => $uuid,
+            $u, 'F',
+                uuid          => $uuid,
                 mask          => $mask,
                 memcache_only => $memcache_only,
                 force_db      => $force,
@@ -9053,7 +9054,7 @@ sub get_friendofs {
     return undef unless $userid;
 
     my $u = LJ::load_userid($userid);
-    return LJ::RelationService->find_relation_sources($u, 
+    return LJ::RelationService->find_relation_sources($u, 'F', 
             nolimit        => $opts->{force} || 0,
             skip_memcached => $opts->{force},
             );
