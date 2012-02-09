@@ -101,7 +101,7 @@ ILikeThis = {
 					top = Math.min(top, $window.height() + $window.scrollTop() - ILikeThis.dialog.outerHeight(true));
 					
 					jQuery(document).click(ILikeThis.document_click);
-					
+						
 					ILikeThis.dialog.css({
 						left: left,
 						top: top,
@@ -151,12 +151,12 @@ DonateButton = {
 		var width = 639;
 		var height = 230;
 
-		jQuery.rpc.bind( function( ev ) {
+		LJ.rpc.bind( function( ev ) {
 			if( ev.origin && ev.origin != Site.siteroot ) {
 				return;
 			}
 
-			if( ev.data === "updateWallet" ) {
+			if( ev.data && ev.data.message === "updateWallet" ) {
 				LiveJournal.run_hook( 'update_wallet_balance' );
 				jQuery.getJSON( LiveJournal.getAjaxUrl( 'give_tokens' ) + "?" + url_data + "&mode=js", 
 					function( result ) {
@@ -173,7 +173,7 @@ DonateButton = {
 		h.name = location.href.replace( /#.*$/, '' );
 
 		setTimeout( function() {
-			jQuery.rpc.initRecipient( h, popupUrl, location.href.replace( /#.*$/, '' ) );
+			LJ.rpc.initRecipient( h, popupUrl, location.href.replace( /#.*$/, '' ) );
 		}, 0 );
 
 		event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
@@ -259,3 +259,4 @@ jQuery(document).click(function(e)
 		findElement();
 	} );
 } )();
+
