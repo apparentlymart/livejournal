@@ -6747,7 +6747,7 @@ sub load_user_props_multi {
     $props = [grep { defined and not ref } @$props];
     return unless @$props;
 
-    $users = { map { $_->{'userid'} => $_ } grep { ref } @$users };
+    $users = { map { $_->{'userid'} => $_ } grep { $_->{'statusvis'} ne 'X' and $_->{'clusterid'} } grep { ref } @$users };
     return unless %$users;
 
     my $groups = LJ::User::PropStorage->get_handler_multi(\@$props);
