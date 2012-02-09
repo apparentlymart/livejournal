@@ -435,13 +435,7 @@ sub unset_remote
 
 sub preload_props {
     my $u = shift;
-
-    ## if called with with options, use LJ::load_user_props
-    if ($_[0] and ref $_[0]){
-        LJ::load_user_props($u, @_);
-    } else {
-        LJ->load_user_props_multi([$u], [@_]);
-    }
+    LJ::load_user_props($u, @_);
 }
 
 sub readonly {
