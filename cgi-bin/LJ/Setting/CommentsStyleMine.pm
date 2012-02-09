@@ -19,6 +19,13 @@ sub label {
     return $class->ml('setting.commentsstylemine.label');
 }
 
+sub helpurl {
+    my ($class, $u) = @_;
+
+    return "comments_style_mine";
+}
+
+
 sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
