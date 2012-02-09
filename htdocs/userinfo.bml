@@ -721,7 +721,7 @@
                          $soc_image .
                          LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => $soc_capital}) . ' ' .
                          LJ::help_icon_html("profile_faq") .
-                         "</li>" .
+                         "</li>"; 
         }
 
         $body .= "</ul>";
