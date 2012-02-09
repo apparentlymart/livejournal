@@ -655,13 +655,32 @@
     #LJSUP-10988: Add position and social capital to user profile
     #==============================================================
     if ($u->is_personal || $u->is_comm) {
+        my %filter = ( sup => 1 );
+
+        #LJSUP-11197: If user is in two ratings (common and UA) display two strings in profile
+        #-------------------------------------------------------------------------------------
+        my $view_ua_ratings = 0;
+        if (LJ::is_enabled('personal_stats_ua')) {
+            my $country = LJ::GeoLocation->get_country_info_by_ip;
+            $country = $u->prop('country') if $u && $country ne 'UA';
+            if ($country eq 'UA') {
+                my $ua_cookie = LJ::Request->cookie('view_ua_ratings') || 'Y';
+                my $ua_prop = $u ? ($u->prop('view_ua_ratings') || 'Y') : 'N';
+                $view_ua_ratings = 1 if $ua_cookie eq 'Y' or $ua_prop eq 'Y';
+                if ( $view_ua_ratings ) {
+                    %filter = ( filter => 'UA' );
+                }
+            }
+        }
+        #-------------------------------------------------------------------------------------
+
         my $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
             func => 'get_value',
             what => $u->journaltype eq 'C' ? 'communities' : 'users', 
             journal_id => $u->userid,
             by => 'friends_weight',
             type => 0,
-            sup => 1,
+            %filter,
         });
         if (ref $position eq 'HASH') {
             if ($position->{result}->{position} < 2000) {
