@@ -41,7 +41,7 @@ sub _find_relation_destinations_type_other {
     my $type  = shift;
     my %opts  = @_;
 
-    my $db = LJ::isdb($opts{db}) ? shift : undef;
+    my $db = LJ::isdb($opts{db}) ? $opts{db} : undef;
 
     my $userid = $u->userid;
     my $typeid = LJ::get_reluser_id($type)+0;
@@ -107,7 +107,7 @@ sub _find_relation_sources_type_other {
     my $type  = shift;
     my %opts  = @_;
 
-    my $db = LJ::isdb($opts{db}) ? shift : undef;
+    my $db = LJ::isdb($opts{db}) ? $opts{db} : undef;
 
     my $userid = $u->userid;
     my $typeid = LJ::get_reluser_id($type)+0;
