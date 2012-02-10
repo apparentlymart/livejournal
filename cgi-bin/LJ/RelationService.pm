@@ -56,6 +56,7 @@ sub find_relation_destinations {
     my $type  = shift;
     my %opts  = @_;
     
+    $u = LJ::want_user($u);
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
@@ -78,6 +79,7 @@ sub find_relation_sources {
     my $type  = shift;
     my %opts  = @_;
 
+    $u = LJ::want_user($u);
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
@@ -99,6 +101,7 @@ sub load_relation_destinations {
     my $type  = shift;
     my %opts  = @_;
 
+    $u = LJ::want_user($u);
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
@@ -125,6 +128,7 @@ sub create_relation_to {
     my $class = shift;
     my $u     = shift;
 
+    $u = LJ::want_user($u);
     if ($class->_load_alt_api('update')){
         my $alt = $class->alt_api($u);
         if ($alt){
@@ -141,6 +145,7 @@ sub remove_relation_to {
     my $class = shift;
     my $u     = shift;
 
+    $u = LJ::want_user($u);
     if ($class->_load_alt_api('update')){
         my $alt = $class->alt_api($u);
         if ($alt){
