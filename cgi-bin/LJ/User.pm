@@ -113,7 +113,8 @@ sub create {
         'userid' => $userid,
         'user'   => $username,
         'code'   => undef,
-        'news'   => $opts{get_ljnews},
+        'news'   => $opts{'get_ljnews'},
+        'email'  => $opts{'email'},
     });
 
     return $u;
