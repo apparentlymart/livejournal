@@ -977,7 +977,9 @@ sub decide_language {
                 # let BML know of mtime for backwards compatibility,
                 # although it may end up not being used in case
                 # this is not a BML page
-                BML::note_mod_time($mtime);
+                unless ( LJ::is_enabled('comment_controller') ) {
+                    BML::note_mod_time($mtime);
+                }
 
                 return ( $guessed_language = $lang );
             }
@@ -1060,7 +1062,7 @@ sub ml {
     }
 
     if ( $code && $code =~ /^[.]/ ) {
-        $code = current_scope() . $code;
+        $code = join('', current_scope() || '', $code);
     }
 
     return get_text( current_language(), $code, undef, $vars );

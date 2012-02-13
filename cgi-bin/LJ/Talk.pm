@@ -115,10 +115,17 @@ sub link_bar
     my @linkele;
 
     my $mlink = sub {
-        my ($url, $piccode) = @_;
-        return ("<a href=\"$url\">" .
-                LJ::img($piccode, "", { 'align' => 'absmiddle' }) .
-                "</a>");
+        my ($url, $piccode, $class) = @_;
+        unless ( LJ::is_enabled('comment_controller') ) {
+            return ("<a href=\"$url\">" .
+                    LJ::img($piccode, "", { 'align' => 'absmiddle' }) .
+                    "</a>");
+        } else {
+            my $title = LJ::Lang::ml('talk.'. $class);
+            return sprintf
+                '<a href="%s" rel="nofollow" title="%s" class="b-controls b-controls-%s"><i class="b-controls-bg"></i>%s</a>',
+                $url, $title, $class, $title;
+        }
     };
 
     my $jarg = "journal=$u->{'user'}&";
@@ -135,12 +142,12 @@ sub link_bar
                                        "itemid=$itemid";
 
     # << Previous
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry");
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry", 'prev');
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev' rel='Previous' />\n";
 
     # memories
     unless ($LJ::DISABLED{'memories'} || $entry->is_delayed) {
-        push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
+        push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd", 'memadd');
     }
 
     # edit entry - if we have a remote, and that person can manage
@@ -150,9 +157,9 @@ sub link_bar
                             (LJ::u_equals($remote, $up) && LJ::can_use_journal($up->{userid}, $u->{user}, {}))))
     {
         if ($entry->is_delayed) {
-            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}delayedid=" . $entry->delayedid, "editentry");
+            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}delayedid=" . $entry->delayedid, "editentry", 'edit');
         } else {
-            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry");
+            push @linkele, $mlink->("$LJ::SITEROOT/editjournal.bml?${jargent}itemid=$itemid", "editentry", 'edit');
         }
     }
 
@@ -160,33 +167,37 @@ sub link_bar
     unless ($LJ::DISABLED{tags}) {
         if (defined $remote && LJ::Tags::can_add_entry_tags($remote, $entry)) {
             if ($entry->is_delayed) {
-                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}delayedid=" . $entry->delayedid, "edittags");
+                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}delayedid=" . $entry->delayedid, "edittags", 'edittags');
             } else {
-                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags");
+                push @linkele, $mlink->("$LJ::SITEROOT/edittags.bml?${jargent}itemid=$itemid", "edittags", 'edittags');
             }
         }
     }
 
     if ( LJ::is_enabled('sharing') && $entry->is_public && !$entry->is_delayed ) {
         LJ::Share->request_resources;
-        push @linkele, $mlink->( '#', 'share' )
+        push @linkele, $mlink->( '#', 'share', 'share')
                      . LJ::Share->render_js( { 'entry' => $entry } );
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
         my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid, require_active => 1) ?
             "track_active" : "track";
-        push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key);
+        push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key, 'track');
     }
 
     if (!$entry->is_delayed && $remote && $remote->can_see_content_flag_button( content => $entry )) {
         my $flag_url = LJ::ContentFlag->adult_flag_url($entry);
-        push @linkele, $mlink->($flag_url, 'flag');
+        push @linkele, $mlink->($flag_url, 'flag', 'track');
     }
 
     ## Next
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry");
+    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry", 'next');
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next' rel='Next' />\n";
+
+    if ( LJ::is_enabled('comment_controller') ) {
+        return \@linkele;
+    }
 
     if (@linkele) {
         $ret .= BML::fill_template("standout", {
