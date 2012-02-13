@@ -1781,4 +1781,7 @@ logproplist.crosspost_tw:
   prettyname: Crosspost to Twitter
   sortorder: 112
 
-
+logproplist.ratingbot_comment:
+  datatype: char
+  des: highest interval in ratings [SUP|UA|NONCYR]
+  prettyname: highest interval in ratings
