@@ -122,10 +122,10 @@
 .details.flag.self=Set this journal as mature/adult.
 
 .details.fotobilder|staleness=1
-.details.fotobilder=[[num]] files in <a [[aopts]]>FotoBilder</a>
+.details.fotobilder=[[num_comma]] fil[[?num_raw|e|e|es]] in <a [[aopts]]>FotoBilder</a>
 
 .details.fotobilder2|staleness=1
-.details.fotobilder2=[[num]] <a [[aopts]]>FotoBilder Files</a>
+.details.fotobilder2=[[num_comma]] <a [[aopts]]>FotoBilder Files</a>
 
 .details.id|staleness=1
 .details.id=LJ User No.: [[id]]
