@@ -46,7 +46,10 @@
     } else {
         my $delayed_obj = LJ::DelayedEntry->get_entry_by_id($u, $delayed_id);
         if (!$delayed_obj) {
-            return "no such scheduled entry $delayed_id for user "  . $u->user;
+            LJ::Request->pnotes ('error' => 'e404');
+            LJ::Request->pnotes ('remote' => LJ::get_remote());
+            BML::return_error_status(404);
+            return;
         }
 
         %req = %{$delayed_obj->data};
