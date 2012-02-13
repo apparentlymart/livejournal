@@ -3731,3 +3731,32 @@ A.lj-button-link:active {
 	color: #94938E;
 	font-size: 9px;
 	}
+
+/* LinkBar */
+.b-linkbar {
+	display: inline-block;
+	margin: 0;
+	padding: 8px;
+	border: 0;
+	list-style: none;
+	background: #C2EBFF;
+	background: #C2EBFF -moz-linear-gradient(top, #C2EBFF 0%, #B4DCFC 100%);
+	background: #C2EBFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#C2EBFF), color-stop(100%,#B4DCFC));
+	background: #C2EBFF -webkit-linear-gradient(top, #C2EBFF 0%,#B4DCFC 100%);
+	background: #C2EBFF -o-linear-gradient(top, #C2EBFF 0%,#B4DCFC 100%);
+	background: #C2EBFF -ms-linear-gradient(top, #C2EBFF 0%,#B4DCFC 100%);
+	background: #C2EBFF linear-gradient(top, #C2EBFF 0%,#B4DCFC 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#C2EBFF', endColorstr='#B4DCFC',GradientType=0 );
+	text-align: center;
+	font: 0/0 serif;
+	}
+	.b-linkbar-item {
+		display: inline;
+		margin: 0 2px;
+		padding: 0;
+		border: 0;
+		vertical-align: top;
+		}
+		.b-linkbar .b-controls {
+			font: 10px/1 Arial,sans-serif;
+			}
