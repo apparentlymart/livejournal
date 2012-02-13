@@ -888,6 +888,27 @@ sub trans {
             LJ::Request->notes( 'usejournal' => $user );
             return remote_domsess_bounce() if LJ::remote_bounce_url();
             return $bml_handler->($bml_file);
+
+        } elsif ($uuri =~ m#^/latest.html$#) { #
+            my $delayed_id = $1;
+            my $u = LJ::load_user($user);
+            if (!$u) {
+                return LJ::Request::NOT_FOUND;
+            }
+
+            if (!LJ::is_enabled("delayed_entries")) {
+                LJ::Request->pnotes ('error' => 'e404');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
+
+            my $latest_item = LJ::get_latest_item($u);
+            if (!$latest_item) {
+                return LJ::Request::NOT_FOUND;
+            }
+            my $latest_link = $u->journal_base . "/$latest_item.html";
+
+            return redir($latest_link);
         } elsif ($uuri =~ m#^/pics#) {
             $mode = "ljphotoalbums";
 
