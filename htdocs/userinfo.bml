@@ -767,7 +767,14 @@
     push @view_links_l, '<li>' . BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints }) . '</li>' if $supportpoints;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
-    push @view_links_r, '<li>' . BML::ml('.details.fotobilder', { num_raw => $ct, num_comma => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" }) . '</li>'
+    my $fh_url = "";
+    if ($u && $u->get_cap('fb_account') && $u->get_cap('fb_can_upload')) {
+        $fh_url = "href='$LJ::FB_SITEROOT/$user/'";
+    }
+    if ($u && $u->can_use_ljphoto) {
+        $fh_url = "href='".$u->journal_base."/pics/catalog/'";
+    }
+    push @view_links_r, '<li>' . BML::ml('.details.fotobilder', { num_raw => $ct, num_comma => $ct_str, aopts => $fh_url }) . '</li>'
         if $ct_str;
     push @view_links_r, '<li>' . BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
