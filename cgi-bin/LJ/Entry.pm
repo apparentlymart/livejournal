@@ -2206,7 +2206,7 @@ sub get_itemid_near2
 sub get_itemid_after2  { return get_itemid_near2(@_, "after");  }
 sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
 
-sub get_latest_item {
+sub get_latest_ditemid {
     my ($u, $opts) = @_;
 
     my $dbr = LJ::get_cluster_reader($u);
