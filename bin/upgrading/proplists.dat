@@ -1785,3 +1785,10 @@ logproplist.ratingbot_comment:
   datatype: char
   des: highest interval in ratings [SUP|UA|NONCYR]
   prettyname: highest interval in ratings
+
+userproplist.opt_modrejectemail:
+  cldversion: 8
+  datatype: bool
+  des: 0: default, do not send emails about rejection from moderation, 1: send them
+  indexed: 0
+  prettyname: Send emails about rejection from moderation

@@ -3560,6 +3560,47 @@ ml_filter_by_poster=Filter community by poster
 ml_filter_by_poster_me|staleness=1
 ml_filter_by_poster_me=Filter community by me
 
+moderation_queue.reject.email.body.html<<
+Dear [[user]],<br />
+<br />
+<p>A new entry submitted by [[poster]] to the community [[community]], which you moderate, has been rejected by [[moderator]] with the following reason:</p>
+[[reason]]
+<p>Rejected entry information:</p>
+<b>Time:</b> [[date]]<br />
+<b>Subject:</b> [[subject]]<br />
+<b>Text:</b><br />
+<hr>
+[[text]]
+<hr>
+This notification is simply to make you aware of this rejected entry. Please contact the listed moderator if you have any questions or concerns about their decision to reject this entry.<br />
+<br />
+Regards,<br />
+[[sitename]] Team
+.
+
+moderation_queue.reject.email.body.plain<<
+Dear [[user]],
+
+A new entry submitted by "[[poster]]" (http://[[poster]].livejournal.com/profile) to the community "[[community]]" (http://[[community]].livejournal.com/profile), which you moderate has been rejected by "[[moderator]]" (http://[[moderator]].livejournal.com/profile) with the following reason:
+
+[[reason]]
+
+Rejected entry information:
+
+Time: [[date]]
+Subject: [[subject]]
+Text:
+--------------------------
+[[text]]
+--------------------------
+This notification is simply to make you aware of this rejected entry. Please contact the listed moderator if you have any questions or concerns about their decision to reject this entry.
+
+Regards,
+[[sitename]] Team
+.
+
+moderation_queue.reject.email.subject=New entry has been rejected from moderation
+
 multisearch.error.no_query|staleness=1
 multisearch.error.no_query=There is no any query provided
 

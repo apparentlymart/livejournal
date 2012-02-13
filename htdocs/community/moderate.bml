@@ -115,6 +115,7 @@ body<=
         $do_mail = 1 unless $poster->is_visible;
 
         # mail the poster
+        my $etime;
         if ($do_mail) {
             my $subject="Moderated submission notification";
             my $to = $poster->email_raw;
@@ -131,7 +132,7 @@ body<=
             }
             unless ($why_mail eq 'success') {
                 $body .= "This is the message you submitted:\n\n";
-                my $etime = sprintf("%04d-%02d-%02d %02d:%02d",
+                $etime = sprintf("%04d-%02d-%02d %02d:%02d",
                                     $req->{'year'}, $req->{'mon'},
                                     $req->{'day'}, $req->{'hour'},
                                     $req->{'min'});
@@ -158,6 +159,70 @@ body<=
             });
         }
 
+        #mail moderators
+        if ($why_mail eq 'reject') {
+            my $dbh = LJ::get_db_writer();
+            my $mods = LJ::load_rel_user($dbh, $cid, 'M') || [];
+            if (@$mods) {
+                # load up all these mods and figure out 
+                # if they want email or not
+                my $modlist = LJ::load_userids(@$mods);
+                my @emails;
+                foreach my $mod (values %$modlist) {
+                    
+                    next unless $mod->is_visible;
+                    next if $mod->email_status ne "A";
+                    next unless $mod->prop('opt_modrejectemail');
+
+                    my $subject = LJ::Lang::get_text(
+                                    $mod->prop('browselang'),
+                                    'moderation_queue.reject.email.subject'
+                                  );
+                    my $body_m = LJ::Lang::get_text(
+                                    $mod->prop('browselang'),
+                                    'moderation_queue.reject.email.body.plain',
+                                    undef, {
+                                            user        => $mod->user,
+                                            poster      => $poster->user,
+                                            moderator   => $remote->user,
+                                            community   => $c->user,
+                                            date        => $etime,
+                                            subject     => $req->{subject},
+                                            text        => $req->{event},    
+                                            reason      => $POST{why},
+                                            sitename    => $LJ::SITENAME,
+                                           }
+                                 );
+                    my $html = ($mod->{opt_htmlemail} eq 'N')? 
+                        '' : 
+                        LJ::Lang::get_text(
+                            $mod->prop('browselang'),
+                            'moderation_queue.reject.email.body.html', 
+                            undef, {
+                                    user        => $mod->ljuser_display,
+                                    poster      => $poster->ljuser_display,
+                                    moderator   => $remote->ljuser_display,
+                                    community   => $c->ljuser_display,
+                                    date        => $etime,
+                                    subject     => $req->{subject},
+                                    text        => LJ::ehtml($req->{event}),    
+                                    reason      => $POST{why},
+                                    sitename    => $LJ::SITENAME,
+                                   }
+                        );                
+
+                    LJ::send_mail({
+                        'to'        => $mod->email_raw,
+                        'from'      => $LJ::DONOTREPLY_EMAIL,
+                        'charset'   => $mod->mailencoding || 'utf-8',
+                        'subject'   => $subject,
+                        'body'      => $body_m,
+                        'html'      => $html,
+                    });
+                }
+            }
+        }
+        
         if ($success) {
             $saved_comm = $c->{'user'};
             $saved_modid = 0;
