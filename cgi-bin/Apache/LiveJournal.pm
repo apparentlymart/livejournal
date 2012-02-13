@@ -889,7 +889,7 @@ sub trans {
             return remote_domsess_bounce() if LJ::remote_bounce_url();
             return $bml_handler->($bml_file);
 
-        } elsif ($uuri =~ m#^/latest.html$#) { #
+        } elsif ($uuri =~ m#^/latest$#) { #
             my $delayed_id = $1;
             my $u = LJ::load_user($user);
             if (!$u) {
