@@ -352,14 +352,16 @@ sub clean
                 next TOKEN;
             }
 
-            if ( $tag eq 'a' ) {
-                $in_link = 1;
-                $href_b_link = $attr->{href};
-            }
+            if ( $opts->{'img_placeholders'} ) {
+                if ( $tag eq 'a' ) {
+                    $in_link = 1;
+                    $href_b_link = $attr->{href};
+                }
 
-            if ( $tag eq 'img' && $in_link ) {
-                $img_link = 1;
-                $newdata .= '</a>';
+                if ( $tag eq 'img' && $in_link ) {
+                    $img_link = 1;
+                    $newdata .= '</a>';
+                }
             }
 
             if ($tag eq "lj-template" && ! $noexpand_embedded) {
@@ -1310,12 +1312,14 @@ sub clean
                 next TOKEN;
             }
 
-            if ( $tag eq 'a' && $in_link ) {
-                $in_link     = 0;
-                $text_b_link = 0;
-                $text_b_link = 0;
-                $href_b_link = '';
-                $img_link    = 0;
+            if ( $opts->{'img_placeholders'} ) {
+                if ( $tag eq 'a' && $in_link ) {
+                    $in_link     = 0;
+                    $text_b_link = 0;
+                    $text_b_link = 0;
+                    $href_b_link = '';
+                    $img_link    = 0;
+                }
             }
 
             my $allow;
@@ -1461,12 +1465,14 @@ sub clean
                 next TOKEN;
             }
 
-            if ( $in_link && $img_link ) {
-                $newdata .= qq~<a href="$href_b_link">~
-                    . $token->[1]
-                    . '</a>';
-                $text_a_link = 1;
-                next TOKEN;
+            if ( $opts->{'img_placeholders'} ) {
+                if ( $in_link && $img_link ) {
+                    $newdata .= qq~<a href="$href_b_link">~
+                        . $token->[1]
+                        . '</a>';
+                    $text_a_link = 1;
+                    next TOKEN;
+                }
             }
 
             if ($eating_ljuser_span) {
