@@ -624,13 +624,10 @@
     my $nudge_link = "[<a href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>$ML{'.details.nudge'}</a>]"
         if $remote && $u->can_be_nudged_by($remote);
 
-    my @comment_stats;
     my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
     my $num_comments_posted = $u->num_comments_posted( dbh => $dbcr );
 
     my $supportpoints = $u->support_points_count;
-    push @comment_stats, BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints })
-        if $supportpoints;
 
     my $timecreate = LJ::TimeUtil->mysql_time($u->timecreate);
     my $createdate = "<span class='tooltip' title=\"$timecreate\">" . substr($timecreate, 0, 10) . "</span>";
@@ -767,6 +764,7 @@
 
     push @view_links_l, '<li>' . BML::ml('.details.tags2', { num_raw => $tagcount, num_comma => LJ::commafy($tagcount), aopts => "href='" . $u->journal_base . "/tag/'" }) . '</li>'
         unless $u->is_identity || $u->is_syndicated;
+    push @view_links_l, '<li>' . BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints }) . '</li>' if $supportpoints;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
     push @view_links_r, '<li>' . BML::ml('.details.fotobilder', { num_raw => $ct, num_comma => $ct_str, aopts => "href='".$u->journal_base."/pics/catalog/'" }) . '</li>'
