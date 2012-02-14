@@ -1616,19 +1616,19 @@ sub load_comments
 
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
 
-    my (%subjects_to_load, $subjcounter);
+    my %subjects_to_load;
+    my $subjcounter = @check_for_children;
+
+    $subjects_to_load{$_}++ foreach @check_for_children;
+
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
         next unless defined $children->{$cfc};
         foreach my $child (@{$children->{$cfc}}) {
             if (scalar(keys %posts_to_load) < $page_size || $opts->{expand_all}) {
                 $posts_to_load{$child} = 1;
-            }
-            elsif (scalar(keys %posts_to_load) < $page_size) {
-                $posts_to_load{$child} = 1;
             } else {
-                $subjcounter++;
-                $subjects_to_load{$child}++ if $subjcounter < $max_subjects;
+                $subjects_to_load{$child}++ if ++$subjcounter < $max_subjects;
             }
             push @check_for_children, $child;
         }
