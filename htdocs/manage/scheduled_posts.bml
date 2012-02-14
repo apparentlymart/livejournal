@@ -5,6 +5,7 @@ windowtitle=><?_ML .title _ML?>
 body<=
 <?_code
 {
+    use strict;
 #line 7
 
     LJ::need_res(qw(
@@ -23,11 +24,13 @@ body<=
           return LJ::error_list("This feature is disabled.");
     }
 
+    my $ret = '';
     my $page_name = 'scheduled_posts.bml';
     my $items_per_page = 20;
     my $skip = $GET{'skip'} || 0;
     my $usejournal = $GET{'usejournal'};
     my $only_me_checked = $GET{'only_me'};
+    my $getextra = $usejournal ? "?usejournal=$usejournal" : undef;
 
     my $remote = LJ::get_remote();
 
