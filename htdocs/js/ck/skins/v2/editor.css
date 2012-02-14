@@ -503,7 +503,7 @@ li.cke_panel_listItem {
 	border-width:3px;
 	}
 .cke_skin_v2 .cke_button .cke_icon {
-	background-image: url(icons-new.png?v=17018);
+	background-image: url(icons-new.png?v=17019);
 	background-repeat:no-repeat;
 	margin-top:1px;
 	width:16px;
@@ -1322,7 +1322,7 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJCut .cke_icon,
 .cke_skin_v2 .cke_button_LJLike .cke_icon,
 .cke_skin_v2 .cke_button_LJSpoiler .cke_icon {
-	background: url(icons-new.png?v=2) no-repeat 0 0;
+	background: url(icons-new.png?v=3) no-repeat 0 0;
 	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
 	background-position: 0 -95px;
