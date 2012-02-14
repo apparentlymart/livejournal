@@ -37,6 +37,7 @@ HTML {
 	height:100%;
 	}
 .lj-cut-wrap,
+.lj-spoiler-wrap,
 .lj-map-wrap,
 .lj-embed-wrap,
 .lj-poll-wrap,
@@ -46,6 +47,7 @@ HTML {
 	width: 100%;
 	}
 .lj-cut,
+.lj-spoiler,
 .lj-map,
 .lj-embed,
 .lj-poll,
@@ -54,7 +56,7 @@ HTML {
 .lj-iframe {
 	margin: 0;
 	}
-.lj-cut-wrap {
+.lj-cut-wrap, .lj-spoiler-wrap {
 	height: 9px!important;
 	}
 .lj-cut {
@@ -71,6 +73,21 @@ HTML {
 	border-width: 1px 0 0;
 	background-position: 0 -27px;
 	}
+.lj-spoiler {
+    height: 7px!important;
+    background-color: #FFF;
+    border: 0 dashed #BCBCBC;
+    background: url(/js/ck/images/lj-spoiler.png) no-repeat 0 0;
+    }
+.lj-spoiler-open {
+    border-width: 0 0 1px;
+    background-position: 50% 0;
+    }
+.lj-spoiler-close {
+    border-width: 1px 0 0;
+    background-position: 50% -23px;
+    }
+
 .lj-map-wrap,
 .lj-iframe-wrap,
 .lj-embed-wrap {
@@ -151,7 +168,7 @@ lj|raw {
 	display: block;
 	}
 
-lj|cut {
+/*lj|cut {
 	display: block;
 	border: #000 1px dotted;
 	background-color: #d2d2d2;
@@ -165,7 +182,7 @@ lj\:cut {
 	min-height: 14px;
 	}
 
-/* fix inline behavior, for no IE */
+*//* fix inline behavior, for no IE *//*
 .lj|cut ul, .lj|cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
@@ -174,7 +191,7 @@ lj\:cut {
 .lj\:cut ul, .lj\:cut ol {
 	background-color: #d2d2d2;
 	border: #000 1px dotted;
-	}
+	}*/
 
 .ljuser {
 	white-space: nowrap;
