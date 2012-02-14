@@ -188,7 +188,7 @@ sub link_bar
 
     if (!$entry->is_delayed && $remote && $remote->can_see_content_flag_button( content => $entry )) {
         my $flag_url = LJ::ContentFlag->adult_flag_url($entry);
-        push @linkele, $mlink->($flag_url, 'flag', 'track');
+        push @linkele, $mlink->($flag_url, 'flag', 'flag');
     }
 
     ## Next
