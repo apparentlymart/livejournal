@@ -5593,6 +5593,8 @@ talk.editcomment=Save comment
 
 talk.edited=Edited:
 
+talk.edittags=Tags
+
 talk.emptypostalert=You need to write something first
 
 talk.error=Error
@@ -5695,6 +5697,8 @@ talk.expandchilds=Expand Childs
 talk.expandlink|staleness=1
 talk.expandlink=Expand
 
+talk.flag=Flag
+
 talk.freeze=Freeze
 
 talk.fromip=(from [[ip]])
@@ -5730,6 +5734,8 @@ talk.loading=Loading...
 talk.loginafterpost=We will log you in after post
 
 talk.manageuserpic=Manage userpics
+
+talk.memadd=Memorize
 
 talk.more=...and [[count]] more [[?count|comment|comments]]...
  
