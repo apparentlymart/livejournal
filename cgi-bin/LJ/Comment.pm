@@ -1746,7 +1746,7 @@ sub make_url {
         unshift @$params, 'journal='. $opts->{'journal'} || $entry->journal->user;
         unshift @$params, 'talkid='. $dtalkid;
 
-        if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen } ) {
+        if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
             unshift @$params, 'mode='. $type;
         } elsif ( $type eq 'spam' ) {
             unshift @$params, 'spam=1';
