@@ -33,7 +33,21 @@ my %domains = (
     hmp_spotlight   => 'Homepage/Spotlight',
     anythingdisney  => 'AnythingDisney',
     bullying_begone => 'bullying_begone',
+    map { ($_ => $_) } qw{
+        ontd-political
+        aramatheydidnt
+        craftgrrlontd-political
+        aramatheydidnt
+        craftgrrl
+        vaginapagina
+        ontd-cats
+        ontdgames
+        spookypoo
+        beauty101
+        lesbian
+    },
 );
+
 =head
     culture         => 'Arts & Culture',
     entertainment   => 'Entertainment',
