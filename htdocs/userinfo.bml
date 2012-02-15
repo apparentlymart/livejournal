@@ -662,8 +662,7 @@
             $country = $u->prop('country') if $u && $country ne 'UA';
             if ($country eq 'UA') {
                 my $ua_cookie = LJ::Request->cookie('view_ua_ratings') || 'Y';
-                my $ua_prop = $u ? ($u->prop('view_ua_ratings') || 'Y') : 'N';
-                $view_ua_ratings = 1 if $ua_cookie eq 'Y' or $ua_prop eq 'Y';
+                $view_ua_ratings = 1 if $ua_cookie eq 'Y';
                 if ( $view_ua_ratings ) {
                     $ua_position = LJ::PersonalStats::DB->fetch_raw('ratings', {
                         func => 'get_value',
