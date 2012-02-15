@@ -229,6 +229,13 @@ sub EntryPage
             $commentposted = 1
                  if ($last_talkid == $dtalkid && $last_jid == $remote->{'userid'});
 
+            my $deleted = $com->{'state'} eq 'D'? 1 : 0;
+            if ( $poster and $poster->{'statusvis'} eq 'D' ) {
+                # LJSV-2075
+                my ($comments, $community_entries) = split ':', $poster->prop("purge_external_content");
+                $deleted = 1 if $comments;
+            }
+
             my $s2com = {
                 '_type' => 'Comment',
                 'journal' => $userlite_journal,
@@ -256,7 +263,7 @@ sub EntryPage
                 'can_marked_as_spam' => LJ::Talk::can_marked_as_spam($remote, $u, $entry->poster, $poster),
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
                 'frozen' => $com->{'state'} eq "F" || !$entry->posting_comments_allowed ? 1 : 0,
-                'deleted' => $com->{'state'} eq "D" ? 1 : 0,
+                'deleted' => $deleted,
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
                 'dom_id' => "ljcmt$dtalkid",
