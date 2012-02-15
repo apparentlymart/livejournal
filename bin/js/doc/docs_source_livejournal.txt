@@ -1,1 +1,2 @@
   jquery/jquery.lj.lazyLoadable.js
+  jquery/jquery.lj.s2editSearchBox.js

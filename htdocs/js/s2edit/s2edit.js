@@ -65,9 +65,9 @@ var s2edit = function() {
 				turboButton = jQuery('.turbo-mode'),
 				toggleTurboButton = function(enable) {
 					if (enable) {
-						turboButton.val('Back to old editor');
+						turboButton.html('Back to old editor');
 					} else {
-						turboButton.val('Show new editor');
+						turboButton.html('Show new editor');
 					}
 				};
 
@@ -91,7 +91,7 @@ var s2edit = function() {
 		},
 
 		isAceSupported: function() {
-			return !(jQuery.browser.opera || (jQuery.browser.msie && jQuery.browser.version));
+			return !(jQuery.browser.opera || (jQuery.browser.msie && +jQuery.browser.version < 9));
 		},
 
 		aceInit: function() {
@@ -109,7 +109,8 @@ var s2edit = function() {
 		toggleEditor: function() {
 			if (!this.isAceSupported()) { return; }
 			var textarea = jQuery('#main'),
-				editorEl = jQuery('#editor');
+				editorEl = jQuery('#editor'),
+				searchbox = jQuery('#searchbox');
 
 			if (!s2isAceActive()) {
 				textarea.hide();
@@ -129,14 +130,20 @@ var s2edit = function() {
 							s2sense(e.data.text.charCodeAt(0));
 						}
 					});
+
+					searchbox.s2editSearchBox({
+						textarea: textarea
+					});
 				}
 
 				aceEditor.getSession().setValue(textarea.val());
+				searchbox.s2editSearchBox('enable');
 				s2settings.save('useAce', true);
 			} else {
 				textarea.val(aceEditor.getSession().getValue());
 				textarea.show();
 				editorEl.hide();
+				searchbox.s2editSearchBox('disable');
 				s2settings.save('useAce', false);
 			}
 		},

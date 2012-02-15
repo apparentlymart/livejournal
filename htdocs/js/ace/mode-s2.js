@@ -145,4 +145,32 @@ canon.addCommand({
 	}
 });
 
+canon.addCommand({
+	name: "findnext",
+	bindKey: bindKey("Ctrl-G", "Command-G"),
+	exec: function(env, args, request) { env.editor.findNext(); }
+});
+
+canon.addCommand({
+	name: "findprevious",
+	bindKey: bindKey("Ctrl-Shift-G", "Command-Shift-G"),
+	exec: function(env, args, request) { env.editor.findPrevious(); }
+});
+
+canon.addCommand({
+	name: "find",
+	bindKey: bindKey("Ctrl-F", "Command-F"),
+	exec: function(env, args, request) {
+		jQuery('#searchbox').s2editSearchBox('show');
+	}
+});
+
+canon.addCommand({
+	name: "Esc",
+	bindKey: bindKey("Esc", "Esc"),
+	exec: function(env, args, request) {
+		jQuery('#searchbox').s2editSearchBox('hide');
+	}
+});
+
 });

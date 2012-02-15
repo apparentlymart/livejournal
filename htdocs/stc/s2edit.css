@@ -279,3 +279,79 @@ a:hover {
 	white-space: nowrap;
 }
 
+.searchbox {
+	visibility: hidden;
+	opacity: 0;
+	position: absolute;
+	top: 1px;
+	right: 20px;
+	width: 300px;
+	margin: 0;
+	padding: 10px 15px 7px;
+	-moz-border-radius-bottomleft: 10px;
+	border-bottom-left-radius: 10px;
+	-webkit-box-shadow: -3px 3px 5px rgba(128, 128, 128, 0.5);
+	-moz-box-shadow: -3px 3px 5px rgba(128, 128, 128, 0.5);
+	box-shadow: -3px 3px 5px rgba(128, 128, 128, 0.5);
+	background: #E8E8E8;
+	z-index: 5;
+	}
+.searchbox-preshow {
+	visibility: visible;
+	opacity: 0;
+	}
+.searchbox-show {
+	visibility: visible;
+	opacity: 1;
+	-webkit-transition: opacity 0.3s ease;
+	-moz-transition: opacity 0.3s ease;
+	-o-transition: opacity 0.3s ease;
+	transition: opacity 0.3s ease;
+	}
+	.searchbox-close {
+		position: absolute;
+		top: 3px;
+		right: 5px;
+		width: 16px;
+		height: 16px;
+		margin: 0;
+		padding: 0;
+		background: url("/img/icons/popup-close.png?v=1") no-repeat 0 0;
+		font: 0/0 serif;
+		cursor: pointer;
+		}
+	.searchbox-close:hover {
+		background-position: 0 -16px;
+		}
+	.searchbox input[name="search-input"] {
+		width: 200px;
+		margin: 0 5px 0 0;
+		padding: 2px 1px 2px 1px;
+		}
+	.searchbox-done input[name="search-input"] {
+		width: 150px;
+		padding: 2px 51px 2px 1px;
+		}
+	.searchbox-wrapper {
+		position: relative;
+		}
+		.searchbox-wrapper .placeholder-label {
+			top: 3px;
+			}
+	.searchbox-info {
+		display: block;
+		margin: 0;
+		padding: 3px 0 0;
+		font-size: smaller;
+		color: #000;
+		}
+	.searchbox-info-counter {
+		display: none;
+		position: absolute;
+		top: 0;
+		right: 15px;
+		color: #808080;
+		}
+	.searchbox-done .searchbox-info-counter {
+		display: block;
+		}

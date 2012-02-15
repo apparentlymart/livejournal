@@ -8,12 +8,19 @@
             <a href="<TMPL_VAR s2doc>" target="_blank">Documentation</a>
         </div>
         <input type="submit" value="Save & Compile" class="compilelink" />
-        <input type="button" value="Show new editor" class="compilelink turbo-mode" />
+        <a href="javascript:void(0);" class="compilelink turbo-mode">Show new editor</a>
     </div>
     <div class="main" id="maindiv">
         <div class="maincontainer">
         <textarea id="main" class="maintext" name="<TMPL_VAR prefix>_s2code" onKeyPress="s2keyPressed(event)" wrap="off"
                   onKeyDown="s2IETabKeyPressedHandler(event)"><TMPL_VAR s2code></textarea>
+        </div>
+        <div class="searchbox" id="searchbox">
+            <span class="searchbox-wrapper"><input type="text" name="search-input" value="" size="30" placeholder="Search" /><span class="searchbox-info-counter"><span class="current"></span> of <span class="total"></span></span></span>&nbsp;<button class="searchbox-prev" title="Prev">&uarr;</button>&nbsp;<button class="searchbox-next" title="Next">&darr;</button>
+            <span class="searchbox-info">
+                <span class="searchbox-info-gotoline">Press Ctrl-Enter to go to the line with that number</span>
+            </span>
+            <i class="searchbox-close"></i>
         </div>
     </div>
         <div class="divider" id="outputdivider" onMouseDown="s2startDrag(event)"
