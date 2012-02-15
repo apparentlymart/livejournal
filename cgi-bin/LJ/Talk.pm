@@ -1617,19 +1617,18 @@ sub load_comments
     my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
 
     my %subjects_to_load;
-    my $subjcounter = @check_for_children;
-
-    $subjects_to_load{$_}++ foreach @check_for_children;
+    my $subjcounter = 0;
 
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
         next unless defined $children->{$cfc};
         foreach my $child (@{$children->{$cfc}}) {
-            if (scalar(keys %posts_to_load) < $page_size || $opts->{expand_all}) {
+            if ( keys %posts_to_load < $page_size or $opts->{'expand_all'} ) {
                 $posts_to_load{$child} = 1;
-            } else {
-                $subjects_to_load{$child}++ if ++$subjcounter < $max_subjects;
+            } elsif ( ++$subjcounter < $max_subjects ) {
+                $subjects_to_load{$child} = 1;
             }
+
             push @check_for_children, $child;
         }
     }
@@ -1637,8 +1636,10 @@ sub load_comments
     # load text of posts
     my ($posts_loaded, $subjects_loaded);
     my $no_subject = LJ::is_enabled('new_comments')? '' : '...';
+
     $posts_loaded = LJ::get_talktext2($u, keys %posts_to_load);
-    $subjects_loaded = LJ::get_talktext2($u, { onlysubjects => 1 }, keys %subjects_to_load) if $subjcounter;
+    $subjects_loaded = LJ::get_talktext2($u, { onlysubjects => 1 }, keys %subjects_to_load, keys %posts_to_load);
+
     foreach my $talkid (keys %posts_to_load) {
         my $post = $posts->{$talkid};
         next unless $post->{'_show'};
