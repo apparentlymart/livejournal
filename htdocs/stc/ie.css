@@ -578,7 +578,13 @@ __________________________________________*/
 .b-pics-privacy .b-pics-privacy-icon {
 	margin-right: 3px;
 	}
-
+.b-popup-pics .b-popup-pics-add-many .b-popup-pics-gallery LI {
+    margin: 7px 8px;
+    }
+.b-pics-submit-options {
+    width: 100% !important;
+    }
+        
 /* Ratings */
 .rate-posts .selfpromo .voting .vote-value A {
 	top: 0;
