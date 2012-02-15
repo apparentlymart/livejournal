@@ -1614,7 +1614,7 @@ sub load_comments
         $top_replies = [ $real_thread || $thread ];
     }
 
-    my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
+    my $max_subjects = $LJ::TALK_MAX_SUBJECTS;
 
     my %subjects_to_load;
     my $subjcounter = 0;
