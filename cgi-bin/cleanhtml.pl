@@ -1149,7 +1149,7 @@ sub clean
                     }
 
                     if ($img_bad) {
-                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" extern_href="$href_b_link" href="~ .
+                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" data-href="$href_b_link" href="~ .
                             LJ::ehtml($hash->{'src'}) . '">' .
                             '<span class="b-mediaplaceholder-inner">' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
@@ -1157,6 +1157,7 @@ sub clean
                             '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . LJ::Lang::ml("mediaplaceholder.loading") . '</span>'.
                             '</span>' .
                             '</a>';
+                        $newdata .= $href_b_link ? '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . LJ::Lang::ml("mediaplaceholder.link") . '">' . LJ::Lang::ml("mediaplaceholder.link") . '</a>' : '';
                         $alt_output = 1;
                         $opencount{"img"}++;
                     }
