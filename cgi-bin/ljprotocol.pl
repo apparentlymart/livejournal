@@ -18,6 +18,7 @@ use Class::Autouse qw(
                       LJ::EmbedModule
                       LJ::DelayedEntry
                       LJ::PushNotification
+                      LJ::Tidy
                       );
 
 use LJ::TimeUtil;
@@ -3906,7 +3907,13 @@ sub getevents {
             $t->[1] =~ s/\n/\r\n/g;
         }
 
-        $evt->{'event'} = $t->[1];
+        if ($req->{'asxml'}) {
+            my $tidy = LJ::Tidy->new( { output => 'xml' } );
+            my $event_text = $tidy->clean( $t->[1] );
+            $evt->{'event'} = '<event>' . $event_text . '</event>';
+        } else {
+            $evt->{'event'} = $t->[1];
+        }
     }
 
     # maybe we don't need the props after all
