@@ -3908,7 +3908,7 @@ sub getevents {
         }
 
         if ($req->{'asxml'}) {
-            my $tidy = LJ::Tidy->new( { output => 'xml' } );
+            my $tidy = LJ::Tidy->new();
             my $event_text = $tidy->clean( $t->[1] );
             $evt->{'event'} = '<event>' . $event_text . '</event>';
         } else {
