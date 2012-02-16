@@ -260,3 +260,48 @@ jQuery(document).click(function(e)
 	} );
 } )();
 
+/**
+ * we handle img placeholders on friends page and entry page
+ */
+(function($) {
+	var placeholders = [
+		{
+			selector: '.b-mediaplaceholder-photo',
+			loading: 'b-mediaplaceholder-processing',
+			init: function() {
+				var self = this;
+				doc.on('click', this.selector, function(ev) { 
+					self.handler(this, ev);
+				});
+			},
+
+			handler: function(el, ev) {
+				var im = new Image();
+
+				im.onload = im.onerror = jQuery.delayedCallback(this.imgLoaded.bind(this, el, im), 500);
+				im.src = el.href;
+				el.className += ' ' + this.loading;
+				ev.preventDefault();
+			},
+
+			imgLoaded: function(el, image) {
+				var img = jQuery('<img />').attr('src', image.src),
+					href = el.getAttribute('data-href');
+
+				if (href && href.length > 0) {
+					img = jQuery('<a>', { href: href }).append(img);
+				}
+
+				jQuery(el).replaceWith(img);
+			}
+		}
+	],
+	doc = $(document);
+
+	LiveJournal.register_hook('page_load', function init() {
+		placeholders.forEach(function(holder) {
+			holder.init();
+		});
+	});
+})(jQuery);
+
