@@ -3776,16 +3776,17 @@ BODY .b-mediaplaceholder:focus {
 	left: auto;
 	display: inline-block;
 	width: auto;
-	height: 22px;
+	height: 23px;
 	min-width: 100px;
 	margin: 0;
-	padding: 10px 10px 0 30px;
-	background: rgb(0,0,0);
-	background: rgba(0,0,0,0.35);
+	padding: 12px 10px 0 30px;
+	vertical-align: top !important;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	border: 1px solid rgb(255,255,255) !important;
-	border: 1px solid rgba(255,255,255,0.3) !important;
+	border: 1px solid rgb(220,220,220) !important;
+	border: 1px solid rgba(220,220,220,0.35) !important;
+	background: rgb(0,0,0) !important;
+	background: rgba(0,0,0,0.35) !important;
 	font: 12px/1 Arial,sans-serif;
 	text-align: left;
 	text-decoration: none !important;
@@ -3793,7 +3794,7 @@ BODY .b-mediaplaceholder:focus {
 	color: #FFF !important;
 	cursor: pointer;
 	}
-	.b-mediaplaceholder-inner {
+	.b-mediaplaceholder .b-mediaplaceholder-inner {
 		position: relative;
 		top: auto;
 		left: auto;
@@ -3803,7 +3804,7 @@ BODY .b-mediaplaceholder:focus {
 		margin: 0;
 		padding: 0 0 0 20px;
 		}
-		.b-mediaplaceholder-pic {
+		.b-mediaplaceholder .b-mediaplaceholder-pic {
 			overflow: hidden;
 			position: absolute;
 			top: 0;
@@ -3817,12 +3818,12 @@ BODY .b-mediaplaceholder:focus {
 		.b-mediaplaceholder-photo .b-mediaplaceholder-pic {
 			width: 13px;
 			height: 11px;
-			background-position: 0 -29px;
+			background-position: 0 -50px;
 			}
 		.b-mediaplaceholder-video .b-mediaplaceholder-pic {
 			width: 12px;
 			height: 13px;
-			background-position: 0 -16px;
+			background-position: 0 -37px;
 			}
 		.b-mediaplaceholder-processing .b-mediaplaceholder-pic {
 			top: 50%;
@@ -3831,7 +3832,7 @@ BODY .b-mediaplaceholder:focus {
 			margin-top: -2px;
 			background: url(/img/preloader-s.gif?v=1) no-repeat 0 0;
 			}
-		.b-mediaplaceholder-label {
+		.b-mediaplaceholder .b-mediaplaceholder-label {
 			display: none;
 			position: static;
 			top: auto;
@@ -3848,3 +3849,44 @@ BODY .b-mediaplaceholder:focus {
 		.b-mediaplaceholder-processing .b-mediaplaceholder-view {
 			display: none;
 			}
+BODY .b-mediaplaceholder-external:link,
+BODY .b-mediaplaceholder-external:visited,
+BODY .b-mediaplaceholder-external:hover,
+BODY .b-mediaplaceholder-external:active,
+BODY .b-mediaplaceholder-external:focus {
+	position: relative;
+	top: auto;
+	left: auto;
+	display: inline-block;
+	width: 35px;
+	height: 37px;
+	margin: 0 10px 0 1px;
+	padding: 0;
+	vertical-align: top !important;
+	border: 0 !important;
+	font: 10px/1 Arial,sans-serif;
+	text-align: left;
+	text-decoration: none !important;
+	text-shadow: none;
+	color: #FFF !important;
+	cursor: pointer;
+	}
+	.b-mediaplaceholder-external .b-mediaplaceholder-pic {
+		overflow: hidden;
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 35px;
+		height: 37px;
+		margin: 0;
+		padding: 0;
+		background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
+		font: 0/0 serif;
+		}
+	.b-mediaplaceholder-external .b-mediaplaceholder-arr {
+		border-right: 5px solid rgba(0,0,0,0.25);
+		}
+	.b-mediaplaceholder-external .b-mediaplaceholder-inner {
+		display: none !important;
+		}

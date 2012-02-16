@@ -1157,7 +1157,11 @@ sub clean
                             '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . LJ::Lang::ml("mediaplaceholder.loading") . '</span>'.
                             '</span>' .
                             '</a>';
-                        $newdata .= $href_b_link ? '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . LJ::Lang::ml("mediaplaceholder.link") . '">' . LJ::Lang::ml("mediaplaceholder.link") . '</a>' : '';
+                        $newdata .= $href_b_link ?
+                            '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . LJ::Lang::ml("mediaplaceholder.link") . '">' .
+                            '<i class="b-mediaplaceholder-pic"></i>' .
+                            '<span class="b-mediaplaceholder-inner">' . LJ::Lang::ml("mediaplaceholder.link") . '</span>' .
+                            '</a>' : '';
                         $alt_output = 1;
                         $opencount{"img"}++;
                     }
