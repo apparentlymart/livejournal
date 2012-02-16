@@ -3554,6 +3554,14 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+mediaplaceholder.link=Link
+
+mediaplaceholder.loading=Loading...
+
+mediaplaceholder.viewimage=View image
+
+mediaplaceholder.viewvideo=Video here
+
 ml_filter_by_poster|staleness=1
 ml_filter_by_poster=Filter community by poster
 

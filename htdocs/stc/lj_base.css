@@ -3732,6 +3732,8 @@ A.lj-button-link:active {
 	font-size: 9px;
 	}
 
+
+
 /* LinkBar */
 .b-linkbar {
 	display: inline-block;
@@ -3759,4 +3761,90 @@ A.lj-button-link:active {
 		}
 		.b-linkbar .b-controls {
 			font: 10px/1 Arial,sans-serif;
+			}
+
+
+
+/* Image & Video Placeholder */
+BODY .b-mediaplaceholder:link,
+BODY .b-mediaplaceholder:visited,
+BODY .b-mediaplaceholder:hover,
+BODY .b-mediaplaceholder:active,
+BODY .b-mediaplaceholder:focus {
+	position: relative;
+	top: auto;
+	left: auto;
+	display: inline-block;
+	width: auto;
+	height: 22px;
+	min-width: 100px;
+	margin: 0;
+	padding: 10px 10px 0 30px;
+	background: rgb(0,0,0);
+	background: rgba(0,0,0,0.35);
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid rgb(255,255,255) !important;
+	border: 1px solid rgba(255,255,255,0.3) !important;
+	font: 12px/1 Arial,sans-serif;
+	text-align: left;
+	text-decoration: none !important;
+	text-shadow: none;
+	color: #FFF !important;
+	cursor: pointer;
+	}
+	.b-mediaplaceholder-inner {
+		position: relative;
+		top: auto;
+		left: auto;
+		display: inline-block;
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 0 0 0 20px;
+		}
+		.b-mediaplaceholder-pic {
+			overflow: hidden;
+			position: absolute;
+			top: 0;
+			left: 0;
+			display: block;
+			margin: 0;
+			padding: 0;
+			background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
+			font: 0/0 serif;
+			}
+		.b-mediaplaceholder-photo .b-mediaplaceholder-pic {
+			width: 13px;
+			height: 11px;
+			background-position: 0 -29px;
+			}
+		.b-mediaplaceholder-video .b-mediaplaceholder-pic {
+			width: 12px;
+			height: 13px;
+			background-position: 0 -16px;
+			}
+		.b-mediaplaceholder-processing .b-mediaplaceholder-pic {
+			top: 50%;
+			width: 11px;
+			height: 3px;
+			margin-top: -2px;
+			background: url(/img/preloader-s.gif?v=1) no-repeat 0 0;
+			}
+		.b-mediaplaceholder-label {
+			display: none;
+			position: static;
+			top: auto;
+			left: auto;
+			width: auto;
+			height: auto;
+			margin: 0;
+			padding: 0;
+			}
+		.b-mediaplaceholder .b-mediaplaceholder-view,
+		.b-mediaplaceholder-processing .b-mediaplaceholder-loading {
+			display: inline;
+			}
+		.b-mediaplaceholder-processing .b-mediaplaceholder-view {
+			display: none;
 			}

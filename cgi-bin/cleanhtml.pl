@@ -1149,9 +1149,14 @@ sub clean
                     }
 
                     if ($img_bad) {
-                        $newdata .= qq~<a class="ljimgplaceholder" extern_href="$href_b_link" href="~ .
+                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" extern_href="$href_b_link" href="~ .
                             LJ::ehtml($hash->{'src'}) . '">' .
-                            LJ::img('placeholder') . '</a>';
+                            '<span class="b-mediaplaceholder-inner">' .
+                            '<i class="b-mediaplaceholder-pic"></i>' .
+                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-view">' . LJ::Lang::ml("mediaplaceholder.viewimage") . '</span>'.
+                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . LJ::Lang::ml("mediaplaceholder.loading") . '</span>'.
+                            '</span>' .
+                            '</a>';
                         $alt_output = 1;
                         $opencount{"img"}++;
                     }
