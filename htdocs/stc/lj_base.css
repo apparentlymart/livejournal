@@ -3798,7 +3798,12 @@ BODY .b-mediaplaceholder:focus {
 	}
 BODY .b-mediaplaceholder:hover,
 BODY .b-mediaplaceholder:active,
-BODY .b-mediaplaceholder:focus {
+BODY .b-mediaplaceholder:focus,
+BODY .b-mediaplaceholder-processing:link,
+BODY .b-mediaplaceholder-processing:visited,
+BODY .b-mediaplaceholder-processing:hover,
+BODY .b-mediaplaceholder-processing:active,
+BODY .b-mediaplaceholder-processing:focus {
 	border: 1px solid rgb(220,220,220) !important;
 	border: 1px solid rgba(220,220,220,0.45) !important;
 	background: rgb(0,0,0) !important;
