@@ -167,13 +167,55 @@ LiveJournal.updateWalletBalance = function () {
 };
 
 // Placeholder onclick event
-LiveJournal.placeholderClick = function(link, html)
-{
+LiveJournal.placeholderClick = function() {
+	var placeholders = {
+		image: {
+			selector: '.b-mediaplaceholder-photo',
+			loading: 'b-mediaplaceholder-processing',
+			init: function() {
+				var self = this;
+				doc.on('click', this.selector, function(ev) { 
+					self.handler(this, ev);
+				});
+			},
+
+			handler: function(el, html) {
+				var im = new Image();
+
+				im.onload = im.onerror = jQuery.delayedCallback(this.imgLoaded.bind(this, el, im), 500);
+				im.src = el.href;
+				el.className += ' ' + this.loading;
+			},
+
+			imgLoaded: function(el, image) {
+				var img = jQuery('<img />').attr('src', image.src),
+					$el = jQuery(el),
+					href = $el.data('href');
+
+				if (href && href.length > 0) {
+					img = jQuery('<a>', { href: href }).append(img);
+					$el.next('.b-mediaplaceholder-external').remove();
+				}
+
+				$el.replaceWith(img);
+			}
+		},
+
+		video: {
+			handler: function(link, html) {
+				link.parentNode.replaceChild(jQuery(unescape(html))[0], link);
+			}
+		}
+	};
 	// use replaceChild for no blink scroll effect
-	link.parentNode.parentNode.replaceChild(jQuery(unescape(html))[0], link.parentNode);
-	
-	return false
-}
+
+	return function(el, html) {
+		var type = (html === 'image') ? html : 'video';
+
+		placeholders[type].handler(el, html);
+		return false;
+	}
+}();
 
 // handy utilities to create elements with just text in them
 function _textSpan () { return _textElements("span", arguments); }
@@ -596,3 +638,4 @@ LiveJournal.isMobile = function() {
 	}
 	return function() { return forceMobile || isMobile; }
 }();
+
