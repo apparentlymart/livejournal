@@ -1159,6 +1159,7 @@ sub clean
                             '</a>';
                         $newdata .= $href_b_link ?
                             '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . LJ::Lang::ml("mediaplaceholder.link") . '">' .
+                            '<i class="b-mediaplaceholder-bg"></i>' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
                             '<span class="b-mediaplaceholder-inner">' . LJ::Lang::ml("mediaplaceholder.link") . '</span>' .
                             '</a>' : '';

@@ -3776,10 +3776,10 @@ BODY .b-mediaplaceholder:focus {
 	left: auto;
 	display: inline-block;
 	width: auto;
-	height: 23px;
+	height: 35px;
 	min-width: 100px;
-	margin: 0;
-	padding: 12px 10px 0 30px;
+	margin: 0 5px 0 0;
+	padding: 0 10px 0 30px;
 	vertical-align: top !important;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
@@ -3787,12 +3787,22 @@ BODY .b-mediaplaceholder:focus {
 	border: 1px solid rgba(220,220,220,0.35) !important;
 	background: rgb(0,0,0) !important;
 	background: rgba(0,0,0,0.35) !important;
-	font: 12px/1 Arial,sans-serif;
+	font: 12px/35px Arial,sans-serif;
 	text-align: left;
 	text-decoration: none !important;
 	text-shadow: none;
 	color: #FFF !important;
 	cursor: pointer;
+	*display: inline;
+	*zoom: 1;
+	}
+BODY .b-mediaplaceholder:hover,
+BODY .b-mediaplaceholder:active,
+BODY .b-mediaplaceholder:focus {
+	border: 1px solid rgb(220,220,220) !important;
+	border: 1px solid rgba(220,220,220,0.45) !important;
+	background: rgb(0,0,0) !important;
+	background: rgba(0,0,0,0.45) !important;
 	}
 	.b-mediaplaceholder .b-mediaplaceholder-inner {
 		position: relative;
@@ -3803,11 +3813,12 @@ BODY .b-mediaplaceholder:focus {
 		height: auto;
 		margin: 0;
 		padding: 0 0 0 20px;
+		*zoom: 1;
 		}
 		.b-mediaplaceholder .b-mediaplaceholder-pic {
 			overflow: hidden;
 			position: absolute;
-			top: 0;
+			top: 50%;
 			left: 0;
 			display: block;
 			margin: 0;
@@ -3818,15 +3829,16 @@ BODY .b-mediaplaceholder:focus {
 		.b-mediaplaceholder-photo .b-mediaplaceholder-pic {
 			width: 13px;
 			height: 11px;
+			margin-top: -6px;
 			background-position: 0 -50px;
 			}
 		.b-mediaplaceholder-video .b-mediaplaceholder-pic {
 			width: 12px;
 			height: 13px;
+			margin-top: -7px;
 			background-position: 0 -37px;
 			}
 		.b-mediaplaceholder-processing .b-mediaplaceholder-pic {
-			top: 50%;
 			width: 11px;
 			height: 3px;
 			margin-top: -2px;
@@ -3860,7 +3872,7 @@ BODY .b-mediaplaceholder-external:focus {
 	display: inline-block;
 	width: 35px;
 	height: 37px;
-	margin: 0 10px 0 1px;
+	margin: 0 10px 0 0;
 	padding: 0;
 	vertical-align: top !important;
 	border: 0 !important;
@@ -3870,18 +3882,37 @@ BODY .b-mediaplaceholder-external:focus {
 	text-shadow: none;
 	color: #FFF !important;
 	cursor: pointer;
+	*display: inline;
+	*zoom: 1;
 	}
-	.b-mediaplaceholder-external .b-mediaplaceholder-pic {
+	.b-mediaplaceholder-external .b-mediaplaceholder-bg {
 		overflow: hidden;
 		position: absolute;
 		top: 0;
 		left: 0;
+		opacity: 0.25;
 		display: block;
 		width: 35px;
 		height: 37px;
 		margin: 0;
 		padding: 0;
 		background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
+		font: 0/0 serif;
+		}
+	.b-mediaplaceholder-external:hover .b-mediaplaceholder-bg {
+		opacity: 0.35;
+		}
+	.b-mediaplaceholder-external .b-mediaplaceholder-pic {
+		overflow: hidden;
+		position: absolute;
+		top: 10px;
+		left: 12px;
+		display: block;
+		width: 16px;
+		height: 16px;
+		margin: 0;
+		padding: 0;
+		background: url(/img/mediaplaceholder.png?v=1) no-repeat -19px -37px;
 		font: 0/0 serif;
 		}
 	.b-mediaplaceholder-external .b-mediaplaceholder-arr {
