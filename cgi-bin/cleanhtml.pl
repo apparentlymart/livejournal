@@ -158,7 +158,7 @@ sub clean
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
 
     my $poster = LJ::load_userid($opts->{posterid});
-    my $put_nofollow = not ($poster and $poster->get_cap('paid'));
+    my $put_nofollow = not ($poster and $poster->get_cap('paid') and not $poster->get_cap('trynbuy'));
 
     my $viewer_lang = $opts->{'viewer_lang'};
     unless ($viewer_lang) {
