@@ -3926,3 +3926,7 @@ BODY .b-mediaplaceholder-external:focus {
 	.b-mediaplaceholder-external .b-mediaplaceholder-inner {
 		display: none !important;
 		}
+
+.lj-spoiler .lj-spoiler-content { display: none; }
+.lj-spoiler-opened .lj-spoiler-content { display: block; }
+

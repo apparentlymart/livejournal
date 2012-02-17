@@ -316,6 +316,8 @@ sub clean
     my $text_a_link = 0;
     my $text_b_link = 0;
 
+    my $ljspoilers_open = 0;
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -460,6 +462,19 @@ sub clean
                 my $wishid = $attr->{wishid};
                 my $userid = $attr->{userid};
                 $newdata .= Encode::decode_utf8(LJ::WishElement->check_and_expand_entry($userid, $wishid));
+            }
+
+            if ( $tag eq 'lj-spoiler' ) {
+                my $title = $attr->{'title'} ||
+                    $attr->{'text'} ||
+                    Encode::decode_utf8(
+                        LJ::Lang::ml('fcklang.ljspoiler.prompt.text') );
+
+                $title = LJ::ehtml($title);
+
+                $newdata .= qq{<div class="lj-spoiler"><p class="lj-spoiler-open"><a href="#">$title</a></p><div class="lj-spoiler-content">};
+                $ljspoilers_open++;
+                next TOKEN;
             }
 
             # Capture object and embed tags to possibly transform them into something else.
@@ -1405,6 +1420,11 @@ sub clean
                 # ignore it
             } elsif ( $tag eq 'lj-lang-container' ) {
                 shift @lj_lang_otherwise;
+            } elsif ( $tag eq 'lj-spoiler' ) {
+                if ($ljspoilers_open) {
+                    $newdata .= qq{</div></div>};
+                    $ljspoilers_open--;
+                }
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
@@ -1600,6 +1620,10 @@ sub clean
                 $newdata .= "</$tag>" x $opencount{$tag};
             }
         }
+    }
+
+    if ($ljspoilers_open) {
+        $newdata .= qq{</div></div>} x $ljspoilers_open;
     }
 
     # extra-paranoid check

@@ -639,3 +639,13 @@ LiveJournal.isMobile = function() {
 	return function() { return forceMobile || isMobile; }
 }();
 
+jQuery(function($) {
+    $(document.body).click(function(e) {
+        var target = $(e.target);
+        if (!target.is(".lj-spoiler > p.lj-spoiler-open > a")) return;
+
+        e.preventDefault();
+        target.parent().parent().toggleClass("lj-spoiler-opened");
+    });
+});
+
