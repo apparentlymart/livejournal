@@ -1743,18 +1743,18 @@ sub render_body {
             'LJUser' => 'ljuser',
             'VideoPrompt' => 'videoprompt',
             'LJVideo' => 'ljvideo2',
-            'CutPrompt' => 'cutprompt',
-            'ReadMore' => 'readmore',
             'CutContents' => 'cutcontents',
-            'LJCut' => 'ljcut',
+
             'LJEmbedPrompt' => 'ljembedprompt',
             'LJEmbedPromptTitle' => 'ljembedprompttitle',
             'LJEmbed' => 'ljembed',
+
             'Poll_PollWizardNotice' => 'poll.pollwizardnotice',
             'Poll_PollWizardNoticeLink' => 'poll.pollwizardnoticelink',
             'Poll_AccountLevelNotice' => 'poll.accountlevelnotice',
             'Poll_PollWizardTitle' => 'poll.pollwizardtitle',
-            'Poll' => 'poll',
+            'Poll_Title' => 'poll',
+
             'LJLike_name' => 'ljlike.name',
             'LJLike_dialogText' => 'ljlike.dialog.text',
             'LJLike_button_google' => 'ljlike.button.google',
@@ -1764,16 +1764,30 @@ sub render_body {
             'LJLike_button_give' => 'ljlike.button.give',
             'LJLike_WizardNotice' => 'ljlike.wizardnotice',
             'LJLike_WizardNoticeLink' => 'ljlike.wizardnoticelink',
+
             'LJUser_WizardNotice' => 'ljuser.wizardnotice',
             'LJUser_WizardNoticeLink' => 'ljuser.wizardnoticelink',
+
             'LJLink_WizardNotice' => 'ljlink.wizardnotice',
             'LJLink_WizardNoticeLink' => 'ljlink.wizardnoticelink',
-            'LJImage_title' => 'ljimage',
-            'LJImage_beta_title' => 'ljimage.beta',
+
+            'LJImage_Title' => 'ljimage',
+            'LJImage_BetaTitle' => 'ljimage.beta',
             'LJImage_WizardNotice' => 'ljimage.wizardnotice',
             'LJImage_WizardNoticeLink' => 'ljimage.wizardnoticelink',
+
+            'LJCut_Title' => 'ljcut',
+            'LJCut_PromptTitle' => 'cutprompt',
+            'LJCut_PromptText' => 'readmore',
             'LJCut_WizardNotice' => 'ljcut.wizardnotice',
             'LJCut_WizardNoticeLink' => 'ljcut.wizardnoticelink',
+
+            'LJSpoiler_Title' => 'ljspoiler',
+            'LJSpoiler_PromptTitle' => 'ljspoiler.prompt',
+            'LJSpoiler_PromptText' => 'ljspoiler.prompt.text',
+            'LJSpoiler_WizardNotice' => 'ljspoiler.wizardnotice',
+            'LJSpoiler_WizardNoticeLink' => 'ljspoiler.wizardnoticelink',
+
             'LJRepost_Value' => 'ljrepost',
         );
 

@@ -2679,6 +2679,17 @@ eventrates.view_all=View all
 fcklang.ljimage=Insert/Edit Image
 fcklang.ljimage.beta=Insert/Edit Image Beta
 
+
+fcklang.ljspoiler=LiveJournal Spoiler
+
+fcklang.ljspoiler.wizardnotice=Spoiler must be edited inside the Spoiler Wizard
+
+fcklang.ljspoiler.wizardnoticelink=Go to Spoiler wizard
+
+fcklang.ljspoiler.prompt=Spoiler text?
+
+fcklang.ljspoiler.prompt.text=Spoiler (click to open)
+
 fcklang.cutcontents=Type your cut contents here.
 
 fcklang.cutprompt=Cut link text?
