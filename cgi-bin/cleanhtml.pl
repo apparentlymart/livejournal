@@ -1150,7 +1150,7 @@ sub clean
 
                     if ($img_bad) {
                         $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" data-href="$href_b_link" href="~ .
-                            LJ::ehtml($hash->{'src'}) . '">' .
+                            LJ::ehtml($hash->{'src'}) . '" onclick="return LiveJournal.placeholderClick(this, \'image\')">' .
                             '<span class="b-mediaplaceholder-inner">' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
                             '<span class="b-mediaplaceholder-label b-mediaplaceholder-view">' . LJ::Lang::ml("mediaplaceholder.viewimage") . '</span>'.
