@@ -43,6 +43,7 @@ sub option {
         . LJ::html_check({
             selected => $chk1,
             name     => "${key}check1",
+            id     => "${key}check1",
           })
         . $class->ml('setting.videoplaceholders.option2.checkbox1')
         . "</label> "
@@ -50,6 +51,7 @@ sub option {
         . LJ::html_check({
             selected => $chk2,
             name     => "${key}check2",
+            id     => "${key}check2",
           })
         . $class->ml('setting.videoplaceholders.option2.checkbox2')
         . "</label> ";
