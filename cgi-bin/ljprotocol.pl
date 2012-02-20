@@ -371,6 +371,13 @@ sub getpoll
                                     }
                                     $_;
                                 } map { delete $_->{pollqid}; $_ } $question->answers;
+
+            if ($req->{'asxml'} && $question->{text}) {
+                my $tidy = LJ::Tidy->new();
+                $question->{text} = $tidy->clean( $question->{text} );
+                warn "Tidy: Pool";
+            }
+
             @{$res->{answers}{$question->pollqid}} = @answers;
         }
     }
@@ -649,6 +656,10 @@ sub getcomments {
         }
 
         $item_data->{body} = $item->{body} if($item->{body} && $item->{_loaded});
+        if ($req->{'asxml'}) {
+            my $tidy = LJ::Tidy->new();
+            $item_data->{body} = $tidy->clean( $item_data->{body} );
+        }
 
         # add parameters to lj-embed
         #LJ::EmbedModule->expand_entry($item->{upost}, \$item_data->{body}, get_video_id => 1) if($item->{upost} && $req->{get_video_ids});
@@ -1089,6 +1100,11 @@ sub getrecentcomments {
             read_more => '<a href="' . $comment->url . '"> ...</a>',
         ) if $req->{trim_widgets};
 
+        if ($req->{'asxml'} && $comment->{text}) {
+            my $tidy = LJ::Tidy->new();
+            $comment->{text} = $tidy->clean( $comment->{text} );
+        }
+
         # add parameters to lj-tags
         #LJ::EmbedModule->expand_entry($users->{$comment->{posterid}}, \$comment->{text}, get_video_id => 1) if($req->{get_video_ids});
 
@@ -1222,6 +1238,11 @@ sub getfriendspage
                 embed_url => $entry->url)
         }
 
+        if ($req->{'asxml'}) {
+            my $tidy = LJ::Tidy->new();
+            $h{event_raw} = $tidy->clean( $h{event_raw} );
+        }
+
         #userpic
         $h{poster_userpic_url} = $h{userpic} && $h{userpic}->url;
 
@@ -1353,6 +1374,11 @@ sub getinbox
         }
 
         $raw->{state} = $item->{state};
+
+        if ($req->{'asxml'} && $raw->{'body'}) {
+            my $tidy = LJ::Tidy->new();
+            $raw->{'body'} = $tidy->clean( $raw->{'body'} );
+        }
 
         push @res, { %$raw,
                      when   => $item->when_unixtime,
@@ -3909,8 +3935,7 @@ sub getevents {
 
         if ($req->{'asxml'}) {
             my $tidy = LJ::Tidy->new();
-            my $event_text = $tidy->clean( $t->[1] );
-            $evt->{'event'} = '<event>' . $event_text . '</event>';
+            $evt->{'event'} = $tidy->clean( $t->[1] );
         } else {
             $evt->{'event'} = $t->[1];
         }
