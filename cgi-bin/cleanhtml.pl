@@ -474,7 +474,7 @@ sub clean
 
                 $title = LJ::ehtml($title);
 
-                $newdata .= qq{<div class="lj-spoiler"><p class="lj-spoiler-open"><a href="#">$title</a></p><div class="lj-spoiler-content">};
+                $newdata .= qq{<div class="lj-spoiler"><p class="lj-spoiler-head">[<b><a href="#">$title</a></b>]</p><div class="lj-spoiler-body">};
                 $ljspoilers_open++;
                 next TOKEN;
             }

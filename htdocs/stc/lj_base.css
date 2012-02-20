@@ -3927,6 +3927,25 @@ BODY .b-mediaplaceholder-external:focus {
 		display: none !important;
 		}
 
-.lj-spoiler .lj-spoiler-content { display: none; }
-.lj-spoiler-opened .lj-spoiler-content { display: block; }
+
+/* LJ Spoiler
+----------------------------------- */
+.lj-spoiler .lj-spoiler-body { 
+    display: block; 
+    }
+.lj-spoiler .lj-spoiler-head { 
+    display: none; 
+    }
+#js .lj-spoiler .lj-spoiler-body { 
+    display: none; 
+    }
+#js .lj-spoiler .lj-spoiler-head { 
+    display: block; 
+    }
+#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body { 
+    display: block; 
+    }
+#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
+    display: none;
+    }
 
