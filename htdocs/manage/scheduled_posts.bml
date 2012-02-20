@@ -32,6 +32,10 @@ body<=
     my $only_me_checked = $GET{'only_me'};
     my $getextra = $usejournal ? "?usejournal=$usejournal" : undef;
 
+    if ($only_me_checked) {
+        $getextra = $getextra ? "$getextra&only_me=1" : '?only_me=1';
+    } 
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>" unless $remote;
