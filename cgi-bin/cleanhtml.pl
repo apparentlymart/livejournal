@@ -358,6 +358,7 @@ sub clean
                 if ( $tag eq 'a' ) {
                     $in_link = 1;
                     $href_b_link = $attr->{href};
+                    $text_a_link = 0;
                 }
 
                 if ( $tag eq 'img' && $in_link ) {
@@ -374,6 +375,7 @@ sub clean
                     # can pass in tokens to override passing the hook the @capture array
                     my ($token, $override_capture) = @_;
                     my $capture = $override_capture ? [$token] : \@capture;
+
                     # In $expanded we must has valid unicode string.
                     my $expanded = ($name =~ /^\w+$/) ?
                         Encode::decode_utf8(LJ::run_hook("expand_template_$name", $capture)) : "";
@@ -1346,6 +1348,7 @@ sub clean
                     $href_b_link = '';
                     $img_link    = 0;
                 }
+                next TOKEN if $text_a_link;
             }
 
             my $allow;
