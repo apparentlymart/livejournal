@@ -640,12 +640,9 @@ LiveJournal.isMobile = function() {
 }();
 
 jQuery(function($) {
-    $(document.body).click(function(e) {
-        var target = $(e.target);
-        if (!target.is(".lj-spoiler > p.lj-spoiler-open > a")) return;
-
-        e.preventDefault();
-        target.parent().parent().toggleClass("lj-spoiler-opened");
-    });
+	$(document).delegate('.lj-spoiler > p.lj-spoiler-head a', 'click', function (evt) {
+		evt.preventDefault();
+		$(this).closest('.lj-spoiler').toggleClass('lj-spoiler-opened');
+	});
 });
 
