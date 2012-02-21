@@ -309,6 +309,17 @@ sub trans {
         LJ::Request->init($r);
     }
 
+    # Move the following into the special OPTIONS Handler in case of appearence more OPTIONS stuff
+    if (LJ::Request->method_number == LJ::Request->M_OPTIONS && LJ::Request->uri =~ m!^/interface/xmlrpc! ) {
+        if (LJ::Request->header_in('Origin') && LJ::Request->header_in('Access-Control-Request-Method') && LJ::Request->header_in('Access-Control-Request-Headers')) {
+            # response to preflight request, see http://www.w3.org/TR/cors/
+            LJ::Request->header_out('Access-Control-Allow-Origin' => '*');
+            LJ::Request->header_out('Access-Control-Allow-Methods' => 'POST');
+            LJ::Request->header_out('Access-Control-Allow-Headers' => LJ::Request->header_in('Access-Control-Request-Headers') || 'origin, content-type');
+        }
+        return LJ::Request::DECLINED;
+    }
+
     # don't deal with subrequests or OPTIONS
     return LJ::Request::DECLINED
         if ! LJ::Request->is_main || LJ::Request->method_number == LJ::Request->M_OPTIONS;
@@ -2197,6 +2208,7 @@ sub interface_content
 
     if ($RQ{'interface'} eq "xmlrpc") {
         return LJ::Request::NOT_FOUND unless LJ::ModuleCheck->have('XMLRPC::Transport::HTTP');
+        LJ::Request->header_out("Access-Control-Allow-Origin",'*') if(LJ::Request->header_in('Origin'));
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_to('LJ::XMLRPC')
