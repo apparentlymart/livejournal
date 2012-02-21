@@ -206,7 +206,7 @@ body<=
                                     date        => $etime,
                                     subject     => $req->{subject},
                                     text        => LJ::ehtml($req->{event}),    
-                                    reason      => $POST{why},
+                                    reason      =>  LJ::html_newlines($POST{why}),
                                     sitename    => $LJ::SITENAME,
                                    }
                         );                
