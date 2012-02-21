@@ -105,39 +105,38 @@ sub load_relation_destinations {
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
-    my $result;
-
     if ($class->_load_alt_api('read', $type)){
         my $alt = $class->alt_api($u);
         if ($alt) {
-            $result = $alt->load_relation_destinations($u, $type, %opts);
-            warn Dumper({load_relation_destinations_rs2=>$result});
+            $alt->load_relation_destinations($u, $type, %opts);
         }
     }
 
-
-
-
     my $interface = $class->relation_api($u);
-    $result = $interface->load_relation_destinations($u, $type, %opts);
-    warn Dumper({load_relation_destinations_mysql=>$result});
-    return $result;
+    return $interface->load_relation_destinations($u, $type, %opts);
 }
 
 sub create_relation_to {
-    my $class = shift;
-    my $u     = shift;
-
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
     $u = LJ::want_user($u);
+    $friend = LJ::want_user($friend);
+    
+    return undef unless $type and $u and $friend;
+
     if ($class->_load_alt_api('update')){
         my $alt = $class->alt_api($u);
         if ($alt){
-            $alt->create_relation_to($u, @_);
+            $alt->create_relation_to($u, $friend, $type, %opts);
         }
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->create_relation_to($u, @_);
+    return $interface->create_relation_to($u, $friend, $type, %opts);
 }
 
 

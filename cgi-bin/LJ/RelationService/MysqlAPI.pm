@@ -171,36 +171,82 @@ sub load_relation_sources {
 
 ##
 sub create_relation_to {
-    my $class = shift;
-    my $u     = shift;
-    my %opts  = @_;
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
+    if ( $type eq 'F' ) {
+        return $class->_create_relation_to_type_f($u, $friend, %opts);
+    } else {
+        return $class->_create_relation_to_type_other($u, $friend, $type, %opts);
+    }
+}
 
-    my $friendid   = $opts{friendid};
-    my $qfg        = $opts{qfg};
-    my $qbg        = $opts{qbg};
-    my $groupmask  = int($opts{groupmask});
+sub _create_relation_to_type_f {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my %opts   = @_;
 
     my $dbh = LJ::get_db_writer();
+    
     my $cnt = $dbh->do("REPLACE INTO friends 
                             (userid, friendid, fgcolor, bgcolor, groupmask) 
                         VALUES 
                             (?, ?, ?, ?, ?)
-                        ", undef, $u->userid, $friendid, $qfg, $qbg, $groupmask);
+                        ", undef, $u->userid, $friend->userid, $opts{fgcolor}, $opts{bgcolor}, $opts{groupmask});
     die "create_relation_to error: " . DBI->errstr if DBI->errstr;
 
-    my $memkey = [$u->userid,"frgmask:" . $u->userid . ":$friendid"];
-    LJ::MemCache::set($memkey, $groupmask, time()+60*15);
-    LJ::memcache_kill($friendid, 'friendofs');
-    LJ::memcache_kill($friendid, 'friendofs2');
+    my $memkey = [$u->userid, "frgmask:" . $u->userid . ":" . $friend->userid];
+    LJ::MemCache::set($memkey, $opts{groupmask}, time()+60*15);
+    LJ::memcache_kill($friend->userid, 'friendofs');
+    LJ::memcache_kill($friend->userid, 'friendofs2');
 
     # invalidate memcache of friends
     LJ::memcache_kill($u->userid, "friends");
     LJ::memcache_kill($u->userid, "friends2");
+    LJ::mark_dirty($u->userid, "friends");
 
-    LJ::run_hooks('befriended', $u, LJ::load_userid($friendid));
-    LJ::User->increase_friendsof_counter($friendid);
-
+    LJ::run_hooks('befriended', $u, $friend);
+    LJ::User->increase_friendsof_counter($friend->userid);
+    
     return $cnt;
+}
+
+sub _create_relation_to_type_other {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $eff_type = $typeid || $type;
+
+    # working on reluser or reluser2?
+    my ($db, $table);
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_master($u);
+        $table = "reluser2";
+    } else {
+        # non-clustered reluser global table
+        $db = LJ::get_db_writer();
+        $table = "reluser";
+    }
+    return undef unless $db;
+
+    # set in database
+    $db->do("REPLACE INTO $table (userid, targetid, type) VALUES (?, ?, ?)",
+            undef, $u->userid, $friend->userid, $eff_type);
+    return undef if $db->err;
+
+    # set in memcache
+    LJ::_set_rel_memcache($u->userid, $friend->userid, $eff_type, 1);
+
+    return 1;
 }
 
 

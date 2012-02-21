@@ -336,39 +336,9 @@ sub check_rel
 # </LJFUNC>
 sub set_rel
 {
-    &nodb;
     my ($userid, $targetid, $type) = @_;
-    return undef unless $type and $userid and $targetid;
 
-    my $u = LJ::want_user($userid);
-    $userid = LJ::want_userid($userid);
-    $targetid = LJ::want_userid($targetid);
-
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $eff_type = $typeid || $type;
-
-    # working on reluser or reluser2?
-    my ($db, $table);
-    if ($typeid) {
-        # clustered reluser2 table
-        $db = LJ::get_cluster_master($u);
-        $table = "reluser2";
-    } else {
-        # non-clustered reluser global table
-        $db = LJ::get_db_writer();
-        $table = "reluser";
-    }
-    return undef unless $db;
-
-    # set in database
-    $db->do("REPLACE INTO $table (userid, targetid, type) VALUES (?, ?, ?)",
-            undef, $userid, $targetid, $eff_type);
-    return undef if $db->err;
-
-    # set in memcache
-    LJ::_set_rel_memcache($userid, $targetid, $eff_type, 1);
-
-    return 1;
+    return LJ::RelationService->create_relation_to($userid, $targetid, $type);
 }
 
 # <LJFUNC>

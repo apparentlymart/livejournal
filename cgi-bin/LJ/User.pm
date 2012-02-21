@@ -8871,7 +8871,6 @@ sub add_friend
         return 0 unless LJ::RateLimit->check($friender, [ $cond ]);
     }
 
-    my $dbh      = LJ::get_db_writer();
     my $sclient  = LJ::theschwartz();
 
     my $fgcol = LJ::color_todb($opts->{'fgcolor'}) || LJ::color_todb("#000000");
@@ -8892,32 +8891,23 @@ sub add_friend
         $groupmask |= (1 << $grp) if $grp;
     }
 
-    foreach my $add_id (@add_ids) {
-        my $cnt = $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) " .
-                           "VALUES ($userid, $add_id, $fgcol, $bgcol, $groupmask)");
-
-        if (!$dbh->err && $cnt == 1) {
-            LJ::run_hooks('befriended', $friender, LJ::load_userid($add_id));
-            LJ::User->increase_friendsof_counter($add_id);
-        }
-    }
-    
     # part of the criteria for whether to fire befriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
                  && $friender->is_visible && $friender->is_person;
 
-    # delete friend-of memcache keys for anyone who was added
-    foreach my $fid (@add_ids) {
-        LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
-        LJ::memcache_kill($fid, 'friendofs');
-        LJ::memcache_kill($fid, 'friendofs2');
+    foreach my $add_id (@add_ids) {
+        LJ::RelationService->create_relation_to(
+            $friender, $add_id, 'F', 
+            groupmask => $groupmask, 
+            fgcolor   => $fgcol,
+            bgcolor   => $bgcol,
+        );
 
         if ($sclient) {
             my @jobs;
 
             # only fire event if the friender is a person and not banned and visible
-            my $friender = LJ::load_userid($userid);
-            my $friendee = LJ::load_userid($fid);
+            my $friendee = LJ::load_userid($add_id);
             if ($notify && !$friendee->is_banned($friender)) {
                 require LJ::Event::BefriendedDelayed;
                 LJ::Event::BefriendedDelayed->send($friendee, $friender);
@@ -8925,16 +8915,12 @@ sub add_friend
 
             push @jobs, TheSchwartz::Job->new(
                                               funcname => "LJ::NewWorker::TheSchwartz::FriendChange",
-                                              arg      => [$userid, 'add', $fid],
+                                              arg      => [$userid, 'add', $add_id],
                                               ) unless $LJ::DISABLED{'friendchange-schwartz'};
 
             $sclient->insert_jobs(@jobs) if @jobs;
         }
     }
-
-    LJ::memcache_kill($userid, 'friends');
-    LJ::memcache_kill($userid, 'friends2');
-    LJ::mark_dirty($userid, "friends");
 
     # WARNING: always returns "true". Check result of executing "REPLACE INTO friends ..." statement above.
     return 1;
