@@ -1342,7 +1342,7 @@ sub create_view_lastn
             \$event,
             {
                 'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
-                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'cuturl'              => $entry_obj->url,
                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
                 'ljcut_disable'       => $ljcut_disable,
                 'suspend_msg'         => $suspend_msg,
@@ -1920,7 +1920,7 @@ sub create_view_friends {
         LJ::CleanHTML::clean_event(
             \$event, {
                 'preformatted'        => $logprops{$datakey}->{'opt_preformatted'},
-                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
+                'cuturl'              => $entry_obj->url(%urlopts_style),
                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
                 'ljcut_disable'       => $ljcut_disable,
                 'suspend_msg'         => $suspend_msg,
@@ -2677,7 +2677,7 @@ sub create_view_day
             \$event,
             {
                 'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
-                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'cuturl'              => $entry_obj->url,
                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
                 'ljcut_disable'       => $ljcut_disable,
                 'suspend_msg'         => $suspend_msg,

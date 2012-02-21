@@ -870,10 +870,10 @@ sub event_html
 
     if($opts->{no_cut_expand}) {
         $opts->{expand_cut} = 0;
-        $opts->{cuturl}     = $self->prop('reposted_from') || $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
+        $opts->{cuturl}     = $self->url . '?page=' . $opts->{page} . '&cut_expand=1';
     } elsif (!$opts->{cuturl}) {
         $opts->{expand_cut} = 1;
-        $opts->{cuturl}     = $self->prop('reposted_from') || $self->url;
+        $opts->{cuturl}     = $self->url;
     }
     $opts->{journalid} = $self->journalid;
     $opts->{posterid}  = $self->posterid;

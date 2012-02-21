@@ -158,7 +158,7 @@ sub DayPage
             \$text,
             {
                 'preformatted'        => $logprops{$itemid}->{'opt_preformatted'},
-                'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                'cuturl'              => $entry_obj->url,
                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
                 'ljcut_disable'       => $ljcut_disable,
                 'suspend_msg'         => $suspend_msg,
