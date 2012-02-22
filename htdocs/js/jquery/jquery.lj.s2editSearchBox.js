@@ -221,38 +221,6 @@
 			this._enabled = false;
 			this.hide();
 			$.lj.basicWidget.prototype.disable.apply(this);
-		},
-
-		/**
-		 * Find element inside the widget and return it. Note, that function caches the elements
-		 * and assigns them ti the widget object with the name _{name}
-		 *
-		 * @param {string} name Name of the selector to search in this.options.selectors
-		 */
-		_el: function(name) {
-			var method = '_' + name;
-
-			if (!this[method]) { this[method] = this.element.find(this.options.selectors[name]); };
-
-			return this[method];
-		},
-
-		/**
-		 * Fetch the class name from the options.
-		 *
-		 * @param {string} name Name of the class name to search in this.options.classNames.
-		 */
-		_cl: function(name) {
-				return this.options.classNames[name];
-		},
-
-		/**
-		 * Fetch the selector from the options.
-		 *
-		 * @param {string} name Name of the selector to search in this.options.selectors
-		 */
-		_s: function(name) {
-				return this.options.selectors[name];
 		}
 	});
 

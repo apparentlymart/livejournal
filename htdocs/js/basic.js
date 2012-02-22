@@ -152,6 +152,25 @@ LJ.DelayedCall.prototype.stop = function() {
 	this._timer = null;
 }
 
+LJ.commafy = function(num) {
+	num = "" + num;
+	if (/^\d+$/.test(num)) {
+		var delim = LiveJournal.getLocalizedStr('number.punctuation');
+		if (delim === '[number.punctuation]') { delim = ','; }
+
+		var hasMatches = true;
+		while (hasMatches) {
+			hasMatches = false;
+			num = num.replace(/(\d)(\d{3})(?!\d)/g, function(str, first, group) {
+				hasMatches = true;
+				return first + delim + group;
+			})
+		}
+	}
+
+	return num;
+};
+
 
 
 /* object extensions */
