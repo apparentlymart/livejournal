@@ -42,6 +42,7 @@ set text_meta_mood = "Настроение";
 
 set text_post_comment = "Оставить комментарий";
 set text_read_comments = "# комментарий // # комментария // # комментариев";
+set text_read_all_comments = "# комментарий // # комментария // # комментариев";
 set text_post_comment_friends = "Оставить комментарий";
 set text_read_comments_friends = "# комментарий // # комментария // # комментариев";
 set text_max_comments = "Достигнуто максимальное количество комментариев.";
