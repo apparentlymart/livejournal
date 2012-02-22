@@ -61,10 +61,15 @@ a:active {
 	}
 	.entry-linkbar-inner {
 		display: inline-block;
-		padding: 7px 10px 3px;
+		padding: 7px 6px;
 		border: 1px solid #8FC3F7;
 		background: #C5DFF9;
+		font: 0/0 serif;
 		}
+		.content .entry .entry-linkbar A {
+			margin: 0 4px;
+			font: 10px/1 Arial,sans-serif;
+			}
 		.content .entry .entry-linkbar img {
 			padding: 0;
 			}
