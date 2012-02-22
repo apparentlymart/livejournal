@@ -707,7 +707,7 @@
                          $diagram_image .
                          LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy(++$ua_position->{result}->{position}), 
                                                         url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
-                                                        "?country=UA&askname=" . $u->username . "#ask_position"}) .
+                                                        "?country=ua&askname=" . $u->username . "#ask_position"}) .
                          "</li>"; 
         }
         if ((ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) || (ref $position eq 'HASH' && $position->{result}->{position} < 2000)) {
