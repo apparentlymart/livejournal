@@ -49,10 +49,9 @@ sub matches_filter {
 
     # all posts by friends
     return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->event_journal);
-    # a post on a specific journal
-    my $journal = LJ::load_userid($subscr->journal);
 
-    return LJ::u_equals($journal, $evtju);
+    # a post on a specific journal
+    return LJ::u_equals( $subscr->journal, $evtju );
 }
 
 sub content {
