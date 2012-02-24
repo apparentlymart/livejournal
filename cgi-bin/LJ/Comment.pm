@@ -50,12 +50,12 @@ use Encode();
 #    _loaded_props:  loaded props
 
 my %singletons    = (); # journalid->jtalkid->singleton
-my %unloaded      = (); # journalid->jtalkid->singleton
-my %unloaded_text = (); # journalid->jtalkid->singleton
-my %unloaded_prop = (); # journalid->jtalkid->singleton
+my %unloaded      = (); # journalid:jtalkid->singleton
+my %unloaded_text = (); # journalid:jtalkid->singleton
+my %unloaded_prop = (); # journalid:jtalkid->singleton
 
 sub reset_singletons {
-    %singletons = ();
+    %singletons = %unloaded = %unloaded_text = %unloaded_prop = ();
 }
 
 # <LJFUNC>
@@ -1012,21 +1012,23 @@ sub blockquote {
     return LJ::Talk::Post::blockquote(@_);
 }
 
+sub thread_start {
+    my ($self) = @_;
+
+    return $self unless $self->parenttalkid;
+
+    my $memkey = join( ':', 'talk_thread_start', $self->journalid, $self->jtalkid );
+    my $thread_start_jtalkid = LJ::MemCache::get_or_set( $memkey, sub {
+        return $self->parent->thread_start->jtalkid;
+    } );
+
+    return LJ::Comment->new( $self->journalid, 'jtalkid' => $thread_start_jtalkid );
+}
+
 sub start_thread_url {
-    my $self    = shift;
+    my ($self) = @_;
 
-    my $dtalkid = $self->dtalkid;
-    my $entry   = $self->entry;
-    my $url     = $entry->url;
-
-    # get all comments to post, makes singletons of many LJ::Comment objects
-    my $comments = LJ::Talk::get_talk_data($self->journal, 'L', $entry->jitemid) || {};
-
-    my $start = $self;
-    while ($start->parent) {
-        $start = $start->parent;
-    }
-    return $start->url;
+    return $self->thread_start->url;
 }
 
 # used for comment email notification headers

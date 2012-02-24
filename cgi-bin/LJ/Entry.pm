@@ -35,9 +35,11 @@ use LJ::TimeUtil;
 #    _loaded_comments: loaded comments
 
 my %singletons = (); # journalid->jitemid->singleton
+my %loaded_comments = (); # journalid->jitemid->[comment, comment, ...]
 
 sub reset_singletons {
     %singletons = ();
+    %loaded_comments = ();
 }
 
 # <LJFUNC>
@@ -527,13 +529,13 @@ sub _load_comments
 sub comment_list {
     my $self = shift;
     $self->_load_comments unless $self->{_loaded_comments};
-    return @{$self->{comments} || []};
+    return @{ $loaded_comments{ $self->journalid }->{ $self->jitemid } || [] };
 }
 
 sub set_comment_list {
     my $self = shift;
 
-    $self->{comments} = \@_;
+    $loaded_comments{ $self->journalid }->{ $self->jitemid } = \@_;
     $self->{_loaded_comments} = 1;
 
     return 1;
