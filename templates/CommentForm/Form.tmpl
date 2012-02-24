@@ -62,43 +62,43 @@
                     </TMPL_IF>
 
                     <TMPL_UNLESS talkpost_do>
-                    <TMPL_IF suspended>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
-                    </TMPL_IF>
+                        <TMPL_IF suspended>
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-suspended"><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.suspended')"></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF deleted>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-deleted"><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.deleted')"></p>
-                    </TMPL_IF>
+                        <TMPL_IF deleted>
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-deleted"><TMPL_VAR EXPR="ml('/talkpost_do.bml.error.deleted')"></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF EXPR="remote_banned && !(whocanreply eq 'reg' && !email_active)">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-banned"><TMPL_VAR ml_banned></p>
-                    </TMPL_IF>
+                        <TMPL_IF EXPR="remote_banned && !(whocanreply eq 'reg' && !email_active)">
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-banned"><TMPL_VAR ml_banned></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF EXPR="whocanreply eq 'friends'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><TMPL_VAR ml_notafriend></p>
-                    </TMPL_IF>
+                        <TMPL_IF EXPR="whocanreply eq 'friends'">
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notafriend"><TMPL_VAR ml_notafriend></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous' && usertype ne 'cookieuser'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><TMPL_VAR ml_noopenidpost></p>
-                    </TMPL_IF>
+                        <TMPL_IF EXPR="whocanreply eq 'reg' && !email_active && usertype ne 'anonymous' && usertype ne 'cookieuser'">
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notreg"><TMPL_VAR ml_noopenidpost></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF EXPR="!email_active && usertype eq 'cookieuser'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notmail"><TMPL_VAR expr="ml('/talkpost_do.bml.error.noverify2')"></p>
-                    </TMPL_IF>
+                        <TMPL_IF EXPR="!email_active && usertype eq 'cookieuser'">
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-notmail"><TMPL_VAR expr="ml('/talkpost_do.bml.error.noverify2')"></p>
+                        </TMPL_IF>
 
-                    <TMPL_IF EXPR="whocanreply eq 'reg'">
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
-                    </TMPL_IF>
-                    </TMPL_IF>
+                        <TMPL_IF EXPR="whocanreply eq 'reg'">
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-regonly"><TMPL_VAR expr="ml('/talkpost.bml.opt.noanonpost')"></p>
+                        </TMPL_IF>
+                    </TMPL_UNLESS>
 
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-ajax"></p>
 
                     <TMPL_IF errors>
-                    <div class="b-postform-user-errors">
-                        <TMPL_LOOP errors>
-                        <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><TMPL_VAR error></p>
-                        </TMPL_LOOP>
-                    </div>
+                        <div class="b-postform-user-errors">
+                            <TMPL_LOOP errors>
+                            <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-errors"><TMPL_VAR error></p>
+                            </TMPL_LOOP>
+                        </div>
                     </TMPL_IF>
                 </td>
             </tr>
@@ -139,21 +139,22 @@
                     <div>
                         <TMPL_IF show_userpics>
 
-                        <script type="text/javascript"> 
-                            var userpicmap=<TMPL_VAR userpicmap>; 
-                            var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
-                        </script> 
+                            <script type="text/javascript"> 
+                                var userpicmap=<TMPL_VAR userpicmap>; 
+                                var defaultpicurl="<TMPL_VAR defaultpicurl>"; 
+                            </script> 
                         
-                        <span id="userpics">
-                            <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
-                            <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
-                                <TMPL_LOOP userpics>
-                                    <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
-                                </TMPL_LOOP>
-                            </select>
-                            <TMPL_VAR helpicon_userpics>
-                            &nbsp;&nbsp;
-                        </span>
+                            <span id="userpics">
+                                <label for="prop_picture_keyword"><TMPL_VAR ml_picturetouse></label>
+                                <select name="prop_picture_keyword" id="prop_picture_keyword" tabindex="21">
+                                    <TMPL_LOOP userpics>
+                                        <option value="<TMPL_VAR userpic_keyword>" <TMPL_IF userpic_selected>selected="selected"</TMPL_IF>><TMPL_VAR userpic_title></option>
+                                    </TMPL_LOOP>
+                                </select>
+                                <TMPL_VAR helpicon_userpics>
+                                &nbsp;&nbsp;
+                            </span>
+
                         </TMPL_IF>
                         
                         <input type="checkbox" name="prop_opt_preformatted" id="prop_opt_preformatted" value="1"<TMPL_IF opt_preformatted_selected> checked="checked"</TMPL_IF> tabindex="22" /><label for='prop_opt_preformatted'>&nbsp;<TMPL_VAR expr="ml('/talkpost.bml.opt.noautoformat')">&nbsp;</label><TMPL_VAR helpicon_noautoformat>
