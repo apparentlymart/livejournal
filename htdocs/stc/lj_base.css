@@ -3766,11 +3766,11 @@ A.lj-button-link:active {
 
 
 /* Image & Video Placeholder */
-BODY .b-mediaplaceholder:link,
-BODY .b-mediaplaceholder:visited,
-BODY .b-mediaplaceholder:hover,
-BODY .b-mediaplaceholder:active,
-BODY .b-mediaplaceholder:focus {
+HTML BODY DIV .b-mediaplaceholder:link,
+HTML BODY DIV .b-mediaplaceholder:visited,
+HTML BODY DIV .b-mediaplaceholder:hover,
+HTML BODY DIV .b-mediaplaceholder:active,
+HTML BODY DIV .b-mediaplaceholder:focus {
 	position: relative;
 	top: auto;
 	left: auto;
@@ -3796,14 +3796,14 @@ BODY .b-mediaplaceholder:focus {
 	*display: inline;
 	*zoom: 1;
 	}
-BODY .b-mediaplaceholder:hover,
-BODY .b-mediaplaceholder:active,
-BODY .b-mediaplaceholder:focus,
-BODY .b-mediaplaceholder-processing:link,
-BODY .b-mediaplaceholder-processing:visited,
-BODY .b-mediaplaceholder-processing:hover,
-BODY .b-mediaplaceholder-processing:active,
-BODY .b-mediaplaceholder-processing:focus {
+HTML BODY DIV .b-mediaplaceholder:hover,
+HTML BODY DIV .b-mediaplaceholder:active,
+HTML BODY DIV .b-mediaplaceholder:focus,
+HTML BODY DIV .b-mediaplaceholder-processing:link,
+HTML BODY DIV .b-mediaplaceholder-processing:visited,
+HTML BODY DIV .b-mediaplaceholder-processing:hover,
+HTML BODY DIV .b-mediaplaceholder-processing:active,
+HTML BODY DIV .b-mediaplaceholder-processing:focus {
 	border: 1px solid rgb(220,220,220) !important;
 	border: 1px solid rgba(220,220,220,0.45) !important;
 	background: rgb(0,0,0) !important;
@@ -3818,6 +3818,7 @@ BODY .b-mediaplaceholder-processing:focus {
 		height: auto;
 		margin: 0;
 		padding: 0 0 0 20px;
+		cursor: pointer;
 		*zoom: 1;
 		}
 		.b-mediaplaceholder .b-mediaplaceholder-pic {
@@ -3830,6 +3831,7 @@ BODY .b-mediaplaceholder-processing:focus {
 			padding: 0;
 			background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
 			font: 0/0 serif;
+			cursor: pointer;
 			}
 		.b-mediaplaceholder-photo .b-mediaplaceholder-pic {
 			width: 13px;
@@ -3858,6 +3860,7 @@ BODY .b-mediaplaceholder-processing:focus {
 			height: auto;
 			margin: 0;
 			padding: 0;
+			cursor: pointer;
 			}
 		.b-mediaplaceholder .b-mediaplaceholder-view,
 		.b-mediaplaceholder-processing .b-mediaplaceholder-loading {
@@ -3866,11 +3869,11 @@ BODY .b-mediaplaceholder-processing:focus {
 		.b-mediaplaceholder-processing .b-mediaplaceholder-view {
 			display: none;
 			}
-BODY .b-mediaplaceholder-external:link,
-BODY .b-mediaplaceholder-external:visited,
-BODY .b-mediaplaceholder-external:hover,
-BODY .b-mediaplaceholder-external:active,
-BODY .b-mediaplaceholder-external:focus {
+HTML BODY DIV .b-mediaplaceholder-external:link,
+HTML BODY DIV .b-mediaplaceholder-external:visited,
+HTML BODY DIV .b-mediaplaceholder-external:hover,
+HTML BODY DIV .b-mediaplaceholder-external:active,
+HTML BODY DIV .b-mediaplaceholder-external:focus {
 	position: relative;
 	top: auto;
 	left: auto;
