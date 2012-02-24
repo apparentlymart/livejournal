@@ -59,13 +59,22 @@ preload( [
 	'/icons/sharethis.gif'
 ] );
 
-function supplant(str, o) {
-	return str.replace(/{([^{}]*)}/g,
-		function (a, b) {
-			var r = o[b];
-			return typeof r === 'string' || typeof r === 'number' ? r : a;
-		}
-	);
+function pollForWindowClose(w, service, link) {
+	if (w.closed) {
+
+		/**
+		* Callback will be fired when external sharing popup will be closed
+		*      sharing script will poll for this, so expect some delay.
+		*
+		* @name LJShare#popupClosed
+		* @param {String} service The name of service which window was closed.
+		* @event
+		*/
+		var event = jQuery.Event('popupClosed', { service: service, shareLink: link });
+		LJShare.dispatchMessage(event);
+	} else {
+		setTimeout(pollForWindowClose.bind(null, w, service, link), 200);
+	}
 }
 
 var selectors = {
@@ -143,6 +152,7 @@ var default_options = {
 var global_options = $.extend( true, {}, default_options );
 
 window.LJShare = {};
+LJ.addPubSub(LJShare); //we add messaging system to notify external scripts about popups being closed.
 
 /**
 * Overrides default options for current page.
@@ -188,26 +198,27 @@ window.LJShare.link = function( opts, node ) {
 
 	function buildDom( initHidden ) {
 		initHidden = initHidden || false;
-		var str = [ supplant( template.start, global_options.ml ) ],
+		var str = [ template.start.supplant(global_options.ml) ],
 			serviceName, serviceObj;
 
 		for( var i = 0; i < links.length; ++i ) {
 			serviceName = links[i];
 			serviceObj = global_options.services[ serviceName ];
 
-			str.push( supplant( template.item, {
+			str.push( template.item.supplant({
 				name: serviceName,
 				title: serviceObj.title,
-				url: supplant( serviceObj.bindLink, options )
+				url: serviceObj.bindLink.supplant(options)
 			} ) );
 		}
 
-		str.push( supplant( template.end, global_options.ml ) );
+		str.push(template.end.supplant(global_options.ml));
 
 		bubbleOptions = {
 			target: link,
 			showOn: options.showOn || global_options.showOn
 		};
+
 		if( options.showOn === "hover" ) {
 			bubbleOptions.closeControl = false;
 		}
@@ -243,7 +254,9 @@ window.LJShare.link = function( opts, node ) {
 				ev.preventDefault();
 				width = global_options.services[ service ].width || 640;
 				height = global_options.services[ service ].height || 480;
-				window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+				var w = window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+												//double encoded url?!
+				pollForWindowClose(w, service, decodeURIComponent(decodeURIComponent(options.url)));
 			}
 		} );
 	}
@@ -283,7 +296,7 @@ window.LJShare.entry = function( opts ) {
 
 			if( service in global_options.services ) {
 				link.each( function() {
-					var url = supplant( serviceObj.bindLink, options );
+					var url = serviceObj.bindLink.supplant(options);
 					if ( service.openInTab ) {
 						this.url = url;
 						this.target = "_blank";

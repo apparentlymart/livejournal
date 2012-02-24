@@ -150,8 +150,34 @@ LJ.DelayedCall.prototype.run = function(/* arguments */) {
 LJ.DelayedCall.prototype.stop = function() {
 	clearTimeout(this._timer);
 	this._timer = null;
-}
+};
 
+/**
+ * Add pub/sub functionality for an object.
+ *
+ * @param {Object} obj Target object.
+ */
+LJ.addPubSub = function(obj) {
+	var o = jQuery({});
+
+	obj.addEventListener = function() {
+		o.on.apply(o, arguments);
+	};
+
+	obj.removeEventListener = function() {
+		o.off.apply(o, arguments);
+	};
+
+	obj.dispatchMessage = function() {
+		o.trigger.apply(o, arguments);
+	};
+};
+
+/**
+ * Format number according to locale. E.g. 1000000 becomes 1,000,000.
+ *
+ * @param {number} num Number to format.
+ */
 LJ.commafy = function(num) {
 	num = "" + num;
 	if (/^\d+$/.test(num)) {
