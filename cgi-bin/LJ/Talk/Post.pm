@@ -744,6 +744,11 @@ sub post_comment {
         'jtalkid'   => $jtalkid,
     });
 
+    ## Counter "new_comment" for monitoring
+    LJ::run_hook ("update_counter", {
+        counter => "new_comment",
+    });
+
     return 1;
 }
 
