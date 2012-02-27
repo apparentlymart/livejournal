@@ -4510,8 +4510,8 @@ FRIENDS_EVENT_STICKY<=
   <A HREF="%%cons:siteroot%%/users/%%user%%/" STYLE="text-decoration:none">
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
-<TD><I>%%datetime%%</I></TD>
-<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<TD><I>%%datetime%%</I><BR>
+<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
 <=FRIENDS_EVENT_STICKY
