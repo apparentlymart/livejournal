@@ -280,7 +280,7 @@ sub _send_now {
 
                     ## Optional params
                     # sender_id => "",  ## stored in email headers. for debug.
-                    # timeout   => 300, ## Default timeout for sending email is 300 sec.
+                    timeout   => 120,   ## Default timeout for sending email is 300 sec.
                     });
 
         ## handle result

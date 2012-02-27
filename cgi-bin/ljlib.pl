@@ -2424,6 +2424,8 @@ sub end_request
     LJ::flush_cleanup_handlers();
     LJ::disconnect_dbs() if $LJ::DISCONNECT_DBS;
     LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
+
+    LJ::run_hooks("end_request");
 }
 
 # <LJFUNC>

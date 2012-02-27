@@ -523,6 +523,11 @@ sub addcomment
         props        => { picture_keyword => $pk }
     );
 
+    ## Counter "new_comment" for monitoring
+    LJ::run_hook ("update_counter", {
+        counter => "new_comment",
+    });
+
     # OK
     return {
         status      => "OK",
@@ -2755,6 +2760,11 @@ sub postevent {
       }
 
     my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
+
+    ## Counter "new_post" for monitoring
+    LJ::run_hook ("update_counter", {
+        counter => "new_post",
+    });
 
     # run local site-specific actions
     LJ::run_hooks("postpost", {

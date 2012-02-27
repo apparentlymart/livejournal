@@ -3,6 +3,7 @@ use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::NewWorker", "Exporter";
+use POSIX ();
 require "ljlib.pl";
 
 my $interval        = 10;
@@ -94,6 +95,7 @@ sub run {
         warn $@ if $@;
         last if $opts->{'run_once'};
     }
+    POSIX::_exit();
 }
 
 # Copy-pasted from 'old' Schwartz.
