@@ -658,6 +658,8 @@
 					}
 				} else {
 					if (text = prompt(promptData.title, promptData.text)) {
+						editor.focus();
+
 						var selection = new CKEDITOR.dom.selection(editor.document),
 							ranges = selection.getRanges(),
 							startContainer,
