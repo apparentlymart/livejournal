@@ -2276,10 +2276,12 @@ sub postevent {
     return fail($err,151) if
         LJ::is_banned($posterid, $ownerid);
 
-    # don't allow backdated posts in communities
-     return fail($err,152) if
-            ($req->{'props'}->{"opt_backdated"} &&
-             $uowner->{'journaltype'} ne "P");
+    if (!LJ::is_enabled("delayed_entries")) {
+        # don't allow backdated posts in communities
+        return fail($err,152) if
+                ($req->{'props'}->{"opt_backdated"} &&
+                 $uowner->{'journaltype'} ne "P");
+    }
 
     # do processing of embedded polls (doesn't add to database, just
     # does validity checking)
@@ -3046,10 +3048,12 @@ sub editevent {
     return fail($err, 210)
         if $req->{event} eq $CannotBeShown;
 
-   # don't allow backdated posts in communities 
-    return fail($err,152) if 
-                ($req->{'props'}->{"opt_backdated"} && 
-                 $uowner->{'journaltype'} ne "P"); 
+    if (!LJ::is_enabled("delayed_entries")) {
+        # don't allow backdated posts in communities 
+        return fail($err,152) if 
+                    ($req->{'props'}->{"opt_backdated"} && 
+                     $uowner->{'journaltype'} ne "P"); 
+    }
 
     # make year/mon/day/hour/min optional in an edit event,
     # and just inherit their old values
