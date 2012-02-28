@@ -774,7 +774,7 @@ sub render_htmltools_block {
     };
 
     my $remote = LJ::get_remote();
-    $insert_image .= qq{
+    $insert_image .= ($remote && $remote->can_use_ljphoto) ? qq{
     <li class='image-beta'>
         <a
             href='javascript:void(0);'
@@ -784,7 +784,7 @@ sub render_htmltools_block {
             $BML::ML{'entryform.insert.image2'}
         </a>
     </li>
-    };
+    } : "";
 
     my $insert_media = '';
     unless ($LJ::DISABLED{embed_module}) {
