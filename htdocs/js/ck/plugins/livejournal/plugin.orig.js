@@ -246,11 +246,11 @@
 		'#': 1
 	};
 
-	CKEDITOR.tools.extend(dtd['lj-cut'] = {}, dtd.$block);
-	CKEDITOR.tools.extend(dtd['lj-spoiler'] = {}, dtd.$block);
-
 	dtd.$block.iframe = dtd.$inline.iframe;
 	delete dtd.$inline.iframe;
+
+	CKEDITOR.tools.extend(dtd['lj-cut'] = {}, dtd.$block);
+	CKEDITOR.tools.extend(dtd['lj-spoiler'] = {}, dtd.$block);
 
 	CKEDITOR.tools.extend(dtd.div, dtd.$block);
 	CKEDITOR.tools.extend(dtd.$body, dtd.$block);
