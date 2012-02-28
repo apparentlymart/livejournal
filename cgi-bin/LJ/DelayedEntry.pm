@@ -38,6 +38,7 @@ sub create {
     my $self = bless {}, $class;
 
     $req->{'event'} =~ s/\r\n/\n/g;
+    $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
 
     my $journal = $opts->{journal};
     my $poster  = $opts->{poster};
@@ -125,6 +126,7 @@ sub update {
     __assert( $self->{poster}, "no poster" );
 
     $req->{tz} = $req->{tz} || $self->data->{tz};
+    $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
 
     my $journalid = $self->journal->userid;
     my $posterid  = $self->poster->userid;

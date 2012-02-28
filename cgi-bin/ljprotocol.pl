@@ -375,7 +375,6 @@ sub getpoll
             if ($req->{'asxml'} && $question->{text}) {
                 my $tidy = LJ::Tidy->new();
                 $question->{text} = $tidy->clean( $question->{text} );
-                warn "Tidy: Pool";
             }
 
             @{$res->{answers}{$question->pollqid}} = @answers;
@@ -2396,7 +2395,6 @@ sub postevent {
             }
 
             $req->{ext}->{flags} = $flags;
-            $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
             $req->{usejournal} = $req->{usejournal} || '';
             delete $req->{'custom_time'};
   
@@ -2897,7 +2895,6 @@ sub editevent {
             return fail( $err, 215 ) unless $req->{tz};
 
             $req->{ext}->{flags} = $flags;
-            $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
             $req->{usejournal} = $req->{usejournal}  || '';
 
             my $entry = LJ::DelayedEntry->get_entry_by_id(
