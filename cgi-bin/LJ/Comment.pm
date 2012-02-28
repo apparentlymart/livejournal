@@ -1745,8 +1745,10 @@ sub make_url {
 
         unshift @$params, $modes{$type}. $dtalkid;
     } else {
-        unshift @$params, 'journal='. $opts->{'journal'} || $entry->journal->user;
-        unshift @$params, 'talkid='. $dtalkid;
+        $journal ||= $entry->journal->user;
+
+        unshift @$params, 'journal='. $journal;
+        unshift @$params, 'talkid='.  $dtalkid;
 
         if ( grep { $type eq $_ } qw{ freeze unfreeze screen unscreen unspam } ) {
             unshift @$params, 'mode='. $type;
