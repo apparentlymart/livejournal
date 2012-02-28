@@ -1907,6 +1907,7 @@ sub TagDetail
     my $t = {
         _type => 'TagDetail',
         _id => $kwid,
+        id => $kwid,
         name => LJ::ehtml($tag->{name}),
         url => LJ::journal_base($u) . '/tag/' . LJ::eurl($tag->{name}),
         use_count => $tag->{uses},
