@@ -261,14 +261,19 @@
 
         my $userpic = LJ::S2::Image_userpic($up, 0, $req{'prop_picture_keyword'});
 
+        my $comments_enabled = ($u->{'opt_showtalklinks'} eq "Y" &&
+                                  ! $req{'prop_opt_nocomments'}  ) ? 1 : 0;
+
+        if ($delayed_id) {
+            $comments_enabled = 0;
+        }
+
         my $comments = LJ::S2::CommentInfo({
             'read_url' => "#",
             'post_url' => "#",
             'count' => "0",
             'maxcomments' => 0,
-            'enabled' => ($u->{'opt_showtalklinks'} eq "Y" &&
-                          ! $req{'prop_opt_nocomments'}
-                          ) ? 1 : 0,
+            'enabled' => $comments_enabled,
             'locked' => ($u->{'opt_showtalklinks'} eq "Y" &&
                           ! $req{'prop_opt_nocomments'} &&
                           ! $req{'prop_opt_lockcomments'}
