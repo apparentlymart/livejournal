@@ -56,15 +56,34 @@ CKEDITOR.editorConfig = function(config) {
 			'-',
 			'LJLink',
 			'LJUserLink',
-			'image',
-			'LJImage_beta']
+			'image']
 	];
+
+	if (window.ljphotoEnabled) {
+		config.toolbar_Full[0].push('LJImage_beta');
+	}
 
 	if (top.Site.media_embed_enabled) {
 		config.toolbar_Full[0].push('LJEmbedLink');
 	}
 
-	config.toolbar_Full[0].push('LJPollLink', 'LJCutLink', 'LJCut', 'LJLike', 'LJSpoiler', '-', 'UnorderedList', 'OrderedList', 'NumberedList', 'BulletedList', '-', 'LJJustifyLeft', 'LJJustifyCenter', 'LJJustifyRight', '-', 'Undo', 'Redo');
+	config.toolbar_Full[0].push('LJPollLink',
+		'LJCutLink',
+		'LJCut',
+		'LJLike',
+		'LJSpoiler',
+		'-',
+		'UnorderedList',
+		'OrderedList',
+		'NumberedList',
+		'BulletedList',
+		'-',
+		'LJJustifyLeft',
+		'LJJustifyCenter',
+		'LJJustifyRight',
+		'-',
+		'Undo',
+		'Redo');
 
 	config.enterMode = CKEDITOR.ENTER_BR;
 	config.shiftEnterMode = CKEDITOR.ENTER_P;

@@ -1832,7 +1832,8 @@ sub render_body {
 DISABLE_HTML
 
         }
-        $$js .= "window.ljphotoEnabled = $ljphoto_enabled;";
+        $$js .= "window.ljphotoEnabled = " . ($remote ? $remote->can_use_ljphoto : "0") . ";";
+        $$js .= "window.ljphotoUploadEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
     }

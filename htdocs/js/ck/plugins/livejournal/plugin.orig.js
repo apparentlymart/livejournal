@@ -587,17 +587,19 @@
 				command: 'image'
 			});
 
-			editor.addCommand('LJImage_beta', {
-				exec: function () {
-					InOb.handleInsertImageBeta('upload');
-				},
-				editorFocus: false
-			});
+			if (window.ljphotoEnabled) {
+				editor.addCommand('LJImage_beta', {
+					exec: function () {
+						InOb.handleInsertImageBeta('upload');
+					},
+					editorFocus: false
+				});
 
-			editor.ui.addButton('LJImage_beta', {
-				label: top.CKLang.LJImage_BetaTitle,
-				command: 'LJImage_beta'
-			});
+				editor.ui.addButton('LJImage_beta', {
+					label: top.CKLang.LJImage_BetaTitle,
+					command: 'LJImage_beta'
+				});
+			}
 
 			// LJ Link Button
 			editor.addCommand('LJLink', {

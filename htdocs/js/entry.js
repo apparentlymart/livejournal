@@ -1018,7 +1018,7 @@ InOb.handleInsertImageBeta = (function () {
 		}
 	}
 
-	if (!window.ljphotoEnabled) {
+	if (!window.ljphotoUploadEnabled) {
 		jQuery(function () {
 			ippu = new LJAPP_IPPU(window.fotkiErrorUpgradeTitle);
 			ippu.setCancelledCallback(function () {
@@ -1034,7 +1034,7 @@ InOb.handleInsertImageBeta = (function () {
 	}
 
 	return function (type, data) {
-		if (window.ljphotoEnabled || type == 'add') {
+		if (window.ljphotoUploadEnabled || type == 'add') {
 			var jPhotoUploader = jQuery('#updateForm');
 
 			if (type == 'add' && data) {
