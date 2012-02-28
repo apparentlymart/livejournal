@@ -695,7 +695,7 @@
                 $soc_capital = LJ::commafy(int($position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
-                         LJ::Lang::ml($href_rating, {rating_place => LJ::commafy(++$position->{result}->{position}), 
+                         LJ::Lang::ml($href_rating, {rating_place => LJ::commafy($position->{result}->{position}+1), 
                                                      url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') . 
                                                      "?country=cyr&askname=" . $u->username . "#ask_position"}) .
                          "</li>"; 
@@ -705,7 +705,7 @@
                 $soc_capital = LJ::commafy(int($ua_position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
-                         LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy(++$ua_position->{result}->{position}), 
+                         LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy($ua_position->{result}->{position}+1), 
                                                         url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
                                                         "?country=ua&askname=" . $u->username . "#ask_position"}) .
                          "</li>"; 
