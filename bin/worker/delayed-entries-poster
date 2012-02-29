@@ -23,7 +23,8 @@ sub options {
 
 sub work {
     foreach my $cluster_id (@LJ::CLUSTERS) {
-        my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, __PACKAGE__->verbose);
+        my $cid = LJ::master_role($cluster_id);
+        my $dbr = LJ::get_dbh($cid);
         LJ::DelayedEntry::Scheduler::on_pulse($cluster_id, $dbr, __PACKAGE__->verbose);
     }
 
