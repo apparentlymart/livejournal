@@ -1757,7 +1757,7 @@ sub make_url {
         }
     }
 
-    $url .= join('&amp;', @$params); 
+    $url .= join('&', @$params); 
 
     $url .= '#t'. $dtalkid if $type eq 'thread';
 
