@@ -252,6 +252,9 @@
 	CKEDITOR.tools.extend(dtd['lj-cut'] = {}, dtd.$block);
 	CKEDITOR.tools.extend(dtd['lj-spoiler'] = {}, dtd.$block);
 
+	CKEDITOR.tools.extend(dtd['lj-cut'], dtd.$inline);
+	CKEDITOR.tools.extend(dtd['lj-spoiler'], dtd.$inline);
+
 	CKEDITOR.tools.extend(dtd.div, dtd.$block);
 	CKEDITOR.tools.extend(dtd.$body, dtd.$block);
 
