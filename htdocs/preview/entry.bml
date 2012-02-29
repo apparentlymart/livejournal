@@ -53,6 +53,9 @@
         }
 
         %req = %{$delayed_obj->data};
+        foreach my $k (keys %{$req{'props'}}) {
+            $req{'prop_' . $k } =  $req{'props'}{$k};
+        }
     }
 
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
