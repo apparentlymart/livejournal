@@ -26,12 +26,12 @@
     }
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
-    min-width: 620px;
+    min-width: 750px;
     max-width: 800px;
 }
 * html #updateForm {
-    width: 725px;
-    width: 650px; /* once ad switched back to skyscraper, remove this */
+/*    width: 725px;
+    width: 650px;  */ /* once ad switched back to skyscraper, remove this */
 }
 #updateForm iframe {
     margin: 0px;

@@ -646,3 +646,10 @@ __________________________________________*/
     zoom: 1;
     vertical-align: middle !important;
     }
+    
+/* Update form
+-----------------------------------------------*/
+
+*:first-child+html #updateForm {
+    width: 750px;
+    }
