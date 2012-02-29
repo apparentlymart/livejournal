@@ -2203,6 +2203,10 @@ sub postevent {
 
     my $event = $req->{'event'};
 
+    if ($uowner->is_community) {
+        delete $req->{'props'}->{'opt_backdated'};
+    }
+
     ### allow for posting to journals that aren't yours (if you have permission)
     my $posterid = $u->{'userid'}+0;
 
@@ -2850,6 +2854,10 @@ sub editevent {
     my $posterid = $u->{'userid'};
     my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
+
+    if ($uowner->is_community) {
+        delete $req->{'props'}->{'opt_backdated'};
+    }
 
     my $itemid = $req->{'itemid'}+0;
     
