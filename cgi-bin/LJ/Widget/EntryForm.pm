@@ -1624,19 +1624,24 @@ sub render_ljphoto_block {
     my $ljphoto_enabled = $remote->can_upload_photo();
 
     LJ::Widget::Fotki::Upload->render();
- 
+
+    my $photouploader_params = {
+        'action'          => 'add_new_post',
+        'availableSpace'  => $available_space,
+        'sizesData'       => $photo_sizes_json,
+        'albumsData'      => $album_list_json,
+        'privacyData'     => $user_groups,
+        'type'            => 'upload',
+        'guid'            => $auth_token,
+        'pics_production' => LJ::is_enabled('pics_production'),
+    };
+
+    my $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
+
     $out .= <<JS ;
 <script type="text/javascript">
     window.ljphotoEnabled = $ljphoto_enabled;
-    jQuery('#updateForm').photouploader({
-        action: 'add_new_post',
-        availableSpace: '$available_space',
-        sizesData: $photo_sizes_json,
-        albumsData: $album_list_json,
-        privacyData: $user_groups,
-        type: 'upload',
-        guid: '$auth_token'
-    });
+    jQuery('#updateForm').photouploader($photouploader_params_out);
 </script>
 JS
 
