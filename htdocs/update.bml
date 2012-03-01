@@ -508,7 +508,7 @@ LIKE_FAQ
         $timezone       =  sprintf("%+.4d", $timezone);
 
         my %req = (
-                    'ver'         => 2,
+                    'ver'         => 4,
                     'username'    => $user,
                     'password'    => $POST{'password'},
                     'usejournal'  => ($usejournalu) ? $usejournalu->user : undef,
