@@ -98,6 +98,15 @@
 
     $ret .= "<p class='wintitle' id='wintitle'></p>";
 
+	$ret .= "<div class='b-pics-promo-wrapper'>";
+	$ret .= "<i class='b-pics-promo-box'></i>";
+	$ret .= "<a class='b-pics-promo-link' href='http://lj-pics-beta.livejournal.com/472.html' target='_blank'>";
+	$ret .= "<span class='b-pics-promo-arrow'></span>";
+	$ret .= "<span class='b-pics-promo-content b-pics-promo-content-header'>$ML{'.msg.newalbums'}</span>";
+	$ret .= "<span class='b-pics-promo-content'>$ML{'.msg.newalbums.organise'}</span>";
+	$ret .= "</a>";
+	$ret .= "</div>";
+
     $ret .= "<div id='formcontent'>";
     $ret .= "<div id='img_error' class='errorbar'></div>";
 
