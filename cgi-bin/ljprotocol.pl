@@ -2391,8 +2391,8 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
-        if ( LJ::DelayedEntry::is_future_date($req) && $req->{'custom_time'} ) {
+    if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
+        if ( $req->{'custom_time'} && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
@@ -2896,7 +2896,7 @@ sub editevent {
     # never gets set in the "flat" protocol path
     return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
     
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") && $req->{delayedid} ) {
+    if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") && $req->{delayedid} ) {
         my $delayedid = delete $req->{delayedid};
         my $res = {};
 
@@ -3428,7 +3428,7 @@ sub getevents {
 
     $skip = 500 if $skip > 500;
 
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
+    if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         my $res = {};
 
         if ( $req->{delayedid} ) {
@@ -4547,7 +4547,7 @@ sub syncitems {
 
     my $external_ids = $req->{'use_external_ids'};
 
-    if ( $req->{ver} > 1 && LJ::is_enabled("delayed_entries") ) {
+    if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         if ( $type eq 'posted' ) {
             $table   = '';
             $idfield = 'jitemid';
