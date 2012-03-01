@@ -391,12 +391,13 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 
 			// wishlist
-			if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
-				linkGroup.push({
-					url: data.wishlist_url,
-					text: data.ml_view_wishlist
-				});
-			}
+			// commented according to task LJSUP-11396
+			// if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
+			// 	linkGroup.push({
+			// 		url: data.wishlist_url,
+			// 		text: data.ml_view_wishlist
+			// 	});
+			// }
 
 			// buy the same userhead
 			if (data.is_logged_in && data.is_person && ! data.is_requester && data.is_custom_userhead) {
