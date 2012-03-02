@@ -216,8 +216,17 @@
             $sec = BML::fill_template("securityprotected");
         }
 
+        my $type = '';
+        if ($req{'sticky'}) {
+            $type = BML::fill_template('TYPESTICKY') . " ";
+        }
+
+        if ($delayed_id) {
+            $type .= BML::fill_template('TYPEDELAYED');
+        }
+        
         $sec .= "<br />\n" unless $sec eq "" or $req{'subject'};
-        $ret .= $sec;
+        $ret .= $type . $sec;
 
         # prevent BML tags interpretation inside post body
         $subject =~ s/<\?/&lt;?/g;
