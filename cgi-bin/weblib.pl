@@ -2037,11 +2037,13 @@ sub placeholder_link {
     $height -= 2;
 
     return qq {
-            <a class="b-mediaplaceholder b-mediaplaceholder-video" href="$link"} . ( $width && $height ? 'style="width:${width}px;height:${height}px;"' : '' ) . qq{ onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
-                <span class="b-mediaplaceholder-inner">
-                    <i class="b-mediaplaceholder-pic"></i>
-                    <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . LJ::Lang::ml("mediaplaceholder.viewvideo") . qq{</span>
-                    <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . LJ::Lang::ml("mediaplaceholder.loading") . qq{</span>
+            <a class="b-mediaplaceholder b-mediaplaceholder-video" href="$link"} . ( $width && $height ? 'style="width:' . $width . 'px;height:' . $height . 'px;"' : '' ) . qq{ onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
+                <span class="b-mediaplaceholder-outer">
+                    <span class="b-mediaplaceholder-inner">
+                        <i class="b-mediaplaceholder-pic"></i>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . LJ::Lang::ml("mediaplaceholder.viewvideo") . qq{</span>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . LJ::Lang::ml("mediaplaceholder.loading") . qq{</span>
+                    </span>
                 </span>
             </a>
         };

@@ -1168,10 +1168,12 @@ sub clean
                     if ($img_bad) {
                         $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" ~ . ( $hash->{'width'} && $hash->{'height'} ? qq~style="width:$hash->{'width'}px;height:$hash->{'height'}px;" ~ : '' ) . qq~data-href="$href_b_link" href="~ .
                             LJ::ehtml($hash->{'src'}) . '" onclick="return LiveJournal.placeholderClick(this, \'image\')">' .
+                            '<span class="b-mediaplaceholder-outer">' .
                             '<span class="b-mediaplaceholder-inner">' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
                             '<span class="b-mediaplaceholder-label b-mediaplaceholder-view">' . LJ::Lang::ml("mediaplaceholder.viewimage") . '</span>'.
                             '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . LJ::Lang::ml("mediaplaceholder.loading") . '</span>'.
+                            '</span>' .
                             '</span>' .
                             '</a>';
                         $newdata .= $href_b_link ?
