@@ -2410,7 +2410,7 @@ sub postevent {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
-            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) ) {
+            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) || $need_moderated) {
                 return fail($err, 322);
             }
 
