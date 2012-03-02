@@ -372,6 +372,48 @@ body<=
             LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
         }
 
+        # get all the maintainers who were removed
+        my $changedmaintainers = LJ::load_userids(keys %{$delete{admin}}, keys %{$add{admin}});
+
+        foreach my $uid (keys %{$delete{admin} || {}}) {
+            # log maintainer deletions
+            $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
+
+            my $delmaintu = $changedmaintainers->{$uid};
+            next unless $delmaintu;
+
+            # send email to the poor maintainer who got removed
+            my $mailusername = $delmaintu->{user};
+            my $mailusercname = $c->{name};
+            my $mailclink = LJ::journal_base($c, ['community']);
+
+            my $lang = $delmaintu->prop('browselang') || $LJ::DEFAULT_LANG;
+            my $html = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_html', undef, {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => "href='$mailclink'",
+                            remote          => $remote->{user},
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
+    
+            my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_plain', undef, {
+                            sitenameshort   => $LJ::SITENAMESHORT,
+                            user            => $mailusername,
+                            usercname       => $mailusercname,
+                            mailclink       => $mailclink,
+                            remote          => $remote->{user},
+                            sitename        => $LJ::SITENAME,
+                            siteroot        => $LJ::SITEROOT,
+                        });
+
+            my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_subject', undef,
+                            { mailusercname => $mailusercname }
+                            );
+            $sendmail->($delmaintu, $html, $plain, $subject);
+        }
+
         # get all the users who were removed
         my $changedusers = LJ::load_userids(keys %{$delete{'post'}});
         # delete members
@@ -415,48 +457,6 @@ body<=
 
                 $sendmail->($delu, $html, $plain, $subject); 
             } 
-        }
-
-        # get all the maintainers who were removed
-        my $changedmaintainers = LJ::load_userids(keys %{$delete{admin}}, keys %{$add{admin}});
-
-        foreach my $uid (keys %{$delete{admin} || {}}) {
-            # log maintainer deletions
-            $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
-
-            my $delmaintu = $changedmaintainers->{$uid};
-            next unless $delmaintu;
-
-            # send email to the poor maintainer who got removed
-            my $mailusername = $delmaintu->{user};
-            my $mailusercname = $c->{name};
-            my $mailclink = LJ::journal_base($c, ['community']);
-
-            my $lang = $delmaintu->prop('browselang') || $LJ::DEFAULT_LANG;
-            my $html = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_html', undef, {
-                            sitenameshort   => $LJ::SITENAMESHORT,
-                            user            => $mailusername,
-                            usercname       => $mailusercname,
-                            mailclink       => "href='$mailclink'",
-                            remote          => $remote->{user},
-                            sitename        => $LJ::SITENAME,
-                            siteroot        => $LJ::SITEROOT,
-                        });
-    
-            my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_plain', undef, {
-                            sitenameshort   => $LJ::SITENAMESHORT,
-                            user            => $mailusername,
-                            usercname       => $mailusercname,
-                            mailclink       => $mailclink,
-                            remote          => $remote->{user},
-                            sitename        => $LJ::SITENAME,
-                            siteroot        => $LJ::SITEROOT,
-                        });
-
-            my $subject = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_subject', undef,
-                            { mailusercname => $mailusercname }
-                            );
-            $sendmail->($delmaintu, $html, $plain, $subject);
         }
 
         # delete other rel edges
