@@ -2340,6 +2340,7 @@ sub postevent {
     my $res_done = 0;  # set true by getlock when post was duplicate, or error getting lock
 
     my $getlock = sub {
+        my $delayed = @_;
         my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 2)", undef, $lock_key);
         unless ($r) {
             $res = undef;    # a failure case has an undef result
@@ -2350,12 +2351,24 @@ sub postevent {
         my @parts = split(/:/, $u->{'dupsig_post'});
         if ($parts[0] eq $dupsig) {
             # duplicate!  let's make the client think this was just the
-            # normal first response.
-            $res->{'itemid'} = $parts[1];
-            $res->{'anum'} = $parts[2];
+            # normal firsit response.
 
-            my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
-            $res->{'url'} = $dup_entry->url;
+            if ($delayed) {
+                my $delayedid = $parts[1];
+                my $entry = LJ::DelayedEntry->get_entry_by_id($uowner, $delayedid);
+                if (!$entry) {
+                    return;
+                }
+
+                $res->{'delayedid'} = $delayedid;
+                $res->{'type'}      = 'delayed';
+            } else {
+                $res->{'itemid'} = $parts[1];
+                $res->{'anum'} = $parts[2];            
+
+                my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
+                $res->{'url'} = $dup_entry->url;
+            }
 
             $res_done = 1;
             $release->();
@@ -2391,6 +2404,7 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
+    
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         if ( $req->{'custom_time'} && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
@@ -2403,13 +2417,21 @@ sub postevent {
             $req->{ext}->{flags} = $flags;
             $req->{usejournal} = $req->{usejournal} || '';
             delete $req->{'custom_time'};
+
+            $getlock->('delayed');
+            return $res if $res_done;  
   
             my $entry = LJ::DelayedEntry->create( $req, { journal => $uowner,
                                                           poster  => $u,} );
-            return fail($err, 507) unless $entry;
+            if (!$entry) {
+                return fail($err, 507);
+            }
+
             $res->{delayedid} = $entry->delayedid;
             $res->{type}      = 'delayed';
 
+            $u->set_prop( {"dupsig_post" => "$dupsig:" . $entry->delayedid . ":0"} );
+            $release->();
             return $res;
         }
         else {
