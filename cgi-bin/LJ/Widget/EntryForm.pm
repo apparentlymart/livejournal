@@ -1602,9 +1602,7 @@ sub render_ljphoto_block {
         'is_default' => ( $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
     } } @LJ::Pics::Photo::DISPLAYED_SIZES;
 
-    my $photo_sizes_json = LJ::JSON->to_json ( \@photo_sizes );
     my $album_list = [];
-    my $album_list_json = '';
     my $available_space = '';
     $album_list = [ LJ::Pics::Album->list( 'userid' => $remote->userid ) ];
     $album_list = [
@@ -1616,14 +1614,12 @@ sub render_ljphoto_block {
             }
         } @$album_list
     ];
-    $album_list_json = LJ::JSON->to_json ( $album_list );
     my $available_space = LJ::Widget::Fotki::UserSpace->display_space(
         LJ::Pics->get_free_space($remote) );
 
     my $auth_token =
         LJ::Auth->sessionless_auth_token( '/' . $remote->username );
 
-    my $user_groups = LJ::JSON->to_json (LJ::Widget::Fotki::Photo->get_user_groups ($remote));
     my $ljphoto_enabled = $remote->can_upload_photo();
 
     LJ::Widget::Fotki::Upload->render();
@@ -1631,9 +1627,9 @@ sub render_ljphoto_block {
     my $photouploader_params = {
         'action'          => 'add_new_post',
         'availableSpace'  => $available_space,
-        'sizesData'       => $photo_sizes_json,
-        'albumsData'      => $album_list_json,
-        'privacyData'     => $user_groups,
+        'sizesData'       => \@photo_sizes,
+        'albumsData'      => $album_list,
+        'privacyData'     => LJ::Widget::Fotki::Photo->get_user_groups($remote),
         'type'            => 'upload',
         'guid'            => $auth_token,
         'pics_production' => LJ::is_enabled('pics_production'),
