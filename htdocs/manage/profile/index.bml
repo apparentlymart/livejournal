@@ -70,7 +70,7 @@ body<=
           country state city zip timezone
           icq aolim yahoo msn url jabber
           google_talk skype gizmo
-          urlname gender last_fm_user opt_hidefriendofs
+          urlname gender opt_hidefriendofs
           sidx_bdate sidx_bday sidx_loc
           opt_showmutualfriends opt_showschools
           opt_showbday opt_showlocation
@@ -490,12 +490,6 @@ body<=
             $ret .= "</td></tr>\n";
         }
 
-        # last_fm_user
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.last_fm'}</td><td>";
-        $ret .= LJ::html_text({ 'name' => 'last_fm_user', 'value' => $u->{'last_fm_user'}, 'size' => '20', 'maxlength' => '255' });
-        $ret .= "<div class='helper'>$ML{'.fn.last_fm.desc'}</div></td></tr>";
-        $ret .= "</td></tr>\n";
-
         } # end is_person check
 
         $ret .= "</table>\n";
@@ -906,7 +900,7 @@ body<=
               opt_whatemailshow comm_theme
               icq aolim yahoo msn url jabber
               google_talk skype
-              urlname gender last_fm_user opt_hidefriendofs
+              urlname gender opt_hidefriendofs
               sidx_bdate sidx_bday
               opt_showmutualfriends opt_showschools
               opt_showbday opt_showlocation opt_showljtalk

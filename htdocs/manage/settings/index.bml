@@ -153,6 +153,7 @@ body<=
                 LJ::Setting::WebmasterTools::Yandex
                 LJ::Setting::GiveFeatures
                 LJ::Setting::LJTimes
+                LJ::Setting::Music
             )],
         },
     );

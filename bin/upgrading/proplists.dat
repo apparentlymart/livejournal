@@ -1792,3 +1792,9 @@ userproplist.opt_modrejectemail:
   des: 0: default, do not send emails about rejection from moderation, 1: send them
   indexed: 0
   prettyname: Send emails about rejection from moderation
+
+userproplist.trava_uid:
+  datatype: char
+  des: user id in trava.ru
+  prettyname: user id in trava.ru
+  indexed: 0
