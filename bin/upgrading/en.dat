@@ -5786,6 +5786,86 @@ talk.placeholder.userpass=Password
 
 talk.postcomment=Add a comment
 
+
+talk.post.adult=Adult content
+
+talk.post.adult.concepts=concepts
+
+talk.post.adult.explicit=explicit
+
+talk.post.adult.none=none
+
+talk.post.change=change
+
+talk.post.comments=Comments
+
+talk.post.comments.nocomments=disabled
+
+talk.post.comments.noemail=no email
+
+talk.post.create.title=New entry
+
+talk.post.journal.default=default
+
+talk.post.find=find
+
+talk.post.identify=identify
+
+talk.post.infobox.all=All variants to post
+
+talk.post.location=Location
+
+talk.post.meta.tojournal=journal
+
+talk.post.meta.username=Username
+
+talk.post.meta.password=Password
+
+talk.post.meta.where=Post to
+
+talk.post.meta.when=Date
+
+talk.post.mood=Mood
+
+talk.post.music=Music
+
+talk.post.repost.facebook=Facebook
+
+talk.post.repost.settings=setup
+
+talk.post.repost.to=Repost to
+
+talk.post.repost.twitter=Twitter
+
+talk.post.screen=Screening
+
+talk.post.screen.all=all
+
+talk.post.screen.anon=anonymous
+
+talk.post.screen.friends=non friends
+
+talk.post.screen.none=none
+
+talk.post.select=select
+
+talk.post.security=Security
+
+talk.post.security.custom=custom
+
+talk.post.security.friends=friends
+
+talk.post.security.private=private
+
+talk.post.security.public=public
+
+talk.post.subject=Subject
+
+talk.post.tags=Tags
+
+
+
+
 talk.prev=Previous
 
 talk.prevshortcut=← Ctrl
