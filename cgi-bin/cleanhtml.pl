@@ -378,7 +378,7 @@ sub clean
 
                     # In $expanded we must has valid unicode string.
                     my $expanded = ($name =~ /^\w+$/) ?
-                        Encode::decode_utf8(LJ::run_hook("expand_template_$name", $capture)) : "";
+                        Encode::decode_utf8(LJ::run_hook("expand_template_$name", $capture, remove_video_sizes => $opts->{remove_video_sizes})) : "";
                     $newdata .= $expanded || "<b>[Error: unknown template '" . LJ::ehtml($name) . "']</b>";
                 };
 
@@ -486,13 +486,13 @@ sub clean
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
                         $newdata .= LJ::run_hook("transform_embed", [$token],
-                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}) || "";
+                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}, remove_video_sizes => $opts->{remove_video_sizes}) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
                         my $expanded = LJ::run_hook("transform_embed", \@capture,
-                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders});
+                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}, remove_video_sizes => $opts->{remove_video_sizes});
                         $newdata .= $expanded || "";
                     });
                     next TOKEN;
@@ -1122,21 +1122,14 @@ sub clean
                     if ($opts->{'remove_img_sizes'}) {
                         delete $hash->{'height'};
                         delete $hash->{'width'};
-                    } else {
-                        if (defined $opts->{'maximgwidth'} &&
-                            (! defined $hash->{'width'} ||
-                             $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
-
-                        if (defined $opts->{'maximgheight'} &&
-                            (! defined $hash->{'height'} ||
-                             $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
                     }
 
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
-                    if ($opts->{'img_placeholders'}) {
-                        $img_bad = 1;
-                    }
+                    # don't use placeholders for small images
+                    if ($opts->{'img_placeholders'}) { $img_bad = 1; }
+                    if ( $opts->{'img_placeholders'} && defined $hash->{'width'} && $hash->{'width'} <= 140 ) { $img_bad = 0; }
+                    if ( $opts->{'img_placeholders'} && defined $hash->{'height'} && $hash->{'height'} <= 37 ) { $img_bad = 0; }
 
                     ## Option 'allowed_img_attrs' provides a list of allowed attributes
                     if (my $allowed = $opts->{'allowed_img_attrs'}){
@@ -2076,6 +2069,8 @@ sub clean_comment
         'posterid'           => $opts->{'posterid'},
         'img_placeholders'   => $opts->{'img_placeholders'},
         'video_placeholders' => $opts->{'video_placeholders'},
+        'remove_img_sizes'   => $opts->{'remove_img_sizes'},
+        'remove_video_sizes' => $opts->{'remove_video_sizes'},
     });
 }
 

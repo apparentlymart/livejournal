@@ -2036,6 +2036,9 @@ sub placeholder_link {
     $width -= 2;
     $height -= 2;
 
+    $width  = undef if $opts{remove_video_sizes};
+    $height = undef if $opts{remove_video_sizes};
+
     return qq {
             <a class="b-mediaplaceholder b-mediaplaceholder-video" href="$link"} . ( $width && $height ? 'style="width:' . $width . 'px;height:' . $height . 'px;"' : '' ) . qq{ onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
                 <span class="b-mediaplaceholder-outer">

@@ -484,11 +484,12 @@ sub module_iframe_tag {
 
     # placeholder
     return LJ::placeholder_link(
-        placeholder_html => $iframe_tag,
-        width            => $width,
-        height           => $height,
-        img              => "$LJ::IMGPREFIX/videoplaceholder.png?v=8209",
-        link             => $iframe_link,
+        placeholder_html   => $iframe_tag,
+        width              => $width,
+        height             => $height,
+        img                => "$LJ::IMGPREFIX/videoplaceholder.png?v=8209",
+        link               => $iframe_link,
+        remove_video_sizes => $opts{remove_video_sizes},
     );
 }
 
