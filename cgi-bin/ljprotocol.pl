@@ -2397,20 +2397,13 @@ sub postevent {
                 (LJ::MemCache::add($key_future, 0),  LJ::MemCache::incr($key_future, 1));
         }
     }
-
-    my $need_moderated = ( $uowner->{'moderated'} =~ /^[1A]$/ ) ? 1 : 0;
-    if ( $uowner->{'moderated'} eq 'F' ) {
-        ## Scan post for spam
-        LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
-    }
-
     
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         if ( $req->{'custom_time'} && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
 
             # if posting to a moderated community, store and bail out here
-            if ( !LJ::DelayedEntry::can_post_to($uowner, $u) || $need_moderated) {
+            if ( !LJ::DelayedEntry::can_post_to($uowner, $u, $req)) {
                 return fail($err, 322);
             }
 
@@ -2438,6 +2431,13 @@ sub postevent {
             $res->{type} = 'posted';
         }
     }
+
+    my $need_moderated = ( $uowner->{'moderated'} =~ /^[1A]$/ ) ? 1 : 0;
+    if ( $uowner->{'moderated'} eq 'F' ) {
+        ## Scan post for spam
+        LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
+    }
+
 
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
@@ -3453,92 +3453,129 @@ sub getevents {
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         my $res = {};
 
-        if ( $req->{delayedid} ) {
+        if ( $req->{delayed} ) {
             return fail( $err, 220 ) if $req->{view} && $req->{view} ne 'stored';
 
             if ( $req->{selecttype} eq 'lastn' ) {
-                my $ids = LJ::DelayedEntry::get_entries_by_journal(
-                    $uowner,
-                    $req->{skip} || 0,
-                    $req->{howmany} || $req->{itemshow} || 20,
-                    $flags->{user}->id,
-                );
+                my $uid     = $u->userid;
+                my $howmany = $req->{'howmany'} || 20;
+                if ($howmany > 50) { $howmany = 50; }
+
+                my $ids = LJ::DelayedEntry->get_entries_by_journal(
+                                            $uowner,
+                                            { 'skip'    => $req->{skip} || 0,
+                                              'show'    => $howmany,
+                                              'userid'  => $uid, });
 
                 for my $did ( @$ids ) {
-                    my $entry = LJ::DelayedEntry::get_entry_by_id(
+                    my $entry = LJ::DelayedEntry->get_entry_by_id(
                         $uowner,
                         $did,
-                        { userid => $flags->{user}->id },
+                        { 'userid' => $uid, },
                     );
+
+                    if (!$entry) {
+                        next;
+                    }
 
                     my $re = {};
 
-                    $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
+                    $re->{$_} = $entry->$_ for qw(delayedid subject event logtime);
+                    my $props = $entry->props;
+                    foreach my $key (keys %$props) {
+                        if (!$props->{$key}) {
+                            delete $props->{$key};
+                        }
+                    }
 
-                    $re->{eventtime}       = $entry->{posttime};
-                    $re->{event_timestamp} = $entry->{posttime_unixtime};
+                    $re->{props}           = $props;
+                    $re->{eventtime}       = $entry->posttime;
+                    $re->{event_timestamp} = $entry->system_posttime;
                     $re->{url}             = $entry->url;
-                    $re->{security}        = $entry->data->{security};
-                    $re->{allowmask}       = $entry->data->{allowmask};
+                    $re->{security}        = $entry->security;
+                    $re->{allowmask}       = $entry->allowmask;
                     $re->{posterid}        = $entry->poster->userid;
-                    $re->{poster}          = $entry->poster->{user};
+                    $re->{poster}          = $entry->poster->username;
 
                     push @{$res->{events}}, $re;
                 }
             }
             elsif ( $req->{selecttype} eq 'one' ) {
-                my $entry = LJ::DelayedEntry::get_entry_by_id(
+                return fail( $err, 218) unless $req->{delayedid};
+                my $uid = $u->userid;
+
+                my $entry = LJ::DelayedEntry->get_entry_by_id(
                     $uowner,
                     $req->{delayedid},
-                    { userid => $flags->{user}->id },
+                    { 'userid' => $uid, },
                 );
 
                 my $re = {};
 
-                $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
+                if (!$entry)  {
+                    next;
+                }
 
-                $re->{eventtime}       = $entry->{posttime};
-                $re->{event_timestamp} = $entry->{posttime_unixtime};
+                $re->{$_} = $entry->$_ for qw(delayedid subject event logtime);
+                my $props = $entry->props;
+                foreach my $key (keys %$props) {
+                    if (!$props->{$key}) {
+                        delete $props->{$key};
+                    }
+                }
+
+                $re->{props}           = $props;
+                $re->{eventtime}       = $entry->posttime;
+                $re->{event_timestamp} = $entry->system_posttime;
                 $re->{url}             = $entry->url;
-                $re->{security}        = $entry->data->{security};
-                $re->{allowmask}       = $entry->data->{allowmask};
+                $re->{security}        = $entry->security;
+                $re->{allowmask}       = $entry->allowmask;
                 $re->{posterid}        = $entry->poster->userid;
-                $re->{poster}          = $entry->poster->{user};
+                $re->{poster}          = $entry->poster->username;
 
                 push @{$res->{events}}, $re;
-            }
-            else {
-                return fail( $err, 218 );
-            }
-        }
-        elsif ( $req->{delayedids} ) {
-            if ( $req->{selecttype} eq 'multiple' ) {
-                for my $did ( @$req->{delayedids} ) {
-                    my $entry = LJ::DelayedEntry::get_entry_by_id(
+            } elsif ( $req->{selecttype} eq 'multiple' ) {
+                return fail( $err, 218) unless $req->{delayedids};
+                my $uid = $u->userid;
+
+
+                for my $did ( @{$req->{delayedids} }) {
+                    my $entry = LJ::DelayedEntry->get_entry_by_id(
                         $uowner,
                         $did,
-                        { userid => $flags->{user}->id },
+                        { 'userid' => $uid, },
                     );
+
+                    if (!$entry)  {
+                        next;
+                    }
 
                     my $re = {};
 
-                    $re->{$_} = $entry->{$_} for qw(delayedid subject event props logtime);
-
-                    $re->{eventtime}       = $entry->{posttime};
-                    $re->{event_timestamp} = $entry->{posttime_unixtime};
+                    $re->{$_} = $entry->$_ for qw(delayedid subject event logtime);
+                    my $props = $entry->props;
+                    foreach my $key (keys %$props) {
+                        if (!$props->{$key}) {
+                            delete $props->{$key};
+                        }
+                    }
+    
+                    $re->{props}           = $props;
+                    $re->{eventtime}       = $entry->posttime;
+                    $re->{event_timestamp} = $entry->system_posttime;
                     $re->{url}             = $entry->url;
-                    $re->{security}        = $entry->data->{security};
-                    $re->{allowmask}       = $entry->data->{allowmask};
+                    $re->{security}        = $entry->security;
+                    $re->{allowmask}       = $entry->allowmask;
                     $re->{posterid}        = $entry->poster->userid;
-                    $re->{poster}          = $entry->poster->{user};
-
+                    $re->{poster}          = $entry->poster->username;
                     push @{$res->{events}}, $re;
                 }
-            }
+             }
             else {
                 return fail( $err, 218 );
             }
         }
+        return $res;
     }
 
     # build the query to get log rows.  each selecttype branch is
