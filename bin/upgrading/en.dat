@@ -1416,6 +1416,8 @@ entryform.music=Music:
 entryform.music.detect|staleness=1
 entryform.music.detect=Detect
 
+entryform.music.search=Search
+
 entryform.nojstime.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
 
 entryform.opt.defpic=(default)
