@@ -592,7 +592,7 @@ sub update_tags {
 sub get_log2_row {
     my ($self, $opts) = @_;
 
-    my $db = LJ::get_cluster_def_reader($self->journal);
+    my $db = LJ::get_cluster_master($self->journal);
     return undef unless $db;
 
     my $sql = "SELECT posterid, posttime, logtime, security, allowmask " .
@@ -658,7 +658,7 @@ sub get_entry_by_id {
         $sql_poster = 'AND posterid = ' . $user->userid . " ";
     }
 
-    my $dbcr = LJ::get_cluster_def_reader($journal)
+    my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
     my $opts = $dbcr->selectrow_arrayref( "SELECT journalid, delayedid, posterid, posttime, logtime " .
@@ -749,7 +749,7 @@ sub entries_exists {
     __assert($journal, "no journal");
     my $journalid = $journal->userid;
     my $userid = $user->userid ;
-    my $dbcr = LJ::get_cluster_def_reader($journal)
+    my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
     my ($delayeds) =  $dbcr->selectcol_arrayref("SELECT delayedid " .
@@ -764,7 +764,7 @@ sub get_usersids_with_delated_entry {
     __assert($journalu);
 
     my $journalid = $journalu->userid;
-    my $dbcr = LJ::get_cluster_def_reader($journalu)
+    my $dbcr = LJ::get_cluster_master($journalu)
         or die "get cluster for journal failed";
 
     return $dbcr->selectcol_arrayref(  "SELECT posterid " .
@@ -776,7 +776,7 @@ sub get_entries_count {
     my ( $class, $journal, $skip, $elements_to_show, $userid ) = @_;
     __assert($journal, "no journal");
     my $journalid = $journal->userid;
-    my $dbcr = LJ::get_cluster_def_reader($journal)
+    my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
     unless ($userid) {
@@ -813,8 +813,10 @@ sub get_entries_by_journal {
     # can view entry (with content)
     my $viewsome = $opts->{'viewsome'} || 0;
 
-    my $dbcr = LJ::get_cluster_def_reader($journal)
-        or die "get cluster for journal failed";
+    my $dbcr = LJ::get_cluster_master($journal);
+    if (!$dbcr) {
+        die "get cluster for journal failed";
+    }
 
     my $u;
 
@@ -851,7 +853,7 @@ sub get_first_entry {
     my ( $journal, $userid ) = @_;
     __assert($journal, "no journal");
 
-    my $dbcr = LJ::get_cluster_def_reader($journal)
+    my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
     my $u;
@@ -878,7 +880,7 @@ sub get_last_entry {
     my ( $journal, $userid ) = @_;
     __assert($journal, "no journal");
 
-    my $dbcr = LJ::get_cluster_def_reader($journal)
+    my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
     my $u;
@@ -973,7 +975,7 @@ sub can_delete_delayed_item {
 }
 
 sub can_post_to {
-    my ($uowner, $poster) = @_;
+    my ($uowner, $poster, $req) = @_;
 
     my $uownerid = $uowner->userid;
     my $posterid = $poster->userid;
@@ -981,6 +983,11 @@ sub can_post_to {
     my $can_manage = $poster->can_manage($uowner) || 0;
     my $moderated = $uowner->prop('moderated') || '';
     my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
+    if ( $req && $uowner->{'moderated'} eq 'F' ) {
+        ## Scan post for spam
+        LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
+    }
+
     my $can_post = ($uowner->is_community() && !$need_moderated) || $can_manage;
 
     if ($can_post) {
