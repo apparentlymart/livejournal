@@ -3783,12 +3783,9 @@ HTML BODY DIV .b-mediaplaceholder:focus {
 	vertical-align: top !important;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	border: 1px solid rgb(220,220,220) !important;
-	border: 1px solid rgba(220,220,220,0.35) !important;
-	background: rgb(0,0,0) !important;
-	background: rgba(0,0,0,0.35) !important;
+	border: 1px solid #E0E0E0 !important;
 	font: 12px/14px Arial,sans-serif;
-	text-align: center;
+	text-align: center !important;
 	text-decoration: none !important;
 	text-shadow: none;
 	color: #FFF !important;
@@ -3796,29 +3793,15 @@ HTML BODY DIV .b-mediaplaceholder:focus {
 	*display: inline;
 	*zoom: 1;
 	}
-HTML BODY DIV .b-mediaplaceholder:hover,
-HTML BODY DIV .b-mediaplaceholder:active,
-HTML BODY DIV .b-mediaplaceholder:focus,
-HTML BODY DIV .b-mediaplaceholder-processing:link,
-HTML BODY DIV .b-mediaplaceholder-processing:visited,
-HTML BODY DIV .b-mediaplaceholder-processing:hover,
-HTML BODY DIV .b-mediaplaceholder-processing:active,
-HTML BODY DIV .b-mediaplaceholder-processing:focus {
-	border: 1px solid rgb(220,220,220) !important;
-	border: 1px solid rgba(220,220,220,0.45) !important;
-	background: rgb(0,0,0) !important;
-	background: rgba(0,0,0,0.45) !important;
-	}
 	.b-mediaplaceholder .b-mediaplaceholder-outer {
 		position: absolute;
 		top: 50%;
 		left: 0;
 		display: block;
 		width: 100%;
-		height: 35px;
-		margin: -17px 0 0;
+		height: 37px;
+		margin: -19px 0 0;
 		padding: 0;
-		line-height: 35px;
 		cursor: pointer;
 		}
 	.b-mediaplaceholder .b-mediaplaceholder-inner {
@@ -3826,18 +3809,39 @@ HTML BODY DIV .b-mediaplaceholder-processing:focus {
 		top: auto;
 		left: auto;
 		display: inline-block;
-		width: auto;
-		height: auto;
+		min-width: 80px;
+		height: 35px;
 		margin: 0;
-		padding: 0 0 0 20px;
+		padding: 0 20px 0 40px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 1px solid rgb(220,220,220) !important;
+		border: 1px solid rgba(220,220,220,0.35) !important;
+		background: rgb(0,0,0) !important;
+		background: rgba(0,0,0,0.35) !important;
+		line-height: 35px;
+		text-align: left !important;
 		cursor: pointer;
 		*zoom: 1;
+		}
+	HTML BODY DIV .b-mediaplaceholder:hover .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder:active .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder:focus .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder-processing:link .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder-processing:visited .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder-processing:hover .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder-processing:active .b-mediaplaceholder-inner,
+	HTML BODY DIV .b-mediaplaceholder-processing:focus .b-mediaplaceholder-inner {
+		border: 1px solid rgb(220,220,220) !important;
+		border: 1px solid rgba(220,220,220,0.45) !important;
+		background: rgb(0,0,0) !important;
+		background: rgba(0,0,0,0.45) !important;
 		}
 		.b-mediaplaceholder .b-mediaplaceholder-pic {
 			overflow: hidden;
 			position: absolute;
 			top: 50%;
-			left: 0;
+			left: 20px;
 			display: block;
 			margin: 0;
 			padding: 0;
@@ -3904,6 +3908,13 @@ HTML BODY DIV .b-mediaplaceholder-external:focus {
 	cursor: pointer;
 	*display: inline;
 	*zoom: 1;
+	}
+HTML#js BODY DIV .b-mediaplaceholder-external:link,
+HTML#js BODY DIV .b-mediaplaceholder-external:visited,
+HTML#js BODY DIV .b-mediaplaceholder-external:hover,
+HTML#js BODY DIV .b-mediaplaceholder-external:active,
+HTML#js BODY DIV .b-mediaplaceholder-external:focus {
+	display: none;
 	}
 	.b-mediaplaceholder-external .b-mediaplaceholder-bg {
 		overflow: hidden;
