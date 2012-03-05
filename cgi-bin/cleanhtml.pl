@@ -1133,13 +1133,13 @@ sub clean
                     }
                     else {
                         $img_bad = 0;
-                    }
 
-                    if ( $opts->{'img_placeholders'} && defined $hash->{'height'} && $hash->{'height'} > 37 ) {
-                        $img_bad = 1;
-                    }
-                    else {
-                        $img_bad = 0;
+                        if ( $opts->{'img_placeholders'} && defined $hash->{'height'} && $hash->{'height'} > 37 ) {
+                            $img_bad = 1;
+                        }
+                        else {
+                            $img_bad = 0;
+                        }
                     }
 
                     ## Option 'allowed_img_attrs' provides a list of allowed attributes
