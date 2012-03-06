@@ -1172,7 +1172,7 @@ sub clean
                     }
 
                     if ($img_bad) {
-                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo" ~ . ( $hash->{'width'} && $hash->{'height'} ? qq~style="width:$hash->{'width'}px;height:$hash->{'height'}px;" ~ : '' ) . qq~data-href="$href_b_link" href="~ .
+                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo ~ . ( $hash->{'width'} && $hash->{'height'} ? qq~ b-mediaplaceholder-good" style="width:$hash->{'width'}px;height:$hash->{'height'}px;" ~ : '' ) . qq~data-href="$href_b_link" href="~ .
                             LJ::ehtml($hash->{'src'}) . '" onclick="return LiveJournal.placeholderClick(this, \'image\')">' .
                             '<span class="b-mediaplaceholder-outer">' .
                             '<span class="b-mediaplaceholder-inner">' .

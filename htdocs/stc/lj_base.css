@@ -3774,16 +3774,17 @@ HTML BODY DIV .b-mediaplaceholder:focus {
 	position: relative;
 	top: auto;
 	left: auto;
+	overflow: hidden;
 	display: inline-block;
 	width: auto;
-	height: 35px;
-	min-width: 140px;
+	height: 37px;
+	min-width: 142px;
 	margin: 0 5px 0 0;
 	padding: 0;
+	-moz-border-radius: 0 !important;
+	border-radius: 0 !important;
+	border: 0 !important;
 	vertical-align: top !important;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	border: 1px solid #E0E0E0 !important;
 	font: 12px/14px Arial,sans-serif;
 	text-align: center !important;
 	text-decoration: none !important;
@@ -3792,6 +3793,16 @@ HTML BODY DIV .b-mediaplaceholder:focus {
 	cursor: pointer;
 	*display: inline;
 	*zoom: 1;
+	}
+HTML BODY DIV .b-mediaplaceholder-good:link,
+HTML BODY DIV .b-mediaplaceholder-good:visited,
+HTML BODY DIV .b-mediaplaceholder-good:hover,
+HTML BODY DIV .b-mediaplaceholder-good:active,
+HTML BODY DIV .b-mediaplaceholder-good:focus {
+	height: 35px;
+	-moz-border-radius: 5px !important;
+	border-radius: 5px !important;
+	border: 1px solid #E0E0E0 !important;
 	}
 	.b-mediaplaceholder .b-mediaplaceholder-outer {
 		position: absolute;
