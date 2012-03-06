@@ -169,6 +169,7 @@ sub EntryPage
                 'posterid'           => $com->{'posterid'},
                 'img_placeholders'   => $replace_images_in_comments,
                 'video_placeholders' => $replace_video_in_comments,
+                'remove_img_sizes'   => $replace_images_in_comments,
                 'remove_video_sizes' => $replace_video_in_comments,
             });
 
