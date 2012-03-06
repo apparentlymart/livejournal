@@ -1655,25 +1655,6 @@
             push @userapps, $app_string;
         }
 
-        use LJ::UserApps::Activities;
-        my @activities;
-        if (scalar @userapps) {
-            my $result = LJ::UserApps::Activities->get_last( $u );
-            foreach (@$result) {
-                my $app = LJ::UserApps->get_application( id => $_->{application_id} );
-                LJ::CleanHTML::clean_subject(\$_->{title});
-                LJ::CleanHTML::clean_event(\$_->{body}, {});
-                push @activities, {
-                    app_name  => $app->name,
-                    app_href  => $app->href,
-                    app_image => $app->image,
-                    title     => $_->{title},
-                    body      => $_->{body},
-                    date      => LJ::TimeUtil->ago_text(time() - $_->{ts_create}),
-                };
-            }
-        }
-
         my $text = $ML{'.apps.installed'};
         my $apps = "<div class='section_body'><p class='inner_section_header first'><span class='expandcollapse on' id='apps_header'>".$arrowimg->("apps")." $text (".scalar(@userapps).")</span></p>";
         $apps .= '<div id="apps_body" class="inner_section_body">';
@@ -1681,21 +1662,6 @@
         $apps .= join("", @userapps);
         $apps .= '</ul>';
         $apps .= LJ::Widget::ApplicationsViewsLayout->render(view_id => 'PROFILE', owner => $u, viewer => $remote, GET => \%GET);
-
-        if (scalar @activities) {
-            $apps .= '<div class="hr"><hr /></div>';
-            $apps .= '<ul class="b-app-activity-list">';
-            foreach (@activities) {
-                $apps .= '<li>';
-                if ($_->{app_image}) {
-                    $apps .= '<img src="'.$_->{app_image}.'" width="60" height="60" alt="' . $_->{app_name} . '" class="pic" /> ';
-                }
-                $apps .= '<p class="date">'. $_->{date}.'</p><p><a href="'.$_->{app_href}.'">'.$_->{app_name}.'</a>: '.$_->{title};
-                $apps .= $_->{body} ? "<br/>$_->{body}" : '';
-                $apps .= '</p></li>';
-            }
-            $apps .= '</ul>';
-        }
         $apps .= '</div>';
         $apps .= '</div>';
 
