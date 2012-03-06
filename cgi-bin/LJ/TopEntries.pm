@@ -77,6 +77,17 @@ my @order = qw/
     hmp_ontd
     anythingdisney
     bullying_begone
+    ontd-political
+    aramatheydidnt
+    craftgrrlontd-political
+    aramatheydidnt
+    craftgrrl
+    vaginapagina
+    ontd-cats
+    ontdgames
+    spookypoo
+    beauty101
+    lesbian
 /;
 =head
     culture
