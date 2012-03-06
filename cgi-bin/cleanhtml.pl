@@ -1127,19 +1127,21 @@ sub clean
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
                     # don't use placeholders for small images
-                    if ($opts->{'img_placeholders'}) { $img_bad = 1; }
-                    if ( $opts->{'img_placeholders'} && defined $hash->{'width'} && $hash->{'width'} > 140 ) {
-                        $img_bad = 1;
-                    }
-                    else {
-                        $img_bad = 0;
-
-                        if ( $opts->{'img_placeholders'} && defined $hash->{'height'} && $hash->{'height'} > 37 ) {
+                    if ($opts->{'img_placeholders'}) {
+                        if ( $hash->{'width'} > 140 ) {
                             $img_bad = 1;
                         }
                         else {
-                            $img_bad = 0;
+                            if ( $hash->{'height'} > 37 ) {
+                                $img_bad = 1;
+                            }
+                            else {
+                                $img_bad = 0;
+                            }
                         }
+                    }
+                    else {
+                        $img_bad = 0;
                     }
 
                     ## Option 'allowed_img_attrs' provides a list of allowed attributes
