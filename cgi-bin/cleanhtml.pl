@@ -1134,10 +1134,12 @@ sub clean
                         else {
                             if ( $hash->{'width'} > 140 ) {
                                 $img_bad = 1;
+                                $hash->{'width'} = 140;
                             }
                             else {
                                 if ( $hash->{'height'} > 37 ) {
                                     $img_bad = 1;
+                                    $hash->{'height'} = 37;
                                 }
                                 else {
                                     $img_bad = 0;
