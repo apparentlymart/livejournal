@@ -932,7 +932,6 @@ var currentPopupWindow;  // set when the iframe registers with us and we setup i
 function onInsertObject(include) {
 	InOb.onClosePopup();
 
-	//var iframe = document.createElement("iframe");
 	var container = document.createElement('div');
 	container.id = 'updateinsobject';
 	container.className = 'updateinsobject';
@@ -1366,7 +1365,7 @@ InOb.tallCenter = function () {
 };
 
 InOb.smallCenter = function () {
-	DOM.setHeight(currentPopup, 307);
+	DOM.setHeight(currentPopup, 375);
 	DOM.setWidth(currentPopup, 700);
 
 	currentPopup.style.top = '50%';

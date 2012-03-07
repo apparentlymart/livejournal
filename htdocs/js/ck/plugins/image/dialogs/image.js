@@ -463,6 +463,17 @@
 					elements :
 						[
 							{
+								type: 'html',
+								html: '<div class="b-pics-promo-wrapper">' +
+										'<i class="b-pics-promo-box"></i>' +
+										'<a target="_blank" href="' + Site.siteroot + '/472.html" class="b-pics-promo-link">' +
+											'<span class="b-pics-promo-arrow"></span>' +
+											'<span class="b-pics-promo-content b-pics-promo-content-header">Try new PhotoAlbums.</span>' +
+											'<span class="b-pics-promo-content">Organise your photos and images with LiveJournal PhotoAlbums.</span>' +
+										'</a>' +
+										'</div>'
+							},
+							{
 								type : 'vbox',
 								padding : 0,
 								children :
