@@ -81,8 +81,8 @@
 				'default': 'entrydate-date',
 				'edit': 'entrydate-changeit',
 				'inedit': 'entrydate-changeit',
-				'infutureedit': 'entrydate-until',
-				'future': Site.hasOwnProperty('is_delayed_post') && Site.is_delayed_post === 0 ? 'entrydate-changeit' : 'entrydate-until',
+				'infutureedit': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
+				'future': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
 				'delayed': 'entrydate-delayed'
 			},
 			selectors: {
