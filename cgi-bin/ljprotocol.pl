@@ -2364,7 +2364,10 @@ sub postevent {
                 $res->{'type'}      = 'delayed';
             } else {
                 $res->{'itemid'} = $parts[1];
-                $res->{'anum'} = $parts[2];            
+                $res->{'anum'} = $parts[2];
+                if (!$res->{'anum'}) {
+                    return;
+                }            
 
                 my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
                 $res->{'url'} = $dup_entry->url;
