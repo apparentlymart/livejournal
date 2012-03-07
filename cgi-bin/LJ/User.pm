@@ -4123,7 +4123,7 @@ sub opt_placeholders_comments {
 sub get_opt_videolinks {
     my $u = shift;
     my $opt = $u->raw_prop("opt_embedplaceholders") || "0:0";
-    $opt = "0:0" unless $opt || $opt eq 'N';
+    $opt = "0:0" if ! $opt || $opt eq 'N';
     $opt = "1:0" unless $opt =~ /^\d\:\d$/;
     return $opt;
 }
