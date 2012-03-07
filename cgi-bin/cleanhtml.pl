@@ -156,6 +156,7 @@ sub clean
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
+    my $ljspoiler_allowed = $opts->{'textonly'}? 0 : 1;
 
     my $poster = LJ::load_userid($opts->{posterid});
     my $put_nofollow = not ($poster and $poster->get_cap('paid') and not $poster->get_cap('trynbuy'));
@@ -466,7 +467,7 @@ sub clean
                 $newdata .= Encode::decode_utf8(LJ::WishElement->check_and_expand_entry($userid, $wishid));
             }
 
-            if ( $tag eq 'lj-spoiler' ) {
+            if ( $tag eq 'lj-spoiler' and $ljspoiler_allowed ) {
                 my $title = $attr->{'title'} ||
                     $attr->{'text'} ||
                     Encode::decode_utf8(
@@ -1887,7 +1888,7 @@ sub clean_subject
 }
 
 ## returns a pure text subject (needed in links, email headers, etc...)
-my $subjectall_eat = [qw[head title style layer iframe applet object]];
+my $subjectall_eat = [qw[head title style layer iframe applet object lj-spoiler ]];
 sub clean_subject_all
 {
     my $ref = shift;
