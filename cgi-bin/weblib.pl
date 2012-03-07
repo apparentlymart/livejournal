@@ -23,6 +23,7 @@ use Class::Autouse qw(
 use LJ::ControlStrip;
 use LJ::SiteScheme;
 use Apache::WURFL;
+use Encode;
 
 # <LJFUNC>
 # name: LJ::img
@@ -2044,8 +2045,8 @@ sub placeholder_link {
                 <span class="b-mediaplaceholder-outer">
                     <span class="b-mediaplaceholder-inner">
                         <i class="b-mediaplaceholder-pic"></i>
-                        <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . LJ::Lang::ml("mediaplaceholder.viewvideo") . qq{</span>
-                        <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . LJ::Lang::ml("mediaplaceholder.loading") . qq{</span>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewvideo")) . qq{</span>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading")) . qq{</span>
                     </span>
                 </span>
             </a>
