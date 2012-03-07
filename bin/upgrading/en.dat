@@ -2912,6 +2912,8 @@ fotki.album.album_cover=Album cover
 fotki.album.available.now|staleness=1
 fotki.album.available.now=Available now
 
+fotki.album.default.sizes=Default sizes
+
 fotki.album.browse.photo=Browse
 
 fotki.album.btn.add|staleness=1
@@ -2927,6 +2929,10 @@ fotki.album.btn.upload|staleness=1
 fotki.album.btn.upload=Upload
 
 fotki.album.browse.photo=Browse
+
+fotki.album.cancel.album=Cancel
+
+fotki.album.custom.size=Custom
 
 fotki.album.click.image|staleness=1
 fotki.album.click.image=Click on image to remove it
@@ -3009,6 +3015,8 @@ fotki.album.link.edit_album=Edit album
 
 fotki.album.link.album.cover=(album cover)
 
+fotki.album.link.from.image=Link from this image (optional)
+
 fotki.album.link.manage|staleness=1
 fotki.album.link.manage=Manage
 
@@ -3045,6 +3053,10 @@ fotki.album.no.photo=No photo
 
 fotki.album.edit.okey=OK
 
+fotki.album.paste.url=Paste url
+
+fotki.album.paste.url.here=Paste image url here
+
 fotki.album.post.images|staleness=1
 fotki.album.post.images=Add to post
 
@@ -3075,6 +3087,10 @@ fotki.album.remove_photo_desc=Remove this photo
 fotki.album.resize.to.post|staleness=1
 fotki.album.resize.to.post=Resize to post:
 
+fotki.album.resize.height=Height
+
+fotki.album.resize.width=Width
+
 fotki.album.save.images|staleness=1
 fotki.album.save.images=Save images
 
@@ -3091,6 +3107,8 @@ fotki.album.select.album=Album:
 
 fotki.album.select_album|staleness=1
 fotki.album.select_album=Select album:
+
+fotki.album.stop.upload=Stop upload?
 
 fotki.album.stop.upload.confirm|staleness=1
 fotki.album.stop.upload.confirm=Do you really want to stop upload and close without saving?
