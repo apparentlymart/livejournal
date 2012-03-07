@@ -2926,6 +2926,8 @@ fotki.album.btn.save=Save
 fotki.album.btn.upload|staleness=1
 fotki.album.btn.upload=Upload
 
+fotki.album.browse.photo=Browse
+
 fotki.album.click.image|staleness=1
 fotki.album.click.image=Click on image to remove it
 
