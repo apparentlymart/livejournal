@@ -201,13 +201,26 @@ sub as_alert {
 sub as_push {
     my $self = shift;
     my $u = shift;
+    my %opts = @_;
+   
+    if (exists $opts{'message'}) {
+        my $msg = $self->load_message;
+        return $msg->body; 
+    }
 
     return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.usermessagerecvd", 1, {
         user => $self->load_message->other_u->{user},
     })
 }
 
-sub as_push_payload { '"t":9,"m":'.shift->arg1 }
+sub as_push_payload {
+    my $self = shift; 
+    my $os = shift;
+    if ($os eq 'wp7') {
+        return "?m=". $self->arg1;
+    }
+    return '"t":9,"m":'.$self->arg1;
+}
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
