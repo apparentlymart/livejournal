@@ -468,8 +468,8 @@
 										'<i class="b-pics-promo-box"></i>' +
 										'<a target="_blank" href="' + Site.siteroot + '/472.html" class="b-pics-promo-link">' +
 											'<span class="b-pics-promo-arrow"></span>' +
-											'<span class="b-pics-promo-content b-pics-promo-content-header">Try new PhotoAlbums.</span>' +
-											'<span class="b-pics-promo-content">Organise your photos and images with LiveJournal PhotoAlbums.</span>' +
+											'<span class="b-pics-promo-content b-pics-promo-content-header">' + Site.ml_text['.msg.newalbums'] + '</span>' +
+											'<span class="b-pics-promo-content">' + Site.ml_text['.msg.newalbums.organise'] + '</span>' +
 										'</a>' +
 										'</div>' : ''
 							},

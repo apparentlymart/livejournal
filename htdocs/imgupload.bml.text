@@ -5,6 +5,8 @@
 
 .msg.unavailable|staleness=1
 .msg.unavailable=This service is temporarily unavailable.
+.msg.newalbums=Try new PhotoAlbums.
+.msg.newalbums.organise=Organise your photos and images with LiveJournal PhotoAlbums.
 
 .size=When uploading from file or from a gallery, the image will display as 320 x 240 (medium) and will link to the image in the gallery.
 

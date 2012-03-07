@@ -603,13 +603,14 @@ TABLE TD {
 	
 /* Fotki promo */ 
 
-.b-pics-promo-wrapper {
+.cke_dialog_ui_vbox_child .b-pics-promo-wrapper {
 	position: relative;
-	margin: 0 15px 20px 15px;
+	margin: 20px 0;
 	border-radius: 6px;
+	cursor: pointer;
 	background-color: #4e92c1;
 	}
-	.b-pics-promo-wrapper .b-pics-promo-box {
+	.cke_dialog_ui_vbox_child .b-pics-promo-wrapper .b-pics-promo-box {
 		display: block;
 		position: absolute;
 		top: 50%;
@@ -619,24 +620,28 @@ TABLE TD {
 		margin-top: -39px;
 		background: url(/img/pics/pics-promo-box.png?ver=1) 0 0 no-repeat;
 		}
-	.b-pics-promo-wrapper .b-pics-promo-link {
+	.cke_dialog_ui_vbox_child .b-pics-promo-wrapper .b-pics-promo-link {
 		position: relative;
 		display: block;
 		height: auto;
 		padding: 10px 50px 10px 130px;
+		cursor: pointer;
 		outline: none;
 		background: none;
 		}
-		.b-pics-promo-content {
+		.cke_dialog_ui_vbox_child .b-pics-promo-wrapper .b-pics-promo-link SPAN {
+			cursor: pointer;
+			}
+		.cke_dialog_ui_vbox_child .b-pics-promo-content {
 			display: block;
 			font-size: 12px;
 			text-shadow: #000 1px 1px 1px;
 			color: #FFF;
 			}
-		.b-pics-promo-content-header {
+		.cke_dialog_ui_vbox_child .b-pics-promo-content-header {
 			font-size: 15px;
 			}
-		.b-pics-promo-link .b-pics-promo-arrow {
+		.cke_dialog_ui_vbox_child .b-pics-promo-link .b-pics-promo-arrow {
 			display: block;
 			position: absolute;
 			top: 50%;
