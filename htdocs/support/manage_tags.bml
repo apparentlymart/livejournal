@@ -74,6 +74,22 @@ body<=
         my $allowmerge  = $FORM{'allowmerge'};
         my $new_name    = $FORM{'new_name'};
 
+        my $cats = LJ::Support::load_cats();
+        my $name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
+
+        my $u_lj_support = LJ::load_user('lj_support');
+
+        my $cat     = $cats->{$spcatid};
+        my $cat_key = $cat->{'catkey'} || '';
+        my $userid  = $u_lj_support ? $u_lj_support->userid : 0;
+        
+        my $target_cat = $everywhere ? 'board' : $cat_key;
+        LJ::statushistory_add( $userid,
+                               $remote->userid,
+                               "support_tag",
+                               "\"$name\" has been renamed to \"$new_name\". Target: $target_cat");
+
+
         LJ::Support::Request::Tag::rename_tag( {'sptagid'    => $sptagid,
                                                 'spcatid'    => $spcatid,
                                                 'new_name'   => $new_name,

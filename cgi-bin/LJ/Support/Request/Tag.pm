@@ -122,10 +122,12 @@ sub rename_tag {
 sub __rename_tag_everywhere {
     my ($opts) = @_;
 
+    #
     # Tag information
+    #
+
     my $sptagid     = $opts->{'sptagid'};
     my $spcatid     = $opts->{'spcatid'};
-
     # The new name for tag 
     my $new_name    = $opts->{'new_name'};
 
@@ -137,19 +139,22 @@ sub __rename_tag_everywhere {
     # Get curret name 
     my $old_name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
 
+    #
     # Receive all categories where rename will be done
-    my $source
-        = $dbh->selectall_hashref( "SELECT sptagid, spcatid FROM supporttag " .
-                                   "WHERE name=?",
-                                   'spcatid',
-                                   undef,
-                                   $old_name );
-
+    #
+    my $source  = $dbh->selectall_hashref( "SELECT sptagid, spcatid " .
+                                           "FROM supporttag " .
+                                           "WHERE name=?",
+                                           'spcatid',
+                                           undef,
+                                           $old_name );
 
     my @old_spcatids = keys %$source;
     my $old_spcatids_str = join(',', @old_spcatids);
 
+    #
     # Receive all tags with new name
+    #
     my $destination
         = $dbh->selectall_hashref( "SELECT sptagid, spcatid FROM supporttag " .
                                    "WHERE name=? AND spcatid IN ($old_spcatids_str)",
@@ -167,34 +172,42 @@ sub __rename_tag_everywhere {
                   $old_name );
 
     } elsif ($allowmerge) {
-
+        #
         # update all in 'supporttag'
+        #
         foreach my $spcatid (keys %$source) {
-            # if no need to merge
+            #
+            # if no needs to merge
+            #
             if (!$destination->{$spcatid}) {
                 next;
             }
 
-            # get dest. by category
+            #
+            # Get a destination id
+            #
             my $destination_hash  = $destination->{$spcatid};
-
-            # get dest. tag id 
             my $destination_id    = $destination_hash->{'sptagid'};
 
+            #
             # remove from source hash
+            #
             my $source_hash       = delete $source->{$spcatid};
-
-            # get src. id
             my $source_id         = $source_hash->{'sptagid'};
 
+            warn LJ::D($destination_hash);
+            warn LJ::D($source_hash);
+
+            #
             # get current spid
+            #
             my $current_spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
                                                           'FROM supporttagmap ' .
                                                           'WHERE sptagid = ?',
                                                           undef,
                                                           $source_id);
 
-            # get current tag id 
+            # get current tag id
             my $spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
                                                   'FROM supporttagmap ' .
                                                   'WHERE sptagid = ?',
@@ -206,9 +219,7 @@ sub __rename_tag_everywhere {
 
             foreach my $current_spid (@$current_spids) {
                 foreach my $spid (@$spids) {
-                    if ($spid == $current_spid) {
-                        next;
-                    }
+
                     eval {
                         $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
                                   'VALUES (?, ?) ',
@@ -221,7 +232,6 @@ sub __rename_tag_everywhere {
         }
 
         foreach my $spcatid (keys %$source) {
-
             my $source_hash = delete $source->{$spcatid};
             my $source_id   = $source_hash->{'sptagid'};
 
@@ -234,7 +244,6 @@ sub __rename_tag_everywhere {
         }
     } else {
         foreach my $spcatid (keys %$source) {
-
             if (exists $destination->{$spcatid}) {
                 next;
             }
