@@ -601,3 +601,48 @@ TABLE TD {
 	margin-right:10px;
 	}
 	
+/* Fotki promo */ 
+
+.b-pics-promo-wrapper {
+	position: relative;
+	margin: 0 15px 20px 15px;
+	border-radius: 6px;
+	background-color: #4e92c1;
+	}
+	.b-pics-promo-wrapper .b-pics-promo-box {
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 20px;
+		width: 111px;
+		height: 95px;
+		margin-top: -39px;
+		background: url(/img/pics/pics-promo-box.png?ver=1) 0 0 no-repeat;
+		}
+	.b-pics-promo-wrapper .b-pics-promo-link {
+		position: relative;
+		display: block;
+		height: auto;
+		padding: 10px 50px 10px 130px;
+		outline: none;
+		background: none;
+		}
+		.b-pics-promo-content {
+			display: block;
+			font-size: 12px;
+			text-shadow: #000 1px 1px 1px;
+			color: #FFF;
+			}
+		.b-pics-promo-content-header {
+			font-size: 15px;
+			}
+		.b-pics-promo-link .b-pics-promo-arrow {
+			display: block;
+			position: absolute;
+			top: 50%;
+			right: 25px;
+			width: 16px;
+			height: 25px;
+			margin-top: -13px;
+			background: url(/img/pics/pics-promo-arrow.png?ver=1) 0 0 no-repeat;
+			}
