@@ -27,7 +27,7 @@ body<=
         my $is_sup = LJ::SUP->is_remote_sup() ? '_ru' : '';
 
         my $rv = LJ::send_mail({
-            to => "writersblock\@$LJ::DOMAIN",
+            to   => 'writersblock@sup.com',
             from => "lj_noreply\@$LJ::DOMAIN",
             charset => "utf-8",
             subject => "Writer's Block Suggestion(s) from $user",
