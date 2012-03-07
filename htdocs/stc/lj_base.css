@@ -3967,22 +3967,25 @@ HTML#js BODY DIV .b-mediaplaceholder-external:focus {
 
 /* LJ Spoiler
 ----------------------------------- */
-.lj-spoiler .lj-spoiler-body { 
-    display: block; 
+.lj-spoiler {
+    display: inline-block;
     }
-.lj-spoiler .lj-spoiler-head { 
-    display: none; 
-    }
-#js .lj-spoiler .lj-spoiler-body { 
-    display: none; 
-    }
-#js .lj-spoiler .lj-spoiler-head { 
-    display: block; 
-    }
-#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body { 
-    display: block; 
-    }
-#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
-    display: none;
-    }
+    .lj-spoiler .lj-spoiler-body { 
+        display: block; 
+        }
+    .lj-spoiler .lj-spoiler-head { 
+        display: none; 
+        }
+    #js .lj-spoiler .lj-spoiler-body { 
+        display: none; 
+        }
+    #js .lj-spoiler .lj-spoiler-head { 
+        display: block; 
+        }
+    #js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body { 
+        display: block; 
+        }
+    #js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
+        display: none;
+        }
 
