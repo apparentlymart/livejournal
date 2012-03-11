@@ -208,6 +208,12 @@
 				border: none;
 				vertical-align: top;
 				}
+			#updateForm #metainfo .entrydate-until .entrydate-title-post {
+				display: none;
+				}
+			#updateForm #metainfo .entrydate-until .entrydate-title-until {
+				display: block;
+				}
 			#updateForm .helplink {
 				border: none;
 				}
@@ -248,7 +254,16 @@
 			.entrydate-until .entrydate-wrap-until {
 				line-height: 10px;
 				}
-			#updateForm #metainfo .entrydate .entrydate-title-until,
+			#updateForm #metainfo .entrydate-delayed .entrydate-title-until {
+				display: none;
+				}
+			#updateForm #metainfo .entrydate-delayed.entrydate-changeit .entrydate-title-until,
+			#updateForm #metainfo .entrydate-delayed.entrydate-until .entrydate-title-post {
+				display: none;
+				}
+			#updateForm #metainfo .entrydate-delayed.entrydate.entrydate-until .entrydate-title-until {
+				display: table-cell;
+				}
 			#updateForm #metainfo .entrydate .entrydate-wrap-date,
 			#updateForm #metainfo .entrydate .entrydate-wrap-post,
 			#updateForm #metainfo LI .i-calendar {
@@ -284,7 +299,6 @@
 				display: none;
 				}
 			#js #updateForm #metainfo .entrydate-until .entrydate-title-date,
-			#js #updateForm #metainfo .entrydate-until .entrydate-title-post,
 			#js #updateForm #metainfo .entrydate-until .entrydate-wrap-until,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-date,
 			#js #updateForm #metainfo .entrydate-changeit .entrydate-title-post,
