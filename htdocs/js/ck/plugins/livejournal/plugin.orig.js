@@ -684,25 +684,37 @@
 						iframeClose.setAttribute('allowTransparency', 'true');
 
 						var range = ranges[0];
+						selection.lock();
+
+						var firstBR = new CKEDITOR.dom.element('br', editor.document);
+						var lastBR = new CKEDITOR.dom.element('br', editor.document);
+
 						if (range.collapsed === true) {
 							editor.insertElement(iframeClose);
 							iframeClose.insertBeforeMe(iframeOpen);
-							iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
-							iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
+							iframeClose.insertBeforeMe(firstBR);
+							iframeClose.insertBeforeMe(lastBR);
 						} else {
 							startContainer = range.getTouchedStartNode();
 							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
 							fragment.append(iframeOpen);
+							fragment.append(firstBR);
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								fragment.append(ranges[i].extractContents());
 							}
 							editor.insertElement(iframeClose);
 							iframeClose.insertBeforeMe(fragment);
+							iframeClose.insertBeforeMe(lastBR);
 						}
+
+						range.setStart(firstBR, 0);
+						range.setEnd(lastBR, 0);
+						selection.unlock();
+
+						selection.selectRanges(ranges);
 
 						iframeOpen.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
 						new CKEDITOR.dom.element('br', editor.document).insertAfter(iframeClose);
-
 					}
 
 					CKEDITOR.note && CKEDITOR.note.hide(true);
