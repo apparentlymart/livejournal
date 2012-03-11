@@ -2582,13 +2582,6 @@ sub postevent {
                      "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
-    if ( $req->{sticky} &&
-         $uowner->is_community() &&
-         !$u->can_manage($uowner) )
-    {
-        return fail($err, 158);
-    }
-
     # post become 'sticky post'
     if ( $req->{sticky} ) {
         $uowner->set_sticky_id($jitemid);
