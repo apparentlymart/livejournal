@@ -1679,7 +1679,6 @@ sub render_ljphoto_block {
         'privacyData'     => LJ::Widget::Fotki::Photo->get_user_groups($remote),
         'type'            => 'upload',
         'guid'            => $auth_token,
-        'pics_production' => LJ::is_enabled('pics_production'),
     };
 
     my $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
