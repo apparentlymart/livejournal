@@ -983,7 +983,7 @@ sub can_post_to {
     my $can_manage = $poster->can_manage($uowner) || 0;
     my $moderated = $uowner->prop('moderated') || '';
     my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
-    if ( $req && $uowner->{'moderated'} eq 'F' ) {
+    if ( $req && $uowner->{'moderated'} && $uowner->{'moderated'} eq 'F' ) {
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
