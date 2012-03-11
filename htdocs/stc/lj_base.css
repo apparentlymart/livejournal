@@ -3730,6 +3730,7 @@ A.lj-button-link:active {
 	background: #FFF0A6;
 	color: #94938E;
 	font-size: 9px;
+	white-space: nowrap;
 	}
 
 
