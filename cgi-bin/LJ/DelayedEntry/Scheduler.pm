@@ -87,6 +87,44 @@ sub __send_error {
     });
 }
 
+sub __notify_user {
+    my ($poster, $journal) = @_;
+    my $email = $poster->email_raw;
+
+    my $lang = $poster->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $html = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_html', undef, {
+                         sitenameshort   => $LJ::SITENAMESHORT,
+                         user            => $poster->user,
+                         usercname       => $journal->user,
+                         sitename        => $LJ::SITENAME,
+                         siteroot        => $LJ::SITEROOT,
+                    });
+
+    my $plain = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_plain', undef, {
+                         sitenameshort   => $LJ::SITENAMESHORT,
+                         user            => $poster->user,
+                         usercname       => $journal->user,
+                         sitename        => $LJ::SITENAME,
+                         siteroot        => $LJ::SITEROOT,
+                    });
+
+    my $text = $poster->{opt_htmlemail} eq 'Y' ? $html : $plain;
+
+    my $subject = LJ::Lang::get_text($lang, 'community.members.delayed.remove.email_subject', undef,
+                    { mailusercname => $journal->user }
+                    );
+
+    LJ::send_mail({
+        'to'        => $email,
+        'from'      => $LJ::ADMIN_EMAIL,
+        'fromname'  => $LJ::SITENAME,
+        'charset'   => 'utf-8',
+        'subject'   => $subject,
+        'body'      => $text,
+        { subject => $subject },
+    });
+}
+
 
 sub on_pulse {
     my ($clusterid, $dbh, $verbose) = @_;
@@ -101,6 +139,22 @@ sub on_pulse {
     eval {
         while ( my $entries = __load_delayed_entries($dbh) ) {
             foreach my $entry (@$entries) {
+                if (!LJ::DelayedEntry::can_post_to($entry->journal,
+                                                   $entry->poster)) {
+                    
+                    if ($verbose) {
+                        print "The entry with subject " . $entry->subject;
+                        print "\ndelayed id = " . $entry->delayedid . 
+                        print " and post date " . $entry->posttime;
+                        print " is deleted becouse USER CANNOT POST\n";
+                    }
+
+                    __notify_user(  $entry->poster,
+                                    $entry->journal);
+                    $entry->delete();
+                    next;
+                }
+
                 my $post_status = $entry->convert();
 
                 # do we need to send error
@@ -121,7 +175,6 @@ sub on_pulse {
                 }
 
                 if ( $post_status->{delete_entry} ) {
-
                     if ($verbose) {
                         print "The entry with subject " . $entry->subject;
                         print "\ndelayed id = " . $entry->delayedid . 
