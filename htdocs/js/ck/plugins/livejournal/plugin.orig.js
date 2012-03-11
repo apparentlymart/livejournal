@@ -690,7 +690,6 @@
 							iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
 							iframeClose.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
 						} else {
-							selection.lock();
 							startContainer = range.getTouchedStartNode();
 							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
 							fragment.append(iframeOpen);
@@ -699,16 +698,11 @@
 							}
 							editor.insertElement(iframeClose);
 							iframeClose.insertBeforeMe(fragment);
-							range.setStartAfter(iframeOpen);
-							range.setEndBefore(iframeClose);
-							selection.unlock();
 						}
 
 						iframeOpen.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
 						new CKEDITOR.dom.element('br', editor.document).insertAfter(iframeClose);
 
-						ranges.length = 1;
-						selection.selectRanges(ranges);
 					}
 
 					CKEDITOR.note && CKEDITOR.note.hide(true);
