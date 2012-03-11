@@ -236,17 +236,7 @@
          $key =~ s/(#)(\w+)/$uid->($2)/eg;
          $key =~ s!\((\d+)\)!int($1/256)!eg;
                     
-         my $sock = LJ::MemCache::_get_sock($key);
          $ret .= "<p><b>Key: </b>$key<br />";
-
-         unless ($sock) {
-             $ret .= "<b>Error: </b>Could not connect to server<br /></p>";
-             next;
-         }
-         
-         if ($POST{'sock'}) {
-             $ret .= "<b>Socket:</b> $sock<br />";
-         } 
 
          my $hashkey = $get_hashkey->($key);
          if ($hashkey) {
@@ -270,10 +260,8 @@
 
  $ret .= '<form method="post" action="memcache_view.bml">';
  $ret .= "<textarea name=query rows=3 cols=60 wrap=off></textarea> ";
- $ret .= "<p>" . LJ::html_check({ 'type' => 'check', 'name' => 'sock', 'id' => 'sock' });
- $ret .= "<label for='sock'>Show host/port per key.</label></p>";
 
- $ret .= "<input type='submit' value='Submit'>";
+ $ret .= "<p><input type='submit' value='Submit'></p>";
  return $ret;
 
 
