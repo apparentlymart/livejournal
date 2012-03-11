@@ -98,7 +98,7 @@ div.lj_ippu {
 .b-btn-tokens {
 	margin: 30px 0 0;
 	padding: 10px 6px 7px;
-    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
 	border-color: #025266;
 	background: -moz-linear-gradient(top, #6ed6e5 0%, #1bbbd2 14%, #1bb2c8 37%, #1ba4b8 66%, #1b9eb1 83%, #1495a7 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6ed6e5), color-stop(14%,#1bbbd2), color-stop(37%,#1bb2c8), color-stop(66%,#1ba4b8), color-stop(83%,#1b9eb1), color-stop(100%,#1495a7));
@@ -294,7 +294,7 @@ HTML:not(IE7) .opera-filter, x:-o-prefocus { display:block; } /* opera gte 9.5 *
 	font-size: 16px;
 	}
 	.user_alias_act INPUT {
-		font-family: Arial, sans-serif;	
+		font-family: Arial, sans-serif; 
 		}
 		.user_alias_act .alias-value {
 			width: 380px;
@@ -670,7 +670,7 @@ HTML BODY.logged-out {
 			border: 0 !important;
 			}
 			.appwidget-sitemessages .b-message-system .ljuser A:link,
-			.appwidget-sitemessages .b-message-system .ljuser A:visited	{
+			.appwidget-sitemessages .b-message-system .ljuser A:visited {
 				text-decoration: none;
 				}
 			.appwidget-sitemessages .b-message-system .ljuser A:hover,
@@ -2558,7 +2558,7 @@ DIV.lj_ippu_app {
 		margin: -5px -10px -10px -10px;
 		}
 		DIV.lj_ippu_app .b-pending-users LI {
-		    padding-bottom: 7px;
+			padding-bottom: 7px;
 			line-height: 15px;
 			font-size: 12px;
 			}
@@ -2656,11 +2656,14 @@ DIV.lj_ippu_app {
 	z-index: 4000;
 	background: url(about:blank);
 	}
-	.b-popup input,
+	.b-popup input[type="text"],
 	.b-popup div,
 	.b-popup strong,
 	.b-popup label {
 		color:#000;
+		}
+	.b-popup input:-moz-placeholder {
+		color: #999;
 		}
 	.b-popup-outer {
 		position: relative;
@@ -2941,42 +2944,42 @@ DIV.lj_ippu_app {
 	.b-ljtimes-suggest .i-popup-arr {
 		overflow: hidden;
 		display: block;
- 		position: absolute;
+		position: absolute;
 		border: 0;
- 		font: 0/0 serif;
+		font: 0/0 serif;
 		background-image: url(/img/popup-arr.gif?v=10883);
 		background-repeat: no-repeat;
- 		}
- 	.b-ljtimes-update .i-popup-arrt,
+		}
+	.b-ljtimes-update .i-popup-arrt,
 	.b-ljtimes-suggest .i-popup-arrt {
- 		top: -7px;
- 		left: 50%;
+		top: -7px;
+		left: 50%;
 		width: 13px;
 		height: 11px;
- 		margin: 0 0 0 -6px;
+		margin: 0 0 0 -6px;
 		padding: 0;
 		background-position: 0 0;
- 		}
- 	.b-ljtimes-update .i-popup-arrtl,
+		}
+	.b-ljtimes-update .i-popup-arrtl,
 	.b-ljtimes-suggest .i-popup-arrtl {
- 		top: -7px;
+		top: -7px;
 		left: 30px;
 		width: 13px;
 		height: 11px;
 		margin: 0;
 		padding: 0;
 		background-position: 0 0;
- 		}
- 	.b-ljtimes-update .i-popup-arrtr,
+		}
+	.b-ljtimes-update .i-popup-arrtr,
 	.b-ljtimes-suggest .i-popup-arrtr {
- 		top: -7px;
+		top: -7px;
 		right: 30px;
 		width: 13px;
 		height: 11px;
 		margin: 0;
 		padding: 0;
 		background-position: 0 0;
- 		}
+		}
 	.b-ljtimes-update .i-popup-arrr,
 	.b-ljtimes-suggest .i-popup-arrr {
 		top: 50%;
@@ -3007,66 +3010,66 @@ DIV.lj_ippu_app {
 		padding: 0;
 		background-position: -11px -11px;
 		}
- 	.b-ljtimes-update .i-popup-arrb,
+	.b-ljtimes-update .i-popup-arrb,
 	.b-ljtimes-suggest .i-popup-arrb {
- 		bottom: -7px;
- 		left: 50%;
+		bottom: -7px;
+		left: 50%;
 		width: 13px;
 		height: 11px;
- 		margin: 0 0 0 -6px;
+		margin: 0 0 0 -6px;
 		padding: 0;
 		background-position: -13px 0;
- 		}
- 	.b-ljtimes-update .i-popup-arrbl,
+		}
+	.b-ljtimes-update .i-popup-arrbl,
 	.b-ljtimes-suggest .i-popup-arrbl {
- 		bottom: -7px;
+		bottom: -7px;
 		left: 30px;
 		width: 13px;
 		height: 11px;
 		margin: 0;
 		padding: 0;
 		background-position: -13px 0;
- 		}
- 	.b-ljtimes-update .i-popup-arrbr,
+		}
+	.b-ljtimes-update .i-popup-arrbr,
 	.b-ljtimes-suggest .i-popup-arrbr {
- 		bottom: -7px;
+		bottom: -7px;
 		right: 30px;
 		width: 13px;
 		height: 11px;
 		margin: 0;
 		padding: 0;
 		background-position: -13px 0;
- 		}
- 	.b-ljtimes-update .i-popup-arrl,
+		}
+	.b-ljtimes-update .i-popup-arrl,
 	.b-ljtimes-suggest .i-popup-arrl {
- 		top: 50%;
- 		left: -7px;
+		top: 50%;
+		left: -7px;
 		width: 11px;
 		height: 13px;
- 		margin: -6px 0 0;
+		margin: -6px 0 0;
 		padding: 0;
 		background-position: 0 -11px;
- 		}
- 	.b-ljtimes-update .i-popup-arrlt,
+		}
+	.b-ljtimes-update .i-popup-arrlt,
 	.b-ljtimes-suggest .i-popup-arrlt {
- 		top: 15px;
- 		left: -7px;
+		top: 15px;
+		left: -7px;
 		width: 11px;
 		height: 13px;
 		margin: 0;
 		padding: 0;
 		background-position: 0 -11px;
- 		}
- 	.b-ljtimes-update .i-popup-arrlb,
+		}
+	.b-ljtimes-update .i-popup-arrlb,
 	.b-ljtimes-suggest .i-popup-arrlb {
- 		bottom: 15px;
- 		left: -7px;
+		bottom: 15px;
+		left: -7px;
 		width: 11px;
 		height: 13px;
 		margin: 0;
 		padding: 0;
 		background-position: 0 -11px;
- 		}
+		}
 
 	.i-thumb-close,
 	.i-popup-close {
@@ -3107,7 +3110,7 @@ DIV.lj_ippu_app {
 		margin: 0 0 3px;
 		padding: 0;
 		}
-	.b-popup-row-head {	
+	.b-popup-row-head { 
 		margin: 0 0 5px;
 		font-weight: bold;
 		}
@@ -3158,8 +3161,8 @@ DIV.lj_ippu_app {
 	.b-popup-messagebox A:visited,
 	.b-popup-messagebox A:hover,
 	.b-popup-messagebox A:active {
-	    color: #00C;
-	    }
+		color: #00C;
+		}
 
 /* Delete bubble */
 .ljcmtmanage {
@@ -3529,7 +3532,7 @@ DIV.lj_ippu_app {
 	border: none!important;
 	text-decoration: none!important;
 	font: 11px/22px Arial,sans-serif!important;
-    white-space:nowrap!important;
+	white-space:nowrap!important;
 	}
 .lj-button {
 	vertical-align: top!important;
@@ -3969,24 +3972,45 @@ HTML#js BODY DIV .b-mediaplaceholder-external:focus {
 /* LJ Spoiler
 ----------------------------------- */
 .lj-spoiler {
-    display: inline-block;
-    }
-    .lj-spoiler .lj-spoiler-body { 
-        display: block; 
-        }
-    .lj-spoiler .lj-spoiler-head { 
-        display: none; 
-        }
-    #js .lj-spoiler .lj-spoiler-body { 
-        display: none; 
-        }
-    #js .lj-spoiler .lj-spoiler-head { 
-        display: block; 
-        }
-    #js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body { 
-        display: block; 
-        }
-    #js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
-        display: none;
-        }
+	position: static;
+	top: auto;
+	left: auto;
+	display: inline-block;
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	}
+	.lj-spoiler .lj-spoiler-body {
+		position: static;
+		top: auto;
+		left: auto;
+		display: block;
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 0;
+		}
+	.lj-spoiler .lj-spoiler-head {
+		position: static;
+		top: auto;
+		left: auto;
+		display: none;
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 0;
+		}
+	#js .lj-spoiler .lj-spoiler-body {
+		display: none;
+		}
+	#js .lj-spoiler .lj-spoiler-head {
+		display: block;
+		}
+	#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body {
+		display: block;
+		}
+	#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
+		display: none;
+		}
 
