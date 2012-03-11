@@ -1184,8 +1184,8 @@ sub clean
                             '<span class="b-mediaplaceholder-outer">' .
                             '<span class="b-mediaplaceholder-inner">' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
-                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-view">' . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewimage")) . '</span>'.
-                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading")) . '</span>'.
+                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-view">' . Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewimage"))) . '</span>'.
+                            '<span class="b-mediaplaceholder-label b-mediaplaceholder-loading">' . Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading"))) . '</span>'.
                             '</span>' .
                             '</span>' .
                             '</a>';
