@@ -519,7 +519,7 @@
 			(function () {
 				var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml';
 
-				function onData(data, userName) {
+				function onData(data, userName, LJUser) {
 					if (data.error) {
 						alert(data.error);
 						return;
@@ -572,7 +572,7 @@
 							method: 'POST',
 							url: url,
 							onData: function (data) {
-								onData(data, userName);
+								onData(data, userName, LJUser);
 							}
 						});
 					}
