@@ -1053,20 +1053,6 @@ sub __extract_tag_list {
     return \@tags_array;
 }
 
-sub __kill_dayct2_cache {
-    my ($u) = @_;
-    my $uid = LJ::want_userid($u) or return undef;
-
-    my $memkey = [$uid, "dayct2:$uid:p"];
-    LJ::MemCache::delete($memkey);
-
-    $memkey = [$uid, "dayct2:$uid:a"];
-    LJ::MemCache::delete($memkey);
-
-    $memkey = [$uid, "dayct2:$uid:g"];
-    LJ::MemCache::delete($memkey);
-}
-
 sub __statistics_absorber {
     my ($journal, $poster) = @_;
 
