@@ -446,10 +446,10 @@
             } else {
                 $li_title = $remote_hasfriend ? $ML{'.optionlinks.modifyfriend.title.other'} : $ML{'.optionlinks.addfriend.title.other'};
             }
-            $body .= "<li class='profile_addfriend' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-friend.gif?v=14658' alt='' />$text</a></li>";
+            $body .= "<li class='profile_addfriend' title=\"$li_title\"><a href='$url'><img src='$LJ::IMGPREFIX/profile_icons/add-friend.png?v=14658' alt='' />$text</a></li>";
         } else {
             $li_title = $ML{'.optionlinks.addfriend.title.loggedout'};
-            $body .= "<li class='profile_addfriend_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-friend-disabled.gif?v=14658' alt='' />$text</li>";
+            $body .= "<li class='profile_addfriend_disabled' title=\"$li_title\"><img src='$LJ::IMGPREFIX/profile_icons/add-friend-disabled.png?v=14658' alt='' />$text</li>";
         }
     }
 
