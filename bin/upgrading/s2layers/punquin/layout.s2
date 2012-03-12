@@ -221,7 +221,6 @@ propgroup text {
   property use text_spam_comment;
   property use text_read_spam_comments;
   property use text_read_all_spam_comments;
-  property use text_view_games;
 }
 set text_gotop = "Go to Top";
 set text_left_comments = "(";
@@ -389,10 +388,6 @@ function print_sidebar(Page p) {
                            lang_viewname($v) :
                            "<a href='$p.view_url{$v}'>"+lang_viewname($v)+"</a>") + "<br />\n";
     }
-    var string games;
-    if ($p.view_my_games) {
-        $games = "&gt; <a href=\"$p.journal.website_url/profile#apps\">$*text_view_games</a><br />";
-    }
 
     # Table Wrapper
     "<!-- Begin Main Sidebar -->\n<td valign='top' align='$*sidebar_position'>";
@@ -403,7 +398,7 @@ function print_sidebar(Page p) {
     print safe "<div style='text-align:center'><span style='color: $*title_color'><strong>$title</strong></span></div>\n";
 
     # Links
-    print safe "<p>$links\n$website\n$games\n";
+    print safe "<p>$links\n$website\n";
     $p->lay_sidebar_navigation();
 
     # Counter
