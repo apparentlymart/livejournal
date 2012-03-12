@@ -38,9 +38,6 @@ property string text_syndicate { noui = 1; }
 property string text_month_form_btn { noui = 1; }
 property string text_tags_section_header { noui = 1; }
 
-property string text_view_games;
-set text_view_games = "My games";
-
 property use text_read_spam_comments;
 property use text_read_all_spam_comments;
 property use text_spam_comment;
@@ -77,9 +74,7 @@ property bool feeds_always { des = "show base feeds when there is no native";
 	noui = 1;
 	} set feeds_always = true;
 
-property string custom_css {
-	string_mode = "css";
-	} set custom_css = "";
+
 property string custom_ie_css {
 	string_mode = "css";
 	} set custom_ie_css = "";
@@ -243,7 +238,6 @@ function _extralinks() : string[][] {
 			["post",$*_{"post_text"},$*_{"post_link"}],
 			["rss",$*_{"rss_text"},$*_{"rss_link"}],
 			["atom",$*_{"atom_text"},$*_{"atom_link"}],
-			["games",$*_{"games_text"},$*_{"games_link"}]
 		];
 }
 function _navlist() : string[][] {
@@ -416,10 +410,6 @@ function _Header {
 #		$*_{"ff_link"} = get_url($p.journal,"friendsfriends");
 #		$*_{"ff_text"} = $*text_view_friendsfriends;
 #	}
-
-# games link
-$*_{"games_link"} = "$*_{"base"}/profile#games";
-$*_{"games_text"} = $*text_view_games;
 
 # Navigation and is_first
 	if ($p.view == "friends") { var FriendsPage pp = $p as FriendsPage;
