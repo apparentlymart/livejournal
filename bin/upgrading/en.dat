@@ -8034,6 +8034,10 @@ widget.customizetheme.nav.style=Style
 widget.customizetheme.title|staleness=1
 widget.customizetheme.title=Customize Your Theme
 
+widget.collapse=Collapse
+
+widget.expand=Expand
+
 widget.featuredstyles.morestyles|staleness=1
 widget.featuredstyles.morestyles=More great styles
 
