@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 sub ajax { 1 }
 sub authas { 1 }
-sub need_res { qw( js/jquery/jquery.storage.js
+sub need_res { qw(
                     js/jquery/jquery.hotkeys.js
                     js/jquery/jquery.lj.s2editSearchBox.js
                     js/ace/ace.js
