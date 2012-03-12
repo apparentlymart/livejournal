@@ -60,6 +60,10 @@
 
 .loggingin=Logging in to server...
 
+.msg.newalbums=Try new PhotoAlbums.
+
+.msg.newalbums.organise=Organise your photos and images with LiveJournal PhotoAlbums.
+
 .noneother=None, or other:
 
 .note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
