@@ -267,7 +267,6 @@ propgroup text {
     property use text_spam_comment;
     property use text_read_spam_comments;
     property use text_read_all_spam_comments;
-    property use text_view_games;
 }
 propgroup customcss {
     property use include_default_stylesheet;
@@ -585,10 +584,7 @@ function Page::print ()
                            "<b>"+lang_viewname($v)+"</b>" :
                            "<a class='index' href='$.view_url{$v}'>"+lang_viewname($v)+"</a>");
     }
-    if ($.view_my_games) {
-        $links = $links + "|<a href=\"$.journal.website_url/profile#apps\">$*text_view_games</a>";
-    }
-
+   
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n
     <head>\n<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />\n""";
 
