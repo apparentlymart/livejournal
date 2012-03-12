@@ -2423,8 +2423,9 @@ sub postevent {
                 return fail($err, 507);
             }
 
-            $res->{delayedid} = $entry->delayedid;
-            $res->{type}      = 'delayed';
+            $res->{'delayedid'} = $entry->delayedid;
+            $res->{'type'}      = 'delayed';
+            $res->{'url'}       = $entry->url;
 
             $u->set_prop( {"dupsig_post" => "$dupsig:" . $entry->delayedid . ":0"} );
             $release->();
