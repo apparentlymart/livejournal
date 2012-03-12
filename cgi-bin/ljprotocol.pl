@@ -3567,8 +3567,9 @@ sub getevents {
             else {
                 return fail( $err, 218 );
             }
+
+            return $res;
         }
-        return $res;
     }
 
     # build the query to get log rows.  each selecttype branch is
