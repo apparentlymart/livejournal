@@ -226,7 +226,6 @@ propgroup text {
   property use text_spam_comment;
   property use text_read_spam_comments;
   property use text_read_all_spam_comments;
-  property use text_view_games;
 }
 set text_left_comments = "comments: ";
 set text_btwn_comments = " or ";
@@ -325,10 +324,6 @@ function captionbar (Page p, bool top) {
                            lang_viewname($v) :
                            "<a href='$p.view_url{$v}'>"+lang_viewname($v)+"</a>") + ".</td></tr>\n";
     }
-    var string games;
-    if ($p.view_my_games) {
-        $games = "<tr><td>View:</td><td><a href=\"$p.journal.website_url/profile#apps\">$*text_view_games</a>";
-    }
 
     var string captionbar_userpicbox_style = "background-color: $*captionbar_userpicbox_color";
     """
@@ -340,7 +335,7 @@ function captionbar (Page p, bool top) {
     <table border='0'>
       $links
       $website
-      $games""";
+      """;
       $p->print_linklist();
       """
       <tr>
