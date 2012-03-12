@@ -258,8 +258,7 @@
 				display: none;
 				}
 			#updateForm #metainfo .entrydate-delayed.entrydate-changeit .entrydate-title-until,
-			#updateForm #metainfo .entrydate-delayed.entrydate-until .entrydate-title-post,
-			#js #updateForm #metainfo .entrydate-delayed.entrydate.entrydate-until .entrydate-title-until {
+			#updateForm #metainfo .entrydate-delayed.entrydate-until .entrydate-title-post {
 				display: none;
 				}
 			#updateForm #metainfo .entrydate-delayed.entrydate.entrydate-until .entrydate-title-until {

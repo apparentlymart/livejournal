@@ -590,11 +590,12 @@ sub render_metainfo_block {
         $out .= qq{
             <label class="title entrydate-title-post">$BML::ML{'entryform.post'}</label>
         };
+        $out .= qq{
+            <label class="title entrydate-title-until">$BML::ML{'entryform.postponed.until'}</label>
+        };
     }
 
-    $out .= qq{
-        <label class="title entrydate-title-until">$BML::ML{'entryform.postponed.until'}</label>
-    };
+
 
     my $backdateout = "";
     if (!LJ::is_enabled("delayed_entries")) {
