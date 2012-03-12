@@ -192,7 +192,7 @@ span.inputcontainer {
 	position: relative;
 	margin: 0 15px 20px 15px;
 	border-radius: 6px;
-	background-color: #4e92c1;
+	background: url(/img/pics/sh.png) 0 50% no-repeat #4e92c1;
 	}
 	.b-pics-promo-wrapper .b-pics-promo-box {
 		display: block;
