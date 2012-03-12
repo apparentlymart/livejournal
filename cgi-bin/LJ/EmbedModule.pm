@@ -106,11 +106,7 @@ sub expand_entry {
 }
 
 sub _expand_tag {
-    my $class = shift;
-    my $journal = shift;
-    my $tag = shift;
-    my $edit = shift;
-    my %opts = @_;
+    my( $class, $journal, $tag, $edit, %opts ) = @_;
 
     my %attrs = $tag =~ /(\w+)="?(\-?\d+)"?/g;
 
@@ -143,7 +139,7 @@ sub _expand_tag {
             $out .= 'vid="'.$1.'" source="rutube" ';
         } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
             $out .= 'vid="'.$1.'" source="yandex" ';
-        } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) {
+        } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) { #"
             $out .= 'vid="'.$1.'" source="mail.ru" ';
         } elsif ($code =~ m!http://(vkontakte\.ru|vk\.com)/video_ext!) {
             $out .= 'source="'.$1.'" ';
