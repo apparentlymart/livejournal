@@ -310,7 +310,6 @@ propgroup text {
     property use text_spam_comment;
     property use text_read_spam_comments;
     property use text_read_all_spam_comments;
-    property use text_view_games;
 }
 
 propgroup customcss {
@@ -1437,9 +1436,6 @@ function print_sidebar_profile() {
     $url  = $p.journal.website_url;
     $text = $p.journal.website_name != "" ? $p.journal.website_name : $*text_website_default_name;
     print safe """<a href="$url">$text</a><br />\n""";
-  }
-  if ($p.view_my_games) {
-    print "<a href=\"$p.journal.website_url/profile#apps\">$*text_view_games</a><br/>";
   }
   if($p isa YearPage) {
     var YearPage yp = $p as YearPage;
