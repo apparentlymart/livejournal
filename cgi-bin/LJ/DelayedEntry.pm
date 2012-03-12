@@ -988,6 +988,10 @@ sub can_post_to {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
+    if ( LJ::is_banned($posterid, $ownerid) ) {
+        return 0;
+    }
+
     my $can_post = ($uowner->is_community() && !$need_moderated) || $can_manage;
 
     if ($can_post) {
