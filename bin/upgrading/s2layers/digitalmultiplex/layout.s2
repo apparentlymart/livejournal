@@ -283,7 +283,6 @@ propgroup text {
     property use text_spam_comment;
     property use text_read_spam_comments;
     property use text_read_all_spam_comments;
-    property use text_view_games;
     property use text_share;
 }
 propgroup sidebar {
@@ -416,11 +415,8 @@ function print_sidebar_navigation() {
             $navigation = """$navigation<tr><td width="100%">$*text_sidebar_link_separator<a href="$page.view_url{$v}">""" +  lang_viewname($v) + "</a></td></tr>";
         }
     }
-    var string games;
-    if ($page.view_my_games) {
-        $games = """<tr><td>$*text_sidebar_link_separator<a href="$page.journal.website_url/profile#apps">$*text_view_games</a></td></tr>""";
-    }
-    $navigation = $navigation + $website + $games;
+
+    $navigation = $navigation + $website;
     #I REMOVE THESE LINES AND REPLACE IT BY NEXT, BECAUSE I NEED TO PRINT INTO BROWSER DIRECTLY INSTEAD CONCATENATE INTO VARIABLE AND THAN PRINT ('cause link->print_raw() cannot into variables)
     #IF YOU CAN FIX IT, DO IT
     #if ($page->lay_sidebar_view_navigation() != "") {
