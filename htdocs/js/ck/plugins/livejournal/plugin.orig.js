@@ -1274,13 +1274,15 @@
 							for (var i = 0, l = ljTags.count(); i < l; i++) {
 								var ljTag = ljTags.getItem(i);
 
-								var userName = ljTag.getAttribute('user');
-								var userTitle = ljTag.getAttribute('title');
-								if (name == (userTitle ? userName + ':' + userTitle : userName)) {
-									var newLjTag = new CKEDITOR.dom.element.createFromHtml(ljUsers[name], editor.document);
-									newLjTag.setAttribute('lj-cmd', 'LJUserLink');
-									ljTag.insertBeforeMe(newLjTag);
-									ljTag.remove();
+								if (ljTag) {
+									var userName = ljTag.getAttribute('user');
+									var userTitle = ljTag.getAttribute('title');
+									if (name == (userTitle ? userName + ':' + userTitle : userName)) {
+										var newLjTag = new CKEDITOR.dom.element.createFromHtml(ljUsers[name], editor.document);
+										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
+										ljTag.insertBeforeMe(newLjTag);
+										ljTag.remove();
+									}
 								}
 							}
 
