@@ -577,7 +577,7 @@ sub render_metainfo_block {
     };
 
     if ( $opts->{'mode'} eq "edit" && $can_edit_date ) {
-        if ( $opts->{'delayed'} ) {
+        if ( $opts->{'delayedid'} ) {
             $out .= qq{
                 <label class="title entrydate-title-date">$BML::ML{'entryform.postponed.until'}</label>
             };
