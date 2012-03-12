@@ -260,3 +260,100 @@ jQuery(document).click(function(e)
 	} );
 } )();
 
+(function() {
+	var storage = {
+		init: function() {
+			this._store = jQuery.storage.getItem('placeholders') || '';
+		},
+
+		makeHash: function(link) {
+			return ' ' + encodeURIComponent(link) + ' ';
+		},
+
+		inStorage: function(link) {
+			return this._store.indexOf(this.makeHash(link)) !== -1;
+		},
+
+		addUrl: function(link) {
+			if (this.inStorage(link)) { return; }
+
+			this._store += this.makeHash(link);
+			jQuery.storage.setItem('placeholders', this._store);
+		}
+	};
+
+	storage.init();
+
+	var placeholders = {
+		image: {
+			selector: '.b-mediaplaceholder-photo',
+			loading: 'b-mediaplaceholder-processing',
+			init: function() {
+				var self = this;
+				doc.on('click', this.selector, function(ev) { 
+					self.handler(this, ev);
+				});
+			},
+
+			handler: function(el, html) {
+				var im = new Image();
+
+				im.onload = im.onerror = jQuery.delayedCallback(this.imgLoaded.bind(this, el, im), 500);
+				im.src = el.href;
+				el.className += ' ' + this.loading;
+
+				storage.addUrl(el.href);
+			},
+
+			imgLoaded: function(el, image) {
+				var img = jQuery('<img />').attr('src', image.src),
+					$el = jQuery(el),
+					href = $el.data('href');
+
+				var style = $el.attr('style'),
+					imw, imh;
+
+				if (style) {
+					//easy way to parse style string
+					var d = jQuery('<div>').attr('style', style);
+					imw = d.width();
+					imh = d.height();
+
+					if (imw) { img.width(imw); }
+					if (imh) { img.height(imh); }
+				}
+
+				if (href && href.length > 0) {
+					img = jQuery('<a>', { href: href }).append(img);
+					$el.next('.b-mediaplaceholder-external').remove();
+				}
+
+				$el.replaceWith(img);
+			}
+		},
+
+		video: {
+			handler: function(link, html) {
+				link.parentNode.replaceChild(jQuery(unescape(html))[0], link);
+			}
+		}
+	};
+	// use replaceChild for no blink scroll effect
+
+	// Placeholder onclick event
+	LiveJournal.placeholderClick = function(el, html) {
+		var type = (html === 'image') ? html : 'video';
+
+		placeholders[type].handler(el, html);
+		return false;
+	};
+
+	LiveJournal.register_hook('page_load', function() {
+		jQuery('.b-mediaplaceholder').each(function() {
+			if(storage.inStorage(this.href)) {
+				this.onclick.apply(this);
+			}
+		});
+	});
+})();
+
