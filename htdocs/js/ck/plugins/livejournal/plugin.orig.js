@@ -665,9 +665,8 @@
 
 						var selection = new CKEDITOR.dom.selection(editor.document),
 							ranges = selection.getRanges(),
-							startContainer,
 							iframeOpen = new CKEDITOR.dom.element('iframe', editor.document),
-							iframeClose = new CKEDITOR.dom.element('iframe', editor.document);
+							iframeClose = iframeOpen.clone();
 
 						iframeOpen.setAttribute('lj-cmd', cmdName);
 						iframeOpen.setAttribute('lj-class', tagName + ' ' + tagName + '-open');
@@ -686,35 +685,31 @@
 						var range = ranges[0];
 						selection.lock();
 
-						var firstBR = new CKEDITOR.dom.element('br', editor.document);
-						var lastBR = new CKEDITOR.dom.element('br', editor.document);
+						var br = new CKEDITOR.dom.element('br', editor.document),
+							firstBR = br.clone(),
+							lastBR = br.clone();
 
-						if (range.collapsed === true) {
-							editor.insertElement(iframeClose);
-							iframeClose.insertBeforeMe(iframeOpen);
-							iframeClose.insertBeforeMe(firstBR);
-							iframeClose.insertBeforeMe(lastBR);
-						} else {
-							startContainer = range.getTouchedStartNode();
-							var fragment = new CKEDITOR.dom.documentFragment(editor.document);
-							fragment.append(iframeOpen);
-							fragment.append(firstBR);
+						var fragment = new CKEDITOR.dom.documentFragment(editor.document);
+						fragment.append(br.clone());
+						fragment.append(iframeOpen);
+						fragment.append(firstBR);
+
+						if (range.collapsed === false) {
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								fragment.append(ranges[i].extractContents());
 							}
-							editor.insertElement(iframeClose);
-							iframeClose.insertBeforeMe(fragment);
-							iframeClose.insertBeforeMe(lastBR);
 						}
+
+						fragment.append(lastBR);
+						editor.insertElement(iframeClose);
+						br.clone().insertAfter(iframeClose);
+						iframeClose.insertBeforeMe(fragment);
 
 						range.setStart(firstBR, 0);
 						range.setEnd(lastBR, 0);
 						selection.unlock();
 
 						selection.selectRanges(ranges);
-
-						iframeOpen.insertBeforeMe(new CKEDITOR.dom.element('br', editor.document));
-						new CKEDITOR.dom.element('br', editor.document).insertAfter(iframeClose);
 					}
 
 					CKEDITOR.note && CKEDITOR.note.hide(true);
@@ -1213,7 +1208,9 @@
 		afterInit: function(editor) {
 			var dataProcessor = editor.dataProcessor;
 
-			function createDoubleFrame(element, tagName, cmdName) {
+			function createDoubleFrame(element, tagName, cmdName, attrName) {
+				attrName = attrName || 'text';
+
 				var openFrame = new CKEDITOR.htmlParser.element('iframe');
 				openFrame.attributes['lj-class'] = tagName + ' ' + tagName + '-open';
 				openFrame.attributes['class'] = tagName + '-wrap';
@@ -1221,8 +1218,8 @@
 				openFrame.attributes['frameBorder'] = 0;
 				openFrame.attributes['allowTransparency'] = 'true';
 
-				if (element.attributes.hasOwnProperty('text')) {
-					openFrame.attributes.text = element.attributes.text;
+				if (element.attributes.hasOwnProperty(attrName)) {
+					openFrame.attributes.text = element.attributes[attrName];
 				}
 
 				element.children.unshift(openFrame);
@@ -1393,7 +1390,7 @@
 						createDoubleFrame(element, 'lj-cut', 'LJCut');
 					},
 					'lj-spoiler': function (element) {
-						createDoubleFrame(element, 'lj-spoiler', 'LJSpoiler');
+						createDoubleFrame(element, 'lj-spoiler', 'LJSpoiler', 'title');
 					},
 					'iframe': function(element) {
 						if (element.attributes['lj-class'] && element.attributes['lj-class'].indexOf('lj-') + 1 == 1) {
@@ -1453,6 +1450,7 @@
 					iframe: function(element) {
 						var newElement = element,
 							isCanBeNested = false,
+							attrName = 'text',
 							className = /lj-[a-z]+/i.exec(element.attributes['lj-class']);
 
 						if (className) {
@@ -1502,6 +1500,7 @@
 								break;
 							case 'lj-spoiler':
 								isCanBeNested = true;
+								attrName = 'title';
 							case 'lj-cut':
 								if (element.attributes['lj-class'].indexOf(className + '-open') + 1) {
 									var node = element.next,
@@ -1510,7 +1509,7 @@
 									newElement = new CKEDITOR.htmlParser.element(className);
 
 									if (element.attributes.hasOwnProperty('text')) {
-										newElement.attributes.text = element.attributes.text;
+										newElement.attributes[attrName] = element.attributes['text'];
 									}
 
 									while (node) {
