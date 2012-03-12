@@ -192,6 +192,19 @@ LiveJournal.placeholderClick = function() {
 					$el = jQuery(el),
 					href = $el.data('href');
 
+				var style = $el.attr('style'),
+					imw, imh;
+
+				if (style) {
+					//easy way to parse style string
+					var d = jQuery('<div>').attr('style', style);
+					imw = d.width();
+					imh = d.height();
+
+					if (imw) { img.width(imw); }
+					if (imh) { img.height(imh); }
+				}
+
 				if (href && href.length > 0) {
 					img = jQuery('<a>', { href: href }).append(img);
 					$el.next('.b-mediaplaceholder-external').remove();
