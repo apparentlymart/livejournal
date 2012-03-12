@@ -103,6 +103,8 @@ my %tag_substitute = (
 # slash and get the proper behavior from a browser.
 my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param|lj-embed)$/i;
 
+our $EnableDynamicElements = undef;
+
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
 # class: text
@@ -155,7 +157,14 @@ sub clean
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
-    my $ljspoiler_allowed = $opts->{'textonly'}? 0 : 1;
+
+    my $enable_dynamic_elements = $EnableDynamicElements;
+    unless ( defined $enable_dynamic_elements ) {
+        $enable_dynamic_elements = LJ::is_web_context();
+    }
+    $enable_dynamic_elements = 0 if $opts->{'textonly'};
+
+    my $ljspoiler_allowed = $enable_dynamic_elements;
 
     my $poster = LJ::load_userid($opts->{posterid});
     my $put_nofollow = not ($poster and $poster->get_cap('paid') and not $poster->get_cap('trynbuy'));
@@ -466,7 +475,9 @@ sub clean
                 $newdata .= Encode::decode_utf8(LJ::WishElement->check_and_expand_entry($userid, $wishid));
             }
 
-            if ( $tag eq 'lj-spoiler' and $ljspoiler_allowed ) {
+            if ( $tag eq 'lj-spoiler' ) {
+                next TOKEN unless $ljspoiler_allowed;
+
                 my $title = $attr->{'title'} ||
                     $attr->{'text'} ||
                     Encode::decode_utf8(
@@ -1462,7 +1473,7 @@ sub clean
             } elsif ( $tag eq 'lj-lang-container' ) {
                 shift @lj_lang_otherwise;
             } elsif ( $tag eq 'lj-spoiler' ) {
-                if ($ljspoilers_open) {
+                if ($ljspoiler_allowed && $ljspoilers_open) {
                     $newdata .= qq{</div></div>};
                     $ljspoilers_open--;
                 }
