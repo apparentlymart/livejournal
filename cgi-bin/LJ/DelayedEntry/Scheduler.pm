@@ -139,8 +139,8 @@ sub on_pulse {
     eval {
         while ( my $entries = __load_delayed_entries($dbh) ) {
             foreach my $entry (@$entries) {
-                if (!LJ::DelayedEntry::can_post_to($entry->journal,
-                                                   $entry->poster)) {
+                if (!LJ::DelayedEntry::can_post_to($entry->poster,
+                                                   $entry->journal)) {
                     
                     if ($verbose) {
                         print "The entry with subject " . $entry->subject;
