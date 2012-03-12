@@ -121,7 +121,7 @@ sub __notify_user {
         'charset'   => 'utf-8',
         'subject'   => $subject,
         'body'      => $text,
-        { subject => $subject },
+        { subject => $subject, reason => $subject, },
     });
 }
 
@@ -139,8 +139,8 @@ sub on_pulse {
     eval {
         while ( my $entries = __load_delayed_entries($dbh) ) {
             foreach my $entry (@$entries) {
-                if (!LJ::DelayedEntry::can_post_to($entry->poster,
-                                                   $entry->journal)) {
+                if (!LJ::DelayedEntry::can_post_to($entry->journal,
+                                                   $entry->poster)) {
                     
                     if ($verbose) {
                         print "The entry with subject " . $entry->subject;
