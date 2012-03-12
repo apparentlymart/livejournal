@@ -127,7 +127,6 @@ sub clean
     $$data = Encode::decode_utf8($$data);
 
     my $p = HTML::TokeParser->new($data);
-
     my $wordlength = $opts->{'wordlength'};
     my $addbreaks = $opts->{'addbreaks'};
     my $keepcomments = $opts->{'keepcomments'};
@@ -1189,7 +1188,7 @@ sub clean
                             '</span>' .
                             '</a>';
                         $newdata .= $href_b_link ?
-                            '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . LJ::Lang::ml("mediaplaceholder.link") . '">' .
+                            '<a href="' . $href_b_link .'" class="b-mediaplaceholder-external" title="' . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.link")) . '">' .
                             '<i class="b-mediaplaceholder-bg"></i>' .
                             '<i class="b-mediaplaceholder-pic"></i>' .
                             '<span class="b-mediaplaceholder-inner">' . Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.link")) . '</span>' .
