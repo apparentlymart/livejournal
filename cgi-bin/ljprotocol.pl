@@ -2362,6 +2362,7 @@ sub postevent {
 
                 $res->{'delayedid'} = $delayedid;
                 $res->{'type'}      = 'delayed';
+                $res->{'url'}       = $entry->url;
             } else {
                 $res->{'itemid'} = $parts[1];
                 $res->{'anum'} = $parts[2];
