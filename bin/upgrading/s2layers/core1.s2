@@ -519,6 +519,9 @@ class Page
     var bool showspam
     "Set to true if need show only spam messages.";
     
+    var bool view_my_games
+    "View my games on profilepage.";
+
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
     same for all view types, and use \$this->title, \$this->head and \$this->body to include view-specific
@@ -1274,6 +1277,12 @@ property string text_spam_comment {
 }
 set text_spam_comment = "(Suspicious comment)";
 
+property string text_view_games {
+    des = "Text for view games on profile page";
+    example = "My Games";
+}
+set text_view_games = "My Games";
+
 property string text_tags_page_header {
     des = "Text for the header of the Tags page";
     example = "Visible Tags";
@@ -1365,6 +1374,13 @@ property string text_view_userinfo {
     example = "My Profile";
 }
 
+property string text_view_usergames {
+    des = "Text used to link to the 'My Games' view";
+    maxlength = 20;
+    "size" = 15;
+    example = "My Games";
+}
+
 property string text_view_memories {
     des = "Text used to link to the 'Memories' view";
     maxlength = 20;
@@ -1386,6 +1402,7 @@ set text_view_friendsfriends = "Friends of Friends";
 set text_view_friendsfriends_filter = "Friends of Friends (Custom filter)";
 set text_view_archive = "Archive";
 set text_view_userinfo = "User Info";
+set text_view_usergames = "My Games";
 set text_view_memories = "Memories";
 set text_view_month = "View Subjects";
 
@@ -2225,6 +2242,7 @@ function lang_viewname(string viewid) [notags] : string
     if ($viewid == "day") { return "Day"; }
     if ($viewid == "month") { return "Month"; }
     if ($viewid == "userinfo") { return $*text_view_userinfo; }
+    if ($viewid == "usergames") { return $*text_view_usergames; }
     if ($viewid == "entry") { return "Read Comments"; }
     if ($viewid == "reply") { return "Post Comment"; }
     if ($viewid == "tags") { return "Tags"; }
