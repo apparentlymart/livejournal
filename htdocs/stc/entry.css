@@ -162,6 +162,7 @@
 	}
 	#updateForm #metainfo {
 		display: table;
+		width: 100%;
 		margin: -3px 0 20px 0;
 		}
 		#updateForm #metainfo LI {
