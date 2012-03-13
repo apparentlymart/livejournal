@@ -293,8 +293,8 @@ sub FriendsPage
             \$text,
             {
                  'preformatted'        => $logprops{$datakey}->{'opt_preformatted'},
-                 'cuturl'              => $entry_obj->prop('reposted_from') || $entry_obj->url(%urlopts_style),
-                 'entry_url'           => $entry_obj->prop('reposted_from') || $entry_obj->url,
+                 'cuturl'              => $entry_obj->url(%urlopts_style),
+                 'entry_url'           => $entry_obj->url,
                  'ljcut_disable'       => $ljcut_disable,
                  'suspend_msg'         => $suspend_msg,
                  'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0,

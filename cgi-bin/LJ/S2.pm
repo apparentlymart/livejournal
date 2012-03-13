@@ -4860,8 +4860,8 @@ sub clear_entry_text {
     my $text = $entry->event_raw;
     LJ::CleanHTML::clean_event( \$text, {
         'preformatted'          => $entry->prop('opt_preformatted'),
-        'cuturl'                => $entry->prop('reposted_from') || $entry->url,
-        'entry_url'             => $entry->prop('reposted_from') || $entry->url,
+        'cuturl'                => $entry->url,
+        'entry_url'             => $entry->url,
         'ljcut_disable'         => 0,
         'journalid'             => $entry->journalid,
         'posterid'              => $entry->posterid,
