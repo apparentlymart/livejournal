@@ -496,14 +496,28 @@ sub clean
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
-                        $newdata .= LJ::run_hook("transform_embed", [$token],
-                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}, remove_video_sizes => $opts->{remove_video_sizes}) || "";
+                        $newdata .= LJ::run_hook(
+                            "transform_embed",
+                            [$token],
+                            nocheck            => $transform_embed_nocheck,
+                            wmode              => $transform_embed_wmode,
+                            video_placeholders => $opts->{video_placeholders},
+                            remove_video_sizes => $opts->{remove_video_sizes},
+                            no_encode          => $opts->{no_encode},
+                        ) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
-                        my $expanded = LJ::run_hook("transform_embed", \@capture,
-                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode, video_placeholders => $opts->{video_placeholders}, remove_video_sizes => $opts->{remove_video_sizes});
+                        my $expanded = LJ::run_hook(
+                            "transform_embed",
+                            \@capture,
+                            nocheck            => $transform_embed_nocheck,
+                            wmode              => $transform_embed_wmode,
+                            video_placeholders => $opts->{video_placeholders},
+                            remove_video_sizes => $opts->{remove_video_sizes},
+                            no_encode          => $opts->{no_encode},
+                        );
                         $newdata .= $expanded || "";
                     });
                     next TOKEN;
@@ -2126,6 +2140,7 @@ sub clean_comment
         'video_placeholders' => $opts->{'video_placeholders'},
         'remove_img_sizes'   => $opts->{'remove_img_sizes'},
         'remove_video_sizes' => $opts->{'remove_video_sizes'},
+        'no_encode'          => $opts->{'no_encode'},
     });
 }
 
