@@ -15,8 +15,9 @@
         return LJ::Maps->get_iframe_source(%GET);
     } elsif ($mode eq 'tackthis'){
         ##
-        my $api = $GET{api};
-        return qq|<script src="http://www.tackthis.com/widget-validate-iframe.php?api=$api" type="text/javascript"></script>|;
+        my $api     = $GET{api};
+        my $pid_arg = $GET{pid} ? "&pid=$GET{pid}" : ""; ## display specified product id
+        return qq|<script src="http://www.tackthis.com/widget-validate-iframe.php?api=$api$pid_arg" type="text/javascript"></script>|;
 
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
