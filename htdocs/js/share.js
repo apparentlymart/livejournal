@@ -237,27 +237,9 @@ window.LJShare.link = function( opts, node ) {
 		dom.find( selectors.links ).click( function( ev )
 		{
 			dom.bubble('hide');
-			var service = $( this ).attr( 'data-service' ),
-				width, height;
-				
-			if( global_options.services[ service ].openInTab ) {
-				if( $.browser.msie ) {
-					ev.preventDefault();
-					width = $( window ).width();
-					height = $( window ).height();
-					window.open( this.href, null, 'toolbar=yes,menubar=yes,status=1,location=yes,scrollbars=yes,resizable=yes,width=' + width + ',height=' + height );
-				} else {
-					//other browsers just open link in new tab
-					this.target = "_blank";
-				}
-			} else {
-				ev.preventDefault();
-				width = global_options.services[ service ].width || 640;
-				height = global_options.services[ service ].height || 480;
-				var w = window.open(this.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
-												//double encoded url?!
-				pollForWindowClose(w, service, decodeURIComponent(decodeURIComponent(options.url)));
-			}
+			var service = $( this ).attr( 'data-service' );
+
+			LJShare.openPopupEvent(this, ev, options.url, service);
 		} );
 	}
 
@@ -278,6 +260,33 @@ window.LJShare.link = function( opts, node ) {
 	} );
 
 	return this;
+};
+
+/**
+ * open popup functionality was exposed to allow the modification of its behavior
+ * by external scripts
+ */
+window.LJShare.openPopupEvent = function(el, ev, url, service) {
+	var width, height;
+
+	if( global_options.services[ service ].openInTab ) {
+		if( $.browser.msie ) {
+			ev.preventDefault();
+			width = $( window ).width();
+			height = $( window ).height();
+			window.open( el.href, null, 'toolbar=yes,menubar=yes,status=1,location=yes,scrollbars=yes,resizable=yes,width=' + width + ',height=' + height );
+		} else {
+			//other browsers just open link in new tab
+			el.target = "_blank";
+		}
+	} else {
+		ev.preventDefault();
+		width = global_options.services[ service ].width || 640;
+		height = global_options.services[ service ].height || 480;
+		w = window.open(el.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
+										//double encoded url?!
+		pollForWindowClose(w, service, decodeURIComponent(decodeURIComponent(url)));
+	}
 };
 
 window.LJShare.entry = function( opts ) {
