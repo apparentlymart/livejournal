@@ -1354,6 +1354,7 @@ sub clean
                                 height             => $height,
                                 img                => "$LJ::IMGPREFIX/videoplaceholder.png",
                                 remove_video_sizes => $opts->{remove_video_sizes},
+                                no_encode          => 1,
                             );
                         }
                         else {

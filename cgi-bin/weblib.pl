@@ -2046,8 +2046,8 @@ sub placeholder_link {
                 <span class="b-mediaplaceholder-outer">
                     <span class="b-mediaplaceholder-inner">
                         <i class="b-mediaplaceholder-pic"></i>
-                        <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewvideo"))) . qq{</span>
-                        <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading"))) . qq{</span>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-view">} . ($opts{no_encode} ? Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewvideo")) : Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.viewvideo")))) . qq{</span>
+                        <span class="b-mediaplaceholder-label b-mediaplaceholder-loading">} . ($opts{no_encode} ? Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading")) : Encode::encode_utf8(Encode::decode_utf8(LJ::Lang::ml("mediaplaceholder.loading")))) . qq{</span>
                     </span>
                 </span>
             </a>
