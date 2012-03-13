@@ -83,7 +83,7 @@ sub __send_error {
                                         'email.delayed_error.subject'),
         'body'      => LJ::Lang::get_text($poster->prop('browselang'),
                                         'email.delayed_error.body',
-        {subject => $subject, reason=>$error}),
+                                        {subject => $subject, reason=>$error}),
     });
 }
 
@@ -121,7 +121,6 @@ sub __notify_user {
         'charset'   => 'utf-8',
         'subject'   => $subject,
         'body'      => $text,
-        { subject => $subject, reason => $subject, },
     });
 }
 
