@@ -8234,9 +8234,9 @@ sub get_daycounts {
     };
 
     my ($locked) = $dbcr->selectrow_array(
-        'SELECT GET_LOCK(?,10)', undef, $memkey->[1] );
+        'SELECT GET_LOCK(?,2)', undef, $memkey->[1] );
 
-    return unless $locked; ## 10 seconds expired
+    return [] unless $locked; ## 2 seconds expired
 
     $list = LJ::MemCache::get($memkey);
     if ($list) {
