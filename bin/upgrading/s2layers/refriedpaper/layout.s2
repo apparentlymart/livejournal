@@ -821,7 +821,8 @@ function EntryLite::print_linkbar() {
       $url          = $link.url;
       $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
       if($url != "") {
-        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+        print """<a href="$url">$text</a>$btwn_comments""";
+        $link->print_raw();
       }
     }
   }
