@@ -3770,11 +3770,11 @@ A.lj-button-link:active {
 
 
 /* Image & Video Placeholder */
-HTML BODY DIV .b-mediaplaceholder:link,
-HTML BODY DIV .b-mediaplaceholder:visited,
-HTML BODY DIV .b-mediaplaceholder:hover,
-HTML BODY DIV .b-mediaplaceholder:active,
-HTML BODY DIV .b-mediaplaceholder:focus {
+HTML BODY * .b-mediaplaceholder:link,
+HTML BODY * .b-mediaplaceholder:visited,
+HTML BODY * .b-mediaplaceholder:hover,
+HTML BODY * .b-mediaplaceholder:active,
+HTML BODY * .b-mediaplaceholder:focus {
 	position: relative;
 	top: auto;
 	left: auto;
@@ -3798,11 +3798,11 @@ HTML BODY DIV .b-mediaplaceholder:focus {
 	*display: inline;
 	*zoom: 1;
 	}
-HTML BODY DIV .b-mediaplaceholder-good:link,
-HTML BODY DIV .b-mediaplaceholder-good:visited,
-HTML BODY DIV .b-mediaplaceholder-good:hover,
-HTML BODY DIV .b-mediaplaceholder-good:active,
-HTML BODY DIV .b-mediaplaceholder-good:focus {
+HTML BODY * .b-mediaplaceholder-good:link,
+HTML BODY * .b-mediaplaceholder-good:visited,
+HTML BODY * .b-mediaplaceholder-good:hover,
+HTML BODY * .b-mediaplaceholder-good:active,
+HTML BODY * .b-mediaplaceholder-good:focus {
 	height: 35px;
 	-moz-border-radius: 5px !important;
 	border-radius: 5px !important;
@@ -3839,14 +3839,14 @@ HTML BODY DIV .b-mediaplaceholder-good:focus {
 		cursor: pointer;
 		*zoom: 1;
 		}
-	HTML BODY DIV .b-mediaplaceholder:hover .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder:active .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder:focus .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder-processing:link .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder-processing:visited .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder-processing:hover .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder-processing:active .b-mediaplaceholder-inner,
-	HTML BODY DIV .b-mediaplaceholder-processing:focus .b-mediaplaceholder-inner {
+	HTML BODY * .b-mediaplaceholder:hover .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder:active .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder:focus .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder-processing:link .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder-processing:visited .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder-processing:hover .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder-processing:active .b-mediaplaceholder-inner,
+	HTML BODY * .b-mediaplaceholder-processing:focus .b-mediaplaceholder-inner {
 		border: 1px solid rgb(220,220,220) !important;
 		border: 1px solid rgba(220,220,220,0.45) !important;
 		background: rgb(0,0,0) !important;
@@ -3900,11 +3900,11 @@ HTML BODY DIV .b-mediaplaceholder-good:focus {
 		.b-mediaplaceholder-processing .b-mediaplaceholder-view {
 			display: none;
 			}
-HTML BODY DIV .b-mediaplaceholder-external:link,
-HTML BODY DIV .b-mediaplaceholder-external:visited,
-HTML BODY DIV .b-mediaplaceholder-external:hover,
-HTML BODY DIV .b-mediaplaceholder-external:active,
-HTML BODY DIV .b-mediaplaceholder-external:focus {
+HTML BODY * .b-mediaplaceholder-external:link,
+HTML BODY * .b-mediaplaceholder-external:visited,
+HTML BODY * .b-mediaplaceholder-external:hover,
+HTML BODY * .b-mediaplaceholder-external:active,
+HTML BODY * .b-mediaplaceholder-external:focus {
 	position: relative;
 	top: auto;
 	left: auto;
@@ -3924,11 +3924,11 @@ HTML BODY DIV .b-mediaplaceholder-external:focus {
 	*display: inline;
 	*zoom: 1;
 	}
-HTML#js BODY DIV .b-mediaplaceholder-external:link,
-HTML#js BODY DIV .b-mediaplaceholder-external:visited,
-HTML#js BODY DIV .b-mediaplaceholder-external:hover,
-HTML#js BODY DIV .b-mediaplaceholder-external:active,
-HTML#js BODY DIV .b-mediaplaceholder-external:focus {
+HTML#js BODY * .b-mediaplaceholder-external:link,
+HTML#js BODY * .b-mediaplaceholder-external:visited,
+HTML#js BODY * .b-mediaplaceholder-external:hover,
+HTML#js BODY * .b-mediaplaceholder-external:active,
+HTML#js BODY * .b-mediaplaceholder-external:focus {
 	display: none;
 	}
 	.b-mediaplaceholder-external .b-mediaplaceholder-bg {
