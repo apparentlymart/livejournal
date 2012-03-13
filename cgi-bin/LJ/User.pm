@@ -8230,9 +8230,12 @@ sub get_daycounts {
     ## get lock to prevent multiple apache processes to execute the sql below.
     ## one process runs, the other wait for results 
     my $release_lock = sub {
-        $dbcr->selectrow_array("SELECT RELEASE_LOCK('$memkey')");
+        $dbcr->do( 'SELECT RELEASE_LOCK(?)', undef, $memkey->[1] );
     };
-    my $locked = $dbcr->selectrow_array("SELECT GET_LOCK('$memkey',10)");
+
+    my ($locked) = $dbcr->selectrow_array(
+        'SELECT GET_LOCK(?,10)', undef, $memkey->[1] );
+
     return unless $locked; ## 10 seconds expired
 
     $list = LJ::MemCache::get($memkey);
@@ -8303,39 +8306,49 @@ sub get_month_daycounts {
     ## is the time of the creation of the list. The memcache is
     ## invalid if there are new entries in journal since that time.
     ##
-    my $memkey = [ $u->userid,
-        join( ':', 'dayct3', 'month', $year, $month, $u->userid, @$kind ) ];
+    my $memkey_base =
+        join( ':', 'dayct3', 'month', $year, $month, $u->userid, @$kind );
+    my $memkey = [ $u->userid, $memkey_base ];
+    my $memlockkey = [ $u->userid, $memkey_base . ':lock' ];
+
+    my $lock_acquired = 0;
+
+    my $lock = sub {
+        return if $lock_acquired;
+        $lock_acquired = 1;
+
+        return LJ::MemCache::add( $memlockkey, 1, 2 );
+    };
+
+    my $unlock = sub {
+        LJ::MemCache::delete($memlockkey);
+        $lock_acquired = 0;
+    };
 
     my $list = LJ::MemCache::get($memkey);
     if ($list) {
         my $list_create_time = shift @$list;
+        my $list_exptime     = shift @$list;
+
+        my $need_recalculate = 0;
 
         my $timeupdate       = $u->timeupdate;
         my $timeupdate_year  = ( gmtime $timeupdate )[5] + 1900;
         my $timeupdate_month = ( gmtime $timeupdate )[4] + 1;
 
-        return $list if $timeupdate_year != $year ||
-            $timeupdate_month != $month ||
-            $u->timeupdate <= $list_create_time;
+        $need_recalculate = 1
+            if $timeupdate_year == $year &&
+            $timeupdate_month == $month &&
+            $u->timeupdate > $list_create_time;
+
+        if ($need_recalculate) {
+            $need_recalculate = 0 unless $lock->();
+        }
+
+        return $list unless $need_recalculate;
     }
 
-    my $dbcr = LJ::get_cluster_def_reader($u) or return;
-    
-    ## get lock to prevent multiple apache processes to execute the sql below.
-    ## one process runs, the other wait for results 
-    my $release_lock = sub {
-        $dbcr->selectrow_array("SELECT RELEASE_LOCK('$memkey')");
-    };
-    my $locked = $dbcr->selectrow_array("SELECT GET_LOCK('$memkey',10)");
-    return unless $locked; ## 10 seconds expired
-
-    $list = LJ::MemCache::get($memkey);
-    if ($list) {
-        ## other process may have filled the data while we waited for the lock
-        my $list_create_time = shift @$list;
-        $release_lock->();
-        return $list;
-    }
+    return [] unless $lock->();
 
     my ( $selecttype, $gmask ) = @$kind;
     my $secwhere;
@@ -8348,6 +8361,8 @@ sub get_month_daycounts {
             "(security='usemask' AND allowmask & $gmask) )";
     }
 
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    
     my $sth = $dbcr->prepare("SELECT day, COUNT(*) ".
                              "FROM log2 WHERE journalid=? $secwhere AND " .
                              "year=? AND month=? " .
@@ -8360,10 +8375,10 @@ sub get_month_daycounts {
         push @$days, [ int($year), int($month), int($d), int($c) ];
     }
 
-    my $exptime = 3600 + int( rand(3600) );
-    LJ::MemCache::set( $memkey, [time, @$days], $exptime );
+    my $exptime = time + 3600 + int( rand(3600) );
+    LJ::MemCache::set( $memkey, [ time, $exptime, @$days ] );
 
-    $release_lock->();
+    $unlock->();
     return $days;
 }
 
