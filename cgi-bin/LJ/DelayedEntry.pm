@@ -380,7 +380,7 @@ sub allowmask {
 
 sub security {
     my ($self) = @_;
-    return $self->data->{security};
+    return $self->data->{security} || '';
 }
 
 sub props {
