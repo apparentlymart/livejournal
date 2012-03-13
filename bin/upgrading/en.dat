@@ -3565,6 +3565,8 @@ ljlib.pageofpages=Page [[page]] of [[total]]
 
 ljspotlight.text=We're keeping an eye out for interesting communities.  Check out [[journal]] to see some great ways people use LJ.
 
+ljtimes.reskining.redigo=Download guide
+
 lostinfo.head=Forget something?
 
 lostinfo.text2=If you forgot your username or password, <a [[aopts]]>recover it here</a>.
