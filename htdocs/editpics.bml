@@ -75,7 +75,6 @@
 
     # get userpics and count 'em
     my @userpics = LJ::Userpic->load_user_userpics($u, { load_expunged => 1 });
-    warn scalar @userpics;
 
     # get maximum number of userpics and expiring dates of its for this user
     my %cap_opts = ();
