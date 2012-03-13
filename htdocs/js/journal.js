@@ -263,7 +263,7 @@ jQuery(document).click(function(e)
 (function() {
 	var storage = {
 		init: function() {
-			this._store = jQuery.storage.getItem('placeholders') || '';
+			this._store = window.sessionStorage && sessionStorage.getItem('placeholders') || '';
 		},
 
 		makeHash: function(link) {
@@ -275,10 +275,11 @@ jQuery(document).click(function(e)
 		},
 
 		addUrl: function(link) {
+			if (!window.sessionStorage) { return; }
 			if (this.inStorage(link)) { return; }
 
 			this._store += this.makeHash(link);
-			jQuery.storage.setItem('placeholders', this._store);
+			sessionStorage.setItem('placeholders', this._store);
 		}
 	};
 
