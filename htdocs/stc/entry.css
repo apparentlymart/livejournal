@@ -177,7 +177,12 @@
 			}
 			#updateForm #metainfo LI .title {
 				display: table-cell;
+				width: 15%;
 				padding: 3px 7px 0 0;
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing:border-box;
+				-ms-box-sizing: border-box;
+				box-sizing: border-box;
 				vertical-align: top;
 				text-align: right;
 				line-height: 20px;
@@ -186,7 +191,12 @@
 				}
 			#updateForm #metainfo LI .wrap {
 				display: table-cell;
+				width: 85%;
 				padding: 3px;
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing:border-box;
+				-ms-box-sizing: border-box;
+				box-sizing: border-box;
 				vertical-align: top;
 				}
 			#updateForm #metainfo LI .current-username {
