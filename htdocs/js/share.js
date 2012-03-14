@@ -239,7 +239,7 @@ window.LJShare.link = function( opts, node ) {
 			dom.bubble('hide');
 			var service = $( this ).attr( 'data-service' );
 
-			LJShare.openPopupEvent(this, ev, options.url, service);
+			LJShare.openPopupEvent(this, ev, options, service);
 		} );
 	}
 
@@ -266,7 +266,7 @@ window.LJShare.link = function( opts, node ) {
  * open popup functionality was exposed to allow the modification of its behavior
  * by external scripts
  */
-window.LJShare.openPopupEvent = function(el, ev, url, service) {
+window.LJShare.openPopupEvent = function(el, ev, options, service) {
 	var width, height;
 
 	if( global_options.services[ service ].openInTab ) {
@@ -285,7 +285,7 @@ window.LJShare.openPopupEvent = function(el, ev, url, service) {
 		height = global_options.services[ service ].height || 480;
 		w = window.open(el.href, 'sharer', 'toolbar=0,status=0,width=' + width + ',height=' + height + ',scrollbars=yes,resizable=yes');
 										//double encoded url?!
-		pollForWindowClose(w, service, decodeURIComponent(decodeURIComponent(url)));
+		pollForWindowClose(w, service, decodeURIComponent(decodeURIComponent(options.url)));
 	}
 };
 
