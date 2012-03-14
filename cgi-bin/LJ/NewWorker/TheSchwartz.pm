@@ -95,7 +95,7 @@ sub run {
         warn $@ if $@;
         last if $opts->{'run_once'};
     }
-    POSIX::_exit();
+    POSIX::_exit(0);
 }
 
 # Copy-pasted from 'old' Schwartz.
