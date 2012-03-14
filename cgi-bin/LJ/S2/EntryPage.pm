@@ -171,6 +171,7 @@ sub EntryPage
                 'video_placeholders' => $replace_video_in_comments,
                 'remove_img_sizes'   => $replace_images_in_comments,
                 'remove_video_sizes' => $replace_video_in_comments,
+                'no_encode'          => 1,
             });
 
             # local time in mysql format to gmtime

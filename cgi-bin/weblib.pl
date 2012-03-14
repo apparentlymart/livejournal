@@ -2038,11 +2038,8 @@ sub placeholder_link {
     $width -= 2;
     $height -= 2;
 
-    $width  = undef if $opts{remove_video_sizes};
-    $height = undef if $opts{remove_video_sizes};
-
     return qq {
-            <a href="$link" class="b-mediaplaceholder b-mediaplaceholder-video } . ( $width && $height ? ' b-mediaplaceholder-good" style="width:' . $width . 'px;height:' . $height . 'px;"' : '" ' ) . qq{ onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
+            <a href="$link" class="b-mediaplaceholder b-mediaplaceholder-video } . ( $opts{remove_video_sizes} ? '" ' : ' b-mediaplaceholder-good" style="width:' . $width . 'px;height:' . $height . 'px;"' ) . ( $width ? qq~ data-width="$width"~ : '' ) . ( $height ? qq~ data-height="$height"~: '' ) . qq{ onclick="return LiveJournal.placeholderClick(this, '$placeholder_html')">
                 <span class="b-mediaplaceholder-outer">
                     <span class="b-mediaplaceholder-inner">
                         <i class="b-mediaplaceholder-pic"></i>

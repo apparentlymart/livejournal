@@ -1149,11 +1149,6 @@ sub clean
                 if ($tag eq "img") {
                     my $img_bad = 0;
 
-                    if ($opts->{'remove_img_sizes'}) {
-                        delete $hash->{'height'};
-                        delete $hash->{'width'};
-                    }
-
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
                     # don't use placeholders for small images
@@ -1202,7 +1197,7 @@ sub clean
                     }
 
                     if ($img_bad) {
-                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo ~ . ( $hash->{'width'} && $hash->{'height'} ? qq~ b-mediaplaceholder-good" style="width:$hash->{'width'}px;height:$hash->{'height'}px;" ~ : '" ' ) . qq~data-href="$href_b_link" href="~ .
+                        $newdata .= qq~<a class="b-mediaplaceholder b-mediaplaceholder-photo ~ . ( $opts->{'remove_img_sizes'} ? '"' : qq~ b-mediaplaceholder-good" style="width:$hash->{'width'}px;height:$hash->{'height'}px;"~ ) . ( $hash->{'width'} ? qq~ data-width="$hash->{'width'}"~ : '' ) . ( $hash->{'height'} ? qq~ data-height="$hash->{'height'}"~: '' ) . qq~data-href="$href_b_link" href="~ .
                             LJ::ehtml($hash->{'src'}) . '" onclick="return LiveJournal.placeholderClick(this, \'image\')">' .
                             '<span class="b-mediaplaceholder-outer">' .
                             '<span class="b-mediaplaceholder-inner">' .
