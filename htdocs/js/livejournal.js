@@ -37,14 +37,25 @@ LiveJournal.initPage = function () {
 	LiveJournal.initInboxUpdate();
 
 	LiveJournal.initNotificationStream();
+	LiveJournal.initSpoilers();
 
-	//ljunq cookie is checked in PageStats/Omniture.pm now
+	//ljuniq cookie is checked in PageStats/Omniture.pm now
 
 	// run other hooks
 	LiveJournal.run_hook("page_load");
 };
 
 jQuery(LiveJournal.initPage);
+
+/**
+ * Spoilers functionality - expand hidden text in posts when user clicks on corresponding link
+ */
+LiveJournal.initSpoilers = function() {
+	jQuery(document).delegate('.lj-spoiler > .lj-spoiler-head a', 'click', function (evt) {
+		evt.preventDefault();
+		jQuery(this).closest('.lj-spoiler').toggleClass('lj-spoiler-opened');
+	});
+};
 
 /**
  * Init long-polling connection to the server.
@@ -588,10 +599,4 @@ LiveJournal.isMobile = function() {
 	return function() { return forceMobile || isMobile; }
 }();
 
-jQuery(function($) {
-	$(document).delegate('.lj-spoiler > p.lj-spoiler-head a', 'click', function (evt) {
-		evt.preventDefault();
-		$(this).closest('.lj-spoiler').toggleClass('lj-spoiler-opened');
-	});
-});
 
