@@ -28,6 +28,8 @@ sub render_body {
     return "";
 }
 
+sub collapsable { } ## true for collapsable widget
+
 sub start_form {
     my $class = shift;
     my %opts = @_;
@@ -130,8 +132,9 @@ sub render {
     } elsif (ref $class && $class->{'no_container_div'}) {
         return $rv;
     } else {
+        my $collapsable_class = $class->collapsable ? 'appwidget-prop-collapsable' : '';
         return 
-            "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n" .
+            "<div class='appwidget appwidget-$css_subclass $collapsable_class' id='$widget_ele_id'>\n" .
             $rv .
             "</div><!-- end .appwidget-$css_subclass -->\n";
     }
