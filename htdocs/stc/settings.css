@@ -1025,3 +1025,28 @@
 					border-bottom: 0;
 					}
 
+/* Music settings */
+
+#LJ__Setting__Music__LastFM_,
+#LJ__Setting__Music__Trava_ {
+	display: inline-block;
+	padding: 0 10px;
+	}
+
+#LJ__Setting__Music__LastFM_ LABEL INPUT {
+	margin-left: 10px;
+	}
+	
+#LJ__Setting__Music__Trava_ A {
+	margin-right: 10px;
+	color: #000;
+	}
+	#LJ__Setting__Music__Trava_ A:hover {
+		text-decoration: none;
+		}
+.settings-trava-logo {
+	display: inline-block;
+	width: 96px;
+	height: 24px;
+	background: url(/img/trava-logo.png?ver=1) 0 0 no-repeat;
+	}
