@@ -98,7 +98,7 @@
 
     $ret .= "<p class='wintitle' id='wintitle'></p>";
 
-    if ( LJ::is_enabled('pics_production') ) {
+    unless ( LJ::is_enabled('pics_production') ) {
         $ret .= "<div class='b-pics-promo-wrapper'>";
         $ret .= "<i class='b-pics-promo-box'></i>";
         $ret .= "<a class='b-pics-promo-link' href='http://lj-pics-beta.livejournal.com/472.html' target='_blank'>";
