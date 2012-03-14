@@ -464,14 +464,14 @@
 						[
 							{
 								type: 'html',
-								html: Site.pics_production ? '<div class="b-pics-promo-wrapper">' +
+								html: Site.pics_production ? '' : '<div class="b-pics-promo-wrapper">' +
 										'<i class="b-pics-promo-box"></i>' +
 										'<a target="_blank" href="' + Site.siteroot + '/472.html" class="b-pics-promo-link">' +
 											'<span class="b-pics-promo-arrow"></span>' +
 											'<span class="b-pics-promo-content b-pics-promo-content-header">' + Site.ml_text['.msg.newalbums'] + '</span>' +
 											'<span class="b-pics-promo-content">' + Site.ml_text['.msg.newalbums.organise'] + '</span>' +
 										'</a>' +
-										'</div>' : ''
+										'</div>'
 							},
 							{
 								type : 'vbox',
