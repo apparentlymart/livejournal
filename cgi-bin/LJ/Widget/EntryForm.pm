@@ -1169,6 +1169,10 @@ sub render_options_block {
                         style="float: left"
                         onclick="trava_search('$trava_uid', true);"
                     >
+                    <input
+                        type="hidden"
+                        id="trava_track_id"
+                    >
                     $help_icon
                 };
 
@@ -1270,17 +1274,22 @@ sub render_options_block {
           return '';
         },
         'lastfm_logo' => sub {
-            return unless $self->should_show_lastfm;
-            return qq{
-                <span class='lastfm'>
-                    <span>
-                        POWERED<br />
-                        BY
+            if ( $self->should_show_trava ) {
+                return "POWERED BY TRAVA.ru";
+            }
+            elsif ( $self->should_show_lastfm ) {
+                return qq{
+                    <span class='lastfm'>
+                        <span>
+                            POWERED<br />
+                            BY
+                        </span>
                     </span>
-                </span>
-                <a href='$LJ::LAST_FM_SITE_URL' target='_blank'
-                    class='lastfm_lnk'>Last.fm</a>
+                    <a href='$LJ::LAST_FM_SITE_URL' target='_blank'
+                        class='lastfm_lnk'>Last.fm</a>
+                };
             };
+            return '';
         },
         'spellcheck' => sub {
             my $out = '';
