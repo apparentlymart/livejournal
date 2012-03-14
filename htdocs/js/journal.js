@@ -309,20 +309,12 @@ jQuery(document).click(function(e)
 			imgLoaded: function(el, image) {
 				var img = jQuery('<img />').attr('src', image.src),
 					$el = jQuery(el),
-					href = $el.data('href');
+					href = $el.data('href'),
+					imw = $el.data('width'),
+					imh = $el.data('height');
 
-				var style = $el.attr('style'),
-					imw, imh;
-
-				if (style) {
-					//easy way to parse style string
-					var d = jQuery('<div>').attr('style', style);
-					imw = d.width();
-					imh = d.height();
-
-					if (imw) { img.width(imw); }
-					if (imh) { img.height(imh); }
-				}
+				if (imw) { img.width(imw); }
+				if (imh) { img.height(imh); }
 
 				if (href && href.length > 0) {
 					img = jQuery('<a>', { href: href }).append(img);
