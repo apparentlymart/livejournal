@@ -5752,6 +5752,8 @@ talk.fromip.extended=([[country]], [[city]] / [[ip]])
 
 talk.frozen=Replies frozen
 
+talk.goup=...go [[count]] [[?count|level|levels]] up...
+
 talk.help=Help
 
 talk.insertbold=Insert Bold (Ctrl+B)
