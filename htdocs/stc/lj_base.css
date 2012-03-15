@@ -520,7 +520,7 @@ It must be invisible, use it only for reskining */
 /* Flexible banner*/
 /* Must be removed after implementation of Framework! */
 .b-banner-flexible {
-	margin: 0 0 12px;
+	margin: 0 0 0;
 	font-size: 0;
 	line-height: 0;
 	width: 970px;
