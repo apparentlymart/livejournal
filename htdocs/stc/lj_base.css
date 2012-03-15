@@ -3755,6 +3755,8 @@ A.lj-button-link:active {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#C2EBFF', endColorstr='#B4DCFC',GradientType=0 );
 	text-align: center;
 	font: 0/0 serif;
+	*display: inline;
+	*zoom: 1;
 	}
 	.b-linkbar-item {
 		display: inline;
