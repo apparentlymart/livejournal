@@ -513,7 +513,7 @@ sub trans {
             LJ::Request->filename($file);
             $LJ::IMGPREFIX = '/img';
             $LJ::STATPREFIX = '/stc';
-            return LJ::Request::OK
+            return $bml_handler->($file);
         }
         else {
             return LJ::Request::FORBIDDEN;
@@ -1375,6 +1375,15 @@ sub trans {
             }
         }
     }
+
+    if ( $host eq $LJ::DOMAIN_WEB && ( my $uri = LJ::Request->uri ) ) {
+        my $filename_full = $LJ::HTDOCS . $uri;
+        $filename_full =~ s{//}{/}g;
+        if ( $filename_full =~ /[.]bml$/ && -e $filename_full ) {
+            return $bml_handler->($filename_full);
+        }
+    }
+
     LJ::Request->pnotes ('error' => 'e404');
     LJ::Request->pnotes ('remote' => LJ::get_remote());
     return LJ::Request::DECLINED

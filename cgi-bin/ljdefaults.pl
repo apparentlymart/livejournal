@@ -442,6 +442,70 @@ use strict;
             User
         );
     }
+
+    if ($LJ::IS_DEV_SERVER) {
+        $LJ::CAPTCHA_MOGILEFS   = 1 unless defined $LJ::CAPTCHA_MOGILEFS;
+        $LJ::USERPIC_MOGILEFS   = 1 unless defined $LJ::USERPIC_MOGILEFS;
+        $LJ::PHONEPOST_MOGILEFS = 1 unless defined $LJ::PHONEPOST_MOGILEFS;
+        $LJ::TRUST_X_HEADERS    = 1 unless defined $LJ::TRUST_X_HEADERS;
+        $LJ::NO_PASSWORD_CHECK  = 1 unless defined $LJ::NO_PASSWORD_CHECK;
+
+        unless (@LJ::CLUSTERS) {
+            @LJ::CLUSTERS = ( 1, 2 );
+        }
+
+        unless ( defined $LJ::DEFAULT_CLUSTER ) {
+            $LJ::DEFAULT_CLUSTER = [ 1, 2 ];
+        }
+
+        unless (%LJ::DBINFO) {
+            %LJ::DBINFO = (
+                'master' => {
+                    'host'   => 'localhost',
+                    'user'   => 'lj',
+                    'pass'   => 'ljpass',
+                    'dbname' => 'livejournal',
+                    'role'   => { 'master' => 1, 'slow' => 1 }
+                },
+
+                'c1' => {
+                    'host'   => 'localhost',
+                    'user'   => 'lj',
+                    'pass'   => 'ljpass',
+                    'dbname' => 'lj_c1',
+                    'role'   => { 'cluster1' => 1 },
+                },
+
+                'c2' => {
+                    'host'   => 'localhost',
+                    'user'   => 'lj',
+                    'pass'   => 'ljpass',
+                    'dbname' => 'lj_c2',
+                    'role'   => { 'cluster2' => 1 },
+                },
+            );
+        }
+
+        unless (%LJ::MOGILEFS_CONFIG) {
+            %LJ::MOGILEFS_CONFIG = (
+                domain => 'danga.com::lj',
+                hosts  => [ '127.0.0.1:7001' ],
+                classes => {
+                    'userpics'   => 3,
+                    'captcha'    => 2,
+                    'phoneposts' => 3,
+                    'file'       => 1,
+                    'photo'      => 2,
+                },
+            );
+        }
+
+        @LJ::MEMCACHE_SERVERS = qw( 127.0.0.1:11211 )
+            unless @LJ::MEMCACHE_SERVERS;
+
+        @LJ::GEARMAN_SERVERS = qw( 127.0.0.1:8000 )
+            unless @LJ::GEARMAN_SERVERS;
+    }
 }
 
 # no dependencies.

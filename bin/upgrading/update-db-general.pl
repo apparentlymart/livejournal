@@ -3546,7 +3546,7 @@ register_alter(sub {
     # upgrade people to the new capabilities system.  if they're
     # using the the paidfeatures column already, we'll assign them
     # the same capability bits that ljcom will be using.
-    if (table_relevant("user") && column_type("user", "caps") eq "")
+    if (table_relevant("user") && !column_type("user", "caps"))
     {
         do_alter("user",
                  "ALTER TABLE user ADD ".

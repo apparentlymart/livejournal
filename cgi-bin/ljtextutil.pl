@@ -8,6 +8,9 @@ use Class::Autouse qw(
                       HTML::Parser
                       LJ::Text
                       );
+
+use Encode;
+
 # <LJFUNC>
 # name: LJ::trim
 # class: text
@@ -279,15 +282,10 @@ sub is_utf8 {
         return LJ::run_hook("is_utf8", $text);
     }
 
-    require Unicode::CheckUTF8;
-    {
-        no strict;
-        local $^W = 0;
-        *stab = *{"main::LJ::"};
-        undef $stab{is_utf8};
-    }
-    *LJ::is_utf8 = \&Unicode::CheckUTF8::is_utf8;
-    return Unicode::CheckUTF8::is_utf8($text);
+    return 1 if Encode::is_utf8($text);
+
+    my $eval_res = eval { Encode::decode_utf8($text); 1 };
+    return $eval_res ? 1 : 0;
 }
 
 # <LJFUNC>

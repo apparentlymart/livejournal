@@ -18,18 +18,23 @@ chomp $pass;
 
 print "\n";
 
-print "Creating system account...\n";
-unless (LJ::create_account({ 'user' => 'system',
-                             'name' => 'System Account',
-                             'password' => $pass }))
-{
+my $u = LJ::load_user('system');
+
+if ($u) {
     print "Already exists.\nModifying 'system' account...\n";
-    my $id = LJ::get_userid("system");
-    $dbh->do("UPDATE password SET password=? WHERE userid=?",
-             undef, $pass, $id);
+    $dbh->do( "UPDATE password SET password=? WHERE userid=?",
+        undef, $pass, $u->userid );
+} else {
+    print "Creating system account...\n";
+    LJ::create_account( {
+        'user'     => 'system',
+        'name'     => 'System Account',
+        'password' => $pass,
+    } );
+
+    $u = LJ::load_user('system');
 }
 
-my $u = LJ::load_user("system");
 unless ($u) {
     print "ERROR: can't find newly-created system account.\n";
     exit 1;
