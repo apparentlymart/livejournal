@@ -350,3 +350,25 @@ jQuery(document).click(function(e)
 	});
 })();
 
+/**
+ * this code initializes common properies for all widgets.
+ * If it will become too large, it should be moved to the separate file
+ */
+(function() {
+    widgets = [
+        {
+            type: 'collapsable',
+            handler: function() {
+                jQuery(document).on('click', '.appwidget-prop-collapsable', function(ev) {
+                    if (ev.target.className.indexOf('w-head-status-switch') !== -1) {
+                        jQuery(this).toggleClass('appwidget-prop-collapsed',
+                                    ev.target.className.indexOf('collapse') !== -1)
+                    }
+                });
+            }
+        }
+    ];
+
+    widgets.forEach(function(prop) { prop.handler(); });
+})();
+
