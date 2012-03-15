@@ -3991,6 +3991,11 @@ sub getevents {
         # line endings
         $t->[1] =~ s/\r//g;
 
+        if ($req->{'asxml'}) {
+            my $tidy = LJ::Tidy->new();
+            $t->[1]  = $tidy->clean( $t->[1] );
+        } 
+
         if ($req->{'lineendings'} eq "unix") {
             # do nothing.  native format.
         }
@@ -4007,12 +4012,7 @@ sub getevents {
             $t->[1] =~ s/\n/\r\n/g;
         }
 
-        if ($req->{'asxml'}) {
-            my $tidy = LJ::Tidy->new();
-            $evt->{'event'} = $tidy->clean( $t->[1] );
-        } else {
-            $evt->{'event'} = $t->[1];
-        }
+        $evt->{'event'} = $t->[1];
     }
 
     # maybe we don't need the props after all
