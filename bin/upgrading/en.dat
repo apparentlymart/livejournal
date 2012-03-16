@@ -5632,6 +5632,8 @@ talk.deletedpost=Deleted Post
 
 talk.deleteduser=<i>Deleted user: [[username]]</i>
 
+talk.down=↓
+
 talk.edit=Edit
 
 talk.editcomment=Save comment
@@ -5954,6 +5956,8 @@ talk.unspamtoreply=Unspam to reply
 talk.url.hint=Hint
 
 talk.userswitch=switch
+
+talk.up=↑
 
 talk.video=Video
 
