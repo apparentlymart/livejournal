@@ -1152,6 +1152,16 @@ sub clean {
 
                     # don't use placeholders for small images
                     if ( $opts->{'img_placeholders'} ) {
+                        if ( exists $hash->{style} ) {
+                            if ( $hash->{style} =~ /width\:\s*(\d+)(?:px)?\;/i ) {
+                                $hash->{width} = $1;
+                            }
+
+                            if ( $hash->{style} =~ /height\:\s*(\d+)(?:px)?\;/i ) {
+                                $hash->{height} = $1;
+                            }
+                        }
+
                         if ( exists $hash->{width} && $hash->{width} && exists $hash->{height} && $hash->{height} ) {
                             if ( $hash->{'width'} > 140 && $hash->{'height'} > 37 ) {
                                 $img_bad = 1;
