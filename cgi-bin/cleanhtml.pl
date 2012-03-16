@@ -115,8 +115,7 @@ our $EnableDynamicElements = undef;
 # des-opts: An hash of options to pass to the parser.
 # returns: Nothing.
 # </LJFUNC>
-sub clean
-{
+sub clean {
     my $data = shift;
     my $opts = shift;
     my $newdata;
@@ -1152,11 +1151,8 @@ sub clean
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
                     # don't use placeholders for small images
-                    if ($opts->{'img_placeholders'}) {
-                        if ( !defined $hash->{width} || ! defined $hash->{height} ) {
-                            $img_bad = 1;
-                        }
-                        else {
+                    if ( $opts->{'img_placeholders'} ) {
+                        if ( exists $hash->{width} && $hash->{width} && exists $hash->{height} && $hash->{height} ) {
                             if ( $hash->{'width'} > 140 && $hash->{'height'} > 37 ) {
                                 $img_bad = 1;
                             }
@@ -1164,6 +1160,10 @@ sub clean
                                 $img_bad = 0;
                             }
                         }
+                        else {
+                            $img_bad = 1;
+                        }
+
                     }
                     else {
                         $img_bad = 0;
