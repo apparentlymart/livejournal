@@ -1728,6 +1728,11 @@ sub render_body {
     my $altlogin = $self->altlogin;
     my ($moodlist, $moodpics);
 
+    LJ::need_string( qw(
+        /update.bml.msg.newalbums
+        /update.bml.msg.newalbums.organise
+    ) );
+
     # usejournal has no point if you're trying to use the account you're logged
     # in as, so disregard it so we can assume that if it exists, we're trying
     # to post to an account that isn't us
