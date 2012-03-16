@@ -3754,9 +3754,9 @@ A.lj-button-link:active {
 	background: #C2EBFF linear-gradient(top, #C2EBFF 0%,#B4DCFC 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#C2EBFF', endColorstr='#B4DCFC',GradientType=0 );
 	text-align: center;
-	font: 0/0 serif;
 	*display: inline;
 	*zoom: 1;
+	*font: 0/0 serif;
 	}
 	.b-linkbar-item {
 		display: inline;
@@ -3764,10 +3764,8 @@ A.lj-button-link:active {
 		padding: 0;
 		border: 0;
 		vertical-align: top;
+		font: 10px/1 Arial,sans-serif;
 		}
-		.b-linkbar .b-controls {
-			font: 10px/1 Arial,sans-serif;
-			}
 
 
 
