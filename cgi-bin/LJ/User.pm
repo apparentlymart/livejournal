@@ -333,7 +333,7 @@ sub username_from_url {
     }
 
     # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
-    if ($url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/([\w-]+)/?$!) {
+    if ($url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/([\w_-]+)/?!) {
         if ( $LJ::IS_USER_DOMAIN->{$1} ) {
             return $2;
         }

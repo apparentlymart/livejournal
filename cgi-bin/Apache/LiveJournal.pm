@@ -379,6 +379,25 @@ sub trans {
 
     LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
 
+    ## check that request URL is canonical (i.e. it starts with $u->journal_base)
+    ## if not, construct canonical URL and redirect there
+    ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
+    {
+
+        ## warning: $uri from outer scope has stripped <user> part from http://users.livejournal.com/<user> URLs
+        my $uri         = LJ::Request->uri;
+        my $current_url = "http://$host$uri";
+        if ($host =~ m!^(users|community)!){
+            my $u = LJ::User->new_from_url($current_url);
+            my $journal_base = $u->journal_base();
+            my $username = $u->username;
+            if ($username !~ /(^_)|(_$)/){
+                $uri =~ s!^/$username/!/!;
+                return redir("$journal_base$uri$args_wq", LJ::Request::HTTP_MOVED_PERMANENTLY());
+            }
+        }
+    }
+
     # process controller
     # if defined
     if ( my $controller = LJ::Request->notes('controller') ) {
@@ -620,22 +639,6 @@ sub trans {
 
         LJ::Request->notes("journalid" => $u->{userid});
 
-        ## check that request URL is canonical (i.e. it starts with $u->journal_base)
-        ## if not, construct canonical URL and redirect there
-        ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
-        {
-            ## warning: $uri from outer scope has stripped <user> part from http://users.livejournal.com/<user> URLs
-            my $uri  = LJ::Request->uri;
-            my $current_url = "http://$host$uri";
-            my $journal_base = $u->journal_base;
-            if (substr($current_url, 0, length($journal_base)) ne $journal_base) {
-                my $new_url = $journal_base;
-                if ($host =~ /^(?:users|community)\./) {
-                    $uri =~ s!^/[^/]+!!;
-                }
-                return redir("$journal_base$uri$args_wq", LJ::Request::HTTP_MOVED_PERMANENTLY());
-            }
-        }
 
         if ($u->is_community) {
             LJ::run_hook('vertical_tags', $remote, $u);
