@@ -1037,16 +1037,43 @@
 .music-settings-trava-logo {
 	vertical-align: top;
 	}
+#LJ__Setting__Music__Trava_ DL,
+#LJ__Setting__Music__Trava_ DD {
+	margin: 0;
+	}
 #LJ__Setting__Music__LastFM_ LABEL INPUT {
 	margin-left: 10px;
 	}
 #LJ__Setting__Music__Trava_ A {
-	margin-right: 10px;
 	color: #000;
 	}
 	#LJ__Setting__Music__Trava_ A:hover {
 		text-decoration: none;
 		}
+.music-settings-disconnect-options {
+	display: none;
+	margin: 0;
+	}
+.music-settings-connect-options {
+	display: inline-block;
+	margin: 0;
+	}
+.music-settings-connect {
+	margin: 0 5px;
+	}
 .music-settings-trava-logo {
-	margin-top: -4px;
+	margin-top: -6px;
+	}
+.music-settings-preloader {
+	display: none;
+	width: 30px;
+	height: 30px;
+	margin-top: -5px;
+	background: url(/img/preloader/preloader-blue-blue.gif?ver=1) 0 0 no-repeat;
+	}
+.music-settings-loading .music-settings-connect {
+	display: none;
+	}
+.music-settings-loading .music-settings-preloader {
+	display: inline-block;
 	}
