@@ -63,7 +63,8 @@ sub load_ljconfig {
 
 # load defaults (should not clobber any existing configs)
 sub load_defaults {
-    do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+    my $load_res = do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+    die $@ unless $load_res;
 }
 
 # loads policy configuration

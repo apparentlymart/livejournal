@@ -126,6 +126,7 @@ my %primarykey      = (); # $table -> "INDEX:col1-col2-col3"
 my @alters          = ();
 my $dbh;
 my $sth;
+my $current_file;
 
 CLUSTER: foreach my $cluster ( @clusters ) {
     print "Updating cluster: $cluster\n" unless $opt_listtables;
@@ -177,6 +178,7 @@ CLUSTER: foreach my $cluster ( @clusters ) {
 
         close F;
 
+        $current_file = File::Basename::basename($file);
         eval $data;
 
         die "Can't run $file: $@\n" if $@;
@@ -266,6 +268,9 @@ sub populate_database {
     my $made_system;
     ($su, $made_system) = vivify_system_user();
 
+    populate_basedata();
+    populate_proplists();
+
     # we have a flag to disable population of s1/s2 if the user requests
     # moreover, styles are not populated during beta server update
     unless ($opt_nostyles || $opt_beta) {
@@ -282,8 +287,6 @@ sub populate_database {
     }
 
     populate_schools();
-    populate_basedata();
-    populate_proplists();
     clean_schema_docs();
     populate_mogile_conf();
 
@@ -1019,8 +1022,8 @@ sub create_table {
     return if $cluster && ! defined $clustered_table{$table};
 
     my $create_sql = $table_create{$table};
-    if ($opt_innodb && $create_sql !~ /type=myisam/i) {
-        $create_sql .= " TYPE=INNODB";
+    if ($opt_innodb && $create_sql !~ /(?:type|engine)=/i) {
+        $create_sql .= " ENGINE=InnoDB";
     }
     do_sql($create_sql);
 
@@ -1042,6 +1045,8 @@ sub create_table {
         }
         else { print "# don't know how to do \$ac = $ac"; }
     }
+
+    clear_table_info($table);
 }
 
 sub drop_table {
@@ -1063,6 +1068,7 @@ sub mark_clustered {
 
 sub register_tablecreate {
     my ($table, $create) = @_;
+
     # we now know of it
     delete $table_unknown{$table};
 

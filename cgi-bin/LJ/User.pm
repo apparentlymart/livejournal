@@ -6747,7 +6747,7 @@ sub load_user_props_multi {
 
     my $groups = LJ::User::PropStorage->get_handler_multi(\@$props);
     my $memcache_available = @LJ::MEMCACHE_SERVERS;
-    my $use_master = $memcache_available || $use_master;
+    $use_master = $memcache_available || $use_master;
     my $memc_expire = time() + 3600 * 24;
 
     foreach my $handler (keys %$groups) {

@@ -486,6 +486,29 @@ use strict;
             );
         }
 
+        # theschwartz config for dev servers
+        # for production config, see cvs/ljconfs/site/etc/ljconfig.pl
+        my $mast   = $LJ::DBINFO{'master'};
+        my $dbname = $mast->{'dbname'} || 'livejournal';
+        my $dbhost = $mast->{'host'} || 'localhost';
+        unless (%LJ::THESCHWARTZ_DBS) {
+            %LJ::THESCHWARTZ_DBS = (
+                'dev' => {
+                    'dsn'    => "dbi:mysql:$dbname;host=$dbhost",
+                    'user'   => $mast->{'user'},
+                    'pass'   => $mast->{'pass'},
+                    'prefix' => 'sch_',
+                },
+            );
+        }
+        unless (%LJ::THESCHWARTZ_DBS_ROLES) {
+            %LJ::THESCHWARTZ_DBS_ROLES = (
+                'default'   => [ 'dev' ],
+                'worker'    => [ 'dev' ],
+                'mass'      => [ 'dev' ],
+            );
+        }
+
         unless (%LJ::MOGILEFS_CONFIG) {
             %LJ::MOGILEFS_CONFIG = (
                 domain => 'danga.com::lj',
