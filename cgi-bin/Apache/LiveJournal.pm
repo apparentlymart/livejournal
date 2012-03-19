@@ -389,7 +389,7 @@ sub trans {
         ## check that request URL is canonical (i.e. it starts with $u->journal_base)
         ## if not, construct canonical URL and redirect there
         ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
-        if ($u && $host =~ m!^(users|community)!){
+        if ($u && $host =~ m!^(users|community)\.!){
             my $journal_base = $u->journal_base();
             my $username = $u->username;
             if ($username !~ /(^_)|(_$)/){
