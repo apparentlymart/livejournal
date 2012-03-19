@@ -1050,13 +1050,18 @@
 	#LJ__Setting__Music__Trava_ A:hover {
 		text-decoration: none;
 		}
-.music-settings-login .music-settings-disconnect-options,
-.music-settings-logout .music-settings-connect-options {
+.music-settings-connect-options,
+.music-settings-disconnect .music-settings-disconnect-options {
+	display: inline-block;
+	}
+.music-settings-error-msg,
+.music-settings-disconnect-options,
+.music-settings-disconnect .music-settings-connect-options {
 	display: none;
 	}
-.music-settings-login  .music-settings-connect-options,
-.music-settings-logout .music-settings-disconnect-options {
-	display: inline-block;
+.music-settings-error .music-settings-error-msg {
+	display: block;
+	color: red;
 	}
 .music-settings-connect {
 	margin: 0 5px;
