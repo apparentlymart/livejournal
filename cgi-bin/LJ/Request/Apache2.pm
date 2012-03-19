@@ -407,12 +407,15 @@ sub LJ::Request::get_params {
     my $r = $class->r();
     if (wantarray()){
         my $qs = $r->args(@_);
-        my @args =
-            map { URI::Escape::uri_unescape ($_) }
-            map { s/\+/ /g; $_ } # in query_string 'break' is encoded as '+' simbol
-            map { split /=/ => $_, 2 }
-            split /[\&\;]/ => $qs;
-        return @args;
+        my @args = split /[&;]/ => $qs;
+        return map {
+            my ($k, $v) = map {
+                s{\+} { }g; # in query_string 'break' is encoded as '+' simbol
+                URI::Escape::uri_unescape($_)
+            } split '=', $_, 2;
+
+            defined $k? ($k, $v) : ();
+        } @args;
     } else {
         return $r->args(@_);
     }
