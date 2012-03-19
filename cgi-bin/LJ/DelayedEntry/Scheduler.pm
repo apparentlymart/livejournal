@@ -43,6 +43,7 @@ sub DESTROY {
 package LJ::DelayedEntry::Scheduler;
 use LJ::DelayedEntry;
 use LJ::Text;
+use LJ::PersistentQueue;
 
 use strict;
 use warnings;
