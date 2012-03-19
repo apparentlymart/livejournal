@@ -392,7 +392,7 @@ sub trans {
             my $journal_base = $u->journal_base();
             my $username = $u->username;
             if ($username !~ /(^_)|(_$)/){
-                $uri =~ s!^/$username/!/!;
+                $uri =~ s!^/$username(/|$)!/!;
                 return redir("$journal_base$uri$args_wq", LJ::Request::HTTP_MOVED_PERMANENTLY());
             }
         }
