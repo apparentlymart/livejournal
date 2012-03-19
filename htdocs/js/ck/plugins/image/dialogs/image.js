@@ -468,8 +468,8 @@
 										'<i class="b-pics-promo-box"></i>' +
 										'<a target="_blank" href="http://lj-pics-beta.livejournal.com/472.html" class="b-pics-promo-link">' +
 											'<span class="b-pics-promo-arrow"></span>' +
-											'<span class="b-pics-promo-content b-pics-promo-content-header">' + Site.ml_text['.msg.newalbums'] + '</span>' +
-											'<span class="b-pics-promo-content">' + Site.ml_text['.msg.newalbums.organise'] + '</span>' +
+											'<span class="b-pics-promo-content b-pics-promo-content-header">' + Site.ml_text['/update.bml.msg.newalbums'] + '</span>' +
+											'<span class="b-pics-promo-content">' + Site.ml_text['/update.bml.msg.newalbums.organise'] + '</span>' +
 										'</a>' +
 										'</div>'
 							},
