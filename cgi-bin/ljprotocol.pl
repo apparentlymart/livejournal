@@ -19,6 +19,7 @@ use Class::Autouse qw(
                       LJ::DelayedEntry
                       LJ::PushNotification
                       LJ::Tidy
+                      LJ::PersistentQueue
                       );
 
 use LJ::TimeUtil;
