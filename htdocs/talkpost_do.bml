@@ -469,8 +469,7 @@
             }
 
             $mlcode = '.success.message2';
-        }
-        else {
+        } elsif ($comment->{state} eq 'S') {
             # otherwise, it's a screened comment.
             if ($journalu->{'journaltype'} eq 'C') {
                 $mlcode = $POST{'usertype'} eq 'anonymous'
@@ -483,6 +482,21 @@
                 $mlcode = $POST{'usertype'} eq 'anonymous'
                     ? '.success.screened.user.anon3'
                     : '.success.screened.user3';
+                $message = $ML{$mlcode};
+                return $redirect->($commentlink) if $ajax;
+            }
+        } else {
+            # otherwise, it's a spammed comment.
+            if ($journalu->{'journaltype'} eq 'C') {
+                $mlcode = $POST{'usertype'} eq 'anonymous'
+                    ? '.success.spammed.comm.anon3'
+                    : '.success.spammed.comm3';
+                $message = $ML{$mlcode};
+                return $redirect->($commentlink) if $ajax;
+            } else {
+                $mlcode = $POST{'usertype'} eq 'anonymous'
+                    ? '.success.spammed.user.anon3'
+                    : '.success.spammed.user3';
                 $message = $ML{$mlcode};
                 return $redirect->($commentlink) if $ajax;
             }

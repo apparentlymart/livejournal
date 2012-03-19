@@ -99,6 +99,14 @@
 
 .success.screened.user3=Your comment has been added. According to this journal's settings, it was marked as screened, and will be visible only to you and the journal's owner until the owner chooses to unscreen it.
 
+.success.spammed.comm.anon3=Your anonymous comment has been added. According to this community's settings, it was marked as spam.
+
+.success.spammed.comm3=Your comment has been added. According to this community's settings, it was marked as spam.
+
+.success.spammed.user.anon3=Your anonymous comment has been added. According to this journal's settings, it was marked as spam.
+
+.success.spammed.user3=Your comment has been added. According to this journal's settings, it was marked as spam.
+
 .success.title=Success
 
 .success.unscreened=Additionally, the screened comment you were replying to has been unscreened and is now visible.
