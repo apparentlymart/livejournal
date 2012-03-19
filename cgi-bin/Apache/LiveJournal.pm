@@ -379,16 +379,17 @@ sub trans {
 
     LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
 
-    ## check that request URL is canonical (i.e. it starts with $u->journal_base)
-    ## if not, construct canonical URL and redirect there
-    ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
-    {
-
-        ## warning: $uri from outer scope has stripped <user> part from http://users.livejournal.com/<user> URLs
+    ##
+    ## Process old/non-cacnonical URL and renamed accounts.
+    if ($host !~ /^www\./){
         my $uri         = LJ::Request->uri;
         my $current_url = "http://$host$uri";
-        if ($host =~ m!^(users|community)!){
-            my $u = LJ::User->new_from_url($current_url);
+        my $u           = LJ::User->new_from_url($current_url);
+
+        ## check that request URL is canonical (i.e. it starts with $u->journal_base)
+        ## if not, construct canonical URL and redirect there
+        ## (redirect cases: old http://community.lj.com/name URL, upper-case URLs, hyphen/underscore in usernames etc)
+        if ($u && $host =~ m!^(users|community)!){
             my $journal_base = $u->journal_base();
             my $username = $u->username;
             if ($username !~ /(^_)|(_$)/){
@@ -396,7 +397,19 @@ sub trans {
                 return redir("$journal_base$uri$args_wq", LJ::Request::HTTP_MOVED_PERMANENTLY());
             }
         }
+
+        ## Renamed accounts
+        if ($u && $u->is_renamed) {
+            my $renamedto = $u->prop('renamedto');
+
+            if ($renamedto ne '') {
+                my $uri = LJ::Request->uri;
+                my $redirect_url = ($renamedto =~ m!^https?://!) ? $renamedto : LJ::journal_base($renamedto) . $uri . $args_wq;
+                return redir($redirect_url, 301);
+            }
+        }
     }
+
 
     # process controller
     # if defined
