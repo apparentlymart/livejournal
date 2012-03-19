@@ -75,7 +75,9 @@ body<=
           opt_showmutualfriends opt_showschools
           opt_showbday opt_showlocation
           opt_sharebday
-          comm_theme opt_showljtalk opt_showonlinestatus/
+          comm_theme opt_showljtalk opt_showonlinestatus
+          playlist_id/,
+          $LJ::DISABLED{'trava'} ? 'last_fm_user' : 'trava_uid',
     );
 
     # to store values before they undergo normalisation
@@ -490,6 +492,14 @@ body<=
             $ret .= "</td></tr>\n";
         }
 
+        if ( $LJ::DISABLED{'trava'} ) {
+            # last_fm_user
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.last_fm'}</td><td>";
+            $ret .= LJ::html_text({ 'name' => 'last_fm_user', 'value' => $u->{'last_fm_user'}, 'size' => '20', 'maxlength' => '255' });
+            $ret .= "<div class='helper'>$ML{'.fn.last_fm.desc'}</div></td></tr>";
+            $ret .= "</td></tr>\n";
+        }
+
         } # end is_person check
 
         $ret .= "</table>\n";
@@ -671,6 +681,33 @@ body<=
 
         $ret .= "</table>\n";
 
+        unless ( $LJ::DISABLED{'trava'} ) {
+
+        # Playlist
+# TODO: remove ||5 !!!!!!!
+        my $trava_uid = $u->prop('trava_uid') || 5;
+
+        if( $trava_uid && $trava_uid > 1 ) {
+            my $playlist_id = $u->prop('playlist_id');
+
+            # if not yet selected
+            $playlist_id = 0 unless defined $playlist_id;
+
+            $ret .= "<div class='section_head'>$ML{'.section.playlist'}</div>\n";
+
+            $ret .= "<table class='field_block'>\n";
+
+            $ret .= "<tr><td class='field_name'><label for='playlist_id'>$ML{'.fn.playlist_on_trava.ru'}</label></td><td>";
+            $ret .= qq~<input type="hidden" name="trava_uid" id="trava_uid" value="$trava_uid"><input type="hidden" name="playlist_id" id="playlist_id" value="$playlist_id" />~ . $ML{'.pl.selected'}. qq~<span id="playlist_name">Loading playlist...</span><br/>~;
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
+                                     'selected' => ! $u->{'opt_hidefriendofs'} });
+            $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
+
+            $ret .= "</table>\n";
+        }
+        }
+
+        # Extra
         $ret .= LJ::run_hook("profile_settings_extra", $u);
 
         # ending submit block
@@ -906,6 +943,10 @@ body<=
               opt_showbday opt_showlocation opt_showljtalk
               opt_sharebday opt_showonlinestatus
             );
+
+            $LJ::DISABLED{'trava'}
+                ? push @uprops, 'last_fm_user'
+                : push @uprops, 'playlist_id';
 
             # reset the gizmo account for this user account
             $u->gizmo_account( $POST{'gizmo'} )

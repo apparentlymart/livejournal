@@ -152,9 +152,9 @@ body<=
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
                 LJ::Setting::GiveFeatures
-                LJ::Setting::LJTimes
-                LJ::Setting::Music
-            )],
+                LJ::Setting::LJTimes),
+                $LJ::DISABLED{'trava'} ? undef : 'LJ::Setting::Music',
+            ],
         },
     );
 
@@ -500,7 +500,7 @@ body<=
     $ret .= "</div>";
 
     $ret .= LJ::Widget::SettingWindow->render;
-    
+
     return $ret;
 }
 _code?>
