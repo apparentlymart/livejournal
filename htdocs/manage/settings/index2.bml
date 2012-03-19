@@ -378,8 +378,7 @@ body<=
     $ret .= "</p></div>";
 
     if ($cats_with_settings{$given_cat}->{form}) {
-        my $confirm_msg = LJ::ejs($ML{'.form.confirm'});
-        $ret .= "<script>Settings.confirm_msg = \"$confirm_msg\";</script>";
+        LJ::need_string('.form.confirm');
         $ret .= "<form id='settings_form' action='$LJ::SITEROOT/manage/settings/index2.bml$getextra${getsep}cat=$given_cat' method='post'>";
         $ret .= LJ::form_auth();
     }
