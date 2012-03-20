@@ -68,6 +68,13 @@
 
 .posted.proterror=The entry has not been posted due to this protocol error: [[err]]
 
+.posted.tags.skipped<<
+However the following tags were not added: [[tags]]<br />
+This either happened because:<br />
+- you have exceeded the maximum number of tags ([[limit]] tag[[?limit||s]]) permitted for this community;<br />
+- you don't have permission to add tags to this community.
+.
+
 .posted.text=The entry has been successfully posted.
 
 .reject.button=Yes, reject it
