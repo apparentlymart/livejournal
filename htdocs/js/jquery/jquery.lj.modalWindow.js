@@ -12,7 +12,7 @@
 			templates: {
 				popup: '<div class="b-popup">' +
 					'<div class="b-popup-outer">' +
-						'<div class="b-popup-inner">' +
+						'<div class="b-popup-inner b-popup-search-music">' +
 							'<div class="popup-inner">' +
 								'<div class="b-popup-content"></div>' +
 								'<i class="i-popup-close"></i>' +
