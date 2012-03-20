@@ -1170,6 +1170,14 @@ sub clean {
                                 $img_bad = 0;
                             }
                         }
+                        elsif ( exists $hash->{width} && ! exists $hash->{height} ) {
+                            delete $hash->{width};
+                            $img_bad = 1;
+                        }
+                        elsif ( exists $hash->{height} && ! exists $hash->{width} ) {
+                            delete $hash->{height};
+                            $img_bad = 1;
+                        }
                         else {
                             $img_bad = 1;
                         }
