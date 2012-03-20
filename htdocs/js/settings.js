@@ -40,8 +40,9 @@ LiveJournal.register_hook('init_settings', function ($) {
 		},
 		classNames: {
 			login: 'music-settings-login',
-			logout: 'music-settings-logout',
-			loading: 'music-settings-loading'
+			disconnect: 'music-settings-disconnect',
+			loading: 'music-settings-loading',
+			error: 'music-settings-error'
 		},
 		url: {
 			trava: 'http://trava.ru/json/autologin'
@@ -53,11 +54,13 @@ LiveJournal.register_hook('init_settings', function ($) {
 	function onGetUserData(data) {
 		travaElement
 			.removeClass(options.classNames.loading)
-			.addClass(data.uid == 1 ? options.classNames.logout : options.classNames.login);
+			.removeClass(options.classNames.error)
+			.addClass(data.uid === 1 ? options.classNames.disconnect : options.classNames.login);
 		$(options.selectors.uIdInput).val(data.uid);
 	}
 
-	function errorGetUserData(data) {
+	function errorGetUserData() {
+		travaElement.addClass(options.classNames.error);
 		travaElement.removeClass(options.classNames.loading);
 	}
 
@@ -67,7 +70,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 
 		$(oldID).hide();
 		$(currentID).show();
-	});
+	}).trigger('change');
 
 
 	travaElement.delegate(options.selectors.connectLink, 'click', function (evt) {
