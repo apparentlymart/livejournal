@@ -1157,7 +1157,7 @@ sub render_options_block {
                 $self->lastfm_geolocation_width,
             });
 
-            if ( $self->should_show_trava ) {
+            #if ( $self->should_show_trava ) {
                 my $trava_uid    = LJ::ejs($opts->{'prop_trava_user'});
                 my $button_label = ml('entryform.music.search');
                 my $help_icon    = LJ::help_icon_html("trava", "", " ");
@@ -1184,8 +1184,8 @@ sub render_options_block {
                 }
 
 
-            }
-            elsif ( $self->should_show_lastfm ) {
+            #}
+            #elsif ( $self->should_show_lastfm ) {
                 my $last_fm_user = LJ::ejs($opts->{'prop_last_fm_user'});
                 my $button_label = ml('entryform.music.detect');
                 my $help_icon = LJ::help_icon_html("lastfm", "", " ");
@@ -1206,7 +1206,7 @@ sub render_options_block {
                         lastfm_current('$last_fm_user', false);
                     });
                 }
-            }
+            #}
 
             $out .= "</span>\n";
 
