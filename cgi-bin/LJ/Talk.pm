@@ -1682,7 +1682,7 @@ sub load_comments
     my %up = ();
     if (%users_to_load) {
         LJ::load_userids_multiple([ map { $_, \$up{$_} } keys %users_to_load ]);
-        LJ::load_user_props_multi(undef, [values %up], [qw{ custom_usericon }]);
+        LJ::load_user_props_multi([values %up], [qw{ custom_usericon }]);
  
         # fill in the 'userpost' member on each post being shown
         while (my ($id, $post) = each %$posts) {

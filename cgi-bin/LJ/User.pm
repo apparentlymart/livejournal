@@ -6622,6 +6622,7 @@ sub wipe_major_memcache
 # args: dbarg?, u, opts?, propname*
 # des-opts: hashref of opts.  set key 'cache' to use memcache.
 # des-propname: the name of a property from the [dbtable[userproplist]] table.
+# README: this function is overridden below if user_props_multi flag is enabled
 # </LJFUNC>
 sub load_user_props {
     &nodb;
@@ -6735,8 +6736,33 @@ sub load_user_props {
     }
 }
 
+sub load_user_props_v2 {
+    my ($u, @props) = @_;
+    return unless ref $u;
+
+    my $opts = ref $props[0]? shift @props : {};
+    unless ( delete $opts->{'reload'} ) {
+        @props = grep { not exists $u->{$_} } @props;
+    }
+
+    LJ::load_user_props_multi([$u], \@props, $opts);
+
+    LJ::User->init_userprop_def;
+
+    foreach my $propname (@props) {
+        next if defined $u->{$propname};
+        next unless defined $LJ::USERPROP_DEF{$propname};
+        $u->{$propname} = $LJ::USERPROP_DEF{$propname};
+    }
+}
+
+if ( LJ::is_enabled('user_props_multi') ) {
+    no strict 'refs';
+    *load_user_props = \&LJ::load_user_props_v2;
+}
+
 sub load_user_props_multi {
-    my ($class, $users, $props, $opts) = @_;
+    my ($users, $props, $opts) = @_;
     my $use_master = $opts->{'use_master'};
 
     $props = [grep { defined and not ref } @$props];
