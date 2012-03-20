@@ -51,10 +51,12 @@ body<=
     my $viewsome = !!$is_admin;
     my $viewall  = ($can_viewall && $GET{'viewall'} == 1);
 
-    LJ::statushistory_add( $usejournal_u->userid,
-                           $remote->userid,
-                           "viewall",
-                           "scheduled: username: $usejournal_u->{'user'}, statusvis: $usejournal_u->{'statusvis'}");
+    if ($viewall) {
+        LJ::statushistory_add( $usejournal_u->userid,
+                               $remote->userid,
+                               "viewall",
+                               "scheduled: username: $usejournal_u->{'user'}, statusvis: $usejournal_u->{'statusvis'}");
+    }
 
     my $entry_chooser = sub {
         my $ref = shift;
