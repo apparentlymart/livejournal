@@ -6756,7 +6756,7 @@ sub load_user_props_v2 {
     }
 }
 
-if ( LJ::is_enabled('user_props_multi') ) {
+unless ( $LJ::DISABLED{'user_props_multi'} ) {
     no strict 'refs';
     *load_user_props = \&LJ::load_user_props_v2;
 }
