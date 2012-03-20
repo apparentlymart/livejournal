@@ -216,10 +216,9 @@ sub as_push {
 sub as_push_payload {
     my $self = shift; 
     my $os = shift;
-    if ($os eq 'wp7') {
-        return "?m=". $self->arg1;
-    }
-    return '"t":9,"m":'.$self->arg1;
+
+    return { 'm' => int($self->arg1),
+             't' => 9,};
 }
 
 sub subscription_as_html {

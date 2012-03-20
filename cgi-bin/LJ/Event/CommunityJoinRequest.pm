@@ -177,7 +177,10 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-    return '"t":15,"j":"'.$self->comm->user().'","u":"'.$self->requestor->user().'"';
+    return { 't' => 15,
+             'j' => $self->comm->user(),
+             'u' => $self->requestor->user(),
+           };
 }
 
 

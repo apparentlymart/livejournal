@@ -195,7 +195,9 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-    return '"t":7,"j":"'.$self->friend->user.'"';
+    return { 't' => 7,
+             'j' => $self->friend->user,   
+           };
 }
 
 1;

@@ -192,7 +192,9 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-    return '"t":1,"p":'.$self->arg1;
+    return { 't' => 1,
+             'p' => $self->arg1,
+           };
 }
 
 1;

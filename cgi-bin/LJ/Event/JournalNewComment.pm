@@ -952,26 +952,38 @@ sub as_push_payload {
     my $entry = $self->comment->entry;
     my $parent = $self->comment->parent;
 
+    my $payload = { 'p' => $entry->ditemid,
+                    'c' => $self->comment->dtalkid,
+                  };
+
 
     unless($u->equals($self->event_journal)) {
 
         if($self->event_journal->journaltype eq 'C') {
-
             if($parent) {
-                return '"t":26, "j":"'.$self->event_journal->user.'",'.
-                    '"p":'.$entry->ditemid.', "r":'.$self->comment->parent->dtalkid.', "c":'.$self->comment->dtalkid;
+                $payload->{'t'} = 26;
+                $payload->{'j'} = $self->event_journal->user;
+                $payload->{'r'} = $self->comment->parent->dtalkid;
+                return $payload;
             }
         } else {
-            return '"t":25,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
+            $payload->{'t'} = 25;
+            $payload->{'j'} = $self->event_journal->user;
+            return $payload;
         }
 
     } else {
+        $payload->{'j'} = $self->event_journal->user;
+
         if($parent && LJ::u_equals($parent->poster, $u)) {
-            return '"t":5,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
+            $payload->{'t'} = 5;
+            return $payload;
         } elsif($self->event_journal->journaltype eq 'C') {
-            return '"t":4,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid;
+            $payload->{'t'} = 4;
+            return $payload;
         } else {
-            return '"t":3,"j":"'.$self->event_journal->user.'","p":'.$entry->ditemid.',"c":'.$self->comment->dtalkid; 
+            $payload->{'t'} = 3;
+            return $payload;
         }
     }
 }  

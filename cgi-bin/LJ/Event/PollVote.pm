@@ -199,8 +199,12 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-
-    return '"t":6,"j":"'.$self->entry->poster->user.'","p":'.$self->entry->ditemid.',"pl":'.$self->arg2;
+    
+    return { 't'  => 6,
+             'j'  => $self->entry->poster->user,
+             'p'  => $self->entry->ditemid,
+             'pl' => $self->arg2,
+           };
 }
 
 1;

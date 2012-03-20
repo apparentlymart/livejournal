@@ -113,7 +113,9 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-    return  '"t": 24, "j": "'.$self->event_journal->user.'"';
+    return { 't' => 24,
+             'j' => $self->event_journal->user,
+           };
 }
 
 

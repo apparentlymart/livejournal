@@ -219,7 +219,10 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
-    return '"t":17,"j":"'.$self->bdayuser->user().'","b":"'. $self->next_bday().'"';
+    return { 't' => 17,
+             'j' => $self->bdayuser->user(),
+             'b' => $self->next_bday(),
+           };
 }
 
 1;

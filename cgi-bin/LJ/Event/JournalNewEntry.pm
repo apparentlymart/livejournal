@@ -439,7 +439,10 @@ sub as_push {
 
 sub as_push_payload {
     my ($self,$u) = @_;
-    return '"t":19,"j":"'.$u->user.'","p":'.$self->entry->ditemid;
+    return { 't' => 19,
+             'j' => $u->user,
+             'p' => $self->entry->ditemid,
+           };
 }
 
 1;
