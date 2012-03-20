@@ -23,7 +23,7 @@ body<=
         return BML::redirect("$LJ::SITEROOT/community/moderate.bml?authas=$GET{comm}");
     }
 
-    $ret .= "<form action='moderate.bml' method='GET'>\n";
+    $ret .= "<form action='moderate.bml' name='authForm' id='authForm' method='GET'>\n";
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas} });
     $ret .= "</form>\n\n";
 
@@ -75,13 +75,45 @@ body<=
         # we need to fix up the username based on the userid we stored
         $req->{user} = $poster->user;
         $req->{username} = $poster->user;
+        
+        # check poster's and moderator's tags manage permissions
+        # to define will we add tags within postevent or after
+        my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) || 
+                              LJ::Tags::can_add_tags($c,$remote);
+        my $p_can_control_tags = LJ::Tags::can_control_tags($c,$poster);
+        my $p_can_add_tags = LJ::Tags::can_add_tags($c,$poster);
+        # update taglist if poster could add them
+        if ($m_can_edit_tags && ($p_can_add_tags || $p_can_control_tags)) { 
+            $req->{props}->{taglist} = $POST{'prop_taglist'};
+        }
         if ($mode eq 'approve_do') {
             my $res = LJ::Protocol::do_request('postevent', $req, \$prot_err, { 'nomod'=>1, 
                                                                                 'noauth'=>1, 
                                                                                 'use_custom_time'=> 0, });
             if ($res) { # succeeded
                 $success = 1;
+                my $err = sub { return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>"; };
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";
+                $ret .= "<br />" .$err->($prot_err). "<br />" unless $res;
+                
+                #add tags, that poster weren't able to add
+                if (!$p_can_control_tags && $m_can_edit_tags) {
+                    my $tagerr = "";
+                    my $skipped_tags = [];
+                    my $addtags = LJ::Tags::update_logtags($c, 
+                                                      $res->{itemid}, {
+                                            set_string => $POST{prop_taglist},
+                                            remote => $remote,
+                                            err_ref => \$tagerr,
+                                            skipped_tags => $skipped_tags, 
+                                        });
+                    $ret .= "<br />" .$err->($tagerr). "<br />" unless $addtags;
+                    $ret .= LJ::Lang::ml(
+                        '/community/moderate.bml.posted.tags.skipped',
+                        { 'tags'  => join(', ', @$skipped_tags),
+                          'limit' => $c->get_cap('tags_max') } 
+                    ) if @$skipped_tags;
+                }
                 # does the poster want to know? if they have working email and notification on
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
@@ -287,6 +319,7 @@ body<=
         }
         my $req = Storable::thaw($frreq);
         my $poster = LJ::load_userid($posterid);
+        my $taglist = LJ::ejs($POST{prop_taglist});
         $ret .= "<?h1 $ML{'.approve.header'} h1?><?p $ML{'.approve.text'} p?>";
         $ret .= "<p><form method='post' action='/community/moderate.bml'><center>";
         $ret .= $formauth;
@@ -294,6 +327,7 @@ body<=
         $ret .= "<input type='hidden' name='cid' value='$c->{'userid'}'>";
         $ret .= "<input type='hidden' name='modid' value='$modid'>";
         $ret .= "<input type='hidden' name='auth' value='" . $req->{'_moderate'}->{'authcode'} . "'>";
+        $ret .= "<input type='hidden' name='prop_taglist' value='$taglist'>";
         $ret .= "<input type='submit' value='$ML{'.approve.button'}'>";
         $ret .= "</center>";
         $ret .= "<p><input type='checkbox' name='preapprove'> " .
@@ -490,7 +524,6 @@ body<=
 
         $ret .= "<form method='post' action='/community/moderate.bml'>";
         $ret .= BML::fill_template("standout", {'DATA'=> $actions});
-        $ret .= "</form>";
 
         my %current;
         if ($props->{'current_mood'} || $props->{'current_moodid'}) {
@@ -512,22 +545,46 @@ body<=
             $current{'Music'} = $props->{'current_music'};
             LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
+        # tags manage permissions should be checked here too
+        # because we are in a different code block
+        my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) ||
+                              LJ::Tags::can_add_tags($c,$remote);
         if ($props->{'taglist'}) {
             $current{'Tags'} = join(", ", sort split(/\s*,\s*/, $props->{'taglist'}));
+        } else {
+            $current{'Tags'} = "" if $m_can_edit_tags;
         }
 
         $ret .= "<div style='margin-left: 30px'>";
         if (%current)
         {
-            $ret .= "<table border=0>\n";
-            foreach (sort keys %current) {
-                my $curkey = "talk.curname_" . $_;
+            $ret .= "<br /><table border=0>\n";
+            foreach my $key (sort keys %current) {
+                my $curkey = "talk.curname_" . $key;
                 my $curname = BML::ml($curkey);
-                $curname = "<b>Current $_:</b>" unless $curname;
-                $ret .= "<tr><td align=right>$curname</td><td>$current{$_}</td></tr>\n";
+                $curname = "<b>Current $key:</b>" unless $curname;
+                $ret .= "<tr><td align=right>$curname</td><td>";
+                if (($curkey eq 'talk.curname_Tags') && ($m_can_edit_tags)) {
+                    $ret .= LJ::html_text(
+                       {
+                           name  => 'prop_taglist',
+                           id    => 'prop_taglist',
+                           class => 'text',
+                           value => ($current{$key}),
+                           size  => 40,
+                           raw   => "autocomplete='off'",
+                       }
+                    );
+                    $ret .= "$BML::ML{'entryform.selecttags'}";
+                    } else {
+                        $ret .= $current{$_};
+                }
+                $ret .= "</td></tr>\n";
             }
-            $ret .= "</table><p>\n";
         }
+        $ret .= "</table><p>\n";
+        $ret .= "</form>";
+        
 
         ### security indicator
         my $sec = "";
