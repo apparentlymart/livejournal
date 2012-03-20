@@ -80,8 +80,10 @@
 		},
 
 		updatePosition: function () {
+			var width = isNaN(this.options.width) ? this._popupNode.width() : this.options.width;
+
 			this._popupNode.css({
-				left: - this.options.width / 2,
+				left: - width / 2,
 				top: $(window).scrollTop() + ($(window).height() * 0.1),
 				marginLeft: '50%'
 			});
@@ -91,6 +93,7 @@
 			if (!isNaN(this.options.width)) {
 				this._contentNode.css('width', this.options.width);
 			}
+
 			if (!isNaN(this.options.height)) {
 				this._contentNode.css('height', this.options.height);
 			}
