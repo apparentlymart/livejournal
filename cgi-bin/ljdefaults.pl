@@ -170,23 +170,6 @@ use strict;
     # Maximum number of comments to display on Recent Comments page
     $LJ::TOOLS_RECENT_COMMENTS_MAX ||= 50;
 
-    # setup the mogilefs defaults so we can create the necessary domains
-    # and such. it is not recommended that you change the name of the
-    # classes. you can feel free to add your own or alter the mindevcount
-    # from within ljconfig.pl, but the LiveJournal code uses these class
-    # names elsewhere and depends on them existing if you're using MogileFS
-    # for storage.
-    #
-    # also note that this won't actually do anything unless you have
-    # defined a MOGILEFS_CONFIG hash in ljconfig.pl and you explicitly set
-    # at least the hosts key to be an arrayref of ip:port combinations
-    # indicating where to reach your local MogileFS server.
-    %LJ::MOGILEFS_CONFIG = () unless defined %LJ::MOGILEFS_CONFIG;
-    $LJ::MOGILEFS_CONFIG{domain}                 ||= 'livejournal';
-    $LJ::MOGILEFS_CONFIG{classes}                ||= {};
-    $LJ::MOGILEFS_CONFIG{classes}->{userpics}    ||= 3;
-    $LJ::MOGILEFS_CONFIG{classes}->{captcha}     ||= 2;
-
     # Default to allow all reproxying.
     %LJ::REPROXY_DISABLE = () unless %LJ::REPROXY_DISABLE;
 
