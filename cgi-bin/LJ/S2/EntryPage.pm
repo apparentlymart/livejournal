@@ -233,7 +233,7 @@ sub EntryPage
                  if ($last_talkid == $dtalkid && $last_jid == $remote->{'userid'});
 
             my $deleted = $com->{'state'} eq 'D'? 1 : 0;
-            if ( $pu and $pu->{'statusvis'} eq 'D' ) {
+            if ( $pu and ($pu->{'statusvis'} eq 'D' or $pu->{'statusvis'} eq 'X' or $pu->{'clusterid'} == 0) ) {
                 # LJSV-2075
                 my ($comments, $community_entries) = split ':', $pu->prop('purge_external_content');
                 $deleted = 1 if $comments;
