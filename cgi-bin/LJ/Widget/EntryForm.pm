@@ -1164,10 +1164,10 @@ sub render_options_block {
 
                 $out .= qq{
                     <input
+                        id="entryform-music-search"
                         type="button" value="$button_label"
                         tabindex="175"
                         style="float: left"
-                        onclick="trava_search('$trava_uid', true);"
                     >
                     <input
                         type="hidden"
@@ -1177,11 +1177,11 @@ sub render_options_block {
                 };
 
                 # automatically detect current music only if creating new entry
-                if ($opts->{'mode'} eq 'update') {
-                    $out .= $self->wrap_js(qq{
-                        trava_current('$trava_uid', false);
-                    });
-                }
+                #if ($opts->{'mode'} eq 'update') {
+                    #$out .= $self->wrap_js(qq{
+                        #trava_current('$trava_uid', false);
+                    #});
+                #}
 
 
             #}
