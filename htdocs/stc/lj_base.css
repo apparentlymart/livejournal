@@ -4018,3 +4018,41 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 			display: none;
 			}
 
+
+/* Help Link
+----------------------------------- */
+.b-helplink:link,
+.b-helplink:visited,
+.b-helplink:hover,
+.b-helplink:active {
+	display: inline-block;
+	position: relative;
+	margin: 0;
+	padding: 0 0 0 20px;
+	border: 0;
+	color: #8E9194 !important;
+	text-decoration: none;
+	}
+.b-helplink:hover,
+.b-helplink:active {
+	color: #C00 !important;
+	}
+	.b-helplink-icon {
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 16px;
+		height: 16px;
+		margin: -8px 0 0;
+		padding: 0;
+		background: url(/img/icons/help.png?v=1) 0 0 no-repeat;
+		font: 0/0 serif;
+		cursor: pointer;
+		}
+	.b-helplink:hover .b-helplink-icon {
+		background-position: -16px 0;
+		}
+
+
+
