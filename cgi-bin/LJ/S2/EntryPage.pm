@@ -188,7 +188,7 @@ sub EntryPage
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});
-            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
+            my $datetime_remote = $tz_remote || undef;
             my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
             my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
 
