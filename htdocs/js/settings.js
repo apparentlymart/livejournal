@@ -36,32 +36,32 @@ LiveJournal.register_hook('init_settings', function ($) {
 			Trava: '#LJ__Setting__Music__Trava_',
 			LastFM: '#LJ__Setting__Music__LastFM_',
 			connectLink: '.music-settings-connect',
-			uIdInput: 'input name="LJ__Setting__Music__Trava_trava_uid"'
+			uIdInput: 'input[name="LJ__Setting__Music__Trava_trava_uid"]'
 		},
 		classNames: {
 			login: 'music-settings-login',
 			disconnect: 'music-settings-disconnect',
 			loading: 'music-settings-loading',
 			error: 'music-settings-error'
-		},
-		url: {
-			trava: 'http://trava.ru/json/autologin'
 		}
 	};
 
 	var travaElement = $(options.selectors.Trava);
+	var hiddenField = travaElement.find(options.selectors.uIdInput);
 
-	function onGetUserData(data) {
-		travaElement
-			.removeClass(options.classNames.loading)
-			.removeClass(options.classNames.error)
-			.addClass(data.uid === 1 ? options.classNames.disconnect : options.classNames.login);
-		$(options.selectors.uIdInput).val(data.uid);
-	}
+	function onLogin(evt, data) {
+		if (data) {
+			travaElement
+				.removeClass(options.classNames.loading)
+				.removeClass(options.classNames.error)
+				.removeClass(options.classNames.disconnect)
+				.addClass(data.uid === 1 ? options.classNames.disconnect : options.classNames.login);
 
-	function errorGetUserData() {
-		travaElement.addClass(options.classNames.error);
-		travaElement.removeClass(options.classNames.loading);
+			hiddenField.val(data.uid);
+		} else {
+			travaElement.addClass(options.classNames.error);
+			travaElement.removeClass(options.classNames.loading);
+		}
 	}
 
 	$('select[name="music_select"]').bind('change', function () {
@@ -72,17 +72,12 @@ LiveJournal.register_hook('init_settings', function ($) {
 		$(currentID).show();
 	}).trigger('change');
 
+	travaElement.trava().bind('travalogin', onLogin);
 
 	travaElement.delegate(options.selectors.connectLink, 'click', function (evt) {
 		evt.preventDefault();
 		travaElement.addClass(options.classNames.loading);
-		$.ajax({
-			url: options.url.trava,
-			cache: false,
-			dataType: 'jsonp',
-			success: onGetUserData,
-			error: errorGetUserData
-		});
+		travaElement.trava('login');
 	});
 });
 
