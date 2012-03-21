@@ -603,6 +603,12 @@ TABLE TD {
 	
 /* Fotki promo */ 
 
+@media screen and (max-height: 500px) {
+    .cke_dialog {
+        position: absolute !important;
+        }
+    }
+
 .cke_dialog_ui_vbox_child .b-pics-promo-wrapper {
 	position: relative;
 	margin: 20px 0;
