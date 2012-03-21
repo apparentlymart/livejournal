@@ -4057,3 +4057,63 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 
 
 
+/* Message System
+----------------------------------- */
+.b-msgsystem-errorbox {
+	display: none;
+	min-height: 50px;
+	margin: 0 -45px 2em -25px;
+	padding: 10px 140px 10px 120px;
+	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	background: #FFEFEF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	}
+	.b-msgsystem-errorbox-head {
+		margin: 0 0 5px;
+		padding: 0;
+		color: #CB1427;
+		font-size: 1em;
+		font-weight: bold;
+		}
+	.b-msgsystem-error {
+		margin: 0 0 10px;
+		padding: 0;
+		color: #787878;
+		}
+#js .b-msgsystem-errorbox-show {
+	display: block;
+	}
+	.b-msgsystem-error {
+		display: none;
+		}
+
+.b-msgsystem-messagebox {
+	display: none;
+	min-height: 50px;
+	margin: 0 -45px 2em -25px;
+	padding: 10px 140px 10px 120px;
+	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	background: #FFEFEF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	}
+	.b-msgsystem-messagebox-head {
+		margin: 0 0 5px;
+		padding: 0;
+		color: #CB1427;
+		font-size: 1em;
+		font-weight: bold;
+		}
+	.b-msgsystem-message {
+		margin: 0 0 10px;
+		padding: 0;
+		color: #787878;
+		}
+#js .b-msgsystem-messagebox-show {
+	display: block;
+	}
+	.b-msgsystem-message {
+		display: none;
+		}
+
