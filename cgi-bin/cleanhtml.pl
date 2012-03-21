@@ -1162,7 +1162,7 @@ sub clean {
                             }
                         }
 
-                        if ( exists $hash->{width} && $hash->{width} && exists $hash->{height} && $hash->{height} ) {
+                        if ( exists $hash->{width} && $hash->{width} =~ /^\d+$/ && exists $hash->{height} && $hash->{height} =~ /^\d+$/ ) {
                             if ( $hash->{'width'} > 140 && $hash->{'height'} > 37 ) {
                                 $img_bad = 1;
                             }
@@ -1170,15 +1170,9 @@ sub clean {
                                 $img_bad = 0;
                             }
                         }
-                        elsif ( exists $hash->{width} && ! exists $hash->{height} ) {
-                            delete $hash->{width};
-                            $img_bad = 1;
-                        }
-                        elsif ( exists $hash->{height} && ! exists $hash->{width} ) {
-                            delete $hash->{height};
-                            $img_bad = 1;
-                        }
                         else {
+                            delete $hash->{width} if exists $hash->{width};
+                            delete $hash->{height} if exists $hash->{height};
                             $img_bad = 1;
                         }
 
