@@ -133,6 +133,17 @@ sub EntryPage
         @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
     }
 
+    my @userids = map { $_->{'posterid'} } @comments;
+    push @userids, $remote->userid if $remote;
+    push @userids, $entry->journalid;
+    my $usermap = LJ::load_userids(@userids);
+    my @user_objects = values %$usermap;
+
+    # these three cover Global, GlobalIndexed, and UserClusterLite,
+    # so there should be no further load_props after this call
+    my @props_to_load = qw( custom_usericon sticky_entry_id timezone );
+    LJ::load_user_props_multi( \@user_objects, \@props_to_load );
+
     my $tz_remote;
     if ($remote) {
         my $tz = $remote->prop("timezone");
@@ -140,6 +151,7 @@ sub EntryPage
     }
 
     my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
+    my ($last_talkid, $last_jid) = LJ::get_lastcomment();
     my $convert_comments = sub {
         my ($self, $destlist, $srclist, $depth) = @_;
 
@@ -227,7 +239,6 @@ sub EntryPage
             }
 
             # Comment Posted Notice
-            my ($last_talkid, $last_jid) = LJ::get_lastcomment();
             my $commentposted = "";
             $commentposted = 1
                  if ($last_talkid == $dtalkid && $last_jid == $remote->{'userid'});
