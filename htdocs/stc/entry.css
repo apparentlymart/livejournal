@@ -949,8 +949,13 @@ td.tabs {
 		height: 24px;
 		background: url(/img/trava-logo.png?ver=1) 0 0 no-repeat;
 		}
-.b-music-list-body {
+.b-music-list-searching-wrapper {
+	position: relative;
 	overflow: hidden;
+	}
+.b-music-list-searching {
+	position: relative;
+	min-height: 150px;
 	margin: 0 0 7px 0;
 	padding: 5px 20px 15px 20px;
 	border-radius: 5px 5px 5px 5px;
@@ -961,34 +966,12 @@ td.tabs {
 	width: 100%;
 	border-collapse: collapse;
 	}
-	.b-music-list .odd {
-		background: #ebebeb;
-		}
-	.b-music-list TD {
-		width: 250px;
-		padding: 6px 0 6px 15px;
-		color: #3f5f9e;
-		text-shadow: 1px 1px 1px #FFF;
-		}
-	.b-music-list TH {
-		padding: 6px 0 10px 15px;
-		}
-		.b-music-list TD SPAN {
-			cursor: pointer;
-			}
-		.b-music-list TD SPAN:hover {
-			text-decoration: underline;
-			}
-.b-music-list-action A {
-	color: #3f5f9e !important;
-	}	
 .b-music-item,
 .b-music-item-header {
 	position: relative;
-	display: table;
 	min-width: 756px;
+	width: 100%;
 	margin: 0;
-	border-collapse: separate;
 	}
 .b-music-item.odd {
 	background: #ebebeb;
@@ -1003,3 +986,53 @@ td.tabs {
 		padding: 6px 0 6px 15px;
 		vertical-align: middle;
 		}
+.b-music-list-state-error .b-music-item-header,
+.b-music-list-state-error .b-music-list-preloader,
+.b-music-list-state-error .b-music-item-body,
+.b-music-list-state-loading .b-music-list-error,
+.b-music-list-state-loading .b-music-item-header,
+.b-music-list-state-loading .b-music-item-body,
+.b-music-list-state-result .b-music-list-error,
+.b-music-list-state-result .b-music-list-preloader {
+	display: none;
+	}
+.b-music-list-error {
+	position: absolute;
+	top: 54px;
+	width: 100%;
+	text-align: center;
+	}
+	.b-music-list-error P {
+		font-size: 20px;
+		margin: 0 0 10px 0;
+		text-shadow: 1px 1px 1px #FFF;
+		}
+	.b-music-list-error SPAN {
+		font-size: 12px;
+		text-shadow: #FFF 1px 1px 1px;
+		}
+.b-music-list-preloader {
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	min-height: 22px;
+	margin-top: -12px;
+	text-align: center;
+	}
+.b-music-list-preloader SPAN {
+	position: relative;
+	padding: 3px 0 0 25px;
+	font-size: 18px;
+	color: #CCC;
+	}
+.b-music-list-preloader-icon {
+	    background: url("/img/friendstimes/loader.gif") no-repeat scroll 0 0 transparent;
+	    font: 0pt/0 serif;
+	    height: 16px;
+	    left: 0;
+	    margin: -6px 0 0;
+	    padding: 0;
+	    position: absolute;
+	    top: 50%;
+	    width: 16px;
+	}
