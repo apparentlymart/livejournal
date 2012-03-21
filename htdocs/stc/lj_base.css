@@ -3792,7 +3792,8 @@ HTML BODY * .b-mediaplaceholder:focus {
 	font: 12px/14px Arial,sans-serif;
 	text-align: center !important;
 	text-decoration: none !important;
-	text-shadow: none;
+	text-shadow: none !important;
+	text-indent: 0 !important;
 	color: #FFF !important;
 	cursor: pointer;
 	*display: inline;
