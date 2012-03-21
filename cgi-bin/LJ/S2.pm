@@ -1835,9 +1835,10 @@ sub DateTime_unix
     return $dt;
 }
 
-sub DateTime_tz
-{
-    # timezone can be scalar timezone name, DateTime::TimeZone object, or LJ::User object
+my %timezone_offsets_cache;
+
+# timezone can be scalar timezone name or LJ::User object
+sub DateTime_tz {
     my ($epoch, $timezone) = @_;
     return undef unless $timezone;
 
@@ -1846,26 +1847,42 @@ sub DateTime_tz
         return undef unless $timezone;
     }
 
-    my $dt = eval {
-        DateTime->from_epoch(
-                             epoch => $epoch,
-                             time_zone => $timezone,
-                             );
+    my $timezone_name;
+    if ( ref $timezone ) {
+        my ( undef, $filename, $line ) = caller(0);
+        warn "passing DateTime::TimeZone to LJ::S2::DateTime_tz " .
+            "is deprecated at $filename line $line\n";
+        $timezone_name = $timezone->name;
+    } else {
+        $timezone_name = $timezone;
+    }
+
+    unless ( exists $timezone_offsets_cache{$timezone_name} ) {
+        my $timezone_object = DateTime::TimeZone->new(
+            'name' => $timezone_name );
+        if ($timezone_object) {
+            $timezone_offsets_cache{$timezone_name} =
+                $timezone_object->offset_for_datetime( DateTime->now ) || 0;
+        } else {
+            $timezone_offsets_cache{$timezone_name} = 0;
+        }
+    }
+
+    my $offset = $timezone_offsets_cache{$timezone_name};
+
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) =
+        gmtime( $epoch + $offset );
+
+    return {
+        '_type'      => 'DateTime',
+        'year'       => $year + 1900,
+        'month'      => $mon  + 1,
+        'day'        => $mday,
+        'hour'       => $hour,
+        'min'        => $min,
+        'sec'        => $sec,
+        '_dayofweek' => $wday + 1,
     };
-    return undef unless $dt;
-
-    my $ret = { '_type' => 'DateTime' };
-    $ret->{'year'} = $dt->year;
-    $ret->{'month'} = $dt->month;
-    $ret->{'day'} = $dt->day;
-    $ret->{'hour'} = $dt->hour;
-    $ret->{'min'} = $dt->minute;
-    $ret->{'sec'} = $dt->second;
-
-    # DateTime.pm's dayofweek is 1-based/Mon-Sun, but S2's is 1-based/Sun-Sat,
-    # so first we make DT's be 0-based/Sun-Sat, then shift it up to 1-based.
-    $ret->{'_dayofweek'} = ($dt->day_of_week % 7) + 1;
-    return $ret;
 }
 
 sub DateTime_parts
