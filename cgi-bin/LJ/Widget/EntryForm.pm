@@ -701,6 +701,9 @@ sub render_top_block {
     $out .= $self->render_userpics_block;
     $out .= $self->render_infobox_block;
     $out .= $self->render_metainfo_block;
+    $out .= $self->wrap_js(q~
+        jQuery('#entryform-music-wrapper').trava().trava('getNowListen');
+    ~) if $self->should_show_trava;
 
     return $out;
 }
