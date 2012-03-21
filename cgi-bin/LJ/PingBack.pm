@@ -55,14 +55,21 @@ sub ping_post {
         poster  => $poster_u,
 
         body    => ($source_entry
-            ? LJ::Lang::ml("pingback.ljping.comment.text", {
+            ? LJ::Lang::get_text(
+                $target_entry->journal->{'browselang'},
+                "pingback.ljping.comment.text",
+                undef,
+                {
                     context   => $context,
                     subject   => $subject,
                     sourceURI => $sourceURI,
                     poster    => $source_entry->poster->username,
               })
-            : LJ::Lang::ml("pingback.public.comment.text",
-              {
+            : LJ::Lang::ml(
+                $target_entry->journal->{'browselang'},
+                "pingback.public.comment.text",
+                undef,
+                {
                     sourceURI => $sourceURI,
                     title     => $subject,
                     context   => $context
