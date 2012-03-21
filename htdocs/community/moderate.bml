@@ -577,7 +577,7 @@ body<=
                     );
                     $ret .= "$BML::ML{'entryform.selecttags'}";
                     } else {
-                        $ret .= $current{$_};
+                        $ret .= $current{$key};
                 }
                 $ret .= "</td></tr>\n";
             }
