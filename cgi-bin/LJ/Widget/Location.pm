@@ -250,7 +250,7 @@ sub handle_post {
         for my $type (qw(entry journal community)) {
             my $class = LJ::Pay::SelfPromo->get_class_by_type($type , 'ua');
             my $promo = $class->current_promo_info();
-            if (LJ::u_equals($promo->promoter, $u)) {
+            if ($promo && LJ::u_equals($promo->promoter, $u)) {
                 $class->withdraw_object($promo->object);
             }
         }
