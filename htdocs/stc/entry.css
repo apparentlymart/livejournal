@@ -957,7 +957,7 @@ td.tabs {
 	position: relative;
 	min-height: 150px;
 	margin: 0 0 7px 0;
-	padding: 5px 20px 15px 20px;
+	padding: 5px 17px 15px 16px;
 	border-radius: 5px 5px 5px 5px;
 	border: 1px solid #ebebeb;
 	background: none repeat scroll 0 0 #F6F6F6;
@@ -966,10 +966,12 @@ td.tabs {
 	width: 100%;
 	border-collapse: collapse;
 	}
+.b-music-item-body {
+	width: 765px;
+	}
 .b-music-item,
 .b-music-item-header {
 	position: relative;
-	min-width: 756px;
 	width: 100%;
 	margin: 0;
 	}
@@ -981,11 +983,25 @@ td.tabs {
 	.b-music-item DT,
 	.b-music-item DD {
 		display: table-cell;
-		min-width: 245px;
 		margin: 0;
 		padding: 6px 0 6px 15px;
 		vertical-align: middle;
 		}
+	.b-music-item-header DT,
+	.b-music-item-header DD {
+		width: 200px;
+		}
+	.b-music-item-artist,
+	.b-music-item-album,
+	.b-music-item-track {
+		min-width: 200px;
+		}
+	.b-music-item-player {
+		width: 106px;
+		min-width: 106px;
+		padding: 0;
+		}
+		
 .b-music-list-state-error .b-music-item-header,
 .b-music-list-state-error .b-music-list-preloader,
 .b-music-list-state-error .b-music-item-body,
@@ -1005,14 +1021,13 @@ td.tabs {
 	.b-music-list-error P {
 		font-size: 20px;
 		text-shadow: 1px 1px 1px #FFF;
-		margin: 0 0 10px 0;
-		
+		margin: 0 0 10px 0;	
 		}
 	.b-music-list-error SPAN {
 		font-size: 12px;
 		text-shadow: #FFF 1px 1px 1px;
 		}
-.b-music-list-preloader {
+.b-music-list-preloader-wrapper {
 	position: absolute;
 	top: 50%;
 	width: 100%;
@@ -1020,7 +1035,7 @@ td.tabs {
 	margin-top: -12px;
 	text-align: center;
 	}
-.b-music-list-preloader SPAN {
+.b-music-list-preloader {
 	position: relative;
 	padding: 3px 0 0 25px;
 	font-size: 18px;
