@@ -1004,8 +1004,9 @@ td.tabs {
 	}
 	.b-music-list-error P {
 		font-size: 20px;
-		margin: 0 0 10px 0;
 		text-shadow: 1px 1px 1px #FFF;
+		margin: 0 0 10px 0;
+		
 		}
 	.b-music-list-error SPAN {
 		font-size: 12px;
