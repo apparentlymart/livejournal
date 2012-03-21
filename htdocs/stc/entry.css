@@ -950,6 +950,7 @@ td.tabs {
 		background: url(/img/trava-logo.png?ver=1) 0 0 no-repeat;
 		}
 .b-music-list-body {
+	overflow: hidden;
 	margin: 0 0 7px 0;
 	padding: 5px 20px 15px 20px;
 	border-radius: 5px 5px 5px 5px;
@@ -978,18 +979,27 @@ td.tabs {
 		.b-music-list TD SPAN:hover {
 			text-decoration: underline;
 			}
-.b-music-list-action {
-	float: right;
-	margin: 4px 0 0 0;
-	}
-.b-music-list-action LI {
-	display: inline;
-	}
-.b-music-list-action LI:first-child {
-	margin: 0 8px 0 0;
-	padding: 0 8px 0 0;
-	background: url(/img/separator.png?ver=1) 100% 50% no-repeat;
-	}
 .b-music-list-action A {
 	color: #3f5f9e !important;
+	}	
+.b-music-item,
+.b-music-item-header {
+	position: relative;
+	display: table;
+	min-width: 756px;
+	margin: 0;
+	border-collapse: separate;
 	}
+.b-music-item.odd {
+	background: #ebebeb;
+	}
+	.b-music-item-header DT,
+	.b-music-item-header DD,
+	.b-music-item DT,
+	.b-music-item DD {
+		display: table-cell;
+		min-width: 245px;
+		margin: 0;
+		padding: 6px 0 6px 15px;
+		vertical-align: middle;
+		}
