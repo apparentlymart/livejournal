@@ -543,7 +543,7 @@ sub domain_journal {
     $host =~ s/^www\.//;
 
     return undef unless
-        $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$! or exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
+        $host =~ m!^([\w\-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$! or exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
 
     my $subdomain = lc($1);
 

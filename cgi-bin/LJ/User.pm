@@ -298,8 +298,7 @@ sub new_from_url {
 ## Input: domain (e.g. 'news.independent.livejournal.com' or 'some.site.domain.com')
 ## Output: LJ::User object or undef
 sub new_from_external_domain {
-    my $class = shift;
-    my $host = shift;
+    my( $class, $host ) = @_;
 
     $host = lc($host);
     $host =~ s/^www\.//;
