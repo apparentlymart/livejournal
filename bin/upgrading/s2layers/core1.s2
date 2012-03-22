@@ -290,7 +290,6 @@ class Tag
 "Represents a tag in its most basic form."
 {
     var readonly string name "Textual representation of this tag.";
-    var readonly string id "ID of this tag.";
     var readonly string url "URL to view entries with this tag.";
 }
 
@@ -667,6 +666,10 @@ class RecentPage extends Page
     "Array of entries available to be seen by the viewer of the page.";
 
     var RecentNav nav;
+
+    var bool tagfilter_active;
+    var string tagfilter_mode;
+    var Tag[] tagfilter_tags;
 }
 
 class FriendsPage extends RecentPage

@@ -9973,18 +9973,20 @@ sub make_journal
         # get user's tags so we know what remote can see, and setup an inverse mapping
         # from keyword to tag
         $opts->{tagids} = [];
+        $opts->{'tagmap'} = {};
         my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
         my %kwref = ( map { $tags->{$_}->{name} => $_ } keys %{$tags || {}} );
-        foreach (@{$opts->{tags}}) {
-            unless ($kwref{$_}) {
+        foreach my $tagname (@{$opts->{tags}}) {
+            unless ($kwref{$tagname}) {
                 LJ::Request->pnotes ('error' => 'e404');
                 LJ::Request->pnotes ('remote' => LJ::get_remote ());
                 $opts->{'handler_return'} = "404 Not Found";
                 return;
             }
             #return $error->("Sorry, one or more specified tags do not exist.", "404 Not Found")
-            #    unless $kwref{$_};
-            push @{$opts->{tagids}}, $kwref{$_};
+            #    unless $kwref{$tagname};
+            push @{$opts->{tagids}}, $kwref{$tagname};
+            $opts->{'tagmap'}->{$tagname} = $kwref{$tagname};
         }
 
         $opts->{tagmode} = $opts->{getargs}->{mode} eq 'and' ? 'and' : 'or';

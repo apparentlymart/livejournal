@@ -33,8 +33,17 @@ sub RecentPage
                     Image("$LJ::IMGPREFIX/data_$what.gif", 32, 15, $caption));
     };
 
+    $p->{'tagfilter_tags'} = [];
+
     if ( $opts->{'tagids'} ) {
         $p->{'page_id'} = 'journal-' . $u->username . '-tags-' . $opts->{'tagmode'} . '-' . join( '-', @{ $opts->{'tagids'} } );
+
+        $p->{'tagfilter_active'} = 1;
+        $p->{'tagfilter_mode'}   = $opts->{'tagmode'};
+        while ( my ( $tagname, $tagid ) = each %{ $opts->{'tagmap'} } ) {
+            push @{ $p->{'tagfilter_tags'} },
+                LJ::S2::Tag( $u, $tagid, $tagname );
+        }
     }
 
     $p->{'data_link'} = {

@@ -1908,8 +1908,6 @@ sub Tag
     
     my $t = {
         _type => 'Tag',
-        _id => $kwid,
-        id => $kwid,
         name => LJ::ehtml($kw),
         url => LJ::journal_base($u) . '/tag/' . LJ::eurl($kw),
     };
