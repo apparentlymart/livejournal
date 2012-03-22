@@ -4087,6 +4087,12 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	.b-msgsystem-error {
 		display: none;
 		}
+.b-msgsystem-errorbox-errors {
+	display: block;
+	}
+	.b-msgsystem-errorbox-errors .b-msgsystem-error-server {
+		display: block;
+		}
 
 .b-msgsystem-messagebox {
 	display: none;
@@ -4096,12 +4102,12 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
-	background: #FFEFEF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	background: #E9EEDF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
 	}
 	.b-msgsystem-messagebox-head {
 		margin: 0 0 5px;
 		padding: 0;
-		color: #CB1427;
+		color: #0D8473;
 		font-size: 1em;
 		font-weight: bold;
 		}
@@ -4115,6 +4121,12 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	}
 	.b-msgsystem-message {
 		display: none;
+		}
+.b-msgsystem-messagebox-messages {
+	display: block;
+	}
+	.b-msgsystem-messagebox-messages .b-msgsystem-message-server {
+		display: block;
 		}
 
 
