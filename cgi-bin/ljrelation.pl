@@ -80,10 +80,10 @@ sub get_groupmask
     my $memkey = [$jid,"frgmask:$jid:$fid"];
     my $mask = LJ::MemCache::get($memkey);
     unless (defined $mask) {
-        my $dbr = LJ::get_db_reader();
-        die "No database reader available" unless $dbr;
+        my $dbw = LJ::get_db_writer();
+        die "No database reader available" unless $dbw;
 
-        $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
+        $mask = $dbw->selectrow_array("SELECT groupmask FROM friends ".
                                       "WHERE userid=? AND friendid=?",
                                       undef, $jid, $fid);
         LJ::MemCache::set($memkey, $mask+0, time()+60*15);
