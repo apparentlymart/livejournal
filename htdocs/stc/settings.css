@@ -1040,16 +1040,49 @@
 	#LJ__Setting__Music__Trava_ A {
 		cursor: pointer;
 		text-decoration: none;
-		}
+		color: blue;
+		}		
 	#LJ__Setting__Music__Trava_ A:hover {
 		text-decoration: underline;
 		}
+		#LJ__Setting__Music__Trava_ .music-settings-login-error-msg A {
+			color: blue;
+			}
 #LJ__Setting__Music__Trava_ DL,
 #LJ__Setting__Music__Trava_ DD {
 	margin: 0;
 	}
 #LJ__Setting__Music__LastFM_ LABEL INPUT {
 	margin-left: 10px;
+	}
+.music-settings-connect {
+	margin: 0 5px;
+	}
+.music-settings-disconnect {
+	color: blue;
+	}
+.music-settings-trava-logo {
+	margin: -6px 0 0 4px;
+	}
+.music-settings-login-error-msg SPAN,
+.music-settings-system-error-msg SPAN {
+	color: red;
+	}
+.music-settings-preloader {
+	display: none;
+	width: 30px;
+	height: 30px;
+	margin-top: -5px;
+	background: url(/img/preloader/preloader-blue-blue.gif?ver=1) 0 0 no-repeat;
+	}
+.music-settings-username {
+	font-size: 12px;
+	}
+.music-settings-loading .music-settings-connect {
+	display: none;
+	}
+.music-settings-loading .music-settings-preloader {
+	display: inline-block;
 	}
 .music-settings-connect-options,
 .music-settings-login .music-settings-login-options {
@@ -1064,34 +1097,4 @@
 .music-settings-login-error .music-settings-login-error-msg,
 .music-settings-system-error .music-settings-system-error-msg {
 	display: block;
-	color: red;
-	}
-.music-settings-connect {
-	margin: 0 5px;
-	}
-.music-settings-disconnect {
-	color: blue;
-	}
-.music-settings-trava-logo {
-	margin: -6px 0 0 4px;
-	}
-.music-settings-preloader {
-	display: none;
-	width: 30px;
-	height: 30px;
-	margin-top: -5px;
-	background: url(/img/preloader/preloader-blue-blue.gif?ver=1) 0 0 no-repeat;
-	}
-.music-settings-loading .music-settings-connect {
-	display: none;
-	}
-.music-settings-loading .music-settings-preloader {
-	display: inline-block;
-	}
-.music-settings-login-error-msg SPAN,
-.music-settings-system-error-msg SPAN {
-	color: red;
-	}
-#LJ__Setting__Music__Trava_ .music-settings-login-error-msg A {
-	color: blue;
 	}
