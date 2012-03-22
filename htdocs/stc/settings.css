@@ -1037,6 +1037,13 @@
 .music-settings-trava-logo {
 	vertical-align: top;
 	}
+	#LJ__Setting__Music__Trava_ A {
+		cursor: pointer;
+		text-decoration: none;
+		}
+	#LJ__Setting__Music__Trava_ A:hover {
+		text-decoration: underline;
+		}
 #LJ__Setting__Music__Trava_ DL,
 #LJ__Setting__Music__Trava_ DD {
 	margin: 0;
@@ -1044,30 +1051,29 @@
 #LJ__Setting__Music__LastFM_ LABEL INPUT {
 	margin-left: 10px;
 	}
-#LJ__Setting__Music__Trava_ A {
-	color: #000;
-	}
-	#LJ__Setting__Music__Trava_ A:hover {
-		text-decoration: none;
-		}
 .music-settings-connect-options,
-.music-settings-disconnect .music-settings-disconnect-options {
+.music-settings-login .music-settings-login-options {
 	display: inline-block;
 	}
-.music-settings-error-msg,
-.music-settings-disconnect-options,
-.music-settings-disconnect .music-settings-connect-options {
+.music-settings-login-error-msg,
+.music-settings-system-error-msg,
+.music-settings-login-options,
+.music-settings-login .music-settings-connect-options {
 	display: none;
 	}
-.music-settings-error .music-settings-error-msg {
+.music-settings-login-error .music-settings-login-error-msg,
+.music-settings-system-error .music-settings-system-error-msg {
 	display: block;
 	color: red;
 	}
 .music-settings-connect {
 	margin: 0 5px;
 	}
+.music-settings-disconnect {
+	color: blue;
+	}
 .music-settings-trava-logo {
-	margin-top: -6px;
+	margin: -6px 0 0 4px;
 	}
 .music-settings-preloader {
 	display: none;
@@ -1081,4 +1087,11 @@
 	}
 .music-settings-loading .music-settings-preloader {
 	display: inline-block;
+	}
+.music-settings-login-error-msg SPAN,
+.music-settings-system-error-msg SPAN {
+	color: red;
+	}
+#LJ__Setting__Music__Trava_ .music-settings-login-error-msg A {
+	color: blue;
 	}
