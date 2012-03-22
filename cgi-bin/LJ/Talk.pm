@@ -1187,7 +1187,7 @@ sub fixup_logitem_replycount {
         $sharedmode = "LOCK IN SHARE MODE";
         $u->begin_work;
     } else {
-        $u->do("LOCK TABLES log2 WRITE, talk2 READ, logbackup WRITE");
+        $u->do("LOCK TABLES log2 WRITE, talk2 READ");
     }
 
     # get count and then update.  this should be totally safe because we've either
@@ -2594,7 +2594,7 @@ sub get_thread_html
     my $tz_remote;
     my $s2_ctx = [];  # ghetto fake S2 context object
     if ($remote) {
-        my $tz_remote = $remote->prop('timezone') || undef;
+        $tz_remote = $remote->prop('timezone') || undef;
     }    
 
     my $viewsome = $input->{viewsome};
