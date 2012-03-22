@@ -92,6 +92,8 @@ body<=
                                                                                 'use_custom_time'=> 0, });
             if ($res) { # succeeded
                 $success = 1;
+                my $approved_entry = LJ::Entry->new($c, jitemid => $res->{itemid});
+                $approved_entry->set_prop( moderator_id => $remote->userid );
                 my $err = sub { return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>"; };
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";
                 $ret .= "<br />" .$err->($prot_err). "<br />" unless $res;

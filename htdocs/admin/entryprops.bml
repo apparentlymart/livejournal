@@ -84,7 +84,14 @@ body<=
             # an ugly hack, i know
             $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop}) if $p->{des} =~ /unix/i;
         }
-
+        if ($prop eq 'moderator_id') {
+            my $moderator = LJ::load_userid($props{$prop});
+            if ($moderator) {
+                $extra = " (".
+                         $moderator->ljuser_display.
+                         ")$extra";
+            }
+        }
         $ret .= "<li><strong>$prop</strong>: $props{$prop}$extra</li><br />";
     }
     if ($entry->is_sticky) {

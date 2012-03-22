@@ -1798,3 +1798,9 @@ userproplist.trava_uid:
   des: user id in trava.ru
   prettyname: user id in trava.ru
   indexed: 0
+
+logproplist.moderator_id:
+  datatype: num
+  des: userid of moderator, who approved this entry
+  prettyname: Moderator's userid
+  sortorder: 10
