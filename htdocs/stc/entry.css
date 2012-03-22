@@ -1002,24 +1002,33 @@ td.tabs {
 		padding: 0;
 		}
 		
-.b-music-list-state-empty .b-music-item-header,
-.b-music-list-state-empty .b-music-list-preloader,
-.b-music-list-state-empty .b-music-item-body,
+.b-music-list-state-error .b-music-item-header,
+.b-music-list-state-error .b-music-list-preloader,
+.b-music-list-state-error .b-music-item-body,
+.b-music-list-state-error .b-music-list-empty,
 .b-music-list-state-loading .b-music-list-error,
 .b-music-list-state-loading .b-music-item-header,
 .b-music-list-state-loading .b-music-item-body,
+.b-music-list-state-loading .b-music-list-empty,
 .b-music-list-state-result .b-music-list-error,
 .b-music-list-state-result .b-music-list-preloader,
+.b-music-list-state-result .b-music-list-empty,
+.b-music-list-state-empty .b-music-list-preloader,
+.b-music-list-state-empty .b-music-list-error,
+.b-music-list-state-empty .b-music-item-body,
+.b-music-list-state-empty .b-music-item-header,
 .b-music-item-more {
 	display: none;
 	}
-.b-music-list-error {
+.b-music-list-error,
+.b-music-list-empty {
 	position: absolute;
 	top: 54px;
 	width: 100%;
 	text-align: center;
 	}
-	.b-music-list-error P {
+	.b-music-list-error P,
+	.b-music-list-empty P {
 		font-size: 20px;
 		text-shadow: 1px 1px 1px #FFF;
 		margin: 0 0 10px 0;	
