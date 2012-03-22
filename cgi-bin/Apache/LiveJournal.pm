@@ -6,9 +6,10 @@ package Apache::LiveJournal;
 use strict;
 no warnings 'uninitialized';
 
+use Carp();
 use Compress::Zlib;
 use Digest::MD5 qw( md5_base64 md5_hex );
-use Carp();
+use File::Spec;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Request;
@@ -1395,10 +1396,11 @@ sub trans {
         }
     }
 
-    if ( $host eq $LJ::DOMAIN_WEB && ( my $uri = LJ::Request->uri ) ) {
-        my $filename_full = $LJ::HTDOCS . $uri;
-        $filename_full =~ s{//}{/}g;
-        if ( $filename_full =~ /[.]bml$/ && -e $filename_full ) {
+    my $uri = LJ::Request->uri;
+    if ( $host eq $LJ::DOMAIN_WEB && defined $uri && $uri =~ /[.]bml$/ ) {
+        my $filename_full = File::Spec->catfile( $LJ::HTDOCS, $uri );
+        ($filename_full) = File::Spec->no_upwards($filename_full);
+        if ( defined $filename_full && -e $filename_full ) {
             return $bml_handler->($filename_full);
         }
     }
