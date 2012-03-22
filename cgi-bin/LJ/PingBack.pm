@@ -48,15 +48,19 @@ sub ping_post {
                     ? ($source_entry->subject_raw || LJ::Lang::ml("pingback.sourceURI.default_title"))
                     : ($title || LJ::Lang::ml("pingback.sourceURI.default_title"));
 
+    my $journal = $target_entry->journal;
+    LJ::load_user_props($journal, 'browselang');
+    my $lang    = $journal->{'browselang'};
+
     my $comment = LJ::Comment->create(
         state   => 'S', # this comment should be 'Screened'
-        journal => $target_entry->journal,
+        journal => $journal,
         ditemid => $target_entry->ditemid,
         poster  => $poster_u,
 
         body    => ($source_entry
             ? LJ::Lang::get_text(
-                $target_entry->journal->{'browselang'},
+                $lang,
                 "pingback.ljping.comment.text",
                 undef,
                 {
@@ -66,7 +70,7 @@ sub ping_post {
                     poster    => $source_entry->poster->username,
               })
             : LJ::Lang::ml(
-                $target_entry->journal->{'browselang'},
+                $lang,
                 "pingback.public.comment.text",
                 undef,
                 {
@@ -79,7 +83,7 @@ sub ping_post {
         props   => { picture_keyword => $LJ::PINGBACK->{userpic} },
     );
 
-    LJ::Talk::screen_comment($target_entry->journal, $target_entry->jitemid, $comment->jtalkid)
+    LJ::Talk::screen_comment($journal, $target_entry->jitemid, $comment->jtalkid)
         if ref $comment;
 
     return $comment;
