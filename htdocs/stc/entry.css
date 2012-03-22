@@ -1002,14 +1002,15 @@ td.tabs {
 		padding: 0;
 		}
 		
-.b-music-list-state-error .b-music-item-header,
-.b-music-list-state-error .b-music-list-preloader,
-.b-music-list-state-error .b-music-item-body,
+.b-music-list-state-empty .b-music-item-header,
+.b-music-list-state-empty .b-music-list-preloader,
+.b-music-list-state-empty .b-music-item-body,
 .b-music-list-state-loading .b-music-list-error,
 .b-music-list-state-loading .b-music-item-header,
 .b-music-list-state-loading .b-music-item-body,
 .b-music-list-state-result .b-music-list-error,
-.b-music-list-state-result .b-music-list-preloader {
+.b-music-list-state-result .b-music-list-preloader,
+.b-music-item-more {
 	display: none;
 	}
 .b-music-list-error {
@@ -1035,13 +1036,14 @@ td.tabs {
 	margin-top: -12px;
 	text-align: center;
 	}
-.b-music-list-preloader {
-	position: relative;
-	padding: 3px 0 0 25px;
-	font-size: 18px;
-	color: #CCC;
-	}
-.b-music-list-preloader-icon {
+	.b-music-list-preloader {
+		position: relative;
+		padding: 3px 0 0 25px;
+		font-size: 18px;
+		text-shadow: 2px 2px 2px #FFF;
+		color: #999;
+		}
+	.b-music-list-preloader-icon {
 	    background: url("/img/friendstimes/loader.gif") no-repeat scroll 0 0 transparent;
 	    font: 0pt/0 serif;
 	    height: 16px;
@@ -1051,4 +1053,14 @@ td.tabs {
 	    position: absolute;
 	    top: 50%;
 	    width: 16px;
+		}
+.b-music-item-more {
+	padding: 8px 0 8px 0;
+	border-radius: 6px;
+	text-align: center;
+	background: #ececec;
 	}
+	.b-music-item-more .b-music-list-preloader {
+		padding: 5px 0 0 25px;
+		font-size: 12px;
+		}
