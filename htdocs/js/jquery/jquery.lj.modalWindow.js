@@ -12,7 +12,7 @@
 			templates: {
 				popup: '<div class="b-popup">' +
 					'<div class="b-popup-outer">' +
-						'<div class="b-popup-inner b-popup-search-music">' +
+						'<div class="b-popup-inner">' +
 							'<div class="popup-inner">' +
 								'<div class="b-popup-content"></div>' +
 								'<i class="i-popup-close"></i>' +
@@ -103,11 +103,14 @@
 			$(document.body)
 				.append(this._faderNode)
 				.append(this._popupNode);
+			
+			this._trigger('show');
 		},
 
 		hide: function () {
 			this._faderNode.detach();
 			this._popupNode.detach();
+			this._trigger('hide');
 		}
 	};
 

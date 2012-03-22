@@ -9,7 +9,10 @@ body<=
 
     BML::set_language_scope('/manage/settings/index.bml');
 
-    LJ::need_res("stc/settings.css", "js/settings.js");
+    LJ::need_res("stc/settings.css",
+     "js/settings.js",
+      "js/jquery/jquery.lj.trava.js");
+
     LJ::set_active_crumb('manage');
 
     my $remote = LJ::get_remote();

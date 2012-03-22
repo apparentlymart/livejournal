@@ -51,16 +51,28 @@ LiveJournal.register_hook('init_settings', function ($) {
 
 	function onLogin(evt, data) {
 		if (data) {
+			var isLogin = data.uid !== 1;
+
 			travaElement
 				.removeClass(options.classNames.loading)
 				.removeClass(options.classNames.error)
 				.removeClass(options.classNames.disconnect)
-				.addClass(data.uid === 1 ? options.classNames.disconnect : options.classNames.login);
+				.addClass(isLogin ? options.classNames.login : options.classNames.disconnect);
 
 			hiddenField.val(data.uid);
+
+			if (isLogin) {
+				travaElement.trava('getUserInfo');
+			}
 		} else {
 			travaElement.addClass(options.classNames.error);
 			travaElement.removeClass(options.classNames.loading);
+		}
+	}
+
+	function onGetInfo(evt, data) {
+		if (data) {
+			console.log(data);
 		}
 	}
 
@@ -73,6 +85,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 	}).trigger('change');
 
 	travaElement.trava().bind('travalogin', onLogin);
+	travaElement.trava().bind('travauserinfo', onGetInfo);
 
 	travaElement.delegate(options.selectors.connectLink, 'click', function (evt) {
 		evt.preventDefault();
