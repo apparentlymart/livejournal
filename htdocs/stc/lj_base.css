@@ -4117,3 +4117,61 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		display: none;
 		}
 
+
+
+/* LJ Button
+----------------------------------- */
+.b-ljbutton {
+	position: relative;
+	display: -moz-inline-stack;
+	display: inline-block;
+	min-height: 1.2em;
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+	*display: inline;
+	_height: 1.2em;
+	zoom: 1;
+	}
+	.b-ljbutton INPUT {
+		*overflow: visible;
+		}
+.b-ljbutton-submit {
+	margin: -0.4em 0;
+	padding: 0.4em;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	background: #038;
+	background: #038 -moz-linear-gradient(top, #38D 0%, #038 100%);
+	background: #038 -webkit-gradient(linear, left top, left bottom, color-stop(0%,#38D), color-stop(100%,#038));
+	background: #038 -webkit-linear-gradient(top, #38D 0%,#038 100%);
+	background: #038 -o-linear-gradient(top, #38D 0%,#038 100%);
+	background: #038 -ms-linear-gradient(top, #38D 0%,#038 100%);
+	background: #038 linear-gradient(top, #38D 0%,#038 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3388DD', endColorstr='#003388',GradientType=0 );
+	}
+.b-ljbutton-submit.b-ljbutton-disabled {
+	background: #AFAFAF;
+	background: #AFAFAF -moz-linear-gradient(top, #E8E8E8 0%, #AFAFAF 100%);
+	background: #AFAFAF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E8E8E8), color-stop(100%,#AFAFAF));
+	background: #AFAFAF -webkit-linear-gradient(top, #E8E8E8 0%,#AFAFAF 100%);
+	background: #AFAFAF -o-linear-gradient(top, #E8E8E8 0%,#AFAFAF 100%);
+	background: #AFAFAF -ms-linear-gradient(top, #E8E8E8 0%,#AFAFAF 100%);
+	background: #AFAFAF linear-gradient(top, #E8E8E8 0%,#AFAFAF 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#E8E8E8', endColorstr='#AFAFAF',GradientType=0 );
+	}
+.b-ljbutton-delete {
+	margin: -0.4em 0;
+	padding: 0.4em;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	background: #970000;
+	background: #970000 -moz-linear-gradient(top, #DA0000 0%, #970000 100%);
+	background: #970000 -webkit-gradient(linear, left top, left bottom, color-stop(0%,#DA0000), color-stop(100%,#970000));
+	background: #970000 -webkit-linear-gradient(top, #DA0000 0%,#970000 100%);
+	background: #970000 -o-linear-gradient(top, #DA0000 0%,#970000 100%);
+	background: #970000 -ms-linear-gradient(top, #DA0000 0%,#970000 100%);
+	background: #970000 linear-gradient(top, #DA0000 0%,#970000 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#DA0000', endColorstr='#970000',GradientType=0 );
+	}
+
