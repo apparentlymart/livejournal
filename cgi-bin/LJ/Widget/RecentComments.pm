@@ -31,7 +31,7 @@ sub render_body {
     $ret .= "<i class='w-head-corner'></i></div>";
 
     # return if no comments
-    return "<h2><span>" . $class->ml('widget.recentcomments.title') . "</span></h2><?warningbar " . $class->ml('widget.recentcomments.nocomments', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . " warningbar?>"
+    return "<h2><span>" . $class->ml('widget.recentcomments.title') . "</span></h2><div class='warningbar'>" . $class->ml('widget.recentcomments.nocomments', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . "</div>"
         unless @comments && defined $comments[0];
 
     # there are comments, print them
