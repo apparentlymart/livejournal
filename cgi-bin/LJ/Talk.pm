@@ -1187,7 +1187,7 @@ sub fixup_logitem_replycount {
         $sharedmode = "LOCK IN SHARE MODE";
         $u->begin_work;
     } else {
-        $u->do("LOCK TABLES log2 WRITE, talk2 READ");
+        $u->do("LOCK TABLES log2 WRITE, talk2 READ, logbackup WRITE");
     }
 
     # get count and then update.  this should be totally safe because we've either
