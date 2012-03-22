@@ -2594,8 +2594,7 @@ sub get_thread_html
     my $tz_remote;
     my $s2_ctx = [];  # ghetto fake S2 context object
     if ($remote) {
-        my $tz = $remote->prop("timezone");
-        $tz_remote = $tz ? eval { DateTime::TimeZone->new(name => $tz); } : undef;
+        my $tz_remote = $remote->prop('timezone') || undef;
     }    
 
     my $viewsome = $input->{viewsome};

@@ -1842,33 +1842,23 @@ sub DateTime_tz {
     my ($epoch, $timezone) = @_;
     return undef unless $timezone;
 
-    if (ref $timezone eq "LJ::User") {
+    if ( LJ::isu($timezone) ) {
         $timezone = $timezone->prop("timezone");
         return undef unless $timezone;
     }
 
-    my $timezone_name;
-    if ( ref $timezone ) {
-        my ( undef, $filename, $line ) = caller(0);
-        warn "passing DateTime::TimeZone to LJ::S2::DateTime_tz " .
-            "is deprecated at $filename line $line\n";
-        $timezone_name = $timezone->name;
-    } else {
-        $timezone_name = $timezone;
-    }
-
-    unless ( exists $timezone_offsets_cache{$timezone_name} ) {
+    unless ( exists $timezone_offsets_cache{$timezone} ) {
         my $timezone_object = DateTime::TimeZone->new(
-            'name' => $timezone_name );
+            'name' => $timezone );
         if ($timezone_object) {
-            $timezone_offsets_cache{$timezone_name} =
+            $timezone_offsets_cache{$timezone} =
                 $timezone_object->offset_for_datetime( DateTime->now ) || 0;
         } else {
-            $timezone_offsets_cache{$timezone_name} = 0;
+            $timezone_offsets_cache{$timezone} = 0;
         }
     }
 
-    my $offset = $timezone_offsets_cache{$timezone_name};
+    my $offset = $timezone_offsets_cache{$timezone};
 
     my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) =
         gmtime( $epoch + $offset );
