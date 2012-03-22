@@ -967,7 +967,10 @@ td.tabs {
 	border-collapse: collapse;
 	}
 .b-music-item-body {
+	overflow-x: hidden;
+	overflow-y: auto;
 	width: 765px;
+	max-height: 340px;
 	}
 .b-music-item,
 .b-music-item-header {
@@ -995,9 +998,18 @@ td.tabs {
 	.b-music-item-album,
 	.b-music-item-track {
 		min-width: 200px;
-		cursor: pointer;
 		color: #3f5f9e;
 		}
+		.b-music-item-artist SPAN,
+		.b-music-item-album SPAN,
+		.b-music-item-track SPAN {
+			cursor: pointer;
+			}
+		.b-music-item-artist SPAN:hover,
+		.b-music-item-album SPAN:hover,
+		.b-music-item-track SPAN:hover {
+			text-decoration: underline;
+			}
 	.b-music-item-player {
 		width: 106px;
 		min-width: 106px;
@@ -1008,18 +1020,24 @@ td.tabs {
 .b-music-list-state-error .b-music-list-preloader-wrapper,
 .b-music-list-state-error .b-music-item-body,
 .b-music-list-state-error .b-music-list-empty,
+.b-music-list-state-error .b-music-item-more,
 .b-music-list-state-loading .b-music-list-error,
 .b-music-list-state-loading .b-music-item-header,
 .b-music-list-state-loading .b-music-item-body,
 .b-music-list-state-loading .b-music-list-empty,
+.b-music-list-state-loading .b-music-item-more,
 .b-music-list-state-result .b-music-list-error,
 .b-music-list-state-result .b-music-list-preloader-wrapper,
 .b-music-list-state-result .b-music-list-empty,
+.b-music-list-state-result .b-music-item-more,
 .b-music-list-state-empty .b-music-list-preloader-wrapper,
 .b-music-list-state-empty .b-music-list-error,
 .b-music-list-state-empty .b-music-item-body,
 .b-music-list-state-empty .b-music-item-header,
-.b-music-item-more {
+.b-music-list-state-empty .b-music-item-more,
+.b-music-list-state-loading-more .b-music-list-preloader-wrapper,
+.b-music-list-state-loading-more .b-music-list-empty,
+.b-music-list-state-loading-more .b-music-list-error {
 	display: none;
 	}
 .b-music-list-error,
@@ -1065,6 +1083,7 @@ td.tabs {
 		background: url("/img/friendstimes/loader.gif") 0 0 no-repeat;
 		}
 .b-music-item-more {
+	margin: 10px 14px 0 0;
 	padding: 8px 0 8px 0;
 	border-radius: 6px;
 	text-align: center;
