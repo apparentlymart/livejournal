@@ -138,6 +138,9 @@ sub __rename_tag_everywhere {
 
     # Get curret name 
     my $old_name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
+    if (!$old_name) {
+        return;
+    }
 
     #
     # Receive all categories where rename will be done
@@ -163,7 +166,7 @@ sub __rename_tag_everywhere {
                                    $new_name );
 
     # Does name exist already?
-    if (!%$destination) {
+    if (!$destination || !%$destination) {
 
         # Just rename 
         $dbh->do( "UPDATE supporttag SET name=? WHERE name=?",
