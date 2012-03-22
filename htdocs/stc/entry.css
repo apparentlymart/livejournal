@@ -995,6 +995,8 @@ td.tabs {
 	.b-music-item-album,
 	.b-music-item-track {
 		min-width: 200px;
+		cursor: pointer;
+		color: #3f5f9e;
 		}
 	.b-music-item-player {
 		width: 106px;
@@ -1003,7 +1005,7 @@ td.tabs {
 		}
 		
 .b-music-list-state-error .b-music-item-header,
-.b-music-list-state-error .b-music-list-preloader,
+.b-music-list-state-error .b-music-list-preloader-wrapper,
 .b-music-list-state-error .b-music-item-body,
 .b-music-list-state-error .b-music-list-empty,
 .b-music-list-state-loading .b-music-list-error,
@@ -1011,9 +1013,9 @@ td.tabs {
 .b-music-list-state-loading .b-music-item-body,
 .b-music-list-state-loading .b-music-list-empty,
 .b-music-list-state-result .b-music-list-error,
-.b-music-list-state-result .b-music-list-preloader,
+.b-music-list-state-result .b-music-list-preloader-wrapper,
 .b-music-list-state-result .b-music-list-empty,
-.b-music-list-state-empty .b-music-list-preloader,
+.b-music-list-state-empty .b-music-list-preloader-wrapper,
 .b-music-list-state-empty .b-music-list-error,
 .b-music-list-state-empty .b-music-item-body,
 .b-music-list-state-empty .b-music-item-header,
@@ -1053,15 +1055,14 @@ td.tabs {
 		color: #999;
 		}
 	.b-music-list-preloader-icon {
-	    background: url("/img/friendstimes/loader.gif") no-repeat scroll 0 0 transparent;
-	    font: 0pt/0 serif;
+		position: absolute;
+	    top: 50%;
+		left: 0;
+		width: 16px;
 	    height: 16px;
-	    left: 0;
 	    margin: -6px 0 0;
 	    padding: 0;
-	    position: absolute;
-	    top: 50%;
-	    width: 16px;
+		background: url("/img/friendstimes/loader.gif") 0 0 no-repeat;
 		}
 .b-music-item-more {
 	padding: 8px 0 8px 0;
