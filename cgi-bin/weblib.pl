@@ -1322,6 +1322,8 @@ sub res_includes {
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
+    my $ret_js  = "";
+    my $ret_css = "";
     my $do_concat = $LJ::IS_SSL ? $LJ::CONCAT_RES_SSL : $LJ::CONCAT_RES;
 
     # all conditions must be complete here
@@ -1425,7 +1427,7 @@ sub res_includes {
 
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
         my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
-        $ret .= qq {
+        $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
@@ -1454,26 +1456,26 @@ sub res_includes {
     my $host = LJ::Request->header_in("Host");
 
     # foreign domain case
-    unless ($host =~ /\.$LJ::DOMAIN(:\d+)?$/) {
+    if (not $host =~ /\.$LJ::DOMAIN(:\d+)?$/ and not $opts->{only_css}) {
         my $remote = LJ::get_remote();
 
         #first part of cross-domain auth
         if ( $remote ) {
-            $ret .= qq|
+            $ret_js .= qq|
                 <script type="text/javascript">
                     lj_user = $remote->{_session}->{userid};
                 </script>
             |;
         }
         else {
-             $ret .= qq|
+             $ret_js .= qq|
                 <script type="text/javascript">
                     lj_user = 0;
                 </script>
             |;
         }
 
-        $ret .= qq|
+        $ret_js .= qq|
             <script src="$siteroot/misc/get_auth_js.bml"></script>
         |;
 
@@ -1483,7 +1485,7 @@ sub res_includes {
         my $domain = $1;
         $curl = LJ::eurl($curl);
 
-        $ret .= qq|
+        $ret_js .= qq|
         <script type="text/javascript">
             if( lj_user !== 0 && lj_master_user === 0 ) {
                 window.location = "http://$domain/misc/clear_domain_session.bml?return=$curl";
@@ -1554,6 +1556,10 @@ sub res_includes {
     my $tags = sub {
         my ($type, $template) = @_;
         return unless $list{$type};
+        return if $opts->{only_css} 
+                and $template =~ /^<script/;
+        return if $opts->{only_js}
+                and $template =~ /^<link/;
 
         foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
             foreach my $args (sort {length($a) <=> length($b)} keys %{ $list{$type}{$cond} }) {
@@ -1588,11 +1594,15 @@ sub res_includes {
         }
     };
 
+
     ## To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript.
     ##  (C) http://code.google.com/speed/page-speed/
     ##
+    $ret .= $ret_css unless $opts->{only_js};
     $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
     $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
+    
+    $ret .= $ret_js unless $opts->{only_css};
     $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
     $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
@@ -1605,19 +1615,19 @@ sub res_includes {
         my ( $type, $code ) = @$inc;
 
         if ($type eq 'js'){
-            $ret .= qq|<script type="text/javascript">\r\n$code</script>\r\n|;
+            $ret .= qq|<script type="text/javascript">\r\n$code</script>\r\n| unless $opts->{only_css};
         }
         elsif ($type eq 'css'){
-            $ret .= qq|<style>\r\n$code</style>\n|;
+            $ret .= qq|<style>\r\n$code</style>\n| unless $opts->{only_js};
         }
         elsif ( $type eq 'js_link' ) {
-            $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n};
+            $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n} unless $opts->{only_css};
         }
         elsif ( $type eq 'css_link' ) {
-            $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />};
+            $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />} unless $opts->{only_js};
         }
         elsif ( $type eq 'html' ) {
-            $ret .= $code;
+            $ret .= $code unless $opts->{only_css}; ## add raw html to js part
         }
     }
 
