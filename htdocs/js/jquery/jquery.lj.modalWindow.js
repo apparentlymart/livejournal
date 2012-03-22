@@ -4,7 +4,7 @@
 
 		options: {
 			width: 800,
-			height: 455,
+			height: 500,
 			selectors: {
 				closeBtn: '.i-popup-close',
 				contentNode: '.b-popup-content'
