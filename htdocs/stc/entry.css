@@ -952,6 +952,7 @@ td.tabs {
 .b-music-list-searching-wrapper {
 	position: relative;
 	overflow: hidden;
+	width: 800px;
 	}
 .b-music-list-searching {
 	position: relative;
@@ -967,16 +968,20 @@ td.tabs {
 	border-collapse: collapse;
 	}
 .b-music-item-body {
+	position: relative;
 	overflow-x: hidden;
 	overflow-y: auto;
 	width: 765px;
-	max-height: 340px;
+	max-height: 350px;
+	zoom: 1;
 	}
-.b-music-item,
-.b-music-item-header {
+.b-music-item {
 	position: relative;
-	width: 100%;
+	width: 750px;
 	margin: 0;
+	}
+.b-music-item-header {
+	width: 745px;
 	}
 .b-music-item.odd {
 	background: #ebebeb;
@@ -987,17 +992,17 @@ td.tabs {
 	.b-music-item DD {
 		display: table-cell;
 		margin: 0;
-		padding: 6px 0 6px 15px;
 		vertical-align: middle;
 		}
 	.b-music-item-header DT,
 	.b-music-item-header DD {
 		width: 200px;
+		max-width: 200px;
 		}
 	.b-music-item-artist,
 	.b-music-item-album,
 	.b-music-item-track {
-		min-width: 200px;
+		width: 200px;		
 		color: #3f5f9e;
 		}
 		.b-music-item-artist SPAN,
