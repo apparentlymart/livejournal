@@ -31,67 +31,93 @@ LiveJournal.register_hook('init_settings', function ($) {
 });
 
 LiveJournal.register_hook('init_settings', function ($) {
-	var options = {
-		selectors: {
-			Trava: '#LJ__Setting__Music__Trava_',
-			LastFM: '#LJ__Setting__Music__LastFM_',
-			connectLink: '.music-settings-connect',
-			uIdInput: 'input[name="LJ__Setting__Music__Trava_trava_uid"]'
-		},
-		classNames: {
-			login: 'music-settings-login',
-			disconnect: 'music-settings-disconnect',
-			loading: 'music-settings-loading',
-			error: 'music-settings-error'
-		}
+	var selectors = {
+		Trava: '#LJ__Setting__Music__Trava_',
+		LastFM: '#LJ__Setting__Music__LastFM_',
+		connectLink: '.music-settings-connect',
+		disconnectLink: '.music-settings-disconnect',
+		userName: '.music-settings-username',
+		musicSelect: 'select[name="music_select"]',
+		uIdInput: 'input[name="LJ__Setting__Music_LJ__Setting__Music__Trava_trava_uid"]'
 	};
 
-	var travaElement = $(options.selectors.Trava);
-	var hiddenField = travaElement.find(options.selectors.uIdInput);
+	var classNames = {
+		login: 'music-settings-login',
+		disconnect: 'music-settings-login-error',
+		loading: 'music-settings-loading',
+		error: 'music-settings-system-error'
+	};
 
-	function onLogin(evt, data) {
-		if (data) {
-			var isLogin = data.uid !== 1;
+	var travaElement = $(selectors.Trava);
+	var musicSelect = $(selectors.musicSelect);
+	var userName = travaElement.find(selectors.userName);
+	var hiddenField = travaElement.find(selectors.uIdInput);
 
-			travaElement
-				.removeClass(options.classNames.loading)
-				.removeClass(options.classNames.error)
-				.removeClass(options.classNames.disconnect)
-				.addClass(isLogin ? options.classNames.login : options.classNames.disconnect);
+	var notLoginID = 1;
+	var allClasses = [];
 
-			hiddenField.val(data.uid);
-
-			if (isLogin) {
-				travaElement.trava('getUserInfo');
-			}
-		} else {
-			travaElement.addClass(options.classNames.error);
-			travaElement.removeClass(options.classNames.loading);
+	for (var name in classNames) {
+		if (classNames.hasOwnProperty(name)) {
+			allClasses.push(classNames[name]);
 		}
 	}
 
-	function onGetInfo(evt, data) {
-		if (data) {
-			console.log(data);
-		}
-	}
+	classNames.allClasses = allClasses.join(' ');
 
-	$('select[name="music_select"]').bind('change', function () {
+	function onChangesMusic () {
 		var currentID = '#' + $(this).val();
-		var oldID = currentID == options.selectors.Trava ? options.selectors.LastFM : options.selectors.Trava;
+		var oldID = currentID == selectors.Trava ? selectors.LastFM : selectors.Trava;
 
 		$(oldID).hide();
 		$(currentID).show();
-	}).trigger('change');
+	}
 
-	travaElement.trava().bind('travalogin', onLogin);
-	travaElement.trava().bind('travauserinfo', onGetInfo);
+	musicSelect.bind('change', onChangesMusic);
 
-	travaElement.delegate(options.selectors.connectLink, 'click', function (evt) {
-		evt.preventDefault();
-		travaElement.addClass(options.classNames.loading);
-		travaElement.trava('login');
+	travaElement.trava()
+		.bind('travalogin', function (evt, data) {
+			if (data) {
+				hiddenField.val(data.uid);
+
+				if (data.uid !== notLoginID) {
+					travaElement.trava('getUserInfo');
+				} else {
+					travaElement
+						.removeClass(classNames.allClasses)
+						.addClass(classNames.disconnect);
+				}
+			} else {
+				travaElement
+					.addClass(classNames.error)
+					.removeClass(classNames.loading);
+			}
+		})
+		.bind('travauserinfo', function (evt, data) {
+			if (data) {
+				userName.html(data.user.name || data.user.nickname);
+
+				travaElement
+					.removeClass(classNames.allClasses)
+					.addClass(classNames.login);
+			}
 	});
+
+	travaElement
+		.delegate(selectors.connectLink, 'click', function (evt) {
+			evt.preventDefault();
+
+			travaElement
+				.addClass(classNames.loading)
+				.trava('login');
+		})
+		.delegate(selectors.disconnectLink, 'click', function (evt) {
+			evt.preventDefault();
+
+			hiddenField.val(notLoginID);
+			travaElement.removeClass(classNames.allClasses);
+		});
+
+	onChangesMusic.call(musicSelect[0]);
 });
 
 LiveJournal.register_hook('page_load', function () {
