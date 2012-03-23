@@ -1730,7 +1730,15 @@ sub render_body {
     my ($moodlist, $moodpics);
 
     LJ::need_string( qw(
-        /music.settings.search
+        /update.bml.music.settings.album
+        /update.bml.music.settings.artist
+        /update.bml.music.settings.loading
+        /update.bml.music.settings.loading.more
+        /update.bml.music.settings.no.data
+        /update.bml.music.settings.no.tracks
+        /update.bml.music.settings.title
+        /update.bml.music.settings.try.again
+        /update.bml.music.settings.search
         /update.bml.msg.newalbums
         /update.bml.msg.newalbums.organise
     ) );
