@@ -532,7 +532,7 @@
             $body .= "<span class='EditPicsUserpic$extra_class'><img src='$url' width='$pic->{'width'}' height='$pic->{'height'}' /></span>\n";
 
             # TODO: if no keywords then light grey text and empty out when you click in it
-            my $keywords = $pic->keywords;
+            my $keywords = $pic->keywords(raw => 1);
             my $comment = $pic->comment;
             $body .= "<div class='userpic_controls'  style='float: left;'>";
             $body .= "<div class='userpic_keywords pkg'>\n";

@@ -306,7 +306,7 @@ sub keywords {
     }
 
     # return keywords for this picid
-    my @pickeywords = $keywords->{$self->id} ? @{$keywords->{$self->id}} : ();
+    my @pickeywords = map { $raw? $_ : LJ::ehtml($_) } $keywords->{$self->id}? @{$keywords->{$self->id}} : ();
 
     if (wantarray) {
         # if list context return the array
