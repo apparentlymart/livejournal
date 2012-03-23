@@ -5632,8 +5632,6 @@ talk.deletedpost=Deleted Post
 
 talk.deleteduser=<i>Deleted user: [[username]]</i>
 
-talk.down=↓
-
 talk.edit=Edit
 
 talk.editcomment=Save comment
@@ -5784,6 +5782,8 @@ talk.loginafterpost=We will log you in after post
 
 talk.manageuserpic=Manage userpics
 
+talk.message=Message
+
 talk.memadd=Memorize
 
 talk.more=...and [[count]] more [[?count|comment|comments]]...
@@ -5912,6 +5912,22 @@ talk.repost.twitter=Twitter
 
 talk.repost.setup=Setup Repost
 
+
+talk.result.links=Now that you've posted, you can:
+
+talk.result.links.edit=Edit the entry
+
+talk.result.links.memories=Add the entry to your memories
+
+talk.result.links.tags=Edit this entry's tags
+
+talk.result.links.view=View the entry
+
+talk.result.success=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
+
+talk.result.success2=Update successful. You can view your scheduled entries <a [[aopts]]>here</a>.
+
+
 talk.screen=Screen
 
 talk.screenedpost=Screened post
@@ -5956,8 +5972,6 @@ talk.unspamtoreply=Unspam to reply
 talk.url.hint=Hint
 
 talk.userswitch=switch
-
-talk.up=↑
 
 talk.video=Video
 
