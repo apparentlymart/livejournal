@@ -653,3 +653,28 @@ __________________________________________*/
 *:first-child+html #updateForm {
     width: 750px;
     }
+
+/* Music settings 
+-----------------------------------------------*/
+
+*:first-child+html #LJ__Setting__Music__LastFM_,
+*:first-child+html #LJ__Setting__Music__Trava_ {
+	display: inline;
+	}	
+*:first-child+html .b-music-item-header DT, 
+*:first-child+html .b-music-item-header DD, 
+*:first-child+html .b-music-item DT, 
+*:first-child+html .b-music-item DD {
+	display: inline;
+	zoom: 1;
+	}
+*:first-child+html	.b-music-item-header DT,
+*:first-child+html	.b-music-item-header DD {
+	max-width: 200px;
+	}
+*:first-child+html .b-music-list-searching {
+	overflow: hidden;
+	}
+*:first-child+html .b-music-item-player {
+	width: 75px;
+	}
