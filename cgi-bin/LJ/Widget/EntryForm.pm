@@ -1275,10 +1275,7 @@ sub render_options_block {
           return '';
         },
         'lastfm_logo' => sub {
-            if ( $self->should_show_trava ) {
-                return "POWERED BY TRAVA.ru";
-            }
-            elsif ( $self->should_show_lastfm ) {
+            if ( $self->should_show_lastfm ) {
                 return qq{
                     <span class='lastfm'>
                         <span>
