@@ -1,7 +1,26 @@
+/**
+ * @fileOverview LiveJournal widget Modal Window for jQuery.
+ * @author <a href="mailto:b-vladi@cs-console.ru">Vlad Kurkin</a>
+ */
 (function ($, window) {
+	/**
+	 * @class LiveJournal widget Modal Window for jQuery.
+	 * @name $.lj.modalWindow
+	 * @requires $.ui.core, $.ui.widget
+	 * @example
+	 * <pre>
+	 *	$('div.with-carousel-content')
+	 *		.modalWindow()
+	 *		.modalWindow('publicMethod')
+	 *		.modalWindow({ many: options })
+	 *		.modalWindow('option', 'getOptionName')
+	 *		.modalWindow('option', 'setOptionName', 'setOptionValue')
+	 *		.modalWindow('modalwindowshow', function( event ){}); // bind some event
+	 *	</pre>
+	 */
 
 	var LJModalWindow = {
-
+		/** @lends $.lj.modalWindow.prototype */
 		options: {
 			width: 800,
 			height: 500,
@@ -25,10 +44,16 @@
 
 		},
 
+		/**
+		 * @private
+		 */
 		_create: function () {
 			this._makeNodes();
 		},
 
+		/**
+		 * @private
+		 */
 		_makeNodes: function () {
 			var options = this.options;
 			var selectors = options.selectors;
@@ -42,6 +67,9 @@
 			this._bindEvents();
 		},
 
+		/**
+		 * @private
+		 */
 		_bindEvents: (function () {
 			function onClose (evt) {
 				evt.preventDefault();
@@ -67,6 +95,9 @@
 			}
 		})(),
 
+		/**
+		 * @private
+		 */
 		_setOption: function (option, value) {
 			switch (option) {
 				case 'content':
@@ -79,6 +110,10 @@
 			this.options[option] = value;
 		},
 
+		/**
+		 * Update the position of the window.
+		 * @function
+		 */
 		updatePosition: function () {
 			var width = isNaN(this.options.width) ? this._popupNode.width() : this.options.width;
 
@@ -89,6 +124,10 @@
 			});
 		},
 
+		/**
+		 * Show window.
+		 * @function
+		 */
 		show: function () {
 			if (!isNaN(this.options.width)) {
 				this._contentNode.css('width', this.options.width);
@@ -107,6 +146,10 @@
 			this._trigger('show');
 		},
 
+		/**
+		 * Hide window.
+		 * @function
+		 */
 		hide: function () {
 			this._faderNode.detach();
 			this._popupNode.detach();
@@ -116,3 +159,17 @@
 
 	$.widget('lj.modalWindow', LJModalWindow);
 })(jQuery, this);
+
+/**
+ * @name $.lj.modalWindow#modalwindowshow
+ * @event
+ * @param {Object} evt jQuery event object
+ * @description The event window is show {@link $.lj.modalWindow#show}.
+ */
+
+/**
+ * @name $.lj.modalWindow#modalwindowhide
+ * @event
+ * @param {Object} evt jQuery event object
+ * @description The event window is hide {@link $.lj.modalWindow#hide}.
+ */
