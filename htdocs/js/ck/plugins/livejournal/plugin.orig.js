@@ -225,12 +225,14 @@
 	dtd.$block['lj-cut'] = 1;
 	dtd.$block['lj-spoiler'] = 1;
 	dtd.$block['lj-poll'] = 1;
+	dtd.$block['lj-repost'] = 1;
 	dtd.$block['lj-pq'] = 1;
 	dtd.$block['lj-pi'] = 1;
 	dtd.$nonEditable['lj-template'] = 1;
 
 	dtd['lj-template'] = {};
 	dtd['lj-map'] = {};
+	dtd['lj-repost'] = {};
 	dtd['lj-raw'] = dtd.div;
 
 	dtd['lj-poll'] = {
@@ -447,6 +449,15 @@
 					return open + content.replace(/\n/g, '') + close;
 				}
 
+				function createRepost(result, firstAttr, secondAttr, content) {
+					var buttonTitle = firstAttr || secondAttr || top.CKLang.LJRepost_Value;
+					var text = content.replace(/"/g, '&quot;');
+
+					content = text + ('<br /><input type="button" value="' + buttonTitle + '" />').replace(/"/g, '&quot;');
+
+					return '<iframe class="lj-repost-wrap" lj-class="lj-repost" frameborder="0" allowTransparency="true" lj-text="' + text + '" lj-button="' + buttonTitle + '" lj-content="' + content + '"></iframe>';
+				}
+
 				editor.dataProcessor.toHtml = function(html, fixForBody) {
 					html = html.replace(/<lj [^>]*?>/gi, closeTag)
 						.replace(/<lj-map [^>]*?>/gi, closeTag)
@@ -454,6 +465,7 @@
 						.replace(/(<lj-cut[^>]*?)\/>/gi, '$1>')
 						.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
 						.replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi, createPoll)
+						.replace(/<lj-repost\s*(?:button\s*=\s*(?:"([^"]*?)")|(?:"([^']*?)"))?.*?>([\s\S]*?)<\/lj-repost>/gi, createRepost)
 						.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, createEmbed);
 
 					if (!$('event_format').checked) {
@@ -1345,7 +1357,11 @@
 						};
 					})(),
 					'lj-map': function(element) {
-						var fakeElement = new CKEDITOR.htmlParser.element('iframe'), frameStyle = '', bodyStyle = '', width = Number(element.attributes.width), height = Number(element.attributes.height);
+						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
+						var frameStyle = '';
+						var bodyStyle = '';
+						var width = Number(element.attributes.width);
+						var height = Number(element.attributes.height);
 
 						if (!isNaN(width)) {
 							frameStyle += 'width:' + width + 'px;';
@@ -1369,13 +1385,6 @@
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
-						return fakeElement;
-					},
-					'lj-repost': function(element) {
-						var fakeElement = new CKEDITOR.htmlParser.element('input');
-						fakeElement.attributes.type = 'button';
-						fakeElement.attributes.value = (element.attributes && element.attributes.button) || top.CKLang.LJRepost_Value;
-						fakeElement.attributes['class'] = 'lj-repost';
 						return fakeElement;
 					},
 					'lj-raw': function(element) {
@@ -1500,6 +1509,12 @@
 							case 'lj-poll':
 								newElement = new CKEDITOR.htmlParser.fragment.fromHtml(decodeURIComponent(element.attributes['lj-data'])).children[0];
 								break;
+							case 'lj-repost':
+								newElement = new CKEDITOR.htmlParser.element('lj-repost');
+								newElement.attributes.button = element.attributes['lj-button'];
+								newElement.children = new CKEDITOR.htmlParser.fragment.fromHtml(element.attributes['lj-text']).children;
+
+							break;
 							case 'lj-spoiler':
 								isCanBeNested = true;
 								attrName = 'title';
@@ -1572,16 +1587,6 @@
 							return ljUserNode;
 						} else if (element.attributes.style == 'display: none;' || !element.children.length) {
 							return false;
-						}
-					},
-					input: function(element) {
-						if (element.attributes['class'] == 'lj-repost') {
-							var newElement = new CKEDITOR.htmlParser.element('lj-repost');
-							if (element.attributes.value != top.CKLang.LJRepost_Value) {
-								newElement.attributes.button = element.attributes.value;
-							}
-							newElement.isOptionalClose = newElement.isEmpty = true;
-							return newElement;
 						}
 					},
 					div: function(element) {
