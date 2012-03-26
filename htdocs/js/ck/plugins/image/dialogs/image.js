@@ -464,14 +464,15 @@
 						[
 							{
 								type: 'html',
-								html: Site.pics_production ? '' : '<div class="b-pics-promo-wrapper">' +
+								html: (CKEDITOR.env.ie && CKEDITOR.env.version <= 9) || Site.pics_production ? '' : '' +
+									'<div class="b-pics-promo-wrapper">' +
 										'<i class="b-pics-promo-box"></i>' +
 										'<a target="_blank" href="http://lj-pics-beta.livejournal.com/472.html" class="b-pics-promo-link">' +
 											'<span class="b-pics-promo-arrow"></span>' +
 											'<span class="b-pics-promo-content b-pics-promo-content-header">' + Site.ml_text['/update.bml.msg.newalbums'] + '</span>' +
 											'<span class="b-pics-promo-content">' + Site.ml_text['/update.bml.msg.newalbums.organise'] + '</span>' +
 										'</a>' +
-										'</div>'
+									'</div>'
 							},
 							{
 								type : 'vbox',
