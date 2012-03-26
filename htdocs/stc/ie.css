@@ -678,3 +678,10 @@ __________________________________________*/
 *:first-child+html .b-music-item-player {
 	width: 75px;
 	}
+	
+/* Music settings 
+-----------------------------------------------*/
+
+.b-pics-promo-wrapper {
+	display: none;
+	}
