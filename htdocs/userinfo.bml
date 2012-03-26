@@ -4,6 +4,7 @@
     use strict;
     use LJ::TimeUtil;
     use LJ::PersonalStats::DB;
+    use LJ::Setting::Music;
 
     use vars qw($title $windowtitle $body $head $bml_okay %GET);
 
@@ -24,7 +25,7 @@
     $body .= "Aliases.authToken = \"$authtoken\";";
 #    $body .= "AddAlias.link = \$('vg_cat_" . $get->{cat} . "');" if ($get->{cat});
     $body .= "</script>";
-    
+
     # Deal with bots
     my $sep  = "**";
     my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
@@ -164,7 +165,7 @@
 
     my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count' => 0);
     my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1);
-    
+
     if ($com) {
         $title = $ML{'.title.communityprofile'};
     } elsif ($u->is_person) {
@@ -366,7 +367,7 @@
     ### Box Ad
     my $boxad = LJ::get_ads({ location => 'bml.userinfo', journalu => $u }) .
                 LJ::get_ads({ location => 'bml.userinfo.sponsored', journalu => $u });
-    
+
     if ($boxad) {
         $body .= "<div class='profile_right_ad'>";
         $body .= $boxad;
@@ -459,10 +460,10 @@
 	$li_title = ($remote && $remote->get_cap('aliases')) ? $ML{'.useralias.title'} : "$ML{'.useralias.title.disabled'}";
 	if ($remote && $remote->get_cap('aliases') && $remote->userid ne $u->userid) {
 
-        my $add_style = $user_alias eq '' 
+        my $add_style = $user_alias eq ''
             ? ""
             : "display:none";
-        my $edit_style = $user_alias eq '' 
+        my $edit_style = $user_alias eq ''
             ? "display:none"
             : "";
 
@@ -562,7 +563,7 @@
             my $img = ($value =~ m#^http://\w+\.fanat\.ru(\/|$)$#)
                         ? 'openid_fanat.png?v=15782'
                         : 'openid.gif?v=14273';
-            
+
             $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/$img' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         }
 
@@ -663,7 +664,7 @@
             if ($country eq 'UA') {
                 $ua_position = LJ::PersonalStats::DB->fetch_raw('ratings', {
                         func => 'get_value',
-                        what => $u->journaltype eq 'C' ? 'communities' : 'users', 
+                        what => $u->journaltype eq 'C' ? 'communities' : 'users',
                         journal_id => $u->userid,
                         by => 'friends_weight',
                         type => 0,
@@ -675,7 +676,7 @@
 
         $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
             func => 'get_value',
-            what => $u->journaltype eq 'C' ? 'communities' : 'users', 
+            what => $u->journaltype eq 'C' ? 'communities' : 'users',
             journal_id => $u->userid,
             by => 'friends_weight',
             type => 0,
@@ -695,27 +696,27 @@
                 $soc_capital = LJ::commafy(int($position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
-                         LJ::Lang::ml($href_rating, {rating_place => LJ::commafy($position->{result}->{position}+1), 
-                                                     url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') . 
+                         LJ::Lang::ml($href_rating, {rating_place => LJ::commafy($position->{result}->{position}+1),
+                                                     url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
                                                      "?country=cyr&askname=" . $u->username . "#ask_position"}) .
-                         "</li>"; 
-        }          
+                         "</li>";
+        }
         if (ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($ua_position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::commafy(int($ua_position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
-                         LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy($ua_position->{result}->{position}+1), 
+                         LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy($ua_position->{result}->{position}+1),
                                                         url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
                                                         "?country=ua&askname=" . $u->username . "#ask_position"}) .
-                         "</li>"; 
+                         "</li>";
         }
         if ((ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) || (ref $position eq 'HASH' && $position->{result}->{position} < 2000)) {
                 $body .= "<li class='rating-social-capital'>" .
                          $soc_image .
                          LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => $soc_capital}) . ' ' .
                          LJ::help_icon_html("profile_faq") .
-                         "</li>"; 
+                         "</li>";
         }
 
         $body .= "</ul>";
@@ -755,7 +756,7 @@
 
     push @view_links_l, '<li>' . BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" }) . '</li>'
         unless $u->is_identity;
-    push @view_links_l, '<li>'. BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) }). '</li>' unless $u->is_identity; 
+    push @view_links_l, '<li>'. BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) }). '</li>' unless $u->is_identity;
 
     push @view_links_l, '<li>' . BML::ml('.details.comments.posted2', { num_raw => $num_comments_posted, num_comma => LJ::commafy($num_comments_posted) }) . '</li>' if LJ::is_enabled("show-talkleft") && ($u->is_personal || $u->is_identity);
 
@@ -1188,7 +1189,7 @@
         $body .= "<div class='section_body' id='interests_body'>";
         if ($intlist) {
             $body .= "<p class='inner_section_header first'>$ML{'.label.interests'} ($intcount):";
-            $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#interests'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
+            $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#playlist'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
             if ($remote) {
                 my $enmasse_link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
                 $enmasse_link .= "&fromuser=$user" unless $remote->id == $userid;
@@ -1261,7 +1262,7 @@
                     $body .= $listusers->([map { $userhash{$_} } @$super_maintainers], 'smaint')
                 } elsif ($show_owner) {
                     $body .= LJ::Lang::ml('userinfo.admins.owner.election.link', {
-                                    href => "href='$LJ::SITEROOT/community/election.bml?authas=$u->{user}'" 
+                                    href => "href='$LJ::SITEROOT/community/election.bml?authas=$u->{user}'"
                             });
                 }
                 $body .= "</div>";
@@ -1612,7 +1613,7 @@
 
         } else {
             $body .= "<p class='inner_section_header first'><span class='expandcollapse on' id='members_header'>" . $arrowimg->("members") . " $ML{'.members.members'}";
-            $body .= " (" . $friends{'count'} . ")" if $should_show_friends; 
+            $body .= " (" . $friends{'count'} . ")" if $should_show_friends;
 
             if (!$should_show_friends) {
                 $body .= ":</span></p><div class='inner_section_body' id='members_body'>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</div>";
@@ -1667,11 +1668,41 @@
 
         $body .= "<div class='ljclear'></div>";
         $body .= "<div class='section' id='apps'><img src='$LJ::IMGPREFIX/application.gif?v=10093' alt='' /> $ML{'.apps.header'} ";
-        $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span> " if $remote && $remote->can_manage($u); 
+        $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/manage/settings/?cat=userapps'>$ML{'.section.edit'}</a>]</span> " if $remote && $remote->can_manage($u);
         $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/games/info.bml?user=".$u->username."'>$ML{'.section.view_all'}</a>]</span></div>";
         $body .= $apps;
     }
-    
+
+    # Music
+    my $playlist_id = $u->prop('playlist_id');
+
+    if ( LJ::is_enabled('userplaylist') &&
+         ($u->is_personal || $u->is_identity) &&
+         (( $remote && $remote->can_manage($u) && LJ::Setting::Music->should_show_playlist($u) ) ||
+          ( $remote && LJ::Setting::Music::Trava->good_ip() && $playlist_id ))
+       ) {
+        my $res = '';
+
+        if ( $playlist_id ) {
+            $res .= qq~<object width="450" height="158" data="http://trava.ru/swfs/TravaPlaylistWidget.swf" type="application/x-shockwave-flash">
+                <param name="movie" value="http://trava.ru/swfs/TravaPlaylistWidget.swf" />
+                <param value="transparent" name="wmode">
+                <param name="FlashVars" value="playlistId=$playlist_id">
+                <param value="true" name="allowfullscreen">
+            </object>~
+        }
+        else {
+            $res .= $ML{'.playlist.not_selected'};
+        }
+
+        $body .= "<div class='ljclear'></div>";
+        $body .= "<div class='section' id='apps'><span class='expandcollapse on' id='playlist_header'>" . $arrowimg->("playlist") . "$ML{'.playlist.header'}</span> ";
+        $body .= "<span class='section_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#userplaylist'>$ML{'.section.edit'}</a>]</span> " if $remote && $remote->can_manage($u);
+        $body .= "</div>";
+        $body .= "<div class='section_body' id='playlist_body'>\n";
+        $body .= $res;
+    }
+
     $body .= LJ::get_ads({ location => 'bml.userinfo.bottom', journalu => $u });
 
     $body .= "</div>";
