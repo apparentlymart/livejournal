@@ -6770,6 +6770,8 @@ sub load_user_props_multi {
     $users = { map { $_->{'userid'} => $_ } grep { $_->{'statusvis'} ne 'X' and $_->{'clusterid'} } grep { ref } @$users };
     return unless %$users;
 
+    $LJ::COUNT_LOAD_PROPS_MULTI++;
+
     my $groups = LJ::User::PropStorage->get_handler_multi(\@$props);
     my $memcache_available = @LJ::MEMCACHE_SERVERS;
     $use_master = $memcache_available || $use_master;
