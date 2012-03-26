@@ -6850,12 +6850,9 @@ sub load_user_props_multi {
             my $handled_props = $groups->{$handler};
 
             foreach my $u (values %$users) {
-                my $propmap_memc = {
-                    %propkeys,
-                    %{ $handler->fetch_props_memcache($u, $handled_props) },
-                };
+                my $propmap_memc = $handler->fetch_props_memcache($u, $handled_props);
 
-                _extend_user_object($u, $propmap_memc);
+                _extend_user_object($u, { %propkeys, %$propmap_memc });
 
                 my @load_from_db = grep { !exists $propmap_memc->{$_} }
                                    @$handled_props;
