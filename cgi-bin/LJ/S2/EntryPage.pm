@@ -146,8 +146,7 @@ sub EntryPage
 
     my $tz_remote;
     if ($remote) {
-        my $tz = $remote->prop("timezone");
-        $tz_remote = $tz ? eval { DateTime::TimeZone->new( name => $tz); } : undef;
+        $tz_remote = $remote->prop('timezone') || undef;
     }
 
     my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
