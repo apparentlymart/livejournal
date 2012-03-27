@@ -198,9 +198,8 @@ sub need_res {
     }
 
     if ( $self->should_show_trava ) {
-        push @ret, qw(
-            js/trava.js
-        )
+        # put trava js here
+        push @ret, qw();
     }
     elsif ( $self->should_show_lastfm ) {
         push @ret, qw(
