@@ -815,6 +815,7 @@ head<=
                     js/dom.js
                     js/httpreq.js
                     js/livejournal.js
+                    js/widget_ippu/selecttags.js
                     js/entry.js
                     js/poll.js
                     js/jquery/jquery.lj.editentriesfilter.js
