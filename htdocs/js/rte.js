@@ -112,6 +112,7 @@
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
 				$.ajax({
 					url: '/js/ck/contents.css?t=' + Site.version,
+					cache: true,
 					success: function (data) {
 						CKEDITOR.styleText = data;
 					}
