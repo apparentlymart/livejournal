@@ -138,7 +138,7 @@ sub render {
             my $clpsd = LJ::Request->cookie('clpsd');
             return 0 unless $clpsd;
             my ($block_id) = $widget_ele_id =~ /(\d+)$/;
-            return 1 if $clpsd =~ /(^|,)\Q$block_id\E(,|$)/; ## collapsed
+            return 1 if $clpsd =~ /(^|:)\Q$block_id\E(:|$)/; ## collapsed
             return 0;
         };
 
