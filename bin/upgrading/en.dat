@@ -5748,6 +5748,8 @@ talk.flag=Flag
 
 talk.freeze=Freeze
 
+talk.from=from
+
 talk.fromip=(from [[ip]])
 talk.fromip.extended|staleness=1
 talk.fromip.extended=([[country]], [[city]] / [[ip]])
