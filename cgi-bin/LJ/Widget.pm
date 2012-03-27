@@ -132,9 +132,20 @@ sub render {
     } elsif (ref $class && $class->{'no_container_div'}) {
         return $rv;
     } else {
+        ## allow user to collapse some widgets
+        my $is_collapsed = eval {
+            return '' unless LJ::is_web_context();
+            my $clpsd = LJ::Request->cookie('clpsd');
+            return 0 unless $clpsd;
+            my ($block_id) = $widget_ele_id =~ /(\d+)$/;
+            return 1 if $clpsd =~ /(^|,)\Q$block_id\E(,|$)/; ## collapsed
+            return 0;
+        };
+
         my $collapsable_class = $class->collapsable ? 'appwidget-prop-collapsable' : '';
+        my $collapsed_class   = ($class->collapsable and $is_collapsed) ? ' appwidget-prop-collapsed' : ''; 
         return 
-            "<div class='appwidget appwidget-$css_subclass $collapsable_class' id='$widget_ele_id'>\n" .
+            "<div class='appwidget appwidget-$css_subclass $collapsable_class $collapsed_class' id='$widget_ele_id'>\n" .
             $rv .
             "</div><!-- end .appwidget-$css_subclass -->\n";
     }
