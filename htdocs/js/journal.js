@@ -355,20 +355,21 @@ jQuery(document).click(function(e)
  * If it will become too large, it should be moved to the separate file
  */
 (function() {
-    widgets = [
-        {
-            type: 'collapsable',
-            handler: function() {
-                jQuery(document).on('click', '.appwidget-prop-collapsable', function(ev) {
-                    if (ev.target.className.indexOf('w-head-status-switch') !== -1) {
-                        jQuery(this).toggleClass('appwidget-prop-collapsed',
-                                    ev.target.className.indexOf('collapse') !== -1)
-                    }
-                });
-            }
-        }
-    ];
+	widgets = [
+		{
+			type: 'collapsable',
+			handler: function() {
+				jQuery(document).on('click', '.appwidget-prop-collapsable', function(ev) {
+					if (ev.target.className.indexOf('w-head-status-switch') !== -1) {
+						var videoCollapes = ev.target.className.indexOf('collapse') !== -1
+						jQuery(this).toggleClass('appwidget-prop-collapsed', videoCollapes);
+						Cookie('video_collapsed', videoCollapes ? 1 : null, { domain: location.host, expires: 14 });
+					}
+				});
+			}
+		}
+	];
 
-    widgets.forEach(function(prop) { prop.handler(); });
+	widgets.forEach(function(prop) { prop.handler(); });
 })();
 
