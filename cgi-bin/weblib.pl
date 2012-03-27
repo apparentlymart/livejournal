@@ -1427,6 +1427,7 @@ sub res_includes {
 
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
         my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
+        my $site_version = LJ::ejs($LJ::CURRENT_VERSION);
         $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
@@ -1436,6 +1437,7 @@ sub res_includes {
                     for (i in p) Site[i] = p[i];
                 })();
                 Site.current_journal = $journal_info_json;
+                Site.version = '$site_version';
            </script>
         };
 
