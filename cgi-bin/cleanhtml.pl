@@ -502,7 +502,7 @@ sub clean {
                             wmode              => $transform_embed_wmode,
                             video_placeholders => $opts->{video_placeholders},
                             remove_video_sizes => $opts->{remove_video_sizes},
-                            no_encode          => $opts->{no_encode},
+                            no_encode          => 1,
                         ) || "";
                         next TOKEN;
                     }
@@ -515,7 +515,7 @@ sub clean {
                             wmode              => $transform_embed_wmode,
                             video_placeholders => $opts->{video_placeholders},
                             remove_video_sizes => $opts->{remove_video_sizes},
-                            no_encode          => $opts->{no_encode},
+                            no_encode          => 1,
                         );
                         $newdata .= $expanded || "";
                     });
