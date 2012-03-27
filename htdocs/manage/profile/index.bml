@@ -699,9 +699,6 @@ body<=
 
             $ret .= "<tr><td class='field_name'><label for='playlist_id'>$ML{'.fn.playlist_on_trava.ru'}</label></td><td>";
             $ret .= qq~<input type="hidden" name="trava_uid" id="trava_uid" value="$trava_uid"><input type="hidden" name="playlist_id" id="playlist_id" value="$playlist_id" />~ . $ML{'.pl.selected'}. qq~<span id="playlist_name"> Loading playlist...</span><br/>~;
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
-                                     'selected' => ! $u->{'opt_hidefriendofs'} });
-            $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
 
             $ret .= "</table>\n";
         }
