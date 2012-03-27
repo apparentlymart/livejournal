@@ -8,7 +8,7 @@ CKEDITOR.editorConfig = function(config) {
 	config.autoParagraph = false;
 	config.autoUpdateElement = false;
 	config.docType = '<!DOCTYPE html>';
-	config.contentsCss = '/js/ck/contents.css?t=' + CKEDITOR.timestamp;
+	config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
 	config.plugins = 'ajax,' +
 		'basicstyles,' +
 		'bidi,' +

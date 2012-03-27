@@ -111,13 +111,14 @@
 		if (!window.switchedRteOn) {
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
 				$.ajax({
-					url: '/js/ck/contents.css?t=' + CKEDITOR.timestamp,
+					url: '/js/ck/contents.css?t=' + Site.version,
 					success: function (data) {
 						CKEDITOR.styleText = data;
 					}
 				});
 
 				CKEDITOR.basePath = statPrefix + '/ck/';
+				CKEDITOR.timestamp = Site.version;
 
 				CKEDITOR.replace('draft', {
 					skin: 'v2',
