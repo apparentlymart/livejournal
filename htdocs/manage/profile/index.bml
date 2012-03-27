@@ -684,8 +684,7 @@ body<=
         unless ( $LJ::DISABLED{'trava'} ) {
 
         # Playlist
-# TODO: remove ||5 !!!!!!!
-        my $trava_uid = $u->prop('trava_uid') || 5;
+        my $trava_uid = $u->prop('trava_uid');
 
         if( $trava_uid && $trava_uid > 1 ) {
             my $playlist_id = $u->prop('playlist_id');
