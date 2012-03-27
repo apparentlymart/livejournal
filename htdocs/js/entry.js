@@ -665,114 +665,16 @@ function getUserTags(user) {
 }
 
 function selectTags(node) {
-	var widget = new LJWidgetIPPU();
-
-	widget.onRefresh = function() {
-		IPPUSelectTags.widget = widget;
-		IPPUSelectTags.init();
-	};
-
-	widget.init({
+	var widget = new LJWidgetIPPU_SelectTags({
 		title: node.firstChild.nodeValue,
 		height: 329,
-		width: jQuery(window).width() / 2,
-		widgetClass: 'IPPU::SelectTags'
+		width: jQuery(window).width() / 2
 	}, {
 		user: jQuery(document.forms.updateForm.usejournal).val()
 	});
-	widget.ippu.addClass('ippu-select-tags');
-	widget.ippu.setClickToClose(false);
 
 	return false;
 }
-
-IPPUSelectTags = {
-	init: function(ippu_node) {
-		$('selecttags-all').value = $('prop_taglist').value.split(/ *, */).join(', ');
-
-		this.checkboxes = jQuery('div.b-selecttags-tags input:checkbox', ippu_node);
-		this.boxesCache = {};
-		this.checked = {};
-		var cache = this.boxesCache,
-			checked = this.checked;
-
-		this.checkboxes.each(function() {
-			cache[this.value] = this;
-
-			if (this.checked) {
-				checked[this.value] = true;
-			}
-		});
-
-		jQuery('#selecttags-all').input(this.input.bind(this)).input();
-	},
-
-	change: function(node) {
-		var inp = $('selecttags-all'),
-			ary = inp.value.replace(/ */, '') ? inp.value.split(/ *, */) : [],
-			i = -1,
-			val = node.value;
-
-		ary = jQuery.map(ary, function (val, idx) {
-			return (val.length > 0) ? val : null
-		});
-
-		if (node.checked) {
-			ary.push(val);
-			this.checked[val] = true;
-		} else {
-			while (ary[++i]) {
-				if (ary[i] == node.value) {
-					ary.splice(i, 1);
-					break;
-				}
-			}
-			delete this.checked[val];
-		}
-
-		inp.value = ary.join(', ');
-	},
-
-	input: function() {
-		var ary = $('selecttags-all').value.split(/ *, */),
-			checkboxes = IPPUSelectTags.checkboxes,
-			cache = this.boxesCache,
-			newChecked = {},
-			checked = this.checked;
-
-		ary = ary.filter(function (val, idx) { return (val.length > 0); })
-				.map(function(val){ return val.trim(); });
-
-		ary.forEach(function(keyword) {
-			keyword = keyword.trim();
-			if (!cache.hasOwnProperty(keyword)) { return; }
-
-			delete checked[keyword];
-			cache[keyword].checked = true;
-			newChecked[keyword] = true;
-		});
-
-		for(var keyword in checked) {
-			cache[keyword].checked = false;
-		}
-		this.checked = newChecked;
-	},
-
-	save_click: function() {
-		$('prop_taglist').value = $('selecttags-all').value.split(/ *, */).join(', ');
-		this.widget.close();
-	},
-
-	reset_click: function() {
-		$('selecttags-all').value = '';
-		IPPUSelectTags.checkboxes.attr('checked', false);
-		this.checked = {};
-
-		for (var keyword in this.boxesCache) {
-			this.boxesCache[keyword].checked = false;
-		}
-	}
-};
 
 function _changeOptionState(option, enable) {
 	if (option) {

@@ -9,7 +9,13 @@ body<=
     LJ::set_active_crumb('moderate');
     return LJ::server_down_html() if ($LJ::SERVER_DOWN);
     use Class::Autouse qw (LJ::Poll);
-
+ 
+    LJ::need_res(qw(
+                    stc/widgets/selecttags.css
+                    js/widget_ippu/selecttags.js
+                    js/community/moderate.js
+                    ));    
+ 
     my $ret;
     my $remote = LJ::get_remote();
 
@@ -577,7 +583,7 @@ body<=
                            raw   => "autocomplete='off'",
                        }
                     );
-                    $ret .= "$BML::ML{'entryform.selecttags'}";
+                    $ret .= '<a href="#" onclick="return selectModTags(this);">' . $BML::ML{'entryform.selecttags'} . '</a>';
                     } else {
                         $ret .= $current{$key};
                 }

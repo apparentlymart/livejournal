@@ -120,10 +120,12 @@ LJ = window.LJ || {};
  *
  * @param {Function} func Function to call.
  * @param {number} wait Time in ms to wait before function will be called.
+ * @param {boolean=false} resetOnCall it true, the function will be executed only after last call + delay time
  */
-LJ.DelayedCall = function(func, wait) {
+LJ.DelayedCall = function(func, wait, resetOnCall) {
 	this._func = func;
 	this._wait = wait;
+	this._resetOnCall = !!resetOnCall;
 	this._timer = null;
 	this._args = null;
 };
@@ -139,7 +141,14 @@ LJ.DelayedCall.prototype._timerCallback = function() {
  */
 LJ.DelayedCall.prototype.run = function(/* arguments */) {
 	this._args = [].slice.call(arguments, 0);
-	if (this._timer) { return; }
+	if (this._timer) {
+		if (this._resetOnCall) {
+			clearTimeout(this._timer);
+			this._timer = null;
+		} else {
+			return;
+		}
+	}
 
 	this._timer = setTimeout(this._timerCallback.bind(this), this._wait);
 };
