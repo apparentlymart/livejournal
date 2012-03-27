@@ -27,6 +27,7 @@ use LJ::LastFM;
 use LJ::Request;
 use LJ::Share;
 use LJ::TimeUtil;
+use LJ::Setting::Music;
 
 # TEMP HACK
 sub get_s2_reader {
@@ -1983,7 +1984,7 @@ sub Entry
 
     my $p = $arg->{'props'};
     if ($p->{'current_music'}) {
-        $e->{'metadata'}->{'music'} = LJ::LastFM::format_current_music_string($p->{'current_music'});
+        $e->{'metadata'}->{'music'} = LJ::Setting::Music::format_current_music_string($p->{'current_music'});
         LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'});
     }
     if (my $mid = $p->{'current_moodid'}) {

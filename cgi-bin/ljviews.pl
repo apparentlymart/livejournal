@@ -11,6 +11,7 @@ package LJ::S1;
 use vars qw(@themecoltypes);
 use Class::Autouse qw(LJ::LastFM);
 use LJ::TimeUtil;
+use LJ::Setting::Music;
 
 # this used to be in a table, but that was kinda useless
 @themecoltypes = (
@@ -1001,8 +1002,8 @@ sub current_mood_str {
 
 sub current_music_str {
     my $val = shift;
-    
-    $val = LJ::LastFM::format_current_music_string($val);
+
+    $val = LJ::Setting::Music::format_current_music_string($val);
     LJ::CleanHTML::clean_subject(\$val);
     return $val;
 }
