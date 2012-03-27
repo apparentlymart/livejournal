@@ -2949,6 +2949,8 @@ fotki.album.create_album=Create album
 fotki.album.default_album_name|staleness=1
 fotki.album.default_album_name=Unsorted
 
+fotki.album.delete.photo=Delete
+
 fotki.album.description|staleness=1
 fotki.album.description=Add your description
 
