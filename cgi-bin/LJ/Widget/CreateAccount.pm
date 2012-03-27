@@ -5,6 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::CreatePage Captcha::reCAPTCHA );
 use LJ::TimeUtil;
+use Digest::MD5 qw/md5_hex/;
 
 sub need_res { qw( stc/widgets/createaccount.css js/widgets/createaccount.js js/browserdetect.js ) }
 
@@ -426,6 +427,16 @@ sub handle_post {
     my %from_post;
     my $remote = LJ::get_remote();
     my $alt_layout = $opts{alt_layout} ? 1 : 0;
+
+    my $userip = LJ::get_remote_ip();
+    my $ua = LJ::Request->header_in ('User-Agent');  
+    my $mem_key = md5_hex($userip.$ua);
+
+    if (LJ::MemCache::get($mem_key)) {
+        LJ::MemCache::incr($mem_key);
+    } else {
+        LJ::MemCache::set($mem_key, 1, 60*60);
+    }
 
     # flag to indicate they've submitted with 'audio' as the answer to the captcha
     my $wants_audio = $from_post{wants_audio} = 0;
