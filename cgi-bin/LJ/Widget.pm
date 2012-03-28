@@ -96,6 +96,10 @@ sub render {
     my $widget_ele_id = $class->widget_ele_id;
 
     return "" unless $class->should_render(@opts);
+    
+    ## parameters beside widgets layout
+    my $ret_opts = {};
+    push @opts => (ret_opts => $ret_opts);
 
     my $rv = eval {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
@@ -132,20 +136,34 @@ sub render {
     } elsif (ref $class && $class->{'no_container_div'}) {
         return $rv;
     } else {
-        ## allow user to collapse some widgets
-        my $is_collapsed = eval {
-            return '' unless LJ::is_web_context();
-            my $clpsd = LJ::Request->cookie('clpsd');
-            return 0 unless $clpsd;
-            my ($block_id) = $widget_ele_id =~ /(\d+)$/;
-            return 1 if $clpsd =~ /(^|:)\Q$block_id\E(:|$)/; ## collapsed
-            return 0;
-        };
+
+        ## do not collapse widgets with changed content id
+        my $widget_content_id = $ret_opts->{widget_content_id};
+
+        ## handle collapsable widgets
+        my $is_collapsed = 0;
+        if ($class->collapsable){
+
+            ## read widget's state from the cookie
+            $is_collapsed = eval {
+                return 0 unless LJ::is_web_context();
+
+                my $clpsd = LJ::Request->cookie('clpsd');
+                return 0 unless $clpsd;
+                
+                my ($block_id) = $widget_ele_id =~ /(\d+)$/;
+                my $widget_content_id_re = $widget_content_id ? "-$widget_content_id" : "";
+                ## cookie: clpsd=block_id-content_id:block_id-content_id:...
+                return 1 if $clpsd =~ /(^|:)$block_id$widget_content_id_re(:|$)/; ## collapsed
+                return 0;
+            };
+
+        }
 
         my $collapsable_class = $class->collapsable ? 'appwidget-prop-collapsable' : '';
         my $collapsed_class   = ($class->collapsable and $is_collapsed) ? ' appwidget-prop-collapsed' : ''; 
         return 
-            "<div class='appwidget appwidget-$css_subclass $collapsable_class $collapsed_class' id='$widget_ele_id'>\n" .
+            "<div class='appwidget appwidget-$css_subclass $collapsable_class $collapsed_class' id='$widget_ele_id' data-cid='$widget_content_id'>\n" .
             $rv .
             "</div><!-- end .appwidget-$css_subclass -->\n";
     }
