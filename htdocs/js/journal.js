@@ -362,21 +362,28 @@ jQuery(document).click(function(e)
 				jQuery(document).on('click', '.appwidget-prop-collapsable', function(ev) {
 					if (ev.target.className.indexOf('w-head-status-switch') !== -1) {
 						var videoCollapes = ev.target.className.indexOf('collapse') !== -1,
-							id = this.id.replace('LJWidget_', ''),
+							id = this.id.replace('LJWidget_', '') + '-',
+							fullid = id + this.getAttribute('data-cid'),
 							cookie = Cookie('clpsd') || '',
-							id_idx = -1;
+							cookie_ids = cookie ? cookie.split(':') : [];
 
-						cookie_ids = cookie ? cookie.split(':') : [];
-						id_idx = jQuery.inArray(id, cookie_ids);
 						jQuery(this).toggleClass('appwidget-prop-collapsed', videoCollapes);
-						if (videoCollapes) {
-							if (id_idx === -1) {
-								cookie_ids.push(id);
+
+						var found = false;
+						for (var i = 0; i < cookie_ids.length; ++i) {
+							if (cookie_ids[i].indexOf(id) !== -1) {
+								found = true;
+								if (videoCollapes) {
+									cookie_ids[i] = fullid;
+								} else {
+									cookie_ids.splice(i, 1);
+								}
+								break;
 							}
-						} else {
-							if (id_idx !== -1) {
-								cookie_ids.splice(id_idx, 1);
-							}
+						}
+
+						if (!found && videoCollapes) {
+							cookie_ids.push(fullid);
 						}
 
 						Cookie('clpsd', cookie_ids.length > 0 ? cookie_ids.join(':') : null, { domain: location.host, expires: 30 });
