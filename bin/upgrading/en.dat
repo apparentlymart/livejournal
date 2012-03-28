@@ -5847,7 +5847,9 @@ talk.post.infobox.all=All variants to post
 
 talk.post.location=Location
 
-talk.post.meta.tojournal=journal
+talk.post.meta.tojournal=to journal
+
+talk.post.meta.tocommunity=to community
 
 talk.post.meta.username=Username
 
