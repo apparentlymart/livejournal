@@ -347,6 +347,11 @@ sub trans {
          LJ::Request->uri($uri);
     }
 
+    ## allow cross domain ajax for (l-).stat domain
+    if ($host eq "stat.$LJ::DOMAIN"){
+        LJ::Request->header_out('Access-Control-Allow-Origin' => '*');
+    }
+
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
     if (LJ::Request->method_number == LJ::Request::M_TRACE) {
