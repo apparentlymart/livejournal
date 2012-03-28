@@ -356,20 +356,24 @@ sub gearman_client {
 }
 
 sub mogclient {
-    return $LJ::MogileFS if $LJ::MogileFS;
+    my (%opts) = @_;
 
-    if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-        eval { require MogileFS::Client; };
-        die "Couldn't load MogileFS: $@" if $@;
+    my $domain = $opts{'domain'} || $LJ::MOGILEFS_CONFIG{'domain'};
 
-        $LJ::MogileFS = MogileFS::Client->new(
-                                      domain => $LJ::MOGILEFS_CONFIG{domain},
-                                      root   => $LJ::MOGILEFS_CONFIG{root},
-                                      hosts  => $LJ::MOGILEFS_CONFIG{hosts},
-                                      readonly => $LJ::DISABLE_MEDIA_UPLOADS,
-                                      timeout => $LJ::MOGILEFS_CONFIG{timeout} || 3,
-                                      )
-            or die "Could not initialize MogileFS";
+    return unless %LJ::MOGILEFS_CONFIG;
+
+    unless ( $LJ::MogileFS{$domain} ) {
+        require MogileFS::Client;
+
+        $LJ::MogileFS{$domain} = MogileFS::Client->new(
+            'domain'   => $domain,
+            'root'     => $LJ::MOGILEFS_CONFIG{'root'},
+            'hosts'    => $LJ::MOGILEFS_CONFIG{'hosts'},
+            'readonly' => $LJ::DISABLE_MEDIA_UPLOADS,
+            'timeout'  => $LJ::MOGILEFS_CONFIG{'timeout'} || 3,
+        );
+
+        die "Could not initialize MogileFS" unless $LJ::MogileFS{$domain};
 
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
@@ -383,7 +387,7 @@ sub mogclient {
         }
     }
 
-    return $LJ::MogileFS;
+    return $LJ::MogileFS{$domain};
 }
 
 sub theschwartz {
