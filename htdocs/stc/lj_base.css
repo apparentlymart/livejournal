@@ -4022,21 +4022,24 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 
 /* Help Link
 ----------------------------------- */
-.b-helplink:link,
-.b-helplink:visited,
-.b-helplink:hover,
-.b-helplink:active {
-	display: inline-block;
+.b-helplink {
+	display: inline;
 	position: relative;
-	margin: 0;
+	margin: 0 0 0 0.5em;
 	padding: 0 0 0 20px;
 	border: 0;
-	color: #8E9194 !important;
-	text-decoration: none;
 	}
-.b-helplink:hover,
-.b-helplink:active {
+BODY div .b-helplink:link,
+BODY div .b-helplink:visited,
+BODY div .b-helplink:hover,
+BODY div .b-helplink:active {
+	color: #8E9194 !important;
+	text-decoration: underline;
+	}
+BODY div .b-helplink:hover,
+BODY div .b-helplink:active {
 	color: #C00 !important;
+	text-decoration: underline;
 	}
 	.b-helplink-icon {
 		display: block;
@@ -4045,7 +4048,7 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		left: 0;
 		width: 16px;
 		height: 16px;
-		margin: -8px 0 0;
+		margin: -7px 0 0;
 		padding: 0;
 		background: url(/img/icons/help.png?v=1) 0 0 no-repeat;
 		font: 0/0 serif;
