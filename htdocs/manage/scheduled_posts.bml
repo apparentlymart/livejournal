@@ -9,16 +9,7 @@ body<=
 #line 7
 
     LJ::need_res(qw(
-                    stc/entry.css
                     stc/editjournal.css
-                    stc/widgets/selecttags.css
-                    js/inputcomplete.js
-                    js/jquery/jquery.ui.position.min.js
-                    js/jquery/jquery.ui.autocomplete.min.js
-                    js/jquery/jquery.bgiframe.js
-                    js/gears_init.js
-                    js/scanner.js
-                    js/photobucket_jw.js
                     ));
     if (!LJ::is_enabled("delayed_entries")) {
           return LJ::error_list("This feature is disabled.");
@@ -176,22 +167,22 @@ body<=
     if ( !$usejournal_u || $usejournal_u->is_community ) {
         $ret .= "<p><a href='$LJ::SITEROOT/manage/$page_name'>" . BML::ml('.lnk.journal') . "</a></p>";
     }
-	
+
     my $timezone = $remote->prop("timezone");
     if ($timezone) {
-		$ret .="<div class='b-editentries-timezone show-timezone'>";
+        $ret .="<div class='b-editentries-timezone show-timezone'>";
         $ret .= BML::ml('.date.your_time_zone');
         $ret .= "<a href=\"$LJ::SITEROOT/manage/settings/?cat=display\">(";
         $ret .= $timezone;
         $ret .= ')</a>';
-		$ret .="</div>";
+        $ret .="</div>";
     } else {
-		$ret .="<div class='b-editentries-timezone'>";
+        $ret .="<div class='b-editentries-timezone'>";
         $ret .= BML::ml('.date.gmt');
         $ret .= "<a href=\"$LJ::SITEROOT/manage/settings/?cat=display\">";
         $ret .= BML::ml('.date.set_time_zone');
         $ret .= '</a>';
-		$ret .="</div>";
+        $ret .="</div>";
     }
     $ret .= $entry_chooser->( \@recent_entries,
                                 first_page   => $skip ? 0 : 1,

@@ -40,24 +40,31 @@ body<=
 
     my $editprivacy_link = "<p class='i-bubble b-bubble-lite b-bubble-editprivacy b-bubble-noarrow'>" . BML::ml('.editprivacy', { aopts => "href='editprivacy.bml'" }) . "</p>";
 
-    LJ::need_res(qw(
-                    stc/entry.css
-                    stc/editjournal.css
-                    stc/widgets/selecttags.css
-                    js/inputcomplete.js
-                    js/jquery/jquery.ui.position.min.js
-                    js/jquery/jquery.ui.autocomplete.min.js
-                    js/jquery/jquery.bgiframe.js
-                    js/gears_init.js
-                    js/scanner.js
-                    js/photobucket_jw.js
-                    ));
+    if ($mode eq "edit") {
+        LJ::need_res(qw(
+                        stc/entry.css
+                        stc/editjournal.css
+                        stc/widgets/selecttags.css
+                        js/inputcomplete.js
+                        js/jquery/jquery.ui.position.min.js
+                        js/jquery/jquery.ui.autocomplete.min.js
+                        js/jquery/jquery.bgiframe.js
+                        js/gears_init.js
+                        js/scanner.js
+                        js/photobucket_jw.js
+                        ));
 
-    if (LJ::is_enabled("delayed_entries")) {
-        LJ::need_string(qw/
-                            entryform.sticky_replace.edit
-                            entryform.sticky.edit
-                            entryform.choose_date/);
+        if (LJ::is_enabled("delayed_entries")) {
+            LJ::need_string(qw/
+                                entryform.sticky_replace.edit
+                                entryform.sticky.edit
+                                entryform.choose_date/);
+        }
+
+    } else {
+        LJ::need_res(qw(
+                        stc/editjournal.css
+                        ));
     }
 
     # append months names tranlation to Site.ml_text['month.names.long']  
@@ -804,32 +811,33 @@ head<=
 
 <?entryformcss?>
 <?_code return $_[0]->{'head'}; _code?>
-<?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 
 <?_code
 {
     my $ret;
 
-    LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
-                    js/httpreq.js
-                    js/livejournal.js
-                    js/widget_ippu/selecttags.js
-                    js/entry.js
-                    js/poll.js
-                    js/jquery/jquery.lj.editentriesfilter.js
-                    ));
+    my $ditemid = $GET{'itemid'} || $POST{'itemid'} || 0;
+    my $delayedid = $GET{'delayedid'} || $POST{'delayedid'};    
 
-    # JS vars for the RTE
-    $ret .= LJ::rte_js_vars($remote);
+    if ( $ditemid || $delayedid ) {
+        LJ::need_res(qw(
+                        js/widget_ippu/selecttags.js
+                        js/entry.js
+                        js/poll.js
+                        ));
+
+        # JS vars for the RTE
+        $ret .= LJ::rte_js_vars($remote);
+        $ret .= '<script type="text/javascript">LiveJournal.register_hook("page_load", setCopyrightEdit);</script>';
+    } else {
+        LJ::need_res(qw(
+                        js/jquery/jquery.lj.editentriesfilter.js
+                        ));
+    }
 
     return $ret;
 }
 _code?>
-<script type='text/javascript'>
-    LiveJournal.register_hook("page_load", setCopyrightEdit);
-</script>
 
 <=head
 page?><?_c <LJDEP>
