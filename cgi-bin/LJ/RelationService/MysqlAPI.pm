@@ -251,36 +251,91 @@ sub _create_relation_to_type_other {
 
 
 sub remove_relation_to {
-    my $class = shift;
-    my $u     = shift;
-    my %opts  = @_;
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    
+    if ( $type eq 'F' ) {
+        return $class->_remove_relation_to_type_f($u, $friend);
+    } else {
+        return $class->_removee_relation_to_type_other($u, $friend, $type);
+    }
+}
 
-    my $friendid = int $opts{friendid};
+sub _remove_relation_to_type_f {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
 
     my $dbh = LJ::get_db_writer() 
         or return 0;
 
-    my $cnt = $dbh->do("
-                DELETE 
-                FROM friends WHERE 
-                    userid = ? AND 
-                    friendid=?
-                ", undef, $u->userid, $friendid);
+    my $cnt = $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?",
+                        undef, $u->userid, $friend->userid);
 
     if (!$dbh->err && $cnt > 0) {
-        LJ::run_hooks('defriended', $u, LJ::load_userid($friendid));
-        LJ::User->decrease_friendsof_counter($friendid);
+        LJ::run_hooks('defriended', $u, $friend);
+        LJ::User->decrease_friendsof_counter($friend->userid);
 
         # delete friend-of memcache keys for anyone who was removed
-        LJ::MemCache::delete([ $u->userid, "frgmask:" . $u->userid . ":$friendid" ]);
-        LJ::memcache_kill($friendid, 'friendofs');
-        LJ::memcache_kill($friendid, 'friendofs2');
+        LJ::MemCache::delete([ $u->userid, "frgmask:" . $u->userid . ":" . $friend->userid ]);
+        LJ::memcache_kill($friend->userid, 'friendofs');
+        LJ::memcache_kill($friend->userid, 'friendofs2');
 
         LJ::memcache_kill($u->userid, 'friends');
         LJ::memcache_kill($u->userid, 'friends2');
     }
 
     return $cnt;
+}
+
+sub _remove_relation_to_type_other {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $userid = ref($u) ? $u->userid : $u;
+    my $friendid = ref($friend) ? $friend->userid : $friend;
+
+    if ($typeid) {
+        # clustered reluser2 table
+        return undef unless $u->writer;
+
+        $u->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? ("userid=".$userid." AND ") : "") .
+               ($friendid ne '*' ? ("targetid=".$friendid." AND ") : "") . "type=$typeid");
+
+        return undef if $u->err;
+    } else {
+        # non-clustered global reluser table
+        my $dbh = LJ::get_db_writer()
+            or return undef;
+
+        my $qtype = $dbh->quote($type);
+        $dbh->do("DELETE FROM reluser WHERE " . ($userid ne '*' ? ("userid=".$userid." AND ") : "") .
+                 ($friendid ne '*' ? ("targetid=".$friendid." AND ") : "") . "type=$qtype");
+
+        return undef if $dbh->err;
+    }
+    
+    # if one of userid or targetid are '*', then we need to note the modtime
+    # of the reluser edge from the specified id (the one that's not '*')
+    # so that subsequent gets on rel:userid:targetid:type will know to ignore
+    # what they got from memcache
+    my $eff_type = $typeid || $type;
+    if ($userid eq '*') {
+        LJ::MemCache::set([$friendid, "relmodt:$friendid:$eff_type"], time());
+    } elsif ($friendid eq '*') {
+        LJ::MemCache::set([$userid, "relmodu:$userid:$eff_type"], time());
+
+    # if neither userid nor targetid are '*', then just call _set_rel_memcache
+    # to update the rel:userid:targetid:type memcache key as well as the
+    # userid and targetid modtime keys
+    } else {
+        LJ::_set_rel_memcache($userid, $friendid, $eff_type, 0);
+    }    
 }
 
 
@@ -651,7 +706,7 @@ sub _get_friendofs {
     # database and insert those into memcache
 
     my $dbh   = LJ::get_db_writer();
-    my $limit_sql = $limit ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD+1);
+    my $limit_sql = $limit ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD + 1);
     my $friendofs = $dbh->selectcol_arrayref
         ("SELECT userid FROM friends WHERE friendid=? $limit_sql",
          undef, $u->userid) || [];
@@ -665,5 +720,51 @@ sub _get_friendofs {
     return @$friendofs;
 }
 
+sub is_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
+    return undef unless $type && $u && $friend;
 
-1
+    my $userid = LJ::want_userid($u);
+    my $friendid = LJ::want_userid($friend);
+
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $eff_type = $typeid || $type;
+
+    my $key = "$userid-$friendid-$eff_type";
+    return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
+
+    # did we get something from memcache?
+    my $memval = LJ::_get_rel_memcache($userid, $friendid, $eff_type);
+    return $memval if defined $memval;
+
+    # are we working on reluser or reluser2?
+    my ($db, $table);
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        $table = "reluser2";
+    } else {
+        # non-clustered reluser table
+        $db ||= LJ::get_db_reader();
+        $table = "reluser";
+    }
+
+    # get data from db, force result to be {0|1}
+    my $dbval = $db->selectrow_array("SELECT COUNT(*) FROM $table ".
+                                     "WHERE userid=? AND friendid=? AND type=? ",
+                                     undef, $userid, $friendid, $eff_type)
+        ? 1 : 0;
+
+    # set in memcache
+    LJ::_set_rel_memcache($userid, $friendid, $eff_type, $dbval);
+
+    # return and set request cache
+    return $LJ::REQ_CACHE_REL{$key} = $dbval;
+}
+
+1;

@@ -60,7 +60,7 @@ sub find_relation_destinations {
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
-    if ($class->_load_alt_api('read', $type)){
+    if ($class->_load_alt_api('read', $type)) {
         my $alt = $class->alt_api($u);
         if ($alt) {
             $alt->find_relation_destinations($u, $type, %opts);
@@ -83,7 +83,7 @@ sub find_relation_sources {
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
-    if ($class->_load_alt_api('read', $type)){
+    if ($class->_load_alt_api('read', $type)) {
         my $alt = $class->alt_api($u);
         if ($alt) {
             $alt->find_relation_sources($u, $type, %opts);
@@ -105,7 +105,7 @@ sub load_relation_destinations {
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
-    if ($class->_load_alt_api('read', $type)){
+    if ($class->_load_alt_api('read', $type)) {
         my $alt = $class->alt_api($u);
         if ($alt) {
             $alt->load_relation_destinations($u, $type, %opts);
@@ -128,7 +128,7 @@ sub create_relation_to {
     
     return undef unless $type and $u and $friend;
 
-    if ($class->_load_alt_api('update')){
+    if ($class->_load_alt_api('update')) {
         my $alt = $class->alt_api($u);
         if ($alt){
             $alt->create_relation_to($u, $friend, $type, %opts);
@@ -141,18 +141,48 @@ sub create_relation_to {
 
 
 sub remove_relation_to {
-    my $class = shift;
-    my $u     = shift;
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
 
-    $u = LJ::want_user($u);
-    if ($class->_load_alt_api('update')){
-        my $alt = $class->alt_api($u);
+    $u = LJ::want_user($u) unless $u eq '*';
+    $friend = LJ::want_user($friend) unless $u eq '*';
+    
+    return undef unless $type and $u and $friend;
+    return undef if $u eq '*' and $friend eq '*';
+
+    if ($class->_load_alt_api('update')) {
+        my $alt = $class->alt_api($u, $friend, $type);
         if ($alt){
-            $alt->create_relation_to($u, @_);
+            $alt->remove_relation_to($u, $friend, $type);
         }
     }
     my $interface = $class->relation_api($u);
-    return $interface->remove_relation_to($u, @_);
+    return $interface->remove_relation_to($u, $friend, $type);
+}
+
+sub is_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
+    $u = LJ::want_user($u);
+    $friend = LJ::want_user($friend);
+    
+    return undef unless $u && $friend && $type;
+
+    if ($class->_load_alt_api('read', $type)) {
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $alt->is_relation_to($u, $friend, $type, %opts);
+        }
+    }
+
+    my $interface = $class->relation_api($u);
+    return $interface->is_relation_to($u, $friend, $type, %opts);    
 }
 
 1;

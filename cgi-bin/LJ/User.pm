@@ -9093,25 +9093,16 @@ sub remove_friend {
 
     my $dbh = LJ::get_db_writer() or return 0;
 
-    foreach my $del_id (@del_ids) {
-        my $cnt = $dbh->do("DELETE FROM friends WHERE userid=$userid AND friendid=$del_id");
-
-        if (!$dbh->err && $cnt > 0) {
-            LJ::run_hooks('defriended', $u, LJ::load_userid($del_id));
-            LJ::User->decrease_friendsof_counter($del_id);
-        }
-    }
-    
     my $sclient = LJ::theschwartz();
     # part of the criteria for whether to fire defriended event
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify} && $u->is_visible && $u->is_person;
 
+    foreach my $del_id (@del_ids) {
+        LJ::RelationService->remove_relation_to( $u, $del_id, 'F' );
+    }
+    
     # delete friend-of memcache keys for anyone who was removed
     foreach my $fid (@del_ids) {
-        LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
-        LJ::memcache_kill($fid, 'friendofs');
-        LJ::memcache_kill($fid, 'friendofs2');
-
         my $friendee = LJ::load_userid($fid);
         if ($sclient) {
             my @jobs;
@@ -9130,10 +9121,6 @@ sub remove_friend {
             $sclient->insert_jobs(@jobs);
         }
     }
-
-    LJ::memcache_kill($userid, 'friends');
-    LJ::memcache_kill($userid, 'friends2');
-    LJ::mark_dirty($userid, "friends");
 
     return 1;
 }

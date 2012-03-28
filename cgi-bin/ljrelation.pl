@@ -281,47 +281,12 @@ sub _set_rel_memcache {
 # </LJFUNC>
 sub check_rel
 {
-    my $db = isdb($_[0]) ? shift : undef;
+    my $class = shift;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type && $userid && $targetid;
 
-    my $u = LJ::want_user($userid);
-    $userid = LJ::want_userid($userid);
-    $targetid = LJ::want_userid($targetid);
-
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $eff_type = $typeid || $type;
-
-    my $key = "$userid-$targetid-$eff_type";
-    return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
-
-    # did we get something from memcache?
-    my $memval = LJ::_get_rel_memcache($userid, $targetid, $eff_type);
-    return $memval if defined $memval;
-
-    # are we working on reluser or reluser2?
-    my $table;
-    if ($typeid) {
-        # clustered reluser2 table
-        $db = LJ::get_cluster_reader($u);
-        $table = "reluser2";
-    } else {
-        # non-clustered reluser table
-        $db ||= LJ::get_db_reader();
-        $table = "reluser";
-    }
-
-    # get data from db, force result to be {0|1}
-    my $dbval = $db->selectrow_array("SELECT COUNT(*) FROM $table ".
-                                     "WHERE userid=? AND targetid=? AND type=? ",
-                                     undef, $userid, $targetid, $eff_type)
-        ? 1 : 0;
-
-    # set in memcache
-    LJ::_set_rel_memcache($userid, $targetid, $eff_type, $dbval);
-
-    # return and set request cache
-    return $LJ::REQ_CACHE_REL{$key} = $dbval;
+    my $result = LJ::RelationService->is_relation_to($userid, $targetid, $type);
+    return $result;
 }
 
 # <LJFUNC>
@@ -521,44 +486,10 @@ sub clear_rel
     $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
     return undef unless $type && $userid && $targetid;
 
-    my $typeid = LJ::get_reluser_id($type)+0;
+    my $result = LJ::RelationService->remove_relation_to($userid, $targetid, $type);
+    return undef unless $result;
 
-    if ($typeid) {
-        # clustered reluser2 table
-        return undef unless $u->writer;
 
-        $u->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-               ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid");
-
-        return undef if $u->err;
-    } else {
-        # non-clustered global reluser table
-        my $dbh = LJ::get_db_writer()
-            or return undef;
-
-        my $qtype = $dbh->quote($type);
-        $dbh->do("DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-                 ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype");
-
-        return undef if $dbh->err;
-    }
-
-    # if one of userid or targetid are '*', then we need to note the modtime
-    # of the reluser edge from the specified id (the one that's not '*')
-    # so that subsequent gets on rel:userid:targetid:type will know to ignore
-    # what they got from memcache
-    my $eff_type = $typeid || $type;
-    if ($userid eq '*') {
-        LJ::MemCache::set([$targetid, "relmodt:$targetid:$eff_type"], time());
-    } elsif ($targetid eq '*') {
-        LJ::MemCache::set([$userid, "relmodu:$userid:$eff_type"], time());
-
-    # if neither userid nor targetid are '*', then just call _set_rel_memcache
-    # to update the rel:userid:targetid:type memcache key as well as the
-    # userid and targetid modtime keys
-    } else {
-        LJ::_set_rel_memcache($userid, $targetid, $eff_type, 0);
-    }
 
     return 1;
 }
