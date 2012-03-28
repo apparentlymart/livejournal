@@ -175,6 +175,7 @@ sub need_res {
         js/ck/ckeditor.js
         js/rte.js
         js/jquery/jquery.lj.basicWidget.js
+        js/jquery/jquery.xdomainrequest.js
         js/jquery/jquery.lj.trava.js
         js/jquery/jquery.lj.modalWindow.js
         js/jquery/jquery.lj.entryDatePicker.js

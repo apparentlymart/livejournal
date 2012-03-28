@@ -113,6 +113,7 @@
 				$.ajax({
 					url: statPrefix + '/ck/contents.css?t=' + Site.version,
 					cache: true,
+					dataType: 'text',
 					success: function (data) {
 						CKEDITOR.styleText = data;
 					}
