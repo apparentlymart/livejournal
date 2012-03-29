@@ -157,7 +157,9 @@ DIV.lc_detect INPUT {
 
 /* Manage playlist
 --------------------------- */
-
+.music-settings-manage A:hover {
+		text-decoration: none;
+		}
 .music-settings-manage-playlist,
 .music-playlist-action {
 	margin: 0 0 0 5px;

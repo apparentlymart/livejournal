@@ -697,19 +697,18 @@ body<=
             $ret .= "<table class='field_block'>\n";
 
             $ret .= "<tr><td class='field_name'><label for='playlist_id'>$ML{'.fn.playlist_on_trava.ru'}</label></td><td>";
-            $ret .= qq~<div class="music-settings-manage-state-loading">~;
+            $ret .= qq~<div class="music-settings-manage music-settings-manage-state-loaded">~;
             $ret .= qq~<input type="hidden" name="trava_uid" id="trava_uid" value="$trava_uid"><input type="hidden" name="playlist_id" id="playlist_id" value="$playlist_id" />~;
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-loading">~ . $ML{'.pl.selected'}. qq~<span class="music-playlist-action">~ . $ML{'.pl.loading'}. qq~</span>~;
             $ret .= qq~<span class="music-settings-preloader"></span>~;
             $ret .= qq~</div>~;
             $ret .= qq~<dl class="music-settings-manage-playlist music-playlist-loaded"><dt>~ . $ML{'.pl.selected'}. qq~<span id="playlist_name"> </span></dt>~;
             $ret .= qq~<dd>~ . $ML{'.pl.change'}. qq~~;
-            $ret .= "<select id='music-settings-playlist-selection'>";
-            $ret .= "</select>";
+            $ret .= qq~<select id="music-settings-playlist-selection"></select><button id="music-settings-playlist-confirm">~ . $ML{'.pl.select'}. qq~</button>~;
             $ret .= "</dd>";
             $ret .= "</dl>";
-            $ret .= qq~<div class="music-settings-manage-playlist music-playlist-empty"> You dont have any playlist, please go to <a href="http://www.trava.ru" target="_blank">trava</a> and do it )))</div>~;
-            $ret .= qq~<div class="music-settings-manage-playlist music-playlist-system-error"> <span class="music-playlist-action"> Failed to query data, please, <a href="#">try again</a> </span></div>~;
+            $ret .= qq~<div class="music-settings-manage-playlist music-playlist-empty">~ . $ML{'.pl.create'}. qq~<a href="http://www.trava.ru" target="_blank">trava.ru</a></div>~;
+            $ret .= qq~<div class="music-settings-manage-playlist music-playlist-system-error"> <span class="music-playlist-action">~ . $ML{'.pl.error'}. qq~<a href="#">~ . $ML{'.pl.connect'}. qq~</a> </span></div>~;
             $ret .= qq~</div>~;
 		    $ret .= "</td>";
             $ret .= "</table>\n";
