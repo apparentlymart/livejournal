@@ -756,7 +756,7 @@ sub is_relation_to {
 
     # get data from db, force result to be {0|1}
     my $dbval = $db->selectrow_array("SELECT COUNT(*) FROM $table ".
-                                     "WHERE userid=? AND friendid=? AND type=? ",
+                                     "WHERE userid=? AND targetid=? AND type=? ",
                                      undef, $userid, $friendid, $eff_type)
         ? 1 : 0;
 

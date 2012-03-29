@@ -281,7 +281,6 @@ sub _set_rel_memcache {
 # </LJFUNC>
 sub check_rel
 {
-    my $class = shift;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type && $userid && $targetid;
 
