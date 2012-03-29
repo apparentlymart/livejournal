@@ -59,7 +59,7 @@ body<=
         $ret .= qq{<input id="rename" type="submit" value="rename"/>};
         $ret .= '<br/>';
         $ret .= qq{<input type="button" value="cancel"
-                    onclick="javascript:new_window.location($LJ::SITEROOT . '/support/manage_tags.bml')"/>};
+                    onclick="javascript:window.location = '$LJ::SITEROOT/support/manage_tags.bml';"/>};
         $ret .= qq{<input type="hidden" value="$sptagid" name="sptagid"/>};
         $ret .= qq{<input type="hidden" value="$spcatid" name="spcatid"/>};
         $ret .= qq{<input type="hidden" value="1" name="renamed"/>};
