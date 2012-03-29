@@ -365,7 +365,7 @@ sub mogclient {
     unless ( $LJ::MogileFS{$domain} ) {
         require MogileFS::Client;
 
-        $LJ::MogileFS{$domain} = MogileFS::Client->new(
+        my $mogclient = MogileFS::Client->new(
             'domain'   => $domain,
             'root'     => $LJ::MOGILEFS_CONFIG{'root'},
             'hosts'    => $LJ::MOGILEFS_CONFIG{'hosts'},
@@ -373,18 +373,20 @@ sub mogclient {
             'timeout'  => $LJ::MOGILEFS_CONFIG{'timeout'} || 3,
         );
 
-        die "Could not initialize MogileFS" unless $LJ::MogileFS{$domain};
+        die 'Could not initialize MogileFS' unless $mogclient;
 
         # set preferred ip list if we have one
-        $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
+        $mogclient->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
 
         if (_using_blockwatch()) {
-            eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
+            eval { LJ::Blockwatch->setup_mogilefs_hooks($mogclient) };
 
             warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
                 if $@;
         }
+
+        $LJ::MogileFS{$domain} = $mogclient;
     }
 
     return $LJ::MogileFS{$domain};
