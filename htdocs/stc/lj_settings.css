@@ -155,5 +155,46 @@ DIV.lc_detect INPUT {
 				left:-99px;
 				}
 
+/* Manage playlist
+--------------------------- */
 
+.music-settings-manage-playlist,
+.music-playlist-action {
+	margin: 0 0 0 5px;
+	}
+	.music-settings-manage-playlist DD {
+		margin: 0;
+		}
+.music-settings-manage-playlist .music-settings-preloader {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	margin-bottom: -10px;
+	background: url(/img/preloader/preloader-blue-blue.gif?ver=1) no-repeat 0 0;
+	}
+#playlist_name {
+	font-weight: bold;
+	}
+.music-settings-manage-state-empty .music-playlist-loading,
+.music-settings-manage-state-empty .music-playlist-loaded,
+.music-settings-manage-state-empty .music-playlist-login-error,
+.music-settings-manage-state-empty .music-playlist-system-error,
+.music-settings-manage-state-loading .music-playlist-loaded,
+.music-settings-manage-state-loading .music-playlist-login-error,
+.music-settings-manage-state-loading .music-playlist-system-error,
+.music-settings-manage-state-loading .music-playlist-empty,
+.music-settings-manage-state-loaded .music-playlist-loading,
+.music-settings-manage-state-loaded .music-playlist-login-error,
+.music-settings-manage-state-loaded .music-playlist-system-error,
+.music-settings-manage-state-loaded .music-playlist-empty,
+.music-settings-manage-state-login-error .music-playlist-loading,
+.music-settings-manage-state-login-error .music-playlist-loaded,
+.music-settings-manage-state-login-error .music-playlist-system-error,
+.music-settings-manage-state-login-error .music-playlist-empty,
+.music-settings-manage-state-system-error .music-playlist-loading,
+.music-settings-manage-state-system-error .music-playlist-loaded,
+.music-settings-manage-state-system-error .music-playlist-login-error,
+.music-settings-manage-state-system-error .music-playlist-empty {
+	display: none;
+	}
 
