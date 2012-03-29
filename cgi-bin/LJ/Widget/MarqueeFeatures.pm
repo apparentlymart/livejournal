@@ -30,6 +30,16 @@ sub render_body {
             'widget.featureshowcase.also',
             'feature_showcase',
         ],
+        'majornotes_my' => [
+            'widget.majornotes_my.title',
+            'widget.majornotes_my.also',
+            'major_notes_my',
+        ],
+        'featureshowcase_my' => [
+            'widget.featureshowcase_my.title',
+            'widget.featureshowcase_my.also',
+            'feature_showcase_my',
+        ],
     };
 
     my $type = $opts{'type'} || 'marqueefeatures';
