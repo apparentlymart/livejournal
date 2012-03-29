@@ -3994,6 +3994,7 @@ sub getevents {
 
         if ($req->{'asxml'}) {
             my $tidy = LJ::Tidy->new();
+            $evt->{'subject'} = $tidy->clean( $evt->{'subject'} );
             $t->[1]  = $tidy->clean( $t->[1] );
         } 
 
