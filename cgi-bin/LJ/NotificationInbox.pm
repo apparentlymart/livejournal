@@ -6,7 +6,7 @@ package LJ::NotificationInbox;
 
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw (LJ::NotificationItem LJ::Event LJ::NotificationArchive);
+use Class::Autouse qw (LJ::NotificationItem LJ::Event LJ::NotificationArchive LJ::Event::InboxUserMessageRecvd);
 
 # constructor takes a $u
 sub new {
@@ -426,10 +426,29 @@ sub enqueue {
             or die $u->errstr;
     }
 
+    # send notification
+    $self->__send_notify( { 'u'         => $u,
+                            'journal_u' => LJ::want_user($evt->arg2),
+                            'msgid'     => $evt->arg1,
+                            'etypeid'   => $evt->etypeid, });
+
     # invalidate memcache
     $self->expire_cache;
 
     return LJ::NotificationItem->new($u, $qid);
+}
+
+sub __send_notify {
+    my ($self, $data) = @_;
+    my $etypeid = $data->{'etypeid'};
+
+    if (LJ::Event::UserMessageRecvd->etypeid == $etypeid) {
+        my $msgid       = $data->{'msgid'};
+        my $u           = $data->{'u'};
+        my $journal_u   = $data->{'journal_u'};
+
+        LJ::Event::InboxUserMessageRecvd->new($u, $msgid, $journal_u)->fire;
+    }
 }
 
 # return true if item is bookmarked
