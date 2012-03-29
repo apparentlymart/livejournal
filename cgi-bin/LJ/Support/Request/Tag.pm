@@ -523,7 +523,9 @@ sub drop_tags {
     my $dbh = LJ::get_db_writer();
 
     my $sptagids_cond;
-    if ($spcatids) {
+    if ($spcatids && @sptagids) {
+        warn LJ::D(@sptagids);
+
         my @spcatids = map { $_ + 0 } @$spcatids;
         my $spcatids_cond = join(',', @spcatids);
 
@@ -532,11 +534,11 @@ sub drop_tags {
             "SELECT sptagid FROM supporttag WHERE ".
             "sptagid IN ($sptagids_cond) AND spcatid IN ($spcatids_cond)"
         )};
-    }
 
-    $sptagids_cond = join(',', @sptagids);
-    $dbh->do("DELETE FROM supporttag WHERE sptagid IN ($sptagids_cond)");
-    $dbh->do("DELETE FROM supporttagmap WHERE sptagid IN ($sptagids_cond)");
+        $sptagids_cond = join(',', @sptagids);
+        $dbh->do("DELETE FROM supporttag WHERE sptagid IN ($sptagids_cond)");
+        $dbh->do("DELETE FROM supporttagmap WHERE sptagid IN ($sptagids_cond)");
+    }
 }
 
 1;
