@@ -350,6 +350,9 @@ sub trans {
     ## allow cross domain ajax for (l-).stat domain
     if ($host eq "stat.$LJ::DOMAIN"){
         LJ::Request->header_out('Access-Control-Allow-Origin' => '*');
+        ## The Access-Control-Allow-Methods header indicates, as part of the response to a preflight request, 
+        ## only GET is allowed.
+        LJ::Request->header_out('Access-Control-Allow-Methods' => 'GET'); 
     }
 
     # disable TRACE (so scripts on non-LJ domains can't invoke
