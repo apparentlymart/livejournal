@@ -1389,11 +1389,6 @@ sub getinbox
 
         $raw->{state} = $item->{state};
 
-        if ($req->{'asxml'} && $raw->{'body'}) {
-            my $tidy = LJ::Tidy->new();
-            $raw->{'body'} = $tidy->clean( $raw->{'body'} );
-        }
-
         push @res, { %$raw,
                      when   => $item->when_unixtime,
                      qid    => $item->qid,
