@@ -346,6 +346,18 @@ sub getpoll
     @questions = grep { $_->pollqid eq $pollqid } @questions if ($pollqid);
     return fail($err, 203, 'pollqid') unless(@questions);
 
+    if ($req->{'asxml'}) {
+        my $tidy = LJ::Tidy->new();
+
+        foreach my $question (@questions) {
+            if ($question->{text}) {
+                $question->{text} = $tidy->clean( $question->{text} );
+            }
+        }
+        $res->{'name'} = $tidy->clean( $res->{'name'} );
+    }
+
+
     # mode to show poll questions
     if($mode =~ /enter|all/) {
         # render_enter
@@ -373,14 +385,11 @@ sub getpoll
                                     $_;
                                 } map { delete $_->{pollqid}; $_ } $question->answers;
 
-            if ($req->{'asxml'} && $question->{text}) {
-                my $tidy = LJ::Tidy->new();
-                $question->{text} = $tidy->clean( $question->{text} );
-            }
-
             @{$res->{answers}{$question->pollqid}} = @answers;
         }
     }
+
+
     return $res;
 }
 
