@@ -5831,6 +5831,8 @@ talk.post.adult.none=none
 
 talk.post.change=change
 
+talk.post.change.back=change back
+
 talk.post.comments=Comments
 
 talk.post.comments.nocomments=disabled
@@ -5856,6 +5858,8 @@ talk.post.meta.tocommunity=to community
 talk.post.meta.username=Username
 
 talk.post.meta.password=Password
+
+talk.post.meta.postpone=Postpone until
 
 talk.post.meta.where=Post to
 
