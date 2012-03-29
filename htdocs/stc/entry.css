@@ -198,6 +198,7 @@
 				-ms-box-sizing: border-box;
 				box-sizing: border-box;
 				vertical-align: top;
+				*width: 70%;
 				}
 			#updateForm #metainfo LI .current-username {
 				line-height: 20px;
@@ -274,6 +275,8 @@
 				}
 			#updateForm #metainfo .entrydate-delayed.entrydate.entrydate-until .entrydate-title-until {
 				display: table-cell;
+				*display: inline;
+				*zoom: 1;
 				}
 			#updateForm #metainfo .entrydate .entrydate-wrap-date,
 			#updateForm #metainfo .entrydate .entrydate-wrap-post,
