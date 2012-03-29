@@ -110,15 +110,18 @@
 
 		if (!window.switchedRteOn) {
 			if (!CKEditor && CKEDITOR && CKEDITOR.env.isCompatible) {
-				$.ajax({
-					url: statPrefix + '/ck/contents.css?t=' + Site.version,
-					cache: true,
-					dataType: 'text',
-					success: function (data) {
-						CKEDITOR.styleText = data;
-					}
-				});
+				//opera does not support CORS as of versio 11.62, so we cannot request data from the other domain right now
+				// $.ajax({
+				// 	url: (jQuery.support.cors ? statPrefix : Site.siteroot) + '/ck/contents.css?t=' + Site.version,
+				// 	cache: true,
+				// 	dataType: 'text',
+				// 	xhrFields: { withCredentials: true },
+				// 	success: function (data) {
+				// 		CKEDITOR.styleText = data;
+				// 	}
+				// });
 
+				CKEDITOR.styleText = statPrefix + '/ck/contents.css?t=' + Site.version
 				CKEDITOR.basePath = statPrefix + '/ck/';
 				CKEDITOR.timestamp = Site.version;
 

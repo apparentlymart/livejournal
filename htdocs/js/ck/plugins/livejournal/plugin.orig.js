@@ -341,7 +341,7 @@
 					doc.open();
 					doc.write('<!DOCTYPE html>' +
 						'<html style="' + ljStyle + '">' +
-							'<head><style type="text/css">' + CKEDITOR.styleText + '</style></head>' +
+							'<head><link rel="stylesheet" href="' + CKEDITOR.styleText + '" /></head>' +
 							'<body scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>'
 								+ decodeURIComponent(frame.getAttribute('lj-content') || '') +
 							'</body>' +
