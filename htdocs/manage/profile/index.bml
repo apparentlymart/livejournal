@@ -709,7 +709,6 @@ body<=
             $ret .= "</dd>";
             $ret .= "</dl>";
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-empty"> You dont have any playlist, please go to <a href="http://www.trava.ru" target="_blank">trava</a> and do it )))</div>~;
-            $ret .= qq~<div class="music-settings-manage-playlist music-playlist-login-error"> You need to <a href="http://www.trava.ru" target="_blank">log in</a></div>~;
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-system-error"> <span class="music-playlist-action"> Failed to query data, please, <a href="#">try again</a> </span></div>~;
             $ret .= qq~</div>~;
 		    $ret .= "</td>";
