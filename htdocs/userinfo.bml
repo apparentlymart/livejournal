@@ -691,7 +691,7 @@
 
         $body .= "<ul class='rating-details'>";
 
-        if (ref $position eq 'HASH' && $position->{result}->{position} < 2000) {
+        if (ref $position eq 'HASH') {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::commafy(int($position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
@@ -701,7 +701,7 @@
                                                      "?country=cyr&askname=" . $u->username . "#ask_position"}) .
                          "</li>";
         }
-        if (ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) {
+        if (ref $ua_position eq 'HASH') {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($ua_position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::commafy(int($ua_position->{result}->{value}/1000));
                 $body .= "<li class='rating-place'>" .
@@ -711,7 +711,7 @@
                                                         "?country=ua&askname=" . $u->username . "#ask_position"}) .
                          "</li>";
         }
-        if ((ref $ua_position eq 'HASH' && $ua_position->{result}->{position} < 2000) || (ref $position eq 'HASH' && $position->{result}->{position} < 2000)) {
+        if ((ref $ua_position eq 'HASH') || (ref $position eq 'HASH')) {
                 $body .= "<li class='rating-social-capital'>" .
                          $soc_image .
                          LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => $soc_capital}) . ' ' .
