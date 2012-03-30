@@ -736,7 +736,7 @@ sub clean {
             }
             elsif ($tag eq "lj-app")
             {
-                next TOKEN if $LJ::DISABLED{'userapps'};
+                next TOKEN unless LJ::is_enabled('userapps');
                 my %app_attr = map { $_ => Encode::encode_utf8($attr->{$_}) } keys %$attr;
                 my $app = LJ::UserApps->get_application( id => delete $app_attr{id}, key => delete $app_attr{key} );
                 next TOKEN unless $app && $app->can_show_restricted;
