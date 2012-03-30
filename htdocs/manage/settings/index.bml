@@ -227,7 +227,7 @@ body<=
     }
 
     if ( $POST{'ajax'} ) {
-        BML::finish();
+        BML::finish_suppress_all();
         return;
     }
 
