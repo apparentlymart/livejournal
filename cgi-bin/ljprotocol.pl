@@ -122,7 +122,7 @@ my %e = (
      "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
      "325" => [ E_PERM, "Can't edit that comment."],
      "326" => [ E_PERM, "Can't delete specified comment."],
-
+     "327" => [ E_PERM, "Selected comment has been already deleted"],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -795,7 +795,8 @@ sub deletecomments {
 
     my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
 
-    foreach my $comm (@comments) { 
+    foreach my $comm (@comments) {
+        return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
     }   
 
