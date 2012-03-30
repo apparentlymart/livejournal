@@ -174,6 +174,9 @@ DIV.lc_detect INPUT {
 	margin-bottom: -10px;
 	background: url(/img/preloader/preloader-blue-blue.gif?ver=1) no-repeat 0 0;
 	}
+.music-playlist-items TD {
+	padding: 0;
+	}
 #playlist_name {
 	font-weight: bold;
 	}
