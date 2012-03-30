@@ -364,7 +364,7 @@ jQuery(document).click(function(e)
 						var videoCollapes = ev.target.className.indexOf('collapse') !== -1,
 							id = this.id.replace('LJWidget_', '') + '-',
 							fullid = id + this.getAttribute('data-cid'),
-							cookie = Cookie('clpsd') || '',
+							cookie = decodeURIComponent(Cookie('clpsd') || ''),
 							cookie_ids = cookie ? cookie.split(':') : [];
 
 						jQuery(this).toggleClass('appwidget-prop-collapsed', videoCollapes);
