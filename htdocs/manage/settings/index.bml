@@ -226,6 +226,11 @@ body<=
         }
     }
 
+    if ( $POST{'ajax'} ) {
+        BML::finish();
+        return;
+    }
+
     my $set;
 
     if ($given_cat eq "notifications") {
