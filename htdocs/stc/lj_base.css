@@ -4008,10 +4008,10 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	#js .lj-spoiler .lj-spoiler-body {
 		display: none;
 		}
-	#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-head {
+	#js .lj-spoiler.lj-spoiler-opened > .lj-spoiler-head {
 		display: none;
 		}
-	#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body {
+	#js .lj-spoiler.lj-spoiler-opened  > .lj-spoiler-body {
 		display: block;
 		}
 		#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body BR:first-child,
