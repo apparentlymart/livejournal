@@ -76,6 +76,8 @@ LiveJournal.register_hook('init_settings', function ($) {
 	}
 
 	function saveChanges (data, success, error) {
+		data.ajax = true;
+
 		$.ajax({
 			type: 'POST',
 			url: hiddenField.closest('form').attr('action'),
