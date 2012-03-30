@@ -31,6 +31,8 @@ LiveJournal.register_hook('init_settings', function ($) {
 });
 
 LiveJournal.register_hook('init_settings', function ($) {
+	var uIdInputName = 'LJ__Setting__Music_LJ__Setting__Music__Trava_trava_uid';
+
 	var selectors = {
 		Trava: '#LJ__Setting__Music__Trava_',
 		LastFM: '#LJ__Setting__Music__LastFM_',
@@ -38,7 +40,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 		disconnectLink: '.music-settings-disconnect',
 		userName: '.music-settings-username',
 		musicSelect: 'select[name="music_select"]',
-		uIdInput: 'input[name="LJ__Setting__Music_LJ__Setting__Music__Trava_trava_uid"]'
+		uIdInput: 'input[name="' + uIdInputName + '"]'
 	};
 
 	var classNames = {
@@ -55,6 +57,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 
 	var notLoginID = 1;
 	var allClasses = [];
+	var UID = hiddenField.val();
 
 	for (var name in classNames) {
 		if (classNames.hasOwnProperty(name)) {
@@ -72,15 +75,35 @@ LiveJournal.register_hook('init_settings', function ($) {
 		$(currentID).show();
 	}
 
+	function saveChanges (data, success, error) {
+		$.ajax({
+			type: 'POST',
+			url: hiddenField.closest('form').attr('action'),
+			data: data,
+			success: success,
+			error: error,
+			dataType: 'text'
+		});
+	}
+
 	musicSelect.bind('change', onChangesMusic);
 
-	travaElement.trava()
+	travaElement.trava({
+			uid: UID
+		})
 		.bind('travalogin', function (evt, data) {
 			if (data) {
 				hiddenField.val(data.uid);
 
 				if (data.uid !== notLoginID) {
-					travaElement.trava('getUserInfo');
+					var formData = {};
+					formData[uIdInputName] = data.uid;
+
+					saveChanges(formData, function () {
+						travaElement.removeClass(classNames.allClasses).addClass(classNames.login).trava('getUserInfo');
+					}, function () {
+						travaElement.removeClass(classNames.allClasses).addClass(classNames.error);
+					});
 				} else {
 					travaElement
 						.removeClass(classNames.allClasses)
@@ -95,10 +118,6 @@ LiveJournal.register_hook('init_settings', function ($) {
 		.bind('travauserinfo', function (evt, data) {
 			if (data) {
 				userName.html(data.user.name || data.user.nickname);
-
-				travaElement
-					.removeClass(classNames.allClasses)
-					.addClass(classNames.login);
 			}
 	});
 
@@ -113,11 +132,22 @@ LiveJournal.register_hook('init_settings', function ($) {
 		.delegate(selectors.disconnectLink, 'click', function (evt) {
 			evt.preventDefault();
 
-			hiddenField.val(notLoginID);
-			travaElement.removeClass(classNames.allClasses);
+			var formData = {};
+			formData[uIdInputName] = 1;
+
+			saveChanges(formData, function () {
+				hiddenField.val(notLoginID);
+				travaElement.removeClass(classNames.allClasses);
+			}, function () {
+				travaElement.removeClass(classNames.allClasses).addClass(classNames.connect);
+			});
 		});
 
 	onChangesMusic.call(musicSelect[0]);
+
+	if (UID !== notLoginID) {
+		travaElement.trava('getUserInfo');
+	}
 });
 
 LiveJournal.register_hook('page_load', function () {
