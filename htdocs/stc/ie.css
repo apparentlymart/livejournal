@@ -584,7 +584,10 @@ __________________________________________*/
 .b-pics-submit-options {
     width: 100% !important;
     }
-        
+*:first-child+html .b-pics-list-albums-selection {
+	bottom: -1px;
+	left: 62px;
+	}
 /* Ratings */
 .rate-posts .selfpromo .voting .vote-value A {
 	top: 0;
