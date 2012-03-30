@@ -448,7 +448,7 @@ LiveJournal.injectScript = function(url, params, parent) {
 	}
 };
 
-LiveJournal.getLocalizedStr = function(key, dict) {
+LiveJournal.getLocalizedStr = function(key, dict, def) {
 	dict = dict || {};
 	var str = '';
 	if (key in Site.ml_text) {
@@ -458,7 +458,7 @@ LiveJournal.getLocalizedStr = function(key, dict) {
 			str = str.replace('%' + tmpl + '%', dict[ tmpl ]);
 		}
 	} else {
-		str = '[' + key + ']';
+		str = def || '[' + key + ']';
 	}
 
 	return str;
@@ -568,7 +568,7 @@ LiveJournal.JSON = function() {
 		return '';
 	}
 
-	return {
+	return window.JSON || {
 		'stringify': stringify,
 		'parse': function(text) {
 			// Parsing happens in three stages. In the first stage, we run the text against

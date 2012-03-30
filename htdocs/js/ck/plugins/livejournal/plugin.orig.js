@@ -1394,8 +1394,14 @@
 						element.name = 'lj:wishlist';
 					},
 					'lj-template': function(element) {
-						element.name = 'lj:template';
-						element.children.length = 0;
+						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
+						fakeElement.attributes['lj-class'] = 'lj-template';
+						fakeElement.attributes['class'] = 'lj-template-wrap';
+						fakeElement.attributes['frameBorder'] = 0;
+						fakeElement.attributes['allowTransparency'] = 'true';
+						fakeElement.attributes['lj-attributes'] = LiveJournal.JSON.stringify(element.attributes);
+
+						return fakeElement;
 					},
 					'lj-cut': function (element) {
 						createDoubleFrame(element, 'lj-cut', 'LJCut');
@@ -1513,7 +1519,11 @@
 								newElement = new CKEDITOR.htmlParser.element('lj-repost');
 								newElement.attributes.button = element.attributes['lj-button'];
 								newElement.children = new CKEDITOR.htmlParser.fragment.fromHtml(element.attributes['lj-text']).children;
-
+							break;
+							case 'lj-template':
+								newElement = new CKEDITOR.htmlParser.element('lj-template');
+								newElement.attributes = LiveJournal.JSON.parse(element.attributes['lj-attributes'].replace(/&quot;/g, '"'));
+								newElement.isOptionalClose = newElement.isEmpty = true;
 							break;
 							case 'lj-spoiler':
 								isCanBeNested = true;
@@ -1593,10 +1603,6 @@
 						if (!element.children.length) {
 							return false;
 						}
-					},
-					'lj:template': function(element) {
-						element.name = 'lj-template';
-						element.isOptionalClose = element.isEmpty = true;
 					},
 					'lj:raw': function(element) {
 						element.name = 'lj-raw';
