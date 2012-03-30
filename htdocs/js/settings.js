@@ -76,7 +76,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 	}
 
 	function saveChanges (data, success, error) {
-		data.ajax = true;
+		data.ajax = 1;
 
 		$.ajax({
 			type: 'POST',
@@ -128,6 +128,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 			evt.preventDefault();
 
 			travaElement
+				.removeClass(classNames.allClasses)
 				.addClass(classNames.loading)
 				.trava('login');
 		})
@@ -147,7 +148,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 
 	onChangesMusic.call(musicSelect[0]);
 
-	if (UID !== notLoginID) {
+	if (Number(UID) !== notLoginID) {
 		travaElement.trava('getUserInfo');
 	}
 });
