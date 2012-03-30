@@ -58,6 +58,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 	var notLoginID = 1;
 	var allClasses = [];
 	var UID = hiddenField.val();
+	var authForm = $('input[name="lj_form_auth"]').val();
 
 	for (var name in classNames) {
 		if (classNames.hasOwnProperty(name)) {
@@ -77,6 +78,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 
 	function saveChanges (data, success, error) {
 		data.ajax = 1;
+		data.lj_form_auth = authForm;
 
 		$.ajax({
 			type: 'POST',
