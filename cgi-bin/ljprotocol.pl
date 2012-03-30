@@ -1245,17 +1245,17 @@ sub getfriendspage
         LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, get_video_id => 1) if $req->{get_video_ids};
         LJ::Poll->expand_entry(\$h{event_raw}, getpolls => 1, viewer => $u ) if $req->{get_polls};
 
+        if ($req->{'asxml'}) {
+            my $tidy = LJ::Tidy->new();
+            $h{event_raw} = $tidy->clean( $h{event_raw} );
+        }
+
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, edit => 1) if $req->{view} eq 'stored';
         } elsif ($req->{parseljtags}) {
             $h{event_raw} = LJ::convert_lj_tags_to_links(
                 event => $h{event_raw},
                 embed_url => $entry->url)
-        }
-
-        if ($req->{'asxml'}) {
-            my $tidy = LJ::Tidy->new();
-            $h{event_raw} = $tidy->clean( $h{event_raw} );
         }
 
         #userpic
