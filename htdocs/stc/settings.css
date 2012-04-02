@@ -1039,6 +1039,7 @@
 	}
 	#LJ__Setting__Music__Trava_ A {
 		cursor: pointer;
+		outline: none;
 		text-decoration: none;
 		color: blue;
 		}		
