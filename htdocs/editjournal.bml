@@ -562,7 +562,8 @@ body<=
 
             # add property for current music button displaying if last.fm user specified
             $entry->{prop_last_fm_user} = $u_for_entry->prop('last_fm_user');
-            $entry->{prop_copyright} = $entry_obj->prop('copyright') || $remote->prop('default_copyright') || 'P';
+            $entry->{prop_trava_user}   = $remote->prop('trava_uid') if $remote;
+            $entry->{prop_copyright}    = $entry_obj->prop('copyright') || $remote->prop('default_copyright') || 'P';
 
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
             $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,

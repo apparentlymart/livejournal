@@ -114,7 +114,7 @@ sub should_show_lastfm {
 sub should_show_trava {
     my ($self) = @_;
     return 0 unless LJ::Setting::Music::Trava->good_ip;
-    return $self->opts->{'prop_trava_user'} > 1 ? 1 : 0;
+    return $self->opts->{'prop_last_fm_user'} ? 0 : 1;
 }
 
 sub tabindex {
