@@ -1153,11 +1153,11 @@ sub clean {
                     # don't use placeholders for small images
                     if ( $opts->{'img_placeholders'} ) {
                         if ( exists $hash->{style} ) {
-                            if ( $hash->{style} =~ /width\:\s*(\d+)(?:px)?\;/i ) {
+                            if ( $hash->{style} =~ /[^\-]width\:\s*(\d+)(?:px)?\;/i ) {
                                 $hash->{width} = $1;
                             }
 
-                            if ( $hash->{style} =~ /height\:\s*(\d+)(?:px)?\;/i ) {
+                            if ( $hash->{style} =~ /[^\-]height\:\s*(\d+)(?:px)?\;/i ) {
                                 $hash->{height} = $1;
                             }
                         }
