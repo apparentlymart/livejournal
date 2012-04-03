@@ -1027,6 +1027,17 @@
 
 /* Music settings */
 
+.music-settings-options {
+	border-collapse: collapse;
+	}
+	.music-settings-options TD {
+		padding: 0;
+		border: 0;
+		vertical-align: top;
+		}
+	.music-settings-options .music-settings-site-list {
+		width: 10%;
+		}
 #LJ__Setting__Music__LastFM_,
 #LJ__Setting__Music__Trava_ {
 	display: inline-block;
