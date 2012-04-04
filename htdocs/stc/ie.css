@@ -595,10 +595,12 @@ __________________________________________*/
 #updateForm #metainfo LI .title {
 	float: left;
 	min-width: 8.5em;
+	white-space: normal;
 	}
 #updateForm #metainfo LI .wrap {
 	overflow: hidden;
 	zoom: 1;
+	*width: 60%;
 	}
 #updateForm #metainfo LI.pkg {
 	display: block;
