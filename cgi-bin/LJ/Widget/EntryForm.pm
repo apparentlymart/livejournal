@@ -1357,9 +1357,17 @@ sub render_options_block {
     }
 
     $out .= "</ul>";
-    $out .= $self->wrap_js(q~
-        jQuery('#entryform-music-wrapper').trava().trava('getNowListen');
-    ~) if $self->should_show_trava;
+
+    if ( $opts->{'mode'} eq "edit" ) {
+        $out .= $self->wrap_js(q~
+            jQuery('#entryform-music-wrapper').trava();
+        ~) if $self->should_show_trava;
+    }
+    else {
+        $out .= $self->wrap_js(q~
+            jQuery('#entryform-music-wrapper').trava().trava('getNowListen');
+        ~) if $self->should_show_trava;
+    }
 
     return $out;
 }
