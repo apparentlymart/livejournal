@@ -42,7 +42,8 @@ body<=
     my $viewsome = !!$is_admin;
     my $viewall  = ($can_viewall && $GET{'viewall'} == 1);
 
-    if ($viewall) {
+    if ($viewalli && $usejournal_u) {
+        
         LJ::statushistory_add( $usejournal_u->userid,
                                $remote->userid,
                                "viewall",
@@ -184,6 +185,7 @@ body<=
         $ret .= '</a>';
         $ret .="</div>";
     }
+
     $ret .= $entry_chooser->( \@recent_entries,
                                 first_page   => $skip ? 0 : 1,
                                 prev         => $skip > $items_per_page ? $skip - $items_per_page : 0,
