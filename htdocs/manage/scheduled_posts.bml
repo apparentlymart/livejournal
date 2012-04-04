@@ -6,6 +6,7 @@ body<=
 <?_code
 {
     use strict;
+    use warnings;
 #line 7
 
     LJ::need_res(qw(
@@ -42,7 +43,7 @@ body<=
     my $viewsome = !!$is_admin;
     my $viewall  = ($can_viewall && $GET{'viewall'} == 1);
 
-    if ($viewalli && $usejournal_u) {
+    if ($viewall && $usejournal_u) {
         
         LJ::statushistory_add( $usejournal_u->userid,
                                $remote->userid,
