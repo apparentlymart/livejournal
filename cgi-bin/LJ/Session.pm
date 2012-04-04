@@ -895,6 +895,19 @@ sub clear_master_cookie {
                path            => '/',
                delete          => 1);
 
+    my $curl = _current_url();
+    if ( $class->domain_journal($curl) eq '__external' ) {
+        $curl =~ m|^https?://(.+?)/|i;
+        my $domain = $1;
+
+        set_cookie('ljdomsess.__external'
+                                   => "",
+                   domain          => $domain,
+                   path            => '/',
+                   delete          => 1);
+    }
+
+
     # set fb global cookie
     if ($LJ::FB_SITEROOT) {
         my $fb_cookie = fb_cookie();
