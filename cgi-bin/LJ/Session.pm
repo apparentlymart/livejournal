@@ -619,6 +619,7 @@ sub session_from_cookies {
 sub session_from_external_cookie {
     my $class = shift;
     my $opts = ref $_[0] ? shift() : {};
+    my $expires = $LJ::DOMSESS_EXPIRATION || 0; # session-cookie only
 
     my $no_session = sub {
         my $reason = shift;
@@ -630,7 +631,7 @@ sub session_from_external_cookie {
             my $domain = $1;
 
             set_cookie(
-                'ljdomsess.__external' => '',
+                'ljdomsess.__external' => $sess->loggedin_cookie_string,
                 path       => '/',
                 http_only  => 1,
                 domain     => $domain,
