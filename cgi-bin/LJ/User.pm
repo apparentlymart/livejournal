@@ -153,7 +153,9 @@ sub create_personal {
         }
     }
     # if we have initial friends for new accounts, add them.
-    my @initial_friends = LJ::SUP->is_sup_enabled($u) ? @LJ::SUP_INITIAL_FRIENDS : @LJ::INITIAL_FRIENDS;
+    my @initial_friends = LJ::SUP->is_sup_enabled($u) 
+            ? (LJ::GeoLocation->ip_country eq 'UA' ? @LJ::UA_INITIAL_FRIENDS : @LJ::SUP_INITIAL_FRIENDS)
+            : @LJ::INITIAL_FRIENDS;
     foreach my $friend (@initial_friends) {
         my $friendid = LJ::get_userid($friend);
         LJ::add_friend($u->id, $friendid) if $friendid;
