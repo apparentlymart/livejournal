@@ -4190,3 +4190,10 @@ BODY div .b-helplink:active {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#DA0000', endColorstr='#970000',GradientType=0 );
 	}
 
+
+/* LJ-CUT link  
+--------------------------------------*/
+.ljcut-link-scissors {
+    font-size: 2em;
+    }
+
