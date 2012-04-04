@@ -998,11 +998,11 @@ td.tabs {
 		vertical-align: middle;
 		}
 	.b-music-item-header DD.b-music-item-header-title {
-		width: 130px;
+		width: 110px;
 		}
 	.b-music-item-header DD.b-music-list-searching-inner {
-		width: 220px !important;
-		min-width: 220px !important;
+		width: 240px !important;
+		min-width: 240px !important;
 		text-align: right;
 		}
 	.b-music-item-header DT,
