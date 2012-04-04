@@ -327,6 +327,22 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,);
 
+
+    my $curl = _current_url();
+    
+    if ( $sess->domain_journal($curl) eq '__external' ) {
+        $curl =~ m|^https?://(.+?)/|i;
+        my $domain = $1;
+        
+        set_cookie('ljdomsess.__external'
+                                   => $sess->loggedin_cookie_string,
+                   domain          => $domain,
+                   path            => '/',
+                   http_only       => 1,
+                   @expires,);
+    }
+
+
     $sess->owner->preload_props('schemepref', 'browselang');
 
     if (my $scheme = $sess->owner->prop('schemepref')) {
