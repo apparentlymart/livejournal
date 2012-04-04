@@ -98,11 +98,20 @@ my %LN_ID   = ();  # id -> { ..., ..., 'children' => [ $ids, .. ] }
 my %LN_CODE = ();  # $code -> ^^^^
 my $LAST_ERROR;
 my %TXT_CACHE;
+my $CACHE_CLEAN_TIME = 0;
 
 if ( $LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA ) {
-    our $_hook_is_installed;
-    LJ::register_hook( 'start_request', sub { %TXT_CACHE = (); } )
-        unless $_hook_is_installed++;
+    LJ::register_hook( 'start_request' => sub { %TXT_CACHE = (); } );
+} else {
+    LJ::register_hook( 'start_request' => sub {
+        return unless time > $CACHE_CLEAN_TIME;
+        %TXT_CACHE = ();
+
+        # set up cache expiration in the next 30 to 60 minutes, randomly;
+        # this is relevant in worker processes that run for very long time
+        # without being restarted
+        $CACHE_CLEAN_TIME = time + 1800 + int( rand(1800) );
+    } );
 }
 
 sub last_error {
