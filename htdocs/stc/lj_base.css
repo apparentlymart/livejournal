@@ -4194,6 +4194,8 @@ BODY div .b-helplink:active {
 /* LJ-CUT link  
 --------------------------------------*/
 .ljcut-link-scissors {
+    padding: 0 2px 0 0;
+    vertical-align: middle;
     font-size: 2em;
     }
 
