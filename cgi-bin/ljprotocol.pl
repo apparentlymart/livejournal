@@ -121,7 +121,7 @@ my %e = (
      "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
      "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
      "325" => [ E_PERM, "Can't edit that comment."],
-     "326" => [ E_PERM, "Can't delete specified comment."],
+     "326" => [ E_PERM, "Can't delete specified comment"],
      "327" => [ E_PERM, "Selected comment has been already deleted"],
 
      # Limit errors
@@ -809,7 +809,7 @@ sub deletecomments {
             my @comment_tree = $comment->entry->comment_list;
             my @children = ($comment);
             while(my $item = shift @children){
-                return fail($err, 326, 'dtalkid:'.$item->dtalkid) unless $item->user_can_delete($u);
+                return fail($err, 326, 'Thread contains somebody else\'s comment. dtalkid:'.$item->dtalkid) unless $item->user_can_delete($u);
                 $map_delete{$item->dtalkid} = $item;
                 push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
             }
