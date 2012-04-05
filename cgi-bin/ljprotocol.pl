@@ -2898,8 +2898,9 @@ sub editevent {
     # can't edit in deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
 
+    my $dbh = LJ::get_db_writer();
     my $dbcm = LJ::get_cluster_master($uowner);
-    return fail($err,306) unless $dbcm;
+    return fail($err,306) unless $dbcm && $dbh;
 
     # can't specify both a custom security and 'friends-only'
     return fail($err, 203, "Invalid friends group security set.")
@@ -3074,6 +3075,10 @@ sub editevent {
         if ( $itemid == $uowner->get_sticky_entry_id() ) {
             $uowner->remove_sticky_entry_id();
         }
+	
+	$dbh->do("UPDATE userusage SET timeupdate=NOW() ".
+	         "WHERE userid=$ownerid");
+	LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
         return $res;
     }
@@ -3329,6 +3334,10 @@ sub editevent {
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
         $res->{'ditemid'} = $itemid * 256 + $oldevent->{'anum'};
     }
+    
+    $dbh->do("UPDATE userusage SET timeupdate=NOW() ".
+             "WHERE userid=$ownerid");
+    LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
     my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
     LJ::EventLogRecord::EditEntry->new($entry)->fire;
