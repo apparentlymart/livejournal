@@ -1060,9 +1060,9 @@ sub editcomment {
     my $parent = $comment->parent;
     return fail($err, 324) if $parent && $parent->{state} eq 'F';
 
-    my $new_comment = { map {$_ => $req->{$_}} grep { $req->{$_} } qw( picture_keyword preformat subject body) };
+    my $new_comment = { map {$_ => $req->{$_}} grep { defined $req->{$_} } qw( picture_keyword preformat subject body) };
     $new_comment->{editid} = $req->{dtalkid};
-    $new_comment->{body} = $comment->body_orig() unless(defined $new_comment->{body});
+    $new_comment->{body} = $comment->body_orig() unless($new_comment->{body}); # body can't be empty!
     $new_comment->{subject} = $comment->subject_orig() unless(defined $new_comment->{subject});
     $new_comment->{preformat} = $comment->prop('opt_preformatted') unless(defined $new_comment->{preformat});
 
