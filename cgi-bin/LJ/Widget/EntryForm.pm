@@ -1154,7 +1154,7 @@ sub render_options_block {
                 'class'     => 'text',
                 'size'      => '35',
                 'maxlength' => LJ::std_max_length(),
-                'tabindex'  => '180',
+                'tabindex'  => '175',
                 $self->lastfm_geolocation_width,
             });
 
@@ -1167,7 +1167,7 @@ sub render_options_block {
                     <input
                         id="entryform-music-search"
                         type="button" value="$button_label"
-                        tabindex="175"
+                        tabindex="180"
                         style="float: left"
                     >
                     <input

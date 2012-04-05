@@ -941,15 +941,19 @@ td.tabs {
 	top: 20px;
 	right: 20px;
 	}
-.b-music-list-logo {
+.b-music-list-side {
 	overflow: hidden;
 	margin: 12px 0;
 	}
-	.b-music-list-logo A {
+	.b-music-list-logo {
 		display: inline-block;
 		width: 96px;
 		height: 24px;
 		background: url(/img/trava-logo.png?ver=1) 0 0 no-repeat;
+		}
+	.b-music-popup-searching {
+		float: right;
+		margin-top: 3px;
 		}
 .b-music-list-searching-wrapper {
 	position: relative;
