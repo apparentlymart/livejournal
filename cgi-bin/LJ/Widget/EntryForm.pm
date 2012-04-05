@@ -1731,6 +1731,7 @@ sub render_body {
         /update.bml.music.settings.search
         /update.bml.msg.newalbums
         /update.bml.msg.newalbums.organise
+        entryform.music.search
     ) );
 
     # usejournal has no point if you're trying to use the account you're logged
