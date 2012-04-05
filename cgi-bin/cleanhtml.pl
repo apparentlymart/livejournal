@@ -704,7 +704,7 @@ sub clean {
                     my $etext = $link_text->();
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<div>" if $tag eq "div";
-                    $newdata .= qq|<b class="ljcut-link"><span class="ljcut-link-scissors">&#9988;</span>&#8943;&nbsp;<a href="$url#cutid$cutcount">$etext</a>&nbsp;&#8943;</b>|;
+                    $newdata .= qq|<b class="ljcut-link">&#9986;&middot;&middot;&middot;<a href="$url#cutid$cutcount">$etext</a>&middot;&middot;&middot;</b>|;
                     $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
