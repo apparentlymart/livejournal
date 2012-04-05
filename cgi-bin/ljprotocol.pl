@@ -796,6 +796,7 @@ sub deletecomments {
     my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
 
     foreach my $comm (@comments) {
+	return fail($err, 203, "dtalkid (specified comment doesn't exist in requested journal)") unless $comm->valid;
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
     }   
