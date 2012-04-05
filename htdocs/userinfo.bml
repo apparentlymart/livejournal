@@ -1683,7 +1683,7 @@
        ) {
         my $res = '';
 
-        if ( $playlist_id ) {
+        if ( $playlist_id > -1 ) {
             $res .= qq~<object width="450" height="158" data="http://trava.ru/swfs/TravaPlaylistWidget.swf" type="application/x-shockwave-flash">
                 <param name="movie" value="http://trava.ru/swfs/TravaPlaylistWidget.swf" />
                 <param value="transparent" name="wmode">
