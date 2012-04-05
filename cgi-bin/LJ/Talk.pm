@@ -1654,7 +1654,6 @@ sub load_comments
         $post->{'subject'} = $subjects_loaded->{$talkid}?
             $subjects_loaded->{$talkid}->[0]:
             $no_subject;
-        $users_to_load{$post->{'posterid'}} ||= 0.5;  # only care about username
     } 
 
     # load meta-data
