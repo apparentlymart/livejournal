@@ -9,7 +9,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 		confirm_msg: LiveJournal.getLocalizedStr('.form.confirm', null, 'Save your changes?'),
 		form_changed: false,
 		navclickSave: function(e) {
-			if (!Settings.form_changed || e.isDefaultPrevented()) {
+			if (!Settings.form_changed || e.isDefaultPrevented() || this.target === '_blank') {
 				return;
 			}
 
@@ -93,6 +93,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 	musicSelect.bind('change', onChangesMusic);
 
 	travaElement.trava({
+			searchControl: false,
 			uid: UID
 		})
 		.bind('travalogin', function (evt, data) {
