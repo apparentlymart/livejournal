@@ -454,11 +454,11 @@ body<=
             my $curkey = "talk.curname_" . $_;
             my $curname = BML::ml($curkey);
             $curname = "<b>Current $_:</b>" unless $curname;
-         
+
             $ret .= "<tr><td align=right>$curname</td>";
-         
+
             if ($_ eq 'Music') {
-                $ret .= "<td>" . LJ::LastFM::format_current_music_string($current{$_}) . "</td></tr>\n";
+                $ret .= "<td>" . LJ::Setting::Music::format_current_music_string($current{$_}) . "</td></tr>\n";
             } else {
                 $ret .= "<td>$current{$_}</td></tr>\n";
             }
