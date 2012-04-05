@@ -1621,7 +1621,9 @@ sub load_comments
 
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
+        $users_to_load{$posts->{$cfc}->{'posterid'}} ||= 0.5;  # only care about username
         next unless defined $children->{$cfc};
+
         foreach my $child (@{$children->{$cfc}}) {
             if ( keys %posts_to_load < $page_size or $opts->{'expand_all'} ) {
                 $posts_to_load{$child} = 1;
