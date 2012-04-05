@@ -806,6 +806,14 @@ userproplist.opt_commentsstylemine:
   multihomed: 0
   prettyname: Comments always in my Style
 
+userproplist.opt_comment_fold_disabled:
+  cldversion: 8
+  datatype: bool 
+  des: 0: disable comment fold for user
+  indexed: 0
+  multihomed: 0
+  prettyname: Comments always in my Style
+
 userproplist.opt_stylemine:
   cldversion: 4
   datatype: bool
