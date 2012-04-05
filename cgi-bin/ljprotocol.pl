@@ -811,7 +811,7 @@ sub deletecomments {
             my @children = ($comment);
             while(my $item = shift @children){
                 return fail($err, 326, 'Thread contains somebody else\'s comment. dtalkid:'.$item->dtalkid) unless $item->user_can_delete($u);
-                $map_delete{$item->dtalkid} = $item;
+                $map_delete{$item->dtalkid} = $item unless $item->is_deleted;
                 push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
             }
         }
