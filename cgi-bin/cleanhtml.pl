@@ -1258,6 +1258,23 @@ sub clean {
                    push @$attrs => 'type' unless grep { $_ eq 'type' } @$attrs;
                 }
 
+                # LJSV-2152: When comment has embed in it - bubbles should be above buttons
+                if ( $tag eq 'iframe' and $hash->{'src'} ) {
+                    foreach my $host (keys %LJ::WHITELIST_VIDEO_HOSTS) {
+                        if ( index $host, $hash->{'src'} ) {
+                            if ( $hash->{'src'} !~ m!wmode=opaque!i ) {
+                                if ( $hash->{'src'} =~ m!\?! ) {
+                                    $hash->{'src'} .= '&wmode=opaque';
+                                } else {
+                                    $hash->{'src'} .= '?wmode=opaque';
+                                }
+                            }
+
+                            last;
+                        }
+                    }
+                }
+
                 # Through the xsl namespace in XML, it is possible to embed scripting lanaguages
                 # as elements which will then be executed by the browser.  Combining this with
                 # customview.cgi makes it very easy for someone to replace their entire journal
