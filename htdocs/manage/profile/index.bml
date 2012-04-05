@@ -692,6 +692,8 @@ body<=
             # if not yet selected
             $playlist_id = 0 unless defined $playlist_id;
 
+            LJ::need_string('.pl.nothingselected');
+
             $ret .= qq~<a name="userplaylist"></a><div class='section_head'>$ML{'.section.playlist'}</div>\n~;
 
             $ret .= "<table class='field_block'>\n";
@@ -709,7 +711,7 @@ body<=
             $ret .= qq~</tr>~;
             $ret .= qq~<tr>~;
             $ret .= qq~<td>~ . $ML{'.pl.change'}. qq~</td><td>~;
-            $ret .= qq~<select id="music-settings-playlist-selection"></select><button id="music-settings-playlist-confirm">~ . $ML{'.pl.select'}. qq~</button></td>~;
+            $ret .= qq~<select id="music-settings-playlist-selection"><option value="-1">$ML{'.pl.shownothing'}</option></select><button id="music-settings-playlist-confirm">~ . $ML{'.pl.select'}. qq~</button></td>~;
             $ret .= qq~</table>~;                    
             $ret .= "</div>";
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-empty">~ . $ML{'.pl.create'}. qq~<a href="http://www.trava.ru" target="_blank">trava.ru</a></div>~;
