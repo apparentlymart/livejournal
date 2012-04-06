@@ -18,6 +18,7 @@ sub render_body {
     my %opts = @_;
 
     my $post = delete $opts{post};
+    my $ret_opts = delete $opts{ret_opts};
 
     croak "invalid arguments: " . join(",", keys %opts)
         if %opts;
