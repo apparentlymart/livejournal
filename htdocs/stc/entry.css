@@ -946,7 +946,7 @@ td.tabs {
 	margin: 12px 0;
 	}
 	.b-music-list-logo {
-		display: inline-block;
+		float: left;
 		width: 96px;
 		height: 24px;
 		background: url(/img/trava-logo.png?ver=1) 0 0 no-repeat;
@@ -998,36 +998,26 @@ td.tabs {
 	.b-music-item DD {
 		display: inline-block;
 		margin: 0;
-		padding: 5px 0 2px 0;
 		vertical-align: middle;
-		}
-	.b-music-item-header DD.b-music-item-header-title {
-		width: 110px;
-		}
-	.b-music-item-header DD.b-music-list-searching-inner {
-		width: 240px !important;
-		min-width: 240px !important;
-		text-align: right;
 		}
 	.b-music-item-header DT,
 	.b-music-item-header DD {
 		width: 200px;
 		}
-		.b-music-item-header DT SPAN,
-		.b-music-item-header DD SPAN {
-			padding: 0 3px;
-			}
 	.b-music-item-artist,
 	.b-music-item-album,
 	.b-music-item-track {
-		width: 200px;		
+		width: 200px;
 		color: #3f5f9e;
 		}
 		.b-music-item-artist SPAN,
 		.b-music-item-album SPAN,
 		.b-music-item-track SPAN {
-			padding: 0 3px;
+			position: relative;
+			display: inline-block;
+			padding: 9px 5px 10px 3px;
 			cursor: pointer;
+			font-size: 11px;
 			}
 		.b-music-item-artist SPAN:hover,
 		.b-music-item-album SPAN:hover,
@@ -1037,10 +1027,10 @@ td.tabs {
 	.b-music-item-player {
 		width: 150px;
 		min-width: 150px;
-		padding: 0;
+		padding: 1px 0 0 0;
 		text-align: right;
 		}
-		
+
 .b-music-list-state-error .b-music-item-header,
 .b-music-list-state-error .b-music-list-preloader-wrapper,
 .b-music-list-state-error .b-music-item-body,

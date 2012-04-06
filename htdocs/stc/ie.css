@@ -673,15 +673,13 @@ __________________________________________*/
 	display: inline;
 	zoom: 1;
 	}
-*:first-child+html	.b-music-item-header DT,
-*:first-child+html	.b-music-item-header DD {
-	max-width: 200px;
-	}
 *:first-child+html .b-music-list-searching {
 	overflow: hidden;
 	}
-*:first-child+html .b-music-item-player {
-	width: 75px;
+.b-music-item-artist SPAN,
+.b-music-item-album SPAN,
+.b-music-item-track SPAN {
+	zoom: 1;
 	}
 	
 /* Music settings 
