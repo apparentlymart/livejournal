@@ -557,7 +557,11 @@ sub trans {
             LJ::Request->filename($file);
             $LJ::IMGPREFIX = '/img';
             $LJ::STATPREFIX = '/stc';
-            return $bml_handler->($file);
+            if ( $file =~ /[.]bml$/ ) {
+                return $bml_handler->($file);
+            } else {
+                return LJ::Request::OK;
+            }
         }
         else {
             return LJ::Request::FORBIDDEN;
