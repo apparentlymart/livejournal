@@ -206,6 +206,37 @@ LJ.commafy = function(num) {
 	return num;
 };
 
+/**
+ * Create function that will call the target function
+ * at most once per every delay seconds. The signature and tests
+ * are taken from underscore project.
+ *
+ * @param {Function} func The function to call.
+ * @param {number} Delay between the calls in ms.
+ */
+LJ.throttle = function(func, delay) {
+	var ctx, args, timer, shouldBeCalled = false;
+
+	return function() {
+		ctx = this;
+		args = arguments;
+
+		var callFunc = function() {
+			timer = null;
+			if (!shouldBeCalled) { return; }
+			shouldBeCalled = false;
+			timer = setTimeout(callFunc, delay);
+			var ret = func.apply(ctx, args);
+
+			return ret;
+		};
+
+		shouldBeCalled = true;
+		if (timer) { return; }
+
+		return callFunc();
+	}
+};
 
 
 /* object extensions */
