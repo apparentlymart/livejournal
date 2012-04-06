@@ -870,26 +870,29 @@ sub user_can_edit {
 
     return 0 unless $u;
 
-    $$errref = LJ::Lang::ml('talk.error.cantedit.invalid');
-    return 0 unless $self && $self->valid;
-
-    # comment editing must be enabled and the user can't be underage and must have the cap
-    $$errref = LJ::Lang::ml('talk.error.cantedit');
-    return 0 unless LJ::is_enabled("edit_comments");
-    return 0 if $u->underage;
-    return 0 unless $u->get_cap("edit_comments");
-
-    # entry cannot be suspended
-    return 0 if $self->entry->is_suspended;
+    unless ( $self && $self->valid ) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.invalid');
+        return 0;
+    }
 
     # user must be the poster of the comment
-    unless ($u->equals($self->poster)) {
+    if ( $self->{'posterid'} != $u->{'userid'} ) {
         $$errref = LJ::Lang::ml('talk.error.cantedit.notyours');
         return 0;
     }
 
+    # comment editing must be enabled and the user can't be underage and must have the cap
+    if ( not LJ::is_enabled("edit_comments") or $u->underage or not $u->get_cap('edit_comments') ) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit');
+        return 0;
+    }
+
+    # entry cannot be suspended
     # user cannot be read-only
-    return 0 if $u->is_readonly;
+    if ( $self->entry->is_suspended or $u->is_readonly ) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit');
+        return 0;
+    }
 
     my $journal = $self->journal;
 
@@ -935,7 +938,6 @@ sub user_can_edit {
         return 0;
     }
 
-    $$errref = "";
     return 1;
 }
 
