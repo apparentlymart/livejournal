@@ -401,6 +401,8 @@ sub common_template_params {
         'ad_bottom'       => $ad_bottom,
         'ad_beforetitle'  => $ad_beforetitle,
 
+        'favicon'             => $favicon,
+
         'uri_tos'             => $uri_tos,
         'uri_privacy'         => $uri_privacy,
         'uri_advertising'     => $uri_advertising,
