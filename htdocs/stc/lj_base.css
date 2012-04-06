@@ -4199,3 +4199,9 @@ BODY div .b-helplink:active {
     font-size: 2em;
     }
 
+/* Trava object  
+--------------------------------------*/
+.meta-music-object {
+	display: inline-block;
+	vertical-align: middle;
+	}
