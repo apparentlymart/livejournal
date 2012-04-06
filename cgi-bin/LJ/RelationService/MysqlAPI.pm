@@ -259,7 +259,7 @@ sub remove_relation_to {
     if ( $type eq 'F' ) {
         return $class->_remove_relation_to_type_f($u, $friend);
     } else {
-        return $class->_removee_relation_to_type_other($u, $friend, $type);
+        return $class->_remove_relation_to_type_other($u, $friend, $type);
     }
 }
 
