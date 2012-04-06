@@ -683,7 +683,7 @@ body<=
 
         unless ( $LJ::DISABLED{'trava'} ) {
 
-        # Playlist 
+        # Playlist
         my $trava_uid = $u->prop('trava_uid');
 
         if( $trava_uid && $trava_uid > 1 ) {
@@ -692,7 +692,7 @@ body<=
             # if not yet selected
             $playlist_id = 0 unless defined $playlist_id;
 
-            LJ::need_string('update.bml.pl.nothingselected');
+            LJ::need_string('.pl.nothingselected');
 
             $ret .= qq~<a name="userplaylist"></a><div class='section_head'>$ML{'.section.playlist'}</div>\n~;
 
@@ -703,7 +703,7 @@ body<=
             $ret .= qq~<input type="hidden" name="trava_uid" id="trava_uid" value="$trava_uid"><input type="hidden" name="playlist_id" id="playlist_id" value="$playlist_id" />~;
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-loading">~ . $ML{'.pl.selected'}. qq~<span class="music-playlist-action">~ . $ML{'.pl.loading'}. qq~</span>~;
             $ret .= qq~<span class="music-settings-preloader"></span>~;
-            $ret .= qq~</div>~;        
+            $ret .= qq~</div>~;
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-loaded">~;
             $ret .= qq~<table class="music-playlist-items">~;
             $ret .= qq~<tr>~;
@@ -711,8 +711,8 @@ body<=
             $ret .= qq~</tr>~;
             $ret .= qq~<tr>~;
             $ret .= qq~<td>~ . $ML{'.pl.change'}. qq~</td><td>~;
-            $ret .= qq~<select id="music-settings-playlist-selection"><option value="-1">$ML{'update.bml.pl.shownothing'}</option></select><button id="music-settings-playlist-confirm">~ . $ML{'.pl.select'}. qq~</button></td>~;
-            $ret .= qq~</table>~;                    
+            $ret .= qq~<select id="music-settings-playlist-selection"><option value="-1">$ML{'.pl.shownothing'}</option></select><button id="music-settings-playlist-confirm">~ . $ML{'.pl.select'}. qq~</button></td>~;
+            $ret .= qq~</table>~;
             $ret .= "</div>";
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-empty">~ . $ML{'.pl.create'}. qq~<a href="http://www.trava.ru" target="_blank">trava.ru</a></div>~;
             $ret .= qq~<div class="music-settings-manage-playlist music-playlist-system-error"> <span class="music-playlist-action">~ . $ML{'.pl.error'}. qq~<a href="#">~ . $ML{'.pl.connect'}. qq~</a> </span></div>~;
