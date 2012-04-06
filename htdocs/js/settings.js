@@ -39,7 +39,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 		connectLink: '.music-settings-connect',
 		disconnectLink: '.music-settings-disconnect',
 		userName: '.music-settings-username',
-		musicSelect: 'select[name="music_select"]',
+		musicSelect: 'select[name="LJ__Setting__Music_music_engine"]',
 		uIdInput: 'input[name="' + uIdInputName + '"]'
 	};
 
