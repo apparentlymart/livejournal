@@ -6649,6 +6649,8 @@ sub load_user_props {
 
     return unless @props;
 
+    $LJ::COUNT_LOAD_PROPS_MULTI++;
+
     my $groups = LJ::User::PropStorage->get_handler_multi(\@props);
     my $memcache_available = @LJ::MEMCACHE_SERVERS;
     my $use_master = $memcache_available || $opts->{'use_master'};
