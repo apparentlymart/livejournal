@@ -9,7 +9,8 @@ body<=
     LJ::set_active_crumb('moderate');
     return LJ::server_down_html() if ($LJ::SERVER_DOWN);
     use Class::Autouse qw (LJ::Poll);
- 
+    use LJ::Setting::Music;
+
     LJ::need_res(qw(
                     stc/widgets/selecttags.css
                     js/widget_ippu/selecttags.js
@@ -550,7 +551,7 @@ body<=
             }
         }
         if ($props->{'current_music'}) {
-            $current{'Music'} = $props->{'current_music'};
+            $current{'Music'} = LJ::Setting::Music::format_current_music_string($props->{'current_music'});
             LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
         # tags manage permissions should be checked here too

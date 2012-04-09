@@ -248,8 +248,8 @@ sub s2_run
 
     if ($ctype =~ m!^text/html!) {
         $cleaner = HTMLCleaner->new(
-                                    'output' => $cleaner_output,
-                                    'valid_stylesheet' => \&LJ::valid_stylesheet_url,
+            'output'           => $cleaner_output,
+            'valid_stylesheet' => \&LJ::valid_stylesheet_url,
                                     );
     }
 
@@ -265,23 +265,27 @@ sub s2_run
     my $print_ctr = 0;  # every 'n' prints we check the recursion depth
 
     my $out_straight = sub {
+        my ( $text ) = @_;
         # Hacky: forces text flush.  see:
         # http://zilla.livejournal.org/906
         if ($need_flush) {
             $cleaner->parse("<!-- -->");
             $need_flush = 0;
         }
-        $$LJ::S2::ret_ref .= $_[0];
+
+        LJ::Setting::Music::expand_ljmusic_tag(\$text);
+        $$LJ::S2::ret_ref .= $text;
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
+
     my $out_clean = sub {
-        my $text = shift;
-
+        my ( $text ) = @_;
         $cleaner->parse($text);
-
+        LJ::Setting::Music::expand_ljmusic_tag($LJ::S2::ret_ref);
         $need_flush = 1;
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
+
     S2::set_output($out_straight);
     S2::set_output_safe($cleaner ? $out_clean : $out_straight);
 
@@ -1984,7 +1988,6 @@ sub Entry
 
     my $p = $arg->{'props'};
     if ($p->{'current_music'}) {
-        LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'});
         $e->{'metadata'}->{'music'} = LJ::Setting::Music::format_current_music_string($p->{'current_music'});
     }
     if (my $mid = $p->{'current_moodid'}) {

@@ -1,6 +1,7 @@
 <?_code
 {
     use strict;
+    use LJ::Setting::Music;
 
     my $delayed_id = $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
     if (!(LJ::did_post() || $delayed_id)) {
@@ -190,7 +191,7 @@
             $current{'Mood'} = "$moodpic$moodname";
         }
         if ($req{'prop_current_music'}) {
-            $current{'Music'} = $req{'prop_current_music'};
+            $current{'Music'} = LJ::Setting::Music::format_current_music_string($req{'prop_current_music'});
             LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
 

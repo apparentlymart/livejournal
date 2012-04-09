@@ -444,6 +444,12 @@ sub clean {
                 next TOKEN;
             }
 
+            if ( $tag eq 'lj-music' ) {
+                $newdata .= LJ::Setting::Music::format_ljmusic( $attr->{'provider'}, $attr->{'id'} );
+
+                next TOKEN;
+            }
+
             ## lj-userpic:
             ##      <lj-userpic> - current journal's default userpic
             ##      <lj-userpic remote> - remote user's default userpic
@@ -1922,14 +1928,14 @@ sub clean_subject
     my $opts = shift || {};
 
     clean($ref, {
-        'wordlength' => 40,
-        'addbreaks' => 0,
-        'eat' => $subject_eat,
-        'mode' => 'deny',
-        'allow' => $subject_allow,
-        'remove' => $subject_remove,
-        'autoclose' => $subject_allow,
-        'noearlyclose' => 1,
+        'wordlength'     => 40,
+        'addbreaks'      => 0,
+        'eat'            => $subject_eat,
+        'mode'           => 'deny',
+        'allow'          => $subject_allow,
+        'remove'         => $subject_remove,
+        'autoclose'      => $subject_allow,
+        'noearlyclose'   => 1,
         'remove_attribs' => [qw/id class style/],
         %$opts,
     });

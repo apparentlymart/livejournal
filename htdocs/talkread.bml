@@ -410,7 +410,7 @@ body<=
     }
 
     if ($props->{'current_music'}) {
-        $current{'Music'} = $props->{'current_music'};
+        $current{'Music'} = LJ::Setting::Music::format_current_music_string($props->{'current_music'});
         LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
 
@@ -456,12 +456,7 @@ body<=
             $curname = "<b>Current $_:</b>" unless $curname;
 
             $ret .= "<tr><td align=right>$curname</td>";
-
-            if ($_ eq 'Music') {
-                $ret .= "<td>" . LJ::Setting::Music::format_current_music_string($current{$_}) . "</td></tr>\n";
-            } else {
-                $ret .= "<td>$current{$_}</td></tr>\n";
-            }
+            $ret .= "<td>$current{$_}</td></tr>\n";
         }
         $ret .= "</table><p>\n";
     }

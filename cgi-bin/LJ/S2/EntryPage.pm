@@ -40,8 +40,8 @@ sub EntryPage
 
     $p->{'page_id'} = 'journal-' . $u->username . '-' . $entry->ditemid;
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
-    
-    my $itemid = $entry->jitemid;
+
+    my $itemid    = $entry->jitemid;
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
     my $style_set = defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : "";
@@ -52,69 +52,71 @@ sub EntryPage
 
     # quickreply js libs
     LJ::need_res(qw(
-                    js/basic.js
-                    js/json.js
-                    js/template.js
-                    js/ippu.js
-                    js/lj_ippu.js
-                    js/userpicselect.js
-                    js/hourglass.js
-                    js/inputcomplete.js
-                    stc/ups.css
-                    stc/lj_base.css
-                    js/datasource.js
-                    js/selectable_table.js
-                    )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
+        js/basic.js
+        js/json.js
+        js/template.js
+        js/ippu.js
+        js/lj_ippu.js
+        js/userpicselect.js
+        js/hourglass.js
+        js/inputcomplete.js
+        stc/ups.css
+        stc/lj_base.css
+        js/datasource.js
+        js/selectable_table.js
+    )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
 
     LJ::need_res(qw(
-                    js/quickreply.js
-                    js/md5.js
-                    js/thread_expander.js
-                    js/thread_expander.ex.js
-                    ));
+        js/quickreply.js
+        js/md5.js
+        js/thread_expander.js
+        js/thread_expander.ex.js
+    ));
 
     if($remote) {
-        LJ::need_string(qw/ 
-                            comment.cancel
-                            comment.delete
-                            comment.delete.q
-                            comment.delete.all
-                            comment.delete.all.my
-                            comment.delete.all.sub
-                            comment.delete.no.options
-                            comment.ban.user
-                            comment.mark.spam
-                            comment.mark.spam.title
-                            comment.mark.spam.subject
-                            comment.mark.spam.button
-                            comment.mark.spam2
-                            comment.mark.spam2.title
-                            comment.mark.spam2.subject
-                            comment.mark.spam2.button
-                            comment.delete/)
+        LJ::need_string(qw(
+            comment.cancel
+            comment.delete
+            comment.delete.q
+            comment.delete.all
+            comment.delete.all.my
+            comment.delete.all.sub
+            comment.delete.no.options
+            comment.ban.user
+            comment.mark.spam
+            comment.mark.spam.title
+            comment.mark.spam.subject
+            comment.mark.spam.button
+            comment.mark.spam2
+            comment.mark.spam2.title
+            comment.mark.spam2.subject
+            comment.mark.spam2.button
+            comment.delete/
+        ));
     }
 
     $p->{'entry'} = $s2entry;
     LJ::run_hook('notify_event_displayed', $entry);
 
     # add the comments
-    my $view_arg = $get->{'view'} || "";
+    my $view_arg  = $get->{'view'} || "";
     my $flat_mode = ($view_arg =~ /\bflat\b/);
-    my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
+    my $view_num  = ($view_arg =~ /(\d+)/) ? $1 : undef;
 
     my %userpic;
     my %user;
     my $copts = {
-        'flat' => $flat_mode,
-        'thread' => int($get->{'thread'} / 256),
-        'page' => $get->{'page'},
-        'view' => $view_num,
+        'flat'       => $flat_mode,
+        'thread'     => int($get->{'thread'} / 256),
+        'page'       => $get->{'page'},
+        'view'       => $view_num,
         'userpicref' => \%userpic,
-        'userref' => \%user,
+        'userref'    => \%user,
+
         # user object is cached from call just made in EntryPage_entry
-        'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
-        'viewall' => $viewall,
-        'expand_all' => $opts->{expand_all},
+        'up'          => LJ::load_user($s2entry->{'poster'}->{'username'}),
+        'viewall'     => $viewall,
+        'expand_all'  => $opts->{expand_all},
         'init_comobj' => 0,
         'showspam'    => $p->{'showspam'} && !$get->{from_rpc},
     };
@@ -588,25 +590,27 @@ sub EntryPage_entry
     }
 
     my $s2entry = Entry($u, {
-        'subject' => $subject,
-        'text' => $event,
-        'dateparts' => $entry->is_delayed ? $entry->alldatepart :
-                    LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
-        'system_dateparts' => $entry->is_delayed ? $entry->system_alldatepart :
-                    LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
-        'security' => $entry->security,
-        'allowmask' => $entry->allowmask,
-        'props' => $entry->props,
-        'itemid' => $ditemid,
-        'delayedid' => $entry->is_delayed ? $entry->delayedid : undef ,
-        'comments' => $comments,
-        'journal' => $userlite_journal,
-        'poster' => $userlite_poster,
-        'tags' => \@taglist,
-        'new_day' => 0,
-        'end_day' => 0,
-        'userpic' => $userpic,
-        'permalink_url' => $permalink,
+        'subject'          => $subject,
+        'text'             => $event,
+        'dateparts'        => $entry->is_delayed
+                              ? $entry->alldatepart
+                              : LJ::TimeUtil->alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => $entry->is_delayed
+                              ? $entry->system_alldatepart
+                              : LJ::TimeUtil->alldatepart_s2($entry->logtime_mysql),
+        'security'         => $entry->security,
+        'allowmask'        => $entry->allowmask,
+        'props'            => $entry->props,
+        'itemid'           => $ditemid,
+        'delayedid'        => $entry->is_delayed ? $entry->delayedid : undef ,
+        'comments'         => $comments,
+        'journal'          => $userlite_journal,
+        'poster'           => $userlite_poster,
+        'tags'             => \@taglist,
+        'new_day'          => 0,
+        'end_day'          => 0,
+        'userpic'          => $userpic,
+        'permalink_url'    => $permalink,
     });
 
     return ($entry, $s2entry);

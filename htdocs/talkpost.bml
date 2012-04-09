@@ -348,8 +348,8 @@ body<=
         $current{'Mood'} = "$moodpic$moodname";
     }
     if ($props->{'current_music'}) {
-        LJ::CleanHTML::clean_subject(\$current{'Music'});
         $current{'Music'} = LJ::Setting::Music::format_current_music_string($props->{'current_music'});
+        LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
 
     if ($props->{'current_location'} || $props->{'current_coords'}) {
