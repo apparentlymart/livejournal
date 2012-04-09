@@ -475,7 +475,7 @@ sub try_renew {
 # NOTE: internal function REQUIRES trusted input
 sub helper_url {
     my ($class, $dest) = @_;
-
+ 
     return unless $dest;
 
     my $u = LJ::get_remote();
@@ -508,8 +508,7 @@ sub helper_url {
         return "${setdomsess}/__setdomsess?dest="
              . LJ::eurl($dest)
              . "&k=" . LJ::eurl($domcook)
-             . "&v=" . LJ::eurl($cookie)
-             if exists $LJ::DOMAIN_JOURNALS_REVERSE{$1};
+             . "&v=" . LJ::eurl($cookie);
     }
 
     return;
@@ -558,7 +557,7 @@ sub domain_journal {
 
     $host =~ s/^www\.//;
 
-    return undef unless
+    return wantarray ? ( '__external', "") : '__external' unless
         $host =~ m!^([\w\-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$! or exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
 
     my $subdomain = lc($1);
