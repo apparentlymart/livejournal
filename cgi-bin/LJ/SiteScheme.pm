@@ -115,8 +115,8 @@ sub common_template_params {
     my $favicon = '';
     if ( my $journal = LJ::get_active_journal() ) {
         if ( $journal->is_personal ) {
-            $favicon = $journal->userhead;
-            $favicon = $LJ::IMGPREFIX . "/" . $favicon
+            ($favicon) = $journal->userhead;
+            $favicon   = $LJ::IMGPREFIX . "/" . $favicon
                 unless $favicon =~ m{^http://};
         }
     }
