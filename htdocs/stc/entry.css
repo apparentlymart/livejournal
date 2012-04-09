@@ -986,6 +986,16 @@ td.tabs {
 	width: 750px;
 	margin: 0;
 	}
+	.b-music-item .b-music-item-player OBJECT {
+		display: none;
+		}
+	.b-music-item-hover .b-music-item-player OBJECT {
+		display: block;
+		}
+	.b-music-item:hover,
+	.b-music-item.odd:hover {
+		background-color: #d0e4f0;
+		}
 .b-music-item-header {
 	width: 750px;
 	}
@@ -1027,7 +1037,6 @@ td.tabs {
 	.b-music-item-player {
 		width: 150px;
 		min-width: 150px;
-		padding: 1px 0 0 0;
 		text-align: right;
 		}
 
