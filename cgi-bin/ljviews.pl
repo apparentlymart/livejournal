@@ -1283,7 +1283,6 @@ sub create_view_lastn
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
 
-        my ($event, $subject, $replycount);
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
