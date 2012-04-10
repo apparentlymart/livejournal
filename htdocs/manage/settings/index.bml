@@ -156,7 +156,7 @@ body<=
                 LJ::Setting::WebmasterTools::Yandex
                 LJ::Setting::GiveFeatures
                 LJ::Setting::LJTimes),
-                $LJ::DISABLED{'trava'} ? undef : 'LJ::Setting::Music',
+                $LJ::DISABLED{'trava'} || $u->is_community ? undef : 'LJ::Setting::Music',
             ],
         },
     );
