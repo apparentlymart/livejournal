@@ -986,12 +986,14 @@ td.tabs {
 	width: 750px;
 	margin: 0;
 	}
+	.b-music-item .b-music-item-player EMBED,
 	.b-music-item .b-music-item-player OBJECT {
 		display: none;
 		}
+	.b-music-item-hover .b-music-item-player EMBED,
 	.b-music-item-hover .b-music-item-player OBJECT {
 		display: block;
-		}
+		} 
 	.b-music-item:hover,
 	.b-music-item.odd:hover {
 		background-color: #d0e4f0;
