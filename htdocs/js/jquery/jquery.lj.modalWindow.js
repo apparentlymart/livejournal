@@ -50,6 +50,11 @@
 		_create: function () {
 			this._visible = false;
 			this._makeNodes();
+			this.hide();
+			$(document.body)
+				.append(this._faderNode)
+				.append(this._popupNode);
+
 		},
 
 		/**
@@ -148,10 +153,8 @@
 			this._visible = true;
 			this.updatePosition();
 
-			$(document.body)
-				.append(this._faderNode)
-				.append(this._popupNode);
-			
+			this._faderNode.show();
+			this._popupNode.show();
 			this._trigger('show');
 		},
 
@@ -161,8 +164,8 @@
 		 */
 		hide: function () {
 			this._visible = false;
-			this._faderNode.detach();
-			this._popupNode.detach();
+			this._faderNode.hide();
+			this._popupNode.hide();
 			this._trigger('hide');
 		}
 	};
