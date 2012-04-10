@@ -164,6 +164,7 @@
 		 */
 		hide: function () {
 			this._visible = false;
+			//we have replaced detach with hide, because it may be really slow in internet explorer
 			this._faderNode.hide();
 			this._popupNode.hide();
 			this._trigger('hide');
