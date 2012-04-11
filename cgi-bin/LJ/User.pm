@@ -6749,14 +6749,6 @@ sub load_user_props_v2 {
     }
 
     LJ::load_user_props_multi([$u], \@props, $opts);
-
-    LJ::User->init_userprop_def;
-
-    foreach my $propname (@props) {
-        next if defined $u->{$propname};
-        next unless defined $LJ::USERPROP_DEF{$propname};
-        $u->{$propname} = $LJ::USERPROP_DEF{$propname};
-    }
 }
 
 unless ( $LJ::DISABLED{'user_props_multi'} ) {
@@ -6782,7 +6774,7 @@ sub load_user_props_multi {
     my $memc_expire = time() + 3600 * 24;
 
     foreach my $handler (keys %$groups) {
-        my %propkeys = map { $_ => '' } @{ $groups->{$handler} };
+        my %propkeys = map { $_ => $LJ::USERPROP_DEF{$_} || '' } @{ $groups->{$handler} };
 
         # if there is no memcache, or if the handler doesn't wish to use
         # memcache, hit the storage directly, update the user object,
@@ -6840,15 +6832,10 @@ sub load_user_props_multi {
                     { 'use_master' => $use_master }
                 );
 
+                _extend_user_object($users->{$userid}, { %$propkeys, %$propmap });
+
                 my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
                 LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
-
-                $packed = {
-                    %$propmap,
-                    %$packed,
-                };
-
-                _extend_user_object($users->{$userid}, $packed);
             }
         } elsif ( $memcache_policy eq 'blob' ) {
             my $handled_props = $groups->{$handler};
