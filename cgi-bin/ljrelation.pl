@@ -69,27 +69,10 @@ sub is_banned
 
 sub get_groupmask
 {
-    # TAG:FR:ljlib:get_groupmask
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
 
-    my $jid = LJ::want_userid($journal);
-    my $fid = LJ::want_userid($remote);
-    return 0 unless $jid && $fid;
-
-    my $memkey = [$jid,"frgmask:$jid:$fid"];
-    my $mask = LJ::MemCache::get($memkey);
-    unless (defined $mask) {
-        my $dbw = LJ::get_db_writer();
-        die "No database reader available" unless $dbw;
-
-        $mask = $dbw->selectrow_array("SELECT groupmask FROM friends ".
-                                      "WHERE userid=? AND friendid=?",
-                                      undef, $jid, $fid);
-        LJ::MemCache::set($memkey, $mask+0, time()+60*15);
-    }
-
-    return $mask+0;  # force it to a numeric scalar
+    return LJ::RelationService->get_groupmask($journal, $remote);
 }
 
 

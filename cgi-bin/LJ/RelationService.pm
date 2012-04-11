@@ -185,4 +185,29 @@ sub is_relation_to {
     return $interface->is_relation_to($u, $friend, $type, %opts);    
 }
 
+sub get_groupmask {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my %opts   = @_;
+    
+    my $type = $opts{type} || 'F';
+    
+    $u = LJ::want_user($u);
+    $friend = LJ::want_user($friend);
+    
+    return 0 unless $u && $friend && $type;
+
+    if ($class->_load_alt_api('read', $type)) {
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $alt->get_groupmask($u, $friend, $type, %opts);
+        }
+    }
+
+    my $interface = $class->relation_api($u);
+    return $interface->get_groupmask($u, $friend, %opts);    
+}
+
+
 1;
