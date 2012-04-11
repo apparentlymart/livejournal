@@ -54,6 +54,7 @@ sub render_body {
         # load the entry the comment was posted to
         my $entry = $comment->entry;
         my $class_name = ($ct == scalar(@comments) - 1) ? "last" : "";
+        $class_name .= (($ct + 1)%2 == 0) ? " odd" : "";
 
         my $subject = $entry->subject_text ? $entry->subject_text : $class->ml('widget.recentcomments.nosubject');
         my $body_part = LJ::Text->truncate_to_word_with_ellipsis( 'str'=>$comment->body_text, 'chars'=>150 ) . "&nbsp;";
@@ -70,7 +71,7 @@ sub render_body {
         $ret .= $class->ml('widget.recentcomments.commentheading', {'poster' => $poster, 'entry' => "<a href='" . $entry->url . "'>"});
         $ret .= $subject;
         $ret .= "</a><br />";
-        $ret .= $body_part;
+        $ret .= "<span class='comment-body'>" . $body_part . "</span>";
         $ret .= "<span class='detail'>(<a href='" . $comment->url . "'>" . $class->ml('widget.recentcomments.link') . "</a>)</span> ";
         $ret .= "<span class='detail'>(<a href='" . $comment->reply_url . "'>" . $class->ml('widget.recentcomments.reply') . "</a>)</span> ";
         $ret .= "</li>";
