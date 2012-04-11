@@ -849,6 +849,8 @@ sub create_qr_div {
                                       {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
                                       ));
 
+    %userpicmap = map { (LJ::ehtml($_) => $userpicmap{$_}) } keys %userpicmap;
+
     my $userpicmap = LJ::JSON->to_json(\%userpicmap);
     $ret .= qq{
                var userpicmap = $userpicmap;
