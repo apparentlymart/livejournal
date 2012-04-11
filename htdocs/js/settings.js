@@ -51,6 +51,10 @@ LiveJournal.register_hook('init_settings', function ($) {
 	};
 
 	var travaElement = $(selectors.Trava);
+
+	//run code only on extensions page
+	if (travaElement.length === 0) { return; }
+
 	var musicSelect = $(selectors.musicSelect);
 	var userName = travaElement.find(selectors.userName);
 	var hiddenField = travaElement.find(selectors.uIdInput);
