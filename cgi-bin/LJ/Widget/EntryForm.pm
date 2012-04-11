@@ -112,6 +112,7 @@ sub should_show_lastfm {
 
 sub should_show_trava {
     my ($self) = @_;
+    return 0 if $LJ::DISABLED{'trava'};
     return 0 unless LJ::Setting::Music::Trava->good_ip;
 
     my $me = $self->remote->prop('music_engine');
