@@ -1299,6 +1299,32 @@ property string text_tag_uses {
 }
 set text_tag_uses = "1 use // # uses";
 
+property bool show_title_on_tagpage {
+    des = "If set, tag’s name(s) will be shown in the title of the page with entries by tag(s)";
+    doc = "If set, tag’s name(s) will be shown in the title of the page with entries by tag(s)";
+}
+set show_title_on_tagpage = false;
+
+property string text_entries_bytag {
+    noui = 1;
+    des = "Text for page title with entries by tags";
+    format = "plurals";
+    example = "Entries by tag // Entries by tags";
+}
+set text_entries_bytag = "Entries by tag // Entries by tags";
+
+property string text_entries_bytag_or {
+    noui = 1;
+    des = "Or";
+}
+set text_entries_bytag_or = "or";
+
+property string text_entries_bytag_and {
+    noui = 1;
+    des = "And";
+}
+set text_entries_bytag_and = "and";
+
 property string text_skiplinks_back {
     des = "Text to show in a link to skip back through entries";
     maxlength = 20;
