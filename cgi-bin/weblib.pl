@@ -1150,12 +1150,21 @@ sub entry_form_decode
     # copy some things from %POST
     foreach (qw(subject
                 prop_picture_keyword prop_current_moodid
-                prop_current_mood prop_current_music
+                prop_current_mood
                 prop_opt_screening prop_opt_noemail
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid prop_give_features)) {
         $req->{$_} = $POST->{$_};
+    }
+
+    if ( $POST->{'prop_current_music'} ) {
+        if ( length( $POST->{'prop_current_music'} ) > 197 ) {
+            $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
+        }
+        else {
+            $req->{'prop_current_music'} = $POST->{'prop_current_music'};
+        }
     }
 
     if ($POST->{"subject"} eq BML::ml('entryform.subject.hint2')) {
