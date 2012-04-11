@@ -2017,7 +2017,7 @@ sub talkform {
         }
 
         foreach my $i (1 .. $res{'pickw_count'}) {
-            $userpicmap{$res{"pickw_$i"}} = $res{"pickwurl_$i"};
+            $userpicmap{LJ::ehtml($res{"pickw_$i"})} = $res{"pickwurl_$i"};
         }
 
         if (my $upi = $remote->userpic) {
