@@ -2224,7 +2224,6 @@ sub Image_userpic
     my $p = $pi->{'pic'}->{$picid};
     my $k = $pi->{'kw'};
     my $kwstr = join(', ', ( grep { $k->{$_}{'picid'} eq $picid } (keys %$k) ) );
-    my $alttext = $kwstr;
 
     return Null("Image") unless $p;
     return {
@@ -2232,7 +2231,7 @@ sub Image_userpic
         'url' => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
         'width' => $p->{'width'},
         'height' => $p->{'height'},
-        'alttext' => $alttext,
+        'alttext' => LJ::ehtml($kwstr),
     };
 }
 
