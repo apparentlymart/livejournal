@@ -6773,6 +6773,8 @@ sub load_user_props_multi {
     $use_master = $memcache_available || $use_master;
     my $memc_expire = time() + 3600 * 24;
 
+    LJ::User->init_userprop_def;
+
     foreach my $handler (keys %$groups) {
         my %propkeys = map { $_ => $LJ::USERPROP_DEF{$_} || '' } @{ $groups->{$handler} };
 
@@ -6832,7 +6834,7 @@ sub load_user_props_multi {
                     { 'use_master' => $use_master }
                 );
 
-                _extend_user_object($users->{$userid}, { %$propkeys, %$propmap });
+                _extend_user_object($users->{$userid}, { %propkeys, %$propmap });
 
                 my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
                 LJ::MemCache::set([$userid, $v], $packed, $memc_expire);
