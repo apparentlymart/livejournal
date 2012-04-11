@@ -608,6 +608,12 @@ cprod.userpic.text.v4=
 
 cprod.userpic.text.v5=
 
+create.head=Join LiveJournal
+
+create.steps.reg=1. Registration
+
+create.steps.finish=2. Finish
+
 crumb.acctstatus=Account Status
 
 crumb.addfriend=Add Friend
@@ -5855,6 +5861,8 @@ talk.post.meta.tojournal=to journal
 
 talk.post.meta.tocommunity=to community
 
+talk.post.meta.tologinpass=to another journal
+
 talk.post.meta.username=Username
 
 talk.post.meta.password=Password
@@ -5862,6 +5870,8 @@ talk.post.meta.password=Password
 talk.post.meta.postpone=Postpone until
 
 talk.post.meta.where=Post to
+
+talk.post.meta.where.it.is=Date
 
 talk.post.meta.when=Date
 
