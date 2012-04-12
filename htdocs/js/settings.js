@@ -18,6 +18,9 @@ LiveJournal.register_hook('init_settings', function ($) {
 		}
 	};
 
+	window.Settings = Settings; //LJSUP-11806: we need to expose the object, because the current logic does not
+								//allow to customize options on the specific pages without it.
+
 	Settings.$form = $('#settings_form');
 	if (!Settings.$form.length) {
 		return;
