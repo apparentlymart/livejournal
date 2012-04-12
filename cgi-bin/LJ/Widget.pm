@@ -152,6 +152,7 @@ sub render {
                 return 0 unless $clpsd;
                 
                 my ($block_id) = $widget_ele_id =~ /(\d+)$/;
+                $block_id = 1; # temporary hack for r91
                 my $widget_content_id_re = $widget_content_id ? "-$widget_content_id" : "";
                 ## cookie: clpsd=block_id-content_id:block_id-content_id:...
                 return 1 if $clpsd =~ /(^|:)$block_id$widget_content_id_re(:|$)/; ## collapsed
