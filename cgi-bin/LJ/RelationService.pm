@@ -209,5 +209,24 @@ sub get_groupmask {
     return $interface->get_groupmask($u, $friend, %opts);    
 }
 
+sub delete_and_purge_completely {
+    my $class  = shift;
+    my $u      = shift;
+    my %opts   = @_;
+    
+    $u = LJ::want_user($u);
+    
+    return unless $u;
+
+    if ($class->_load_alt_api('write', 'F')) {
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $alt->delete_and_purge_completely($u, %opts);
+        }
+    }
+
+    my $interface = $class->relation_api($u);
+    return $interface->delete_and_purge_completely($u, %opts);    
+}
 
 1;

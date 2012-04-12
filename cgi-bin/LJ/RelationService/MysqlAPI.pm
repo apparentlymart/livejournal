@@ -794,4 +794,20 @@ sub get_groupmask {
     return $mask+0;  # force it to a numeric scalar
 }
 
+sub delete_and_purge_completely {
+    my $class = shift;
+    my $u = shift;
+    my %opts = @_;
+    
+    return unless $u;
+    
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("DELETE FROM reluser WHERE userid=?", undef, $u->id);
+    $dbh->do("DELETE FROM friends WHERE userid=?", undef, $u->id);
+    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
+    $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
+
+    return 1;
+}
+
 1;

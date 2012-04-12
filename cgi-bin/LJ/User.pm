@@ -3679,13 +3679,13 @@ sub delete_and_purge_completely {
     # TODO: delete from global tables
     my $dbh = LJ::get_db_writer();
 
-    my @tables = qw(user friends useridmap reluser priv_map infohistory email password);
+    my @tables = qw(user useridmap priv_map infohistory email password);
     foreach my $table (@tables) {
         $dbh->do("DELETE FROM $table WHERE userid=?", undef, $u->id);
     }
+    
+    LJ::RelationService->delete_and_purge_completely($u);
 
-    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
-    $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
     $dbh->do("DELETE FROM email_aliases WHERE alias=?", undef, $u->user . "\@$LJ::USER_DOMAIN");
 
     $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->id)
@@ -4814,21 +4814,17 @@ sub _load_friend_friendof_uids_from_db {
     my $u     = shift;
     my $mode  = shift;
     my $limit = shift;
-
-    $limit = " LIMIT $limit" if $limit;
-
-    my $sql = '';
+    
+    my @uids;
     if ($mode eq 'friends'){
-        $sql = "SELECT friendid FROM friends WHERE userid=? $limit";
+        @uids = LJ::RelationService->find_relation_destinations($u, 'F', limit => $limit);
     } elsif ($mode eq 'friendofs'){
-        $sql = "SELECT userid FROM friends WHERE friendid=? $limit";
+        @uids = LJ::RelationService->find_relation_sources($u, 'F', limit => $limit);
     } else {
         Carp::croak("mode must either be 'friends' or 'friendofs'");
     }
 
-    my $dbh = LJ::get_db_reader();
-    my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
-    return $uids;
+    return \@uids;
 }
 
 ## Returns exact friendsOf count. Whitout limit.
