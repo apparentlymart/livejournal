@@ -1812,3 +1812,16 @@ logproplist.moderator_id:
   des: userid of moderator, who approved this entry
   prettyname: Moderator's userid
   sortorder: 10
+
+logproplist.set_to_schedule:
+  datatype: num 
+  des: time when post set to schedule list
+  prettyname: Schedule time
+  sortorder: 112
+
+logproplist.revtime_sch:
+  datatype: num 
+  des: scheduled post last edit time
+  prettyname: Scheduled post last edit time
+  sortorder: 113
+

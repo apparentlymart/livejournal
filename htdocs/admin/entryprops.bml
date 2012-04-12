@@ -75,6 +75,11 @@ body<=
 
     $ret .= "<ul>";
 
+    my %time_props = (
+        'revtime_sch' => 1,
+        'set_to_schedule' => 1,
+    );
+
     foreach my $prop (sort keys %props) {
         my $extra = "";
 
@@ -83,6 +88,9 @@ body<=
 
             # an ugly hack, i know
             $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop}) if $p->{des} =~ /unix/i;
+            if ($time_props{$prop}) {
+                $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop});
+            }
         }
         if ($prop eq 'moderator_id') {
             my $moderator = LJ::load_userid($props{$prop});

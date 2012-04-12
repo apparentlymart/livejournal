@@ -47,6 +47,12 @@ sub create {
     my $journalid   = $journal->userid;
     my $posterid    = $poster->userid;
     my $subject     = $req->{subject};
+
+    my $now        = time;
+
+    $req->{props}->{'set_to_schedule'} = $now;
+    $req->{props}->{'revtime_sch'}     = $now;
+
     my $posttime    = __get_datetime($req);
     my $data_ser    = __serialize($req);
     my $delayedid   = LJ::alloc_user_counter( $journal,
@@ -127,6 +133,9 @@ sub update {
 
     $req->{tz} = $req->{tz} || $self->data->{tz};
     $req->{ext}->{flags}->{u} = undef; # it's no need to be stored
+
+    $req->{props}->{'set_to_schedule'} = $self->prop('set_to_schedule');
+    $req->{props}->{'revtime_sch'} = time;
 
     my $journalid = $self->journal->userid;
     my $posterid  = $self->poster->userid;
