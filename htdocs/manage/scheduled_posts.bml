@@ -21,7 +21,7 @@ body<=
     my $skip = $GET{'skip'} || 0;
     my $usejournal = $GET{'usejournal'};
     my $only_me_checked = $GET{'only_me'};
-    my $getextra = $usejournal ? "?usejournal=$usejournal" : undef;
+    my $getextra = $usejournal ? "?usejournal=$usejournal" : '';
 
     if ($only_me_checked) {
         $getextra = $getextra ? "$getextra&only_me=1" : '?only_me=1';
@@ -145,8 +145,8 @@ body<=
     # header
     $ret .= "<div class='b-editentries-header'>";
     $ret .= "<h1>" . BML::ml('.title') . "</h1>";
-
     $ret .= "<form action='$page_name$getextra' method='get' class='b-editentries-form'>\n";
+
     $ret .= "<p>" . LJ::html_text( { 'name'        => 'usejournal', 
                                      'size'        => '20', 
                                      'mfaxlength'  => '15', 
