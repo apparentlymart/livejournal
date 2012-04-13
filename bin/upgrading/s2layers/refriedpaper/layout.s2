@@ -1142,12 +1142,13 @@ function make_poster(EntryLite e) : string {
   if($e isa Entry) {
     $user   = $e.journal + "";
     $poster = $e.poster  + "";
-    if($p.view == "recent" and not($e.poster->equals($e.journal))) {
+
+   if($p.view == "recent" and not($e.poster->equals($e.journal))) {
       $user   = $e.poster + "";
       $poster = "";
-    } elseif($p.view == "recent") {
-      $user = "";
-    }
+      } elseif($p.view == "recent") {
+        $user = "";
+      }
     if($e.poster->equals($e.journal)) {
       if($p.view != "friends") {
         $user = "";
@@ -1165,9 +1166,16 @@ function make_poster(EntryLite e) : string {
   }
 
   if($user != "") {
+
     $return = $return + """
+
       <td class="dateheader"$screenedfg>$*text_user</td>
       <td class="datecontent"$screenedfg>$user""";
+
+      if ($poster) {
+        $return = $return + " (posted by $poster)";
+      }
+
     $return = $return + """</td>
     """;
   }
