@@ -815,6 +815,9 @@ function EntryLite::print_linkbar() {
       }
     }
   }
+
+  print  $linkbar;
+
   foreach var string link_key ($.link_keyseq) {
     var Link link = $this->get_link($link_key);
     if (defined $link) {
@@ -828,8 +831,9 @@ function EntryLite::print_linkbar() {
   }
   $url     = $.permalink_url;
   $text    = $*text_permalink;
-  $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
-  print $linkbar;
+  print """<a href="$url">$text</a>""" + $*text_right_comments;
+ 
+
   if($this isa Comment) {
     var Comment c      = $this as Comment;
     if ($c.parent_url != "") {
