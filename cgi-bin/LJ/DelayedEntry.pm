@@ -823,7 +823,7 @@ sub get_entries_by_journal {
 
     my $dbcr = LJ::get_cluster_master($journal);
     if (!$dbcr) {
-        die "get cluster for journal failed";
+        return [];
     }
 
     my $u;
