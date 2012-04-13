@@ -309,7 +309,7 @@ sub _load_featured_posts {
     return if $self->{_post_loaded};
 
     my $domain = $self->{domain};
-    my $ext_block = LJ::ExtBlock->load_by_id("spts_$domain");
+    my $ext_block = LJ::ExtBlock->load_by_id("spts_$domain", {skip_local_cache => 1});
     my $prop_val = $ext_block ? $ext_block->blocktext : '';
 =head
     $prop_val = '3:5:0:0' unless $prop_val;
