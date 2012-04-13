@@ -70,7 +70,6 @@ sub create {
     }
 
     my $allowmask  = $req->{'allowmask'}+0;
-    my $now        = time;
 
     my $dt = DateTime->new(   year       => $req->{year},
                               month      => $req->{mon},
