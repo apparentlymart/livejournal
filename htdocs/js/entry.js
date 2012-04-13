@@ -921,6 +921,9 @@ InOb.handleInsertImageBeta = (function () {
 
 	if (!window.ljphotoUploadEnabled) {
 		jQuery(function () {
+			//LJSUP-11815: the code should work only on the page with editor     
+			if (!$('draft')) { return; }
+
 			ippu = new LJAPP_IPPU(window.fotkiErrorUpgradeTitle);
 			ippu.setCancelledCallback(function () {
 				ippu.contentElement.style.display = 'none';
