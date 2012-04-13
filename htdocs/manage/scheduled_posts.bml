@@ -7,7 +7,6 @@ body<=
 {
     use strict;
     use warnings;
-#line 7
 
     LJ::need_res(qw(
                     stc/editjournal.css
@@ -41,7 +40,7 @@ body<=
     my $can_viewall = LJ::check_priv($remote, "canview", "*");
 
     my $viewsome = !!$is_admin;
-    my $viewall  = ($can_viewall && $GET{'viewall'} == 1);
+    my $viewall  = ($can_viewall && $GET{'viewall'} && $GET{'viewall'} eq 1);
 
     if ($viewall && $usejournal_u) {
         
