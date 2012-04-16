@@ -1308,7 +1308,14 @@ sub _format_mail_both {
             $body .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
         }
 
-        $body .= blockquote($parent ? $parent->body_html : $entry->event_html);
+        my $text = '';
+        if ($parent) {
+            $text = $parent->body_html;
+        } else {
+            $text = $entry->event_html({ cuturl => $entry->url });
+        }
+
+        $body .= blockquote($text);
     } else {
         $body .= $intro . "\n\n" . indent($parent ? $parent->body_raw : $entry->event_raw, ">");
     }
