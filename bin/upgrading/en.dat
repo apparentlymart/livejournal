@@ -610,9 +610,33 @@ cprod.userpic.text.v5=
 
 create.head=Join LiveJournal
 
+create.nextsteps.communities=join communities
+
+create.nextsteps.friends=find friends
+
+create.nextsteps.pics=upload pictures
+
+create.nextsteps.profile=fill your profile
+
+create.post=Create First Post
+
 create.steps.reg=1. Registration
 
 create.steps.finish=2. Finish
+
+create.reg.create=Create account
+
+create.reg.email=Email
+
+create.reg.password=Password
+
+create.reg.tos=By creating an account on LiveJournal, you agree to our <a href="#">User Agreement</a> and <a href="#">Privacy Policy</a>.
+
+create.reg.username=Username
+
+create.reg.username.desc=Your name on LiveJournal
+
+create.welcome=Welcome 
 
 crumb.acctstatus=Account Status
 
@@ -5847,6 +5871,8 @@ talk.post.comments.noemail=no email
 
 talk.post.create.title=New entry
 
+talk.post.edit.title=Edit entry
+
 talk.post.journal.default=default
 
 talk.post.find=find
@@ -5854,6 +5880,8 @@ talk.post.find=find
 talk.post.identify=identify
 
 talk.post.infobox.all=All variants to post
+
+talk.post.in.community=in community
 
 talk.post.location=Location
 
@@ -5910,6 +5938,16 @@ talk.post.security.private=private
 talk.post.security.public=public
 
 talk.post.subject=Subject
+
+talk.post.submit.delete=Delete Entry
+
+talk.post.submit.post=Post Entry
+
+talk.post.submit.preview=Preview Entry
+
+talk.post.submit.save=Save Entry
+
+talk.post.submit.spam=Delete as spam
 
 talk.post.tags=Tags
 
