@@ -195,7 +195,6 @@ sub need_res {
 
     if ($self->should_show_userpics && $self->should_show_userpicselect) {
         push @ret, qw(
-            js/json.js
             js/template.js
             js/userpicselect.js
             js/httpreq.js
