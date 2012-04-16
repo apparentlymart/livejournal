@@ -121,7 +121,7 @@ my %e = (
      "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
      "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
      "325" => [ E_PERM, "Can't edit that comment."],
-     "326" => [ E_PERM, "Can't delete specified comment"],
+     "326" => [ E_PERM, "Not allowed to edit or delete this comment"],
      "327" => [ E_PERM, "Selected comment has been already deleted"],
 
      # Limit errors
