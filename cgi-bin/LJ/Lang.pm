@@ -875,6 +875,9 @@ sub plural_form {
 
     $count ||= 0;
 
+    ## remove the gaps from numbers: 25 500 -> 25500
+    $count =~ s/\s+//g;
+
     my $lang_short = substr( $lang, 0, 2 );
     my $handler = $PLURAL_FORMS_HANDLERS{$lang_short} || \&plural_form_en;
 
