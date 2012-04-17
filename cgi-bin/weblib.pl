@@ -1162,7 +1162,14 @@ sub entry_form_decode
 
     if ( $POST->{'prop_current_music'} ) {
         if ( length( $POST->{'prop_current_music'} ) > 197 ) {
-            $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
+            my $pos = index( $POST->{'prop_current_music'}, '|' );
+
+            if ( $pos == -1 ) {
+                $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
+            }
+            else {
+                $req->{'prop_current_music'} = substr( substr($POST->{'prop_current_music'}, 0, $pos), 0, 197 ) . '...' . substr( $POST->{'prop_current_music'}, $pos + 1 );
+            }
         }
         else {
             $req->{'prop_current_music'} = $POST->{'prop_current_music'};
