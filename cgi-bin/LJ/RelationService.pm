@@ -229,4 +229,38 @@ sub delete_and_purge_completely {
     return $interface->delete_and_purge_completely($u, %opts);    
 }
 
+sub clear_rel_multi {
+    my $class = shift;
+    my $edges = shift;
+    
+    return undef unless ref $edges eq 'ARRAY';
+
+    if ($class->_load_alt_api('write', 'B')) {
+        my $alt = $class->alt_api();
+        if ($alt) {
+            $alt->clear_rel_multi($edges);
+        }
+    }
+
+    my $interface = $class->relation_api();
+    return $interface->clear_rel_multi($edges);
+}
+
+sub set_rel_multi {
+    my $class = shift;
+    my $edges = shift;
+    
+    return undef unless ref $edges eq 'ARRAY';
+
+    if ($class->_load_alt_api('write', 'B')) {
+        my $alt = $class->alt_api();
+        if ($alt) {
+            $alt->set_rel_multi($edges);
+        }
+    }
+
+    my $interface = $class->relation_api();
+    return $interface->set_rel_multi($edges);
+}
+
 1;
