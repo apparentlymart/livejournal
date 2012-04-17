@@ -90,8 +90,10 @@ body<=
         my $p_can_control_tags = LJ::Tags::can_control_tags($c,$poster);
         my $p_can_add_tags = LJ::Tags::can_add_tags($c,$poster);
         # update taglist if poster could add them
-        if ($m_can_edit_tags && ($p_can_add_tags || $p_can_control_tags)) { 
-            $req->{props}->{taglist} = $POST{'prop_taglist'};
+        if ($m_can_edit_tags && 
+            ($p_can_add_tags || $p_can_control_tags) && 
+            $POST{'prop_taglist'}) { 
+                $req->{props}->{taglist} = $POST{'prop_taglist'};
         }
         if ($mode eq 'approve_do') {
             my $res = LJ::Protocol::do_request('postevent', $req, \$prot_err, { 'nomod'=>1, 
@@ -105,24 +107,6 @@ body<=
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";
                 $ret .= "<br />" .$err->($prot_err). "<br />" unless $res;
                 
-                #add tags, that poster weren't able to add
-                if (!$p_can_control_tags && $m_can_edit_tags) {
-                    my $tagerr = "";
-                    my $skipped_tags = [];
-                    my $addtags = LJ::Tags::update_logtags($c, 
-                                                      $res->{itemid}, {
-                                            set_string => $POST{prop_taglist},
-                                            remote => $remote,
-                                            err_ref => \$tagerr,
-                                            skipped_tags => $skipped_tags, 
-                                        });
-                    $ret .= "<br />" .$err->($tagerr). "<br />" unless $addtags;
-                    $ret .= LJ::Lang::ml(
-                        '/community/moderate.bml.posted.tags.skipped',
-                        { 'tags'  => join(', ', @$skipped_tags),
-                          'limit' => $c->get_cap('tags_max') } 
-                    ) if @$skipped_tags;
-                }
                 # does the poster want to know? if they have working email and notification on
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
@@ -558,10 +542,17 @@ body<=
         # because we are in a different code block
         my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) ||
                               LJ::Tags::can_add_tags($c,$remote);
-        if ($props->{'taglist'}) {
-            $current{'Tags'} = join(", ", sort split(/\s*,\s*/, $props->{'taglist'}));
-        } else {
-            $current{'Tags'} = "" if $m_can_edit_tags;
+        my $p_can_edit_tags = LJ::Tags::can_control_tags($c,$up) ||
+                              LJ::Tags::can_add_tags($c,$up);
+        if ($p_can_edit_tags) {                      
+            if ($props->{'taglist'}) {
+                $current{'Tags'} = join(", ", 
+                                        sort split(/\s*,\s*/, 
+                                        $props->{'taglist'})
+                                       );
+            } else {
+                $current{'Tags'} = "" if $m_can_edit_tags;
+            }
         }
 
         $ret .= "<div style='margin-left: 30px'>";
@@ -584,7 +575,8 @@ body<=
                            raw   => "autocomplete='off'",
                        }
                     );
-                    $ret .= '<a href="#" onclick="return selectModTags(this);">' . $BML::ML{'entryform.selecttags'} . '</a>';
+                    $ret .= '<a href="#" onclick="return selectModTags(this);">' . 
+                            $BML::ML{'entryform.selecttags'} . '</a>';
                     } else {
                         $ret .= $current{$key};
                 }
