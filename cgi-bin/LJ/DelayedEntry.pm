@@ -8,6 +8,7 @@ use Storable;
 
 sub create_from_url {
     my ($class, $url, $opts) = @_;
+    return undef unless $url;
 
     if ($url =~ m!(.+)/d(\d+)\.html!) {
         my $username = $1;
