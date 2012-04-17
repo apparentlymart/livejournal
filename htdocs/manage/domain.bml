@@ -59,6 +59,9 @@ body<=
                 $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->{'userid'});
                 LJ::MemCache::delete("domain:" . $dom); 
             } else {
+                if ($dom =~ /(?:(?:живойжурнал|жж)\.рф)|(?:(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai)/) {
+                    return LJ::bad_input($ML{'domain.bml.error.domainru'});
+                }
                 $dbh->do("INSERT INTO domains VALUES (?, ?)", undef, $dom, $u->{'userid'});
                 if ($dbh->err) {
                     my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=?",
