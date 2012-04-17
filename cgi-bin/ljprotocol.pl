@@ -1985,6 +1985,8 @@ sub common_event_validation
             # Allow syn_links and syn_ids the full width of the prop, to avoid truncating long URLS
             if ($_ eq 'syn_link' || $_ eq 'syn_id') {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP);
+            } elsif ( $_ eq 'current_music' ) {
+                $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::CMMAX_PROP);
             } else {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
             }
@@ -2886,7 +2888,7 @@ sub editevent {
     }
 
     my $itemid = $req->{'itemid'}+0;
-    
+
     $itemid ||= int( ($req->{'ditemid'} + 0) / 256);
 
     # underage users can't do this
@@ -2922,7 +2924,7 @@ sub editevent {
     # but we've already removed the utf-8 flag in the XML-RPC path, and it
     # never gets set in the "flat" protocol path
     return fail($err, 409) if length($req->{event}) >= LJ::BMAX_EVENT;
-    
+
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") && $req->{delayedid} ) {
         my $delayedid = delete $req->{delayedid};
         my $res = {};
@@ -2944,7 +2946,7 @@ sub editevent {
             if ($req->{'event'} !~ /\S/ ) {
                 $entry->delete();
                 $res->{delayedid} = $delayedid;
-                
+
                 $uowner->log_event('delete_entry', {
                                             remote => $u,
                                             actiontarget => $delayedid,
@@ -2996,8 +2998,7 @@ sub editevent {
 
     ### what can they do to somebody elses entry?  (in shared journal)
     ### can edit it if they own or maintain the journal, but not if the journal is read-only
-    if ($posterid != $oldevent->{'posterid'} || $u->is_readonly || $uowner->is_readonly)
-    {
+    if ($posterid != $oldevent->{'posterid'} || $u->is_readonly || $uowner->is_readonly) {
         ## deleting.
         return fail($err,304)
             if ($req->{'event'} !~ /\S/ && !
@@ -3075,10 +3076,10 @@ sub editevent {
         if ( $itemid == $uowner->get_sticky_entry_id() ) {
             $uowner->remove_sticky_entry_id();
         }
-	
-	$dbh->do("UPDATE userusage SET timeupdate=NOW() ".
-	         "WHERE userid=$ownerid");
-	LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
+
+    $dbh->do("UPDATE userusage SET timeupdate=NOW() ".
+             "WHERE userid=$ownerid");
+    LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
         return $res;
     }

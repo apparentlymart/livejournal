@@ -30,6 +30,7 @@ use constant BMAX_KEYWORD => 80;
 use constant CMAX_KEYWORD => 40;
 use constant BMAX_PROP    => 255;   # logprop[2]/talkprop[2]/userproplite (not userprop)
 use constant CMAX_PROP    => 100;
+use constant CMMAX_PROP   => 254;   # current_music length limit
 use constant BMAX_GRPNAME => 60;
 use constant CMAX_GRPNAME => 30;
 use constant BMAX_GRPNAME2 => 90; # introduced in dversion6, when we widened the groupname column

@@ -1168,7 +1168,7 @@ sub entry_form_decode
                 $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
             }
             else {
-                $req->{'prop_current_music'} = substr( substr($POST->{'prop_current_music'}, 0, $pos), 0, 197 ) . '...' . substr( $POST->{'prop_current_music'}, $pos + 1 );
+                $req->{'prop_current_music'} = substr( substr($POST->{'prop_current_music'}, 0, $pos), 0, 197 ) . '... ' . substr( $POST->{'prop_current_music'}, $pos );
             }
         }
         else {
