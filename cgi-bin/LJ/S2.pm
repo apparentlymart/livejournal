@@ -1989,7 +1989,7 @@ sub Entry
     my $p = $arg->{'props'};
     if ($p->{'current_music'}) {
         $e->{'metadata'}->{'music'} = LJ::Setting::Music::format_current_music_string($p->{'current_music'});
-        LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'});
+        LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'}, { 'ignore_lj_music' => 1 });
     }
     if (my $mid = $p->{'current_moodid'}) {
         my $theme = defined $arg->{'moodthemeid'} ? $arg->{'moodthemeid'} : $u->{'moodthemeid'};

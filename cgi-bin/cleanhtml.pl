@@ -444,10 +444,16 @@ sub clean {
                 next TOKEN;
             }
 
-            if ( $tag eq 'lj-music' ) {
+            # LJSUP-11810: Change the widget trava.ru
+            # bypass S2 "print safe" function.
+            # <lj-music> must be expanded at last order
+            if ( $tag eq 'lj-music' && ! $opts->{'ignore_lj_music'} ) {
                 $newdata .= LJ::Setting::Music::format_ljmusic( $attr->{'provider'}, $attr->{'id'} );
 
                 next TOKEN;
+            }
+            else {
+                $newdata .= $token->[4];
             }
 
             ## lj-userpic:
