@@ -2927,6 +2927,8 @@ fotki.album.add.more=Add more
 fotki.album.add.photos|staleness=1
 fotki.album.add.photos=You can add one or more photos at once using "Ctrl" button or "Shift"
 
+fotki.album.add.selected=Add to entry selected
+
 fotki.album.add.to.entry|staleness=1
 fotki.album.add.to.entry=Add to entry
 
