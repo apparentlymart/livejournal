@@ -4205,3 +4205,21 @@ BODY div .b-helplink:active {
 	display: inline-block;
 	vertical-align: middle;
 	}
+	
+/* Comm Promo Admin panel 
+--------------------------------------*/
+
+.b-commpromo-admin-item {
+	margin-bottom: 20px;
+	border-collapse: collapse;
+	}
+.b-commpromo-admin-item TH,
+.b-commpromo-admin-item TD {
+	padding: 7px 10px 12px 10px;
+	border: 1px solid #CCC;
+	}
+.b-commpromo-admin-item TH {
+	background: #f0f0f0;
+	color: #003366;
+	}
+
