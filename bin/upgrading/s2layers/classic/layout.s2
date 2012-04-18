@@ -515,6 +515,7 @@ print safe """
 print safe """<table class="main" width="100%"><tr><td>
     $userpic
     <span class="page_title">$title</span>
+    <p class="view_links">$links</p> 
 """;
 if (size $.linklist > 0 and $*linklist_support) {
 $this->print_linklist();
