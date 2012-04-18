@@ -452,7 +452,7 @@ sub clean {
 
                 next TOKEN;
             }
-            else {
+            elsif ( $tag eq 'lj-music' ) {
                 $newdata .= $token->[4];
             }
 
