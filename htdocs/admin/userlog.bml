@@ -34,10 +34,10 @@ body<=
     my $can_view =  LJ::check_priv($remote, 'canview', '*') || 
                     LJ::check_priv($remote, 'canview', 'userlog');
     my $can_view_uniq = LJ::check_priv($remote, 'canview', 'uniq');
-    return $err->("You do not have the necessary privilege to view this page.")
-        unless $can_view || 
-                LJ::check_priv($remote, 'canview', 'userloglight') ||
-                $LJ::IS_DEV_SERVER;
+#    return $err->("You do not have the necessary privilege to view this page.")
+#        unless $can_view || 
+#                LJ::check_priv($remote, 'canview', 'userloglight') ||
+#                $LJ::IS_DEV_SERVER;
 
     my $user = LJ::canonical_username($POST{user} || $GET{user});
 
@@ -155,6 +155,12 @@ FORM
             $action = "Unmarked as spammer " . LJ::ljuser($u) if $u;
         } elsif (my $info = LJ::run_hook('userlog_rows', $row, $extra)) {
             $action = $info;
+        } elsif ($row->{action} eq 'custom_ratings_screen') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Screened in customized rating " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'custom_ratings_unscreen') {
+            my $u = LJ::load_userid($row->{actiontarget});
+            $action = "Uncreened in customized rating0 " . LJ::ljuser($u) if $u;
         } else {
             $action = "Unknown action ($row->{action})";
         }
