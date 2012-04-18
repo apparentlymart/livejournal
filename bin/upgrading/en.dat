@@ -3220,6 +3220,8 @@ fotki.migration.label=Select this checkbox if you want migrate to new LJ PhotoHo
 
 fotki.migration.started.text=Migration was started
 
+fotki.migration.started.link=<a href="[[link]]">Go to the albums list</a>
+
 fotki.migration.title=Promo page
 
 fotki.photo.recover|staleness=1
