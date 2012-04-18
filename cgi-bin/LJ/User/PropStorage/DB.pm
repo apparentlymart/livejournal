@@ -43,6 +43,8 @@ sub fetch_props_db {
         };
     }
 
+    $LJ::COUNT_LOAD_PROPS_MULTI_DB++;
+
     my $res = $dbh->selectall_arrayref($sql, { 'Slice' => {} }, $userid);
 
     foreach my $row (@$res) {

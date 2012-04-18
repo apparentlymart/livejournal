@@ -2339,7 +2339,8 @@ sub start_request
 
     $LJ::VERTICALS_FORCE_USE_MASTER = 0;    # It need to load a new created category from master insteed slave server.
 
-    $LJ::COUNT_LOAD_PROPS_MULTI = 0;        # Counter for number of requests function LJ::User::load_user_props_multi()
+    $LJ::COUNT_LOAD_PROPS_MULTI    = 0;     # Counter for number of requests function LJ::User::load_user_props_multi()
+    $LJ::COUNT_LOAD_PROPS_MULTI_DB = 0;     # Counter for number of requests for props load to DB
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
