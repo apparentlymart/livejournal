@@ -766,8 +766,8 @@ sub trans {
         }
 
         if ($opts->{'mode'} eq "ljphotoalbums" && $opts->{'user'} ne 'pics') {
-            my $burl = LJ::remote_bounce_url();
-            return remote_domsess_bounce() if LJ::remote_bounce_url();
+#            my $burl = LJ::remote_bounce_url();
+#            return remote_domsess_bounce() if LJ::remote_bounce_url();
             LJ::Request->notes("_journal" => $opts->{'user'});
 
             my $u = LJ::load_user($opts->{user});
@@ -788,17 +788,17 @@ sub trans {
 
             my %post_params = LJ::Request->post_params;
             ## If no remote we can try authtorize by auth_token
-            if (!$remote && !LJ::Auth->check_sessionless_auth_token (
+            if (LJ::did_post() && !LJ::Auth->check_sessionless_auth_token (
                     $LJ::DOMAIN_WEB."/pics/upload",
                     auth_token => $post_params{'form_auth'}, 
                     user => $opts->{user})
             ) {
                 LJ::Request->pnotes ('error' => 'ljphoto_members');
                 LJ::Request->pnotes ('remote' => LJ::load_user($opts->{'user'}));
+                LJ::set_remote ($u) unless $remote;
                 return LJ::Request::FORBIDDEN;
             }
 
-            LJ::set_remote ($u) unless $remote;
             $remote = LJ::get_remote();
 =head
             unless ($remote && ($remote->can_use_ljphoto() || LJ::Request->uri =~ m#^/pics/new_photo_service#)) {
