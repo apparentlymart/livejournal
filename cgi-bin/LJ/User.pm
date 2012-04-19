@@ -3873,7 +3873,7 @@ sub can_use_ljphoto {
 
     ## return 1 if $u->prop ('fotki_migration_status');
 
-    return 0;
+    return 1;
 }
 
 sub can_upload_photo {
