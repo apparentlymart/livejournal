@@ -4060,6 +4060,30 @@ BODY div .b-helplink:active {
 
 
 
+/* Value Bar
+----------------------------------- */
+.b-valuebar {
+	display: inline-block;
+	margin: 0;
+	}
+	.b-valuebar-outer {
+		display: inline-block;
+		margin: 0;
+		background: red;
+		}
+		.b-valuebar-inner {
+			margin: 0;
+			}
+	.b-valuebar-desc {
+		margin: 0;
+		line-height: 1.2;
+		font-size: 90%;
+		font-style: italic;
+		color: #666;
+		}
+
+
+
 /* Message System
 ----------------------------------- */
 .b-msgsystem-errorbox {
