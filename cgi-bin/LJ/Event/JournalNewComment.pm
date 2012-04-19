@@ -143,7 +143,7 @@ sub as_email_string {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
-    LJ::set_remote($u);
+    LJ::set_remote($comment->journal);
 
     my $filename = $self->template_file_for(section => 'body_text', lang => $u->prop('browselang'));
     if ($filename) {
