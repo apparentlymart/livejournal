@@ -3242,6 +3242,8 @@ fotki.migration.conditions=Before the end of the transfer process you have acces
 
 fotki.migration.button=Start
 
+fotki.migration.data.transferred=Your data are being transferred from the old photo hosting service to the new one.
+
 fotki.migration.decline=You are not have access to FotoBilder
 
 fotki.migration.label=Select this checkbox if you want migrate to new LJ PhotoHosting
@@ -3251,6 +3253,8 @@ fotki.migration.started.text=Migration was started
 fotki.migration.started.link=<a href="[[link]]">Go to the albums list</a>
 
 fotki.migration.title=Promo page
+
+fotki.migration.try.again=This can take a few minutes; please wait and try again.
 
 fotki.photo.recover|staleness=1
 fotki.photo.recover=You can recover it, before you clicking "Save all" button
