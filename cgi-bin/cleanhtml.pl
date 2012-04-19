@@ -849,7 +849,7 @@ sub clean {
                     }
                 }
 
-                $newdata .= '<div class="lj-like">';
+                $newdata .= '<div class="lj-like"><!--';
                 foreach my $button (@buttons) {
                     if ( $button eq 'facebook' ) {
                         my $language = LJ::Lang::get_remote_lang();
@@ -929,7 +929,7 @@ sub clean {
                         }
                     }
                 }
-                $newdata .= '</div>';
+                $newdata .= '--></div>';
             }
 
             # Don't allow any tag with the "set" attribute
