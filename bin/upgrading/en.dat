@@ -3032,6 +3032,8 @@ fotki.album.edit.empty.photo.desc=(no description)
 fotki.album.edit.empty.photo.title|staleness=1
 fotki.album.edit.empty.photo.title=(no title)
 
+fotki.album.edit.okey=Ok
+
 fotki.album.edit.save|staleness=1
 fotki.album.edit.save=Save
 
@@ -3112,8 +3114,6 @@ fotki.album.new.album.name=New album name
 
 fotki.album.no.photo|staleness=1
 fotki.album.no.photo=No photo
-
-fotki.album.edit.okey=OK
 
 fotki.album.paste.url=Paste url
 
