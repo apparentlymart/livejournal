@@ -3871,7 +3871,7 @@ sub can_use_ljphoto {
     }
 =cut
 
-    return 1 if $u->prop ('fotki_migration_status');
+    ## return 1 if $u->prop ('fotki_migration_status');
 
     return 0;
 }
