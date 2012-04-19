@@ -610,6 +610,34 @@ cprod.userpic.text.v5=
 
 create.head=Join LiveJournal
 
+create.cap.head=Use all LiveJournal capabilities
+
+create.cap.desc=Upload photo, use userheads, userpics.
+
+create.cap.try=Try free
+
+create.cap.tokens=10 000 tokens
+
+create.cap.year=per year
+
+create.login.head=Login to LiveJournal
+
+create.login.desc=You can use your social accounts.
+
+create.login.facebook=Facebook
+
+create.login.vkontakte=VKontakte
+
+create.login.twitter=Twitter
+
+create.login.mailru=Mail.Ru
+
+create.login.google=Google
+
+create.login.openid=OpenID
+
+create.login.secure=LiveJournal Secure Site
+
 create.nextsteps.communities=join communities
 
 create.nextsteps.friends=find friends
@@ -5889,6 +5917,10 @@ talk.post.in.community=in community
 
 talk.post.location=Location
 
+talk.post.meta.asjournal=as
+
+talk.post.meta.asloginpass=as another user
+
 talk.post.meta.tojournal=to journal
 
 talk.post.meta.tocommunity=to community
@@ -5901,9 +5933,11 @@ talk.post.meta.password=Password
 
 talk.post.meta.postpone=Postpone until
 
+talk.post.meta.who=Post as
+
 talk.post.meta.where=Post to
 
-talk.post.meta.where.it.is=Date
+talk.post.meta.where.it.is=Poster
 
 talk.post.meta.when=Date
 
@@ -5940,6 +5974,8 @@ talk.post.security.friends=friends
 talk.post.security.private=private
 
 talk.post.security.public=public
+
+talk.post.sticky=sticky
 
 talk.post.subject=Subject
 
