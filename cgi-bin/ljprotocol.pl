@@ -52,100 +52,98 @@ use constant FRIEND_ITEMS_LIMIT => 50;
 
 my %e = (
      # User Errors
-     "100" => [ E_PERM, "Invalid username" ],
-     "101" => [ E_PERM, "Invalid password" ],
-     "102" => [ E_PERM, "Can't use custom/private security on shared/community journals." ],
-     "103" => [ E_PERM, "Poll error" ],
-     "104" => [ E_TEMP, "Error adding one or more friends" ],
-     "105" => [ E_PERM, "Challenge expired" ],
-     "150" => [ E_PERM, "Can't post as non-user" ],
-     "151" => [ E_TEMP, "Banned from journal" ],
-     "152" => [ E_PERM, "Can't make back-dated entries in non-personal journal." ],
-     "153" => [ E_PERM, "Incorrect time value" ],
-     "154" => [ E_PERM, "Can't add a redirected account as a friend" ],
-     "155" => [ E_TEMP, "Non-authenticated email address" ],
-     "156" => [ E_TEMP, sub { # to reload w/o restart
-         LJ::tosagree_str('protocol' => 'text') ||
-         LJ::tosagree_str('protocol' => 'title')
-     } ],
-     "157" => [ E_TEMP, "Tags error" ],
-     "158" => [ E_TEMP, "You have no rights to make this entry sticky"],
+     "100" => E_PERM,
+     "101" => E_PERM,
+     "102" => E_PERM,
+     "103" => E_PERM,
+     "104" => E_TEMP,
+     "105" => E_PERM,
+     "150" => E_PERM,
+     "151" => E_TEMP,
+     "152" => E_PERM,
+     "153" => E_PERM,
+     "154" => E_PERM,
+     "155" => E_TEMP,
+     "156" => E_TEMP,
+     "157" => E_TEMP,
+     "158" => E_TEMP,
 
      # Client Errors
-     "200" => [ E_PERM, "Missing required argument(s)" ],
-     "201" => [ E_PERM, "Unknown method" ],
-     "202" => [ E_PERM, "Too many arguments" ],
-     "203" => [ E_PERM, "Invalid argument(s)" ],
-     "204" => [ E_PERM, "Invalid metadata datatype" ],
-     "205" => [ E_PERM, "Unknown metadata" ],
-     "206" => [ E_PERM, "Invalid destination journal username." ],
-     "207" => [ E_PERM, "Protocol version mismatch" ],
-     "208" => [ E_PERM, "Invalid text encoding" ],
-     "209" => [ E_PERM, "Parameter out of range" ],
-     "210" => [ E_PERM, "Client tried to edit with corrupt data.  Preventing." ],
-     "211" => [ E_PERM, "Invalid or malformed tag list" ],
-     "212" => [ E_PERM, "Message body is too long" ],
-     "213" => [ E_PERM, "Message body is empty" ],
-     "214" => [ E_PERM, "Message looks like spam" ],
-     "215" => [ E_PERM, "Timezone is not set" ],
-     "216" => [ E_PERM, "Unknown post type" ],
-     "217" => [ E_PERM, "Can't convert posted item to delayed" ],
-     "218" => [ E_PERM, "Wrong selecttype" ],
-     "219" => [ E_PERM, "Missing mandatory argument (id or ids)" ],
-     "220" => [ E_PERM, "Can't use such view mode" ],
+     "200" => E_PERM,
+     "201" => E_PERM,
+     "202" => E_PERM,
+     "203" => E_PERM,
+     "204" => E_PERM,
+     "205" => E_PERM,
+     "206" => E_PERM,
+     "207" => E_PERM,
+     "208" => E_PERM,
+     "209" => E_PERM,
+     "210" => E_PERM,
+     "211" => E_PERM,
+     "212" => E_PERM,
+     "213" => E_PERM,
+     "214" => E_PERM,
+     "215" => E_PERM,
+     "216" => E_PERM,
+     "217" => E_PERM,
+     "218" => E_PERM,
+     "219" => E_PERM,
+     "220" => E_PERM,
+     "221" => E_PERM,
 
      # Access Errors
-     "300" => [ E_TEMP, "Don't have access to requested journal" ],
-     "301" => [ E_TEMP, "Access of restricted feature" ],
-     "302" => [ E_TEMP, "Can't edit post from requested journal" ],
-     "303" => [ E_TEMP, "Can't edit post in community journal" ],
-     "304" => [ E_TEMP, "Can't delete post in this community journal" ],
-     "305" => [ E_TEMP, "Action forbidden; account is suspended." ],
-     "306" => [ E_TEMP, "This journal is temporarily in read-only mode.  Try again in a couple minutes." ],
-     "307" => [ E_PERM, "Selected journal no longer exists." ],
-     "308" => [ E_TEMP, "Account is locked and cannot be used." ],
-     "309" => [ E_PERM, "Account is marked as a memorial." ],
-     "310" => [ E_TEMP, "Account needs to be age verified before use." ],
-     "311" => [ E_TEMP, "Access temporarily disabled." ],
-     "312" => [ E_TEMP, "Not allowed to add tags to entries in this journal" ],
-     "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
-     "314" => [ E_PERM, "Only paid users allowed to use this request" ],
-     "315" => [ E_PERM, "User messaging is currently disabled" ],
-     "316" => [ E_TEMP, "Poster is read-only and cannot post entries." ],
-     "317" => [ E_TEMP, "Journal is read-only and entries cannot be posted to it." ],
-     "318" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
-     "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
-     "320" => [ E_TEMP, "Sorry, there was a problem with content of the entry" ],
-     "321" => [ E_TEMP, "Sorry, deleting is temporary disabled. Entry is 'private' now" ],
-     "322" => [ E_PERM, "Not allowed to post to community with moderation queue"],
-     "323" => [ E_PERM, "Root entry is suspended; action is prohibited"],
-     "324" => [ E_PERM, "Parent comment is frozen; action is prohibited"],
-     "325" => [ E_PERM, "Can't edit that comment."],
-     "326" => [ E_PERM, "Not allowed to edit or delete this comment"],
-     "327" => [ E_PERM, "Selected comment has been already deleted"],
+     "300" => E_TEMP,
+     "301" => E_TEMP,
+     "302" => E_TEMP,
+     "303" => E_TEMP,
+     "304" => E_TEMP,
+     "305" => E_TEMP,
+     "306" => E_TEMP,
+     "307" => E_PERM,
+     "308" => E_TEMP,
+     "309" => E_PERM,
+     "310" => E_TEMP,
+     "311" => E_TEMP,
+     "312" => E_TEMP,
+     "313" => E_TEMP,
+     "314" => E_PERM,
+     "315" => E_PERM,
+     "316" => E_TEMP,
+     "317" => E_TEMP,
+     "318" => E_TEMP,
+     "319" => E_TEMP,
+     "320" => E_TEMP,
+     "321" => E_TEMP,
+     "322" => E_PERM,
+     "323" => E_PERM,
+     "324" => E_PERM,
+     "325" => E_PERM,
+     "326" => E_PERM,
+     "327" => E_PERM,
 
      # Limit errors
-     "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
-     "404" => [ E_TEMP, "Cannot post" ],
-     "405" => [ E_TEMP, "Post frequency limit." ],
-     "406" => [ E_TEMP, "Client is making repeated requests.  Perhaps it's broken?" ],
-     "407" => [ E_TEMP, "Moderation queue full" ],
-     "408" => [ E_TEMP, "Maximum queued posts for this community+poster combination reached." ],
-     "409" => [ E_PERM, "Post too large." ],
-     "410" => [ E_PERM, "Your trial account has expired.  Posting now disabled." ],
-     "411" => [ E_TEMP, "Action frequency limit." ],
-     "412" => [ E_TEMP, "Subscribe limit reached." ],
+     "402" => E_TEMP,
+     "404" => E_TEMP,
+     "405" => E_TEMP,
+     "406" => E_TEMP,
+     "407" => E_TEMP,
+     "408" => E_TEMP,
+     "409" => E_PERM,
+     "410" => E_PERM,
+     "411" => E_TEMP,
+     "412" => E_TEMP,
 
      # Server Errors
-     "500" => [ E_TEMP, "Internal server error" ],
-     "501" => [ E_TEMP, "Database error" ],
-     "502" => [ E_TEMP, "Database temporarily unavailable" ],
-     "503" => [ E_TEMP, "Error obtaining necessary database lock" ],
-     "504" => [ E_PERM, "Protocol mode no longer supported." ],
-     "505" => [ E_TEMP, "Account data format on server is old and needs to be upgraded." ], # cluster0
-     "506" => [ E_TEMP, "Journal sync temporarily unavailable." ],
-     "507" => [ E_PERM, "Delayed entry 'create' failed"],
-     "508" => [ E_PERM, "Delayed entry 'edit' failed"],
+     "500" => E_TEMP,
+     "501" => E_TEMP,
+     "502" => E_TEMP,
+     "503" => E_TEMP,
+     "504" => E_PERM,
+     "505" => E_TEMP,
+     "506" => E_TEMP,
+     "507" => E_PERM,
+     "508" => E_PERM,
 );
 
 my %HANDLERS = (
@@ -203,7 +201,7 @@ sub error_class
 {
     my $code = shift;
     $code = $1 if $code =~ /^(\d\d\d):(.+)/;
-    return $e{$code} && ref $e{$code} ? $e{$code}->[0] : undef;
+    return $e{$code};
 }
 
 sub error_is_transient
@@ -224,12 +222,9 @@ sub error_message
     ($code, $des) = ($1, $2) if $code =~ /^(\d\d\d):(.+)/;
 
     my $prefix = "";
-    my $error =
-      $e{$code} && ref $e{$code}
-      ? ( ref $e{$code}->[1] eq 'CODE' ? $e{$code}->[1]->() : $e{$code}->[1] )
-      : "BUG: Unknown error code ($code)!";
-    $prefix = "Client error: " if $code >= 200;
-    $prefix = "Server error: " if $code >= 500;
+    my $error = LJ::Lang::ml("xmlrpc.error.$code") || "BUG: Unknown error code ($code)!";
+    $prefix = LJ::Lang::ml('xmlrpc.client_error') if $code >= 200;
+    $prefix = LJ::Lang::ml('xmlrpc.server_error') if $code >= 500;
     my $totalerror = "$prefix$error";
     $totalerror .= ": $des" if $des;
     return $totalerror;
@@ -240,11 +235,26 @@ sub do_request
     # get the request and response hash refs
     my ($method, $req, $err, $flags) = @_;
 
-    # if version isn't specified explicitly, it's version 0
     if (ref $req eq "HASH") {
+
+        # if version isn't specified explicitly, it's version 0
         $req->{'ver'} ||= $req->{'version'};
         $req->{'ver'} = 0 unless defined $req->{'ver'};
+
+        # check specified language
+        if (defined $req->{'lang'} && $req->{'lang'}) {
+            if ($req->{'lang'} eq 'en') {
+                $req->{'lang'} = "en_LJ";
+            } elsif (not grep /^$req->{'lang'}$/, @LJ::LANGS) {
+                return fail($err, 221, $req->{'lang'} );
+            }
+        }
     }
+    
+    # set specified or default language
+    my $current_lang = LJ::Lang::current_language();
+    my $lang = $req->{'lang'} || $current_lang || $LJ::DEFAULT_LANG;
+    LJ::Lang::current_language($lang) unless $lang eq $current_lang;
 
     $flags ||= {};
     my @args = ($req, $err, $flags);
@@ -409,13 +419,13 @@ sub editpoll
 
     my $is_super = $poll->prop('supermaintainer');
 
-    return fail($err, 103, 'Maintainer election poll') if($is_super);
+    return fail($err, 103, 'xmlrpc.des.maintainer_poll') if($is_super);
 
     my $status = $req->{status};
     return fail($err, 200, 'status') unless($status);
     return fail($err, 203, 'status') unless($status =~ /open|close/);
 
-    return fail($err, 103, 'You are not owner of the poll') unless($poll->is_owner($u));
+    return fail($err, 103, 'xmlrpc.des.not_poll_owner') unless($poll->is_owner($u));
 
     if($status eq 'open') {
         $poll->open_poll();
@@ -570,18 +580,18 @@ sub getcomments {
     }
 
     return fail($err,200,"journal") unless($journal);
-    return fail($err,200,"ditemid or itemid") unless($req->{ditemid} || $req->{itemid});
+    return fail($err,200,'xmlrpc.des.or', {'first'=>'ditemid', 'second'=>'itemid'}) unless($req->{ditemid} || $req->{itemid});
 
     my $itemid = int($req->{ditemid} / 256);
     $itemid ||= $req->{itemid} + 0;
 
     # load root post
     my $jitem = LJ::Talk::get_journal_item($journal, $itemid);
-    return fail($err,203,"ditemid (specified post doesn't exist in requested journal)") unless($jitem);
+    return fail($err,203,'xmlrpc.des.no_post_by_param', {'param'=>'ditemid'}) unless($jitem);
     my $up = LJ::load_userid( $jitem->{'posterid'} );
 
     # check permission to access root post
-    return fail($err,300,"") unless( LJ::can_view($u, $jitem));
+    return fail($err,300) unless( LJ::can_view($u, $jitem));
 
     my $talkid = int(($req->{dtalkid} + 0)/256);   # talkid to load thread
 
@@ -780,23 +790,23 @@ sub deletecomments {
         $journal = $u;
     }
 
-    return fail($err, 200, "dtalkid or dtalkids") unless($req->{dtalkid} || $req->{dtalkids});
+    return fail($err, 200, 'xmlrpc.des.or', {'first'=>'dtalkid','second'=>'dtalkids'}) unless($req->{dtalkid} || $req->{dtalkids});
     my @ids;
     if ($req->{dtalkids}) {
         foreach my $num (split(/\s*,\s*/, $req->{'dtalkids'})) {
-            return fail($err, 203, "Non-numeric dtalkid '$num'") unless $num =~ /^\d+$/;
+            return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'dtalkid','value'=>$num}) unless $num =~ /^\d+$/;
             push @ids, $num;
         }
     } else {
         my $num = $req->{dtalkid};
-        return fail($err, 203, "Non-numeric dtalkid") unless $num =~ /^\d+$/;
+        return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'dtalkid','value'=>$num}) unless $num =~ /^\d+$/;
         push @ids, $num;
     }
 
     my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
 
     foreach my $comm (@comments) {
-	return fail($err, 203, "dtalkid (specified comment doesn't exist in requested journal)") unless $comm->valid;
+	return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->valid;
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
     }   
@@ -810,7 +820,7 @@ sub deletecomments {
             my @comment_tree = $comment->entry->comment_list;
             my @children = ($comment);
             while(my $item = shift @children){
-                return fail($err, 326, 'Thread contains somebody else\'s comment. dtalkid:'.$item->dtalkid) unless $item->user_can_delete($u);
+                return fail($err, 326, 'xmlrpc.des.foreign_comment', {'dtalkid'=>$item->dtalkid}) unless $item->user_can_delete($u);
                 $map_delete{$item->dtalkid} = $item unless $item->is_deleted;
                 push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
             }
@@ -852,17 +862,17 @@ sub updatecomments {
         $journal = $u;
     }
 
-    return fail($err, 200, "dtalkid or dtalkids") unless($req->{dtalkid} || $req->{dtalkids});
+    return fail($err, 200, 'xmlrpc.des.or',{'first'=>'dtalkid','second'=>'dtalkids'}) unless($req->{dtalkid} || $req->{dtalkids});
 
     my @ids;
     if ($req->{dtalkids}) {
         foreach my $num (split(/\s*,\s*/, $req->{'dtalkids'})) {
-            return fail($err, 203, "Non-numeric dtalkid '$num'") unless $num =~ /^\d+$/;
+            return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'dtalkid', 'value'=>$num}) unless $num =~ /^\d+$/;
             push @ids, $num;
         }
     } else {
         my $num = $req->{dtalkid};
-        return fail($err, 203, "Non-numeric dtalkid") unless $num =~ /^\d+$/;
+        return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'dtalkid', 'value'=>$num}) unless $num =~ /^\d+$/;
         push @ids, $num;
     }
 
@@ -1050,10 +1060,10 @@ sub editcomment {
     return fail($err, 200, "dtalkid") unless($req->{dtalkid});
     
     my $comment = LJ::Comment->new($journal, dtalkid => $req->{dtalkid});
-    return fail($err, 203, 'dtalkid and journal(id)') unless $comment;
+    return fail($err, 203, 'xmlrpc.des.and', {first=>'dtalkid',second=>'journal(id)'}) unless $comment;
 
     my $entry = $comment->entry;
-    return fail($err, 203, 'dtalkid and journal(id)') unless $entry;;
+    return fail($err, 203, 'xmlrpc.des.and', {first=>'dtalkid',second=>'journal(id)'}) unless $entry;;
     return fail($err, 323) if $entry && $entry->is_suspended;
 
     my $up = $entry->poster;
@@ -1165,9 +1175,9 @@ sub getfriendspage
     my $u = $flags->{'u'};
 
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
-    return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
     my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
-    return fail($err, 209, "Bad skip value") if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'skip'}) if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
 
     my $lastsync = int $req->{lastsync};
     my $before = int $req->{before};
@@ -1310,12 +1320,12 @@ sub getinbox
     my $u = $flags->{'u'};
 
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
-    return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
     my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
-    return fail($err, 209, "Bad skip value") if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'skip'}) if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
 
     # get the user's inbox
-    my $inbox = $u->notification_inbox or return fail($err, 500, "Cannot get user inbox");
+    my $inbox = $u->notification_inbox or return fail($err, 500, 'xmlrpc.des.inbox_fail');
 
     my %type_number = (
         Befriended           => 1,
@@ -1349,7 +1359,7 @@ sub getinbox
     if ($req->{'lastsync'}) {
         $sync_date = int $req->{'lastsync'};
         if($sync_date <= 0) {
-            return fail($err,203,"Invalid syncitems date format (must be unixtime)");
+            return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'});
         }
     }
 
@@ -1369,7 +1379,7 @@ sub getinbox
     @notifications = reverse @notifications;
 
     if (my $before = $req->{'before'}) {
-        return fail($err,203,"Invalid syncitems date format (must be unixtime)") if $before <= 0;
+        return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'}) if $before <= 0;
         @notifications = grep {$_->when_unixtime <= $before} @notifications;
     }
 
@@ -1416,7 +1426,7 @@ sub setmessageread {
     my $u = $flags->{'u'};
 
     # get the user's inbox
-    my $inbox = $u->notification_inbox or return fail($err, 500, "Cannot get user inbox");
+    my $inbox = $u->notification_inbox or return fail($err, 500, 'xmlrpc.des.inbox_fail');
     my @result;
 
     # passing requested ids for loading
@@ -1482,11 +1492,11 @@ sub sendmessage
         unless LJ::text_in($body_text);
 
     my ($msg_len_b, $msg_len_c) = LJ::text_length($body_text);
-    return fail($err, 212, 'found: ' . LJ::commafy($msg_len_c) . ' characters, it should not exceed ' . LJ::commafy($msg_limit))
+    return fail($err, 212, 'xmlrpc.des.message_long', {'len'=>LJ::commafy($msg_len_c), 'limit'=>LJ::commafy($msg_limit)})
         unless ($msg_len_c <= $msg_limit);
 
 
-    return fail($err, 213, 'found: ' . LJ::commafy($msg_len_c) . ' characters, it should exceed zero')
+    return fail($err, 213, 'xmlrpc.des.message_empty', {'len'=>LJ::commafy($msg_len_c)})
         if ($msg_len_c <= 0);
 
     my @to = (ref $req->{'to'}) ? @{$req->{'to'}} : ($req->{'to'});
@@ -1552,7 +1562,7 @@ sub login
     ## check for version mismatches
     ## non-Unicode installations can't handle versions >=1
 
-    return fail($err,207, "This installation does not support Unicode clients")
+    return fail($err,207, 'xmlrpc.des.not_unicode')
         if $ver>=1 and not $LJ::UNICODE;
 
     # do not let locked people log in
@@ -1573,7 +1583,7 @@ sub login
     ## return their friend groups
     if (LJ::u_equals($u, $uowner)) {
         $res->{'friendgroups'} = list_friendgroups($u);
-        return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
+        return fail($err, 502, 'xmlrpc.des.friend_groups_fail') unless $res->{'friendgroups'};
         if ($ver >= 1) {
             foreach (@{$res->{'friendgroups'}}) {
                 LJ::text_out(\$_->{'name'});
@@ -1648,7 +1658,7 @@ sub login
     {
         my $client = $req->{'clientversion'};
 
-        return fail($err, 208, "Bad clientversion string")
+        return fail($err, 208, 'xmlrpc.des.bad_value', {'param'=>'clientversion'})
             if $ver >= 1 and not LJ::text_in($client);
 
         my $dbh = LJ::get_db_writer();
@@ -1682,7 +1692,7 @@ sub getfriendgroups
     };
 
     $res->{'friendgroups'} = list_friendgroups($u);
-    return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
+    return fail($err, 502, 'xmlrpc.des.friend_groups_fail') unless $res->{'friendgroups'};
     if ($req->{'ver'} >= 1) {
         foreach (@{$res->{'friendgroups'} || []}) {
             LJ::text_out(\$_->{'name'});
@@ -1763,7 +1773,7 @@ sub getfriends
 
     if ($req->{'includegroups'}) {
         $res->{'friendgroups'} = list_friendgroups($u);
-        return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
+        return fail($err, 502, 'xmlrpc.des.friend_groups_fail') unless $res->{'friendgroups'};
         if ($req->{'ver'} >= 1) {
             foreach (@{$res->{'friendgroups'} || []}) {
                 LJ::text_out(\$_->{'name'});
@@ -1947,29 +1957,29 @@ sub common_event_validation
         $req->{'year'} < 1970 ||    # before unix time started = bad
         $req->{'year'} > 2037)      # after unix time ends = worse!  :)
     {
-        return fail($err,203,"Invalid year value.");
+        return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'year'});
     }
     if ($req->{'mon'} !~ /^\d{1,2}$/ ||
         $req->{'mon'} < 1 ||
         $req->{'mon'} > 12)
     {
-        return fail($err,203,"Invalid month value.");
+        return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'month'});
     }
     if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 ||
         $req->{'day'} > LJ::TimeUtil->days_in_month($req->{'mon'},
                                           $req->{'year'}))
     {
-        return fail($err,203,"Invalid day of month value.");
+        return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'day of month'});
     }
     if ($req->{'hour'} !~ /^\d{1,2}$/ ||
         $req->{'hour'} < 0 || $req->{'hour'} > 23)
     {
-        return fail($err,203,"Invalid hour value.");
+        return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'hour'});
     }
     if ($req->{'min'} !~ /^\d{1,2}$/ ||
         $req->{'min'} < 0 || $req->{'min'} > 59)
     {
-        return fail($err,203,"Invalid minute value.");
+        return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'minute'});
     }
 
     # column width
@@ -2005,7 +2015,7 @@ sub common_event_validation
     # we don't want attackers sending something that looks like gzipped data
     # in protocol version 0 (unknown8bit allowed), otherwise they might
     # inject a 100MB string of single letters in a few bytes.
-    return fail($err,208,"Cannot send gzipped data")
+    return fail($err,208,'xmlrpc.des.send_gzip_fail')
         if substr($req->{'event'},0,2) eq "\037\213";
 
     # non-ASCII?
@@ -2029,7 +2039,7 @@ sub common_event_validation
                 ## encoding is unknown - it's neither ASCII nor UTF-8
                 # only people should have unknown8bit entries.
                 my $uowner = $flags->{u_owner} || $flags->{u};
-                return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
+                return fail($err,207,'xmlrpc.des.need_unicode_client')
                     if $uowner->{journaltype} ne 'P';
 
                 # so rest of site can change chars to ? marks until
@@ -2037,12 +2047,12 @@ sub common_event_validation
                 $req->{'props'}->{'unknown8bit'} = 1;
             }
         } else {
-            return fail($err,207, "This installation does not support Unicode clients") unless $LJ::UNICODE;
+            return fail($err,207, 'xmlrpc.des.not_unicode') unless $LJ::UNICODE;
             # validate that the text is valid UTF-8
             if (!LJ::text_in($req->{'subject'}) ||
                 !LJ::text_in($req->{'event'}) ||
                 grep { !LJ::text_in($_) } values %{$req->{'props'}}) {
-                return fail($err, 208, "The text entered is not a valid UTF-8 stream");
+                return fail($err, 208, 'xmlrpc.des.not_valid_unicode');
             }
         }
     }
@@ -2066,13 +2076,13 @@ sub common_event_validation
         my $val = $req->{'props'}->{$pname};
 
         if ($ptype eq "bool" && $val !~ /^[01]$/) {
-            return fail($err,204,"Property \"$pname\" should be 0 or 1");
+            return fail($err,204,'xmlrpc.des.non_boolean',{'param'=>$pname});
         }
         if ($ptype eq "num" && $val =~ /[^\d]/) {
-            return fail($err,204,"Property \"$pname\" should be numeric");
+            return fail($err,204,'xmlrpc.des.non_arifmetic',{'param'=>$pname,'value'=>$val});
         }
         if ($pname eq "current_coords" && ! eval { LJ::Location->new(coords => $val) }) {
-            return fail($err,204,"Property \"current_coords\" has invalid value");
+            return fail($err,204,'xmlrpc.des.bad_value', {'param'=>'current_coords'});
         }
     }
 
@@ -2188,7 +2198,7 @@ sub postevent {
             # FIXME we ought to store this timezone and make use of it somehow.
             $offset = $req->{'tz'} / 100.0;
         } else {
-            return fail($err, 203, "Invalid tz");
+            return fail($err, 203, 'xmlrpc.des.bad_value', {'param'=>'tz'});
         }
     }
 
@@ -2244,7 +2254,7 @@ sub postevent {
         !$time_was_faked && $u->{'newesteventtime'} &&
         $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
-        return fail($err, 153, "You have an entry which was posted at $u->{'newesteventtime'}, but you're trying to post an entry before this. Please check the date and time of both entries. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. Otherwise, use the \"Date Out of Order\" option for this entry instead.");
+        return fail($err, 153, 'xmlrpc.des.entry_time_conflict', {'newesteventtime'=>$u->{'newesteventtime'}});
     }
    
     if ( $req->{sticky} &&
@@ -2265,7 +2275,7 @@ sub postevent {
     }
 
     # can't specify both a custom security and 'friends-only'
-    return fail($err, 203, "Invalid friends group security set")
+    return fail($err, 203, 'xmlrpc.des.friends_security')
         if $qallowmask > 1 && $qallowmask % 2;
 
     ## if newpost_minsecurity is set, new entries have to be
@@ -2301,7 +2311,7 @@ sub postevent {
     my @polls = ();
     if (LJ::Poll->contains_new_poll(\$event))
     {
-        return fail($err,301,"Your account type doesn't permit creating polls.")
+        return fail($err,301,'xmlrpc.des.poll_not_permitted')
             unless (LJ::get_cap($u, "makepoll")
                     || ($uowner->{'journaltype'} eq "C"
                         && LJ::get_cap($uowner, "makepoll")
@@ -2575,7 +2585,7 @@ sub postevent {
     }
 
     my $jitemid = LJ::alloc_user_counter($uowner, "L");
-    return $fail->($err,501,"No itemid could be generated.") unless $jitemid;
+    return $fail->($err,501,'xmlrpc.des.cannnot_generate_items') unless $jitemid;
 
     # bring in LJ::Entry with Class::Autouse
     LJ::Entry->can("dostuff");
@@ -2905,7 +2915,7 @@ sub editevent {
     return fail($err,306) unless $dbcm && $dbh;
 
     # can't specify both a custom security and 'friends-only'
-    return fail($err, 203, "Invalid friends group security set.")
+    return fail($err, 203, 'xmlrpc.des.friends_security')
         if $qallowmask > 1 && $qallowmask % 2;
 
     ### make sure user can't change a post to "custom/private security" on shared journals
@@ -3633,7 +3643,7 @@ sub getevents {
         my $rtime_what = $is_community ? "rlogtime" : "revttime";
 
         if ($req->{'beforedate'}) {
-            return fail($err,203,"Invalid beforedate format.")
+            return fail($err,203,'xmlrpc.des.bad_value',{'param'=>'beforedate'})
                 unless ($req->{'beforedate'} =~
                         /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
             my $qd = $dbr->quote($req->{'beforedate'});
@@ -3661,9 +3671,9 @@ sub getevents {
         return fail($err, 506) if $LJ::DISABLED{'syncitems'};
 
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
-        return fail($err, 203, "Invalid syncitems date format")
+        return fail($err, 203, 'xmlrpc.des.bad_value',{'param'=>'syncitems'})
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-        return fail($err, 301, "syncitems is unavailable in anonymous mode") unless($u);
+        return fail($err, 301, 'xmlrpc.des.syncitems_unavailable') unless($u);
 
         my $now = time();
 
@@ -3723,17 +3733,17 @@ sub getevents {
         my @ids;
         if($req->{'itemids'}) {
             foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
-                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
+                return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'itemid', 'value'=>$num}) unless $num =~ /^\d+$/;
                 push @ids, $num;
             }
         } elsif ($req->{'ditemids'}) {
             foreach my $num (split(/\s*,\s*/, $req->{'ditemids'})) {
-                return fail($err, 203, "Non-numeric itemid") unless $num =~ /^\d+$/;
+                return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>'itemid', 'value'=>$num}) unless $num =~ /^\d+$/;
                 push @ids, int(($num+0)/256);
             }
         }
         my $limit = 100;
-        return fail($err, 209, "Can't retrieve more than $limit entries at once") if @ids > $limit;
+        return fail($err, 209, 'xmlrpc.des.entries_limit', {'limit'=>$limit}) if @ids > $limit;
 
         my $in = join(',', @ids);
         $where = "AND jitemid IN ($in)";
@@ -3779,7 +3789,7 @@ sub getevents {
         $where = "AND jitemid IN ($in)";
     }
     else {
-        return fail($err,200,"Invalid selecttype.");
+        return fail($err,200,'xmlrpc.des.bad_value',{'param'=>'selecttype'});
     }
 
     if (my $posterid = int($req->{'posterid'})) {
@@ -3945,7 +3955,7 @@ sub getevents {
                 $evt->{'props'}->{$_} = LJ::text_convert($evt->{'props'}->{$_}, $uowner, \$error);
             }
 
-            return fail($err, 208, "Cannot display this post. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
+            return fail($err, 208, 'xmlrpc.des.cannnot_display_post',{'siteroot'=>$LJ::SITEROOT})
                 if $error;
         }
 
@@ -3961,7 +3971,7 @@ sub getevents {
                     $t->[0] = $t->[1] = $CannotBeShown;
                 }
                 else {
-                    return fail($err, 207, "Cannot display/edit a Unicode post with a non-Unicode client. Please see $LJ::SITEROOT/support/encodings.bml for more information.");
+                    return fail($err, 207, 'xmlrpc.des.not_unicode_client', {'siteroot'=>$LJ::SITEROOT});
                 }
             }
         }
@@ -4112,14 +4122,14 @@ sub editfriends
     };
 
     # only people, shared journals, and owned syn feeds can add friends
-    return $fail->(104, "Journal type cannot add friends")
+    return $fail->(104, 'xmlrpc.des.friends_add_not_allowed')
         unless ($u->{'journaltype'} eq 'P' ||
                 $u->{'journaltype'} eq 'S' ||
                 $u->{'journaltype'} eq 'I' ||
                 ($u->{'journaltype'} eq "Y" && $u->password));
 
     # Don't let suspended users add friend
-    return $fail->(305, "Suspended journals cannot add friends.")
+    return $fail->(305, 'xmlrpc.des.suspended_add_friend')
         if ($u->is_suspended);
 
      my $sclient = LJ::theschwartz();
@@ -4147,7 +4157,7 @@ sub editfriends
         my $fg = $fa->{'fgcolor'} || "#000000";
         my $bg = $fa->{'bgcolor'} || "#FFFFFF";
         if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i) {
-            return $fail->(203, "Invalid color values");
+            return $fail->(203, 'xmlrpc.des.bad_value',{'param'=>'color'});
         }
 
         my $row = LJ::load_user($aname);
@@ -4298,9 +4308,9 @@ sub editfriendgroups
         foreach my $bit (keys %{$req->{'set'}})
         {
             my $name = $req->{'set'}->{$bit}->{'name'};
-            return fail($err,207,"non-ASCII names require a Unicode-capable client")
+            return fail($err,207,'xmlrpc.des.not_ascii')
                 if $req->{'ver'} < 1 and not LJ::is_ascii($name);
-            return fail($err,208,"Invalid group names. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
+            return fail($err,208,'xmlrpc.des.invalid_group',{'siteroot'=>$LJ::SITEROOT})
                 unless LJ::text_in($name);
         }
     }
@@ -4608,7 +4618,7 @@ sub syncitems {
     my $date = $req->{'lastsync'};
 
     if ($date) {
-        return fail($err, 203, "Invalid date format")
+        return fail($err, 203, 'xmlrpc.des.bad_value', {'param'=>'date'})
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
     } else {
         $date = "0000-00-00 00:00:00";
@@ -5021,8 +5031,7 @@ sub authenticate
     }
 
     # if there is a require TOS revision, check for it now
-    return fail($err, 156, LJ::tosagree_str('protocol' => 'text'))
-        unless $u->tosagree_verify;
+    return fail($err, 156) unless $u->tosagree_verify;
 
     # remember the user record for later.
     $flags->{'u'} = $u;
@@ -5032,10 +5041,11 @@ sub authenticate
 
 sub fail
 {
-    my $err = shift;
+    my $err  = shift;
     my $code = shift;
-    my $des = shift;
-    $code .= ":$des" if $des;
+    my $des  = shift;
+    my $vars = shift; 
+    $code .= ":".($des =~ /^xmlrpc\.des\./ ? LJ::Lang::ml($des, $vars) : $des) if $des;
     $$err = $code if (ref $err eq "SCALAR");
     return undef;
 }
