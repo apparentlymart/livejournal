@@ -397,3 +397,51 @@ jQuery(document).click(function(e)
 	widgets.forEach(function(prop) { prop.handler(); });
 })();
 
+
+/**
+* delayed like buttons loader
+*/
+(function() {
+	var likePos = [];
+
+	LiveJournal.register_hook('page_load', function() {
+		
+		likePos = jQuery('.lj-like').map(function() {
+			return {
+				el: this,
+				top: jQuery(this).position().top,
+				init: false
+			};
+		}).toArray();
+
+		fullInit();
+
+		if (likePos.length > 0) jQuery(window).scroll(fullInit);
+	});
+
+	function fullInit() {
+		if (likePos.length > 0) {
+			
+			var scrollTop = jQuery(window).scrollTop(),
+				windowHeight = jQuery(window).height(),
+
+				toInit = likePos.filter(function(like) {
+					return (!like.init &&
+							 like.top > scrollTop &&
+							 like.top < scrollTop + windowHeight + 200);
+				});
+
+			toInit.forEach(function(like) {
+				var jEl = jQuery(like.el),
+					likeHtml = jEl.html();
+				
+
+				jEl.html(likeHtml.slice(4, -3)); // strip '<!--' and '-->'
+				LiveJournal.parseLikeButtons();
+
+				like.init = true;
+			});
+		}
+	}
+	
+})();

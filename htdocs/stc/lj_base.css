@@ -3685,6 +3685,7 @@ A.lj-button-link:active {
 /* LJ like buttons 
 -----------------------------------------------*/
 .lj-like {
+	min-height: 48px;
 	margin:12px 0!important;
 	}
 	.lj-like-item {
