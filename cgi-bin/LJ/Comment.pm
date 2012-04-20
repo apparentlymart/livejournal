@@ -10,6 +10,7 @@ use strict;
 use Carp qw/ croak /;
 use Class::Autouse qw(
                       LJ::Entry
+                      LJ::Lang
                       );
 
 use lib "$ENV{LJHOME}/cgi-bin";
