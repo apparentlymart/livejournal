@@ -347,14 +347,6 @@ sub trans {
          LJ::Request->uri($uri);
     }
 
-    ## allow cross domain ajax for (l-).stat domain
-    if ($host eq "stat.$LJ::DOMAIN"){
-        LJ::Request->header_out('Access-Control-Allow-Origin' => '*');
-        ## The Access-Control-Allow-Methods header indicates, as part of the response to a preflight request, 
-        ## only GET is allowed.
-        LJ::Request->header_out('Access-Control-Allow-Methods' => 'GET'); 
-    }
-
     # disable TRACE (so scripts on non-LJ domains can't invoke
     # a trace to get the LJ cookies in the echo)
     if (LJ::Request->method_number == LJ::Request::M_TRACE) {
@@ -387,6 +379,14 @@ sub trans {
     $LJ::IS_BOT_USERAGENT = BotCheck->is_bot( LJ::Request->header_in('User-Agent') );
 
     LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
+
+    # js/css file concatenation
+    if ($host eq "stat.$LJ::DOMAIN"){
+        Apache::LiveJournal::ConcatHeadFiles->load;
+        LJ::Request->handler("perl-script");
+        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::ConcatHeadFiles::handler);
+        return LJ::Request::OK;
+    }
 
     ##
     ## Process old/non-cacnonical URL and renamed accounts.
@@ -1264,15 +1264,6 @@ sub trans {
 
         my $view = $determine_view->($user, $vhost, $rest);
         return $view if defined $view;
-    }
-
-    # header file concatenation
-    my $unParsedURI= LJ::Request->r->unparsed_uri();
-    if ($unParsedURI =~ /\?\?/) {
-        Apache::LiveJournal::ConcatHeadFiles->load;
-        LJ::Request->handler("perl-script");
-        LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::ConcatHeadFiles::handler);
-        return LJ::Request::OK;
     }
 
     # custom interface handler
