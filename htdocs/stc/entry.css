@@ -1106,7 +1106,7 @@ td.tabs {
 	    height: 16px;
 	    margin: -6px 0 0;
 	    padding: 0;
-		background: url("/img/friendstimes/loader.gif") 0 0 no-repeat;
+		background: url("/img/preloader/spinner1.gif") 0 0 no-repeat;
 		}
 .b-music-item-more {
 	margin: 10px 14px 0 0;
