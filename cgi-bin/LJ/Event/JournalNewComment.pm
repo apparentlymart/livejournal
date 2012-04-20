@@ -160,6 +160,8 @@ sub as_email_html {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    LJ::set_remote($u);
+
     my $filename = $self->template_file_for(section => 'body_html', lang => $u->prop('browselang'));
     if ($filename) {
         # Load template file into template processor
