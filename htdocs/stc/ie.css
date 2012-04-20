@@ -563,6 +563,13 @@ __________________________________________*/
 	display: inline;
 	zoom: 1;
 	}
+.b-pics-submit-options {
+	min-width: 757px !important;
+	zoom: 1 !important;
+	}
+.b-pics-header-select-album {
+	zoom: 1;
+	}
 .b-pics-bar .b-pics-edit-field {
 	height: 22px;
 	}
@@ -587,6 +594,23 @@ __________________________________________*/
 *:first-child+html .b-pics-list-albums-selection {
 	bottom: -1px;
 	left: 62px;
+	}
+*:first-child+html .b-popup-pics-paste .b-pics-paste-url {
+	min-width: 757px;
+	}
+*:first-child+html .b-pics-preview-wrapper,
+*:first-child+html .b-pics-add-fields {
+	display: inline-block;
+	}
+*:first-child+html .b-pics-url-field {
+	width: 620px;
+	}
+*:first-child+html .b-popup-pics-paste .b-pics-paste-url,
+*:first-child+html .b-popup-pics-upload-header,
+*:first-child+html .b-popup-pics-paste-header,
+*:first-child+html .b-popup-pics-add-header {
+	display: inline;
+	zoom: 1 !important;
 	}
 /* Ratings */
 .rate-posts .selfpromo .voting .vote-value A {
