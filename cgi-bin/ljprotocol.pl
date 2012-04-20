@@ -803,13 +803,14 @@ sub deletecomments {
         push @ids, $num;
     }
 
-    my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
-
-    foreach my $comm (@comments) {
-	return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->valid;
+    my @comments;
+    foreach my $id (@ids) {
+        my $comm = LJ::Comment->new($journal, dtalkid => $id);
+        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
-    }   
+        push @comments, $comm;
+    }
 
     my @to_delete;
     if(!$req->{thread}){
@@ -883,10 +884,13 @@ sub updatecomments {
     my $can_method = ($action =~ /spam|unspam/ ? ($action eq 'spam' ? "LJ::Talk::can_marked_as_spam" : "LJ::Talk::can_unmark_spam") :  "LJ::Talk::can_$action");
     $can_method = \&{$can_method};
 
-    my @comments = map { LJ::Comment->new($journal, dtalkid => $_) } @ids;
-    foreach my $comm (@comments) {
+    my @comments;
+    foreach my $id (@ids) {
+        my $comm = LJ::Comment->new($journal, dtalkid => $id);
+        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $can_method->($u, $journal, $comm->entry->poster, $comm->poster);
-    }   
+        push @comments, $comm;
+    }
 
     # get first entry
     my $jitemid = $comments[0]->entry->jitemid;
