@@ -806,7 +806,7 @@ sub render_htmltools_block {
     };
 
     my $remote = LJ::get_remote();
-    $insert_image .= ($remote && $remote->can_use_ljphoto) ? qq{
+    $insert_image .= ($remote && ($remote->prop ('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto) ? qq{
     <li class='image-beta'>
         <a
             href='javascript:void(0);'
@@ -1914,7 +1914,7 @@ sub render_body {
 DISABLE_HTML
 
         }
-        $$js .= "window.ljphotoEnabled = " . ($remote ? $remote->can_use_ljphoto : "0") . ";";
+        $$js .= "window.ljphotoEnabled = " . ($remote ? ($remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto : "0") . ";";
         $$js .= "window.ljphotoUploadEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
