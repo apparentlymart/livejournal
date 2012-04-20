@@ -238,6 +238,68 @@ LJ.throttle = function(func, delay) {
 	}
 };
 
+LJ.console = function() {
+	var consoleExists = function() { return 'console' in window },
+		runIfExists = function(method, args) {
+			if (consoleExists() && console[method]) {
+				console[method].apply(console, args);
+				return true;
+			}
+
+			return false;
+		};
+
+	var consoleShim = {
+		log: function() {
+			if (jQuery.browser.msie && consoleExists()) {
+				console.log( [].join.apply(arguments) );
+			} else {
+				runIfExists('log', arguments);
+			}
+		}
+	};
+
+	var timers = {};
+	consoleShim.time = function(label) {
+		if (!runIfExists('time', arguments) && !timers[label]) {
+			timers[label] = +new Date();
+		}
+	}
+
+	consoleShim.timeEnd = function(label) {
+		if (!runIfExists('timeEnd', arguments) && timers[label]) {
+			var now = +new Date();
+			consoleShim.log(label + ': ' + (now - timers[label]) + 'ms');
+			delete timers[label];
+		}
+	}
+
+	return consoleShim;
+}();
+
+LJ.DOM = LJ.DOM || {};
+
+
+/**
+ * Inject stylesheet into page.
+ *
+ * @param {string} Stylesheet filename to inject.
+ * @param {global} Global object.
+ */
+LJ.DOM.injectStyle = function(fileName, _window) {
+	var w = _window || window,
+		head = w.document.getElementsByTagName("head")[0],
+		cssNode = w.document.createElement('link');
+	
+	cssNode.type = 'text/css';
+	cssNode.rel = 'stylesheet';
+	cssNode.href = fileName;
+	
+	head.appendChild(cssNode);
+
+	//console.log(fileName + ' injected from ' + w.location.href);
+};
+
 
 /* object extensions */
 if (!Object.extend)

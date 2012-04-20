@@ -6,12 +6,14 @@
 	<meta content="noindex, nofollow" name="robots">
 	<script type="text/javascript">
 		window.ready = function(poll){
+			top.LJ.DOM.injectStyle('<?statprefix?>/js/ck/skins/v2/dialog.css?t=' + (top.Site ? top.Site.version : ''), window);
+
 			top.jQuery(document.poll.whovote).val([poll.whovote]);
 			top.jQuery(document.poll.whoview).val([poll.whoview]);
 			document.poll.name.value = poll.name;
 		};
 	</script>
-	<link rel="stylesheet" type="text/css" href="<?statprefix?>/js/ck/skins/v2/dialog.css" media="all">
+	<!--<link rel="stylesheet" type="text/css" href="<?statprefix?>/js/ck/skins/v2/dialog.css" media="all">-->
 </head>
 
 <body style="overflow: hidden">
