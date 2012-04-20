@@ -622,6 +622,16 @@ create.cap.year=per year
 
 create.login.head=Login to LiveJournal
 
+create.features.comments=Post comments
+
+create.features.communities=Post entries in communities
+
+create.features.friends=Customize your Friends page
+
+create.features.groups=Create custom groups of friends
+
+create.features.notifications=Receive email notifications
+
 create.login.desc=You can use your social accounts.
 
 create.login.facebook=Facebook
@@ -636,6 +646,10 @@ create.login.google=Google
 
 create.login.openid=OpenID
 
+create.login.openid.placeholder=OpenID url
+
+create.login.openid.button=Login
+
 create.login.secure=LiveJournal Secure Site
 
 create.nextsteps.communities=join communities
@@ -645,6 +659,8 @@ create.nextsteps.friends=find friends
 create.nextsteps.pics=upload pictures
 
 create.nextsteps.profile=fill your profile
+
+create.identity=With an identity account you can:
 
 create.post=Create First Post
 
@@ -5894,6 +5910,8 @@ talk.post.adult.concepts=concepts
 talk.post.adult.explicit=explicit
 
 talk.post.adult.none=none
+
+talk.post.backdated=do not add to friends page and RSS
 
 talk.post.change=change
 
