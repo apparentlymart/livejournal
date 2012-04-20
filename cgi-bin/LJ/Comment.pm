@@ -1312,7 +1312,12 @@ sub _format_mail_both {
         if ($parent) {
             $text = $parent->body_html;
         } else {
+            my $language_old = LJ::Lang::current_language;
+            LJ::Lang::current_language($lang);
+
             $text = $entry->event_html({ cuturl => $entry->url });
+
+            LJ::Lang::current_language($language_old);
         }
 
         $body .= blockquote($text);
