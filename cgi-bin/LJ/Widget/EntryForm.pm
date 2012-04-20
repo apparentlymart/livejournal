@@ -1914,7 +1914,9 @@ sub render_body {
 DISABLE_HTML
 
         }
-        $$js .= "window.ljphotoEnabled = " . ($remote ? ($remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto : "0") . ";";
+        my $show_button = 0;
+        $show_button = 1 if $remote && ($remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto;
+        $$js .= "window.ljphotoEnabled = $show_button;";
         $$js .= "window.ljphotoUploadEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
