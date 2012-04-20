@@ -1313,13 +1313,27 @@ sub need_res {
         @LJ::NEEDED_RES = ();
         return;
     }
+    
+    foreach my $key (@keys) {
+        my $reskey  = $key;
+        my $resopts = $opts;
+        if (ref $reskey eq 'ARRAY'){
+            $reskey  = $key->[1];
+            $resopts = $key->[0];
+        }
 
-    foreach my $reskey (@keys) {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
+
+        ## is the key part of library/package
+        if (my $library = $LJ::JS_SOURCE_MAP_REV{$reskey}){
+            $reskey = $library;
+        }
+
         unless (exists $LJ::NEEDED_RES{$reskey}) {
             push @LJ::NEEDED_RES, $reskey;
         }
-        $LJ::NEEDED_RES{$reskey} = $opts;
+
+        $LJ::NEEDED_RES{$reskey} = $resopts;
     }
 }
 
@@ -1342,6 +1356,7 @@ sub res_includes {
     my $ret = "";
     my $ret_js  = "";
     my $ret_css = "";
+    my %libs    = (); ## pseudo files.
     my $do_concat = $LJ::IS_SSL ? $LJ::CONCAT_RES_SSL : $LJ::CONCAT_RES;
 
     # all conditions must be complete here
@@ -1459,18 +1474,6 @@ sub res_includes {
            </script>
         };
 
-        ## Filter included res.
-        ## if resource is a part of a common set, skip it here
-        ## and add to page inside the set.
-        @LJ::NEEDED_RES = grep {
-                    ## check common JS sources.
-                    if ($LJ::STRICTLY_INCLUDED_JS_H{$_}){
-                        $LJ::NEEDED_RES{include_common_js} = 1;
-                        0; ## include this file as a part of common sources set.
-                    } else {
-                        1; ## include them as is.
-                    }
-                } @LJ::NEEDED_RES;
     } ## / unless $only_needed
 
     my $host = LJ::Request->header_in("Host");
@@ -1512,8 +1515,7 @@ sub res_includes {
             } else if ( lj_master_user > 0 && lj_master_user !== lj_user ) {
                 window.location = "${LJ::SITEROOT}/misc/get_domain_session.bml?return=$curl";
             }
-        </script>
-        |;
+        </script>\n|;
     }
 
     my $now = time();
@@ -1539,31 +1541,25 @@ sub res_includes {
     };
 
 
-    ## Some of basic JS sources are widely used.
-    ## Include all even required only one of them.
-    if ($LJ::NEEDED_RES{include_common_js}){
-        foreach my $js (@LJ::STRICTLY_INCLUDED_JS){
-            my $mtime = _file_modtime("js/$js", $now);
-            $add->(common_js => $js, $mtime); ## without "js" prefix
-        }
-    }
-
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
-        my $mtime = _file_modtime($key, $now);
-        $path = $key;
+        my $mtime;
+        my $library;
 
-        # if we want to also include a local version of this file, include that too
-        if (@LJ::USE_LOCAL_RES) {
-            if (grep { lc $_ eq lc $key } @LJ::USE_LOCAL_RES) {
-                my $inc = $key;
-                $inc =~ s/(\w+)\.(\w+)$/$1-local.$2/;
-                LJ::need_res($inc);
+        ## for libraries check mtime of all files
+        if (my $library_files = $LJ::JS_SOURCES_MAP{$key}){
+            $library = $key;
+            $libs{$library} = 1;
+            foreach my $file (@$library_files){ 
+                my $lmtime = _file_modtime($key, $now);
+                $mtime = $lmtime if $lmtime > $mtime;
             }
         }
 
+        $path = $key;
+
         if ($path =~ m!^js/(.+)!) {
-            $add->('js', $1, $mtime, $LJ::NEEDED_RES{$key});
+            $add->("js$library", $1, $mtime, $LJ::NEEDED_RES{$key} || {});
         }
         elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
             $add->("${1}stccss", $2, $mtime, $LJ::NEEDED_RES{$key});
@@ -1619,14 +1615,20 @@ sub res_includes {
     ##  (C) http://code.google.com/speed/page-speed/
     ##
     $ret .= $ret_css unless $opts->{only_js};
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>")  unless $opts->{only_js};
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>") unless $opts->{only_js};
     
-    $ret .= $ret_js unless $opts->{only_css};
-    $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
-    $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
-    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
-    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
+    unless ($opts->{only_css}){
+        $ret .= $ret_js;
+        foreach my $library (@LJ::JS_SOURCES_ORDER){ ## add libraries in strict order
+            next unless $libs{$library};
+            $tags->("js$library", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+        }
+        $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>")  unless $opts->{only_css};
+        $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>")    unless $opts->{only_css};
+        $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>")  unless $opts->{only_css};
+        $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>") unless $opts->{only_css};
+    }
 
     return $ret if $only_needed;
 

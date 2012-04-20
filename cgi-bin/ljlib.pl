@@ -2373,48 +2373,6 @@ sub start_request
     # reload config if necessary
     LJ::Config->start_request_reload;
 
-    # include standard files if this is web-context
-    unless ($LJ::DISABLED{sitewide_includes}) {
-        if (LJ::Request->is_inited) {
-            # standard site-wide JS and CSS
-            # jQuery always should be the first in the list
-            LJ::need_res(qw(
-                            js/jquery.js
-                            js/jquery_fn.js
-                            js/basic.js
-                            js/livejournal.js
-                            js/jquery/jquery.ui.core.min.js
-                            js/jquery/jquery.ui.widget.min.js
-                            js/jquery/jquery.tmpl.min.js
-                            js/jquery/jquery.lj.basicWidget.js
-                            js/jquery/jquery.lj.bubble.js
-                            stc/lj_base.css
-                            ));
-
-            # esn ajax
-            LJ::need_res(qw(
-                            js/esn.js
-                            stc/esn.css
-                            ))
-                unless LJ::conf_test($LJ::DISABLED{esn_ajax});
-
-            # contextual popup JS
-            LJ::need_res(qw(
-                            js/ippu.js
-                            js/lj_ippu.js
-                            js/ljwidget.js
-                            js/ljwidget_ippu.js
-                            js/hourglass.js
-                            js/contextualhover.js
-                            stc/contextualhover.css
-                            )
-            ) if LJ::show_contextual_hover();
-
-            # Conditional IE CSS file for all pages
-            LJ::need_res({condition => 'lte IE 8'}, 'stc/ie.css');
-        }
-    }
-
     LJ::run_hooks("start_request");
 
     return 1;
