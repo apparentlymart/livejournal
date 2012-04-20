@@ -207,6 +207,10 @@ A:visited:hover {
 		margin-right:16px;
 		margin-left:329px;
 		}
+	.tag-page-header {
+		margin: 20px 0px 0px 16px;
+		font: normal 1.8em/1.4 Georgia;
+		}
 	.content .entry {
 		margin-top:2.2em;
 		}

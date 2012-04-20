@@ -187,6 +187,12 @@ A:visited:hover {
 .content {
 	padding-top:0;
 	}
+.tag-page-header {
+		margin: 0px 0px 20px 20px;
+		font-size: 1.6em;
+		font-weight: normal;
+		color: #FFF;
+		}	
 .content .entry-wrap {
 	padding:0;
 	background:#FFF;

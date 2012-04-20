@@ -151,6 +151,13 @@ A:visited {
 		margin-right:16px;
 		margin-left:320px;
 		}
+
+.tag-page-header {
+		margin: 20px 0 0 30px;
+		font-size: 1.8em;
+		font-weight: bold;
+		}
+
 .content .entry-wrap {
 	clear:both;
 	padding-left:28px;

@@ -147,6 +147,12 @@ A:visited:hover {
 		border-width:1px 0 0 1px;
 		margin-left:4px;
 		}
+.tag-page-header {
+		margin: 20px 0px 10px 0px;
+		letter-spacing: .15em;
+		font-size: 1.2em;
+		font-weight: bold;
+		}
 
 /* Entry */
 .entry-wrap {
