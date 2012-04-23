@@ -4248,3 +4248,111 @@ BODY div .b-helplink:active {
 	color: #003366;
 	}
 
+
+/* MassActions
+--------------------------------------*/
+.b-massaction {
+	position: relative;
+	z-index: 9;
+	margin: 0;
+	padding: 1.5em 0;
+	clear: both;
+	-moz-box-shadow: 0 -2px 7px 0 rgba(0,43,96,0.5);
+	-webkit-box-shadow: 0 -2px 7px 0 rgba(0,43,96,0.5);
+	box-shadow: 0 -2px 7px 0 rgba(0,43,96,0.5);
+	background: #B4DDFE;
+	background: #B4DDFE -moz-linear-gradient(top, #C2EBFF 0%, #B4DDFE 100%);
+	background: #B4DDFE -webkit-gradient(linear, left top, left bottom, color-stop(0%,#C2EBFF), color-stop(100%,#B4DDFE));
+	background: #B4DDFE -webkit-linear-gradient(top, #C2EBFF 0%,#B4DDFE 100%);
+	background: #B4DDFE -o-linear-gradient(top, #C2EBFF 0%,#B4DDFE 100%);
+	background: #B4DDFE -ms-linear-gradient(top, #C2EBFF 0%,#B4DDFE 100%);
+	background: #B4DDFE linear-gradient(top, #C2EBFF 0%,#B4DDFE 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#C2EBFF', endColorstr='#B4DDFE',GradientType=0 );
+	*zoom: 1;
+	}
+.b-grove-3comments .b-massaction {
+	display: none;
+	}
+.s-horizon .b-massaction {
+	margin: 0 -25px;
+	padding: 1.15em 25px;
+	}
+.s-lanzelot .b-massaction {
+	margin: 0 -26px;
+	padding: 1.15em 26px;
+	}
+.b-massaction-fixed {
+	position: fixed;
+	bottom: 24px;
+	width: 100%;
+	}
+.ljtimes-disabled .b-massaction-fixed,
+.ljtimes-minimized .b-massaction-fixed {
+	bottom: 0;
+	}
+	.b-massaction-checkall {
+		display: inline;
+		vertical-align: middle;
+		}
+		.b-massaction-checkall INPUT {
+			margin: 0;
+			}
+	.b-massaction .b-ljbutton {
+		position: static;
+		margin-left: 1.5em;
+		}
+.b-massaction-problems {
+	background: #FFEFEF;
+	background: #FFEFEF -moz-linear-gradient(top, #FFF6F6 0%, #FFEFEF 100%);
+	background: #FFEFEF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF6F6), color-stop(100%,#FFEFEF));
+	background: #FFEFEF -webkit-linear-gradient(top, #FFF6F6 0%,#FFEFEF 100%);
+	background: #FFEFEF -o-linear-gradient(top, #FFF6F6 0%,#FFEFEF 100%);
+	background: #FFEFEF -ms-linear-gradient(top, #FFF6F6 0%,#FFEFEF 100%);
+	background: #FFEFEF linear-gradient(top, #FFF6F6 0%,#FFEFEF 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFF6F6', endColorstr='#FFEFEF',GradientType=0 );
+	}
+	.b-massaction-errors {
+		display: none;
+		margin: 0;
+		padding: 10px 0 10px 30px;
+		background: url(/img/icons/error-mini.png?v=1) no-repeat 0 6px;
+		color: #CB1427;
+		}
+		.b-massaction-error {
+			margin: 0;
+			padding: 0;
+			}
+	.b-massaction-problems .b-massaction-errors {
+		display: block;
+		}
+	.b-massaction-preloader {
+		display: none;
+		position: absolute;
+		bottom: 13px;
+		right: 26px;
+		width: 30px;
+		height: 30px;
+		margin: 0;
+		padding: 0;
+		background: url(/img/preloader/preloader-blue-blue.gif?v=1) no-repeat 0 0;
+		font: 0/0 serif;
+		}
+	.b-massaction-processing .b-massaction-preloader {
+		display: block;
+		}
+	.b-massaction-fixed .b-massaction-preloader {
+		position: fixed;
+		}
+	.ljtimes-disabled .b-massaction-fixed .b-massaction-preloader,
+	.ljtimes-minimized .b-massaction-fixed .b-massaction-preloader {
+		position: fixed;
+		}
+
+@media screen and (max-width: 1300px), (max-width: 1280px) and (max-height: 800px) {
+	.g-sensor .b-massaction-fixed,
+	.mobile-msg .b-massaction-fixed {
+		position: relative;
+		bottom: auto;
+		width: auto;
+		}
+	}
