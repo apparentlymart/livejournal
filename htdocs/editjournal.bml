@@ -186,7 +186,7 @@ body<=
                 { 'location' => 'bml.editjournal', 'ljadwrapper' => 1 } );
         }
 
-        return LJ::Widget::EntryChooser->render(
+        return $journal->is_identity ? "" : LJ::Widget::EntryChooser->render(
             'link_prev'    => $link_prev,
             'link_next'    => $link_next,
             'show_posters' => $usejournal ? 1 : 0,
