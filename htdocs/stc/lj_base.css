@@ -4356,3 +4356,107 @@ BODY div .b-helplink:active {
 		width: auto;
 		}
 	}
+
+
+/* Posts Controls
+--------------------------------------*/
+.b-controls:link,
+.b-controls:visited,
+.b-controls:hover,
+.b-controls:active {
+	overflow: hidden;
+	position: relative;
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	text-indent: 30px;
+	text-decoration: none;
+	*overflow: visible;
+	*display: inline;
+	*text-indent: 0;
+	*font: 0/0 serif;
+	*zoom: 1;
+	}
+.b-controls:link::no-images,
+.b-controls:visited::no-images,
+.b-controls:hover::no-images,
+.b-controls:active::no-images {
+	text-indent: 0;
+	}
+	.b-controls-bg {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		padding: 0;
+		font: 0/0 serif;
+		background-image: url(/img/btn_actions.png?v=15742);
+		background-repeat: no-repeat;
+		cursor: pointer;
+		}
+	.b-controls-left .b-controls-bg,
+	.b-controls-prev .b-controls-bg {
+		background-position: 0 0;
+		}
+	.b-controls-right .b-controls-bg,
+	.b-controls-next .b-controls-bg {
+		background-position: -24px 0;
+		}
+	.b-controls-top .b-controls-bg {
+		background-position: -48px 0;
+		}
+	.b-controls-bottom .b-controls-bg {
+		background-position: -72px 0;
+		}
+	.b-controls-delete .b-controls-bg {
+		background-position: -48px -48px;
+		}
+	.b-controls-spam .b-controls-bg {
+		background-position: 0 -48px;
+		}
+	.b-controls-unspam .b-controls-bg {
+		background-position: -24px -48px;
+		}
+	.b-controls-freeze .b-controls-bg {
+		background-position: -48px -72px;
+		}
+	.b-controls-unfreeze .b-controls-bg {
+		background-position: -72px -72px;
+		}
+	.b-controls-screen .b-controls-bg {
+		background-position: -24px -72px;
+		}
+	.b-controls-unscreen .b-controls-bg {
+		background-position: 0 -72px;
+		}
+	.b-controls-track .b-controls-bg {
+		background-position: 0 -24px;
+		}
+	.b-leaf-tracked-parent .b-controls-track .b-controls-bg,
+	.b-controls-trackthread .b-controls-bg {
+		background-position: -24px -24px;
+		}
+	.b-leaf-tracked .b-controls-track .b-controls-bg,
+	.b-controls-tracking .b-controls-bg {
+		background-position: -48px -24px;
+		}
+	.b-controls-edit .b-controls-bg {
+		background-position: -48px -96px;
+		}
+	.b-controls-memadd .b-controls-bg {
+		background-position: 0 -96px;
+		}
+	.b-controls-share .b-controls-bg {
+		background-position: -72px -24px;
+		}
+	.b-controls-edittags .b-controls-bg {
+		background-position: -24px -96px;
+		}
+	.b-controls-flag .b-controls-bg {
+		background-position: -72px -48px;
+		}
