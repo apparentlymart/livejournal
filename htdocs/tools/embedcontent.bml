@@ -17,7 +17,8 @@
         ##
         my $api     = $GET{api};
         my $pid_arg = $GET{pid} ? "&pid=$GET{pid}" : ""; ## display specified product id
-        return qq|<script src="http://www.tackthis.com/widget-validate-iframe.php?api=$api$pid_arg" type="text/javascript"></script>|;
+        my $cat_arg = $GET{cid} ? "&cid=$GET{cid}" : ""; ## category id
+        return qq|<script src="http://www.tackthis.com/widget-validate-iframe.php?api=$api$pid_arg$cat_arg" type="text/javascript"></script>|;
 
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
