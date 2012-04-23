@@ -8,8 +8,8 @@ use LJ::Event;
 use LJ::Subscription::Group;
 use LJ::Subscription::QuotaError;
 
-my @group_cols = (LJ::Subscription::Group::GROUP_COLS);
-my @other_cols = (LJ::Subscription::Group::OTHER_COLS);
+my @group_cols = (LJ::Subscription::Group::GROUP_COLS());
+my @other_cols = (LJ::Subscription::Group::OTHER_COLS());
 
 use Carp qw(confess cluck);
 

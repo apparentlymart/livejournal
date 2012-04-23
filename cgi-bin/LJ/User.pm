@@ -203,7 +203,7 @@ sub create_community {
     $u->set_prop("moderated", $opts{moderated});
     $u->set_prop("adult_content", $opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
 
-    my $remote = LJ::get_remote();
+    my $remote = $opts{'owner'} || LJ::get_remote();
 
 	die "No remote user!\n" unless $remote;
 
@@ -241,7 +241,7 @@ sub create_syndicated {
              undef, $u->id, $opts{feedurl});
     die $dbh->errstr if $dbh->err;
 
-    my $remote = LJ::get_remote();
+    my $remote = $opts{'creator'} || LJ::get_remote();
     LJ::statushistory_add($remote, $u, "synd_create", "acct: " . $u->user);
 
     return $u;

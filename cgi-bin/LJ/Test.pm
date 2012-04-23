@@ -1,9 +1,3 @@
-package LJ::Test;
-require Exporter;
-use strict;
-use Carp qw(croak);
-use vars qw(@ISA @EXPORT);
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #              WARNING! PELIGROSO! ACHTUNG! VNIMANIYE!
 # some fools (aka mischa) try to use this library from web context,
@@ -11,12 +5,22 @@ use vars qw(@ISA @EXPORT);
 # Test::FakeApache because that really fucks with things.
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-use Class::Autouse qw(
-                      DBI
-                      LJ::ModuleCheck
-                      );
-@ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm temp_feed alloc_sms_num fake_apache);
+package LJ::Test;
+require Exporter;
+use strict;
+
+use base 'Exporter';
+
+use Carp qw();
+use DBI;
+
+use LJ::ModuleCheck;
+
+# TODO: use EXPORT_OK instead, do not clutter the caller's namespace
+# unless asked to specifically
+our @EXPORT = qw(
+    memcache_stress with_fake_memcache temp_user
+    temp_comm temp_feed alloc_sms_num fake_apache );
 
 my @temp_userids;  # to be destroyed later
 END {
@@ -27,6 +31,8 @@ END {
         $u->delete_and_purge_completely;
     }
 }
+
+our $VERBOSE = 0;
 
 $LJ::_T_FAKESCHWARTZ = 1 unless $LJ::_T_NOFAKESCHWARTZ;
 my $theschwartz = undef;
@@ -61,64 +67,106 @@ sub theschwartz {
     }]);
 }
 
+sub create_user {
+    my ( $class, %opts ) = @_;
+
+    my $journaltype = $opts{'journaltype'} || 'P';
+
+    unless ( $opts{'user'} ) {
+        my @chars = split //, 'abcdefghijklmnopqrstuvwxyz';
+        my $chars_count = scalar(@chars);
+
+        my $u;
+
+        do {
+            $opts{'user'} = $opts{'user_prefix'} || 't_';
+
+            foreach ( 1 .. ( 15 - length( $opts{'user_prefix'} ) ) ) {
+                $opts{'user'} .= $chars[ rand($chars_count) ];
+            }
+
+            $u = LJ::load_user( $opts{'user'} );
+        } while ($u);
+    }
+
+    # TODO: change these to //= when we finally upgrade our perl
+    $opts{'bdate'} = '1980-01-01' unless defined $opts{'bdate'};
+
+    # 0x08 => paid, 0x10 => permanent, 0x400 => sup, see lj-caps-conf.pl
+    $opts{'caps'}  = 0x418        unless defined $opts{'caps'};
+
+    if ( $journaltype eq 'P' ) {
+        $opts{'password'}   = 'test' unless defined $opts{'password'};
+        $opts{'get_ljnews'} = 0      unless defined $opts{'get_ljnews'};
+        $opts{'underage'}   = 0      unless defined $opts{'underage'};
+        $opts{'ofage'}      = 1      unless defined $opts{'ofage'};
+        $opts{'status'}     = 'A'    unless defined $opts{'status'};
+    }
+
+    $opts{'email'} = 'do-not-reply@livejournal.com'
+        unless defined $opts{'email'};
+
+    my $u;
+
+    if ( $journaltype eq 'P' ) {
+        $u = LJ::User->create_personal(%opts);
+    } elsif ( $journaltype eq 'C' ) {
+        unless ( defined $opts{'owner'} ) {
+            $opts{'owner'} = $class->create_user(
+                %opts, 'journaltype' => 'P', 'user' => undef );
+        }
+
+        $u = LJ::User->create_community(%opts);
+    } elsif ( $journaltype eq 'Y' ) {
+        unless ( defined $opts{'creator'} ) {
+            $opts{'creator'} = $class->create_user(
+                %opts, 'journaltype' => 'P', 'user' => undef );
+        }
+
+        $opts{'feedurl'} = "$LJ::SITEROOT/fakerss.xml#"
+            unless defined $opts{'feedurl'};
+
+        $u = LJ::User->create_syndicated(%opts);
+    } else {
+        die "unknown journaltype $journaltype";
+    }
+
+    # some hooks override this, so let's switch it back
+    LJ::update_user( $u, { 'caps' => $opts{'caps'} } );
+
+    if ($VERBOSE) {
+        warn "created user $opts{'user'}\n";
+    }
+
+    if ( $opts{'temporary'} ) {
+        push @temp_userids, $u->userid;
+    }
+
+    return $u;
+}
+
 sub temp_user {
     shift() if $_[0] eq __PACKAGE__;
     my %args = @_;
     my $underscore  = delete $args{'underscore'};
-    my $journaltype = delete $args{'journaltype'}  || "P";
-    croak('unknown args') if %args;
+    my $journaltype = delete $args{'journaltype'}  || 'P';
+    die 'unknown args' if %args;
 
-    my $pfx = $underscore ? "_" : "t_";
-    while (1) {
-        my $username = $pfx . LJ::rand_chars(15 - length $pfx);
-        my $uid = LJ::create_account({
-            user => $username,
-            name => "test account $username",
-            email => "test\@$LJ::DOMAIN",
-            journaltype => $journaltype,
-        });
-        if ($uid) {
-            my $u = LJ::load_userid($uid) or next;
-            push @temp_userids, $uid;
-            return $u;
-        }
-    }
+    my $pfx = $underscore ? '_' : 't_';
+
+    return __PACKAGE__->create_user(
+        'user_prefix' => $pfx,
+        'journaltype' => $journaltype,
+        'temporary'   => 1,
+    );
 }
 
 sub temp_comm {
-    shift() if $_[0] eq __PACKAGE__;
-
-    # make a normal user
-    my $u = temp_user();
-
-    # update journaltype
-    LJ::update_user($u, { journaltype => 'C' });
-
-    # communities always have a row in 'community'
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("INSERT INTO community SET userid=?", undef, $u->{userid});
-    die $dbh->errstr if $dbh->err;
-
-    return $u;
+    return __PACKAGE__->create_user( 'journaltype' => 'C', 'temporary' => 1 );
 }
 
 sub temp_feed {
-    shift() if $_[0] eq __PACKAGE__;
-
-    # make a normal user
-    my $u = temp_user();
-
-    # update journaltype
-    LJ::update_user($u, { journaltype => 'Y' });
-
-    # communities always have a row in 'syndicated'
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
-             undef, $u->id, "$LJ::SITEROOT/fakerss.xml#" . $u->user);
-
-    die $dbh->errstr if $dbh->err;
-
-    return $u;
+    return __PACKAGE__->create_user( 'journaltype' => 'Y', 'temporary' => 1 );
 }
 
 
