@@ -121,6 +121,9 @@ my %e = (
      "325" => E_PERM,
      "326" => E_PERM,
      "327" => E_PERM,
+     "328" => E_PERM,
+     "329" => E_PERM,
+     "330" => E_PERM,
 
      # Limit errors
      "402" => E_TEMP,
@@ -803,12 +806,48 @@ sub deletecomments {
         push @ids, $num;
     }
 
+    my $can_manage = $u->can_manage($journal);
+
+    my (%to_delauthor, %to_ban, %to_mark_spam);
+
     my @comments;
     foreach my $id (@ids) {
         my $comm = LJ::Comment->new($journal, dtalkid => $id);
         return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
+
+        if($req->{'delauthor'}) {
+
+            # they can delete all comments posted by the same author
+            # if they are the entry author, and the comment being deleted
+            # has not been posted anonymously
+            my $can_delauthor = $comm->poster && ( $can_manage || ( $u->userid == $comm->entry->poster->userid ) );
+            return fail($err, 328, 'dtalkid:'.$comm->dtalkid) unless $can_delauthor; 
+            $to_delauthor{$comm->entry->jitemid}->{$comm->poster->userid} = 1;
+        }
+
+        if($req->{'ban'}) {
+            
+            # they can ban the comment author if they are the journal owner
+            # and there is an author; also, they will not be able to ban
+            # themselves
+            my $can_sweep = ( $u && $comm->poster && $u->can_sweep($journal) );
+            my $can_ban   = ( $can_manage || $can_sweep ) && $comm->poster && ( $u->userid != $comm->poster->userid );
+            return fail($err, 329, 'dtalkid:'.$comm->dtalkid) unless $can_ban;
+            $to_ban{$comm->poster->userid} = $comm->poster;
+        }
+        
+        if($req->{'spam'}) {
+
+            # they can mark as spam unless the comment is their own;
+            # they don't need to be the community maintainer to do that
+            my $can_mark_spam = LJ::Talk::can_mark_spam($u, $journal, $comm->poster, $comm) 
+                && $comm->poster && ( $u->userid != $comm->poster->userid );
+            return fail($err, 330, 'dtalkid:'.$comm->dtalkid) unless $can_mark_spam;
+            $to_mark_spam{$comm->jtalkid} = $comm;
+        }
+
         push @comments, $comm;
     }
 
@@ -831,7 +870,26 @@ sub deletecomments {
 
     # delete all comments
     $_->delete for @to_delete;
+    
+    # delete author comments (only for authors of root comment in thread)
+    foreach my $jitemid (keys %to_delauthor) {
+        foreach my $userid (keys %{$to_delauthor{$jitemid}}) {
+            LJ::Talk::delete_author( $journal, $jitemid, $userid );
+        }
+    }
 
+    # ban authors (only for authors of root comment in thread)
+    $journal->ban_user($_) for values %to_ban;
+
+    # mark comments as spam (only for root comment in thread)
+    foreach my $comment (values %to_mark_spam) {
+        my $poster = $comment->poster;
+        LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
+        LJ::set_rel($journal, $poster, 'D');
+        $journal->log_event('spam_set', { actiontarget => $poster->{userid}, remote => $u });
+        LJ::run_hook('auto_suspender_for_spam', $poster->{userid});
+    }
+    
     return {
         status => 'OK',
         result => @to_delete + 0,
@@ -879,15 +937,16 @@ sub updatecomments {
 
     my $action = $req->{action};
     return fail($err, 200, "action") unless($action);
-    return fail($err, 203, "action") unless($action =~ /^screen|unscreen|freeze|unfreeze|spam|unspam$/);
+    return fail($err, 203, "action") unless($action =~ /^screen|unscreen|freeze|unfreeze|unspam$/);
 
-    my $can_method = ($action =~ /spam|unspam/ ? ($action eq 'spam' ? "LJ::Talk::can_marked_as_spam" : "LJ::Talk::can_unmark_spam") :  "LJ::Talk::can_$action");
+    my $can_method = ($action =~ /unspam/ ? "LJ::Talk::can_unmark_spam" :  "LJ::Talk::can_$action");
     $can_method = \&{$can_method};
 
     my @comments;
     foreach my $id (@ids) {
         my $comm = LJ::Comment->new($journal, dtalkid => $id);
         return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
+        return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $can_method->($u, $journal, $comm->entry->poster, $comm->poster);
         push @comments, $comm;
     }
@@ -905,6 +964,7 @@ sub updatecomments {
             my @comment_tree = $comment->entry->comment_list;
             my @children = ($comment);
             while(my $item = shift @children){
+                next if $item->is_deleted;
                 return fail($err, 326, 'dtalkid:'.$item->dtalkid) unless $can_method->($u, $journal, $item->entry->poster, $item->poster);
                 $map_update{$item->dtalkid} = $item;
                 push @children, grep { $_->{parenttalkid} == $item->{jtalkid} } @comment_tree;
@@ -915,7 +975,7 @@ sub updatecomments {
 
     # process comments
     my $method;
-    if ($action =~ /screen|unscreen|spam|unspam/) {
+    if ($action =~ /screen|unscreen|unspam/) {
         $method = \&{"LJ::Talk::$action".'_comment'};
         $method->($journal, $jitemid, map { $_->{jtalkid} } @to_update);
     } elsif ($action =~ /freeze|unfreeze/) {
