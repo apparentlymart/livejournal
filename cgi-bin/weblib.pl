@@ -1160,20 +1160,18 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_};
     }
 
-    if ( $POST->{'prop_current_music'} ) {
-        if ( length( $POST->{'prop_current_music'} ) > 197 ) {
-            my $pos = index( $POST->{'prop_current_music'}, '|' );
+    if ( length( $POST->{'prop_current_music'} ) > 197 ) {
+        my $pos = index( $POST->{'prop_current_music'}, '|' );
 
-            if ( $pos == -1 ) {
-                $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
-            }
-            else {
-                $req->{'prop_current_music'} = substr( substr($POST->{'prop_current_music'}, 0, $pos), 0, 197 ) . '... ' . substr( $POST->{'prop_current_music'}, $pos );
-            }
+        if ( $pos == -1 ) {
+            $req->{'prop_current_music'} = substr( $POST->{'prop_current_music'}, 0, 197 ) . '...';
         }
         else {
-            $req->{'prop_current_music'} = $POST->{'prop_current_music'};
+            $req->{'prop_current_music'} = substr( substr($POST->{'prop_current_music'}, 0, $pos), 0, 197 ) . '... ' . substr( $POST->{'prop_current_music'}, $pos );
         }
+    }
+    else {
+        $req->{'prop_current_music'} = $POST->{'prop_current_music'};
     }
 
     if ($POST->{"subject"} eq BML::ml('entryform.subject.hint2')) {
