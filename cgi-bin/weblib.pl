@@ -1447,6 +1447,7 @@ sub res_includes {
                 remoteUser               => $remote && $remote->user,
                 remoteLocale             => LJ::lang_to_locale( LJ::Lang::get_remote_lang() ),
                 pics_production          => LJ::is_enabled('pics_production'),
+                message_to_delete        => LJ::Lang::ml('shop.reports.detailed.domainru.ask.delete'),
         );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
