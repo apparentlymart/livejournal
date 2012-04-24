@@ -401,6 +401,7 @@ jQuery(document).click(function(e)
 /**
 * delayed like buttons loader
 */
+
 (function() {
 	var likePos = [];
 
@@ -409,7 +410,7 @@ jQuery(document).click(function(e)
 		likePos = jQuery('.lj-like').map(function() {
 			return {
 				el: this,
-				top: jQuery(this).position().top,
+				top: jQuery(this).offset().top,
 				init: false
 			};
 		}).toArray();
@@ -427,7 +428,7 @@ jQuery(document).click(function(e)
 
 				toInit = likePos.filter(function(like) {
 					return (!like.init &&
-							 like.top > scrollTop &&
+							 like.top > scrollTop - 100 &&
 							 like.top < scrollTop + windowHeight + 200);
 				});
 
@@ -435,7 +436,6 @@ jQuery(document).click(function(e)
 				var jEl = jQuery(like.el),
 					likeHtml = jEl.html();
 				
-
 				jEl.html(likeHtml.slice(4, -3)); // strip '<!--' and '-->'
 				LiveJournal.parseLikeButtons();
 
