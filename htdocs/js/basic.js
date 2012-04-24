@@ -277,6 +277,38 @@ LJ.console = function() {
 	return consoleShim;
 }();
 
+LJ._const = {};
+
+/**
+ * Define a constant.
+ *
+ * @param {string} name name of the constant. All spaces will be replaced with underline.
+ *     if constant was already defined, the function will throw the exception.
+ * @param {*} value A value of the constant.
+ */
+LJ.defineConst = function(name, value) {
+	name = name.toUpperCase().replace(/\s+/g, '_');
+
+	if (LJ._const.hasOwnProperty(name)) {
+		throw new Error('constant was already defined');
+	} else {
+		LJ._const[name] = value;
+	}
+
+}
+
+/**
+ * Get the value of the constant.
+ *
+ * @param {string} name The name of the constant.
+ * @return {*} The value of the constant or undefined if constant was not defined.
+ */
+LJ.getConst = function(name) {
+	name = name.toUpperCase().replace(/\s+/g, '_');
+
+	return (LJ._const.hasOwnProperty(name) ? LJ._const[name] : void 0);
+}
+
 LJ.DOM = LJ.DOM || {};
 
 

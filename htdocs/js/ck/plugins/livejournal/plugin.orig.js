@@ -597,22 +597,22 @@
 			})();
 
 			// LJ Image Button
-			editor.ui.addButton('image', {
-				label: top.CKLang.LJImage_Title,
-				command: 'image'
-			});
-
-			if (window.ljphotoEnabled) {
-				editor.addCommand('LJImage_beta', {
+			if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
+				editor.ui.addButton('image', {
+					label: top.CKLang.LJImage_Title,
+					command: 'image'
+				});
+			} else {
+				editor.addCommand('LJImage', {
 					exec: function () {
 						InOb.handleInsertImageBeta('upload');
 					},
 					editorFocus: false
 				});
 
-				editor.ui.addButton('LJImage_beta', {
-					label: top.CKLang.LJImage_BetaTitle,
-					command: 'LJImage_beta'
+				editor.ui.addButton('image', {
+					label: top.CKLang.LJImage_Title,
+					command: 'LJImage'
 				});
 			}
 

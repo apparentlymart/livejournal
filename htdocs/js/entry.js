@@ -11,6 +11,11 @@ if (! ("$" in window)) {
 	};
 }
 
+LJ.defineConst('LJPHOTO_MIGRATION_NONE', 0);
+LJ.defineConst('LJPHOTO_MIGRATION_QUEUED', 1);
+LJ.defineConst('LJPHOTO_MIGRATION_STARTED', 2);
+LJ.defineConst('LJPHOTO_MIGRATION_FINISHED', 3);
+
 function initEntryDate() {
 	jQuery('#entrydate').entryDatePicker({
 		//flag is set to true for new posts
@@ -938,7 +943,8 @@ InOb.handleInsertImageBeta = (function () {
 	}
 
 	return function (type, data) {
-		if (window.ljphotoUploadEnabled || type == 'add') {
+		//we should show old dialog only when migration did not start and new photohosting is disabled
+		if (window.ljphotoUploadEnabled || window.ljphotoMigrationStatus !== LJ.getConst('LJPHOTO_MIGRATION_NONE') || type === 'add') {
 			var jPhotoUploader = jQuery('#updateForm');
 
 			if (type == 'add' && data) {

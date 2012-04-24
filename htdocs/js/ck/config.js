@@ -59,9 +59,9 @@ CKEDITOR.editorConfig = function(config) {
 			'image']
 	];
 
-	if (window.ljphotoEnabled) {
-		config.toolbar_Full[0].push('LJImage_beta');
-	}
+	// if (window.ljphotoEnabled) {
+	// 	config.toolbar_Full[0].push('LJImage_beta');
+	// }
 
 	if (top.Site.media_embed_enabled) {
 		config.toolbar_Full[0].push('LJEmbedLink');

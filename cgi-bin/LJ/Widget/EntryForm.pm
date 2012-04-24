@@ -793,7 +793,8 @@ sub render_htmltools_block {
 
     my $opts = $self->opts;
 
-    my $insert_image = qq{
+    my $remote = LJ::get_remote();
+    my $insert_image = ($remote && ($remote->prop ('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_NONE()) && $remote->can_use_ljphoto) ? qq{
         <li class='image'>
             <a
                 href='javascript:void(0);'
@@ -803,15 +804,14 @@ sub render_htmltools_block {
                 $BML::ML{'entryform.insert.image2'}
             </a>
         </li>
-    };
+    } : "";
 
-    my $remote = LJ::get_remote();
     $insert_image .= ($remote && ($remote->prop ('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto) ? qq{
-    <li class='image-beta'>
+    <li class='image'>
         <a
             href='javascript:void(0);'
             onclick='InOb.handleInsertImageBeta();'
-            title='$BML::ML{'ljimage.beta'}'
+            title='$BML::ML{'fckland.ljimage'}'
         >
             $BML::ML{'entryform.insert.image2'}
         </a>
@@ -1697,13 +1697,11 @@ sub render_ljphoto_block {
 
     my $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
 
-    my $migration_started = $remote && LJ::Pics::Migration->user_under_maintenance ($remote) ? 1 : 0;
-    my $migration_finished = $remote && $remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE() ? 1 : 0;
+    my $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
 
     $out .= <<JS ;
 <script type="text/javascript">
-    window.ljphotoMigrationStarted = $migration_started;
-    window.ljphotoMigrationFinished = $migration_finished;
+    window.ljphotoMigrationStatus = $migration_status;
     window.ljphotoEnabled = $ljphoto_enabled;
     jQuery('#updateForm').photouploader($photouploader_params_out);
 </script>
@@ -1919,13 +1917,11 @@ sub render_body {
 DISABLE_HTML
 
         }
-        my $show_button = 0;
-        $show_button = 1 if $remote && ($remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto;
-        my $migration_started = $remote && LJ::Pics::Migration->user_under_maintenance ($remote) ? 1 : 0;
-        my $migration_finished = $remote && $remote->prop('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE() ? 1 : 0;
-        $$js .= "window.ljphotoMigrationStarted = $migration_started;";
-        $$js .= "window.ljphotoMigrationFinished = $migration_finished;";
-        $$js .= "window.ljphotoEnabled = $show_button;";
+        my $ljphoto_enabled = 0;
+        $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
+        my $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
+        $$js .= "window.ljphotoMigrationStatus = $migration_status;";
+        $$js .= "window.ljphotoEnabled = $ljphoto_enabled;";
         $$js .= "window.ljphotoUploadEnabled = $ljphoto_enabled;";
         $$js = $self->wrap_js($$js);
 
