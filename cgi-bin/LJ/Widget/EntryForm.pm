@@ -806,7 +806,7 @@ sub render_htmltools_block {
         </li>
     } : "";
 
-    $insert_image .= ($remote && ($remote->prop ('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_DONE()) && $remote->can_use_ljphoto) ? qq{
+    $insert_image .= ($remote && ($remote->prop ('fotki_migration_status') != LJ::Pics::Migration::MIGRATION_STATUS_NONE()) && $remote->can_use_ljphoto) ? qq{
     <li class='image'>
         <a
             href='javascript:void(0);'

@@ -944,7 +944,7 @@ InOb.handleInsertImageBeta = (function () {
 
 	return function (type, data) {
 		//we should show old dialog only when migration did not start and new photohosting is disabled
-		if (window.ljphotoUploadEnabled || window.ljphotoMigrationStatus !== LJ.getConst('LJPHOTO_MIGRATION_NONE') || type === 'add') {
+		if (!window.ljphotoEnabled || window.ljphotoMigrationStatus !== LJ.getConst('LJPHOTO_MIGRATION_NONE') || type === 'add') {
 			var jPhotoUploader = jQuery('#updateForm');
 
 			if (type == 'add' && data) {

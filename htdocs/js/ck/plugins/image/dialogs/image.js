@@ -261,6 +261,9 @@
 			previewLinkId = numbering('previewLink'),
 			previewImageId = numbering('previewImage');
 
+		//show all four tabs only if old photohosting is enabled
+		var showFullDialog = window.ljphotoUploadEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE');
+
 		return {
 			title : editor.lang.image[ dialogType == 'image' ? 'title' : 'titleButton' ],
 			minWidth : 480,
@@ -1063,7 +1066,7 @@
 							}
 						]
 				},
-				{
+				((showFullDialog) ? {
 					id : 'Upload',
 					hidden : false,
 					filebrowser : 'uploadButton',
@@ -1075,8 +1078,8 @@
 							html: '<iframe name="rteUpload" id="rteUpload" src="' + Site.siteroot + '/imguploadrte.bml?only_upload=1" bgcolor="transparent" frameborder="0" scrolling="no" style="width: 99%; height: 340px;"></iframe>'
 						}
 					]
-				},
-				{
+				} : null),
+				((showFullDialog) ? {
 					id : 'Photobucket',
 					hidden : false,
 					label : 'Photobucket',
@@ -1087,7 +1090,7 @@
 							html: '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite=' + pb_affsite_id + '&bg=%23FFFFFF&border=false&bordercolor=%23000000' + cb_url + '&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=false&promo=false" bgcolor="transparent" frameborder="0" scrolling="no" style="width: 99%; height: 440px;"></iframe>'
 						}
 					]
-				}
+				} : null)
 			]
 		};
 	};
