@@ -694,7 +694,7 @@
         if (ref $position eq 'HASH') {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::commafy(int($position->{result}->{value}/1000));
-                $soc_capital = $soc_capital < 10 ? ' < 10 ' : $soc_capital;
+                $soc_capital = $soc_capital < 0.1 ? ' < 10 ' : $soc_capital;
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
                          LJ::Lang::ml($href_rating, {rating_place => LJ::commafy($position->{result}->{position}+1),
@@ -705,7 +705,7 @@
         if (ref $ua_position eq 'HASH') {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($ua_position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::commafy(int($ua_position->{result}->{value}/1000));
-                $soc_capital = $soc_capital < 10 ? ' < 10 ' : $soc_capital;
+                $soc_capital = $soc_capital < 0.1 ? ' < 10 ' : $soc_capital;
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
                          LJ::Lang::ml($ua_href_rating, {rating_place => LJ::commafy($ua_position->{result}->{position}+1),
