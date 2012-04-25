@@ -117,7 +117,7 @@ function new_post_load(dotime) {
 }
 
 function updateRepostButtons(stateIndex) {
-	var boxes = ['facebook', 'twitter'], input, label, parentNode, parentDisableClass = 'b-repost-item-disabled', linkDisclass = 'b-repost-item-dis';
+	var boxes = ['facebook', 'twitter', 'vkontakte'], input, label, parentNode, parentDisableClass = 'b-repost-item-disabled', linkDisclass = 'b-repost-item-dis';
 
 	for (var i in boxes) {
 		input = $('repost_' + boxes[i]);
