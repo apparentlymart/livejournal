@@ -4616,3 +4616,39 @@ BODY div .b-helplink:active {
 		text-decoration: none;
 		cursor: default;
 		}
+
+
+
+/* jQuery UI Autocomplete
+--------------------------------------*/
+.ui-autocomplete {
+	position: absolute;
+	left: 0;
+	top: 21px;
+	width: 190px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #AAA;
+	border-top: 0;
+	list-style: none;
+	line-height: 1.4;
+	background: #FFF;
+	z-index: 999;
+	}
+	.ui-autocomplete LI {
+		margin: 0;
+		padding: 0;
+		cursor: pointer;
+		text-align: left;
+		}
+		.ui-autocomplete LI A {
+			display: block;
+			margin: 0;
+			padding: 1px 10px;
+			color: #000;
+			text-decoration: none;
+			text-align: left;
+			}
+		.ui-autocomplete .ui-state-hover {
+			background: #EEE;
+			}
