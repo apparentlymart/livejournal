@@ -1825,3 +1825,9 @@ logproplist.revtime_sch:
   prettyname: Scheduled post last edit time
   sortorder: 113
 
+logproplist.crosspost_vk:
+  datatype: char
+  des: crosspost to vkontakte information
+  prettyname: Crosspost to vkontakte
+  sortorder: 114
+
