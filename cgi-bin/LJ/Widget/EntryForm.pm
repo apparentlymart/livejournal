@@ -1681,7 +1681,9 @@ sub render_ljphoto_block {
     my $auth_token =
         LJ::Auth->sessionless_auth_token( '/' . $remote->username );
 
-    my $ljphoto_enabled = $remote->can_upload_photo();
+    my $ljphoto_upload_enabled = $remote->can_upload_photo();
+    my $ljphoto_enabled = 0;
+    $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
 
     LJ::Widget::Fotki::Upload->render();
 
@@ -1703,6 +1705,7 @@ sub render_ljphoto_block {
 <script type="text/javascript">
     window.ljphotoMigrationStatus = $migration_status;
     window.ljphotoEnabled = $ljphoto_enabled;
+    window.ljphotoUploadEnabled = $ljphoto_upload_enabled;
     jQuery('#updateForm').photouploader($photouploader_params_out);
 </script>
 JS
@@ -1900,9 +1903,9 @@ sub render_body {
         }
 
         $$js .= 'initEntryDate();';
-        my $ljphoto_enabled = $remote ? $remote->can_upload_photo() : 0;
+        my $ljphoto_upload_enabled = $remote && $remote->can_upload_photo() ? 1 : 0;
 
-        unless ($ljphoto_enabled) {
+        unless ($ljphoto_upload_enabled) {
             my $fotki_error_upgrade_link = ml('fotki.error.upgrade.link');
             my $fotki_error_upgrade_description = ml('fotki.error.upgrade.description');
             my $fotki_error_upgrade_title = ml('fotki.error.upgrade.title');
@@ -1917,12 +1920,7 @@ sub render_body {
 DISABLE_HTML
 
         }
-        my $ljphoto_enabled = 0;
-        $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
-        my $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
-        $$js .= "window.ljphotoMigrationStatus = $migration_status;";
-        $$js .= "window.ljphotoEnabled = $ljphoto_enabled;";
-        $$js .= "window.ljphotoUploadEnabled = $ljphoto_enabled;";
+
         $$js = $self->wrap_js($$js);
 
     }
