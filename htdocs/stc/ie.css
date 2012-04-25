@@ -595,6 +595,9 @@ __________________________________________*/
 	bottom: -1px;
 	left: 62px;
 	}
+/*.b-pics-add-content {
+	width: 350px;
+	} */
 *:first-child+html .b-popup-pics-paste .b-pics-paste-url {
 	min-width: 757px;
 	}
