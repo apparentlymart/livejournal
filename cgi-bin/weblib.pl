@@ -1309,6 +1309,7 @@ sub need_res {
     if ($opts->{clean_list}) {
         %LJ::NEEDED_RES = ();
         @LJ::NEEDED_RES = ();
+        @LJ::INCLUDE_TEMPLATE = ();
         return;
     }
     
@@ -1318,6 +1319,11 @@ sub need_res {
         if (ref $reskey eq 'ARRAY'){
             $reskey  = $key->[1];
             $resopts = $key->[0];
+        }
+
+        if ( $reskey =~ m!^templates/! ) {
+            push @LJ::INCLUDE_TEMPLATE, $reskey;
+            next;
         }
 
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
@@ -1649,6 +1655,52 @@ sub res_includes {
         }
         elsif ( $type eq 'html' ) {
             $ret .= $code unless $opts->{only_css}; ## add raw html to js part
+        }
+    }
+
+    # add jQuery.tmpl templates
+    {
+        next unless $opts->{'only_tmpl'};
+        my %loaded;
+        foreach my $template (@LJ::INCLUDE_TEMPLATE) {
+            my $path = [split m{(?<!\\)/}, $template];
+            my $file = pop @$path;
+
+            shift @$path if $path->[0] eq 'templates';
+
+            $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
+            my $fpath = join('/', $path, $file);
+            
+            -f $fpath         or  next;
+            $loaded{$fpath}++ and next;
+
+            my $data = LJ::Response::CachedTemplate->new(
+                file               => $file,
+                path               => $path,
+                translate          => $LJ::TEMPLATE_TRANSLATION,
+                filter             => $LJ::TEMPLATE_FILTER,
+            );
+
+            my $key = $template;
+            $key =~ s{(?<!\\)/} {-}g;
+            $key =~ s{\.tmpl$} {}g;
+
+            # TODO: </script> in template can ruin your day
+            if ( $LJ::IS_DEV_SERVER ) {
+                $ret .= sprintf q{
+<script type="text/plain" id="%s" data-path="%s" data-file="%s" data-filter="%s" data-translation="%s">
+%s
+</script>
+                }, $key, $path, $file, $LJ::TEMPLATE_FILTER, $LJ::TEMPLATE_TRANSLATION, $data->raw_output();
+
+
+            } else {
+                $ret .= sprintf q{
+<script type="text/plain" id="%s">
+%s
+</script>
+                }, $key, $data->raw_output();
+            }
         }
     }
 

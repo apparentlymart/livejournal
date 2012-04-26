@@ -29,22 +29,6 @@ sub new {
         );
     }
 
-    if ( LJ::is_web_context() ) {
-        %common_params = (
-            %common_params,
-
-            'lj_res_includes_basic'
-                => LJ::res_includes({ 'only_needed' => 1 }),
-
-            'lj_res_includes' => LJ::res_includes(),
-            
-            ##
-            'lj_res_in_bottom'    => (LJ::Request->get_param('res_bottom') ? 1 : 0),
-            'lj_res_includes_css' => LJ::res_includes({ only_css => 1 }),
-            'lj_res_includes_js'  => LJ::res_includes({ only_js  => 1 }),
-        );
-    }
-
     if ($opts->{'use_expr'}) {
         require HTML::Template::Pro; # load module on demand
 

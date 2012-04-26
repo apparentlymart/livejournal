@@ -32,6 +32,15 @@ sub render_page {
 
     my $params = $handler->template_params($args_normalized);
 
+    if ( LJ::is_web_context() ) {
+        $params->{'lj_res_in_bottom'}      = LJ::Request->get_param('res_bottom')? 1 : 0;
+        $params->{'lj_res_includes'}       = LJ::res_includes();
+        $params->{'lj_res_includes_basic'} = LJ::res_includes({ only_needed => 1 });
+        $params->{'lj_res_templates'}      = LJ::res_includes({ only_tmpl   => 1 });
+        $params->{'lj_res_includes_css'}   = LJ::res_includes({ only_css    => 1 });
+        $params->{'lj_res_includes_js'}    = LJ::res_includes({ only_js     => 1 });
+    }
+
     my $template = LJ::HTML::Template->new( { 'use_expr' => 1 },
         'filename' => $filename, );
 
