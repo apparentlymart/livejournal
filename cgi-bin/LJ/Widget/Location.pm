@@ -4,7 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use DateTime::TimeZone;
-use LJ::Widget::Shop::View::SelfPromo;
+#use LJ::Widget::Shop::View::SelfPromo;
 
 my @location_props = qw/ country state city zip sidx_loc/;
 
@@ -246,15 +246,15 @@ sub handle_post {
         $class->error($class->ml('widget.location.error.locale.state_ne_country'));
     }
 
-    if (LJ::is_enabled('selfpromo_ua') && $u->prop('country') eq 'UA') {
-        for my $type (qw(entry journal community)) {
-            my $class = LJ::Pay::SelfPromo->get_class_by_type($type , 'ua');
-            my $promo = $class->current_promo_info();
-            if ($promo && LJ::u_equals($promo->promoter, $u)) {
-                $class->withdraw_object($promo->object);
-            }
-        }
-    }
+   # if (LJ::is_enabled('selfpromo_ua') && $u->prop('country') eq 'UA') {
+   #     for my $type (qw(entry journal community)) {
+   #         my $class = LJ::Pay::SelfPromo->get_class_by_type($type , 'ua');
+   #         my $promo = $class->current_promo_info();
+   #         if ($promo && LJ::u_equals($promo->promoter, $u)) {
+   #             $class->withdraw_object($promo->object);
+   #         }
+   #     }
+   # }
 
     # zip-code validation stuff
     if ($post->{'country'} eq "US") {
