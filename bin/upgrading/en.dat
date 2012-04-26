@@ -3010,6 +3010,8 @@ fotki.album.cancel.album=Cancel
 
 fotki.album.custom.size=Custom
 
+fotki.album.change=All your current selection will be lost. Do you really want to change the album?
+
 fotki.album.click.image|staleness=1
 fotki.album.click.image=Click on image to remove it
 
@@ -3122,6 +3124,8 @@ fotki.album.link.upload=Upload
 fotki.album.link.upload.new|staleness=1
 fotki.album.link.upload.new=Upload new
 
+fotki.album.load.more=Loading more..
+
 fotki.album.manage.albums|staleness=1
 fotki.album.manage.albums=Manage albums
 
@@ -3130,6 +3134,8 @@ fotki.album.new.album.name=New album name
 
 fotki.album.no.photo|staleness=1
 fotki.album.no.photo=No photo
+
+fotki.album.no.pics=There are no photos in this album.
 
 fotki.album.paste.url=Paste url
 
