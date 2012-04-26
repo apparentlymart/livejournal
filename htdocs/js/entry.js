@@ -911,16 +911,14 @@ InOb.handleInsertImageBeta = (function () {
 	function onHtmlReady(event) {
 		if (window.switchedRteOn) {
 			var editor = CKEDITOR.instances.draft;
-			for (var i = 0, l = event.htmlStrings.length; i < l; i++) {
-				editor.insertElement(new CKEDITOR.dom.element.createFromHtml(event.htmlStrings[i], editor.document));
-			}
+			editor.insertHtml(event.htmlStrings.join('<br />'));
 		} else {
 			var selection = DOM.getSelectedRange($('draft'));
 			var node = $('draft');
 			var value = node.value;
 			var start = value.substring(0, selection.start);
 			var end = value.substring(selection.end);
-			node.value = start + event.htmlStrings.join('') + end;
+			node.value = start + event.htmlStrings.join('\n') + end;
 		}
 	}
 
