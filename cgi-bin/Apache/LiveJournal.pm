@@ -1209,12 +1209,12 @@ sub trans {
 
         $u = LJ::want_user($u);
 
-        if ($LJ::DOMAIN_JOURNALS_REVERSE{$u->user} || $LJ::DOMAIN_JOURNALS{$u->user}) {
-            my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
-            return $view if defined $view;
-        } else {
+#        if ($LJ::DOMAIN_JOURNALS_REVERSE{$u->user} || $LJ::DOMAIN_JOURNALS{$u->user}) {
+#            my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
+#            return $view if defined $view;
+#        } else {
             return redir("http://".$u->user.$LJ::USER_DOMAIN);
-        }
+#        }
 
         LJ::Request->pnotes ('error' => 'baduser');
         LJ::Request->pnotes ('remote' => LJ::get_remote());
