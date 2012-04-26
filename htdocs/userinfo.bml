@@ -680,7 +680,7 @@
             journal_id => $u->userid,
             by => 'friends_weight',
             type => 0,
-            sup => 1,
+            sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
         });
 
         if ((ref $ua_position eq 'HASH') || (ref $position eq 'HASH')) {
