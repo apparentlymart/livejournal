@@ -3873,6 +3873,8 @@ sub can_use_ljphoto {
 
     ## return 1 if $u->prop ('fotki_migration_status');
 
+    return 0 if $u->is_identity;
+
     return 1;
 }
 
