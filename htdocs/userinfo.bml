@@ -714,7 +714,7 @@
                                                         "?country=ua&askname=" . $u->username . "#ask_position"}) .
                          "</li>";
         }
-        if ((ref $ua_position eq 'HASH') || (ref $position eq 'HASH')) {
+        if ((ref $ua_position eq 'HASH') || (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)))) {
                 $body .= "<li class='rating-social-capital'>" .
                          $soc_image .
                          LJ::Lang::ml('ljcom.userinfo.social_capital',{soc_capital => $soc_capital}) . ' ' .
