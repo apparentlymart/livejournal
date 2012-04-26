@@ -695,11 +695,12 @@
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = int($position->{result}->{value}/1000);
                 $soc_capital = $soc_capital < 10 ? ' < 10 ' : LJ::commafy($soc_capital);
+                my $country  = LJ::SUP->is_sup_enabled($u) ? 'cyr' : 'noncyr';
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
                          LJ::Lang::ml($href_rating, {rating_place => LJ::commafy($position->{result}->{position}+1),
                                                      url_rating => $LJ::SITEROOT . "/ratings/" . ($u->journaltype eq 'C' ? 'community' : 'users') .
-                                                     "?country=cyr&askname=" . $u->username . "#ask_position"}) .
+                                                     "?country=$country&askname=" . $u->username . "#ask_position"}) .
                          "</li>";
         }
         if (ref $ua_position eq 'HASH') {
