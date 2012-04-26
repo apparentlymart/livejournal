@@ -2330,6 +2330,7 @@ sub start_request
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)
                                       #  keys are relative from htdocs, values 1 or 2 (1=external, 2=inline)
+    @LJ::INCLUDE_TEMPLATE = ();       # jQuery.tmpl templates (translated from HTML::Template)
     %LJ::JSML = ();                   # Javascript language variables sent to the page header for further javascript use
     @LJ::INCLUDE_RAW = ();            # raw js/css added after needed resources.
     %LJ::REQ_GLOBAL = ();             # per-request globals
