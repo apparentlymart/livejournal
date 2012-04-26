@@ -10,7 +10,7 @@ use Class::Autouse qw(
                       LJ::Config
                       LJ::Maps
                       LJ::UserApps
-                      LJ::Clean::Like
+                      LJ::CleanHtml::Like
                       );
 
 LJ::Config->load;
