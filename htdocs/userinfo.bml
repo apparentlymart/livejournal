@@ -691,7 +691,7 @@
 
         $body .= "<ul class='rating-details'>";
 
-        if (ref $position eq 'HASH') {
+        if (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u) )) {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = int($position->{result}->{value}/1000);
                 $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
