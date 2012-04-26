@@ -804,9 +804,7 @@ sub render_htmltools_block {
                 $BML::ML{'entryform.insert.image2'}
             </a>
         </li>
-    } : "";
-
-    $insert_image .= ($remote && ($remote->prop ('fotki_migration_status') != LJ::Pics::Migration::MIGRATION_STATUS_NONE()) && $remote->can_use_ljphoto) ? qq{
+    } : qq{ 
     <li class='image'>
         <a
             href='javascript:void(0);'
@@ -816,7 +814,7 @@ sub render_htmltools_block {
             $BML::ML{'entryform.insert.image2'}
         </a>
     </li>
-    } : "";
+    };
 
     my $insert_media = '';
     unless ($LJ::DISABLED{embed_module}) {
@@ -1628,78 +1626,102 @@ sub render_ljphoto_block {
 
     my $remote = $self->remote ();
 
-    # in case of insert one photo or photo album
-    my $insert_photos = [];
+    my ($migration_status, $ljphoto_enabled, $ljphoto_upload_enabled, $photouploader_params_out, $insert_photos)
+        = (0, 0, 0, "", []);
 
-    my $albums_id = $opts->{'albums_id'};
-    my $photos_id = $opts->{'photos_id'};
+    my $photouploader_params;
+    my $photouploader_params_out;
 
-    my @photos = grep { $_ } map {
-        my $photo = LJ::Pics::Photo->load_and_check_auth( $remote, $_ );
-        $photo;
-    } split (/,/, $photos_id);
+    if ($remote) {
+        # in case of insert one photo or photo album
 
-    foreach my $album_id (split /,/, $albums_id) {
-        my $album = LJ::Pics::Album->load_and_check_auth( $remote, $album_id );
-        next unless $album;
-        push @photos, $album->photos;
+        my $albums_id = $opts->{'albums_id'};
+        my $photos_id = $opts->{'photos_id'};
+
+        my @photos = grep { $_ } map {
+            my $photo = LJ::Pics::Photo->load_and_check_auth( $remote, $_ );
+            $photo;
+        } split (/,/, $photos_id);
+
+        foreach my $album_id (split /,/, $albums_id) {
+            my $album = LJ::Pics::Album->load_and_check_auth( $remote, $album_id );
+            next unless $album;
+            push @photos, $album->photos;
+        }
+
+        $insert_photos = [ grep { $_ } map {
+                my $photo = $_;
+
+                my $res = $photo ? {
+                    photo_desc  => $photo->prop('description'),
+                    photo_title => $photo->prop('title'),
+                    photo_url   => $photo->image_url( 'size' => @photos > 1 ? 100 : 600 ),
+                    photo_id    => $photo->photo_id_displayed,
+                } : undef;
+                $res;
+            } @photos ];
+
+        my @photo_sizes = map { {
+            'size'       => $_,
+            'text'       => LJ::Lang::ml("fotki.size.$_.text"),
+            'is_default' => ( $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
+        } } @LJ::Pics::Photo::DISPLAYED_SIZES;
+
+        my $album_list = [];
+        my $available_space = '';
+        $album_list = [ LJ::Pics::Album->list( 'userid' => $remote->userid ) ];
+        $album_list = [
+            map {
+                my $album = $_;
+                {
+                    album_title => $album->album_title,
+                    album_id    => $album->album_id_displayed,
+                }
+            } @$album_list
+        ];
+        my $available_space = LJ::Widget::Fotki::UserSpace->display_space(
+            LJ::Pics->get_free_space($remote) );
+
+        my $auth_token =
+            LJ::Auth->sessionless_auth_token( '/' . $remote->username );
+
+        $ljphoto_upload_enabled = $remote->can_upload_photo();
+        $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
+
+        $photouploader_params = {
+            'action'          => 'add_new_post',
+            'availableSpace'  => $available_space,
+            'sizesData'       => \@photo_sizes,
+            'albumsData'      => $album_list,
+            'privacyData'     => LJ::Widget::Fotki::Photo->get_user_groups($remote),
+            'type'            => 'upload',
+            'guid'            => $auth_token,
+        };
+
+        $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
+
+        $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
+    } else {
+        my @photo_sizes = map { {
+            'size'       => $_,
+            'text'       => LJ::Lang::ml("fotki.size.$_.text"),
+            'is_default' => ( $remote && $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
+        } } @LJ::Pics::Photo::DISPLAYED_SIZES;
+
+
+        $photouploader_params = {
+            'action'          => 'add_new_post',
+            'sizesData'       => \@photo_sizes,
+            'albumsData'      => [],
+            'privacyData'     => LJ::Widget::Fotki::Photo->get_user_groups($remote),
+            'type'            => 'upload',
+            'guid'            => '',
+        };
+
+        $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
     }
 
-    $insert_photos = [ grep { $_ } map {
-            my $photo = $_;
-
-            my $res = $photo ? {
-                photo_desc  => $photo->prop('description'),
-                photo_title => $photo->prop('title'),
-                photo_url   => $photo->image_url( 'size' => @photos > 1 ? 100 : 600 ),
-                photo_id    => $photo->photo_id_displayed,
-            } : undef;
-            $res;
-        } @photos ];
-
-    my @photo_sizes = map { {
-        'size'       => $_,
-        'text'       => LJ::Lang::ml("fotki.size.$_.text"),
-        'is_default' => ( $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
-    } } @LJ::Pics::Photo::DISPLAYED_SIZES;
-
-    my $album_list = [];
-    my $available_space = '';
-    $album_list = [ LJ::Pics::Album->list( 'userid' => $remote->userid ) ];
-    $album_list = [
-        map {
-            my $album = $_;
-            {
-                album_title => $album->album_title,
-                album_id    => $album->album_id_displayed,
-            }
-        } @$album_list
-    ];
-    my $available_space = LJ::Widget::Fotki::UserSpace->display_space(
-        LJ::Pics->get_free_space($remote) );
-
-    my $auth_token =
-        LJ::Auth->sessionless_auth_token( '/' . $remote->username );
-
-    my $ljphoto_upload_enabled = $remote->can_upload_photo();
-    my $ljphoto_enabled = 0;
-    $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
-
     LJ::Widget::Fotki::Upload->render();
-
-    my $photouploader_params = {
-        'action'          => 'add_new_post',
-        'availableSpace'  => $available_space,
-        'sizesData'       => \@photo_sizes,
-        'albumsData'      => $album_list,
-        'privacyData'     => LJ::Widget::Fotki::Photo->get_user_groups($remote),
-        'type'            => 'upload',
-        'guid'            => $auth_token,
-    };
-
-    my $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
-
-    my $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
 
     $out .= <<JS ;
 <script type="text/javascript">
@@ -1936,8 +1958,7 @@ DISABLE_HTML
     $out .= $self->render_submitbar_block;
 
     ## Show a new photoalbums interface only for logged-in users
-    $out .= $self->render_ljphoto_block
-        if $remote && $remote->can_use_ljphoto();
+    $out .= $self->render_ljphoto_block;
 
     $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
 
