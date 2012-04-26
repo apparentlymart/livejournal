@@ -36,7 +36,7 @@ sub render_page {
         $params->{'lj_res_in_bottom'}      = LJ::Request->get_param('res_bottom')? 1 : 0;
         $params->{'lj_res_includes'}       = LJ::res_includes();
         $params->{'lj_res_includes_basic'} = LJ::res_includes({ only_needed => 1 });
-        $params->{'lj_res_templates'}      = LJ::res_includes({ only_tmpl   => 1 });
+        $params->{'lj_res_templates'}      = LJ::res_includes({ only_needed => 1, only_tmpl   => 1 });
         $params->{'lj_res_includes_css'}   = LJ::res_includes({ only_css    => 1 });
         $params->{'lj_res_includes_js'}    = LJ::res_includes({ only_js     => 1 });
     }

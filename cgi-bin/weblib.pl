@@ -1384,6 +1384,51 @@ sub res_includes {
         $wstatprefix = $LJ::WSTATPREFIX;
     }
 
+    if ( $opts->{'only_tmpl'} ) {{
+        # add jQuery.tmpl templates
+        my %loaded;
+        foreach my $template (@LJ::INCLUDE_TEMPLATE) {
+            my $path = [split m{(?<!\\)/}, $template];
+            my $file = pop @$path;
+
+            shift @$path if $path->[0] eq 'templates';
+
+            $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
+            my $fpath = join('/', $path, $file);
+            
+            -f $fpath         or  next;
+            $loaded{$fpath}++ and next;
+
+            my $data = LJ::Response::CachedTemplate->new(
+                file               => $file,
+                path               => $path,
+                translate          => $LJ::TEMPLATE_TRANSLATION,
+                filter             => $LJ::TEMPLATE_FILTER,
+            );
+
+            my $key = $template;
+            $key =~ s{(?<!\\)/} {-}g;
+            $key =~ s{\.tmpl$} {}g;
+
+            # TODO: </script> in template can ruin your day
+            if ( $LJ::IS_DEV_SERVER ) {
+                $ret .= sprintf q{
+                    <script type="text/plain" id="%s" data-path="%s" data-file="%s" data-filter="%s" data-translation="%s">
+                    %s
+                    </script>
+                }, $key, $path, $file, $LJ::TEMPLATE_FILTER, $LJ::TEMPLATE_TRANSLATION, $data->raw_output();
+
+
+            } else {
+                $ret .= sprintf q{
+                    <script type="text/plain" id="%s">%s</script>
+                }, $key, $data->raw_output();
+            }
+        }
+
+        return $ret;
+    }}
+
     # include standard JS info
     unless ( $only_needed ) {
         # find current journal
@@ -1657,51 +1702,6 @@ sub res_includes {
         }
     }
 
-    # add jQuery.tmpl templates
-    {
-        next unless $opts->{'only_tmpl'};
-        my %loaded;
-        foreach my $template (@LJ::INCLUDE_TEMPLATE) {
-            my $path = [split m{(?<!\\)/}, $template];
-            my $file = pop @$path;
-
-            shift @$path if $path->[0] eq 'templates';
-
-            $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
-            my $fpath = join('/', $path, $file);
-            
-            -f $fpath         or  next;
-            $loaded{$fpath}++ and next;
-
-            my $data = LJ::Response::CachedTemplate->new(
-                file               => $file,
-                path               => $path,
-                translate          => $LJ::TEMPLATE_TRANSLATION,
-                filter             => $LJ::TEMPLATE_FILTER,
-            );
-
-            my $key = $template;
-            $key =~ s{(?<!\\)/} {-}g;
-            $key =~ s{\.tmpl$} {}g;
-
-            # TODO: </script> in template can ruin your day
-            if ( $LJ::IS_DEV_SERVER ) {
-                $ret .= sprintf q{
-<script type="text/plain" id="%s" data-path="%s" data-file="%s" data-filter="%s" data-translation="%s">
-%s
-</script>
-                }, $key, $path, $file, $LJ::TEMPLATE_FILTER, $LJ::TEMPLATE_TRANSLATION, $data->raw_output();
-
-
-            } else {
-                $ret .= sprintf q{
-<script type="text/plain" id="%s">
-%s
-</script>
-                }, $key, $data->raw_output();
-            }
-        }
-    }
 
     return $ret;
 }
