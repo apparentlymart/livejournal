@@ -207,7 +207,8 @@ sub convert {
     my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
     my $fail = !defined $res->{itemid} && $res->{message};
 
-    return { 'delete_entry' => (!$fail || $err < 500),
+    return { 'delete_entry'  => (!$fail || $err < 500),
+             'error_message' => $res->{message},
              'res' => $res };
 }
 

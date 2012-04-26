@@ -147,7 +147,7 @@ sub on_pulse {
                         print "The entry with subject " . $entry->subject;
                         print "\ndelayed id = " . $entry->delayedid . 
                         print " and post date " . $entry->posttime;
-                        print " is deleted becouse USER CANNOT POST\n";
+                        print " is deleted because USER CANNOT POST\n";
                     }
 
                     __notify_user(  $entry->poster,
@@ -159,16 +159,12 @@ sub on_pulse {
                 my $post_status = $entry->convert();
 
                 # do we need to send error
-                if ( $post_status->{error_message} ) {
-                    __send_error($entry->poster, 
-                                $entry->data->{subject},
-                                $post_status->{error_message});
-
-                    if ($verbose) {
-                        print "(posting failed)The entry with subject " . $entry->subject;
-                        print "\ndelayed id = " . $entry->delayedid . 
-                        print " and post date " . $entry->posttime . "\n";
-                    }
+                if ( $post_status->{'error_message'} ) {
+                    warn "(posting failed) The entry with subject " . $entry->subject .
+                          "\ndelayed id = " . $entry->delayedid . 
+                          " and post date " . $entry->posttime . 
+                          " error : " . $post_status->{'error_message'};
+                    
                 } elsif ($verbose) {
                         print "(posting)The entry with subject " . $entry->subject;
                         print "\ndelayed id = " . $entry->delayedid . 
