@@ -812,7 +812,7 @@ sub clean {
                 }
 
 
-                my $like = LJ::Clean::Like->new({ 'entry_url' => $opts->{'entry_url'},
+                my $like = LJ::CleanHtml::Like->new({ 'entry_url' => $opts->{'entry_url'},
                                                   'buttons'   => $attr->{'buttons'} ,
                                                 });     
         
