@@ -141,16 +141,25 @@ sub execute {
         $extra{password} = $ou->password;
     }
 
-    LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->password . 'change'))
-        if $extra{password} ne $u->password;
+    if ( $extra{password} ne $u->password ) {
+        LJ::User::InfoHistory->add( $u,
+            'password', Digest::MD5::md5_hex( $u->password . 'change' ) );
+    }
 
     # reset the email address
     $extra{email} = $ou->email_raw;
     $extra{status} = 'A';
+
+    # TODO: move this to LJ::User::InfoHistory or change it to adding a new
+    # entry; updating table with log data is not a good idea
     $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'", undef, $u->id)
         or $self->error("Error updating infohistory for emailreset: " . $dbh->errstr);
-    LJ::infohistory_add($u, 'emailreset', $u->email_raw, $u->email_status)
-        unless $ou->email_raw eq $u->email_raw; # record only if it changed
+
+    # record only if it changed
+    if ( $ou->email_raw ne $u->email_raw ) {
+        LJ::User::InfoHistory->add( $u,
+            'emailreset', $u->email_raw, $u->email_status );
+    }
 
     # get the new journaltype
     $extra{journaltype} = $typemap->{$type};

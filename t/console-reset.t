@@ -31,8 +31,8 @@ is($u2->email_raw, "resetemail\@$LJ::DOMAIN", "Email reset correctly.");
 is($u2->email_status, "T", "Email status set correctly.");
 
 my $dbh = LJ::get_db_reader();
-my $rv = $dbh->do("SELECT * FROM infohistory WHERE userid=? AND what='email'", undef, $u2->id);
-ok($rv < 1, "Addresses wiped from infohistory.");
+my $infohistory = LJ::User::InfoHistory->get( $u2, 'email' );
+ok( @$infohistory < 1, "Addresses wiped from infohistory." );
 
 $u->revoke_priv("reset_email");
 

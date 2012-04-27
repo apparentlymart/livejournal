@@ -854,7 +854,8 @@ body<=
         my $email_changed = (($u->email_raw ne $POST{'email'}) && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD);
         if ($email_changed) {
             # record old email address;
-            LJ::infohistory_add($u, 'email', $u->email_raw, $u->{status});
+            LJ::User::InfoHistory->add( $u,
+                'email', $u->email_raw, $u->email_status );
 
             $u->log_event('email_change', { remote => $remote, new => $POST{'email'} });
 

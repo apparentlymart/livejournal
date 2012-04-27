@@ -2127,20 +2127,10 @@ sub process_vote {
             }
 
             if (@$uids) {
-                my $remote_email = $remote->email_raw;
                 my $us = LJ::load_userids(@$uids);
 
                 # Get all emails for the user submitting the poll
-                my $dbr = LJ::get_db_reader();
-                my $sth = $dbr->prepare("SELECT oldvalue FROM infohistory " .
-                                        "WHERE userid=? AND what='email' " .
-                                        "ORDER BY timechange");
-                $sth->execute($remote->{'userid'});
-                my @emails;
-                push @emails, $remote_email;
-                while (my $em = $sth->fetchrow_array) {
-                    push @emails, $em;
-                }
+                my @emails = map { $_->{'email'} } @{ $remote->emails_info };
 
                 foreach my $u (values %$us) {
                     next unless $u;

@@ -58,34 +58,21 @@ sub new {
         # TODO: check is $u a user object?
         die "Missing credentials" unless $ip && $action && $old_username;
 
-        my $dbh = LJ::get_db_writer($u);
-        my $sth = $dbh->prepare(
-            "SELECT UNIX_TIMESTAMP(timechange) as utimechange, oldvalue".
-            " FROM infohistory".
-            " WHERE userid=? AND what='username'".
-            " ORDER BY utimechange DESC LIMIT 2");
-        $sth->execute($userid);
-        my ($timechange, $oldvalue) = $sth->fetchrow_array;
+        my $infohistory = LJ::User::InfoHistory->get( $u, 'username' );
+        my ($latest_record) =
+            reverse
+            sort { $a->timechange_unix <=> $b->timechange_unix }
+            @$infohistory;
 
-        # Check for errors
         die "This event (uid=$userid, what=username) was not found in logs"
-            unless $timechange;
+            unless $latest_record;
+
+        my $timechange = $latest_record->timechange_unix;
+        my $oldvalue   = $latest_record->oldvalue;
 
         die "Event (uid=$userid, what=username) was not found in logs".
             " has wrong old username: $oldvalue instead of $old_username"
                 if $oldvalue ne $old_username;
-
-        my ($timechange2, $oldvalue2) = $sth->fetchrow_array;
-        die "Second record about this event was found in log"
-            if $timechange2 && $timechange2 == $timechange && ($oldvalue2 ne $oldvalue);
-
-        # Remember ip address
-        $dbh->do(
-            "UPDATE infohistory".
-            " SET other='ip=$ip'".
-            " WHERE userid=$userid".
-            "   AND what='username'".
-            "   AND UNIX_TIMESTAMP(timechange)=$timechange");
 
         return $timechange;
     };
@@ -201,19 +188,18 @@ sub _as_email {
         my ($u, $timechange_stamp) = @_;
         my $userid = $u->{userid};
 
-        my $dbh = LJ::get_db_reader($u);
-        my $sth = $dbh->prepare(
-            "SELECT oldvalue, other".
-            " FROM infohistory".
-            " WHERE userid=? AND what='username' AND UNIX_TIMESTAMP(timechange)=?");
-        $sth->execute($userid, $timechange_stamp);
-        my ($old_name, $other) = $sth->fetchrow_array;
+        my $infohistory = LJ::InfoHistory->get( $u, 'username' );
+        my ($infohistory_record) =
+            grep { $_->timechange_unix == $timechange_stamp }
+            @$infohistory;
 
-        # Check for errors
-        unless ($old_name) {
+        unless ($infohistory_record) {
             croak "This event (uid=$userid, what=username) was not found in logs";
             return undef;
         }
+
+        my $old_name = $infohistory_record->oldvalue;
+        my $other    = $infohistory_record->other;
 
         # Convert $timechange from GMT to local for user
         my $offset = 0;

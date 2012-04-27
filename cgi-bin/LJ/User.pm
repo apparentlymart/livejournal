@@ -10,43 +10,49 @@
 #             so the queries can be tagged for use by the star replication
 #             daemon.
 
+package LJ::User;
 use strict;
 no warnings 'uninitialized';
 
-package LJ::User;
-use Carp;
 use lib "$ENV{LJHOME}/cgi-bin";
-use List::Util ();
-use LJ::Request;
-use LJ::Constants;
-use LJ::MemCache;
-use LJ::Session;
-use LJ::RateLimit qw//;
-use URI qw//;
-use LJ::JSON;
-use HTTP::Date qw(str2time);
-use LJ::TimeUtil;
-use LJ::User::PropStorage;
-use LJ::FileStore;
-use LJ::RelationService;
 
+use Carp;
+use HTTP::Date qw( str2time );
+use List::Util qw();
+use URI        qw();
+
+use LJ::Constants;
+use LJ::JSON;
+use LJ::FileStore;
+use LJ::MemCache;
+use LJ::RateLimit           qw();
+use LJ::RelationService;
+use LJ::Request;
+use LJ::Session;
+use LJ::TimeUtil;
+use LJ::User::InfoHistory;
+use LJ::User::PropStorage;
+
+# TODO: get rid of Class::Autouse, maybe? it's pretty useless
+# in web context and leads to some nasty bugs otherwise, so probably
+# the benefit is not worth it
 use Class::Autouse qw(
-                      URI
-                      LJ::Subscription
-                      LJ::SMS
-                      LJ::SMS::Message
-                      LJ::Identity
-                      LJ::Auth
-                      LJ::Jabber::Presence
-                      LJ::S2
-                      IO::Socket::INET
-                      Time::Local
-                      LJ::M::FriendsOf
-                      LJ::BetaFeatures
-                      LJ::S2Theme
-                      LJ::Subscription
-                      LJ::Subscription::GroupSet
-                      );
+    IO::Socket::INET
+    Time::Local
+
+    LJ::Auth
+    LJ::BetaFeatures
+    LJ::Identity
+    LJ::Jabber::Presence
+    LJ::M::FriendsOf
+    LJ::Subscription
+    LJ::S2
+    LJ::S2Theme
+    LJ::SMS
+    LJ::SMS::Message
+    LJ::Subscription
+    LJ::Subscription::GroupSet
+);
 
 # class method to create a new account.
 sub create {
@@ -2335,16 +2341,11 @@ sub last_login_time {
 sub last_password_change_time {
     my ($u) = @_;
 
-    my $dbr = LJ::get_db_reader();
-    my ($time) = $dbr->selectrow_array(
-        'SELECT UNIX_TIMESTAMP(MAX(timechange)) FROM infohistory ' .
-        'WHERE userid=? AND what="password"',
-        undef,
-        $u->userid,
-    );
+    my $infohistory = LJ::User::InfoHistory->get( $u, 'password' );
+    my @password_change_timestamps = map { $_->timechange_unix } @$infohistory;
 
-    $time ||= 0;
-    return $time;
+    return 0 unless @password_change_timestamps;
+    return List::Util::max( @password_change_timestamps );
 }
 
 # THIS IS DEPRECATED DO NOT USE
@@ -2466,20 +2467,6 @@ sub update_email_alias {
     return 1;
 }
 
-# this is DEPRECATED in favor of can_reset_password_using_email
-sub can_receive_password {
-    my ($u, $email) = @_;
-
-    return 0 unless $u && $email;
-    return 1 if lc($email) eq lc($u->email_raw);
-
-    my $dbh = LJ::get_db_reader();
-    return $dbh->selectrow_array("SELECT COUNT(*) FROM infohistory ".
-                                 "WHERE userid=? AND what='email' ".
-                                 "AND oldvalue=? AND other='A'",
-                                 undef, $u->id, $email);
-}
-
 # my $u = LJ::want_user(12);
 # my $data = $u->get_email_data('test@test.ru');
 # print $data->{'email_state'}; # email status if test@test.ru is the
@@ -2523,23 +2510,31 @@ sub emails_info {
 
     my @ret;
 
-    my $dbr = LJ::get_db_reader();
-    my $infohistory_rows = $dbr->selectall_arrayref(
-        'SELECT what, UNIX_TIMESTAMP(timechange) AS timechange, '.
-        'oldvalue, other FROM infohistory WHERE userid=? AND '.
-        'what IN ("email", "emaildeleted") ORDER BY timechange',
-        { Slice => {} }, $u->id
-    );
-    my @infohistory_rows = @$infohistory_rows;
+    my $infohistory =
+        LJ::User::InfoHistory->get( $u, [ 'email', 'emaildeleted' ] );
 
-    # this actually finds the greatest timechange in rows before $rownum;
+    my $infohistory_records =
+        [ sort { $a->timechange_unix <=> $b->timechange_unix } @$infohistory ];
+
+    # my $dbr = LJ::get_db_reader();
+    # my $infohistory_rows = $dbr->selectall_arrayref(
+    #     'SELECT what, UNIX_TIMESTAMP(timechange) AS timechange, '.
+    #     'oldvalue, other FROM infohistory WHERE userid=? AND '.
+    #     'what IN ("email", "emaildeleted") ORDER BY timechange',
+    #     { Slice => {} }, $u->id
+    # );
+    # my @infohistory_rows = @$infohistory_rows;
+
+    # this actually finds the greatest timechange in rows before $recordnum;
     # if it fails to find it, it returns $u->timecreate
     my $find_timeset = sub {
-        my ($rownum) = @_;
+        my ($recordnum) = @_;
 
-        for (my $rownum2 = $rownum-1; $rownum2 >= 0; $rownum2--) {
-            my $row2 = $infohistory_rows->[$rownum2];
-            return $row2->{'timechange'} if ($row2->{'what'} eq 'email');
+        for ( my $recordnum2 = $recordnum - 1;
+            $recordnum2 >= 0; $recordnum2-- )
+        {
+            my $record2 = $infohistory_records->[$recordnum2];
+            return $record2->timechange_unix if $record2->what eq 'email';
         }
 
         # in case we found nothing, the address was set when the account
@@ -2547,23 +2542,18 @@ sub emails_info {
         return $u->timecreate;
     };
 
-    foreach my $rownum (0..$#infohistory_rows) {
-        my $row = $infohistory_rows->[$rownum];
-        if ($row->{'what'} eq 'email') {
+    foreach my $recordnum ( 0 .. $#$infohistory_records ) {
+        my $record = $infohistory_records->[$recordnum];
+        if ( $record->what eq 'email' ) {
             # new email has been added to the list, but now, we're going to
             # record the old address
-
-            my $email = { email => $row->{'oldvalue'} };
-            $email->{'changed'} = $row->{'timechange'};
-            $email->{'status'} = $row->{'other'};
-
-            # in case we found nothing, the address was set when the account
-            # was registered
-
-            $email->{'set'} = $find_timeset->($rownum);
-
-            push @ret, $email;
-        } elsif ($row->{'what'} eq 'emaildeleted') {
+            push @ret, {
+                'email'   => $record->oldvalue,
+                'changed' => $record->timechange_unix,
+                'status'  => $record->other,
+                'set'     => $find_timeset->($recordnum),
+            };
+        } elsif ( $record->what eq 'emaildeleted' ) {
             # there may be two cases here: 1) it was something like an admin
             # deletion or 2) it was deletion through /tools/emailmanage.bml,
             # which previously did 'UPDATE infohistory SET what="emaildelete"'
@@ -2571,57 +2561,59 @@ sub emails_info {
             # /tools/emailmanage.bml has since been changed to record that
             # change as a new entry, which returns us to the first case
 
-            unless ($row->{'other'} =~ /;/) {
+            unless ( $record->other =~ /;/ ) {
                 # first case: find all other occurences of that email
                 # and mark them with the date of deletion
 
                 foreach my $email (@ret) {
-                    next unless $email->{'email'} eq $row->{'oldvalue'};
-                    next unless $email->{'set'} <= $row->{'timechange'};
+                    next unless $email->{'email'} eq $record->oldvalue;
+                    next unless $email->{'set'} <= $record->timechange_unix;
 
-                    $email->{'deleted'} = $row->{'timechange'}
+                    $email->{'deleted'} = $record->timechange_unix
                         unless $email->{'deleted'};
                 }
             } else {
                 # second case: parse the timestamp, create an email hashref,
-                # find the row with the next address to set "set", and
+                # find the record with the next address to set "set", and
                 # finally, mark it as deleted. ugh.
 
-                my ($status, $time) = split /;/, $row->{'other'};
+                my ( $status, $time ) = split /;/, $record->other;
 
                 # there is no joke here. in infohistory, time is stored as
                 # MySQL DATETIME. emailmanage.bml used to just append it to
                 # previous status, so now, we need to parse.
                 $time = str2time($time);
 
-                my $email = { email => $row->{'oldvalue'} };
-                $email->{'changed'} = $time;
-                $email->{'status'} = $status;
-                $email->{'deleted'} = $row->{'timechange'};
+                # we need to find the first record which has timestamp
+                # greater or equal to $time so that we can call $find_timeset
+                my $nextrecord = 0;
+                foreach my $recordnum2 ( 0 .. $#$infohistory_records ) {
+                    my $record2 = $infohistory_records->[$recordnum2];
+                    next unless $record2->what eq 'email';
+                    next if $record2->timechange_unix < $time;
 
-                # now, we need to find the first row which has timestamp more
-                # or equal to $time so that we can call $find_timeset
-                my $nextrow = 0;
-                foreach my $rownum2 (0..$#infohistory_rows) {
-                    my $row2 = $infohistory_rows->[$rownum2];
-                    next unless $row2->{'what'} eq 'email';
-                    next if $row2->{'timechange'} < $time;
-
-                    $nextrow = $rownum2;
+                    $nextrecord = $recordnum2;
                     last;
                 }
 
-                $email->{'set'} = $find_timeset->($nextrow);
-                push @ret, $email;
+                push @ret, {
+                    'email'   => $record->oldvalue,
+                    'changed' => $time,
+                    'status'  => $status,
+                    'deleted' => $record->timechange_unix,
+                    'set'     => $find_timeset->($nextrecord),
+                };
             }
         }
     }
 
     # finally, the current address
-    my $email = { email => $u->email_raw, current => 1 };
-    $email->{'status'} = $u->email_status;
-    $email->{'set'} = $find_timeset->($#infohistory_rows + 1);
-    push @ret, $email;
+    push @ret, {
+        'email'   => $u->email_raw,
+        'current' => 1,
+        'status'  => $u->email_status,
+        'set'     => $find_timeset->( $#$infohistory_records + 1 ),
+    };
 
     $u->{'_emails'} = \@ret;
     return \@ret;
@@ -2762,15 +2754,9 @@ sub delete_email {
 
     return unless $u->can_delete_email($addr);
 
-    my $dbh = LJ::get_db_writer();
-    $dbh->do(
-        'INSERT INTO infohistory SET '.
-        'userid=?, what="emaildeleted", timechange=NOW(), '.
-        'oldvalue=?', undef, $u->id, $addr
-    );
+    LJ::User::InfoHistory->add( $u, 'emaildeleted', $addr );
 
     # update cache now
-
     my $emails = $u->emails_info;
     foreach my $email (@$emails) {
         next if $email->{'deleted'};
@@ -6046,7 +6032,7 @@ sub rename_identity {
 
     LJ::memcache_kill($u, "userid");
 
-    LJ::infohistory_add($u, 'identity', $from);
+    LJ::User::InfoHistory->add( $u, 'identity', $from );
 
     return 1;
 }
@@ -7691,29 +7677,6 @@ sub mark_user_active {
                $uid, time(), $u->{clusterid}) or return 0;
     }
     return 1;
-}
-
-# <LJFUNC>
-# name: LJ::infohistory_add
-# des: Add a line of text to the [[dbtable[infohistory]] table for an account.
-# args: uuid, what, value, other?
-# des-uuid: User id or user object to insert infohistory for.
-# des-what: What type of history is being inserted (15 chars max).
-# des-value: Value for the item (255 chars max).
-# des-other: Optional. Extra information / notes (30 chars max).
-# returns: 1 on success, 0 on error.
-# </LJFUNC>
-sub infohistory_add {
-    my ($uuid, $what, $value, $other) = @_;
-    $uuid = LJ::want_userid($uuid);
-    return unless $uuid && $what && $value;
-
-    # get writer and insert
-    my $dbh = LJ::get_db_writer();
-    my $gmt_now = LJ::TimeUtil->mysql_time(time(), 1);
-    $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, ?, ?, ?)",
-             undef, $uuid, $what, $gmt_now, $value, $other);
-    return $dbh->err ? 0 : 1;
 }
 
 # <LJFUNC>

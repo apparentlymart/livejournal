@@ -165,7 +165,10 @@ sub basic_rename {
     $dbh->do("DELETE FROM expunged_users WHERE user IN (?, ?)",
              undef, $from, $to);
 
-    LJ::infohistory_add($u, 'username', $from);
+    my $ip = $opts->{'ip'};
+    $ip ||= LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1';
+
+    LJ::User::InfoHistory->add( $u, 'username', $from, "ip=$ip" );
 
     # tell all web machines to clear their caches for this userid/name mapping
     LJ::procnotify_add("rename_user", { 'userid' => $u->{'userid'},
@@ -194,7 +197,7 @@ sub basic_rename {
         LJ::Event::SecurityAttributeChanged->new($u ,  { 
             action       => 'account_renamed', 
             old_username => $from, 
-            ip           => ($opts->{ip} || (LJ::is_web_context() ? LJ::Request->remote_ip() : '127.0.0.1')),
+            ip           => $ip,
             datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
         })->fire;
     }

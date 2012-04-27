@@ -46,8 +46,7 @@ sub execute {
     LJ::set_rel($ucomm, $unew, 'A');
 
     # so old maintainers can't regain access
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("DELETE FROM infohistory WHERE userid = ?", undef, $ucomm->id);
+    LJ::User::InfoHistory->clear($ucomm);
 
     # change password to blank and set email of community to new maintainer's email
     LJ::update_user($ucomm, { password => '', email => $unew->email_raw });

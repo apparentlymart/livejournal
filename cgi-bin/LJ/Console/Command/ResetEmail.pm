@@ -33,8 +33,10 @@ sub execute {
 
     my $aa = LJ::register_authaction($u->id, "validateemail", $newemail);
 
-    LJ::infohistory_add($u, 'emailreset', $u->email_raw, $u->email_status)
-        if $u->email_raw ne $newemail;
+    if ( $u->email_raw ne $newemail ) {
+        LJ::User::InfoHistory->add( $u,
+            'emailreset', $u->email_raw, $u->email_status );
+    }
 
     LJ::update_user($u, { email => $newemail, status => 'T' })
         or return $self->error("Unable to set new email address for $username");
@@ -51,6 +53,8 @@ sub execute {
         'body' => $body,
     }) or $self->info("Confirmation email could not be sent.");
 
+    # TODO: move this to LJ::User::InfoHistory or change it to adding a new
+    # entry; updating table with log data is not a good idea
     my $dbh = LJ::get_db_writer();
     $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'",
              undef, $u->id) or return $self->error("Database error: " . $dbh->errstr);

@@ -30,20 +30,22 @@ sub execute {
     return $self->error("Invalid user $user")
         unless $u;
 
-    my $dbh = LJ::get_db_reader();
-    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid=?");
-    $sth->execute($u->id);
+    my $infohistory = LJ::User::InfoHistory->get($u);
 
     return $self->error("No matches.")
-        unless $sth->rows;
+        unless @$infohistory;
 
     $self->info("Infohistory of user: $user");
-    while (my $info = $sth->fetchrow_hashref) {
-        $info->{'oldvalue'} ||= '(none)';
-        $self->info("Changed $info->{'what'} at $info->{'timechange'}.");
-        $self->info("Old value of $info->{'what'} was $info->{'oldvalue'}.");
-        $self->info("Other information recorded: $info->{'other'}")
-            if $info->{'other'};
+    foreach my $record (@$infohistory) {
+        my $oldvalue = $record->oldvalue || '(none)';
+
+        $self->info( "Changed " . $record->what .
+            " at " . $record->timechange . "." );
+        $self->info("Old value of " . $record->what . " was $oldvalue.");
+
+        if ( my $other = $record->other ) {
+            $self->info("Other information recorded: $other");
+        }
     }
 
     return 1;
