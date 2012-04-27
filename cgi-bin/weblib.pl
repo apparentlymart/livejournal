@@ -1406,6 +1406,7 @@ sub res_includes {
                 filter             => $LJ::TEMPLATE_FILTER,
             );
 
+            # Create template id
             my $key = $template;
             $key =~ s{(?<!\\)/} {-}g;
             $key =~ s{\.tmpl$} {}g;
@@ -1417,13 +1418,16 @@ sub res_includes {
                     %s
                     </script>
                 }, $key, $path, $file, $LJ::TEMPLATE_FILTER, $LJ::TEMPLATE_TRANSLATION, $data->raw_output();
-
-
             } else {
                 $ret .= sprintf q{
                     <script type="text/plain" id="%s">%s</script>
                 }, $key, $data->raw_output();
             }
+
+            # Let js know about template 
+            $ret .= sprintf q{
+                <script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>
+            }, $key, $key, $LJ::TEMPLATE_TRANSLATION;
         }
 
         return $ret;
