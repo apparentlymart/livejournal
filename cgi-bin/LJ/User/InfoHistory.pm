@@ -45,7 +45,7 @@ sub get {
 
     if ( ref $what eq 'ARRAY' ) {
         my %acceptable_what = map { $_ => 1 } @$what;
-        return [ grep { $acceptable_what{ $_->what } } @$records;
+        return [ grep { $acceptable_what{ $_->what } } @$records ];
     } else {
         return [ grep { $_->what eq $what } @$records ];
     }
