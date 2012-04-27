@@ -2828,6 +2828,32 @@ sub get_current_email_set_date {
     return undef;
 }
 
+sub previous_usernames {
+    my ($u) = @_;
+
+    # the memcache is set to expire automatically on an account rename;
+    # the value there contains a username, and if that changes, we have
+    # to recalculate stuff
+    my $memkey = [ $u->userid, 'previous_usernames:' . $u->userid ];
+    if ( my $value = LJ::MemCache::get($memkey) ) {
+        if ( $value->{'current'} eq $u->username ) {
+            return $value->{'previous'};
+        }
+    }
+
+    my $infohistory = LJ::User::InfoHistory->get( $u, 'username' );
+    my @usernames   = map { $_->oldvalue } @$infohistory;
+
+    my $value = { 'current' => $u->username, 'previous' => \@usernames };
+
+    # the auto-expiration here may fail us in case user is renamed back
+    # before this function is called with that user in the other username,
+    # so let's expire it after a day passes to somehow handle that
+    LJ::MemCache::set( $memkey, $value, 86400 );
+
+    return \@usernames;
+}
+
 sub share_contactinfo {
     my ($u, $remote) = @_;
 
