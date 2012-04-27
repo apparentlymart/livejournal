@@ -380,8 +380,9 @@ sub trans {
 
     LJ::Request->pnotes( 'original_uri' => LJ::Request->uri );
 
-    # js/css file concatenation
-    if ($host eq "stat.$LJ::DOMAIN"){
+    ## JS/CSS file concatenation
+    ## skip it for .bml.
+    if ($host eq "stat.$LJ::DOMAIN" and LJ::Request->uri !~ /\.bml$/){
         Apache::LiveJournal::ConcatHeadFiles->load;
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::ConcatHeadFiles::handler);
