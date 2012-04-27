@@ -7993,6 +7993,121 @@ sub ljuser {
         $extra;
 }
 
+my $ljuser_tmpl_path = join('/', $ENV{'LJHOME'}, 'templates', 'User');
+
+sub ljuser2 {
+    my ($user, $opts) = @_;
+    my ($u, $username, $journal_url, $striked);
+    my ($journal_name, $journal, $userhead);
+    my ($attrs, $color);
+    my $profile_url = $opts->{'profile_url'};
+    my $side_alias  = $opts->{'side_alias'};
+
+    if ( isu($user) ) {
+        $u = $user;
+        $username = $u->username;
+    } else {
+        $u = LJ::load_user($user);
+        $username = $user;
+    }
+
+    if ( $u and LJ::isu($u) ) {
+        # Traverse the renames to the final journal
+        unless ( $opts->{'no_follow'} ) {
+            $u = $u->get_renamed_user;
+            $username = $u->username;
+        }
+
+        unless ( $profile_url ) {
+            $profile_url = $u->profile_url;
+            $profile_url .= '?mode=full' if $opts->{'full'};
+        }
+
+        # Mark accounts as deleted that aren't visible, memorial, locked, or
+        # read-only
+        if ( $u->statusvis !~ m![VMLO]! ) {
+           $striked = 1; 
+        }
+
+        $journal_name = $username;
+        $journal_url  = $u->journal_base . "/";
+        ($userhead)   = $u->userhead($opts);
+
+        # Identity
+        if ( $u->is_identity ) {
+            my $params = $u->identity->ljuser_display_params($u, $opts);
+            $profile_url  = $params->{'profile_url'}  || $profile_url;
+            $journal_url  = $params->{'journal_url'}  || $journal_url;
+            $journal_name = $params->{'journal_name'} || $journal_name;
+        }
+    } else {
+        $username      = LJ::canonical_username($username);
+        $journal_url   = join('', $LJ::SITEROOT, '/userinfo.bml?user=', $username);
+        $profile_url ||= $journal_url;
+        $userhead      = 'userinfo.gif';
+    }
+
+    my $user_alias = LJ::ljuser_alias($username);
+    my $alias      = ($user_alias and not $side_alias)? 1 : 0;
+
+    # FIXME: try to remove this
+    if ( $opts->{'in_journal'} ) {
+        my $cu = LJ::load_user($opts->{'in_journal'});
+        if ( $cu ) {
+            $attrs = join('"', 'data-journal=', $cu->journal_base, '');
+        }
+    }
+
+    # Userhead
+    unless ( $userhead =~ m!^https?:\/\/! ) {
+        $userhead   = join('',
+            $opts->{'imgroot'} || $LJ::IMGPREFIX,
+            '/', $userhead,
+            '?v=', $LJ::CURRENT_VERSION
+        );
+    }
+
+    if ( $color = $opts->{'link_color'} ) {
+        unless ( $color =~ /^#(?:[a-f0-9]{3}|[a-f0-9]{6})$/i ) {
+            undef $color;
+        }
+    }
+
+    $opts->{'bold'} = 1 unless exists $opts->{'bold'};
+
+    my $params     = {
+        alias          => $alias,
+        attrs          => $attrs,
+        bold           => $opts->{'bold'}? 1 : 0,
+        color          => $color,
+        user_alias     => LJ::ehtml($user_alias),
+        side_alias     => $side_alias,
+        target         => $opts->{'target'},
+        username       => $username,
+        journal        => $opts->{'title'} || $journal_name,
+        striked        => $striked,
+        journal_url    => $journal_url,
+        profile_url    => $profile_url,
+        userhead_url   => $userhead,
+    };
+
+    if ( $opts->{'json'} ) {
+        return LJ::JSON->to_json($params);
+    } elsif ( $opts->{'raw'} ) {
+        return $params;
+    } else {
+        return LJ::Response::CachedTemplate->new(
+            path   => $ljuser_tmpl_path,
+            file   => 'Display.tmpl',
+            params => $params,
+        )->raw_output();
+    }
+} # ljuser2
+
+unless ( $LJ::DISABLED{'ljuser_templates'} ) {
+    *ljuser = \&ljuser2;
+}
+
 sub set_email {
     my ($userid, $email) = @_;
 
