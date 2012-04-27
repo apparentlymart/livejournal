@@ -1213,7 +1213,7 @@ sub trans {
 #            my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
 #            return $view if defined $view;
 #        } else {
-            return redir("http://".$u->user.$LJ::USER_DOMAIN);
+            return redir("http://".$u->user.$LJ::USER_DOMAIN, 302);
 #        }
 
         LJ::Request->pnotes ('error' => 'baduser');
