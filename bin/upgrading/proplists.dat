@@ -1529,6 +1529,11 @@ userproplist.custom_usericon:
   des: Custom user icon, to be used instead of /img/userinfo.gif in ljuser
   prettyname: Custom user icon
 
+userproplist.custom_usericon_individual:
+  datatype: char
+  des: Individual user icon. It contains uh_id & exp_date.
+  prettyname: Individual user icon
+
 userproplist.talkleftct:
   datatype: char
   des: Count of comments left by the user
