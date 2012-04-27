@@ -373,4 +373,39 @@ sub drop_html {
     return $what;
 }
 
+# <LJFUNC>
+# name: LJ::Text->wrap_urls
+# des: Wrap URLs into "a href"
+#      <a href="[URL]">[URL]</a>
+# args: text
+# des-text: text to be changed
+# returns: text with active URLs  
+# </LJFUNC>
+sub wrap_urls {
+    my ($class, $text) = @_;
+    my %url = ();
+    my $urlcount = 0;
+    my $match = sub {
+        my $str = shift;
+        my $end = '';
+        if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
+            $url{++$urlcount} = $1;
+            $end = $2;
+        } else {
+            $url{++$urlcount} = $str;
+        }
+        return "&url$urlcount;$url{$urlcount}&urlend;$end";
+    };
+    my $tag_a = sub {
+        my ($key, $title) = @_;
+        return "<a href='$url{$key}'>$title</a>";
+    };
+    ## URL is http://anything-here-but-space-and-quotes/and-last-symbol-isn't-space-comma-period-etc
+    ## like this (http://example.com) and these: http://foo.bar, http://bar.baz.
+    $text =~ s!(https?://[^\s\'\"\<\>]+[^\s\'\"\<\>\.\,\?\:\)])! $match->($1) !ge;
+    $text =~ s|&url(\d+);(.*?)&urlend;|$tag_a->($1,$2)|ge;
+    
+    return $text;
+}
+
 1;
