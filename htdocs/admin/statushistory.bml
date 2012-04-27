@@ -101,7 +101,7 @@
                 $ret .= '<nobr>' . LJ::TimeUtil->statushistory_time($hist->{$_}) . '</nobr>';
             } elsif ($_ eq 'notes') {
                 # notes need to be ehtml'd, but afterwards, we can convert \n to <br />
-                my $enotes = LJ::ehtml($hist->{$_});
+                my $enotes = LJ::Text->wrap_urls(LJ::ehtml($hist->{$_}));
                 $enotes =~ s!\n!<br />\n!g;
                 $ret .= $enotes;
             } else {
