@@ -311,7 +311,6 @@ LJ.getConst = function(name) {
 
 LJ.DOM = LJ.DOM || {};
 
-
 /**
  * Inject stylesheet into page.
  *
@@ -330,6 +329,52 @@ LJ.DOM.injectStyle = function(fileName, _window) {
 	head.appendChild(cssNode);
 
 	//console.log(fileName + ' injected from ' + w.location.href);
+};
+
+LJ.UI = LJ.UI || {};
+LJ.UI._templates = {};
+
+LJ.UI.registerTemplate = function(name, id, type) {
+	var node = jQuery('#' + id),
+		template;
+
+	type = type || 'JQuery';
+
+	if (node.length > 0) {
+		template = node.text();
+	} else {
+		template = id;
+	}
+
+	LJ.UI._templates[name] = {
+		type: type
+	}
+
+	var tmplObject = LJ.UI._templates[name];
+
+	switch(type) {
+		case 'JQuery':
+			jQuery.template(name, template);
+			break;
+	}
+
+};
+
+LJ.UI.template = function(name, data) {
+	var tmplObj = LJ.UI._templates[name],
+		html;
+
+	if (!tmplObj) {
+		LJ.console.log('Warn: template ', name, ' was called but is not defined yet.'); 
+		return jQuery();
+	}
+
+	switch (tmplObj.type) {
+		default:
+			html = jQuery.tmpl(name, data);
+	}
+
+	return html;
 };
 
 
