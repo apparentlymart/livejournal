@@ -8081,7 +8081,7 @@ sub ljuser2 {
         bold           => $opts->{'bold'}? 1 : 0,
         color          => $color,
         user_alias     => LJ::ehtml($user_alias),
-        side_alias     => $side_alias,
+        side_alias     => $user_alias? $side_alias : undef,
         target         => $opts->{'target'},
         username       => $username,
         journal        => $opts->{'title'} || $journal_name,
