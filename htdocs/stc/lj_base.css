@@ -4460,6 +4460,9 @@ BODY div .b-helplink:active {
 	.b-controls-flag .b-controls-bg {
 		background-position: -72px -48px;
 		}
+	.b-controls-stat .b-controls-bg {
+		background-position: 0 -193px;
+		}
 
 /* Pager ( Pagination )
 --------------------------------------*/
