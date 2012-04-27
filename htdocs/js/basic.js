@@ -327,13 +327,22 @@ LJ.DOM.injectStyle = function(fileName, _window) {
 	cssNode.href = fileName;
 	
 	head.appendChild(cssNode);
-
-	//console.log(fileName + ' injected from ' + w.location.href);
 };
 
 LJ.UI = LJ.UI || {};
+
+/**
+ * Private namespace to hold information about templates.
+ */
 LJ.UI._templates = {};
 
+/**
+ * Register new template in system.
+ *
+ * @param {string} name The name of the template.
+ * @param {string} id Id of the script tag containing the templates or the template text.
+ * @param {string=JQuery} type Type of the template. Default is jquery templates.
+ */
 LJ.UI.registerTemplate = function(name, id, type) {
 	var node = jQuery('#' + id),
 		template;
@@ -360,6 +369,15 @@ LJ.UI.registerTemplate = function(name, id, type) {
 
 };
 
+/**
+ * Render the template with the data. Current version returns jQuery object
+ *    but surely should be able to return rendered strings.
+ *
+ *  @param {string} name The name of the template. Template should be registered.
+ *  @param {Object} data Data object to inset into template
+ *
+ *  @return {jQuery} jQuery object containing new markup.
+ */
 LJ.UI.template = function(name, data) {
 	var tmplObj = LJ.UI._templates[name],
 		html;
