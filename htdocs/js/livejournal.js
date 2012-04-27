@@ -30,6 +30,13 @@ LiveJournal.run_hook = function () {
 };
 
 LiveJournal.initPage = function () {
+	//LJRU-3137: The code relies on the Site global variable
+	//so it appears on all livejournal pages. If it's
+	//not there than we are on the external site.
+	if (!window.Site) {
+		return;
+	}
+
 	//register system hooks
 	LiveJournal.register_hook('update_wallet_balance', LiveJournal.updateWalletBalance);
 	LiveJournal.register_hook('xdr/message', LiveJournal.processXdr);
