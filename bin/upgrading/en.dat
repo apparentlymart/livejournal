@@ -3307,6 +3307,8 @@ fotki.photo.upload.error.file_not_selected=File not selected
 fotki.photo.upload.error.file_type_not_supported|staleness=1
 fotki.photo.upload.error.file_type_not_supported=File type is not supported
 
+fotki.photo.upload.error.forbidden=You cannot access this page because this journal is not visible.
+
 fotki.photo.upload.error.no_access_rpc|staleness=1
 fotki.photo.upload.error.no_access_rpc=Internal Error
 
