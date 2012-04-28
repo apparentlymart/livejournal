@@ -3070,6 +3070,8 @@ fotki.album.index.title.beta=beta
 fotki.album.index.windowtitle|staleness=1
 fotki.album.index.windowtitle=PhotoAlbums
 
+fotki.album.link.add.photo.to.entry=Add to post
+
 fotki.album.link.add.to.entry|staleness=1
 fotki.album.link.add.to.entry=Add to entry
 
