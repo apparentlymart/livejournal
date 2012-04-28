@@ -1203,9 +1203,16 @@ sub trans {
         my $u = LJ::User->new_from_external_domain($host);
 
         unless ($u) {
-            LJ::Request->pnotes ('error' => 'baduser');
-            LJ::Request->pnotes ('remote' => LJ::get_remote());
-            return LJ::Request::NOT_FOUND;
+            if ($host =~ /(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
+                LJ::Request->pnotes ('error' => 'baddomainru');
+                LJ::Request->pnotes ('journal_username' => $host);
+                LJ::Request->pnotes ('uri' => 'http://www.livejournal.com/shop/domain_ru.bml');
+                return LJ::Request::NOT_FOUND;
+            } else {
+                LJ::Request->pnotes ('error' => 'baduser');
+                LJ::Request->pnotes ('remote' => LJ::get_remote());
+                return LJ::Request::NOT_FOUND;
+            }
         }
 
         $u = LJ::want_user($u);
@@ -1215,13 +1222,6 @@ sub trans {
             return $view if defined $view;
         } else {
             return redir($u->journal_base);
-        }
-
-        if ($host =~ /(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
-            LJ::Request->pnotes ('error' => 'baddomainru');
-            LJ::Request->pnotes ('journal_username' => $host);
-            LJ::Request->pnotes ('uri' => 'http://www.livejournal.com/shop/domain_ru.bml');
-            return LJ::Request::NOT_FOUND;
         }
 
         LJ::Request->pnotes ('error' => 'baduser');
