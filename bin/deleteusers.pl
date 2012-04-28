@@ -147,7 +147,7 @@ foreach my $uid (@delusers)
     $runsql->($user, "DELETE FROM reluser WHERE targetid=$uid");
     $runsql->($user, "DELETE FROM userlog WHERE userid=$uid");
 
-    $runsql->($user, "UPDATE payitems SET status='refund' WHERE item='domainru' AND rcptid=$uid");
+    $runsql->($user, "UPDATE payitems SET item='domainru_free' WHERE item='domainru' AND rcptid=$uid");
     $runsql->($user, "UPDATE user SET statusvis='X', statusvisdate=NOW(), password='' WHERE userid=$uid");
 
 }

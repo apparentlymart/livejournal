@@ -1210,11 +1210,18 @@ sub trans {
 
         $u = LJ::want_user($u);
 
-        if ($LJ::DOMAIN_JOURNALS_REVERSE{$u->user} || $LJ::DOMAIN_JOURNALS{$u->user}) {
+        if ($LJ::DOMAIN_JOURNALS_REVERSE{$host} || $LJ::DOMAIN_JOURNALS{$u->user}) {
             my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
             return $view if defined $view;
         } else {
-            return redir("http://".$u->user.".".$LJ::USER_DOMAIN);
+            return redir("http://".$u->journal_base);
+        }
+
+        if ($host =~ /(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
+            LJ::Request->pnotes ('error' => 'baddomainru');
+            LJ::Request->pnotes ('journal_username' => $host);
+            LJ::Request->pnotes ('uri' => 'http://www.livejournal.com/shop/domain_ru.bml');
+            return LJ::Request::NOT_FOUND;
         }
 
         LJ::Request->pnotes ('error' => 'baduser');
