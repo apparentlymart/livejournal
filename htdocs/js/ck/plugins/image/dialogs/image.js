@@ -262,7 +262,7 @@
 			previewImageId = numbering('previewImage');
 
 		//show all four tabs only if old photohosting is enabled
-		var showFullDialog = window.ljphotoUploadEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE');
+		var showFullDialog = window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE');
 
 		return {
 			title : editor.lang.image[ dialogType == 'image' ? 'title' : 'titleButton' ],
