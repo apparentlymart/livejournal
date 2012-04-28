@@ -1205,8 +1205,8 @@ sub trans {
         unless ($u) {
             if ($host =~ /(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
                 LJ::Request->pnotes ('error' => 'baddomainru');
-                LJ::Request->pnotes ('journal_username' => $host);
-                LJ::Request->pnotes ('uri' => 'http://www.livejournal.com/shop/domain_ru.bml');
+                LJ::Request->pnotes ('domainname' => $host);
+                LJ::Request->pnotes ('uri_domain_shop' => 'http://www.livejournal.com/shop/domain_ru.bml');
                 return LJ::Request::NOT_FOUND;
             } else {
                 LJ::Request->pnotes ('error' => 'baduser');
