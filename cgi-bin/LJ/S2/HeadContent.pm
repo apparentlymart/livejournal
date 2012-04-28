@@ -123,6 +123,7 @@ sub _page_head {
     }
 
     $head_content .= LJ::res_includes() . $extra_js;
+    $head_content .= LJ::res_includes({ only_needed => 1, only_tmpl   => 1 });
     LJ::run_hooks( 'head_content', \$head_content );
 
     my $get = $opts->{'getargs'};

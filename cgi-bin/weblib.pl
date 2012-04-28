@@ -1384,8 +1384,8 @@ sub res_includes {
         $wstatprefix = $LJ::WSTATPREFIX;
     }
 
-    if ( $opts->{'only_tmpl'} ) {{
-        # add jQuery.tmpl templates
+    # add jQuery.tmpl templates
+    if ( $opts->{'only_tmpl'} ) {
         my %loaded;
         foreach my $template (@LJ::INCLUDE_TEMPLATE) {
             my $path = [split m{(?<!\\)/}, $template];
@@ -1394,7 +1394,7 @@ sub res_includes {
             shift @$path if $path->[0] eq 'templates';
 
             $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
-            my $fpath = join('/', $path, $file);
+            my $fpath = join '/', $path, $file;
             
             -f $fpath         or  next;
             $loaded{$fpath}++ and next;
@@ -1431,7 +1431,7 @@ sub res_includes {
         }
 
         return $ret;
-    }}
+    }
 
     # include standard JS info
     unless ( $only_needed ) {
