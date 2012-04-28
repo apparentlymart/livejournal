@@ -794,27 +794,26 @@ sub render_htmltools_block {
     my $opts = $self->opts;
 
     my $remote = LJ::get_remote();
-    my $insert_image = ($remote && ($remote->prop ('fotki_migration_status') == LJ::Pics::Migration::MIGRATION_STATUS_NONE()) && $remote->can_use_ljphoto) ? qq{
-        <li class='image'>
-            <a
-                href='javascript:void(0);'
-                onclick='InOb.handleInsertImage();'
-                title='$BML::ML{'fckland.ljimage'}'
-            >
-                $BML::ML{'entryform.insert.image2'}
-            </a>
-        </li>
-    } : qq{ 
-    <li class='image'>
-        <a
-            href='javascript:void(0);'
-            onclick='InOb.handleInsertImageBeta();'
-            title='$BML::ML{'fckland.ljimage'}'
-        >
-            $BML::ML{'entryform.insert.image2'}
-        </a>
-    </li>
-    };
+    my $insert_image = '';
+
+    if ($remote) {
+        my $function_name = 'handleInsertImage';
+        if ( LJ::Pics::Migration->user_enabled_new_photohosting($remote) ) {
+            $function_name = 'handleInsertImageBeta';
+        }
+
+        $insert_image = qq{
+            <li class='image'>
+                <a
+                    href='javascript:void(0);'
+                    onclick='InOb.$function_name();'
+                    title='$BML::ML{'fckland.ljimage'}'
+                >
+                    $BML::ML{'entryform.insert.image2'}
+                </a>
+            </li>
+        };
+    }
 
     my $insert_media = '';
     unless ($LJ::DISABLED{embed_module}) {
@@ -1686,7 +1685,7 @@ sub render_ljphoto_block {
             LJ::Auth->sessionless_auth_token( '/' . $remote->username );
 
         $ljphoto_upload_enabled = $remote->can_upload_photo();
-        $ljphoto_enabled = 1 if $remote && $remote->can_use_ljphoto && !LJ::Pics::Migration->user_under_maintenance ($remote);
+        $ljphoto_enabled = 1 if $remote && !LJ::Pics::Migration->user_under_maintenance ($remote);
 
         $photouploader_params = {
             'action'          => 'add_new_post',
