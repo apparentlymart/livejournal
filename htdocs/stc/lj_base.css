@@ -4464,6 +4464,8 @@ BODY div .b-helplink:active {
 		background-position: 0 -193px;
 		}
 
+
+
 /* Pager ( Pagination )
 --------------------------------------*/
 .b-pager {
@@ -4655,3 +4657,60 @@ BODY div .b-helplink:active {
 		.ui-autocomplete .ui-state-hover {
 			background: #EEE;
 			}
+
+
+
+/* Drop-over
+--------------------------------------*/
+.b-dropover-container {
+	position: relative;
+	}
+	.b-dropover {
+		display: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 2;
+		margin: -15px -15px;
+		padding: 34px 14px 14px;
+		list-style: none;
+		border: 1px solid #C0C2C8;
+		-moz-border-radius-bottomright: 9px;
+		-moz-border-radius-bottomleft: 9px;
+		border-bottom-right-radius: 9px;
+		border-bottom-left-radius: 9px;
+		-moz-box-shadow: 0 10px 15px rgba(53,99,161,0.8);
+		-webkit-box-shadow: 0 10px 15px rgba(53,99,161,0.8);
+		box-shadow: 0 10px 15px rgba(53,99,161,0.8);
+		background: #FAFAFA;
+		background: -moz-linear-gradient(top, #FAFCFE 0%, #E2E3E7 25%, #FAFAFA 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FAFCFE), color-stop(25%,#E2E3E7), color-stop(100%,#FAFAFA));
+		background: -webkit-linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
+		background: -o-linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
+		background: -ms-linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
+		background: linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FAFCFE', endColorstr='#FAFAFA',GradientType=0 );
+		}
+	.b-dropover-open .b-dropover {
+		display: block;
+		}
+	.b-dropover-close {
+		display: none;
+		position: absolute;
+		top: 1px;
+		right: 10px;
+		z-index: 2;
+		width: 16px;
+		height: 16px;
+		margin: 0;
+		padding: 0;
+		background: url(/img/icons/popup-close.png?v=1) 0 0 no-repeat;
+		font: 0/0 serif;
+		cursor: pointer;
+		}
+	.b-dropover-close:hover {
+		background-position: 0 -16px;
+		}
+	.b-dropover-open .b-dropover-close {
+		display: block;
+		}
