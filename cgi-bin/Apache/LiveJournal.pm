@@ -1217,7 +1217,10 @@ sub trans {
 
         $u = LJ::want_user($u);
 
-        if ($LJ::DOMAIN_JOURNALS_REVERSE{$host} || $LJ::DOMAIN_JOURNALS{$u->user}) {
+        my $check_host = lc($host);
+        $check_host =~ s/^www\.//;
+
+        if ($LJ::DOMAIN_JOURNALS_REVERSE{$check_host} || $LJ::DOMAIN_JOURNALS{$u->user}) {
             my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
             return $view if defined $view;
         } else {
