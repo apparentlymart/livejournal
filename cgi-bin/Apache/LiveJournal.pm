@@ -1214,7 +1214,7 @@ sub trans {
             my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
             return $view if defined $view;
         } else {
-            return redir("http://".$u->journal_base);
+            return redir($u->journal_base);
         }
 
         if ($host =~ /(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
