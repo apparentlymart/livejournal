@@ -402,7 +402,7 @@ sub wrap_urls {
     };
     ## URL is http://anything-here-but-space-and-quotes/and-last-symbol-isn't-space-comma-period-etc
     ## like this (http://example.com) and these: http://foo.bar, http://bar.baz.
-    $text =~ s!(https?://[^\s\'\"\<\>]+[^\s\'\"\<\>\.\,\?\:\)])! $match->($1) !ge;
+    $text =~ s!(https?://[^\s\'\"\<\>]+[^\s\'\"\<\>\.\,\?\:\;\)])! $match->($1) !ge;
     $text =~ s|&url(\d+);(.*?)&urlend;|$tag_a->($1,$2)|ge;
     
     return $text;
