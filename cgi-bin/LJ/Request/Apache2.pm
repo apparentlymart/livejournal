@@ -525,6 +525,11 @@ sub LJ::Request::parsed_uri {
     $class->r()->parsed_uri; # Apache2::URI
 }
 
+sub LJ::Request::unparsed_uri {
+    my $class = shift;
+    $class->r()->unparsed_uri; # Apache2::URI
+}
+
 sub LJ::Request::current_callback {
     my $class = shift;
     return ModPerl::Util::current_callback();

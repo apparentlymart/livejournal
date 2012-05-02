@@ -472,6 +472,10 @@ sub LJ::Request::parsed_uri {
     $class->r()->parsed_uri; # Apache::URI
 }
 
+sub LJ::Request::unparsed_uri {
+    die "not implemented";
+}
+
 sub LJ::Request::current_callback {
     my $class = shift;
     return $class->r()->current_callback;
