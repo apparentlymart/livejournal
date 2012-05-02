@@ -2250,8 +2250,9 @@ sub interface_content
 
     # simplified code from 'package BML::Cookie' in Apache/BML.pm
     my $cookie_str = LJ::Request->header_in("Cookie");
-    warn("Apache::LiveJournal: \$cookie_str = [$cookie_str]");
-    if ($cookie_str =~ m{\blangpref=(?:(\w{2,10})/\d+\b|"(\w{2,10})/\d+")}) { # simplified code from BML::decide_language
+    
+    # simplified code from BML::decide_language
+    if ($cookie_str && LJ::durl($cookie_str) =~ m{\blangpref=(?:(\w{2,10})/\d+\b|"(\w{2,10})/\d+")}) { 
         my $lang = $1 || $2;
         # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
         BML::set_language($lang, \&LJ::Lang::get_text);
