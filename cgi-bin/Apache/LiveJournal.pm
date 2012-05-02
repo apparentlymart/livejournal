@@ -2250,8 +2250,8 @@ sub interface_content
 
     # simplified code from 'package BML::Cookie' in Apache/BML.pm
     my $cookie_str = LJ::Request->header_in("Cookie");
-    if ($cookie_str =~ /\blangpref=(\w{2,10})\/\d+\b/) { # simplified code from BML::decide_language
-        my $lang = $1;
+    if ($cookie_str =~ m{\blangpref=(?:(\w{2,10})/\d+\b|"(\w{2,10})/\d+")}) { # simplified code from BML::decide_language
+        my $lang = $1 || $2;
         # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
         BML::set_language($lang, \&LJ::Lang::get_text);
     }
