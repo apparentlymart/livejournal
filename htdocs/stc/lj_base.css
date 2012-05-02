@@ -4714,3 +4714,23 @@ BODY div .b-helplink:active {
 	.b-dropover-show .b-dropover-close {
 		display: block;
 		}
+
+
+
+/* LJ User
+--------------------------------------*/
+.i-ljuser {
+	position: static;
+	display: inline;
+	white-space: nowrap;
+	}
+.i-ljuser-deleted {
+	text-decoration: line-through;
+	}
+	.i-ljuser-userhead {
+		width: 16px;
+		height: 16px;
+		vertical-align: text-bottom;
+		}
+	.i-ljuser-username {
+		}
