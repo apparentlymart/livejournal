@@ -382,7 +382,10 @@ sub trans {
 
     ## JS/CSS file concatenation
     ## skip it for .bml.
-    if ($host eq "stat.$LJ::DOMAIN" and LJ::Request->uri !~ /\.bml$/){
+    if (
+        ($host eq "stat.$LJ::DOMAIN" and LJ::Request->uri !~ /\.bml$/) or
+        ($LJ::IS_SSL and LJ::Request->unparsed_uri =~ /\?\?/)
+    ){
         Apache::LiveJournal::ConcatHeadFiles->load;
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::ConcatHeadFiles::handler);
