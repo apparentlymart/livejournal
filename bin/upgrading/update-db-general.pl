@@ -545,10 +545,15 @@ EOC
 
 register_tablecreate('domains', <<'EOC');
 CREATE TABLE `domains` (
+  `domainid` int(10) unsigned NOT NULL auto_increment,
   `domain` varchar(80) NOT NULL,
   `userid` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`domain`),
-  KEY `userid` (`userid`)
+  `rcptid` int(10) unsigned NOT NULL,
+  `type` char(5) default NULL,
+  `name` char(80) default NULL,
+  PRIMARY KEY  (`domainid`),
+  KEY `userid` (`userid`),
+  KEY `rcptid` (`userid`)
 )
 EOC
 
@@ -4430,6 +4435,14 @@ register_alter(sub {
                 ADD pic_orig_url VARCHAR(255) NOT NULL DEFAULT '',
                 ADD pic_fb_url VARCHAR(255) NOT NULL DEFAULT ''
         ");
+    }
+
+    unless (column_type("domains", "domainid")) {
+            do_alter("domains", "ALTER TABLE domains DROP PRIMARY KEY");
+            do_alter("domains", "ALTER TABLE domains ADD COLUMN domainid int(10) unsigned NOT NULL AUTO_INCREMENT KEY");
+            do_alter("domains", "ALTER TABLE domains ADD COLUMN rcptid int(10) unsigned NOT NULL");
+            do_alter("domains", "ALTER TABLE domains ADD COLUMN type char(5)");
+            do_alter("domains", "ALTER TABLE domains ADD COLUMN name char(80)");
     }
 });
 
