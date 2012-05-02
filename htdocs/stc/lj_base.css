@@ -4699,7 +4699,7 @@ BODY div .b-helplink:active {
 		position: absolute;
 		top: 1px;
 		right: 10px;
-		z-index: 2;
+		z-index: 5;
 		width: 16px;
 		height: 16px;
 		margin: 0;
@@ -4711,6 +4711,6 @@ BODY div .b-helplink:active {
 	.b-dropover-close:hover {
 		background-position: 0 -16px;
 		}
-	.b-dropover-open .b-dropover-close {
+	.b-dropover-show .b-dropover-close {
 		display: block;
 		}
