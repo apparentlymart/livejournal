@@ -1875,6 +1875,10 @@ sub auth_okay
     my $ip_banned = shift;
     return 0 unless isu($u);
 
+    LJ::run_hook ("update_counter", {
+        counter => "check_password",
+    });
+
     $actual ||= $u->password;
 
     my $user = $u->{'user'};

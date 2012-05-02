@@ -7431,6 +7431,10 @@ sub check_priv
     my ($u, $priv, $arg) = @_;
     return 0 unless $u;
 
+    LJ::run_hook ("update_counter", {
+        counter => "check_priv",
+    });
+
     LJ::load_user_privs($u, $priv)
         unless $u->{'_privloaded'}->{$priv};
 
