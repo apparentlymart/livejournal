@@ -1289,6 +1289,18 @@ sub js_dumper {
     }
 }
 
+## stc/0 is the empty file.
+## its modtime is checked for all concatenated sources and it is updated
+## for every release, so in the most cases this modtime 
+## as timestamp is used for "?v" param value.
+sub stc_0_modtime {
+    my $now = shift;
+    $now = time() unless defined $now;
+
+    ## touch-ing it changes ?v= param for all included res.
+    return _file_modtime("stc/0", $now);
+}
+
 sub stat_src_to_url {
     my $url = shift;
     my $mtime = _file_modtime("/stc" . $url, time);
@@ -1362,6 +1374,7 @@ sub res_includes {
     my $ret_css = "";
     my %libs    = (); ## pseudo files.
     my $do_concat = $LJ::IS_SSL ? $LJ::CONCAT_RES_SSL : $LJ::CONCAT_RES;
+    my $now     = time();
 
     # all conditions must be complete here
     # example: cyr/non-cyr flag changed at settings page
@@ -1502,6 +1515,7 @@ sub res_includes {
                 remoteUser               => $remote && $remote->user,
                 remoteLocale             => LJ::lang_to_locale( LJ::Lang::get_remote_lang() ),
                 pics_production          => LJ::is_enabled('pics_production'),
+                v                        => stc_0_modtime($now),
         );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
@@ -1571,7 +1585,6 @@ sub res_includes {
         </script>\n|;
     }
 
-    my $now = time();
     my %list;   # type -> condition -> args -> [list of files];
     my %oldest; # type -> condition -> args -> $oldest
     my $add = sub {
@@ -1642,7 +1655,7 @@ sub res_includes {
 
                     ## stc/0 is the empty file.
                     ## touch-ing it changes ?v= param for all included res.
-                    my $mtime_base = _file_modtime("stc/0", $now);
+                    my $mtime_base = stc_0_modtime($now);
                     $mtime = $mtime_base if $mtime_base > $mtime;
 
                     $csep .= "?v=" . $mtime;
