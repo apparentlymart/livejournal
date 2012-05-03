@@ -542,7 +542,6 @@ __________________________________________*/
 	overflow: visible;
 	padding: 0 10px;
 	}
-.b-pics-list-albums LI.b-pics-list-albums-item,
 .b-pics-edit-field-click .b-pics-input-edit,
 .b-pics-edit-field-click .b-pics-textarea-edit,
 .b-pics-edit-field-click .b-pics-btn,
@@ -608,6 +607,7 @@ __________________________________________*/
 *:first-child+html .b-pics-url-field {
 	width: 620px;
 	}
+*:first-child+html .b-pics-list-albums LI.b-pics-list-albums-item,
 *:first-child+html .b-popup-pics-paste .b-pics-paste-url,
 *:first-child+html .b-popup-pics-upload-header,
 *:first-child+html .b-popup-pics-paste-header,
