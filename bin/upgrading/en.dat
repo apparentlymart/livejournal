@@ -5798,7 +5798,11 @@ talk.error.nocomment=The comment does not exist.
 
 talk.error.noentry=No such entry.
 
+talk.error.nopass=No password sent
+
 talk.error.nojournal=Error: couldn't determine journal from arguments.
+
+talk.error.noreply_deleted=This comment was deleted
 
 talk.error.nosuchjournal=No such journal
 
@@ -5809,6 +5813,8 @@ talk.error.notauthorised=You are not authorized to view this protected entry.
 talk.error.notafriend=Comments allowed for friends only
 
 talk.error.notamember=Comments allowed for members only
+
+talk.error.nouser=No username sent
 
 talk.error.purged|staleness=1
 talk.error.purged=This journal has been deleted and purged.
@@ -5980,6 +5986,8 @@ talk.post.meta.when=Date
 talk.post.mood=Mood
 
 talk.post.music=Music
+
+talk.post.nosubject=no subject
 
 talk.post.repost.facebook=Facebook
 
