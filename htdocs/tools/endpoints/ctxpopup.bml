@@ -1,4 +1,5 @@
 <?_code # -*-bml-*-
+
 {
     use strict;
     use vars qw(%GET);
@@ -116,6 +117,28 @@
 
         $ret{userpic_w} = 100;
         $ret{userpic_h} = 100;
+    }
+
+    if ($u && ($u->is_personal || $u->is_comm)) {
+        my ($position, $first, $soc_capital);
+
+        $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
+            func => 'get_value',
+            what => $u->journaltype eq 'C' ? 'communities' : 'users',
+            journal_id => $u->userid,
+            by => 'friends_weight',
+            type => 0,
+            sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
+        });
+
+        if (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u) )) {
+            $first = $position->{result}->{position}!=0 ? 0 : 1;
+            $soc_capital = int($position->{result}->{value}/1000);
+            $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
+
+            $ret{first}  = $first; 
+            $ret{value}  = $soc_capital;
+        }
     }
 
     if ( $remote ) {
