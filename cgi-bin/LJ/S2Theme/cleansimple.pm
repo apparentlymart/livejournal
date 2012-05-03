@@ -113,8 +113,4 @@ package LJ::S2Theme::cleansimple::valentine;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( clean warm ) }
 
-package LJ::S2Theme::cleansimple::minimal_black;
-use base qw(LJ::S2Theme::cleansimple);
-sub cats { qw( clean ) }
-
 1;
