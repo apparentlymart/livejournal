@@ -4,16 +4,18 @@ use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
 
+use LJ::Pics;
+
 sub cmd { "suspend" }
 
-sub desc { "Suspend an account or entry." }
+sub desc { "Suspend an account or entry or photo/album." }
 
 sub args_desc { [
-                 'username or email address or entry url' => "The username of the account to suspend, or an email address to suspend all accounts at that address, or an entry URL to suspend a single entry within an account",
-                 'reason' => "Why you're suspending the account or entry.",
+                 'username or email address or entry url or photo url or album url' => "The username of the account to suspend, or an email address to suspend all accounts at that address, or an entry URL to suspend a single entry within an account, or photo URL to suspend, or album URL to suspend all photos",
+                 'reason' => "Why you're suspending the account or entry or photo or album.",
                  ] }
 
-sub usage { '<username or email address or entry url> <reason>' }
+sub usage { '<username or email address or entry url or photo/album url> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -27,6 +29,32 @@ sub execute {
         unless $user && $reason && scalar(@args) == 0;
 
     my $remote = LJ::get_remote();
+
+    my $photo = LJ::Pics::Photo->new_from_url ($user);
+    if ($photo) {
+        ## we've got a photo url
+        ## suspend and return
+        $photo->set_prop ('suspend_reason', $reason);
+        my $journal = $photo->owner;
+        LJ::statushistory_add($journal, $remote, "suspend", "photo: $user / $reason");
+        $photo->delete_from_cdn () if $LJ::PICS_IMAGES_USE_CDN;
+        return $self->print("Photo " . $user . " suspended.");
+    }
+
+    my $album = LJ::Pics::Album->new_from_url ($user);
+    if ($album) {
+        ## we've got an album url
+        ## suspend and return
+        $album->set_prop ('suspend_reason', $reason);
+        my @photos = $album->photos;
+        if ($LJ::PICS_IMAGES_USE_CDN) {
+            $_->delete_from_cdn () foreach @photos;
+        }
+        my $journal = $album->owner;
+        LJ::statushistory_add($journal, $remote, "suspend", "album: $user / $reason");
+        return $self->print("Album " . $user . " suspended.");
+    }
+
     my $entry = LJ::Entry->new_from_url($user);
     if ($entry) {
         my $poster = $entry->poster;
