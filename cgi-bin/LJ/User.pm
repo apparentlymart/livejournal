@@ -8001,6 +8001,7 @@ sub ljuser2 {
     my ($u, $username, $journal_url, $striked);
     my ($journal_name, $journal, $userhead);
     my ($attrs, $color, $user_alias, %user);
+    my $identity;
     my $profile_url;
 
     if ( isu($user) ) {
@@ -8033,7 +8034,8 @@ sub ljuser2 {
 
             # Identity
             if ( $u->is_identity ) {
-                my $params = $u->identity->ljuser_display_params($u, $opts);
+                $identity  = $u->identity;
+                my $params = $identity->ljuser_display_params($u, $opts);
                 $profile_url  = $params->{'profile_url'};
                 $journal_url  = $params->{'journal_url'}  || $journal_url;
                 $journal_name = $params->{'journal_name'} || $journal_name;
@@ -8068,6 +8070,7 @@ sub ljuser2 {
         journal_url    => $journal_url,
         profile_url    => $profile_url,
         userhead_url   => $userhead,
+        is_identity    => $identity? 1 : 0,
     }};
 
     $user{'bold'}         = 1                      if $opts->{'bold'} or not exists $opts->{'bold'};
@@ -8114,7 +8117,7 @@ sub ljuser2 {
 } # ljuser2
 
 if ( not $LJ::DISABLED{'ljuser_templates'} ) {
-    if ( $ENV{'MOD_PERL'} ) {
+    unless ( $ENV{'MOD_PERL'} ) {
         # Sometimes we need style inlined
         # In emails, for example
         *ljuser = sub { ljuser2($_[0], { %{ $_[1] || {} }, inline_css => 1 }) };
