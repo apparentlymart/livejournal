@@ -193,6 +193,8 @@ LiveJournal.updateWalletBalance = function () {
 				balance.innerHTML = newBalance;
 			}
 		}
+
+		LiveJournal.run_hook('balance_updated', resp.balance);
 	}, 'json');
 };
 
