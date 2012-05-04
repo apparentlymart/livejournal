@@ -3269,7 +3269,7 @@ DIV.lj_ippu_app {
 		font-size: 12px;
 		}
 	.b-contextualhover .soc_cap{
-		line-height: 17px;
+		line-height: 18px;
 		}
 		.b-contextualhover .soc_cap .b-icon{
 			float: left;
@@ -3280,10 +3280,10 @@ DIV.lj_ippu_app {
 			background-repeat: no-repeat;
 			}
 .b-icon-social-capital {
-	background-position:  0 50%;
+	background-position: 0 50%;
 	}
  .b-icon-social-capital-first {
-	background-position:  -17px 50%;
+	background-position: -17px 50%;
 	}
 	.b-contextualhover .input-checkbox {
 		margin-right: 2px;
