@@ -1400,47 +1400,66 @@ sub res_includes {
     # add jQuery.tmpl templates
     if ( $opts->{'only_tmpl'} ) {
         my %loaded;
-        foreach my $template (@LJ::INCLUDE_TEMPLATE) {
+        foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
             my $path = [split m{(?<!\\)/}, $template];
             my $file = pop @$path;
+            my ($type, $filter);
 
             shift @$path if $path->[0] eq 'templates';
 
             $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
             my $fpath = join '/', $path, $file;
             
-            -f $fpath         or  next;
-            $loaded{$fpath}++ and next;
+            -f $fpath             or warn 'Missing template '. $fpath and next;
+            $loaded{lc $fpath}++ and next;
+
+            for ($file) {
+                m{\.jqtmpl$}i and do {
+                    $type   = 'JQuery.tmpl';
+                    $filter = 'jqtmpl';
+                };
+
+                m{\.tmpl$}i   and do {
+                    $type   = 'HTML::Template';
+                    $filter = $LJ::TEMPLATE_FILTER;
+                };
+            }
+
+            $type or next;
 
             my $data = LJ::Response::CachedTemplate->new(
                 file               => $file,
                 path               => $path,
+                type               => $type,
                 translate          => $LJ::TEMPLATE_TRANSLATION,
-                filter             => $LJ::TEMPLATE_FILTER,
+                filter             => $filter,
             );
 
             # Create template id
             my $key = $template;
             $key =~ s{(?<!\\)/} {-}g;
-            $key =~ s{\.tmpl$} {}g;
+            $key =~ s{\.(?:jq)?tmpl$} {}g;
 
             # TODO: </script> in template can ruin your day
             if ( $LJ::IS_DEV_SERVER ) {
-                $ret .= sprintf q{
-                    <script type="text/plain" id="%s" data-path="%s" data-file="%s" data-filter="%s" data-translation="%s">
-                    %s
-                    </script>
-                }, $key, $path, $file, $LJ::TEMPLATE_FILTER, $LJ::TEMPLATE_TRANSLATION, $data->raw_output();
+                $ret .= sprintf q{<script type="text/plain"
+                    id="%s"
+                    data-path="%s"
+                    data-file="%s"
+                    data-type="%s"
+                    data-filter="%s"
+                    data-translation="%s">},
+                $key, $path, $file, $type, $filter, $LJ::TEMPLATE_TRANSLATION;
+                $ret .= $data->raw_output();
+                $ret .= '</script>';
             } else {
-                $ret .= sprintf q{
-                    <script type="text/plain" id="%s">%s</script>
-                }, $key, $data->raw_output();
+                $ret .= sprintf q{<script type="text/plain" id="%s">}, $key;
+                $ret .= $data->raw_output();
+                $ret .= '</script>';
             }
 
             # Let js know about template 
-            $ret .= sprintf q{
-                <script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>
-            }, $key, $key, $LJ::TEMPLATE_TRANSLATION;
+            $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
         }
 
         return $ret;
