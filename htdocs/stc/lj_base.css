@@ -3268,23 +3268,6 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
-	.b-contextualhover .soc_cap{
-		line-height: 18px;
-		}
-		.b-contextualhover .soc_cap .b-icon{
-			float: left;
-			width: 16px;
-			height: 16px;
-			margin:0 2px 0 0;
-			background-image: url(/img/icon-social-capital.png);
-			background-repeat: no-repeat;
-			}
-.b-icon-social-capital {
-	background-position: 0 50%;
-	}
- .b-icon-social-capital-first {
-	background-position: -17px 50%;
-	}
 	.b-contextualhover .input-checkbox {
 		margin-right: 2px;
 		vertical-align: middle;
@@ -3336,6 +3319,29 @@ DIV.lj_ippu_app {
 			.b-contextualhover .b-contextualhover-options LI A:hover {
 				text-decoration: underline !important;
 				}
+	.b-contextualhover .b-contextualhover-param {
+		line-height: 18px;
+		}
+	.b-contextualhover .b-contextualhover-param-item {
+		list-style: none;
+		}
+		.b-contextualhover-param-item .b-icon-scapital {
+			margin:0 2px 0 0;
+			}
+
+/* Social Capital Icon */
+.b-icon-scapital {
+	float: left;
+	width: 16px;
+	height: 16px;
+	margin:0 2px 0 0;
+	background-image: url(/img/icon-social-capital.png);
+	background-repeat: no-repeat;
+	background-position: 0 50%;
+	}
+ .b-icon-scapital-first {
+	background-position: -17px 50%;
+	}
 
 /* Native Sharing */
 .b-sharethis {
