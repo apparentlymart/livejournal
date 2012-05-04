@@ -1040,7 +1040,6 @@
 		}
 #LJ__Setting__Music__LastFM_,
 #LJ__Setting__Music__Trava_ {
-	display: inline-block;
 	padding: 0 10px;
 	}
 #LJ__Setting__Music__Trava_,
@@ -1050,6 +1049,7 @@
 	}
 	#LJ__Setting__Music__Trava_ A {
 		cursor: pointer;
+		border: 0;
 		outline: none;
 		text-decoration: none;
 		color: blue;
