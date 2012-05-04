@@ -440,7 +440,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			new Image().src = this.adriverImages[userType].supplant({ random: Math.random()});
 
 
-			console.log(data);
 			buildObject.socialCap = {
                 first: !!data.first
             }
