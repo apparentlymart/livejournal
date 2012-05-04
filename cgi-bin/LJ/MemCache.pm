@@ -228,7 +228,9 @@ sub _connect {
     my ($server) = @_;
 
     if ($connections{$server} && $connections_pid{$server} ne $$) {
-        warn "Connection to $server was established from other PID: old=$connections_pid{$server}, cur=$$";
+        warn "Connection to $server was established from other PID: old=$connections_pid{$server}, cur=$$"
+            unless $LJ::IS_DEV_SERVER;
+
         my $old_handler = delete $connections{$server};
         $old_handler->disconnect_all;
     }
