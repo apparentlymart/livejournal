@@ -6117,6 +6117,14 @@ talk.unspamtoreply=Unspam to reply
 
 talk.url.hint=Hint
 
+talk.user=User
+
+talk.user.example=Example
+
+talk.user.hint=tema
+
+talk.user.insert=Insert user
+
 talk.userswitch=switch
 
 talk.video=Video
