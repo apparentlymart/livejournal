@@ -131,46 +131,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		templates: {
 			wrapper: '<div class="b-contextualhover"></div>',
 			loading: 'Loading...',
-			content: 
-					'{{if userpic }}' +
-					'<div class="b-contextualhover-side">' +
-						'<div class="b-contextualhover-userpic">' +
-							'<a href="${userpic.allpics}"><img src="${userpic.pic}" alt="" /></a>' +
-						'</div>' +
-					'</div>' +
-					'{{/if}}' +
-					'<div class="b-contextualhover-section">' +
-					'<div class="b-contextualhover-title">' +
-						'<h3>{{html title.title}}</h3>' +
-						'{{each headLinks}}' +
-								'<p>{{if $value.url}}<a href="${$value.url}">${$value.text}</a>' +
-								'{{else}}{{html $value}}{{/if}}</p>' + 
-						'{{/each}}' +
-					'</div>' +
-					'{{each(i, group) linkGroups}}' +
-						'{{if group.length }}' +
-						'<ul class="b-contextualhover-options">' +
-							'{{each group}}<li>' +
-								'{{if $value.url}}<a href="${$value.url}">${$value.text}</a>' +
-								'{{else}}{{html $value}}{{/if}}' +
-							'</li>{{/each}}' +
-						'</ul>' +
-						'{{/if}}' +
-					'{{/each}}' +
-					'{{if showBanOptions }}' +
-					'<ul class="b-contextualhover-options">' +
-						'{{if reportBot}}<li><a href="${reportBot.url}">${reportBot.text}</a></li>{{/if}}' +
-						'<li class="b-contextualhover-options-ban">' +
-							'<p>${banUsersLink.text}:</p>' +
-							'{{if banCheckboxes}}<div class="b-contextualhover-options-wrap">' +
-								'{{each banCheckboxes}}' +
-								'<p><label><input type="checkbox" class="input-checkbox ${$value.className}" {{if $value.checked}}checked{{/if}} /> ${$value.label}</label></p>' +
-								'{{/each}}' +
-							'</div>{{/if}}' +
-						'</li>' +
-					'</ul>' +
-					'{{/if}}' +
-					'</div>'
+			content: ''
 		},
 
 		init: function() {
@@ -478,9 +439,14 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 			new Image().src = this.adriverImages[userType].supplant({ random: Math.random()});
 
+			buildObject.socialCap = {
+				value: data.value,
+				first: !!data.first
+			}
+
 			this.element
 				.empty()
-				.append(jQuery.tmpl(this.templates.content, buildObject));
+				.append(LJ.UI.template('templates-Widgets-contextualhover', buildObject));
 
 			if (this.element.is(':visible')) {
 				//show method forces bubble to reposition with respect to the new content
