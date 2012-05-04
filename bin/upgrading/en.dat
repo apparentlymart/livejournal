@@ -6121,9 +6121,9 @@ talk.url.hint=Hint
 
 talk.user=User
 
-talk.user.example=Example
+talk.user.example=tema
 
-talk.user.hint=tema
+talk.user.hint=Example:
 
 talk.user.insert=Insert user
 
