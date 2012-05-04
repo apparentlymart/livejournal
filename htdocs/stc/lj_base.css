@@ -3268,10 +3268,23 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
-		.b-contextualhover .soc_cap IMG{
+	.b-contextualhover .soc_cap{
+		line-height: 17px;
+		}
+		.b-contextualhover .soc_cap .b-icon{
+			float: left;
+			width: 16px;
+			height: 16px;
 			margin:0 2px 0 0;
-			vertical-align: bottom;
+			background-image: url(/img/icon-social-capital.png);
+			background-repeat: no-repeat;
 			}
+.b-icon-social-capital {
+	background-position:  0 50%;
+	}
+ .b-icon-social-capital-first {
+	background-position:  -17px 50%;
+	}
 	.b-contextualhover .input-checkbox {
 		margin-right: 2px;
 		vertical-align: middle;
