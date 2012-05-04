@@ -3268,6 +3268,10 @@ DIV.lj_ippu_app {
 		line-height: 16px;
 		font-size: 12px;
 		}
+		.b-contextualhover .soc_cap IMG{
+			margin:0 2px 0 0;
+			vertical-align: bottom;
+			}
 	.b-contextualhover .input-checkbox {
 		margin-right: 2px;
 		vertical-align: middle;
