@@ -2354,7 +2354,6 @@ sub start_request
     LJ::Message->reset_singletons;
     LJ::Vertical->reset_singletons;
     LJ::Browse->reset_singletons;
-    eval { LJ::Widget::Comment->clean_cache };
 
     LJ::UniqCookie->clear_request_cache;
 
