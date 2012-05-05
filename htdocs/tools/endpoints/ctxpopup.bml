@@ -134,7 +134,7 @@
         if (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u) )) {
             $first = $position->{result}->{position}!=0 ? 0 : 1;
             $soc_capital = int($position->{result}->{value}/1000);
-            $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
+            $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
 
             $ret{first}  = $first; 
             $ret{value}  = $soc_capital;

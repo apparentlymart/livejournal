@@ -68,6 +68,9 @@
 .send_message|staleness=1
 .send_message=Send message
 
+.social_capital_less_that|staleness=1
+.social_capital_less_that=less that 10
+
 .stop_community|staleness=1
 .stop_community=Stop watching
 
