@@ -4754,7 +4754,8 @@ BODY div .b-helplink:active {
 	.i-ljuser-userhead {
 		width: 16px;
 		height: 16px;
-		vertical-align: text-bottom;
+		padding: 0 1px 0 0;
+		vertical-align: bottom;
 		}
 	.i-ljuser-username {
 		}
