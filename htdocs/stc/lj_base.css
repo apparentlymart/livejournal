@@ -3321,6 +3321,7 @@ DIV.lj_ippu_app {
 				}
 	.b-contextualhover .b-contextualhover-param {
 		line-height: 18px;
+		margin:0 0 6px;
 		}
 	.b-contextualhover .b-contextualhover-param-item {
 		list-style: none;
