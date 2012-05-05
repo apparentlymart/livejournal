@@ -67,20 +67,27 @@ sub run {
     
     my $last_death_check = time();
     while ( ! $class->should_quit()) {
-        eval {
-            LJ::start_request();
-            $class->check_limits();
+        LJ::start_request();
+        $class->check_limits();
 
-            my $did_work = 0;
-            warn "looking for work...\n" if $verbose;
+        my $did_work = 0;
+        warn "looking for work...\n" if $verbose;
+
+        my $work_result = eval {
             if ($class->on_prework()) {
                 $did_work = $sclient->work_once();
                 $class->on_afterwork($did_work);
             }
-            warn "did work = " . ($did_work || '') . "\n" if $verbose;
+            
+            1;
+        };
+        warn $@ unless $work_result;
 
-            return if $class->should_quit();
+        warn "did work = " . ($did_work || '') . "\n" if $verbose;
 
+        last if $class->should_quit || $opts->{'run_once'};
+
+        if ($work_result) {
             if ($did_work) {
                 $sleep-- if $sleep > 0;
             } else {
@@ -88,12 +95,10 @@ sub run {
                 $sleep = 10 if ++$sleep > 10;
                 sleep $sleep;
             }
+        }
 
-            # do request cleanup before we process another job
-            LJ::end_request();
-        };
-        warn $@ if $@;
-        last if $opts->{'run_once'};
+        # do request cleanup before we process another job
+        LJ::end_request();
     }
     POSIX::_exit(0);
 }
