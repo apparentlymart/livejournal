@@ -350,7 +350,8 @@ LJ.UI.registerTemplate = function(name, id, type) {
 	type = type || 'JQuery';
 
 	if (node.length > 0) {
-		template = node.text();
+		//jQuery.text() method returns empty string in IE8
+		template = node.html();
 	} else {
 		template = id;
 	}
