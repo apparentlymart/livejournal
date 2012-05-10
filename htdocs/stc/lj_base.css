@@ -3336,7 +3336,7 @@ DIV.lj_ippu_app {
 	width: 16px;
 	height: 16px;
 	margin:0 2px 0 0;
-	background-image: url(/img/icon-social-capital.png);
+	background-image: url(/img/icon-social-capital.png?v=1);
 	background-repeat: no-repeat;
 	background-position: 0 50%;
 	}
