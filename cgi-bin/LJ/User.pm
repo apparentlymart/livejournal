@@ -4057,7 +4057,13 @@ sub userhead {
     return $userhead, $userhead_w, $userhead_h;
 }
 
-
+sub userhead_url {
+    my $u = shift;
+    my ($userhead) = $u->userhead;
+    return undef unless $userhead;
+    return $userhead if $userhead =~ m|^https?://|;
+    return join '', $LJ::IMGPREFIX, '/', $userhead, '?v=', $LJ::CURRENT_VERSION;
+}
 
 sub bio {
     my $u = shift;
@@ -10846,4 +10852,20 @@ sub country_of_remote_ip {
     return undef;
 }
 
+sub get_aggregated_user {
+    my ($row, $opts) = @_;
+   
+    my $user = eval { LJ::load_userid($row->{userid}) };
+
+    return unless $user;
+
+    return unless $opts->{attrs} && ref $opts->{attrs};
+
+    foreach my $method (@{$opts->{attrs}}) {
+        my @result = eval {$user->$method};
+        ($row->{$method}) = @result > 1 ? \@result : @result;
+    }
+}
+
+    
 1;

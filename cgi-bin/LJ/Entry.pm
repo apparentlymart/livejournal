@@ -1495,6 +1495,7 @@ package LJ;
 use Class::Autouse qw (
                        LJ::Poll
                        LJ::EmbedModule
+                       LJ::Tidy
                        );
 
 # <LJFUNC>
@@ -3102,6 +3103,57 @@ sub get_eventrates
     }
 
     return @userids;
+}
+
+sub get_aggregated_entry {
+    my ($row, $opts) = @_;
+    my $entry = eval { LJ::Entry->new_from_item_hash($row) };
+    
+    return unless $entry;
+
+    return unless $opts->{attrs} && ref $opts->{attrs}; 
+
+    foreach my $method (@{$opts->{attrs}}) {
+        my @result = eval {$entry->$method};
+        ($row->{$method}) = @result > 1 ? \@result : @result;
+    }
+
+    my $remote;
+
+    if ($opts->{trim_widgets}) {
+        $row->{event_raw} ||= $entry->event_raw;
+        $row->{event_raw} = LJ::trim_widgets(
+            length     => $opts->{trim_widgets},
+            img_length => $opts->{widgets_img_length},
+            text       => $row->{event_raw},
+            read_more  => '<a href="' . $entry->url . '"> ...</a>',
+        )
+    };
+
+    if ($opts->{get_video_ids}) {
+        $row->{event_raw} ||= $entry->event_raw;
+        LJ::EmbedModule->expand_entry($entry->poster, \$row->{event_raw}, get_video_id => 1);
+    }
+
+    if ($opts->{get_polls}) {
+        $row->{event_raw} ||= $entry->event_raw;
+        $remote = LJ::load_userid($opts->{remote_id}) if (!$remote && $opts->{remote_id}); 
+        LJ::Poll->expand_entry(\$row->{event_raw}, getpolls => 1, viewer => $remote );
+    }
+
+    if ($opts->{asxml}) {
+        my $tidy = LJ::Tidy->new();
+        $row->{event_raw} ||= $entry->event_raw;
+        $row->{event_raw} = $tidy->clean( $row->{event_raw} );
+    }
+    
+    if ($opts->{parseljtags}) {
+        $row->{event_raw} ||= $entry->event_raw;
+        $row->{event_raw} = LJ::convert_lj_tags_to_links(
+            event => $row->{event_raw},
+            embed_url => $entry->url);
+    }
+
 }
 
 1;

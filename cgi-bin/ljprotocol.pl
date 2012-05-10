@@ -20,6 +20,8 @@ use Class::Autouse qw(
                       LJ::PushNotification
                       LJ::Tidy
                       LJ::PersistentQueue
+                      LJ::PersonalStats::Ratings::Posts
+                      LJ::PersonalStats::Ratings::Journals
                       );
 
 use LJ::TimeUtil;
@@ -190,6 +192,9 @@ my %HANDLERS = (
     pushsubscriptions => \&pushsubscriptions,
     resetpushcounter  => \&resetpushcounter,
     getpushlist       => \&getpushlist,
+                
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (geteventsrating => \&geteventsrating) : (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getusersrating => \&getusersrating) : (),
 );
 
 sub translate
@@ -5318,6 +5323,196 @@ sub getpushlist {
 
 }
 
+sub geteventsrating {
+    my ($req, $err, $flags) = @_;
+
+    authenticate($req, $err, {%$flags, allow_anonymous => 1});
+    my $user_id = $flags->{u} ? $flags->{u}->id : 0;
+    
+    return fail($err, 200, 'region') unless $req->{region};
+
+    return fail($err, 203, 'region') unless $req->{region} =~ /^cyr|noncyr|ua$/;
+
+    return fail($err, 203, 'sort') if $req->{sort} &&  $req->{sort} !~ /^hits|visitors|default$/;
+
+    foreach my $p (qw(skip itemshow user_id)){
+        return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>$p, 'value'=>$req->{$p}}) if ($req->{$p} && $req->{$p} =~ /\D/);
+        $req->{$p} += 0;
+    }
+
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $req->{itemshow} > 100;
+
+    $req->{getselfpromo} = 1 unless defined $req->{getselfpromo};
+
+    my ($res, @err) = LJ::PersonalStats::Ratings::Posts->get_rating_segment( {
+        rating_country   => $req->{region},
+        ($req->{sort} ne 'default' ? (sort => $req->{sort}) : ()),
+        offset           => $req->{skip} || 0,
+        length           => $req->{itemshow} || 30,
+        show_selfpromo   => $req->{getselfpromo},
+        filter_selfpromo => $req->{getselfpromo},
+        user_id          => $user_id,
+    });
+
+    return fail($err, 500, $err[0]) unless $res && ref $res && $res->{data} && ref $res->{data};
+
+    my (@events, $selfpromo);
+
+    my $entry_opts = {
+        attrs         => [qw(ditemid subject_raw event_raw)],
+        remote_id     => $user_id,
+        map { $_ => $req->{$_} } qw(trim_widgets img_length get_video_ids get_polls asxml parseljtags),
+    };
+
+    my $user_opts = {
+        attrs => [qw(userid username)],
+    };
+
+    foreach my $row (@{$res->{data}}) {
+        $row->{ditemid}   = delete $row->{post_id} if $row->{post_id};
+        $row->{journalid} = delete $row->{journal_id} if $row->{journal_id};
+        LJ::get_aggregated_entry($row, $entry_opts);
+
+        $row->{userid} = delete $row->{journalid} if  $row->{journalid};
+        LJ::get_aggregated_user($row, $user_opts);
+
+        push @events, {
+            # rating data
+            position     => $row->{position},
+            delta        => $row->{delta},
+            isnew        => $row->{is_new} || 0,
+            was_in_promo => $row->{was_in_promo} || 0,
+            # entry data
+            ditemid      => $row->{ditemid},
+            subject      => $row->{subject_raw},
+            event        => $row->{event_raw},
+            # user data
+            posterid     => $row->{userid},
+            poster       => $row->{username}
+        } 
+    }
+
+    if ($req->{getselfpromo}) {
+        return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
+        my $sp = $res->{selfpromo}->get_template_params()->[0];
+        $sp->{ditemid}   = delete $sp->{post_id} if $sp->{post_id};
+        $sp->{journalid} = delete $sp->{journal_id} if $sp->{journal_id};
+        LJ::get_aggregated_entry($sp, $entry_opts);
+
+        $selfpromo = {
+            # selfpromo data
+            remaning_time => $sp->{remaning_time}, 
+            price         => $sp->{buyout},
+            # entry data
+            ditemid       => $sp->{ditemid},
+            subject       => $sp->{subject_raw},
+            event         => $sp->{event_raw},
+            # user data
+            posterid      => $sp->{journal_id},
+            poster        => $sp->{username},
+        };
+    }
+    
+    return {
+        status => 'OK',
+        skip   => $req->{skip} || 0,
+        region => $req->{region},
+        events => \@events,
+        ($req->{getselfpromo} ? (selfpromo => $selfpromo) : ())
+    };
+}
+
+sub getusersrating {
+    my ($req, $err, $flags) = @_;
+
+    authenticate($req, $err, {%$flags, allow_anonymous => 1});
+    my $user_id = $flags->{u} ? $flags->{u}->id : 0;
+
+    return fail($err, 200, 'region') unless $req->{region};
+
+    return fail($err, 203, 'region') unless $req->{region} =~ /^cyr|noncyr|ua$/;
+
+    return fail($err, 203, 'sort') if $req->{sort} &&  $req->{sort} !~ /^hits|friends|authority|default$/;
+
+    foreach my $p (qw(skip itemshow user_id)){
+        return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>$p, 'value'=>$req->{$p}}) if ($req->{$p} && $req->{$p} =~ /\D/);
+    }
+
+    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $req->{itemshow} > 100;
+
+    $req->{getselfpromo} = 1 unless defined $req->{getselfpromo};
+    
+    my ($res, @err) = LJ::PersonalStats::Ratings::Journals->get_rating_segment( {
+        rating_country   => $req->{region},
+        ($req->{sort} ne 'default' ? (sort => $req->{sort}) : ()),
+        is_community     => $req->{journaltype} eq 'C' ? 1 : 0,
+        offset           => $req->{skip} || 0,
+        length           => $req->{itemshow} || 30,
+        show_selfpromo   => $req->{getselfpromo},
+        filter_selfpromo => $req->{getselfpromo},
+    });
+    
+    return fail($err, 500, $err[0]) unless $res && ref $res && $res->{data} && ref $res->{data};
+
+    my (@users, $selfpromo);
+
+    my $user_opts = {
+        attrs => [qw(username display_name profile_url journal_base userpic userhead_url name_raw)],
+    };
+
+    foreach my $row (@{$res->{data}}) {
+
+        $row->{userid} = delete $row->{journal_id} if  $row->{journal_id};
+        LJ::get_aggregated_user($row, $user_opts);
+        
+        push @users, {
+            # rating data
+            rating_value     => $row->{value},
+            position         => $row->{position},
+            delta            => $row->{delta},
+            isnew            => $row->{is_new} || 0,
+            was_in_promo     => $row->{was_in_promo} || 0,
+            # user data
+            username         => $row->{username},
+            identity_display => $row->{display_name},
+            identity_url     => $row->{profile_url},
+            userpic_url      => $row->{userpic} ? $row->{userpic}->url : '',
+            journal_url      => $row->{journal_base},
+            userhead_url     => $row->{userhead_url},
+            title            => $row->{name_raw},
+        }
+    }
+   
+    if ($req->{getselfpromo}) {
+        return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
+      
+        my $sp = $res->{selfpromo}->get_template_params()->[0];
+        $sp->{userid} = delete $sp->{journal_id} if  $sp->{journal_id};
+        LJ::get_aggregated_user($sp, $user_opts);
+
+        $selfpromo = {
+            # selfpromo data
+            remaning_time    => $sp->{remaning_time}, 
+            price            => $sp->{buyout},
+            # user data
+            username         => $sp->{username},
+            identity_display => $sp->{display_name},
+            identity_url     => $sp->{profile_url},
+            userpic_url      => $sp->{userpic} ? $sp->{userpic}->url : '',
+            journal_url      => $sp->{journal_base},
+            userhead_url     => $sp->{userhead_url},
+            title            => $sp->{name_raw},
+        };
+    }
+
+    return {
+        status => 'OK',
+        skip   => $req->{skip} || 0,
+        region => $req->{region},
+        users => \@users,
+        ($req->{getselfpromo} ? (selfpromo => $selfpromo) : ())
+    };
+}
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol
 package LJ;
