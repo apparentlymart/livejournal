@@ -6,15 +6,15 @@ use Carp qw(croak);
 
 sub cmd { "unsuspend" }
 
-sub desc { "Unsuspend an account or entry. Or unmark entries made by already unsuspended account." }
+sub desc { "Unsuspend an account, entry, album or photo. Or unmark entries made by already unsuspended account." }
 
 sub args_desc { [
                  '--unmark' => "Optional flag to not check 'suspended' status but simply put job for worker to unmark again. Not applicable to entry level.",
-                 'username or email address or entry url' => "The username of the account to unsuspend, or an email address to unsuspend all accounts at that address, or an entry URL to unsuspend a single entry within an account",
-                 'reason' => "Why you're unsuspending the account or entry",
+                 'username, email address, entry url, album url or photo url' => "The username of the account to unsuspend, or an email address to unsuspend all accounts at that address, or an entry URL to unsuspend a single entry within an account, or an album or photo URL to unsuspend",
+                 'reason' => "Why you're unsuspending the account, entry, album or photo",
                  ] }
 
-sub usage { '[--unmark] <username or email address or entry url> <reason>' }
+sub usage { '[--unmark] <username, email address, entry, album or photo url> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -37,6 +37,32 @@ sub execute {
         unless $user && $reason && scalar(@args) == 0;
 
     my $remote = LJ::get_remote();
+
+    my $photo = LJ::Pics::Photo->new_from_url ($user);
+    if ($photo) {
+        ## we've got a photo url
+        ## suspend and return
+        $photo->set_prop ('suspend_reason', 0);
+        my $journal = $photo->owner;
+        LJ::statushistory_add($journal, $remote, "unsuspend", "photo: $user / $reason");
+        $photo->delete_from_cdn () if $LJ::PICS_IMAGES_USE_CDN;
+        return $self->print("Photo " . $user . " unsuspended.");
+    }
+
+    my $album = LJ::Pics::Album->new_from_url ($user);
+    if ($album) {
+        ## we've got an album url
+        ## suspend and return
+        $album->set_prop ('suspend_reason', 0);
+        my @photos = $album->photos;
+        if ($LJ::PICS_IMAGES_USE_CDN) {
+            $_->delete_from_cdn () foreach @photos;
+        }
+        my $journal = $album->owner;
+        LJ::statushistory_add($journal, $remote, "unsuspend", "album: $user / $reason");
+        return $self->print("Album " . $user . " unsuspended.");
+    }
+
     my $entry = LJ::Entry->new_from_url($user);
     if ($entry) {
         my $poster = $entry->poster;
