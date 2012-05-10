@@ -5401,7 +5401,7 @@ sub geteventsrating {
 
         $selfpromo = {
             # selfpromo data
-            remaning_time => $sp->{remaning_time}, 
+            remaning_time => $sp->{timeleft}, 
             price         => $sp->{buyout},
             # entry data
             ditemid       => $sp->{ditemid},
@@ -5492,7 +5492,7 @@ sub getusersrating {
 
         $selfpromo = {
             # selfpromo data
-            remaning_time    => $sp->{remaning_time}, 
+            remaning_time    => $sp->{timeleft}, 
             price            => $sp->{buyout},
             # user data
             username         => $sp->{username},
