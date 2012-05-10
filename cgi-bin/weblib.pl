@@ -2385,8 +2385,9 @@ sub get_body_class_for_service_pages {
         push @classes, "shop-page";
     } elsif ($uri =~ m!^/pics(/.*)?$!) {
         if (LJ::_is_pics_branding_active()) {
-            my $remote = LJ::get_remote ();
-            if (LJ::Pics::Album->list( 'userid' => $remote->userid )) {
+            my ($user) = $host =~ /([\w\-]{1,15})\.\Q$LJ::DOMAIN\E$/;
+            $user = LJ::get_remote () || LJ::load_user ($user);
+            if ($user && LJ::Pics::Album->list( 'userid' => $user->userid )) {
                 ## photos exists
                 push @classes, "framework-page-view";
             } else {
