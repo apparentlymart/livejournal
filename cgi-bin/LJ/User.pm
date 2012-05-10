@@ -8065,7 +8065,7 @@ sub ljuser2 {
         }
     }
 
-    my %user = %{ $ljuser_cache->{$username} ||= {
+    %user = %{ $ljuser_cache->{$username} ||= {
         attrs          => $attrs,
         bold           => 0,
         side_alias     => 0,
