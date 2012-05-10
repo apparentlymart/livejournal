@@ -4751,11 +4751,13 @@ BODY div .b-helplink:active {
 .i-ljuser-deleted {
 	text-decoration: line-through;
 	}
-	.i-ljuser-userhead {
-		width: 16px;
-		height: 16px;
-		padding: 0 1px 0 0;
-		vertical-align: bottom;
+	HTML BODY .i-ljuser-userhead {
+		width: 16px !important;
+		height: 16px !important;
+		margin: 0 !important;
+		padding: 0 1px 0 0 !important;
+		border: 0 !important;
+		vertical-align: bottom !important;
 		}
 	.i-ljuser-username {
 		}
