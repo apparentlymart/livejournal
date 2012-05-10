@@ -6025,6 +6025,8 @@ talk.post.security.public=public
 
 talk.post.sticky=sticky
 
+talk.post.sticky.replace=sticky (will replace existing post)
+
 talk.post.subject=Subject
 
 talk.post.submit.delete=Delete Entry
@@ -6039,7 +6041,11 @@ talk.post.submit.spam=Delete as spam
 
 talk.post.tags=Tags
 
+talk.post.tags.done=Done
 
+talk.post.tags.filter=filter tags
+
+talk.post.tags.selected=Selected tags
 
 
 talk.prev=Previous
