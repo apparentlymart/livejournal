@@ -1,21 +1,27 @@
-/*!
- * LiveJournal widget Carousel for jQuery.
- *
- * Copyright 2011, vkurkin@sup.com
- *
- * http://docs.jquery.com/UI
- *
- * Depends:
- *	jquery.ui.core.js
- *	jquery.ui.widget.js
- *	jquery.lj.basicWidget.js
- *
- * Public API:
- * start Start the rotation
- * stop Stop the rotation
+/**
+ * @fileOverview LiveJournal widget Carousel for jQuery.
+ * @author <a href="mailto:b-vladi@cs-console.ru">Vlad Kurkin</a>
  */
 (function($) {
+	/**
+	 *
+	 * @class LiveJournal widget Carousel for jQuery.
+	 * @name $.lj.carousel
+	 * @requires $.ui.core, $.ui.widget, $.lj.basicWidget
+	 * @extends $.lj.basicWidget
+	 * @example
+	 * <pre>
+	 *	$('div.with-carousel-content')
+	 *		.carousel()
+	 *		.carousel('publicMethod')
+	 *		.carousel({ many: options })
+	 *		.carousel('option', 'getOptionName')
+	 *		.carousel('option', 'setOptionName', 'setOptionValue')
+	 *		.carousel('carouselhide', function( event ){}); // bind some event
+	 *	</pre>
+	 */
 	$.widget('lj.carousel', jQuery.lj.basicWidget, {
+		/** @lends $.lj.carousel.prototype */
 		options: {
 			state: 'start',
 			slideEffect: 'fade',
@@ -33,14 +39,24 @@
 			}
 		},
 
+		/**
+		 * Start carousel
+		 */
 		start: function() {
 			this._setState('start');
 		},
 
+
+		/**
+		 * Stop carousel
+		 */
 		stop: function() {
 			this._setState('stop');
 		},
 
+		/**
+		 * @private
+		 */
 		_create: function () {
 			var self = this, selectors = this.options.selectors;
 
@@ -70,6 +86,9 @@
 			this._setState(this.options.state);
 		},
 
+		/**
+		 * @private
+		 */
 		_bindControls: (function () {
 			function onStartSlide(evt) {
 				evt.data._setState('start', evt);
@@ -92,6 +111,9 @@
 			}
 		})(),
 
+		/**
+		 * @private
+		 */
 		_setCurrentItem: function (index) {
 			var activeClass = this.options.classNames.activeContent, self = this;
 
@@ -135,6 +157,9 @@
 			this._currentItem.parent.addClass(activeClass);
 		},
 
+		/**
+		 * @private
+		 */
 		_setOption: function (name, value) {
 			switch (name) {
 				case 'currentIndex':
@@ -146,6 +171,9 @@
 			}
 		},
 
+		/**
+		 * @private
+		 */
 		_stopSlider: function () {
 			this._timer = clearTimeout(this._timer);
 		},
@@ -160,6 +188,9 @@
 			}, delay);
 		},
 
+		/**
+		 * @private
+		 */
 		_setState: function (state) {
 			switch (state) {
 				case 'start':
