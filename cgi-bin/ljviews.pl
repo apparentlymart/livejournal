@@ -1159,7 +1159,7 @@ sub create_view_lastn
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
-    $lastn_page{'head'} .= LJ::res_includes() . $extra_js;
+    $lastn_page{'head'} .= LJ::res_includes() . LJ::res_includes({only_needed => 1, only_tmpl => 1}) . $extra_js;
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1665,7 +1665,7 @@ sub create_view_friends {
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
-    $friends_page{'head'} .= LJ::res_includes() . $extra_js;
+    $friends_page{'head'} .= LJ::res_includes() . LJ::res_includes({only_needed => 1, only_tmpl => 1}) . $extra_js;
 
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -2237,7 +2237,7 @@ sub create_view_calendar
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
-    $calendar_page{'head'} .= LJ::res_includes() . $extra_js;
+    $calendar_page{'head'} .= LJ::res_includes() . LJ::res_includes({only_needed => 1, only_tmpl => 1}) . $extra_js;
 
     $calendar_page{'months'} = "";
 
@@ -2503,7 +2503,7 @@ sub create_view_day
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
     my $extra_js = LJ::statusvis_message_js($u);
-    $day_page{'head'} .= LJ::res_includes() . $extra_js;
+    $day_page{'head'} .= LJ::res_includes() . LJ::res_includes({only_needed => 1, only_tmpl => 1}) . $extra_js;
 
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
