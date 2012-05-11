@@ -109,7 +109,7 @@ Event.prep = function(e){
 };
 
 /**
- * @namespace LiveJournal utility objects
+ * @namespace LJ LiveJournal utility objects
  */
 LJ = window.LJ || {};
 
@@ -329,6 +329,9 @@ LJ.DOM.injectStyle = function(fileName, _window) {
 	head.appendChild(cssNode);
 };
 
+/**
+ * @namespace LJ.UI Namespace should contain utility functions that are connected with widgets.
+ */
 LJ.UI = LJ.UI || {};
 
 /**
@@ -395,6 +398,34 @@ LJ.UI.template = function(name, data) {
 
 	return html;
 };
+
+LJ.UI._mixins = {};
+
+/**
+ * Register a mixin to allow to use it later in the jQuery UI widgets.
+ *
+ * @param {string} name Name of the widget.
+ * @param {Function} module The function that will bootsrap widget. The Function will be applied
+ *     to the widget instance and the return object will represent the public api for the mixin.
+ */
+LJ.UI.mixin = function(name, module) {
+	if (arguments.length === 1) {
+		if (LJ.UI._mixins.hasOwnProperty(name)) {
+			return LJ.UI._mixins[name];
+		} else {
+			LJ.console.log('Warn: Mixin ', name, ' was called but is not defined yet.'); 
+		}
+	} else {
+		LJ.UI._mixins[name] = module;
+	}
+};
+
+/**
+ * @namespace LJ.Support The namespace should contain variables to check whether some funcionality is availible in the current browser.
+ */
+LJ.Support = LJ.Support || {};
+
+LJ.Support.geoLocation = 'geolocation' in navigator;
 
 
 /* object extensions */
