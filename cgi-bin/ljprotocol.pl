@@ -2306,7 +2306,7 @@ sub postevent {
     my $qeventtime = $dbh->quote($eventtime);
 
     # load userprops all at once
-    my @poster_props = qw(newesteventtime dupsig_post);
+    my @poster_props = qw(newesteventtime);
     my @owner_props = qw(newpost_minsecurity moderated);
     push @owner_props, 'opt_weblogscom' unless $req->{'props'}->{'opt_backdated'};
 
@@ -2436,6 +2436,9 @@ sub postevent {
             $res_done = 1;   # tell caller to bail out
             return;
         }
+        
+        LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
+         
         my @parts = split(/:/, $u->{'dupsig_post'});
         if ($parts[0] eq $dupsig) {
             # duplicate!  let's make the client think this was just the
@@ -2454,7 +2457,7 @@ sub postevent {
             } else {
                 $res->{'itemid'} = $parts[1];
                 $res->{'anum'} = $parts[2];
-                if (!$res->{'anum'}) {
+                unless (defined $res->{'anum'}) {
                     return;
                 }            
 
@@ -2509,7 +2512,7 @@ sub postevent {
             my $entry = LJ::DelayedEntry->create( $req, { journal => $uowner,
                                                           poster  => $u,} );
             if (!$entry) {
-                return fail($err, 507);
+                return $fail->($err, 507);
             }
 
             $res->{'delayedid'} = $entry->delayedid;
