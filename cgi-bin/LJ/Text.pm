@@ -408,4 +408,30 @@ sub wrap_urls {
     return $text;
 }
 
+# this is extracted from LJ::Support::Request::Tag; note that it's only
+# used in selected places at this time -- for example, entry tags are still
+# case-sensitive in case they use non-ASCII symbols
+sub normalize_tag_name {
+    my ( $class, $name, %opts ) = @_;
+
+    # cleanup
+    $name =~ s/,//g; # tag separator
+    $name =~ s/(^\s+|\s+$)//g; # starting or trailing whitespace
+    $name =~ s/\s+/ /g; # excessive whitespace
+
+    return unless $name;
+
+    # this hack is to get Perl actually perform lc() on a Unicode string
+    # you're welcome to fix it if you know a better way ;)
+    $name = decode_utf8($name);
+    $name = lc($name);
+    $name = encode_utf8($name);
+
+    if ( my $length_limit = delete $opts{'length_limit'} ) {
+        $name = $class->truncate_to_bytes( $name, $length_limit );
+    }
+
+    return $name;
+}
+
 1;

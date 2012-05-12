@@ -52,6 +52,8 @@ use strict;
 use Encode qw(encode decode);
 use List::MoreUtils qw();
 
+use LJ::Text;
+
 # get_requests_tags(): fetches information about which tags are assigned
 # to the given requests; returns:
 # { $spid1 => [ $sptagid1, $sptagid2 ], $spid2 => [ $sptagid3, $sptagid4 ] }
@@ -387,23 +389,9 @@ sub normalize_tag_name {
 
     $name =~ s/\(.*?\)//g if $LJ::IS_DEV_SERVER;
 
-    # cleanup
-    $name =~ s/,//g; # tag separator
-    $name =~ s/(^\s+|\s+$)//g; # starting or trailing whitespace
-    $name =~ s/\s+/ /g; # excessive whitespace
-
-    return undef unless $name;
-
-    # this hack is to get Perl actually perform lc() on a Unicode string
-    # you're welcome to fix it if you know a better way ;)
-    $name = decode('utf8', $name);
-    $name = lc($name);
-    $name = encode('utf8', $name);
-
     # leave only the first 50 characters - it's the DB schema limit
-    $name =~ s/^(.{50}).*$/$1/;
-
-    return $name;
+    return
+        LJ::Text->normalize_tag_name( $name, 'length_limit' => 50 ) || undef;
 }
 
 # tag_name_to_id(): gets an sptagid for a given name and spcatid,

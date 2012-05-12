@@ -7530,7 +7530,7 @@ sub remote_has_priv
 #       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
 #       'D' == 'moDule embed contents', 'W' == 'Wish-list element'
 #       'F' == Photo ID, 'A' == Album ID, 'Y' == delaYed entries
-#       'I' == Fotki migration log ID
+#       'I' == Fotki migration log ID, 'H' == pics tag id
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a separate namespace.  perhaps a separate function/table?
@@ -7541,7 +7541,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQGDWFAYI]$/;             #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQGDWFAYIH]$/;             #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -7670,6 +7670,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ( $dom eq 'I' ) {
         $newmax = $u->selectrow_array("SELECT MAX(logid) FROM fotki_migration_log WHERE userid=?",
+                                      undef, $uid);
+    } elsif ( $dom eq 'H' ) {
+        $newmax = $u->selectrow_array("SELECT MAX(tag_id) FROM fotki_tags WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
