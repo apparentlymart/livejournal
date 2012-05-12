@@ -22,21 +22,4 @@ sub text_props {
 
 
 ### Themes ###
-
-package LJ::S2Theme::sturdygesture::boxedin;
-use base qw(LJ::S2Theme::sturdygesture);
-sub cats { qw( clean ) }
-
-package LJ::S2Theme::sturdygesture::boxless;
-use base qw(LJ::S2Theme::sturdygesture);
-sub cats { qw( clean ) }
-
-package LJ::S2Theme::sturdygesture::martialblue;
-use base qw(LJ::S2Theme::sturdygesture);
-sub cats { qw( clean cool ) }
-
-package LJ::S2Theme::sturdygesture::redmond;
-use base qw(LJ::S2Theme::sturdygesture);
-sub cats { qw( clean cool ) }
-
 1;
