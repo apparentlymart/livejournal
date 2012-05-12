@@ -2441,7 +2441,7 @@ sub postevent {
         LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
          
         my @parts = split(/:/, $u->{'dupsig_post'});
-        if ($parts[0] eq $dupsigi && !$allowdup) {
+        if ($parts[0] eq $dupsig && !$allowdup) {
             # duplicate!  let's make the client think this was just the
             # normal firsit response.
 
