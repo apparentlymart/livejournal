@@ -34,6 +34,7 @@ sub execute {
     if ($photo) {
         ## we've got a photo url
         ## suspend and return
+        $photo->set_prop ('suspended', 1);
         $photo->set_prop ('suspend_reason', $reason);
         my $journal = $photo->owner;
         LJ::statushistory_add($journal, $remote, "suspend", "photo: $user / $reason");
@@ -45,6 +46,7 @@ sub execute {
     if ($album) {
         ## we've got an album url
         ## suspend and return
+        $album->set_prop ('suspended', 1);
         $album->set_prop ('suspend_reason', $reason);
         my @photos = $album->photos;
         if ($LJ::PICS_IMAGES_USE_CDN) {

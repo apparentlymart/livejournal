@@ -42,7 +42,7 @@ sub execute {
     if ($photo) {
         ## we've got a photo url
         ## suspend and return
-        $photo->set_prop ('suspend_reason', 0);
+        $photo->set_prop ('suspended', 0);
         my $journal = $photo->owner;
         LJ::statushistory_add($journal, $remote, "unsuspend", "photo: $user / $reason");
         $photo->delete_from_cdn () if $LJ::PICS_IMAGES_USE_CDN;
@@ -53,7 +53,7 @@ sub execute {
     if ($album) {
         ## we've got an album url
         ## suspend and return
-        $album->set_prop ('suspend_reason', 0);
+        $album->set_prop ('suspended', 0);
         my @photos = $album->photos;
         if ($LJ::PICS_IMAGES_USE_CDN) {
             $_->delete_from_cdn () foreach @photos;
