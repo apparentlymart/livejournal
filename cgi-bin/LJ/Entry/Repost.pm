@@ -139,7 +139,7 @@ sub delete {
         LJ::delete_entry($u, $repost_itemid, undef, undef);
         __delete_repost_record($entry_obj->journal, $entry_obj->jitemid, $u->userid);
     
-        return  { 'result' => 'OK' };
+        return  { 'result' => { 'delete' => 'OK' } } ;
     }
 
     return LJ::API::Error->get_error('entry_not_found');
