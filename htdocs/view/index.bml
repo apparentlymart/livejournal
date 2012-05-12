@@ -170,8 +170,8 @@ LJ::Request->notes("codepath" => "bml.view.index");
      $need_userid{$it->[4]} = 1;
  }
  my $lt = LJ::get_logtext2($u, @itemids);
- my %u;
- LJ::load_userids_multiple([map { $_ => \$u{$_} } keys %need_userid], []);
+ my %apu;
+ LJ::load_userids_multiple([map { $_ => \$apu{$_} } keys %need_userid], []);
 
  # sort on event time
  my $lday = 0;  # last day shown
@@ -180,7 +180,28 @@ LJ::Request->notes("codepath" => "bml.view.index");
      my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security, $allowmask) = @$it;
 
      my $entry = LJ::Entry->new($u, jitemid => $itemid);
-     my $pu = $u{$posterid};
+
+     warn "it1: $itemid";
+     my $journalu = $u;
+     my ($repost_entry_obj, $subject);
+     my $content =  { 'original_post_obj' => \$entry,
+                      'repost_obj'        => \$repost_entry_obj,
+                      'itemid'            => \$itemid,
+                      'anum'              => \$anum,
+                      'journalu'          => \$journalu,
+                      'posterid'          => \$posterid,
+                      'security'          => \$security,
+                      'subject'           => \$subject,
+                      'eventtime'         => \$eventtime,
+                      'allowmask'         => \$allowmask,
+                      'reply_count'       => \$replycount, };
+
+     if (LJ::EntryReference->substitute_content( $entry, $content )) {
+         next unless $entry->visible_to($remote);
+         $apu{$posterid} = $entry->poster;
+     }
+
+     my $pu = $apu{$posterid};
      next if $pu->is_suspended && !$viewsome;
      next if $entry && $entry->is_suspended_for($remote);
      if ( !$viewsome && $pu && $pu->is_deleted
@@ -192,9 +213,8 @@ LJ::Request->notes("codepath" => "bml.view.index");
          next if $purge_community_entries;
      }
 
-
-     my $subject = $lt->{$itemid}->[0];
-     my $poster = $u{$posterid}->{user};
+     $subject ||= $lt->{$itemid}->[0];
+     my $poster = $apu{$posterid}->user;
 
      if ($day != $lday) {
          if ($lday) { $body .= "</table></dd>"; }
@@ -212,7 +232,7 @@ LJ::Request->notes("codepath" => "bml.view.index");
      # well here.
      if ($LJ::UNICODE && !LJ::is_utf8($subject)) {
          my $error;
-         my $subj = LJ::text_convert($subject, $u, \$error);
+         my $subj = LJ::text_convert($subject, $journalu, \$error);
          $subject = $subj unless $error;
          LJ::text_out(\$subject);
      }
@@ -226,7 +246,7 @@ LJ::Request->notes("codepath" => "bml.view.index");
      } elsif ($security eq "usemask") {
          if ($allowmask == 0) { # custom security with no group -- essentially private
              $sec = " <?securityprivate?>";
-         } elsif ($allowmask > 1 && $u && $u->equals($remote)) { # custom group -- only show to journal owner
+         } elsif ($allowmask > 1 && $journalu && $journalu->equals($remote)) { # custom group -- only show to journal owner
              $sec = " <?securitygroups?>";
          } else { # friends only or custom group showing to non journal owner
              $sec = " <?securityprotected?>";
@@ -243,7 +263,8 @@ LJ::Request->notes("codepath" => "bml.view.index");
 
      LJ::CleanHTML::clean_subject_all(\$subject);
 
-     $body .= "<td><a href='" . LJ::item_link($u, $itemid, $anum) . "'>$subject</a>$sec$rep</td></tr>\n";
+     warn "it2:  $itemid " .  LJ::item_link($journalu, $itemid, $anum);
+     $body .= "<td><a href='" . LJ::item_link($journalu, $itemid, $anum) . "'>$subject</a>$sec$rep</td></tr>\n";
  }
  if ($lday) { $body .= "</table></dd>\n"; }
  $body .= "</dl>";

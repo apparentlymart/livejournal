@@ -12,6 +12,7 @@ use vars qw(@themecoltypes);
 use Class::Autouse qw(LJ::LastFM);
 use LJ::TimeUtil;
 use LJ::Setting::Music;
+use LJ::Entry::Repost;
 
 # this used to be in a table, but that was kinda useless
 @themecoltypes = (
@@ -1276,6 +1277,8 @@ sub create_view_lastn
         my ($posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
+        my $journalu = $u;
+
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         
@@ -1286,7 +1289,26 @@ sub create_view_lastn
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
-        
+
+        my $username = $user;
+        my $repost_entry_obj;
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'journalu'          => \$journalu,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'event'             => \$event,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
+            $username = $entry_obj->poster->username;
+            $posteru{$posterid} = $entry_obj->poster;
+            $logprops{$itemid} = $entry_obj->props;
+        }
+
         if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -1296,7 +1318,7 @@ sub create_view_lastn
         if ( $LJ::UNICODE &&
                 ( $entry_obj->prop("unknown8bit") ||
                  $logprops{$itemid}->{'unknown8bit'} ) ) {
-            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
+            LJ::item_toutf8($journalu, \$subject, \$event, $logprops{$itemid});
         }
 
         my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
@@ -1332,7 +1354,7 @@ sub create_view_lastn
             });
         }
 
-        my $itemargs = "journal=$user&amp;itemid=$ditemid";
+        my $itemargs = "journal=$username&amp;itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
 
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
@@ -1353,7 +1375,7 @@ sub create_view_lastn
         );
 
         LJ::expand_embedded(
-            $u,
+            $journalu,
             $ditemid,
             $remote,
             \$event,
@@ -1362,14 +1384,14 @@ sub create_view_lastn
 
         $event = LJ::ContentFlag->transform_post(
             'post'    => $event,
-            'journal' => $u,
+            'journal' => $journalu,
             'remote'  => $remote,
             'entry'   => $entry_obj,
         );
 
         $lastn_event{'event'} = $event;
 
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url; 
         $lastn_event{'permalink'} = $permalink;
 
         if($subject !~ /[<>]/) {
@@ -1384,7 +1406,7 @@ sub create_view_lastn
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
             my $dispreadlink = $replycount ||
-                ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($u));
+                ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($journalu));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1409,18 +1431,18 @@ sub create_view_lastn
             'vars' => $vars,
             'prefix' => "LASTN",
             'event' => \%lastn_event,
-            'user' => $u,
+            'user' => $journalu,
             'entry_obj' => $entry_obj,
         });
 
-        if ($u->{'userid'} != $posterid)
+        if ($journalu->userid != $posterid)
         {
             my %lastn_altposter = ();
 
             my $pu = $posteru{$posterid};
             my $poster = $pu->{'user'};
             $lastn_altposter{'poster'} = $poster;
-            $lastn_altposter{'owner'} = $user;
+            $lastn_altposter{'owner'}  = $username;
 
             if (my $picid = $item->{'_picid'}) {
                 my $pic = $userpics{$picid};
@@ -1453,7 +1475,7 @@ sub create_view_lastn
         my $ads = LJ::get_ads({
             location            => 's1.ebox',
             s1_view             => 'lastn',
-            journalu            => $u, 
+            journalu            => $journalu, 
             current_post_number => $eventnum,
             total_posts_number  => scalar @items,
         });
@@ -1846,6 +1868,27 @@ sub create_view_friends {
         my $subject    = $logtext->{$datakey}->[0];
         my $event      = $logtext->{$datakey}->[1];
 
+        my $repost_entry_obj;
+        my $journalu;
+
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'journalu'          => \$journalu,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'event'             => \$event,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount,
+                         'cluster_id'        => \$clusterid, };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            $friendid = $journalu->userid;
+            $logprops{$itemid} = $entry_obj->props;
+            $friends{$friendid} = $journalu;
+            $pu = $entry_obj->poster;
+        }
+
         if ( $logprops{$datakey}->{'repost'} && $remote && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
             $event = LJ::Lang::ml(
                 'friendsposts.reposted',
@@ -1870,8 +1913,8 @@ sub create_view_friends {
         }
 
         my ($friend, $poster);
-        $friend = $poster = $friends{$friendid}->{'user'};
-        $poster = $pu->{'user'};
+        $friend = $poster = $friends{$friendid}->user;
+        $poster = $pu->user;
 
         my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
 
@@ -1909,7 +1952,7 @@ sub create_view_friends {
 
         my %urlopts_style;
         if (    $remote && $remote->{'opt_stylemine'}
-             && $remote->{'userid'} != $friendid )
+             && $remote->userid != $friendid )
         {
             $urlopts_style{'style'} = 'mine';
         }
@@ -1993,7 +2036,7 @@ sub create_view_friends {
         $friends_event{'bgcolor'} = $friends{$friendid}->{'bgcolor'} || "#ffffff";
 
         my $journalbase = LJ::journal_base($friends{$friendid});
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url;
         $friends_event{'permalink'} = $permalink;
 
         $friends_event{'subject'} = "<a href='$permalink'>" . $friends_event{'subject'} . "</a>";
@@ -2628,6 +2671,9 @@ sub create_view_day
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
+        my $username = $user;
+        my $journalu = $u;
+
         if ( !$viewsome && $pu && $pu->is_deleted
           && !$LJ::JOURNALS_WITH_PROTECTED_CONTENT{$pu->username} )
         {
@@ -2642,9 +2688,25 @@ sub create_view_day
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
 
+        my $repost_entry_obj;
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'journalu'          => \$journalu,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'event'             => \$event,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            $username = $entry_obj->poster->user;
+            $logprops{$itemid} = $entry_obj->props;
+        }
+
         if ($LJ::UNICODE &&
             ( $entry_obj->prop("unknown8bit") || $logprops{$itemid}->{'unknown8bit'} )) {
-            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
+            LJ::item_toutf8($journalu, \$subject, \$event, $logprops{$itemid});
         }
 
         my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
@@ -2666,7 +2728,7 @@ sub create_view_day
             });
         }
 
-        my $itemargs = "journal=$user&amp;itemid=$ditemid";
+        my $itemargs = "journal=$username&amp;itemid=$ditemid";
 
         $day_event{'itemargs'} = $itemargs;
 
@@ -2687,7 +2749,7 @@ sub create_view_day
         });
 
         LJ::expand_embedded(
-            $u,
+            $journalu,
             $ditemid,
             $remote,
             \$event,
@@ -2703,7 +2765,7 @@ sub create_view_day
 
         $day_event{'event'} = $event;
 
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url;
         $day_event{'permalink'} = $permalink;
 
         $day_event{'subject'} = "<a href='$permalink'>" . $day_event{'subject'} . "</a>";
@@ -2741,7 +2803,7 @@ sub create_view_day
             'vars' => $vars,
             'prefix' => "DAY",
             'event' => \%day_event,
-            'user' => $u,
+            'user' => $journalu,
             'entry_obj' => $entry_obj,
         });
 
@@ -2759,7 +2821,7 @@ sub create_view_day
         my $ads = LJ::get_ads({
             location            => 's1.ebox',
             s1_view             => 'day',
-            journalu            => $u, 
+            journalu            => $journalu, 
             current_post_number => $eventnum,
             total_posts_number  => scalar @items,
         });
