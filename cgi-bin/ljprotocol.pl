@@ -2427,6 +2427,7 @@ sub postevent {
     my $res = {};
     my $res_done = 0;  # set true by getlock when post was duplicate, or error getting lock
 
+    my $allowdup = $flags->{'allow_dupsing_post'};
     my $getlock = sub {
         my $delayed = @_;
         my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 2)", undef, $lock_key);
@@ -2440,7 +2441,7 @@ sub postevent {
         LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
          
         my @parts = split(/:/, $u->{'dupsig_post'});
-        if ($parts[0] eq $dupsig) {
+        if ($parts[0] eq $dupsigi && !$allowdup) {
             # duplicate!  let's make the client think this was just the
             # normal firsit response.
 

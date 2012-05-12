@@ -126,7 +126,7 @@ body<=
                                };
             }
         };
-
+ 
         if ( scalar @$items == 0 ) {
             $insert->();
             return @ordered;
@@ -171,12 +171,25 @@ body<=
         }
 
         my @entries;
+        my $real_entries = {};
 
         my $journal = LJ::load_user($usejournal) || $remote;
         foreach my $e_raw (@res) {
             if ( $e_raw->{'itemid'} ) {
-                push @entries,
-                    LJ::Entry->new_from_item_hash( $journal, $e_raw );
+               my $entry_obj 
+                    = LJ::Entry->new_from_item_hash( $journal, $e_raw );
+
+               my $repost_entry_obj;
+               my $content =  { 'original_post_obj' => \$entry_obj,
+                                'repost_obj'        => \$repost_entry_obj, };
+
+               if (LJ::EntryReference->substitute_content( $entry_obj, $content )) {
+                   $real_entries->{$entry_obj->posterid}->{$entry_obj->jitemid} 
+                            = { 'itemid'    => $repost_entry_obj->jitemid,
+                                'journalid' => $repost_entry_obj->journalid, };
+               }
+
+               push @entries, $entry_obj;
             }
         }
 
@@ -191,6 +204,7 @@ body<=
             'link_next'    => $link_next,
             'show_posters' => $usejournal ? 1 : 0,
             'entries'      => \@entries,
+            'real_entries' => $real_entries,
             'adhtml'       => $adhtml,
         );
     };
@@ -237,9 +251,9 @@ body<=
                 $itemid = int($ditemid / 256);
 
                 $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
-    
+
                 # do getevents request
-              
+ 
                 LJ::do_request({ 'mode' => 'getevents',
                                  'selecttype' => 'one',
                                  'ver' => $LJ::PROTOCOL_VER,
