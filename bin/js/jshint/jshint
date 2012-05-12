@@ -1,0 +1,8 @@
+#/usr/bin/env bash
+
+SCRIPT_DIR=`dirname $0`
+CONFIG=$SCRIPT_DIR/jshintrc
+SCRIPT=$SCRIPT_DIR/jshint-rhino.js
+
+exec $SCRIPT --config $CONFIG "$@"
+
