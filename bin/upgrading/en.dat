@@ -6049,6 +6049,8 @@ talk.post.tags.done=Done
 
 talk.post.tags.filter=filter tags
 
+talk.post.tags.new=New tags
+
 talk.post.tags.selected=Selected tags
 
 talk.post.visual=Visual editor
