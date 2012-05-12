@@ -1836,3 +1836,9 @@ logproplist.crosspost_vk:
   prettyname: Crosspost to vkontakte
   sortorder: 114
 
+logproplist.repost_link:
+  datatype: char
+  des: repost link information
+  prettyname: Repost link informaton
+  sortorder: 114
+

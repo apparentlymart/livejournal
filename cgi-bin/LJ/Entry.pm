@@ -121,6 +121,11 @@ sub new
     # save the singleton if it doesn't exist
     $singletons{$journalid}->{$jitemid} = $self;
 
+    my $url = $self->prop('repost_link');
+    if ($url && ($url ne $self->url) ) {
+        $self->{'original_post_obj'} = LJ::Entry->new_from_url($url);
+    }
+
     return $self;
 }
 
@@ -1488,6 +1493,17 @@ sub is_sticky {
 sub can_delete_journal_item {
     my $class = shift;
     return LJ::can_delete_journal_item(@_);
+}
+
+sub convert_to_repost {
+    my ($class, $url) = @_;
+    $class->set_prop( 'repost_link' =>  $url);
+} 
+
+sub original_post {
+    my ($class) = @_;
+
+    return $class->{'original_post_obj'};
 }
 
 package LJ;

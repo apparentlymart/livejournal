@@ -106,6 +106,7 @@ sub END { LJ::end_request(); }
                     "comet_history", "pingrel",
                     "eventrates", "eventratescounters",
                     "friending_actions_q", "delayedlog2", "delayedblob2",
+                    "repost2",
                     );
 
 # keep track of what db locks we have out

@@ -3399,6 +3399,17 @@ CREATE TABLE `zips` (
 )
 EOC
 
+register_tablecreate('repost2', <<'EOC');
+CREATE TABLE `repost2` (
+    `journalid` int(10) NOT NULL,
+    `jitemid` int(11) NOT NULL,
+    `reposterid` int(10) NOT NULL,
+    `reposted_jitemid` int(11) NOT NULL,
+    PRIMARY KEY ( `journalid`, `reposterid`, `jitemid` ),
+    KEY `jitemid` ( `journalid`, `jitemid` )
+)
+EOC
+
 post_create("clients",
             "sqltry" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
             );
