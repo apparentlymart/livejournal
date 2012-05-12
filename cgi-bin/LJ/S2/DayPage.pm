@@ -6,6 +6,7 @@ package LJ::S2;
 
 use LJ::TimeUtil;
 use LJ::UserApps;
+use LJ::Entry::Repost;
 
 sub DayPage
 {
@@ -118,10 +119,10 @@ sub DayPage
         my ($posterid, $itemid, $security, $allowmask, $alldatepart, $anum) =
             map { $item->{$_} } qw(posterid itemid security allowmask alldatepart anum);
 
+        my $journalu = $u;
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         $entry_obj->handle_prefetched_props($logprops{$itemid});
-        
         
         my $replycount = $logprops{$itemid}->{'replycount'} || 0;
         my $subject = $logtext->{$itemid}->[0];
@@ -131,6 +132,37 @@ sub DayPage
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        }
+
+        my $repost_entry_obj;
+        my $lite_journalu =  $userlite_journal;
+
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'journalu'          => \$journalu,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'allowmask'         => \$allowmask,
+                         'event'             => \$text,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount,
+                         'userlite'          => \$lite_journalu, };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
+                                                                'viewsome' => $viewsome});
+
+            $logprops{$itemid} = $entry_obj->props;
+
+            $lite_journalu = UserLite($entry_obj->journal);
+
+            $apu_lite{$entry_obj->journalid} = $lite_journalu;
+            $apu{$entry_obj->journalid} = $entry_obj->journal;
+            if (!$apu_lite{$posterid} || !$apu{$posterid}) {
+                $apu_lite{$posterid} = UserLite($entry_obj->poster);
+                $apu{$posterid} = $entry_obj->poster; 
+            }
         }
 
         # don't show posts from suspended users or suspended posts
@@ -148,7 +180,7 @@ sub DayPage
         }
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+            LJ::item_toutf8($journalu, \$subject, \$text, $logprops{$itemid});
         }
 
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
@@ -170,7 +202,7 @@ sub DayPage
         );
 
         LJ::expand_embedded(
-            $u,
+            $journalu,
             $ditemid,
             $remote,
             \$text,
@@ -187,7 +219,7 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url;
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
@@ -217,7 +249,7 @@ sub DayPage
 
         my @taglist;
         while (my ($kwid, $kw) = each %{$tags->{$itemid} || {}}) {
-            push @taglist, Tag($u, $kwid => $kw);
+            push @taglist, Tag($journalu, $kwid => $kw);
         }
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
@@ -233,7 +265,7 @@ sub DayPage
             }
         }
 
-        my $entry = Entry($u, {
+        my $entry = Entry($journalu, {
             'subject' => $subject,
             'text' => $text,
             'dateparts' => $alldatepart,
@@ -242,12 +274,15 @@ sub DayPage
             'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
-            'journal' => $userlite_journal,
+            'journal' => $lite_journalu,
             'poster' => $userlite_poster,
             'comments' => $comments,
             'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
+            'real_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
+            'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
+
         });
 
         push @{$p->{'entries'}}, $entry;

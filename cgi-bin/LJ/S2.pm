@@ -1944,7 +1944,8 @@ sub Entry
     };
 
     foreach (qw(subject text journal poster new_day end_day
-                comments userpic permalink_url itemid tags delayedid )) {
+                comments userpic permalink_url itemid tags delayedid 
+                real_journalid real_itemid )) {
         $e->{$_} = $arg->{$_};
     }
 
@@ -1957,6 +1958,7 @@ sub Entry
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
     my $link_keyseq = $e->{'link_keyseq'};
+    push @$link_keyseq, 'delete_reference'  if LJ::is_enabled('entry_reference');
     push @$link_keyseq, 'mem_add'           if LJ::is_enabled('memories');
     push @$link_keyseq, 'tell_friend'       if LJ::is_enabled('tellafriend');
     push @$link_keyseq, 'share'             if LJ::is_enabled('sharing');
@@ -3981,9 +3983,22 @@ sub _Entry__get_link
     my $posteru  = $this->{'poster'}->{'_u'};
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
-    my $journalu = LJ::load_user($journal);
+    my $journalu      = LJ::load_user($journal);
+    my $real_user = $this->{'real_journalid'} ? LJ::want_user($this->{'real_journalid'}) : undef;
+
+    if ($this->{'real_itemid'}) {
+        if ($key eq 'delete_reference') {
+            return $null_link unless $remote;
+            return $null_link unless LJ::u_equals($remote, $real_user);
+
+            return LJ::S2::Link("$LJ::SITEROOT/$this->{'real_itemid'}",
+                            $ctx->[S2::PROPS]->{"text_delete_repost"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
+        }
+    }
 
     if ($key eq "edit_entry") {
+        return $null_link if (LJ::is_enabled('entry_reference') && $this->{'real_itemid'});
         return $null_link unless $remote &&
                                     ( LJ::u_equals( $remote, $journalu ) ||
                                       LJ::u_equals( $remote, $posteru ) ||
@@ -4005,6 +4020,7 @@ sub _Entry__get_link
     return $null_link if $this->{delayed};
 
     if ($key eq "edit_tags") {
+        return $null_link if (LJ::is_enabled('entry_reference') && $this->{'real_itemid'});
         my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
 
         return $null_link 

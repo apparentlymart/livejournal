@@ -7,6 +7,7 @@ package LJ::S2;
 use LJ::TimeUtil;
 use LJ::UserApps;
 use LJ::DelayedEntry;
+use LJ::Entry::Repost;
 
 sub MonthPage
 {
@@ -106,10 +107,33 @@ sub MonthPage
             map { $item->{$_} } qw(posterid jitemid security allowmask alldatepart replycount anum);
         my $subject = $lt->{$itemid}->[0];
         my $day = $item->{'day'};
+        my $journalu = $u;
 
         my $ditemid = $itemid*256 + $anum;
         my $entry_obj  = LJ::Entry->new($u, ditemid => $ditemid);
         $entry_obj->handle_prefetched_props($logprops{$itemid}); 
+
+        my $repost_entry_obj;
+        my $lite_journalu = $userlite_journal;
+
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'itemid'            => \$itemid,
+                         'journalu'          => \$journalu,                        
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'allowmask'         => \$allowmask,
+                         'subject_repost'    => \$subject,
+                         'reply_count'       => \$replycount, };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY unless $entry_obj->visible_to($remote);
+
+            $pu{$posterid} = $entry_obj->poster;
+            $lite_journalu =  UserLite($entry_obj->journal);
+            $pu_lite{$posterid} = UserLite($entry_obj->poster);
+        }
 
         # don't show posts from suspended users or suspended posts
         my $pu = $pu{$posterid};
@@ -125,10 +149,9 @@ sub MonthPage
             next ENTRY if $purge_community_entries;
         }
 
-
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
                 my $text;
-            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+            LJ::item_toutf8($journalu, \$subject, \$text, $logprops{$itemid});
         }
         
         if ($opt_text_subjects) {
@@ -139,7 +162,7 @@ sub MonthPage
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url;
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
@@ -148,14 +171,14 @@ sub MonthPage
             'read_url' => $readurl,
             'post_url' => $posturl,
             'count' => $replycount,
-            'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
+            'maxcomments' => ($replycount >= LJ::get_cap($journalu, 'maxcomments')) ? 1 : 0,
             'enabled' => $entry_obj->comments_shown,
             'locked' => !$entry_obj->posting_comments_allowed,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
-                           ($remote->{'user'} eq $u->{'user'} || $remote->can_manage($u))) ? 1 : 0,
+                           ($remote->user eq $journalu->user || $remote->can_manage($journalu))) ? 1 : 0,
         });
 
-        my $userlite_poster = $userlite_journal;
+        my $userlite_poster = $lite_journalu;
         my $userpic = $p->{'journal'}->{'default_pic'};
         if ($u->{'userid'} != $posterid) {
             $userlite_poster = $pu_lite{$posterid};
@@ -163,7 +186,7 @@ sub MonthPage
             $userpic = Image_userpic($pu{$posterid}, 0, $pickw);
         }
 
-        my $entry = Entry($u, {
+        my $entry = Entry($journalu, {
             'subject' => $subject,
             'text' => "",
             'dateparts' => $alldatepart,
@@ -172,11 +195,13 @@ sub MonthPage
             'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
-            'journal' => $userlite_journal,
+            'journal' => $lite_journalu,
             'poster' => $userlite_poster,
             'comments' => $comments,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
+            'original_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
+            'original_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
 
         push @{$day_entries{$day}}, $entry;

@@ -2,6 +2,7 @@ use strict;
 package LJ::S2;
 
 use LJ::DelayedEntry;
+use LJ::Entry::Repost;
 use LJ::UserApps;
 
 sub RecentPage
@@ -149,15 +150,47 @@ sub RecentPage
         my ($posterid, $itemid, $security, $allowmask, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security allowmask alldatepart);
 
+        my $journalu      = $u;
+        my $lite_journalu = $userlite_journal;
+
         my $ditemid   = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+       
+        my $repost_entry_obj; 
 
-        next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
+        next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall, 
+                                                            'viewsome' => $viewsome});
 
         $entry_obj->handle_prefetched_props($logprops{$itemid});
         my $replycount = $logprops{$itemid}->{'replycount'};
+
         my $subject    = $logtext->{$itemid}->[0];
         my $text       = $logtext->{$itemid}->[1];
+
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'journalu'          => \$journalu,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'allowmask'         => \$allowmask,
+                         'event'             => \$text,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount,
+                         'userlite'          => \$lite_journalu, };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {        
+            next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
+                                                                'viewsome' => $viewsome});
+
+            $logprops{$itemid} = $entry_obj->props;
+
+            $lite_journalu = UserLite($entry_obj->journal);
+            $apu_lite{$entry_obj->journalid} = $lite_journalu;
+            if (!$apu_lite{$posterid}) {
+                $apu_lite{$posterid} = UserLite($entry_obj->poster);
+            }
+        }
 
         if ( $get->{'nohtml'} ) {
             # quote all non-LJ tags
@@ -168,7 +201,7 @@ sub RecentPage
         $itemnum++;
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
+            LJ::item_toutf8($journalu, \$subject, \$text, $logprops{$itemid});
         }
 
         my $date = substr($alldatepart, 0, 10);
@@ -199,7 +232,7 @@ sub RecentPage
         );
 
         LJ::expand_embedded(
-            $u,
+            $journalu,
             $ditemid,
             $remote,
             \$text,
@@ -208,16 +241,16 @@ sub RecentPage
 
         $text = LJ::ContentFlag->transform_post(
             'post'    => $text,
-            'journal' => $u,
+            'journal' => $journalu,
             'remote'  => $remote,
             'entry'   => $entry_obj,
         );
 
         my @taglist;
-        while (my ($kwid, $kw) = each %{$tags->{"$u->{userid} $itemid"} || {}}) {
-            push @taglist, Tag($u, $kwid => $kw);
+        while (my ($kwid, $kw) = each %{$tags->{"$journalu->{userid} $itemid"} || {}}) {
+            push @taglist, Tag($journalu, $kwid => $kw);
         }
-        LJ::run_hooks('augment_s2_tag_list', u => $u, jitemid => $itemid, tag_list => \@taglist);
+        LJ::run_hooks('augment_s2_tag_list', u => $journalu, jitemid => $itemid, tag_list => \@taglist);
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
@@ -227,12 +260,12 @@ sub RecentPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->prop('opt_nctalklinks');
 
-        my $permalink = "$journalbase/$ditemid.html";
+        my $permalink = $entry_obj->url;
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
         my $posturl = $permalink . "?mode=reply";
 
-        my $has_screened = ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($u)) ? 1 : 0;
+        my $has_screened = ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($journalu)) ? 1 : 0;
 
         my $comments = CommentInfo({
             'read_url' => $readurl,
@@ -246,9 +279,9 @@ sub RecentPage
             'show_postlink' => $entry_obj->posting_comments_allowed,
         });
 
-        my $userlite_poster = $userlite_journal;
-        my $pu = $u;
-        if ($u->{'userid'} != $posterid) {
+        my $userlite_poster = $lite_journalu;
+        my $pu = $journalu;
+        if ($journalu->userid != $posterid) {
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
             $pu = $apu{$posterid};
         }
@@ -263,7 +296,7 @@ sub RecentPage
             }
         }
 
-        my $entry = $lastentry = Entry($u, {
+        my $entry = $lastentry = Entry($journalu, {
             'subject' => $subject,
             'text' => $text,
             'dateparts' => $alldatepart,
@@ -272,14 +305,16 @@ sub RecentPage
             'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
-            'journal' => $userlite_journal,
-            'poster' => $userlite_poster,
+            'journal' => $lite_journalu,
+            'poster'  => $userlite_poster,
             'comments' => $comments,
             'new_day' => $new_day,
             'end_day' => 0,   # if true, set later
             'tags' => \@taglist,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
+            'real_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
+            'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
         
         push @{$p->{'entries'}}, $entry;

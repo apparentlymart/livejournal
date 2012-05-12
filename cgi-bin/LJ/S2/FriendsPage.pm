@@ -7,6 +7,7 @@ use Class::Autouse qw/LJ::ContentFlag/;
 use LJ::Request;
 use LJ::TimeUtil;
 use LJ::UserApps;
+use LJ::Entry::Repost;
 
 sub FriendsPage
 {
@@ -259,6 +260,29 @@ sub FriendsPage
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+        my $repost_entry_obj;
+        
+        my $content =  { 'original_post_obj' => \$entry_obj,
+                         'repost_obj'        => \$repost_entry_obj,
+                         'ditemid'           => \$ditemid,
+                         'itemid'            => \$itemid,
+                         'journalid'         => \$friendid,
+                         'posterid'          => \$posterid,
+                         'security'          => \$security,
+                         'allowmask'         => \$allowmask,
+                         'event_friend'      => \$text,
+                         'subject'           => \$subject,
+                         'reply_count'       => \$replycount, };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY unless $entry_obj->visible_to($remote);
+
+            $friend   = $poster = $entry_obj->journal;
+
+            $posters{$posterid} = $poster;
+            $friends{$friendid} = $friend;
+            $datakey   = "$friendid $itemid";
+        }
 
         if ( $remote && $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
             $text = LJ::Lang::ml(

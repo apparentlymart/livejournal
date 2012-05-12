@@ -1499,6 +1499,11 @@ property string text_permalink {
 }
 set text_permalink = "Link";
 
+property string text_delete_repost {
+    des = "Text to delete repost link";
+}
+set text_delete_repost = "Delete repost";
+
 property string text_edit_entry {
     des = "Text to edit an entry";
 }
