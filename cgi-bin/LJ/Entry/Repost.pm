@@ -9,6 +9,14 @@ use LJ::Lang;
 
 sub __get_count {
     my ($u, $jitemid) = @_;
+
+    my $journalid = $u->userid;
+    my $memcache_key = "reposted_count:$journalid:$jitemid";
+    my ($count) = LJ::MemCache::get($memcache_key);
+    if ($count) {
+        return $count;
+    }
+
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
@@ -18,12 +26,25 @@ sub __get_count {
                                                    undef,
                                                    $u->userid,
                                                    $jitemid, );
+
+    LJ::MemCache::set($memcache_key, $count_jitemid, 3600);
+
     return $count_jitemid;
 
 }
 
 sub __get_repostid {
     my ($u, $jitemid, $reposterid) = @_;
+
+    warn "__get_repostid";
+    my $journalid = $u->userid;
+    my $memcache_key = "reposted_itemid:$journalid:$jitemid:$reposterid";
+    my ($itemid) = LJ::MemCache::get($memcache_key);
+    if ($itemid) {
+        warn $itemid;
+        return $itemid;
+    }
+
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
@@ -34,11 +55,20 @@ sub __get_repostid {
                                                    $u->userid,
                                                    $jitemid,
                                                    $reposterid, );
+
+    LJ::MemCache::set($memcache_key, $repost_jitemid, 3600);
     return $repost_jitemid;
 }
 
 sub __create_repost_record {
     my ($u, $itemid, $repost_journalid, $repost_itemid) = @_;
+
+    my $journalid = $u->userid;
+    my $memcache_key_count = "reposted_count:$journalid:$itemid";
+    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$repost_journalid";
+   
+    LJ::MemCache::delete($memcache_key_count);
+    LJ::MemCache::delete($memcache_key_status);
 
     $u->do('INSERT INTO repost2 VALUES(?,?,?,?)',
             undef,
@@ -50,6 +80,12 @@ sub __create_repost_record {
 
 sub __delete_repost_record {
     my ($u, $itemid, $reposterid) = @_;
+
+    my $journalid = $u->userid;
+    my $memcache_key = "reposted_count:$journalid:$itemid";
+    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$reposterid";
+    LJ::MemCache::delete($memcache_key);
+    LJ::MemCache::delete($memcache_key_status);
 
     $u->do('DELETE FROM repost2 WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
             undef,
@@ -104,8 +140,8 @@ sub __create_repost {
         return;
     }
 
-    my $url = $entry_obj->url;
-    $post_obj->convert_to_repost($url);
+    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
+    $post_obj->convert_to_repost($mark);
 
     # create record
     my $repost_jitemid = $post_obj->jitemid;
@@ -126,9 +162,52 @@ sub get_status {
 
     my $reposted = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid );
     return  { 'result' => { 
-                  'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
-                  'reposted' => !!$reposted, },
+              'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
+              'reposted' => !!$reposted, },
             };
+}
+
+sub __reposters {
+    my ($dbcr, $journalid, $jitemid) = @_;
+
+    my $reposted = $dbcr->selectcol_arrayref( 'SELECT reposterid ' .
+                                              'FROM repost2 ' .
+                                              'WHERE journalid = ? AND jitemid = ? LIMIT 1000',
+                                              undef,
+                                              $journalid,
+                                              $jitemid, ); 
+
+    return undef unless scalar @$reposted;
+    return $reposted;
+}
+
+sub delete_all_reposts_records {
+    my ($class, $journalid, $jitemid) = @_;
+
+    my $memcache_key = "reposted_count:$journalid:$jitemid";
+    LJ::MemCache::delete($memcache_key);
+
+    my $u = LJ::want_user($journalid);
+    my $dbcr = LJ::get_cluster_master($u)
+        or die "get cluster for journal failed";
+
+
+    while (my $reposted = __reposters($dbcr, $journalid, $jitemid)) {
+        foreach my $reposterid (@$reposted) {
+            warn  LJ::D($reposterid);
+            my $memcache_key_status = "reposted_itemid:$journalid:$jitemid:$reposterid";
+            LJ::MemCache::delete($memcache_key_status);
+        }
+
+        my $reposters = join(',', @$reposted);
+        warn $reposters;
+
+        $u->do('DELETE FROM repost2 WHERE journalid = ? AND jitemid = ? AND reposterid IN ($reposters)',
+                undef,
+                $u->userid,
+                $jitemid,);
+
+    }
 }
 
 sub delete {

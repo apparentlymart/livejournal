@@ -9,6 +9,7 @@ use strict;
 use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
 use LJ::TimeUtil;
+use LJ::Entry::Repost;
 
 # internal fields:
 #
@@ -121,9 +122,15 @@ sub new
     # save the singleton if it doesn't exist
     $singletons{$journalid}->{$jitemid} = $self;
 
-    my $url = $self->prop('repost_link');
-    if ($url && ($url ne $self->url) ) {
-        $self->{'original_post_obj'} = LJ::Entry->new_from_url($url);
+    my $link = $self->prop('repost_link');
+    if ($link) {
+        my ($journalid, $jitemid) = split(/:/, $link);
+        my $user = int($journalid) ? LJ::want_user(int($journalid)) : undef;
+        if ($user && $jitemid)
+        {        
+            my $reposted_entry = LJ::Entry->new(int($journalid), jitemid => int($jitemid));
+            $self->{'original_post_obj'} = $reposted_entry if $reposted_entry->valid;
+        }
     }
 
     return $self;
@@ -2520,6 +2527,8 @@ sub delete_entry
     my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]) if $dc > 0;
+
+    LJ::Entry::Repost->delete_all_reposts_records($uuserid, $jitemid);
 
     if ( $jitemid == $u->get_sticky_entry_id() ){
         $u->remove_sticky_entry_id();
