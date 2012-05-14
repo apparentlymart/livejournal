@@ -48,4 +48,61 @@ sub comment_props {
 
 
 ### Themes ###
+
+
+package LJ::S2Theme::tabularindent::ashfire;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::brownleather;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(    ) }
+
+package LJ::S2Theme::tabularindent::desktop;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::everblue;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(    ) }
+sub designer { "everdred" }
+
+package LJ::S2Theme::tabularindent::everwhite;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(  ) }
+sub designer { "everdred" }
+
+package LJ::S2Theme::tabularindent::forest;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(    ) }
+
+package LJ::S2Theme::tabularindent::lowercurtain;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::mexicanfood;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::pistmint;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::satinhandshake;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::stripes;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::tabularindent::sunny;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::valentine;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+
 1;

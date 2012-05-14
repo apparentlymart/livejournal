@@ -45,4 +45,38 @@ sub comment_props {
 
 
 ### Themes ###
+
+
+package LJ::S2Theme::deardiary::cellular;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::redrock;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::regal;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::royalty;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::striking;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::unsaturates;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::wired;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
 1;

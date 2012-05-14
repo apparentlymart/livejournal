@@ -52,4 +52,28 @@ sub comment_props {
 
 ### Themes ###
 
+package LJ::S2Theme::disjointed::blackblu;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
+package LJ::S2Theme::disjointed::dante;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
+package LJ::S2Theme::disjointed::greenhues;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( cool modern nature ) }
+
+package LJ::S2Theme::disjointed::monotonegrey;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::disjointed::satinhandshake;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
+package LJ::S2Theme::disjointed::xcolibur;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
 1;

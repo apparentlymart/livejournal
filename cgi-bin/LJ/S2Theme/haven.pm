@@ -86,4 +86,70 @@ sub ordering_props {
 
 
 ### Themes ###
+
+
+package LJ::S2Theme::haven::bluecomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::bluedouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::bluesplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::bluetetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::greendouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::greensplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::greentriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigoblue;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangeanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangemonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::redanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::redmonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violetanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowmonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowtriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 1;

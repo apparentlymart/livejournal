@@ -42,4 +42,57 @@ sub comment_props {
 
 
 ### Themes ###
+
+package LJ::S2Theme::magazine::ashfire;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::brownleather;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(    ) }
+
+package LJ::S2Theme::magazine::desktop;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::everblue;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::everwhite;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::magazine::forest;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(    ) }
+
+package LJ::S2Theme::magazine::lowercurtain;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::mexicanfood;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::satinhandshake;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::stripes;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::magazine::sunny;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::valentine;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::wonb;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
 1;
