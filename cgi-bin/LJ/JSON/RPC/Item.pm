@@ -56,7 +56,9 @@ sub new {
     $self->{'uri'}    = $uri;
     $self->{'method'} = $method;
     $self->{'params'} = $params;
-    $self->{'id'}     = $data->{'id'};
+    if (exists $data->{'id'}) {
+        $self->{'id'}     = $data->{'id'};
+    }
  
     return $self,
 }
@@ -173,7 +175,7 @@ sub params {
 
 sub is_notitification {
     my ($self) = @_;
-    return !$self->{'id'};
+    return !(exists $self->{'id'});
 }
 
 1;

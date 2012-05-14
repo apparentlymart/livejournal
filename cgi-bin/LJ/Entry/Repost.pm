@@ -252,7 +252,7 @@ sub create {
             my $count = __get_count($entry_obj->journal, $entry_obj->jitemid);
             $result->{'result'} = { 'count' => $count };
         } elsif (!$error) {
-            $error = LJ::Lang::ml('api.unknown');
+            $error = LJ::Lang::ml('api.error.unknown_error');
         }
     }
 
@@ -268,7 +268,21 @@ sub substitute_content {
     my ($class, $entry_obj, $opts) = @_;
 
     my $original_entry_obj = $entry_obj->original_post;
-    return unless $original_entry_obj;
+
+    unless ($original_entry_obj) {
+        my $link = $entry_obj->prop('repost_link'); 
+        if ($link) {
+            my ($org_journalid, $org_jitemid) = split(/:/, $link);
+            my $journal = int($link) ? LJ::want_user($link) : undef;
+             
+            my $event = LJ::Lang::ml( 'entry.reference.journal.delete',
+                                      'datetime'     => $entry_obj->eventtime_mysql );
+
+            ${$opts->{'event'}} = $event;
+            return 1;    
+        }
+        return 0;
+    }
 
     if ($opts->{'anum'}) {
         ${$opts->{'anum'}} = $original_entry_obj->anum;
@@ -315,7 +329,7 @@ sub substitute_content {
     }
 
     if ($opts->{'eventtime'}) {
-        ${$opts->{'eventtime'}} = $original_entry_obj->eventtime_mysql;
+        ${$opts->{'eventtime'}} = $entry_obj->eventtime_mysql;
     }
 
     if ($opts->{'event'}) {
