@@ -3983,7 +3983,6 @@ sub _Entry__get_link
     my $posteru  = $this->{'poster'}->{'_u'};
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
-    my $journalu      = LJ::load_user($journal);
     my $real_user = $this->{'real_journalid'} ? LJ::want_user($this->{'real_journalid'}) : undef;
 
     if ($this->{'real_itemid'}) {
@@ -3991,7 +3990,8 @@ sub _Entry__get_link
             return $null_link unless $remote;
             return $null_link unless LJ::u_equals($remote, $real_user);
 
-            return LJ::S2::Link("$LJ::SITEROOT/$this->{'real_itemid'}",
+            my $entry = LJ::Entry->new($journalu, ditemid => $this->{'itemid'});
+            return LJ::S2::Link($entry->url,
                             $ctx->[S2::PROPS]->{"text_delete_repost"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
         }

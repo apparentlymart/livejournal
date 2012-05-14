@@ -1503,8 +1503,8 @@ sub can_delete_journal_item {
 }
 
 sub convert_to_repost {
-    my ($class, $url) = @_;
-    $class->set_prop( 'repost_link' =>  $url);
+    my ($class, $mark) = @_;
+    $class->set_prop( 'repost_link' =>  $mark);
 } 
 
 sub original_post {
