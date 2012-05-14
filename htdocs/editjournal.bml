@@ -183,7 +183,7 @@ body<=
                my $content =  { 'original_post_obj' => \$entry_obj,
                                 'repost_obj'        => \$repost_entry_obj, };
 
-               if (LJ::EntryReference->substitute_content( $entry_obj, $content )) {
+               if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
                    $real_entries->{$entry_obj->posterid}->{$entry_obj->jitemid} 
                             = { 'itemid'    => $repost_entry_obj->jitemid,
                                 'journalid' => $repost_entry_obj->journalid, };
