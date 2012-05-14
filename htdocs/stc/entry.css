@@ -933,7 +933,7 @@ td.tabs {
 	position: relative;
 	min-height: 150px;
 	margin: 0 0 7px 0;
-	padding: 5px 17px 15px 16px;
+	padding: 0 17px 15px 16px;
 	border-radius: 5px 5px 5px 5px;
 	border: 1px solid #ebebeb;
 	background: none repeat scroll 0 0 #F6F6F6;
@@ -979,11 +979,20 @@ td.tabs {
 	.b-music-item DD {
 		display: inline-block;
 		margin: 0;
-		vertical-align: middle;
 		}
 	.b-music-item-header DT,
 	.b-music-item-header DD {
 		width: 200px;
+		vertical-align: middle;
+		}
+		.b-music-item-header DT SPAN,
+		.b-music-item-header DD SPAN {
+			padding-left: 10px;
+			font-weight: bold;
+			}
+	.b-music-item DT,
+	.b-music-item DD {
+		vertical-align: top;
 		}
 	.b-music-item-artist,
 	.b-music-item-album,
@@ -996,9 +1005,12 @@ td.tabs {
 		.b-music-item-track SPAN {
 			position: relative;
 			display: inline-block;
-			padding: 9px 5px 10px 3px;
+			padding: 9px 5px 10px 10px;
 			cursor: pointer;
 			font-size: 11px;
+			}
+		.b-music-item-artist SPAN {
+			font-weight: bold;
 			}
 		.b-music-item-artist SPAN:hover,
 		.b-music-item-album SPAN:hover,
@@ -1006,11 +1018,19 @@ td.tabs {
 			text-decoration: underline;
 			}
 	.b-music-item-player {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
 		width: 150px;
 		min-width: 150px;
 		text-align: right;
 		}
-
+		.b-music-item-player EMBED {
+			position: absolute;
+			top: 50%;
+			margin-top: -14px;
+			}
 .b-music-list-state-error .b-music-item-header,
 .b-music-list-state-error .b-music-list-preloader-wrapper,
 .b-music-list-state-error .b-music-item-body,
