@@ -130,20 +130,25 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 		templates: {
 			wrapper: '<div class="b-contextualhover"></div>',
-			loading: 'Loading...',
-			content: ''
+			content: 'templates-Widgets-contextualhover',
+			loading: 'Loading...'
 		},
 
 		init: function() {
 			var wrapper = jQuery(this.templates.wrapper),
 				self = this;
 
+			this._visible = false;
+
 			this.element = jQuery(wrapper).bubble({
-				// showDelay: 500,
+				alwaysShowUnderTarget: true,
 				closeControl: false,
-				// showOn: 'hover',
+				show: function() {
+					ContextualPopup._visible = true;
+				},
 				hide: function() {
 					ContextualPopup.hideHourglass();
+					ContextualPopup._visible = false;
 				},
 				classNames: {
 					containerAddClass: this.classNames.popup
@@ -441,13 +446,13 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 
 			buildObject.socialCap = {
-                first: !!data.first
-            }
-            if (data.value) buildObject.socialCap.value = data.value;
+				first: !!data.first
+			}
+			if (data.value) buildObject.socialCap.value = data.value;
 
 			this.element
 				.empty()
-				.append(LJ.UI.template('templates-Widgets-contextualhover', buildObject));
+				.append(LJ.UI.template(this.templates.content, buildObject));
 
 			if (this.element.is(':visible')) {
 				//show method forces bubble to reposition with respect to the new content
@@ -508,9 +513,15 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			if (!Site.ctx_popup) return;
 
 			popup.init();
-			jQuery(document.body)
+			var body = jQuery(document.body);
+
+			body
 				.mouseover(ContextualPopup.mouseOver)
 				.ljAddContextualPopup();
+
+			if (LJ.Support.touch) {
+				body.on('click', ContextualPopup.touchStart);
+			}
 		},
 
 		/**
@@ -559,7 +570,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 		},
 
-		mouseOver: function(e) {
+		activate: function(e) {
 			var target = e.target,
 				ctxPopupId = target.username || target.userid || target.up_url,
 				t = ContextualPopup;
@@ -581,6 +592,25 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				} else {
 					popup.show();
 				}
+
+				return true;
+			}
+
+			return false;
+		},
+
+		mouseOver: function(e) {
+			ContextualPopup.activate(e);
+		},
+
+		touchStart: function(e) {
+			var current = ContextualPopup.currentElement;
+
+			//if popup is activated then currentElement property is rewriten somewhere inside the activate
+			//function and this condition works;
+			if (ContextualPopup.activate(e) && (!ContextualPopup._visible || current !== ContextualPopup.currentElement)) {
+				e.preventDefault();
+				e.stopPropagation();
 			}
 		},
 
