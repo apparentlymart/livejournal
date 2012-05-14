@@ -1630,8 +1630,7 @@ sub res_includes {
                 my $res = $_;
                 ## is the key part of library/package
                 if (my $library = $LJ::JS_SOURCE_MAP_REV{$_}){
-                    $res = $library unless $libs{$library};
-                    $libs{$library}++;
+                    $res = $libs{$library}++ ? '' : $library;
                 } 
                 $res;
             } @LJ::NEEDED_RES;
