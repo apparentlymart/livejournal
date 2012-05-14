@@ -77,7 +77,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 			});
 		}
 
-		jQuery(form).submit(function(e) { widget.changeAlias(e, form) });
+		jQuery(form).submit(function(e) { widget.changeAlias(e, form); });
 	},
 
 	cancel: function (e) {
@@ -87,9 +87,9 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 
 
 //this object contains only authToken
-Aliases = {}
+Aliases = {};
 function addAlias(target, ptitle, ljusername, oldalias, callback) {
-	if (! ptitle) return true;
+	if (! ptitle) { return true; }
 	
 	new LJWidgetIPPU_AddAlias({
 		title: ptitle,
@@ -107,6 +107,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 
 (function($) {
+
+	"use strict";
 
 	/**
 	 * Object contains methods to build and display user popup.
@@ -211,7 +213,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				linkGroups: []
 			};
 
-			if (data.url_userpic && data.url_userpic != ctxPopupId) {
+			if (data.url_userpic && data.url_userpic !== ctxPopupId) {
 				buildObject.userpic = {
 					allpics: data.url_allpics,
 					pic: data.url_userpic
@@ -221,17 +223,19 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			// relation
 			var label, username = '<strong>' + data.display_username + ' </strong>';
 			if (data.is_comm) {
-				if (data.is_member)
+				if (data.is_member) {
 					label = data.ml_you_member.replace('[[username]]', username);
-				else if (data.is_friend)
+				} else if (data.is_friend) {
 					label = data.ml_you_watching.replace('[[username]]', username);
-				else
+				} else {
 					label = username;
+				}
 			} else if (data.is_syndicated) {
-				if (data.is_friend)
-						label = data.ml_you_subscribed.replace('[[username]]', username);
-				else
+				if (data.is_friend) {
+					label = data.ml_you_subscribed.replace('[[username]]', username);
+				} else {
 					label = username;
+				}
 			} else {
 				if (data.is_requester) {
 					label = data.ml_this_is_you;
@@ -239,10 +243,11 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					label = username;
 					
 					if (data.is_friend_of) {
-						if (data.is_friend)
+						if (data.is_friend) {
 							label += data.ml_mutual_friend;
-						else
+						} else {
 							label += data.ml_lists_as_friend;
+						}
 					} else if (data.is_friend) {
 						label += data.ml_your_friend;
 					}
@@ -291,15 +296,16 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 						e.stopPropagation();
 						ContextualPopup.changeRelation(data, ctxPopupId, data.is_friend ? 'removeFriend' : 'addFriend', e);
 					},
-					text: function()
+					text: (function()
 					{
-						if (data.is_comm)
+						if (data.is_comm) {
 							return data.is_friend ? data.ml_stop_community : data.ml_watch_community;
-						else if (data.is_syndicated)
+						} else if (data.is_syndicated) {
 							return data.is_friend ? data.ml_unsubscribe_feed : data.ml_subscribe_feed;
-						else
+						} else {
 							return data.is_friend ? data.ml_remove_friend : data.ml_add_friend;
-					}()
+						}
+					}())
 				});
 
 				if (data.is_friend && !data.is_identity) {
@@ -327,13 +333,13 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 
 			//filter community
-			if( ( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) 
-						&& Site.current_journal.is_comm === "1" ) || data.posted_in ) {
+			if( ( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) &&
+						Site.current_journal.is_comm === "1" ) || data.posted_in ) {
 				linkGroup.push({
 					url: ( ( data.posted_in ) ? data.posted_in : Site.current_journal.url_journal ) + '/?poster=' + data.username,
-					text: ( Site.remoteUser === data.username && !data.posted_in ) 
-							? ( data.ml_filter_by_poster_me || 'Filter community by me' ) 
-							: ( data.ml_filter_by_poster || 'Filter community by poster' )
+					text: ( Site.remoteUser === data.username && !data.posted_in ) ?
+							( data.ml_filter_by_poster_me || 'Filter community by me' ) :
+							( data.ml_filter_by_poster || 'Filter community by poster' )
 				});
 			}
 
@@ -358,12 +364,12 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 			// wishlist
 			// commented according to task LJSUP-11396
-			// if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
-			// 	linkGroup.push({
-			// 		url: data.wishlist_url,
-			// 		text: data.ml_view_wishlist
-			// 	});
-			// }
+			//if ((data.is_person || data.is_comm) && !data.is_requester && data.wishlist_url) {
+			//	linkGroup.push({
+			//		url: data.wishlist_url,
+			//		text: data.ml_view_wishlist
+			//	});
+			//}
 
 			// buy the same userhead
 			if (data.is_logged_in && data.is_person && ! data.is_requester && data.is_custom_userhead) {
@@ -447,8 +453,9 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 			buildObject.socialCap = {
 				first: !!data.first
-			}
-			if (data.value) buildObject.socialCap.value = data.value;
+			};
+
+			if (data.value) { buildObject.socialCap.value = data.value; }
 
 			this.element
 				.empty()
@@ -463,7 +470,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 
 		/**
-		 * Go through all build objects and find all callbacks that should be bound 
+		 * Go through all build objects and find all callbacks that should be bound
 		 * to the node events.
 		 *
 		 * @param {Object} buildObject Template object.
@@ -478,14 +485,14 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 					if (value.click) {
 						//default handler is by url
-						var selector = value.selector || '[href="' + value.url + '"]';
+						selector = value.selector || '[href="' + value.url + '"]';
 						selector = selector.supplant(value);
 						element.delegate(selector, 'click', value.click);
 					}
 
 					if (value.change) {
 						//for checkboxes selector should present anyway
-						var selector = value.selector;
+						selector = value.selector;
 						selector = selector.supplant(value);
 						element.delegate(selector, 'change', value.change);
 					}
@@ -510,7 +517,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 		setup: function() {
 			// don't do anything if no remote
-			if (!Site.ctx_popup) return;
+			if (!Site.ctx_popup) { return; }
 
 			popup.init();
 			var body = jQuery(document.body);
@@ -528,7 +535,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		 * Search child nodes and bind hover events on them if needed.
 		 */
 		searchAndAdd: function(node) {
-			if (!Site.ctx_popup) return;
+			if (!Site.ctx_popup) { return; }
 
 			// attach to all ljuser head icons
 			var rex_userid = /\?userid=(\d+)/,
@@ -542,7 +549,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				ljuser = ljusers[i];
 				parent = ljuser.parentNode;
 
-				if (parent.href && (userid = parent.href.match(rex_userid)) && !(parent.className.indexOf(class_nopopup) >= 0)) {
+				if (parent.href && (userid = parent.href.match(rex_userid)) && parent.className.indexOf(class_nopopup) < 0) {
 					ljuser.userid = userid[1];
 				} else if (parent.parentNode.getAttribute('lj:user')) {
 					ljuser.username = parent.parentNode.getAttribute('lj:user');
@@ -560,7 +567,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			i = -1;
 			while (ljusers[++i]) {
 				ljuser = ljusers[i];
-				if (ljuser.src.match(rex_userpic) && !(ljuser.className.indexOf(class_nopopup) >= 0)) {
+				if (ljuser.src.match(rex_userpic) && ljuser.className.indexOf(class_nopopup) < 0) {
 					ljuser.up_url = ljuser.src;
 					if (ljuser.parentNode.getAttribute('data-journal')) {
 						ljuser.posted_in = ljuser.parentNode.getAttribute('data-journal');
@@ -575,7 +582,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				ctxPopupId = target.username || target.userid || target.up_url,
 				t = ContextualPopup;
 
-			if (target.tagName == 'IMG' && ctxPopupId) {
+			if (target.tagName === 'IMG' && ctxPopupId) {
 				// if we don't have cached data background request it
 				if (!t.cachedResults[ctxPopupId]) {
 					t.getInfo(target, ctxPopupId);
@@ -587,7 +594,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				}
 
 				// show other popup
-				if (t.currentElement != target) {
+				if (t.currentElement !== target) {
 					t.showPopup(ctxPopupId, target);
 				} else {
 					popup.show();
@@ -623,7 +630,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			this.currentId = ctxPopupId;
 			var data = this.cachedResults[ctxPopupId];
 
-			if (data && data.noshow) return;
+			if (data && data.noshow) { return; }
 			if (this.currentElement && this.currentElement !== ele) {
 				popup.hide(true);
 			}
@@ -642,13 +649,12 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 
 		renderPopup: function(ctxPopupId) {
-			popup.render(this.cachedResults[ctxPopupId], ctxPopupId)
+			popup.render(this.cachedResults[ctxPopupId], ctxPopupId);
 		},
 
 		// ajax request to change relation
 		changeRelation: function (info, ctxPopupId, action, e) {
-			var changedRelation = function(data)
-			{
+			var changedRelation = function(data) {
 				if (data.error) {
 					return ContextualPopup.showNote(data.error);
 				}
@@ -659,7 +665,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				
 				// if the popup is up, reload it
 				ContextualPopup.renderPopup(ctxPopupId);
-			}
+			};
 			
 			var xhr = jQuery.post(LiveJournal.getAjaxUrl('changerelation'),
 						{
@@ -753,7 +759,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					
 					t.currentRequests[popup_id] = null;
 					
-					if (t.currentId == popup_id) {
+					if (t.currentId === popup_id) {
 						t.renderPopup(popup_id);
 					}
 				},
@@ -772,7 +778,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		}
 	};
 
-})(jQuery);
+}(jQuery));
 
 
 // when page loads, set up contextual popups

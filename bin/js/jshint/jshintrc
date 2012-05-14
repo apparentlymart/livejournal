@@ -113,7 +113,12 @@
     "predef"        : [         // Extra globals.
         "Site",
         "LiveJournal",
-        "LJ"
+        "LJ",
+        "ContextualPopup",
+        "LJ_IPPU",
+        "IPPU",
+        "Class",
+        "LJWidgetIPPU"
     ],
     "indent"        : 4         // Specify indentation spacing
 }
