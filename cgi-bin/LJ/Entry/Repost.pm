@@ -36,12 +36,10 @@ sub __get_count {
 sub __get_repostid {
     my ($u, $jitemid, $reposterid) = @_;
 
-    warn "__get_repostid";
     my $journalid = $u->userid;
     my $memcache_key = "reposted_itemid:$journalid:$jitemid:$reposterid";
     my ($itemid) = LJ::MemCache::get($memcache_key);
     if ($itemid) {
-        warn $itemid;
         return $itemid;
     }
 
@@ -100,7 +98,6 @@ sub __create_post {
     my $err = 0;
     my $flags = { 'noauth'             => 1,
                   'use_custom_time'    => 0,
-                  'allow_dupsing_post' => 1,
                   'u'                  => $u };
 
     my %req = ( 'username'    => $u->user,
@@ -160,7 +157,7 @@ sub __create_repost {
 sub get_status {
     my ($class, $u, $entry_obj) = @_;
 
-    my $reposted = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid );
+    my $reposted = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid ) || 0;
     return  { 'result' => { 
               'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
               'reposted' => !!$reposted, },
@@ -215,7 +212,11 @@ sub delete {
     my $repost_itemid = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid );
 
     if ($repost_itemid) {
-        LJ::delete_entry($u, $repost_itemid, undef, undef);
+        LJ::set_remote($u);
+        my $result = LJ::API::Event->delete({ itemid => $repost_itemid, journalid => $u->userid} ); 
+        if ($result->{'error'}) { 
+            return $result;
+        }
         __delete_repost_record($entry_obj->journal, $entry_obj->jitemid, $u->userid);
     
         return  { 'result' => { 'delete' => 'OK' } } ;
