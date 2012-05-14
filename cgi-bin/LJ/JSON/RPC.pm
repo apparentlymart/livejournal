@@ -78,9 +78,15 @@ sub response {
         $resp_data = $item->response($items->{'result'});
     }
 
-    my $response = LJ::Response::JSON->new();
-    $response->data($resp_data);
-    return $response;
+    if ($resp_data) {
+        my $response = LJ::Response::JSON->new();
+        $response->data($resp_data);
+        return $response;
+    } else {
+        my $response = LJ::Response->new();
+        return $response;
+        
+    }
 }
 
 1;
