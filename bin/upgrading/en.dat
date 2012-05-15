@@ -5945,6 +5945,8 @@ talk.post.change.back=change back
 
 talk.post.collapse.extra=Collapse mood, music, location
 
+talk.post.collapse.options=Collapse adult, comments, screen, backdated
+
 talk.post.comments=Comments
 
 talk.post.comments.nocomments=disabled
@@ -5956,6 +5958,8 @@ talk.post.create.title=New entry
 talk.post.edit.title=Edit entry
 
 talk.post.expand.extra=Expand mood, music, location
+
+talk.post.expand.options=Expand adult, comments, screen, backdated
 
 talk.post.html=HTML
 
