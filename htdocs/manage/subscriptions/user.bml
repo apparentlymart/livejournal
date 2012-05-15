@@ -16,11 +16,11 @@ body<=
     use LJ::Widget::SubscribeInterface;
 
     BML::decl_params(
-                     lj_form_auth => qr/./,
-                     journal      => 'word',
-                     event        => 'word',
-                     _default     => qr/./,
-                     );
+        lj_form_auth => qr/./,
+        journal      => 'word',
+        event        => 'word',
+        _default     => qr/./,
+    );
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
@@ -60,15 +60,30 @@ body<=
         my %ntypeids = map { $_ => $_->ntypeid } @ntypes;
 
         foreach my $field (keys %POST) {
-            next unless $field =~ /event\-(\d+)/;
+            next unless $field =~ /event\-(\d+)(?:\-c)?/;
             my $field_num = $1;
+            my $flag = 0;
 
             my $group = LJ::Subscription::Group->thaw($POST{$field});
 
             foreach my $ntypeid (values %ntypeids) {
-                next unless $POST{'sub-'.$field_num.'-'.$ntypeid};
+                if ( $POST{'sub-' . $field_num . '-' . $ntypeid . '-c'} ) {
+                    $group->clear_rel($journal, $u);
+                    $flag = 1;
+                }
+                elsif( $POST{'sub-' . $field_num . '-' . $ntypeid} ) {
+                    $group->create_sub($ntypeid);
+                }
+                else {
+                    next;
+                }
+            }
 
-                $group->create_sub($ntypeid);
+            if ( $field =~ /event\-(\d+)\-c/ ) {
+                $group->set_rel($journal, $u) unless $flag;
+
+                # check_rel field is not real subscription
+                next;
             }
 
             $newset->insert_group($group);
@@ -91,7 +106,8 @@ body<=
     my $widget = LJ::Widget::SubscribeInterface->new;
 
     $widget->{'no_container_div'} = 1;
-    $widget->{'page'} = '/manage/subscriptions/user.bml';
+    $widget->{'page'}             = '/manage/subscriptions/user.bml';
+    $widget->{'journal'}          = $journal;
 
     $ret .= '<form method="post" action="">';
 
@@ -99,6 +115,7 @@ body<=
 
     if ($GET{'tag'}) {
         my $usertags = LJ::Tags::get_usertags($journal, {remote => $remote});
+
         foreach my $tag_num (keys %$usertags) {
             if ($usertags->{$tag_num}->{'name'} eq $GET{'tag'}) {
                 $tag = $tag_num;
@@ -109,9 +126,9 @@ body<=
 
     my $groups = [
         { event => "JournalNewEntry", arg1 => $tag, 'journalid' => $journal->id },
-        { event => "JournalNewEntry", 'journalid' => $journal->id },
-        { event => "NewUserpic", 'journalid' => $journal->id },
-        { event => "Birthday", 'journalid' => $journal->id },
+        { event => "JournalNewEntry",               'journalid' => $journal->id },
+        { event => "NewUserpic",                    'journalid' => $journal->id },
+        { event => "Birthday",                      'journalid' => $journal->id },
     ];
 
     push @$groups, { event => "JournalNewComment", 'journalid' => $journal->id }
@@ -121,7 +138,16 @@ body<=
         unless LJ::User->is_protected_username($journal->user);
 
     push @$groups, { event => "CommunityJoinReject", 'journalid' => $journal->id }
-        if $u && $u->can_manage($journal); 
+        if $u && $u->can_manage($journal);
+
+    if ( LJ::is_friend($journal, $u) ) {
+        push @$groups, { 'separator' => 1 };
+        push @$groups, {
+            'event'     => 'CommunityMassMail',
+            'check_rel' => 'C',
+            'journalid' => $journal->id,
+        };
+    }
 
     $ret .= $widget->render({
         'title' => BML::ml('subscribe_interface.category.this-journal', { 'journal' => $journal->ljuser_display }),
