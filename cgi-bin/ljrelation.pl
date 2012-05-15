@@ -14,6 +14,7 @@ use LJ::RelationService;
 # I - inviter
 # D - spammer
 # W - journal sweeper
+# C - do not receive mass mailing from community
 #########################
 
 # <LJFUNC>
