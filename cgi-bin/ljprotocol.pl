@@ -2428,7 +2428,7 @@ sub postevent {
     my $res_done = 0;  # set true by getlock when post was duplicate, or error getting lock
 
     my $getlock = sub {
-        my $delayed = @_;
+        my ($delayed) = @_;
         my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 2)", undef, $lock_key);
         unless ($r) {
             $res = undef;    # a failure case has an undef result
@@ -2436,35 +2436,34 @@ sub postevent {
             $res_done = 1;   # tell caller to bail out
             return;
         }
-        
+
+        if ($delayed) {
+            my $entry = LJ::DelayedEntry->dupsig_check($uowner, $posterid, $req);
+            if (!$entry) {
+                return;
+            }
+
+            $res->{'delayedid'} = $entry->delayedid;
+            $res->{'type'}      = 'delayed';
+            $res->{'url'}       = $entry->url;
+
+            $res_done = 1;
+            $release->();
+        }
+ 
         LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
-         
+ 
         my @parts = split(/:/, $u->{'dupsig_post'});
         if ($parts[0] eq $dupsig) {
             # duplicate!  let's make the client think this was just the
             # normal firsit response.
 
-            if ($delayed) {
-                my $delayedid = $parts[1];
-                my $entry = LJ::DelayedEntry->get_entry_by_id($uowner, $delayedid);
-                if (!$entry) {
-                    return;
-                }
+            $res->{'itemid'} = $parts[1];
+            $res->{'anum'} = $parts[2];
 
-                $res->{'delayedid'} = $delayedid;
-                $res->{'type'}      = 'delayed';
-                $res->{'url'}       = $entry->url;
-            } else {
-                $res->{'itemid'} = $parts[1];
-                $res->{'anum'} = $parts[2];
-                unless (defined $res->{'anum'}) {
-                    return;
-                }            
-
-                my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
-                $res->{'url'} = $dup_entry->url;
-            }
-
+            my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
+            $res->{'url'} = $dup_entry->url;
+            
             $res_done = 1;
             $release->();
         }
@@ -2519,7 +2518,6 @@ sub postevent {
             $res->{'type'}      = 'delayed';
             $res->{'url'}       = $entry->url;
 
-            $u->set_prop( {"dupsig_post" => "$dupsig:" . $entry->delayedid . ":0"} );
             $release->();
             return $res;
         }

@@ -109,6 +109,7 @@ sub create {
                   $delayedid,
                   $data_ser );
 
+
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
 
@@ -120,6 +121,7 @@ sub create {
     $self->{delayed_id} = $delayedid;
 
     $self->{default_dateformat} = $opts->{'dateformat'} || 'S2';
+    $self->__set_mark($req);
     __statistics_absorber($journal, $poster);
 
     return $self;
@@ -191,6 +193,7 @@ sub update {
                         $data_ser, $journalid, $delayedid );
     $self->{data} = $req;
 
+    $self->__set_mark($journalid, $posterid, $delayedid, $req);
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
 }
@@ -1016,6 +1019,22 @@ sub can_post_to {
     return $relcount ? 1 : 0;
 }
 
+sub dupsig_check {
+    my ($class, $journal, $posterid, $req) = @_;
+
+    my $signature = __get_mark($journal->userid, $posterid);
+    return unless $signature;
+
+    my @parts = split(/:/, $signature);
+    my $current_signature = __signature($req);
+
+    if ($current_signature eq $parts[0]) {
+        my $delayedid = $parts[1];
+        return LJ::DelayedEntry->get_entry_by_id( $journal, 
+                                                  $delayedid );
+    }
+}
+
 sub __delayed_entry_can_see {
     my ( $uowner, $poster ) = @_;
 
@@ -1134,6 +1153,34 @@ sub __statistics_absorber {
 
     LJ::MemCache::incr($stat_key, 1) ||
         (LJ::MemCache::add($stat_key, 0),  LJ::MemCache::incr($stat_key, 1));
+}
+
+
+sub __get_mark {
+    my ($journalid, $posterid, $req) = @_;
+
+    my $memcache_key = "delayed_entry_dup:$journalid:$posterid";
+    my ($postsig) = LJ::MemCache::get($memcache_key);
+
+    return $postsig;
+}
+
+sub __set_mark {
+    my ($self, $req) = @_; 
+    my $signature = __signature($req) . ":" . $self->delayedid;
+
+    my $journalid = $self->journalid;
+    my $posterid  = $self->posterid;
+
+    my $memcache_key = "delayed_entry_dup:$journalid:$posterid";
+    LJ::MemCache::set($memcache_key, $signature, 35);
+}
+
+sub __signature {
+    my ($req) = @_;
+    my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} }
+                                           qw(subject event usejournal security allowmask)));
+    return $dupsig;
 }
 
 sub __serialize {
