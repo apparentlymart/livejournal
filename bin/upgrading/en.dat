@@ -5955,6 +5955,12 @@ talk.post.comments.noemail=no email
 
 talk.post.create.title=New entry
 
+talk.post.draft.autosave=Draft autosaved
+
+talk.post.draft.restore=Restore draft?
+
+talk.post.draft.restored=Draft restored
+
 talk.post.edit.title=Edit entry
 
 talk.post.expand.extra=Expand mood, music, location
