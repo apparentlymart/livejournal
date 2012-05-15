@@ -28,8 +28,8 @@ sub render_body {
 
     my $ret = '';
 
-    $ret .= '<table class="Subscribe" cellspacing="0" cellpadding="0" ' .
-        'style="clear:none">' unless $self->{'no_table'};
+    $ret .= '<table class="Subscribe" cellspacing="0" cellpadding="0" style="clear:none">'
+        unless $self->{'no_table'};
 
     $self->{'catnum'} ||= 0;
     $self->{'field_num'} ||= 0;
@@ -37,7 +37,7 @@ sub render_body {
     my $curcatnum = $self->{'catnum'}++;
     $ret .= '<tbody class="CategoryRow-' . $curcatnum . ' ' .
         'CategoryRow-'.$opts->{'css_class'}.'">';
-    
+
     $ret .= '<tr class="CategoryRow CategoryRowFirst">';
     $ret .= '<td>';
     $ret .= '<span class="CategoryHeading">'.$opts->{'title'}.'</span>';
@@ -50,6 +50,7 @@ sub render_body {
     }
 
     $ret .= '</td>';
+
     foreach my $ntype (@ntypes) {
         $ret .= "<td>";
 
@@ -93,55 +94,64 @@ sub render_body {
 
         $ret .= '<tr class="'.join(' ', @classes).'">';
 
-        my $event_html = $group->event_as_html($field_num);
+        if ( exists $group->{'separator'} && $group->{'separator'} ) {
+            $ret .= '<td class="separator" colspan="' . (int(@ntypes) + 1) . '"><hr/></td>';
+        }
+        else {
+            my $event_html = $group->event_as_html($field_num, (exists $group->{'check_rel'} && $group->{'check_rel'} ? 1 : 0));
 
-        if ($self->{'allow_delete'} && $group->is_tracking) {
-            my $link;
-            my $frozen = $group->freeze;
+            if ($self->{'allow_delete'} && $group->is_tracking) {
+                my $link;
+                my $frozen = $group->freeze;
 
-            $link = $self->{'page'};
-            $link .= ($link =~ /\?/ ? '&' : '?');
-            $link .= 'delete_group='.$group->freeze . '&';
-            $link .= 'auth_token='.LJ::eurl(LJ::Auth->ajax_auth_token(
-                $u, $self->{'page'},
-                'delete_group' => $group->freeze,
-            ));
+                $link = $self->{'page'};
+                $link .= ($link =~ /\?/ ? '&' : '?');
+                $link .= 'delete_group='.$group->freeze . '&';
+                $link .= 'auth_token='.LJ::eurl(LJ::Auth->ajax_auth_token(
+                    $u, $self->{'page'},
+                    'delete_group' => $group->freeze,
+                ));
 
-            $event_html = qq{
-                <a href="$link" class="i-basket delete-group">
-                    <img src="$LJ::SITEROOT/img/portal/btn_del.gif?v=5825">
-                </a>
-                $event_html
-            };
+                $event_html = qq{
+                    <a href="$link" class="i-basket delete-group">
+                        <img src="$LJ::SITEROOT/img/portal/btn_del.gif?v=5825">
+                    </a>
+                    $event_html
+                };
+            }
+
+            if ($interface->{'disabled'}) {
+                $event_html .= ' ' . $interface->{'disabled_pic'};
+            }
+
+            $ret .= '<td>' . $event_html . '</td>';
+
+            foreach my $ntype (@ntypes) {
+                my $ntypeid = $ntypeids{$ntype};
+                my $sub = $group->find_or_insert_ntype($ntypeid);
+
+                my $ntype_interface = $group->get_ntype_interface_status($ntypeid, $u);
+                my $value = $ntype_interface->{'disabled'}
+                    ? $ntype_interface->{'force'}
+                    : exists $group->{'check_rel'} && $group->{'check_rel'}
+                        ? $group->check_rel($self->{'journal'}, $u)
+                        : $sub->active;
+
+                my $checkbox = '';
+                $checkbox = LJ::html_check({
+                    'name' => 'sub-' . $field_num . '-' . $ntypeid . (exists $group->{'check_rel'} && $group->{'check_rel'} ? '-c' : ''),
+                    'id' => 'sub-' . $field_num . '-' . $ntypeid,
+                    'selected' => $value,
+                    'disabled' => $ntype_interface->{'disabled'},
+                    'class' => 'SubscribeCheckbox-'.$curcatnum.'-'.$ntypeids{$ntype},
+                }) if $ntype_interface->{'visible'};
+
+                $ret .= '<td>' . $checkbox . '</td>';
+            }
         }
 
-        if ($interface->{'disabled'}) {
-            $event_html .= ' ' . $interface->{'disabled_pic'};
-        }
-
-        $ret .= '<td>' . $event_html . '</td>';
-        foreach my $ntype (@ntypes) {
-            my $ntypeid = $ntypeids{$ntype};
-            my $sub = $group->find_or_insert_ntype($ntypeid);
-
-            my $ntype_interface = $group->get_ntype_interface_status($ntypeid, $u);
-            my $value = $ntype_interface->{'disabled'} ?
-                $ntype_interface->{'force'} :
-                $sub->active;
-
-            my $checkbox = '';
-            $checkbox = LJ::html_check({
-                'name' => 'sub-' . $field_num . '-' . $ntypeid,
-                'id' => 'sub-' . $field_num . '-' . $ntypeid,
-                'selected' => $value,
-                'disabled' => $ntype_interface->{'disabled'},
-                'class' => 'SubscribeCheckbox-'.$curcatnum.'-'.$ntypeids{$ntype},
-            }) if $ntype_interface->{'visible'};
-
-            $ret .= '<td>' . $checkbox . '</td>';
-        }
         $ret .= '</td>';
-    }    
+    }
 
     unless ($visible_groups) {
         my $blurb = "<?p <strong>" . LJ::Lang::ml('subscribe_interface.nosubs.title') . "</strong><br />";
