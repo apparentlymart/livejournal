@@ -173,12 +173,22 @@ sub on_pulse {
 
                 if ( $post_status->{delete_entry} ) {
                     if ($verbose) {
-                        print "The entry with subject " . $entry->subject;
+                        print "The entry with ";
                         print "\ndelayed id = " . $entry->delayedid . 
                         print " and post date " . $entry->posttime;
-                        print " is deleted\n";
-                    }
+                        print " is deleted.\n";
 
+                        my $res = $post_status->{'res'};
+                        if ($res) {
+                            my $current_time = DateTime->now;
+                            my $url = $res->{'url'} || '';
+                            print "New post url " . $url;
+                            print " current time : " . $current_time->ymd . ", ";
+                            print $current_time->hms . "\n";
+                        }
+
+                    }
+                
                     $entry->delete();
                 }
             }
