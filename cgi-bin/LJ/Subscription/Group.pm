@@ -12,7 +12,7 @@ my @other_cols = (OTHER_COLS);
 
 sub freeze {
     my ($self) = @_;
-    
+
     my %self = %$self;
     return join('-', map { $_ || 0 } @self{@group_cols});
 }
@@ -260,17 +260,40 @@ sub as_html {
 }
 
 sub event_as_html {
-    my ($self, $field_num) = @_;
+    my ($self, $field_num, $check_rel) = @_;
 
     my $ret = '';
 
     my $evtclass = $self->event_class || return undef;
+
     if ($evtclass->can('event_as_html')) {
         return $evtclass->event_as_html($self, $field_num);
     }
 
-    $ret .= LJ::html_hidden('event-'.$field_num => $self->freeze);
+    $ret .= LJ::html_hidden('event-' . $field_num . ( $check_rel ? '-c' : '') => $self->freeze);
     $ret .= $self->as_html;
+}
+
+sub set_rel {
+    my ($self, $journal, $u) = @_;
+    my $evtclass = $self->event_class || return undef;
+
+    $evtclass->set_rel($journal, $u) if $evtclass->can('set_rel');
+}
+
+sub clear_rel {
+    my ($self, $journal, $u) = @_;
+    my $evtclass = $self->event_class || return undef;
+
+    $evtclass->clear_rel($journal, $u) if $evtclass->can('clear_rel');
+}
+
+sub check_rel {
+    my ($self, $journal, $u) = @_;
+    my $evtclass = $self->event_class || return undef;
+
+    return $evtclass->check_rel($journal, $u) if $evtclass->can('check_rel');
+    return 0;
 }
 
 sub event {
