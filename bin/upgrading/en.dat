@@ -1197,6 +1197,10 @@ date.month.september.long=September
 
 date.month.september.short=Sep
 
+date.next=Next month
+
+date.prev=Prev month
+
 Email=Email
 
 email.newacct.body<<
