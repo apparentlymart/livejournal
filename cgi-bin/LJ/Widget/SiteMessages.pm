@@ -51,6 +51,15 @@ sub render_body {
         }
     } else {
         my $message = LJ::SiteMessages->get_open_message;
+
+        ## quick hack for just one message
+        ## can be removed after r92.
+        eval {
+            my $uri = LJ::Request->uri;
+            ## show this message only on /update.bml page
+            $message = '' if $message and $message->{mid} eq 88 and $uri !~ m|/update.bml|;
+        };
+
         if ($message) {
             $ret .= $class->_format_one_message($message);
         }
