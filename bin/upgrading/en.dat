@@ -6027,6 +6027,8 @@ talk.post.security.custom=custom
 
 talk.post.security.friends=friends
 
+talk.post.security.members=members
+
 talk.post.security.private=private
 
 talk.post.security.public=public
