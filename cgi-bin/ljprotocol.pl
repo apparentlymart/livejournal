@@ -2439,16 +2439,15 @@ sub postevent {
 
         if ($delayed) {
             my $entry = LJ::DelayedEntry->dupsig_check($uowner, $posterid, $req);
-            if (!$entry) {
-                return;
+            if ($entry) {
+                $res->{'delayedid'} = $entry->delayedid;
+                $res->{'type'}      = 'delayed';
+                $res->{'url'}       = $entry->url;
+    
+                $res_done = 1;
+                $release->();
             }
-
-            $res->{'delayedid'} = $entry->delayedid;
-            $res->{'type'}      = 'delayed';
-            $res->{'url'}       = $entry->url;
-
-            $res_done = 1;
-            $release->();
+            return;
         }
  
         LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
