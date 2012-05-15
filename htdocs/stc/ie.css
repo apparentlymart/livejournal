@@ -593,6 +593,13 @@ __________________________________________*/
 	bottom: -1px;
 	left: 62px;
 	}
+*:first-child+html .b-popup-pics-gallery,
+*:first-child+html .b-popup-pics-add-one .b-pics-submit-options {
+	min-width: 757px;
+	}
+*:first-child+html .b-popup-pics-add-one .b-pics-submit-options {
+	width: 100%;
+	}
 /*.b-pics-add-content {
 	width: 350px;
 	} */
@@ -606,14 +613,16 @@ __________________________________________*/
 *:first-child+html .b-pics-url-field {
 	width: 620px;
 	}
-*:first-child+html .b-pics-list-albums LI.b-pics-list-albums-item,
-*:first-child+html .b-popup-pics-paste .b-pics-paste-url,
-*:first-child+html .b-popup-pics-upload-header,
-*:first-child+html .b-popup-pics-paste-header,
-*:first-child+html .b-popup-pics-add-header {
+*:first-child+html .b-pics-list-albums LI.b-pics-list-albums-item  {
 	display: inline;
 	zoom: 1 !important;
 	}
+.b-popup-pics-add-one .b-popup-pics-upload-header,
+.b-popup-pics-add-one .b-popup-pics-paste-header,
+.b-popup-pics-add-one .b-popup-pics-list-header {
+	display: none;
+	}
+
 /* Ratings */
 .rate-posts .selfpromo .voting .vote-value A {
 	top: 0;
