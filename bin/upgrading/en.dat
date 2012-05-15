@@ -5943,6 +5943,8 @@ talk.post.change=change
 
 talk.post.change.back=change back
 
+talk.post.collapse.extra=Collapse mood, music, location
+
 talk.post.comments=Comments
 
 talk.post.comments.nocomments=disabled
@@ -5952,6 +5954,8 @@ talk.post.comments.noemail=no email
 talk.post.create.title=New entry
 
 talk.post.edit.title=Edit entry
+
+talk.post.expand.extra=Expand mood, music, location
 
 talk.post.html=HTML
 
@@ -6074,7 +6078,7 @@ talk.repost.twitter=Twitter
 talk.repost.setup=Setup Repost
 
 
-talk.result.links=Now that you've posted, you can:
+talk.result.links=Now you can:
 
 talk.result.links.edit=Edit the entry
 
@@ -6084,10 +6088,15 @@ talk.result.links.tags=Edit this entry's tags
 
 talk.result.links.view=View the entry
 
-talk.result.success=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
+talk.result.success.create=Entry successfuly added. You can view your updated journal <a href="[[href]]">here</a>.
 
-talk.result.success2=Update successful. You can view your scheduled entries <a [[aopts]]>here</a>.
+talk.result.success.create.delayed=Entry successfuly added. You can view your scheduled entries <a href="[[href]]">here</a>.
 
+talk.result.success.delete=Delete successful. You can view your updated journal <a href="[[href]]">here</a>.
+
+talk.result.success.update=Update successful. You can view your updated journal <a href="[[href]]">here</a>.
+
+talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>.
 
 talk.screen=Screen
 
