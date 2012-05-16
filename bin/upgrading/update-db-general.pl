@@ -552,6 +552,7 @@ CREATE TABLE `domains` (
   `type` char(5) default NULL,
   `name` char(80) default NULL,
   PRIMARY KEY  (`domainid`),
+  UNIQUE KEY `domain` (`domain`),
   KEY `userid` (`userid`),
   KEY `rcptid` (`userid`)
 )
@@ -4455,6 +4456,11 @@ register_alter(sub {
             do_alter("domains", "ALTER TABLE domains ADD COLUMN type char(5)");
             do_alter("domains", "ALTER TABLE domains ADD COLUMN name char(80)");
     }
+
+    unless (index_name("domains", "UNIQUE:domain")) {
+        do_alter("domains", "ALTER TABLE domains ADD UNIQUE (domain)");
+    }
+
 });
 
 register_alter(sub {
