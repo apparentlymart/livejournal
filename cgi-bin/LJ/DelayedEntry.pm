@@ -702,6 +702,10 @@ sub get_entry_by_id {
         $sql_poster = 'AND posterid = ' . $user->userid . " ";
     }
 
+    unless ($options->{'show_posted'}) {
+        $sql_poster = " AND finaltime IS NULL ";
+    }
+
     my $dbcr = LJ::get_cluster_master($journal)
         or die "get cluster for journal failed";
 
@@ -798,6 +802,7 @@ sub entries_exists {
 
     my ($delayeds) =  $dbcr->selectcol_arrayref("SELECT delayedid " .
                                                 "FROM delayedlog2 WHERE journalid=$journalid AND posterid = $userid ".
+                                                "AND finaltime IS NULL " .
                                                 "LIMIT 1");
     return @$delayeds;
 }
@@ -813,7 +818,7 @@ sub get_usersids_with_delated_entry {
 
     return $dbcr->selectcol_arrayref(  "SELECT posterid " .
                                        "FROM delayedlog2 ".
-                                       "WHERE journalid = $journalid GROUP BY posterid" );
+                                       "WHERE journalid = $journalid AND finaltime IS NULL GROUP BY posterid" );
 }
 
 sub get_entries_count {
@@ -838,7 +843,7 @@ sub get_entries_count {
 
     return $dbcr->selectrow_array(  "SELECT count(delayedid) " .
                                     "FROM delayedlog2 ".
-                                    "WHERE journalid=$journalid" );
+                                    "WHERE journalid=$journalid AND finaltime IS NULL" );
 }
 
 sub get_entries_by_journal {
@@ -889,7 +894,8 @@ sub get_entries_by_journal {
     my $journalid = $journal->userid;
 
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                     "FROM delayedlog2 WHERE journalid=$journalid $sql_poster".
+                                     "FROM delayedlog2 WHERE journalid=$journalid $sql_poster ".
+                                     "AND finaltime IS NULL " .
                                      "ORDER BY $sticky_sql revptime DESC $sql_limit");
 }
 
@@ -916,6 +922,7 @@ sub get_first_entry {
 
     my ($id) = $dbcr->selectrow_array("SELECT delayedid " .
                                       "FROM delayedlog2 WHERE journalid=?  $sql_poster".
+                                      "AND finaltime IS NULL " .
                                       "ORDER BY is_sticky ASC, revptime DESC LIMIT 1", undef, $journal->userid);
     return $id || 0;
 }
@@ -942,6 +949,7 @@ sub get_last_entry {
 
     my ($id) = $dbcr->selectrow_array("SELECT delayedid " .
                                       "FROM delayedlog2 WHERE journalid=?  $sql_poster".
+                                      "AND finaltime IS NULL " .
                                       "ORDER BY is_sticky DESC, revptime ASC LIMIT 1", undef, $journal->userid);
     return $id || 0;
 }
@@ -993,6 +1001,7 @@ sub get_itemid_near2 {
         if ($is_current_sticky) {
             my ($new_stime) = $dbr->selectrow_array("SELECT revptime " .
                                                     "FROM delayedlog2 WHERE journalid=? $sql_poster AND is_sticky = 0 ".
+                                                    "AND finaltime IS NULL " .
                                                     "ORDER BY revptime LIMIT 1", undef, $jid);
             if ($new_stime < $stime) {
                 $stime = $new_stime;
@@ -1007,6 +1016,7 @@ sub get_itemid_near2 {
     my $result_ref = $dbr->selectcol_arrayref(  "SELECT delayedid FROM delayedlog2 use index (rlogtime,revptime) ".
                                                 "WHERE journalid=? AND $sql_item_rule AND delayedid <> ? ".
                                                 $sql_poster. " ".
+                                                "AND finaltime IS NULL " .
                                                 "ORDER BY is_sticky $order_sticky, revptime $order LIMIT 2",
                                                 undef, $jid, $stime, $delayedid);
     return 0 unless $result_ref;
