@@ -210,6 +210,19 @@ sub convert {
     my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
     my $fail = !defined $res->{itemid} && $res->{message};
 
+
+    if ( $err || !$fail ) {
+        my $url = $res->{'url'} || '';
+        $self->journal->do( "UPDATE delayedlog2 SET ".
+                            "finaltime=NOW(), url=? " .
+                            "WHERE delayedid = ? AND " .
+                                  "journalid = ?", 
+                            undef,
+                            $url,
+                            $self->delayedid,
+                            $self->journalid ); 
+    }
+
     return { 'delete_entry'  => (!$fail || $err < 500),
              'error_message' => $res->{message},
              'res' => $res };
@@ -227,12 +240,30 @@ sub convert_from_data {
     if ($fail) {
         $self->update($req);
     }
+
+    
+    if ( $err || !$fail ) {
+        my $url = $res->{'url'} || '';
+        $self->journal->do( "UPDATE delayedlog2 SET ".
+                            "finaltime=NOW(), url=? " .
+                            "WHERE delayedid = ? AND " .
+                                  "journalid = ?",
+                            undef,
+                            $url,
+                            $self->delayedid,
+                            $self->journalid );
+    }
+
     return { 'delete_entry' => (!$fail || $err < 500),
              'res' => $res };
 }
 
 sub delete {
     my ($self) = @_;
+
+    # read https://jira.sup.com/browse/LJSUP-12200
+    __assert( 0, "do not use this function" );
+
     __assert( $self->{delayed_id}, "no delayed id" );
     __assert( $self->{journal}, "no journal" );
 

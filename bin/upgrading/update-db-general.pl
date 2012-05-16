@@ -4480,6 +4480,20 @@ register_alter(sub {
     my $dbh = shift;
     my $runsql = shift;
 
+    unless (column_type("delayedlog2", "finaltime")) {
+        do_alter( "delayedlog2",
+                  "ALTER TABLE delayedlog2 " .
+                  "ADD finaltime datetime DEFAULT NULL, " . 
+                  "ADD url VARCHAR(255) DEFAULT NULL" );
+    }
+
+});
+
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
     unless (column_type("send_email_errors", "message")) {
         do_alter("send_email_errors",
                  "ALTER TABLE send_email_errors " .

@@ -59,9 +59,9 @@ sub __load_delayed_entries {
     my ($dbh) = @_;
     my @entries;
 
-    my $list = $dbh->selectall_arrayref("SELECT journalid, delayedid, posterid " .
-                                        "FROM delayedlog2 ".
-                                        "WHERE posttime <= NOW() LIMIT 1000");
+    my $list = $dbh->selectall_arrayref( "SELECT journalid, delayedid, posterid " .
+                                         "FROM delayedlog2 ".
+                                         "WHERE posttime <= NOW() AND finaltime IS NULL LIMIT 1000" );
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
                                                    { journalid  => $tuple->[0],
@@ -147,12 +147,10 @@ sub on_pulse {
                         print "The entry with subject " . $entry->subject;
                         print "\ndelayed id = " . $entry->delayedid . 
                         print " and post date " . $entry->posttime;
-                        print " is deleted because USER CANNOT POST\n";
                     }
 
                     __notify_user(  $entry->poster,
                                     $entry->journal);
-                    $entry->delete();
                     next;
                 }
 
@@ -169,27 +167,6 @@ sub on_pulse {
                         print "(posting)The entry with subject " . $entry->subject;
                         print "\ndelayed id = " . $entry->delayedid . 
                         print " and post date " . $entry->posttime . "\n";
-                }
-
-                if ( $post_status->{delete_entry} ) {
-                    if ($verbose) {
-                        print "The entry with ";
-                        print "\ndelayed id = " . $entry->delayedid . 
-                        print " and post date " . $entry->posttime;
-                        print " is deleted.\n";
-
-                        my $res = $post_status->{'res'};
-                        if ($res) {
-                            my $current_time = DateTime->now;
-                            my $url = $res->{'url'} || '';
-                            print "New post url " . $url;
-                            print " current time : " . $current_time->ymd . ", ";
-                            print $current_time->hms . "\n";
-                        }
-
-                    }
-                
-                    $entry->delete();
                 }
             }
         } 
