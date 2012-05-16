@@ -97,6 +97,7 @@
                     stc/display_none.css
                     stc/lj_base.css
                     stc/entry.css
+                    stc/trava.css
                     stc/widgets/selecttags.css
                     js/jquery/jquery.ui.position.min.js
                     js/jquery/jquery.ui.autocomplete.min.js
