@@ -529,4 +529,50 @@ sub drop_tags {
     }
 }
 
+# get_tags_ranking(): gets a list of support tags, sorted by frequency of usage
+# calling format:
+# get_tags_ranking($area, $threshold)
+# $area should be one of the following values ('all','jira-all','jira-fixed','jira-open')
+# returns a list of hashrefs.
+sub get_tags_ranking {
+    my ($area, $threshold) = @_;
+
+    $threshold = int $threshold;
+
+    my $dbr = LJ::get_db_reader();
+    my $rows = $dbr->selectall_arrayref(qq{
+            SELECT   name tagname,
+                     MIN(sptagid) mintagid,
+                     MIN(spcatid) mincatid,
+                     count(*) qty
+            FROM     supporttag LEFT JOIN supporttagmap
+            USING    (sptagid)
+            GROUP BY name
+            HAVING   qty >= $threshold
+            ORDER BY qty DESC
+        }, { Slice => {} });
+
+    my @res;
+    foreach my $row (@$rows) {
+        my $name = $row->{tagname};
+
+        my @tag_areas = qw( all );
+
+        if ( $name =~ /ljsv|ljsup|ljm/ ) {
+            push @tag_areas, 'jira-all';
+
+            if ( $name =~ /fixed/ ) {
+                push @tag_areas, 'jira-fixed';
+            } else {
+                push @tag_areas, 'jira-open';
+            }
+        }
+
+        next unless grep { $_ eq $area } @tag_areas;
+        push @res, $row;
+
+    }
+    return @res;
+}
+
 1;

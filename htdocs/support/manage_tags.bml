@@ -45,13 +45,15 @@ body<=
     if ($FORM{'rename'}) {
         my $sptagid = $FORM{'sptagid'};
         my $spcatid = $FORM{'spcatid'};
+        my $area    = $FORM{'everywhere'} ? 'checked' : '';
         my $name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
 
         my $ret = '<form method="POST">';
         $ret .= qq{New name: <input name="new_name" type="text" value="$name"/>};
         $ret .= '<br/>';
         $ret .= qq{<label for="everywhere">$ML{'.rename.everywhere'}</label>};
-        $ret .= qq{<input id="everywhere" type="checkbox" name="everywhere"/>};
+        $ret .= qq{<input id="everywhere" type="checkbox" name="everywhere"
+                    $area/>};
         $ret .= '<br/>';
         $ret .= qq{<label for="merge">$ML{'.rename.merge'}</label>};
         $ret .= qq{<input id="merge" type="checkbox" name="allowmerge"/>};
