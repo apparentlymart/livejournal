@@ -193,7 +193,7 @@ sub update {
                         $data_ser, $journalid, $delayedid );
     $self->{data} = $req;
 
-    $self->__set_mark($journalid, $posterid, $delayedid, $req);
+    $self->__set_mark($req);
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
 }
