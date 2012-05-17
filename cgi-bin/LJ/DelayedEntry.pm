@@ -261,9 +261,6 @@ sub convert_from_data {
 sub delete {
     my ($self) = @_;
 
-    # read https://jira.sup.com/browse/LJSUP-12200
-    __assert( 0, "do not use this function" );
-
     __assert( $self->{delayed_id}, "no delayed id" );
     __assert( $self->{journal}, "no journal" );
 
