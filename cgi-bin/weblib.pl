@@ -2398,10 +2398,10 @@ sub get_body_class_for_service_pages {
             $user = LJ::get_remote () || LJ::load_user ($user);
             if ($user && LJ::Pics::Album->list( 'userid' => $user->userid )) {
                 ## photos exists
-                push @classes, "framework-page-view";
+                push @classes, "b-foto-branding-view";
             } else {
                 ## no photos
-                push @classes, "framework-page-promo";
+                push @classes, "b-foto-branding-promo";
             }
         } else {
             ## branding is not active
@@ -2418,6 +2418,10 @@ sub get_body_class_for_service_pages {
                  )
     ){
         push @classes, "p-friendstimes";
+    }
+    if ($uri =~ m!^/update\.bml!) {
+        push @classes, "b-foto-branding"
+            if LJ::_is_pics_branding_active();
     }
     return join(" ", @classes);
 }
