@@ -112,11 +112,11 @@ body<=
                 my $entry = LJ::DelayedEntry->get_entry_by_id($u, $ditem);
                 
                 push @ordered, {
-                                'alldatepart' => $entry->alldatepart ,
+                                'alldatepart' => $entry->alldatepart('default', 1) ,
                                 'system_alldatepart' => $entry->system_alldatepart,
                                 'allowmask'   => $entry->allowmask,
                                 'posterid'    => $entry->posterid,
-                                'eventtime'   => $entry->posttime,
+                                'eventtime'   => $entry->posttime(1),
                                 'security'    => $entry->security,
                                 'logtime'     => $entry->logtime,
                                 'delayed_obj' => $entry,
@@ -278,7 +278,7 @@ body<=
                 $res{'events_1_event'} = $entry_obj->event;
                 $res{'events_1_allowmask'} = $entry_obj->allowmask;
                 $res{'events_1_security'} = $entry_obj->security;            
-                $res{'events_1_eventtime'} = $entry_obj->posttime;
+                $res{'events_1_eventtime'} = $entry_obj->posttime(1);
                 $res{'events_1_'} = $entry_obj->prop("current_mood");
                 $res{'events_1_itemid'} = 0; # has no itemid
                 $res{'events_1_anum'} = 0;# has no anum

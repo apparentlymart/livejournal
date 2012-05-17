@@ -330,6 +330,7 @@ sub timezone {
     if (!$remote) {
         return 0;
     }
+
     return $remote->prop("timezone");
 }
 
@@ -361,12 +362,17 @@ sub posttime_as_unixtime {
 }
 
 sub posttime {
-    my ($self, $u) = @_;
+    my ($self, $use_original_timezone) = @_;
     my $posttime = $self->system_posttime;
     my $timezone = $self->timezone;
+
+    if ($use_original_timezone) {
+        $timezone = $self->post_timezone;
+    }
     if (!$timezone) {
         return $posttime;
     }
+
     my $epoch = $self->posttime_as_unixtime;
     my $dt = DateTime->from_epoch( 'epoch' => $epoch );
     $dt->set_time_zone( $timezone );
@@ -390,8 +396,9 @@ sub logtime_mysql {
 }
 
 sub alldatepart {
-    my ($self, $style) = @_;
-    my $mysql_time = $self->posttime;
+    my ($self, $style, $use_original_timezone) = @_;
+
+    my $mysql_time = $self->posttime($use_original_timezone);
     if ( ($style && $style eq 'S1') || $self->{default_dateformat} eq 'S1') {
         return LJ::TimeUtil::->alldatepart_s1($mysql_time);
     }
