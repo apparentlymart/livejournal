@@ -3481,6 +3481,10 @@ fotki.error.upgrade.title=Uploading pictures does not available
 fotki.error.upgrade.description=Your current account status does not allow you to upload pictures.
 fotki.error.upgrade.link=Upgrade your account
 
+format.date.long=%M %d, %y
+
+format.date.short=%m/%d/%y
+
 gender.female|staleness=1
 gender.female=Female
 
