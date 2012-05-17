@@ -5985,9 +5985,17 @@ talk.post.in.community=in community
 
 talk.post.location=Location
 
+talk.post.meta.altcommunity=change
+
+talk.post.meta.altlogin=change
+
 talk.post.meta.asjournal=as
 
 talk.post.meta.asloginpass=as another user
+
+talk.post.meta.backcommunity=back
+
+talk.post.meta.backlogin=back
 
 talk.post.meta.tojournal=to journal
 
@@ -6159,7 +6167,7 @@ talk.url.hint=Hint
 
 talk.user=User
 
-talk.user.example=tema
+talk.userhint.default=igrick
 
 talk.user.hint=Example:
 
