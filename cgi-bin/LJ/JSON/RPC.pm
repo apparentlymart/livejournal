@@ -29,7 +29,7 @@ sub new {
     };
 
     if ($@) {
-        warn $@;
+        warn $@ if $LJ::IS_DEV_SERVER;
         my $fatal = { 'error_code' => -32700, 'error_message' => 'Parse error' };
         $self->{'items'} = { 'item' => LJ::JSON::RPC::Item->new({ 'fatal' =>  $fatal })};
     }
@@ -41,6 +41,10 @@ sub call {
     my ($self, $callback) = @_;
     my $items = $self->{'items'};
 
+    my $call_info = { 
+        'source' => 'jsonrpc',
+    };
+
     if (ref $items eq 'ARRAY') {
         foreach my $entry (@$items) {
             my $item = $entry->{'item'};
@@ -49,7 +53,7 @@ sub call {
             my $method = $item->method;
             my $params = $item->params;
 
-            $entry->{'result'} = $callback->($method, $params);
+            $entry->{'result'} = $callback->($method, $params, $call_info);
         }
     } else {
         my $item   = $items->{'item'};
@@ -58,7 +62,7 @@ sub call {
         my $method = $item->method;
         my $params = $item->params;
 
-       $items->{'result'} = $callback->($method, $params);
+       $items->{'result'} = $callback->($method, $params, $call_info);
     }
 }
 

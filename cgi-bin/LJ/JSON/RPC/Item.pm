@@ -24,6 +24,9 @@ sub new {
     my $jsonrpc = $data->{'jsonrpc'};
     my $method  = $data->{'method'};
     my $params  = $data->{'params'};
+    if (exists $data->{'id'}) {
+        $self->{'id'} = $data->{'id'};
+    }
 
     $self->{'fatal'} = { 'error_code' => -32602, 'error_message' => 'Invalid params' } unless $params;
     $self->{'fatal'} = { 'error_code' => -32602, 'error_message' => 'Invalid params' } if ref $params eq 'ARRAY';
@@ -32,8 +35,8 @@ sub new {
     }
 
     my $remote  = LJ::get_remote;
-    my $auth    = delete $params->{'auth'};
-    if (!$auth) {
+    my $auth    = delete $params->{'auth_token'};
+    if (!$auth || !$remote) {
         $self->{'fatal'} = { 'error_code' => -12600, 'error_message' => 'Auth is missed' };
     } else {
         if (!LJ::Auth->check_ajax_auth_token($remote, $uri, 'auth_token' => $auth)) {
@@ -43,7 +46,6 @@ sub new {
     if ($self->{'fatal'}) {
         return $self;
     }
-
 
     $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } unless $method;
     $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } if !$jsonrpc || $jsonrpc ne '2.0';
