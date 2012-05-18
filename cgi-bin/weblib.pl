@@ -1541,12 +1541,15 @@ sub res_includes {
         my $site_params = LJ::js_dumper(\%site);
 
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
-        my $jsml_out = LJ::JSON->to_json(\%LJ::JSML);
-        my $site_version = LJ::ejs($LJ::CURRENT_VERSION);
+        my $jsml_out          = LJ::JSON->to_json(\%LJ::JSML);
+        my $jsvar_out         = LJ::JSON->to_json(\%LJ::JSVAR);
+        my $site_version      = LJ::ejs($LJ::CURRENT_VERSION);
+
         $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
+                Site.page = $jsvar_out;
                 (function(){
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
@@ -2443,6 +2446,29 @@ sub need_string {
         } else {
             $LJ::JSML{$item} = LJ::Lang::ml($item);
         }
+    }
+}
+
+# Add some javascript variables
+sub need_var {
+    my %vars;
+
+    # Our arguments are hash ref
+    if (@_ == 1 and ref $_[0] eq 'HASH') {
+        %vars = %{$_[0]};
+    # List of key-value pairs otherwise
+    } else {
+        while (my ($k, $v) = splice @_, 0, 2) {
+            $vars{$k} = $v;
+        }
+    }
+
+    while (my ($k, $v) = each %vars) {
+        if ( exists $LJ::JSVAR{$k} ) {
+            warn 'JS Variable override: '. $k;
+        }
+
+        $LJ::JSVAR{$k} = $v;
     }
 }
 
