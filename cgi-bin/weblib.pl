@@ -2454,7 +2454,7 @@ sub need_var {
     my %vars;
 
     # Our arguments are hash ref
-    if (@_ == 1 and ref $_[0] eq 'HASH') {
+    if (@_ == 1 and ref $_[0] and ref $_[0] eq 'HASH') {
         %vars = %{$_[0]};
     # List of key-value pairs otherwise
     } else {
