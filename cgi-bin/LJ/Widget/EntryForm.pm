@@ -1697,8 +1697,6 @@ sub render_ljphoto_block {
             'guid'            => $auth_token,
         };
 
-        $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
-
         $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
     } else {
         my @photo_sizes = map { {
@@ -1716,9 +1714,12 @@ sub render_ljphoto_block {
             'type'            => 'upload',
             'guid'            => '',
         };
-
-        $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
     }
+
+    $photouploader_params->{'tracking_opendialog'} = LJ::run_hook ("photohosting_page_reskinning", page_type => 'tracking_opendialog_update_bml');
+    $photouploader_params->{'tracking_photouploaded'} = LJ::run_hook ("photohosting_page_reskinning", page_type => 'tracking_photouploaded_update_bml');
+
+    $photouploader_params_out = LJ::JSON->to_json($photouploader_params);
 
     LJ::Widget::Fotki::Upload->render();
 
