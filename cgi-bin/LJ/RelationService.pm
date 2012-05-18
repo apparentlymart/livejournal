@@ -147,7 +147,7 @@ sub remove_relation_to {
     my $type   = shift;
 
     $u = LJ::want_user($u) unless $u eq '*';
-    $friend = LJ::want_user($friend) unless $u eq '*';
+    $friend = LJ::want_user($friend) unless $friend eq '*';
     
     return undef unless $type and $u and $friend;
     return undef if $u eq '*' and $friend eq '*';
