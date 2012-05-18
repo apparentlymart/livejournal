@@ -218,7 +218,7 @@ sub delete_and_purge_completely {
     
     return unless $u;
 
-    if ($class->_load_alt_api('write', 'F')) {
+    if ($class->_load_alt_api('update', 'F')) {
         my $alt = $class->alt_api($u);
         if ($alt) {
             $alt->delete_and_purge_completely($u, %opts);
@@ -235,7 +235,7 @@ sub clear_rel_multi {
     
     return undef unless ref $edges eq 'ARRAY';
 
-    if ($class->_load_alt_api('write', 'B')) {
+    if ($class->_load_alt_api('update', 'B')) {
         my $alt = $class->alt_api();
         if ($alt) {
             $alt->clear_rel_multi($edges);
@@ -252,7 +252,7 @@ sub set_rel_multi {
     
     return undef unless ref $edges eq 'ARRAY';
 
-    if ($class->_load_alt_api('write', 'B')) {
+    if ($class->_load_alt_api('update', 'B')) {
         my $alt = $class->alt_api();
         if ($alt) {
             $alt->set_rel_multi($edges);
