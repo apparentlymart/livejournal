@@ -27,7 +27,7 @@ sub __get_count {
                                                    $u->userid,
                                                    $jitemid, );
 
-    LJ::MemCache::set($memcache_key, $count_jitemid, 3600);
+    LJ::MemCache::set($memcache_key, $count_jitemid, 30);
 
     return $count_jitemid;
 
@@ -54,7 +54,7 @@ sub __get_repostid {
                                                    $jitemid,
                                                    $reposterid, );
 
-    LJ::MemCache::set($memcache_key, $repost_jitemid, 3600);
+    LJ::MemCache::set($memcache_key, $repost_jitemid, 30);
     return $repost_jitemid;
 }
 
@@ -62,11 +62,6 @@ sub __create_repost_record {
     my ($u, $itemid, $repost_journalid, $repost_itemid) = @_;
 
     my $journalid = $u->userid;
-    my $memcache_key_count = "reposted_count:$journalid:$itemid";
-    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$repost_journalid";
-   
-    LJ::MemCache::delete($memcache_key_count);
-    LJ::MemCache::delete($memcache_key_status);
 
     $u->do('INSERT INTO repost2 VALUES(?,?,?,?)',
             undef,
@@ -74,6 +69,13 @@ sub __create_repost_record {
             $itemid,
             $repost_journalid,
             $repost_itemid, );
+
+    my $memcache_key_count = "reposted_count:$journalid:$itemid";
+    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$repost_journalid";
+
+    LJ::MemCache::incr($memcache_key_count, 1) ||
+            (LJ::MemCache::add($memcache_key_count, 0),  LJ::MemCache::incr($memcache_key_count, 1));
+    LJ::MemCache::set($memcache_key_status, $repost_itemid, 30);
 }
 
 sub __delete_repost_record {
@@ -157,7 +159,9 @@ sub __create_repost {
 sub get_status {
     my ($class, $u, $entry_obj) = @_;
 
-    my $reposted = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid ) || 0;
+    my $reposted = __get_repostid( $entry_obj->journal, 
+                                   $entry_obj->jitemid, $u->userid ) || 0;
+
     return  { 'result' => { 
               'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
               'reposted' => !!$reposted, },
@@ -172,7 +176,7 @@ sub __reposters {
                                               'WHERE journalid = ? AND jitemid = ? LIMIT 1000',
                                               undef,
                                               $journalid,
-                                              $jitemid, ); 
+                                              $jitemid, );
 
     return undef unless scalar @$reposted;
     return $reposted;
@@ -188,18 +192,15 @@ sub delete_all_reposts_records {
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
-
     while (my $reposted = __reposters($dbcr, $journalid, $jitemid)) {
         foreach my $reposterid (@$reposted) {
-            warn  LJ::D($reposterid);
             my $memcache_key_status = "reposted_itemid:$journalid:$jitemid:$reposterid";
             LJ::MemCache::delete($memcache_key_status);
         }
 
         my $reposters = join(',', @$reposted);
-        warn $reposters;
 
-        $u->do('DELETE FROM repost2 WHERE journalid = ? AND jitemid = ? AND reposterid IN ($reposters)',
+        $u->do("DELETE FROM repost2 WHERE journalid = ? AND jitemid = ? AND reposterid IN ($reposters)",
                 undef,
                 $u->userid,
                 $jitemid,);
@@ -273,10 +274,14 @@ sub substitute_content {
         my $link = $entry_obj->prop('repost_link'); 
         if ($link) {
             my ($org_journalid, $org_jitemid) = split(/:/, $link);
-            my $journal = int($link) ? LJ::want_user($link) : undef;
+            my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : undef;
+            
+            my $fake_entry = LJ::Entry->new( $journal, jitemid => $org_jitemid);
              
             my $event = LJ::Lang::ml( 'entry.reference.journal.delete',
-                                      'datetime'     => $entry_obj->eventtime_mysql );
+                                      'datetime'     => $entry_obj->eventtime_mysql, 
+                                      'url'          => $fake_entry->url);
+
 
             ${$opts->{'event'}} = $event;
             return 1;    

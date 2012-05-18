@@ -2528,7 +2528,7 @@ sub delete_entry
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]) if $dc > 0;
 
-    LJ::Entry::Repost->delete_all_reposts_records($uuserid, $jitemid);
+    LJ::Entry::Repost->delete_all_reposts_records($jid, $jitemid);
 
     if ( $jitemid == $u->get_sticky_entry_id() ){
         $u->remove_sticky_entry_id();
