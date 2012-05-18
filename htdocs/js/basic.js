@@ -309,6 +309,35 @@ LJ.getConst = function(name) {
 	return (LJ._const.hasOwnProperty(name) ? LJ._const[name] : void 0);
 }
 
+/**
+ * Define a namespace.
+ *
+ * @param {string} path The String with namespace to be created.
+ * @param {Object=} top An optional object. If set then the namespace will be built relative to it. Defaults to the window.
+ */
+LJ.define = function(path, top) {
+	var ns = path.split('.'),
+		name;
+
+	top = top || window;
+
+	while (name = ns.shift()) {
+		top[name] = top[name] || {};
+		top = top[name];
+	}
+
+}
+
+/**
+ * Mark the namespace as a dependency. The function does nothing now.
+ *
+ * @param {string} path Namespace name.
+ */
+LJ.require = function(path) {
+	//fillme
+};
+
+
 LJ.DOM = LJ.DOM || {};
 
 /**
