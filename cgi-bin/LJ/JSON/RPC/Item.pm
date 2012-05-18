@@ -105,7 +105,7 @@ sub response {
         my $remote = LJ::get_remote;
         my @params_vars = keys %{$self->{'params'}};
         my $auth = LJ::Auth->ajax_auth_token($remote, $self->{'uri'}, \@params_vars);
-        $result->{'auth'} = $auth;
+        $result->{'auth_token'} = $auth;
         $resp->{'result'} = $result; 
     }
  
