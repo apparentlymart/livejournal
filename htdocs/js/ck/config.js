@@ -123,7 +123,7 @@ CKEDITOR.editorConfig = function(config) {
 	config.pasteFromWordRemoveFontStyles = false;
 	config.pasteFromWordRemoveStyles = false;
 
-	config.extraPlugins = 'livejournal';
+	config.extraPlugins = 'livejournal,onchange';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
 };
