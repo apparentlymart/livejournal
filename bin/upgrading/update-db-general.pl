@@ -72,28 +72,6 @@ CREATE TABLE `adoptlast` (
 )
 EOC
 
-register_tablecreate('antispam', <<'EOC');
-CREATE TABLE `antispam` (
-  `journalid` int(10) unsigned NOT NULL,
-  `itemid` int(10) unsigned NOT NULL DEFAULT '0',
-  `type` char(1) NOT NULL,
-  `posterid` int(10) unsigned NOT NULL DEFAULT '0',
-  `eventtime` date DEFAULT NULL,
-  `poster_ip` char(15) DEFAULT NULL,
-  `email` char(50) DEFAULT NULL,
-  `user_agent` varchar(128) DEFAULT NULL,
-  `uniq` char(15) DEFAULT NULL,
-  `spam` tinyint(3) unsigned DEFAULT NULL,
-  `confidence` float(4,3) unsigned DEFAULT NULL,
-  `review` char(1) DEFAULT NULL,
-  PRIMARY KEY (`journalid`,`itemid`,`type`),
-  KEY `posterid` (`posterid`,`eventtime`),
-  KEY `spam` (`spam`),
-  KEY `review` (`review`),
-  KEY `eventtime` (`eventtime`)
-)
-EOC
-
 register_tablecreate('authactions', <<'EOC');
 CREATE TABLE `authactions` (
   `aaid` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -3513,6 +3491,7 @@ register_tabledrop("fvcache");
 register_tabledrop("userpic_comment");
 register_tabledrop("events");
 register_tabledrop("randomuserset");
+register_tabledrop("antispam");
 
 ### changes
 
@@ -4386,14 +4365,6 @@ register_alter(sub {
         do_alter("ml_latest",
                  "ALTER TABLE ml_latest " .
                  "ADD revid int unsigned default null");
-    }
-
-    unless (column_type("antispam", "eventtime") eq 'date') {
-        do_alter("antispam",
-                 "ALTER TABLE antispam " .
-                 "MODIFY eventtime DATE DEFAULT NULL");
-        do_alter("antispam",
-                 "ALTER TABLE antispam ADD INDEX(eventtime)");
     }
 
     unless (column_type("site_messages", "countries")) {
