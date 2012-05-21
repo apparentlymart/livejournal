@@ -18,7 +18,8 @@ sub usage { '<account> <status> [ <reason> ]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "siteadmin", "users");
+    return LJ::check_priv($remote, "siteadmin", "users") ||
+           LJ::check_priv($remote, "changejournalstatus");
 }
 
 sub execute {
@@ -42,8 +43,18 @@ sub execute {
     return $self->error("Account is already in that state.")
         if $u->statusvis eq $statusvis;
 
-    # update statushistory first so we have the old statusvis
+    # respect unsuspend procedure
+    return $self->error("Unsuspend command should be used for suspended journals")
+        if $u->is_suspended;
+
+    # respect arg of changejournalstatus
     my $remote = LJ::get_remote();
+    if (! LJ::check_priv($remote, "siteadmin", "users") &&
+        ! LJ::check_priv($remote, "changejournalstatus", "$statusvis")) {
+            return $self->error("You are not permitted to change status to '$statusvis'");
+    }
+
+    # update statushistory first so we have the old statusvis
     my $reason = '';
     $reason = join ' ', '. Reason:', @args if @args;
     LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis. $reason);
