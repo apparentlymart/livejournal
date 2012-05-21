@@ -337,6 +337,107 @@ LJ.require = function(path) {
 	//fillme
 };
 
+LJ.define('LJ.Util.Date');
+
+(function() {
+
+	function normalizeFormat(format) {
+		if (!format || format === 'short') {
+			format = LiveJournal.getLocalizedStr('format.date.short');
+		} else if (format === 'long') {
+			format = LiveJournal.getLocalizedStr('format.date.long');
+		}
+
+		return format;
+	}
+
+	/**
+	 * Parse date from string.
+	 *
+	 * @param {string} datestr The string containing the date.
+	 * @param {string} format Required date string format.
+	 */
+	LJ.Util.Date.parse = function(datestr, format) {
+		format = normalizeFormat(format);
+
+		var testStr = normalizeFormat(format),
+			positions = [ null ],
+			pos = 0, token,
+			regs = {
+				'%y' : '(\\d{4})',
+				'%m' : '(\\d{2})',
+				'%d' : '(\\d{2})'
+			};
+
+		while( ( pos = testStr.indexOf( '%', pos ) ) !== -1 ) {
+			token = testStr.substr( pos, 2 );
+			if( token in regs ) {
+				testStr = testStr.replace( token, regs[ token ] );
+				positions.push( token );
+			} else {
+				positions.push( null );
+			}
+		}
+
+		var r = new RegExp( testStr ),
+			arr = r.exec( datestr );
+
+		if( !arr ) {
+			return null;
+		} else {
+			var d = new Date();
+			for( var i = 1; i < arr.length; ++i ) {
+				if( positions[ i ] ) {
+					switch( positions[ i ] ) {
+						case '%D':
+							d.setDate( arr[ i ] );
+							break;
+						case '%M':
+							d.setMonth( parseInt( arr[ i ], 10 ) - 1 );
+							break;
+						case '%Y':
+							d.setFullYear( arr[ i ] );
+							break;
+					}
+				}
+			}
+
+			return d;
+		}
+	};
+
+	/**
+	 * Create string representation of object according to the format.
+	 *
+	 * @param {Date} date The date object to work with.
+	 * @param {string=} format String format. Possible default formats are 'short' and 'long'.
+	 */
+	LJ.Util.Date.format = function(date, format) {
+		format = normalizeFormat(format);
+
+		return format.replace( /%([a-zA-Z]{1})/g, function(str, letter) {
+			switch (letter) {
+				case 'M' :
+					return ('' + (date.getMonth() + 1)).pad(2, '0');
+				case 'B' : //full month
+					// return ('' + date.getMonth()).pad(2, '0');
+					return 'nostr';
+				case 'D' :
+					return ('' + date.getDate()).pad(2, '0');
+				case 'Y' :
+					return date.getFullYear();
+				case 'R' :
+					return ('' + date.getHours()).pad(2, '0') + ':' + ('' + date.getMinutes()).pad(2, '0');
+				default:
+					return str;
+			}
+		});
+	};
+
+}());
+
+
+
 LJ.DOM = LJ.DOM || {};
 
 /**
