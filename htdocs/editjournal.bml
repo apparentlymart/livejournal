@@ -180,16 +180,6 @@ body<=
                my $entry_obj 
                     = LJ::Entry->new_from_item_hash( $journal, $e_raw );
 
-               my $repost_entry_obj;
-               my $content =  { 'original_post_obj' => \$entry_obj,
-                                'repost_obj'        => \$repost_entry_obj, };
-
-               if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
-                   $real_entries->{$entry_obj->posterid}->{$entry_obj->jitemid} 
-                            = { 'itemid'    => $repost_entry_obj->jitemid,
-                                'journalid' => $repost_entry_obj->journalid, };
-               }
-
                push @entries, $entry_obj;
             }
         }

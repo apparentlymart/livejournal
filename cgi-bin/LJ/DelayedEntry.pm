@@ -285,6 +285,10 @@ sub delete {
     LJ::MemCache::delete($memcache_key);
 }
 
+sub original_post {
+    return;
+}
+
 sub delayedid {
     my ($self) = @_;
     return $self->{delayed_id};
