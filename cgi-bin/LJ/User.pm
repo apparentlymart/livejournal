@@ -6163,19 +6163,39 @@ sub dismissed_page_notices_remove {
 sub custom_usericon {
     my ($u) = @_;
 
-    my $url = $u->prop('custom_usericon') || '';
-    if (
-           $url =~ /userhead/
-        && $url !~ /v=\d+/
-        && (my ($uh_id) = $url =~ m/\/userhead\/(\d+)$/)
-    ) {
-        my $uh = LJ::UserHead->get_userhead ($uh_id);
-        if ($uh) {
-            my $uh_fs = LJ::FileStore->get_path_info ( path => "/userhead/".$uh->get_uh_id );
-            $url .= "?v=".$uh_fs->{'change_time'} if $uh_fs->{'change_time'};
+    my $url = "";
+
+    my $propval = $u->prop ('custom_usericon_individual');
+    if ($propval) {
+        my $individual_uh_info = LJ::JSON->from_json ($propval);
+        if ($individual_uh_info->{'date_exp'} > time) {
+            my ($uh_id) = $individual_uh_info->{'uh_id'} =~ m#uh-(\d+)#;
+            my $uh = LJ::UserHead->get_userhead ($uh_id);
+            if ($uh) {
+                my $uh_fs = LJ::FileStore->get_path_info ( path => "/userhead/".$uh_id );
+                $url = $LJ::FILEPREFIX."/userhead/".$uh_id;
+                $url .= "?v=".$uh_fs->{'change_time'} if $uh_fs->{'change_time'};
+            }
+        } else {
+            $u->set_custom_usericon (undef);
+        }
+    } else {
+        $url = $u->prop('custom_usericon') || '';
+        if (
+               $url =~ /userhead/
+            && $url !~ /v=\d+/
+            && (my ($uh_id) = $url =~ m/\/userhead\/(\d+)$/)
+        ) {
+            my $uh = LJ::UserHead->get_userhead ($uh_id);
+            if ($uh) {
+                my $uh_fs = LJ::FileStore->get_path_info ( path => "/userhead/".$uh->get_uh_id );
+                $url .= "?v=".$uh_fs->{'change_time'} if $uh_fs->{'change_time'};
+            }
         }
     }
+
     $url =~ s#^http://files\.livejournal\.com#$LJ::FILEPREFIX#;
+
     return $url;
 }
 
