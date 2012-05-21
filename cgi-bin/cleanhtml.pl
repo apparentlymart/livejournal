@@ -1535,13 +1535,17 @@ sub clean {
                 ## like this (http://example.com) and these: http://foo.bar, http://bar.baz.
                 $token->[1] =~ s!(https?://[^\s\'\"\<\>]+[^\s\'\"\<\>\.\,\?\:\)])! $match->($1); !ge;
             }
-
+        
             # escape tags in text tokens.  shouldn't belong here!
             # especially because the parser returns things it's
             # confused about (broken, ill-formed HTML) as text.
             $token->[1] =~ s/</&lt;/g;
             $token->[1] =~ s/>/&gt;/g;
 
+            ## Convert %username%.жж.рф and %username%.живойжурнал.рф to urls
+            $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0436}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
+            $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0438}\x{0432}\x{043E}\x{0439}\x{0436}\x{0443}\x{0440}\x{043D}\x{0430}\x{043B}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
+ 
             # put <wbr> tags into long words, except inside <pre> and <textarea>.
             if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
                 $token->[1] =~ s/(\S{$wordlength,})/break_word($1,$wordlength)/eg;
@@ -1892,12 +1896,12 @@ sub clean_event
     my $wordlength = defined $opts->{'wordlength'} ? $opts->{'wordlength'} : 40;
 
     # fast path:  no markup or URLs to linkify, and no suspend message needed
-    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted} && !$opts->{suspend_msg}) {
+    if ($$ref !~ /\<|\>|http/ && $$ref !~ /(.*?)\.?жж\.рф/ && $$ref !~ /(.*?)\.?живойжурнал\.рф/ && ! $opts->{preformatted} && !$opts->{suspend_msg}) {
         $$ref =~ s/(\S{$wordlength,})/break_word($1,$wordlength)/eg if $wordlength;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
-
+ 
     my $cleancss = $opts->{'journalid'} ?
         ! $LJ::STYLE_TRUSTED{ $opts->{'journalid'} } : 0;
 
@@ -2034,7 +2038,7 @@ sub clean_comment
     }
 
     # fast path:  no markup or URLs to linkify
-    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
+    if ($$ref !~ /\<|\>|http/ && $$ref !~ /(.*?)\.?жж\.рф/ && $$ref !~ /(.*?)\.?живойжурнал\.рф/ && ! $opts->{preformatted}) {
         $$ref =~ s/(\S{40,})/break_word($1,40)/eg;
         $$ref =~ s/\r?\n/<br \/>/g;
         return 0;
