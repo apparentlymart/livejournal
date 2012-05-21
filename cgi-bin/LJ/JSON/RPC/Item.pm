@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use LJ::API::Error;
+use LJ::API::Auth;
 
 #
 # json request and response jpc 2.0
@@ -34,18 +35,13 @@ sub new {
         return $self;
     }
 
-    my $remote  = LJ::get_remote;
-    my $auth    = delete $params->{'auth_token'};
-    if (!$auth || !$remote) {
-        $self->{'fatal'} = { 'error_code' => -12600, 'error_message' => 'Auth is missed' };
-    } else {
-        if (!LJ::Auth->check_ajax_auth_token($remote, $uri, 'auth_token' => $auth)) {
-            $self->{'fatal'} = { 'error_code' => -12600, 'error_message' => 'Auth failed' };
-        }
-    }
+    my $access = LJ::API::Auth->rpc_access($uri, $params);
+    $self->{'fatal'} = $access->{'error'};
     if ($self->{'fatal'}) {
         return $self;
     }
+ 
+    $self->{'access_type'} = $access->{'type'};
 
     $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } unless $method;
     $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } if !$jsonrpc || $jsonrpc ne '2.0';
@@ -102,10 +98,14 @@ sub response {
     #
     ############################################################################
     if ($result) {
-        my $remote = LJ::get_remote;
+        my $remote = LJ::get_remote();
         my @params_vars = keys %{$self->{'params'}};
-        my $auth = LJ::Auth->ajax_auth_token($remote, $self->{'uri'}, \@params_vars);
-        $result->{'auth_token'} = $auth;
+
+        if ($self->{'access_type'} eq 'auth_token') {
+            my $auth = LJ::Auth->ajax_auth_token($remote, $self->{'uri'}, \@params_vars);
+            $result->{'auth_token'} = $auth;
+        }
+
         $resp->{'result'} = $result; 
     }
  
