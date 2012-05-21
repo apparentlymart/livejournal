@@ -3481,9 +3481,9 @@ fotki.error.upgrade.title=Uploading pictures does not available
 fotki.error.upgrade.description=Your current account status does not allow you to upload pictures.
 fotki.error.upgrade.link=Upgrade your account
 
-format.date.long=%M %d, %y
+format.date.long=%B %D, %Y
 
-format.date.short=%m/%d/%y
+format.date.short=%M/%D/%Y
 
 format.date.offset=0
 
@@ -6003,6 +6003,12 @@ talk.post.meta.backcommunity=back
 
 talk.post.meta.backlogin=back
 
+talk.post.meta.password=Password
+
+talk.post.meta.postpone=Postpone until
+
+talk.post.meta.othercommunity=Other community:
+
 talk.post.meta.tojournal=to journal
 
 talk.post.meta.tocommunity=to community
@@ -6011,13 +6017,9 @@ talk.post.meta.tologinpass=to another journal
 
 talk.post.meta.username=Username
 
-talk.post.meta.password=Password
-
-talk.post.meta.postpone=Postpone until
-
 talk.post.meta.who=Post as
 
-talk.post.meta.where=Post to
+talk.post.meta.where=Post
 
 talk.post.meta.where.it.is=Poster
 
