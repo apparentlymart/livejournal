@@ -103,8 +103,15 @@ sub response {
 
         my $access_type = $self->{'access_type'};
         if ($access_type && $access_type eq 'auth_token') {
-            my $auth = LJ::Auth->ajax_auth_token($remote, $self->{'uri'}, \@params_vars);
-            $result->{'auth_token'} = $auth;
+            if ($remote) {
+                my $auth = LJ::Auth->ajax_auth_token($remote, 
+                                                     $self->{'uri'}, 
+                                                     \@params_vars);
+                $result->{'auth_token'} = $auth;
+            } else {
+                my $auth = LJ::Auth->sessionless_auth_token($self->{'uri'});
+                $result->{'auth_token'} = $auth;
+            }
         }
 
         $resp->{'result'} = $result; 
