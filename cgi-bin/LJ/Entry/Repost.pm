@@ -263,10 +263,11 @@ sub __get_reposters {
     my $reposters = $dbcr->selectcol_arrayref( 'SELECT reposterid ' .
                                                'FROM repost2 ' .
                                                'WHERE journalid = ? AND jitemid = ? ' . $after . 
-                                               'LIMIT 20',
+                                               'LIMIT 25',
                                                undef,
                                                $u->userid,
                                                $jitemid,);
+
     return $reposters;
 }
 
@@ -281,17 +282,24 @@ sub get_list {
                                                 $jitemid, 
                                                 $lastuserid);
     if ($cached_reposters) {
+        warn "from cache";
         return $cached_reposters;
     }
+    warn "no cache";
  
     my $repostersids = __get_reposters( $entry->journal,
                                         $jitemid,
                                         $lastuserid );
 
-    my $reposters_info = {};
+    my $reposters_info = { users => {} };
+    my $users = $reposters_info->{'users'};
+
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
-        $reposters_info->{'users'} = { $u->user  => $u->userhead_url };
+        warn "user url: ". $u->url;
+
+        $users->{$u->user} = { 'userhead' => $u->userhead_url,
+                               'url'      => $u->journal_base, };
     }   
     $reposters_info->{'last'} = $repostersids->[-1];
 
