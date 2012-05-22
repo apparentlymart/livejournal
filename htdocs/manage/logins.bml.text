@@ -7,6 +7,8 @@
 
 .loggedin.table.bound=Bound to IP
 
+.loggedin.table.country=Country
+
 .loggedin.table.create=Creation Time
 
 .loggedin.table.current=Current Session
@@ -16,6 +18,8 @@
 .loggedin.table.exptype=Expiration Type
 
 .loggedin.table.ip=IP Address
+
+.loggedin.table.isp=ISP
 
 .loggedin.table.logout=Log Out
 

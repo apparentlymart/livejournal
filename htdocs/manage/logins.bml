@@ -19,8 +19,9 @@ body<=
 
     my $body = my $user = '';
     my $adminmode = 0;
-    if (LJ::check_priv($u, 'canview', 'sessions') ||
-        LJ::check_priv($u, 'canview', '*')) {
+    my $can_view_ip = LJ::check_priv($u, 'canview', 'sessions');
+    if ($can_view_ip ||
+        LJ::check_priv($u, 'canview', 'sessions-sup')) {
         $user = LJ::canonical_username($GET{'user'} || $POST{'user'});
         $body .= "<form method='GET' action='logins.bml'>\n";
         $body .= "<label for='user'>$ML{'.user'} ";
@@ -63,7 +64,14 @@ body<=
     } else {
         $body .= "<?h1 $ML{'.loggedin.header'} h1?>";
     }
-    $body .= "<table width='100%'><tr><th>$ML{'.loggedin.table.time'}</th><th>$ML{'.loggedin.table.ip'}</th><th width='45%'>$ML{'.loggedin.table.useragent'}</th>";
+    $body .= "<table width='100%'><tr>\n";
+    $body .= "<th>$ML{'.loggedin.table.time'}</th>";
+    $body .= "<th>$ML{'.loggedin.table.ip'}</th>";
+    $body .= "<th>$ML{'.loggedin.table.country'}</th>";
+    if ($adminmode) {
+        $body .= "<th>$ML{'.loggedin.table.isp'}</th>";
+    }
+    $body .= "<th width='45%'>$ML{'.loggedin.table.useragent'}</th>";
     $body .= "<th>$ML{'.loggedin.table.exptype'}</th><th>$ML{'.loggedin.table.bound'}</th><th>$ML{'.loggedin.table.create'}</th><th>$ML{'.loggedin.table.expire'}</th>" if $adminmode;
     $body .= "<th>$ML{'.loggedin.table.logout'}</th></tr>\n" unless $user;
 
@@ -73,9 +81,16 @@ body<=
             next;
         }
 
+        my $ip = $can_view_ip ? LJ::ehtml($login->[2]) : '***';
+        my $country = LJ::LJcom::country_of_ip($login->[2]) || '-';
+        my $isp = LJ::LJcom::isp_of_ip($login->[2]) || '-';
         $body .= "<tr>\n";
         $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($login->[0])) . "</td>\n";
-        $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>\n";
+        $body .= "<td>" . $ip . "</td>\n";
+        $body .= "<td>" . $country . "</td>\n";
+        if ($adminmode) {
+           $body .= "<td>" . $isp . "</td>\n";
+        }
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>\n";
         if ($adminmode) {
             my $sid = $login->[1];
@@ -106,11 +121,24 @@ body<=
     } else {
         $body .= "<?h1 $ML{'.prior.header'} h1?>\n";
     }
-    $body .= "<table width='100%'><tr><th>$ML{'.prior.table.time'}</th><th>$ML{'.prior.table.ip'}</th><th width='57%'>$ML{'.prior.table.useragent'}</th></tr>";
+    $body .= "<table width='100%'><tr><th>$ML{'.prior.table.time'}</th>";
+    $body .= "<th>$ML{'.loggedin.table.ip'}</th>";
+    $body .= "<th>$ML{'.loggedin.table.country'}</th>";
+    if ($adminmode) {
+        $body .= "<th>$ML{'.loggedin.table.isp'}</th>";
+    }
+    $body .= "<th width='57%'>$ML{'.prior.table.useragent'}</th></tr>";
     foreach my $login (sort { $b->[1] <=> $a->[1] } @prior) {
+        my $ip = $can_view_ip ? LJ::ehtml($login->[2]) : '***';
+        my $country = LJ::LJcom::country_of_ip($login->[2]) || '-';
+        my $isp = LJ::LJcom::isp_of_ip($login->[2]) || '-';
         $body .= "<tr>\n";
         $body .= "<td>" . LJ::ehtml(LJ::TimeUtil->time_to_http($login->[0])) . "</td>\n";
-        $body .= "<td>" . LJ::ehtml($login->[2]) . "</td>\n";
+        $body .= "<td>" . $ip . "</td>\n";
+        $body .= "<td>" . $country . "</td>\n";
+        if ($adminmode) {
+           $body .= "<td>" . $isp . "</td>\n";
+        }
         $body .= "<td>" . LJ::ehtml($login->[3]) . "</td>\n";
         $body .= "</tr>\n";
     }
