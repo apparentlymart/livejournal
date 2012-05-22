@@ -341,6 +341,11 @@ LJ.define('LJ.Util.Date');
 
 (function() {
 
+	var months = [ 'january', 'february', 'march', 'april',
+					'may', 'june', 'july', 'august',
+					'september', 'october', 'november', 'december' ],
+		month_ml = 'date.month.{month}.long';
+
 	function normalizeFormat(format) {
 		if (!format || format === 'short') {
 			format = LiveJournal.getLocalizedStr('format.date.short');
@@ -349,6 +354,11 @@ LJ.define('LJ.Util.Date');
 		}
 
 		return format;
+	}
+
+	function getMonth(idx) {
+		var month = months[ idx % 12 ];
+		return LiveJournal.getLocalizedStr(month_ml.supplant({month: month}));
 	}
 
 	/**
@@ -367,6 +377,9 @@ LJ.define('LJ.Util.Date');
 			positions = [ null ],
 			pos = 0, token,
 			regs = {
+				'%y' : '(\\d{4})',
+				'%m' : '(\\d{2})',
+				'%d' : '(\\d{2})',
 				'%Y' : '(\\d{4})',
 				'%M' : '(\\d{2})',
 				'%D' : '(\\d{2})'
@@ -393,12 +406,15 @@ LJ.define('LJ.Util.Date');
 			for( var i = 1; i < arr.length; ++i ) {
 				if( positions[ i ] ) {
 					switch( positions[ i ] ) {
+						case '%d':
 						case '%D':
 							d.setDate( arr[ i ] );
 							break;
+						case '%m':
 						case '%M':
 							d.setMonth( parseInt( arr[ i ], 10 ) - 1 );
 							break;
+						case '%y':
 						case '%Y':
 							d.setFullYear( arr[ i ] );
 							break;
@@ -421,13 +437,15 @@ LJ.define('LJ.Util.Date');
 
 		return format.replace( /%([a-zA-Z]{1})/g, function(str, letter) {
 			switch (letter) {
+				case 'm' :
 				case 'M' :
 					return ('' + (date.getMonth() + 1)).pad(2, '0');
 				case 'B' : //full month
-					// return ('' + date.getMonth()).pad(2, '0');
-					return 'nostr';
+					return getMonth(date.getMonth());
+				case 'd' :
 				case 'D' :
 					return ('' + date.getDate()).pad(2, '0');
+				case 'y' :
 				case 'Y' :
 					return date.getFullYear();
 				case 'R' :
