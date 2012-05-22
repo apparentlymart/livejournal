@@ -167,11 +167,14 @@ sub __create_repost {
 sub get_status {
     my ($class, $entry_obj, $u) = @_;
 
-    my $reposted = __get_repostid( $entry_obj->journal, 
-                                   $entry_obj->jitemid, $u->userid ) || 0;
+    my $reposted = 0;
+    if ($reposted) {
+        $reposted = __get_repostid( $entry_obj->journal, 
+                                    $entry_obj->jitemid, $u->userid ) || 0;
+    }
 
     return  { 'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
-              'reposted' => !!$reposted,
+              'reposted' => (! !$reposted) || 0,
             };
 }
 
