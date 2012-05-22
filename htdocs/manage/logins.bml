@@ -8,6 +8,8 @@ body<=
     use vars qw(%GET %POST);
     use LJ::TimeUtil;
 
+    LJ::need_res('stc/admin/logins.css');
+
     BML::decl_params(
        'user' => 'word',
        'x' => 'digits',
