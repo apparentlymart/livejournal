@@ -683,7 +683,8 @@ sub get_text {
 
     $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
 
-    return $text || ( $LJ::IS_DEV_SERVER ? "[uhhh: $code]" : "" );
+    return $text if defined $text;
+    return $LJ::IS_DEV_SERVER? "[uhhh: $code]" : "";
 }
 
 # Loads multiple language strings at once.  These strings
