@@ -26,6 +26,13 @@
 			evt.data._isCalendarOpen = true;
 			evt.preventDefault();
 		},
+
+		onStopEdit: function(evt) {
+			evt.data.reset();
+			evt.data._isCalendarOpen = false;
+			evt.preventDefault();
+		},
+
 		onChangeMonth: function(evt) {
 			var self = evt.data,
 				month = this.selectedIndex,
@@ -42,9 +49,11 @@
 
 			self._setEditDate(newDate);
 		},
+
 		onChangeTime: function(evt) {
-			var newDate = $(this).timeEntry('getTime'),
-				self = evt.data;
+			var self = evt.data || this,
+				newDate = (self._isOldDesign) ? $(this).timeEntry('getTime') :
+												LJ.Util.Date.parse(evt.target.value);
 
 			if (self._isEvent === false) {
 				return;
@@ -54,9 +63,11 @@
 			newDate.setMonth(self.currentDate.getMonth());
 			self._setEditDate(newDate);
 		},
+
 		onChangeDate: function(evt) {
-			var newDate = $(this).dateEntry('getDate'),
-				self = evt.data;
+			var self = evt.data || this,
+				newDate = (self._isOldDesign) ? $(this).dateEntry('getDate') :
+												LJ.Util.Date.parse(evt.target.value);
 
 			if (self._isEvent === false) {
 				return;
@@ -111,6 +122,7 @@
 				}
 			});
 
+			this._isOldDesign = !!this._dateInputs.date_ymd_yyyy;
 			this._dateString = this.element.find(this.options.selectors.dateString);
 
 			$.lj.basicWidget.prototype._create.apply(this);
@@ -122,12 +134,19 @@
 				var inputs = this._dateInputs,
 					timeParts = inputs.time.val().match(/([0-9]{1,2}):([0-9]{1,2})/);
 
-				this.currentDate = new Date(
-					Number(inputs.date_ymd_yyyy.val()),
-					Number(inputs.date_ymd_mm.val() - 1),
-					Number(inputs.date_ymd_dd.val()),
-					timeParts[1],
-					timeParts[2]);
+				this.currentDate = null;
+				if (this._isOldDesign) {
+					this.currentDate = new Date(
+						Number(inputs.date_ymd_yyyy.val()),
+						Number(inputs.date_ymd_mm.val() - 1),
+						Number(inputs.date_ymd_dd.val()),
+						timeParts[1],
+						timeParts[2]);
+				} else {
+					this.currentDate = LJ.Util.Date.parse(inputs._date);
+					this.currentDate.setHours(timeParts[1]);
+					this.currentDate.setMinutes(timeParts[2]);
+				}
 			}
 
 			this._bindControls();
@@ -144,44 +163,70 @@
 			//we do not need eny events in the old control
 
 			this.element.find(this.options.selectors.editLink).bind('click', this, listeners.onStartEdit);
+			this.element.find(this.options.selectors.backLink).bind('click', this, listeners.onStopEdit);
 
 			$(this.options.selectors.monthSelect).bind('change', this, listeners.onChangeMonth);
 
-			this._calendar = $(this.options.selectors.calendar, this.element).calendar({
+			var calOptions = {
 				currentDate: this.currentDate,
+				dateFormat: LiveJournal.getLocalizedStr('format.date.short'),
 				ml: {
 					caption: Site.ml_text['entryform.choose_date'] || 'Choose date:'
 				},
 				endMonth: new Date(2037, 11, 31),
-				showCellHovers: true
-			}).bind('daySelected', function(evt, date) {
-					var currentDate = $(this).calendar('option', 'currentDate');
-					delete self._isCalendarOpen;
+				showCellHovers: true,
+			};
 
-					if (currentDate.getMonth() !== date.getMonth() || currentDate.getDate() !== date.getDate() || currentDate.getFullYear() !== date.getFullYear()) {
-						date.setHours(currentDate.getHours());
-						date.setMinutes(currentDate.getMinutes());
-						self._setEditDate(date);
+			if (!this._isOldDesign) {
+				$.extend(true, calOptions, {
+					closeControl: false,
+					bubbleClass: true,
+					templates: {
+						calendar: 'templates-Widgets-datepicker'
+					},
+					classNames: {
+						container: '',
+						inactive : 'b-datepicker-calendar-day-disabled',
+						future : 'b-datepicker-calendar-day-disabled',
+						current  : 'b-datepicker-calendar-day-active'
 					}
 				});
+			}
 
-			this._dateInputs.time.timeEntry({
-				show24Hours: true,
-				useMouseWheel: false,
-				spinnerImage: ''
-			}).bind('change', this, listeners.onChangeTime);
+			this._el('calendar').calendar(calOptions)
+				.bind('daySelected', function(evt, date) {
+				var currentDate = $(this).calendar('option', 'currentDate');
+				delete self._isCalendarOpen;
 
-			this._dateInputs.date_ymd_yyyy.dateEntry({
-				dateFormat: 'y ',
-				useMouseWheel: false,
-				spinnerImage: ''
-			}).dateEntry('setDate', this.currentDate).bind('change', this, listeners.onChangeDate);
+				if (currentDate.getMonth() !== date.getMonth() || currentDate.getDate() !== date.getDate() || currentDate.getFullYear() !== date.getFullYear()) {
+					date.setHours(currentDate.getHours());
+					date.setMinutes(currentDate.getMinutes());
+					self._setEditDate(date);
+				}
+			});
 
-			this._dateInputs.date_ymd_dd.dateEntry({
-				dateFormat: 'd ',
-				useMouseWheel: false,
-				spinnerImage: ''
-			}).dateEntry('setDate', this.currentDate).bind('change', this, listeners.onChangeDate);
+			if (this._isOldDesign) {
+				this._dateInputs.time.timeEntry({
+					show24Hours: true,
+					useMouseWheel: false,
+					spinnerImage: ''
+				}).bind('change', this, listeners.onChangeTime);
+
+				this._dateInputs.date_ymd_yyyy.dateEntry({
+					dateFormat: 'y ',
+					useMouseWheel: false,
+					spinnerImage: ''
+				}).dateEntry('setDate', this.currentDate).bind('change', this, listeners.onChangeDate);
+
+				this._dateInputs.date_ymd_dd.dateEntry({
+					dateFormat: 'd ',
+					useMouseWheel: false,
+					spinnerImage: ''
+				}).dateEntry('setDate', this.currentDate).bind('change', this, listeners.onChangeDate);
+			} else {
+				this._dateInputs.date.bind('blur', this, listeners.onChangeDate);
+				this._dateInputs.time.bind('blur', this, listeners.onChangeTime);
+			}
 		},
 
 		_setOption: function(name, value) {
@@ -274,29 +319,31 @@
 			this._setOption('state', 'default');
 		},
 
-		_setTime: (function(){
-			function twodigit(n) {
-				return n < 10 ? '0' + n : n;
-			}
-
-			return function(date) {
+		_setTime: function(date) {
 				var inputs = this._dateInputs;
 				date = date || new Date;
 
 				this._isEvent = false;
-				inputs.date_ymd_yyyy.dateEntry('setDate', date);
-				inputs.date_ymd_mm.val(date.getMonth() + 1);
-				inputs.date_ymd_dd.dateEntry('setDate', date);
-				inputs.time.timeEntry('setTime', date);
+				if (inputs.date_ymd_yyyy) {
+					inputs.date_ymd_yyyy.dateEntry('setDate', date);
+					inputs.date_ymd_mm.val(date.getMonth() + 1);
+					inputs.date_ymd_dd.dateEntry('setDate', date);
+					inputs.time.timeEntry('setTime', date);
+				} else {
+					inputs.time.val(LJ.Util.Date.format(date, '%R'));
+					inputs.date.val(LJ.Util.Date.format(date, 'short'));
+				}
 
 				if(!this._isCalendarOpen) {
 					this._calendar.calendar('option', 'currentDate', date);
 				}
 
-				inputs.date_diff.val(1);
+				if (inputs.date_diff) {
+					inputs.date_diff.val(1);
+				}
 
 				if(this.options.state == 'default') {
-					this._dateString.text(this.options.monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ', ' + twodigit(date.getHours()) + ':' + twodigit(date.getMinutes()));
+					this._dateString.text(LJ.Util.Date.format(date, 'long') + ', ' + LJ.Util.Date.format(date, '%R'));
 				}
 
 				delete this._isEvent;
@@ -304,7 +351,6 @@
 				this.currentDate = date;
 
 				return false;
-			};
-		})()
+		}
 	});
 }(jQuery, window));
