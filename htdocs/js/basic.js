@@ -360,13 +360,16 @@ LJ.define('LJ.Util.Date');
 	LJ.Util.Date.parse = function(datestr, format) {
 		format = normalizeFormat(format);
 
+		//don't touch it if you can't use it
+		if (!datestr) { return datestr; }
+
 		var testStr = normalizeFormat(format),
 			positions = [ null ],
 			pos = 0, token,
 			regs = {
-				'%y' : '(\\d{4})',
-				'%m' : '(\\d{2})',
-				'%d' : '(\\d{2})'
+				'%Y' : '(\\d{4})',
+				'%M' : '(\\d{2})',
+				'%D' : '(\\d{2})'
 			};
 
 		while( ( pos = testStr.indexOf( '%', pos ) ) !== -1 ) {
@@ -375,6 +378,7 @@ LJ.define('LJ.Util.Date');
 				testStr = testStr.replace( token, regs[ token ] );
 				positions.push( token );
 			} else {
+				pos += 2; //skip this token
 				positions.push( null );
 			}
 		}
