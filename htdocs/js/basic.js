@@ -460,6 +460,20 @@ LJ.define('LJ.Util.Date');
 
 
 
+/**
+ * Get a variable, defined especially for this page in the Site.page.
+ * 
+ * @param {string} Variable name.
+ * @return {*} Returns a page variable or undefined if not found.
+ */
+LJ.pageVar = function(name) {
+	if (Site.page && Site.page.hasOwnProperty(name)) {
+		return Site.page;
+	} else {
+		return void(0);
+	}
+};
+
 LJ.DOM = LJ.DOM || {};
 
 /**
