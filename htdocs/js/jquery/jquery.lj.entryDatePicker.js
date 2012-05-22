@@ -52,8 +52,23 @@
 
 		onChangeTime: function(evt) {
 			var self = evt.data || this,
-				newDate = (self._isOldDesign) ? $(this).timeEntry('getTime') :
-												LJ.Util.Date.parse(evt.target.value);
+				newDate, dateAr;
+			
+			if (self._isOldDesign)  {
+				newDate = $(this).timeEntry('getTime');
+			} else {
+				dateAr = evt.target.value.split(':').map(function(el) { return parseInt(el, 10); });
+				newDate = new Date();
+				if (dateAr.length === 2) {
+					if (dateAr[0] < 0) { dateAr[0] = 0; }
+					if (dateAr[0] > 23) { dateAr[0] = 23; }
+					if (dateAr[1] < 0) { dateAr[1] = 0; }
+					if (dateAr[1] > 59) { dateAr[1] = 59; }
+
+					newDate.setHours(dateAr[0]);
+					newDate.setMinutes(dateAr[1]);
+				}
+			}
 
 			if (self._isEvent === false) {
 				return;
@@ -174,7 +189,7 @@
 					caption: Site.ml_text['entryform.choose_date'] || 'Choose date:'
 				},
 				endMonth: new Date(2037, 11, 31),
-				showCellHovers: true,
+				showCellHovers: true
 			};
 
 			if (!this._isOldDesign) {
@@ -183,6 +198,12 @@
 					bubbleClass: true,
 					templates: {
 						calendar: 'templates-Widgets-datepicker'
+					},
+					selectors: {
+						prevMonth: '.cal-nav-prev',
+						nextMonth: '.cal-nav-next',
+						monthSelect: '.b-datepicker-controls-month',
+						yearSelect: '.b-datepicker-controls-year'
 					},
 					classNames: {
 						container: '',
@@ -197,6 +218,7 @@
 				.bind('daySelected', function(evt, date) {
 				var currentDate = $(this).calendar('option', 'currentDate');
 				delete self._isCalendarOpen;
+				self._isEvent = false; //we're not a blur event
 
 				if (currentDate.getMonth() !== date.getMonth() || currentDate.getDate() !== date.getDate() || currentDate.getFullYear() !== date.getFullYear()) {
 					date.setHours(currentDate.getHours());
@@ -324,7 +346,7 @@
 				date = date || new Date;
 
 				this._isEvent = false;
-				if (inputs.date_ymd_yyyy) {
+				if (this._isOldDesign) {
 					inputs.date_ymd_yyyy.dateEntry('setDate', date);
 					inputs.date_ymd_mm.val(date.getMonth() + 1);
 					inputs.date_ymd_dd.dateEntry('setDate', date);
