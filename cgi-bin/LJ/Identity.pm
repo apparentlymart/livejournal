@@ -259,6 +259,9 @@ sub unpack_forwhat {
             warn 'invalid format ' . $extra;
             die;
         }
+    } elsif ( $forwhat =~ /^oauth\-([a-z0-9]+)$/i ) {
+        $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$1";
+        $returl_fail = $returl;
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled
