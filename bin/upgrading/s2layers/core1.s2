@@ -343,6 +343,7 @@ class EntryLite
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
     function time_display (string datefmt, string timefmt) : string "time_display, with customized date/time formats.";
     function builtin formatted_subject (string{} opts) : string "formats subject - outputs subject as html-link, gets hash of attributes - class and(or) style ";
+    var readonly string reposted_by "The string about reposter";
 }
 
 class Entry extends EntryLite

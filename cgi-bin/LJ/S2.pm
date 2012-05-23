@@ -1957,6 +1957,11 @@ sub Entry
     $e->{'system_time'} = DateTime_parts($arg->{'system_dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
+    if ($e->{'real_journalid'}) {
+        my $reposter = LJ::want_user($e->{'real_journalid'});
+        $e->{'reposted_by'} = LJ::Lang::ml( 'entry.reference.reposter', { 'reposter' => LJ::ljuser2($reposter) } );
+    }
+
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'delete_reference'  if LJ::is_enabled('entry_reference');
     push @$link_keyseq, 'mem_add'           if LJ::is_enabled('memories');
