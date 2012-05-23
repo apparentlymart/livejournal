@@ -4125,11 +4125,13 @@ BODY div .b-helplink:link,
 BODY div .b-helplink:visited,
 BODY div .b-helplink:hover,
 BODY div .b-helplink:active {
+	border: 0;
 	color: #8E9194 !important;
 	text-decoration: underline;
 	}
 BODY div .b-helplink:hover,
 BODY div .b-helplink:active {
+	border: 0;
 	color: #C00 !important;
 	text-decoration: underline;
 	}
