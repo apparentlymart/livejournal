@@ -98,8 +98,7 @@
 			state: 'default',
 			//when the widget is in inedit or infutureedit states, the timers are paused.
 			states: ['default', 'edit', 'inedit', 'infutureedit', 'future'],
-			monthNames: Site.ml_text['month.names.long'] || ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-			updateDate: !Site.is_edit,
+			updateDate: true,
 			//if true, widget sets custom_time flag if user clicks on edit link. Otherwise it
 			//does so only on real time change from user.
 			disableOnEdit: false,
@@ -107,8 +106,8 @@
 				'default': 'entrydate-date',
 				'edit': 'entrydate-changeit',
 				'inedit': 'entrydate-changeit',
-				'infutureedit': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
-				'future': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
+				'infutureedit': 'entrydate-until',
+				'future': 'entrydate-until',
 				'delayed': 'entrydate-delayed'
 			},
 			selectors: {
@@ -158,7 +157,7 @@
 						timeParts[1],
 						timeParts[2]);
 				} else {
-					this.currentDate = LJ.Util.Date.parse(inputs._date);
+					this.currentDate = LJ.Util.Date.parse(inputs.date.val());
 					this.currentDate.setHours(timeParts[1]);
 					this.currentDate.setMinutes(timeParts[2]);
 				}
@@ -186,7 +185,7 @@
 				currentDate: this.currentDate,
 				dateFormat: LiveJournal.getLocalizedStr('format.date.short'),
 				ml: {
-					caption: Site.ml_text['entryform.choose_date'] || 'Choose date:'
+					caption: LiveJournal.getLocalizedStr('entryform.choose_date', null, 'Choose date:')
 				},
 				endMonth: new Date(2037, 11, 31),
 				showCellHovers: true

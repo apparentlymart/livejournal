@@ -468,7 +468,7 @@ LJ.define('LJ.Util.Date');
  */
 LJ.pageVar = function(name) {
 	if (Site.page && Site.page.hasOwnProperty(name)) {
-		return Site.page;
+		return Site.page[name];
 	} else {
 		return void(0);
 	}

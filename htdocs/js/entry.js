@@ -20,7 +20,10 @@ function initEntryDate() {
 	jQuery('#entrydate').entryDatePicker({
 		//flag is set to true for new posts
 		updateDate: !!window.updatePostTime,
-		customTimeFlag: jQuery('#journal_time_edited')
+		classNames: {
+			'infutureedit': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
+			'future': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
+		}
 	});
 }
 
