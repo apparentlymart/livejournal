@@ -446,7 +446,7 @@ sub trans {
             warn "response error: $@"
                 if $@;
 
-            return $response->http_status;
+            return LJ::Request::DONE;
         } );
 
         return LJ::Request::OK;
