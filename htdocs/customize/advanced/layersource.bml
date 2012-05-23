@@ -43,7 +43,7 @@
         my ($md5, $save_cache);
         if ($pub->{$id}) {
             # let's see if we have it cached
-            $md5 = Digest::MD5::md5_hex($s2code);
+            $md5 = Digest::MD5::md5_hex( $s2code . '-xx-title' );
             my $cache = $dbr->selectrow_array("SELECT value FROM blobcache WHERE bckey='s2html-$id'");
             if ($cache =~ s/^\[$md5\]//) {
                 $html = $cache;
@@ -53,12 +53,17 @@
         }
 
         unless ($html) {
-            my $cr = new S2::Compiler;
+            my $cr = S2::Compiler->new;
+
+            my $html_title = LJ::ehtml( $layerinfo->{$id}->{'name'} );
+            $html_title .= ' - Layer Source' if $html_title;
+
             $cr->compile_source({
                 'source' => \$s2code,
                 'output' => \$html,
                 'format' => "html",
                 'type' => $pub->{$id}->{'type'},
+                'html_title' => $html_title,
             });
         }
 
