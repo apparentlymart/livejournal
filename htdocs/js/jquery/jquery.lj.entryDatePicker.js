@@ -183,7 +183,7 @@
 
 			var calOptions = {
 				currentDate: this.currentDate,
-				dateFormat: LiveJournal.getLocalizedStr('format.date.short'),
+				dateFormat: LiveJournal.getLocalizedStr('date.format.short'),
 				ml: {
 					caption: LiveJournal.getLocalizedStr('entryform.choose_date', null, 'Choose date:')
 				},
