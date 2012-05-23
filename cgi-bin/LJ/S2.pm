@@ -3564,7 +3564,7 @@ sub _print_reply_container
         my $ditemid = $page->{'entry'}{'itemid'} || 0;
 
         my $userpic = LJ::ehtml($page->{'_picture_keyword'}) || "";
-        my $thread = $page->{'viewing_thread'} + 0 || "";
+        my $thread = $page->{'_viewing_thread_id'} + 0 || "";
         my $text_hint = $ctx->[S2::PROPS]->{'comment_form_text_hint'} || '';
 
         $text_hint = LJ::dhtml ($text_hint);
