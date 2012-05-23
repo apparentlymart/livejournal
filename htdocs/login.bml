@@ -61,7 +61,7 @@
 
         # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
         if ($POST{ret} && $POST{ret} != 1) {
-            my ($redir_host) = $POST{ret} =~ m#^http://([\.:\w-]+)#i;
+            my ($redir_host) = $POST{ret} =~ m#^https?://([\.:\w-]+)#i;
         
             # if the redirect is going to FotoBilder, and they don't have the fb_account cap,
             # then we don't redirect them, but keep them here and display an error message
@@ -100,6 +100,14 @@
     my $login_html = sub {
         my $nojs = $GET{'nojs'};
 
+        my $ret = $POST{'ret'};
+        my $forwhat  = $POST{'forwhat'} ? '&forwhat='.$POST{'forwhat'} : '';
+
+        if (my $token = $GET{'oauth_token'}) {
+            $forwhat  = "&forwhat=oauth-$token";
+            $ret      = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$token";
+        }
+    
         # can't do challenge/response with LDAP.
         $nojs = 1 if $LJ::LDAP_HOST;
 
@@ -212,7 +220,7 @@
         } else {
             $body .= "<div class='columns-2-r300 pkg'>\n";
             $body .= "<div class='columns-2-left'>\n";
-            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret},
+            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $ret,
                                                 returnto => $POST{returnto}, nojs => $nojs, user => $user );
             $body .= "<div class='login-create-account'>\n";
             $body .= "<hr class='hr' />\n";
@@ -220,12 +228,12 @@
             $body .= "<form action='<?siteroot?>/create.bml' method='get'><input type='submit' value='$ML{'.createaccount.button'}' class='create-account' /></form>\n";
             $body .= "<p>$ML{'.or.connect.using'}</p>\n";
             $body .= "<p class=\"b-loginpage-btns\">";
-            $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.gif?v=18100\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=12457\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=11791\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.gif?v=11792\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
+            $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.gif?v=18100\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=12457\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=11791\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.gif?v=11792\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
             $body .= "</p>\n";
             $body .= "<ul>\n";
             $body .= "<li>$ML{'.createaccount.whylogin.benefit1'}</li>";

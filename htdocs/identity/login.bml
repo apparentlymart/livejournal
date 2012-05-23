@@ -17,7 +17,7 @@ body<=
     my $thispage = "$LJ::SITEROOT/identity/login.bml";
     return LJ::Widget::LoginMulti->render(
         'thispage' => $thispage,
-        'forwhat'  => LJ::Request->post_param('forwhat'),
+        'forwhat'  => ( LJ::Request->post_param('forwhat') || LJ::Request->get_param('forwhat') ),
     );
 
 }
