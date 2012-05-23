@@ -1542,10 +1542,12 @@ sub clean {
             $token->[1] =~ s/</&lt;/g;
             $token->[1] =~ s/>/&gt;/g;
 
-            ## Convert %username%.жж.рф and %username%.живойжурнал.рф to urls
-            $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0436}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
-            $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0438}\x{0432}\x{043E}\x{0439}\x{0436}\x{0443}\x{0440}\x{043D}\x{0430}\x{043B}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
- 
+            if ($auto_format && ! $noautolinks && ! $opencount{'a'} && ! $opencount{'textarea'}) {            
+                ## Convert %username%.жж.рф and %username%.живойжурнал.рф to urls
+                $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0436}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
+                $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0438}\x{0432}\x{043E}\x{0439}\x{0436}\x{0443}\x{0440}\x{043D}\x{0430}\x{043B}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
+            } 
+
             # put <wbr> tags into long words, except inside <pre> and <textarea>.
             if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
                 $token->[1] =~ s/(\S{$wordlength,})/break_word($1,$wordlength)/eg;
