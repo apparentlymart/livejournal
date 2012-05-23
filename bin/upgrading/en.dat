@@ -1113,6 +1113,12 @@ date.day.wednesday.long=Wednesday
 
 date.day.wednesday.short=Wed
 
+date.format.long=%B %D, %Y
+
+date.format.short=%M/%D/%Y
+
+date.format.offset=0
+
 date.month.april.genitive|staleness=1
 date.month.april.genitive=April
 
@@ -3480,12 +3486,6 @@ fotki.beta.title=Welcome to the Albums beta!
 fotki.error.upgrade.title=Uploading pictures does not available
 fotki.error.upgrade.description=Your current account status does not allow you to upload pictures.
 fotki.error.upgrade.link=Upgrade your account
-
-format.date.long=%B %D, %Y
-
-format.date.short=%M/%D/%Y
-
-format.date.offset=0
 
 gender.female|staleness=1
 gender.female=Female
