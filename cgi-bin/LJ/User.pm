@@ -310,6 +310,7 @@ sub new_from_external_domain {
 
     $host = lc($host);
     $host =~ s/^www\.//;
+    $host =~ s/_/-/g if ($host =~ /(.*?)\.?(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/);
 
     if (my $user = $LJ::DOMAIN_JOURNALS_REVERSE{$host}) {
         return LJ::load_user($user);
