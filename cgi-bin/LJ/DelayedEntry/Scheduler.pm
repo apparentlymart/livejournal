@@ -164,9 +164,9 @@ sub on_pulse {
                           " error : " . $post_status->{'error_message'};
                     
                 } elsif ($verbose) {
-                        print "(posting)The entry with subject " . $entry->subject;
-                        print "\ndelayed id = " . $entry->delayedid . 
-                        print " and post date " . $entry->posttime . "\n";
+                        print "(posting) The entry with delayed id = " . 
+                              $entry->delayedid . 
+                              " and post date " . $entry->posttime . "\n";
                 }
             }
         } 
