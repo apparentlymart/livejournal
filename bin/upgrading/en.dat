@@ -5938,6 +5938,32 @@ talk.placeholder.username=Username
  
 talk.placeholder.userpass=Password
 
+
+talk.poll.head=Poll Creator
+
+talk.controls.down=Down
+
+talk.controls.remove=Remove
+
+talk.controls.up=Up
+
+talk.poll.settings.name=poll name (opt.)
+
+talk.poll.settings.whoview=Who can view the text entry responses and voters in this poll?
+
+talk.poll.settings.whoview.all=All
+
+talk.poll.settings.whoview.friends=Friends
+
+talk.poll.settings.whoview.justme=Just me
+
+talk.poll.settings.whovote=Who can vote in this poll?
+
+talk.poll.settings.whovote.all=All
+
+talk.poll.settings.whovote.friends=Friends
+
+
 talk.postcomment=Add a comment
 
 
