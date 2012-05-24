@@ -5703,6 +5703,14 @@ talk.collapseall=Collapse All
 talk.collapselink|staleness=1
 talk.collapselink=Collapse
 
+talk.color.insert=Insert
+
+talk.color.sampletitle=Highlight
+
+talk.color.selected=Selected color
+
+talk.color.title=Select color
+
 talk.commentpermlink=link
 
 talk.commentpost=Post a new comment
