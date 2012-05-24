@@ -34,7 +34,7 @@ if (!jQuery.support.cors && window.XDomainRequest) {
 						try {
 							if (userType === 'json') {
 								try {
-									responses.json = JSON.parse(xdr.responseText);
+									responses.json = (window.JSON || LiveJournal.JSON).parse(xdr.responseText);
 								} catch(e) {
 									status.code = 500;
 									status.message = 'parseerror';
@@ -67,7 +67,7 @@ if (!jQuery.support.cors && window.XDomainRequest) {
 						});
 					};
 					xdr.open(options.type, options.url);
-					xdr.send();
+					xdr.send(options.data);
 				},
 				abort: function() {
 					if (xdr) {
