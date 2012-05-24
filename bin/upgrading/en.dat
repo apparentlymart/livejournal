@@ -5949,11 +5949,11 @@ talk.placeholder.userpass=Password
 
 talk.poll.head=Poll Creator
 
-talk.controls.down=Down
+talk.poll.controls.down=Down
 
-talk.controls.remove=Remove
+talk.poll.controls.remove=Remove
 
-talk.controls.up=Up
+talk.poll.controls.up=Up
 
 talk.poll.settings.name=poll name (opt.)
 
