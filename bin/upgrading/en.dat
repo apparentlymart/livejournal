@@ -5901,6 +5901,14 @@ talk.likes.insert=Insert
 talk.link=Link
 
 talk.link.insert=Insert
+
+talk.cut.main=Cut
+
+talk.cut.button=Insert
+
+talk.spoiler.main=Spoiler
+
+talk.spoiler.button=Insert
  
 talk.loading=Loading...
  
