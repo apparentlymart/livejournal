@@ -1,25 +1,17 @@
-/*!
- * LiveJournal datePicker for edit entries.
- *
- * Copyright 2011, dmitry.petrov@sup.com & vkurkin@sup.com
- *
- * http://docs.jquery.com/UI
- * 
- * Depends:
- *	jquery.ui.core.js
- *	jquery.ui.widget.js
- *	jquery.lj.basicWidget.js
- *	jquery.lj.inlineCalendar.js
- *	jquery.dateentry.js
- *	jquery.timeentry.js
- *
- * @overview Widget represents a date picker on update.bml and editjournal.bml pages.
- *
- * Public API:
- * reset Return widget to the initial state
- * 
+ /**
+ * @author dmitry.petrov@sup.com (Dmitry Petrov)
+ * @fileoverview LiveJournal post date widget for new post page.
+ */
+
+/**
+ * @name $.lj.entryDatePicker
+ * @requires $.ui.core, $.ui.widget, $.lj.basicWidget, $.lj.inlineCalendar, $.lj.calendar,
+ *     $.dateentry(for old page), $.timeentry(for old page).
+ * @class Widget allows to choose custom date for post and to revert it if necessary.
  */
 (function($, window) {
+	"use strict";
+
 	var listeners = {
 		onStartEdit: function(evt) {
 			evt.data._setState('edit');
@@ -43,7 +35,7 @@
 			}
 
 			newDate.setMonth(month);
-			if(newDate.getMonth() != month) {
+			if(newDate.getMonth() !== month) {
 				newDate = new Date(self.currentDate.getFullYear(), month + 1, 0, newDate.getHours(), newDate.getMinutes());
 			}
 
@@ -93,6 +85,7 @@
 		}
 	};
 
+	/** @lends $.lj.entryDatePicker.prototype */
 	$.widget('lj.entryDatePicker', jQuery.lj.basicWidget, {
 		options: {
 			state: 'default',
@@ -136,13 +129,17 @@
 				}
 			});
 
+			//In the old page we have three separate input fields for
+			//the day, month and a year.
 			this._isOldDesign = !!this._dateInputs.date_ymd_yyyy;
 			this._dateString = this.element.find(this.options.selectors.dateString);
 
 			$.lj.basicWidget.prototype._create.apply(this);
 
-			if (this._initialUpdateDate = this.options.updateDate) {
-				this.currentDate = new Date;
+			this._initialUpdateDate = this.options.updateDate;
+
+			if (this._initialUpdateDate) {
+				this.currentDate = new Date();
 				this._startTimer();
 			} else {
 				var inputs = this._dateInputs,
@@ -227,6 +224,7 @@
 			});
 
 			if (this._isOldDesign) {
+				//These aweful plugins are disabled on the new page.
 				this._dateInputs.time.timeEntry({
 					show24Hours: true,
 					useMouseWheel: false,
@@ -269,11 +267,14 @@
 			}
 		},
 
+		/**
+		 * Start a timer to update the page. Time should work only on the new post pages.
+		 */
 		_startTimer: function() {
 			var self = this;
 			if (this.options.updateDate && !this._updateTimer) {
 				this._updateTimer = setInterval(function() {
-					var current = new Date;
+					var current = new Date();
 					current.setMilliseconds(self.currentDate.getMilliseconds());
 					current.setSeconds(self.currentDate.getSeconds());
 
@@ -284,18 +285,24 @@
 			}
 		},
 
+		/**
+		 * Trigger change the date in the input fields on the page
+		 *     and stop timer if necessary.
+		 *
+		 * @param {Date} date A date to set.
+		 */
 		_setEditDate: function(date) {
-			if(this.options.state == 'default') {
+			if(this.options.state === 'default') {
 				return;
 			}
 
-			var current = new Date;
+			var current = new Date();
 			current.setMilliseconds(0);
 			current.setSeconds(0);
 			date.setMilliseconds(0);
 			date.setSeconds(0);
 
-			var delta = +date - (+new Date);
+			var delta = +date - (+new Date());
 			this._setTime(date);
 
 			if (delta > 0) {
@@ -336,13 +343,14 @@
 			}
 		},
 
-		reset: function() {
-			this._setOption('state', 'default');
-		},
-
+		/**
+		 * Update all input fields with the date.
+		 *
+		 * @param {Date} date A date to set.
+		 */
 		_setTime: function(date) {
 				var inputs = this._dateInputs;
-				date = date || new Date;
+				date = date || new Date();
 
 				this._isEvent = false;
 				if (this._isOldDesign) {
@@ -363,7 +371,7 @@
 					inputs.date_diff.val(1);
 				}
 
-				if(this.options.state == 'default') {
+				if(this.options.state === 'default') {
 					this._dateString.text(LJ.Util.Date.format(date, 'long') + ', ' + LJ.Util.Date.format(date, '%R'));
 				}
 
@@ -372,6 +380,13 @@
 				this.currentDate = date;
 
 				return false;
+		},
+
+		/**
+		 * Reset the widget to the initial state.
+		 */
+		reset: function() {
+			this._setOption('state', 'default');
 		}
 	});
 }(jQuery, window));
