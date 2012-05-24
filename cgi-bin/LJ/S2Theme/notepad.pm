@@ -33,4 +33,8 @@ sub comment_props {
     return $self->_append_props("comment_props", @props);
 }
 
+package LJ::S2Theme::notepad::unruled;
+use base qw(LJ::S2Theme::notepad);
+sub cats { qw( ) }
+
 1;

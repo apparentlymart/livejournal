@@ -48,7 +48,15 @@ package LJ::S2Theme::punquin::autumn;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(    ) }
 
+package LJ::S2Theme::punquin::bold;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(    ) }
+
 package LJ::S2Theme::punquin::brownleather;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(    ) }
+
+package LJ::S2Theme::punquin::bruise;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(    ) }
 
@@ -56,7 +64,15 @@ package LJ::S2Theme::punquin::bw;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(  ) }
 
+package LJ::S2Theme::punquin::deepmelodrama;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(  ) }
+
 package LJ::S2Theme::punquin::desktop;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::punquin::drone;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(   ) }
 
@@ -94,7 +110,23 @@ package LJ::S2Theme::punquin::minimal;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(  ) }
 
+package LJ::S2Theme::punquin::pistmint;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::punquin::ranchhand;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(  ) }
+
 package LJ::S2Theme::punquin::satinhandshake;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::punquin::shrinkvio;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::punquin::standard;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(   ) }
 
@@ -110,5 +142,8 @@ package LJ::S2Theme::punquin::valentine;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw(   ) }
 
+package LJ::S2Theme::punquin::victim;
+use base qw(LJ::S2Theme::punquin);
+sub cats { qw(   ) }
 
 1;

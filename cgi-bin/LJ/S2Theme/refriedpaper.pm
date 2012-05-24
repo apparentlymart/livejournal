@@ -55,4 +55,8 @@ sub comment_props {
     return $self->_append_props("comment_props", @props);
 }
 
+package LJ::S2Theme::refriedpaper::clean;
+use base qw(LJ::S2Theme::refriedpaper);
+sub cats { qw(   ) }
+
 1;

@@ -67,7 +67,19 @@ package LJ::S2Theme::cleansimple::brownleather;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 
+package LJ::S2Theme::cleansimple::bruise;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::deepmelodrama;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
 package LJ::S2Theme::cleansimple::desktop;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::drone;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 
@@ -97,7 +109,27 @@ package LJ::S2Theme::cleansimple::mexicanfood;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 
+package LJ::S2Theme::cleansimple::pistmint;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::purpleblues;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::ranchhand;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
 package LJ::S2Theme::cleansimple::satinhandshake;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::shrinkvio;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::standard;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 
@@ -110,6 +142,10 @@ use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 
 package LJ::S2Theme::cleansimple::valentine;
+use base qw(LJ::S2Theme::cleansimple);
+sub cats { qw( ) }
+
+package LJ::S2Theme::cleansimple::victim;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( ) }
 

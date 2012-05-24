@@ -38,6 +38,10 @@ package LJ::S2Theme::variableflow::bow;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(  ) }
 
+package LJ::S2Theme::variableflow::chiller;
+use base qw(LJ::S2Theme::variableflow);
+sub cats { qw(  ) }
+
 package LJ::S2Theme::variableflow::dirtyterminal;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(   ) }
@@ -46,15 +50,31 @@ package LJ::S2Theme::variableflow::greyarea;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(   ) }
 
-package LJ::S2Theme::variableflow::;
+package LJ::S2Theme::variableflow::martialblue;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(    ) }
 
-package LJ::S2Theme::variableflow::purplepower;
+package LJ::S2Theme::variableflow::martialblue;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(   ) }
 
+package LJ::S2Theme::variableflow::nature;
+use base qw(LJ::S2Theme::variableflow);
+sub cats { qw(    ) }
+
+package lj::s2theme::variableflow::purplepower;
+use base qw(lj::s2theme::variableflow);
+sub cats { qw(   ) }
+
+package lj::s2theme::variableflow::realteal;
+use base qw(lj::s2theme::variableflow);
+sub cats { qw(   ) }
+
 package LJ::S2Theme::variableflow::redready;
+use base qw(LJ::S2Theme::variableflow);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::variableflow::regaldust;
 use base qw(LJ::S2Theme::variableflow);
 sub cats { qw(   ) }
 

@@ -58,7 +58,19 @@ package LJ::S2Theme::tabularindent::brownleather;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw(    ) }
 
+package LJ::S2Theme::tabularindent::bruise;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::deepmelodrama;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(    ) }
+
 package LJ::S2Theme::tabularindent::desktop;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::drone;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw(   ) }
 
@@ -88,7 +100,19 @@ package LJ::S2Theme::tabularindent::pistmint;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw(   ) }
 
+package LJ::S2Theme::tabularindent::ranchhand;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
 package LJ::S2Theme::tabularindent::satinhandshake;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::shrinkvio;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::tabularindent::standard;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw(   ) }
 
@@ -104,5 +128,8 @@ package LJ::S2Theme::tabularindent::valentine;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw(   ) }
 
+package LJ::S2Theme::tabularindent::victim;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw(   ) }
 
 1;

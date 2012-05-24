@@ -55,11 +55,23 @@ package LJ::S2Theme::classic::brownleather;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
+package LJ::S2Theme::classic::bruise;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
 package LJ::S2Theme::classic::calmfire;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
+package LJ::S2Theme::classic::deepmelodrama;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
 package LJ::S2Theme::classic::desktop;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
+package LJ::S2Theme::classic::drone;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
@@ -73,6 +85,10 @@ use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 sub designer { "everdred" }
 
+package LJ::S2Theme::classic::flesh;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
 package LJ::S2Theme::classic::forest;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
@@ -85,7 +101,23 @@ package LJ::S2Theme::classic::mexicanfood;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
+package LJ::S2Theme::classic::pistmint;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
+package LJ::S2Theme::classic::ranchhand;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
 package LJ::S2Theme::classic::satinhandshake;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
+package LJ::S2Theme::classic::shrinkvio;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
+package LJ::S2Theme::classic::standart;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
@@ -98,6 +130,10 @@ use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 
 package LJ::S2Theme::classic::valentine;
+use base qw(LJ::S2Theme::classic);
+sub cats { qw( ) }
+
+package LJ::S2Theme::classic::victin;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( ) }
 

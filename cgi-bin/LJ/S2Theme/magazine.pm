@@ -51,7 +51,19 @@ package LJ::S2Theme::magazine::brownleather;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw(    ) }
 
+package LJ::S2Theme::magazine::bruise;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::deepmelodrama;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(    ) }
+
 package LJ::S2Theme::magazine::desktop;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::drone;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw(   ) }
 
@@ -75,7 +87,23 @@ package LJ::S2Theme::magazine::mexicanfood;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw(   ) }
 
+package LJ::S2Theme::magazine::pistmint;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::ranchhand;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
 package LJ::S2Theme::magazine::satinhandshake;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::shrinkvio;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::standard;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw(   ) }
 
@@ -88,6 +116,10 @@ use base qw(LJ::S2Theme::magazine);
 sub cats { qw(   ) }
 
 package LJ::S2Theme::magazine::valentine;
+use base qw(LJ::S2Theme::magazine);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::magazine::victim;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw(   ) }
 

@@ -22,6 +22,9 @@ sub text_props {
 
 
 ### Themes ###
+package LJ::S2Theme::sturdygesture::beansprout;
+use base qw(LJ::S2Theme::sturdygesture);
+sub cats { qw(  ) }
 
 package LJ::S2Theme::sturdygesture::boxedin;
 use base qw(LJ::S2Theme::sturdygesture);
@@ -36,6 +39,10 @@ use base qw(LJ::S2Theme::sturdygesture);
 sub cats { qw(   ) }
 
 package LJ::S2Theme::sturdygesture::redmond;
+use base qw(LJ::S2Theme::sturdygesture);
+sub cats { qw(   ) }
+
+package LJ::S2Theme::sturdygesture::shadesofgray;
 use base qw(LJ::S2Theme::sturdygesture);
 sub cats { qw(   ) }
 

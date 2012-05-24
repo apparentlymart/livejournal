@@ -45,6 +45,13 @@ sub comment_props {
 
 
 ### Themes ###
+package LJ::S2Theme::lickable::aqua_marine;
+use base qw(LJ::S2Theme::lickable);
+sub cats { qw( ) }
+
+package LJ::S2Theme::lickable::martialblue;
+use base qw(LJ::S2Theme::lickable);
+sub cats { qw( ) }
 
 package LJ::S2Theme::lickable::nature;
 use base qw(LJ::S2Theme::lickable);

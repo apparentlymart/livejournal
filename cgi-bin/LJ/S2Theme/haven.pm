@@ -87,12 +87,19 @@ sub ordering_props {
 
 ### Themes ###
 
+package LJ::S2Theme::haven::blueanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
 
 package LJ::S2Theme::haven::bluecomplementary;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
 package LJ::S2Theme::haven::bluedouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::bluemonochromatic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -104,7 +111,19 @@ package LJ::S2Theme::haven::bluetetradic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::greenanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::greencomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::greendouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::greenmonochromatic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -112,7 +131,15 @@ package LJ::S2Theme::haven::greensplit_complementary;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::greentetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::greentriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigoanalogous;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -120,7 +147,39 @@ package LJ::S2Theme::haven::indigoblue;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::indigocomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigodouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigomonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigosplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigotetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::indigotriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::orangeanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangecomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangedouble_complementary;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -128,7 +187,27 @@ package LJ::S2Theme::haven::orangemonochromatic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::orangesplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangetetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::orangetriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::redanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::redcomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::reddouble_complementary;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -136,7 +215,43 @@ package LJ::S2Theme::haven::redmonochromatic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::redsplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::redtetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::redtriadic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::violetanalogous;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violetcomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violetdouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violetmonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violetsplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violettetradic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::violettriadic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
@@ -144,7 +259,23 @@ package LJ::S2Theme::haven::yellowanalogous;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 
+package LJ::S2Theme::haven::yellowcomplementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowdouble_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
 package LJ::S2Theme::haven::yellowmonochromatic;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowsplit_complementary;
+use base qw(LJ::S2Theme::haven);
+sub cats { qw( ) }
+
+package LJ::S2Theme::haven::yellowtetradic;
 use base qw(LJ::S2Theme::haven);
 sub cats { qw( ) }
 

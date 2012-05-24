@@ -56,4 +56,8 @@ sub ordering_props {
     return $self->_append_props("ordering_props", @props);
 }
 
+package LJ::S2Theme::digitalmultiplex::classic;
+use base qw(LJ::S2Theme::digitalmultiplex);
+sub cats { qw( ) }
+
 1;

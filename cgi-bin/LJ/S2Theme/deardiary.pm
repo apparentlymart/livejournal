@@ -51,7 +51,15 @@ package LJ::S2Theme::deardiary::cellular;
 use base qw(LJ::S2Theme::deardiary);
 sub cats { qw( ) }
 
-package LJ::S2Theme::deardiary::;
+package LJ::S2Theme::deardiary::deepblue;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::everred;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::nature;
 use base qw(LJ::S2Theme::deardiary);
 sub cats { qw( ) }
 
@@ -64,6 +72,10 @@ use base qw(LJ::S2Theme::deardiary);
 sub cats { qw( ) }
 
 package LJ::S2Theme::deardiary::royalty;
+use base qw(LJ::S2Theme::deardiary);
+sub cats { qw( ) }
+
+package LJ::S2Theme::deardiary::slinkypink;
 use base qw(LJ::S2Theme::deardiary);
 sub cats { qw( ) }
 

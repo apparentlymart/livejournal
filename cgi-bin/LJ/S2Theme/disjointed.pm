@@ -56,7 +56,15 @@ package LJ::S2Theme::disjointed::blackblu;
 use base qw(LJ::S2Theme::disjointed);
 sub cats { qw( ) }
 
+package LJ::S2Theme::disjointed::blues;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
 package LJ::S2Theme::disjointed::dante;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
+package LJ::S2Theme::disjointed::deepmelodrama;
 use base qw(LJ::S2Theme::disjointed);
 sub cats { qw( ) }
 
@@ -68,7 +76,19 @@ package LJ::S2Theme::disjointed::monotonegrey;
 use base qw(LJ::S2Theme::disjointed);
 sub cats { qw(  ) }
 
+package LJ::S2Theme::disjointed::periwinkle;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw(  ) }
+
 package LJ::S2Theme::disjointed::satinhandshake;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw( ) }
+
+package LJ::S2Theme::disjointed::subduedblues;
+use base qw(LJ::S2Theme::disjointed);
+sub cats { qw(  ) }
+
+package LJ::S2Theme::disjointed::subduedpurples;
 use base qw(LJ::S2Theme::disjointed);
 sub cats { qw( ) }
 
