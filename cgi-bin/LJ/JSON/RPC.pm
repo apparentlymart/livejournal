@@ -8,8 +8,10 @@ use LJ::JSON::RPC::Item;
 use LJ::Response::JSON;
 
 sub new {
-    my ($class, $uri, $request) = @_;
+    my ($class, $uri, $request, $callback) = @_;
     my $self = bless {}, $class;
+
+    $self->{'callback'} = $callback;
 
     eval {
         my $data = LJ::JSON->from_json($request);
@@ -82,9 +84,10 @@ sub response {
         $resp_data = $item->response($items->{'result'});
     }
 
-    my $response = LJ::Response::JSON->new();
-    $response->data($resp_data);
-    return $response;
+    return LJ::Response::JSON->new( 
+                'data'     => $resp_data,
+                'callback' => $self->{'callback'} );
+
 }
 
 1;
