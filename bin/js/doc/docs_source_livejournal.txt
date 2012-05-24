@@ -1,2 +1,3 @@
   jquery/jquery.lj.lazyLoadable.js
   jquery/jquery.lj.s2editSearchBox.js
+  jquery/jquery.lj.entryDatePicker.js
