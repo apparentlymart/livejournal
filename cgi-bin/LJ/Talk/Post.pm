@@ -586,11 +586,6 @@ sub require_captcha_test {
     
     return if $commenter && $commenter->prop('in_whitelist_for_spam');
 
-    ## LJSUP-12322: Do not display captcha if user has social capital more than 15
-    my $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
-    $soc_cap = $soc_cap->{result}->{authority};
-    return if $soc_cap > 15;
-
     ## allow some users (our bots) to post without captchas in any rate
     return if $commenter and 
               grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
@@ -610,9 +605,8 @@ sub require_captcha_test {
         return 1 if LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
     }
 
-
     ##
-    ## 4. Test preliminary limit on comment.
+    ## 2. Test preliminary limit on comment.
     ## We must check it before we will allow owner to pass.
     ##
     if (LJ::Talk::get_replycount($journal, int($ditemid / 256)) >= LJ::get_cap($journal, 'maxcomments-before-captcha')) {
@@ -620,14 +614,23 @@ sub require_captcha_test {
     }
 
     ##
-    ## 2. Don't show captcha to the owner of the journal, no more checks
+    ## 3. Do not display captcha if user has social capital more than 15
+    ##
+    ##
+    my $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
+    $soc_cap = $soc_cap->{result}->{authority};
+    return if $soc_cap > 15;
+ 
+ 
+    ##
+    ## 4. Don't show captcha to the owner of the journal, no more checks
     ##
     if (!$anon_commenter && $commenter->{userid}==$journal->{userid}) {
         return;
     }
 
     ##
-    ## 3. Custom (journal) settings
+    ## 5. Custom (journal) settings
     ##
     my $show_captcha_to = $journal->prop('opt_show_captcha_to');
     if (!$show_captcha_to || $show_captcha_to eq 'N') {
@@ -644,7 +647,7 @@ sub require_captcha_test {
     }
 
     ##
-    ## 4. Global (site) settings
+    ## 6. Global (site) settings
     ## See if they have any tags or URLs in the comment's body
     ##
     if ($LJ::HUMAN_CHECK{'comment_html_auth'}
