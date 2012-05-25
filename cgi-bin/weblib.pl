@@ -1315,6 +1315,7 @@ sub stat_src_to_url {
 ## Support 'args' option. Example: LJ::need_res( { args => 'media="screen"' }, 'stc/ljtimes/iframe.css' );
 ## Results in: <link rel="stylesheet" type="text/css" href="http://stat.lj-3-32.bulyon.local/ljtimes/iframe.css?v=1285833891" media="screen"/>
 ## LJ::need_res( {clean_list => 1} ) will suppress ALL previous resources and do NOTHING more!
+## LJ::need_res( {insert_head => 1}, 'my.css' ) insert my.css to the head of the list of sources. 
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my @keys = @_;
@@ -1325,7 +1326,13 @@ sub need_res {
         @LJ::INCLUDE_TEMPLATE = ();
         return;
     }
-    
+
+    my $insert_head = 0;
+    if ($opts->{insert_head}){
+        $insert_head = 1;
+    }
+
+    my @reskeys = ();
     foreach my $key (@keys) {
         my $reskey  = $key;
         my $resopts = $opts;
@@ -1342,11 +1349,17 @@ sub need_res {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
 
         unless (exists $LJ::NEEDED_RES{$reskey}) {
-            push @LJ::NEEDED_RES, $reskey;
+            push @reskeys => $reskey;
         }
-
         $LJ::NEEDED_RES{$reskey} = $resopts;
     }
+
+    if ($insert_head){
+        unshift @LJ::NEEDED_RES, @reskeys;
+    } else {
+        push @LJ::NEEDED_RES, @reskeys;
+    }
+
 }
 
 sub include_raw  {
