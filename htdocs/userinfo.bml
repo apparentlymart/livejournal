@@ -695,7 +695,7 @@
         if (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u) )) {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
-                $soc_capital = int($position->{result}->{authority}/1000);
+                $soc_capital = int($soc_capital->{result}->{authority}/1000);
                 $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
                 my $country  = LJ::SUP->is_sup_enabled($u) ? 'cyr' : 'noncyr';
                 $body .= "<li class='rating-place'>" .
@@ -708,7 +708,7 @@
         if (ref $ua_position eq 'HASH') {
                 $soc_image = "<img src='$LJ::IMGPREFIX/profile_icons/" . ($ua_position->{result}->{position}!=0 ? 'social-capital.png?v=17298' : 'korona.png?v=17319') . "'/>";
                 $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
-                $soc_capital = int($position->{result}->{authority}/1000);
+                $soc_capital = int($soc_capital->{result}->{authority}/1000);
                 $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
                 $body .= "<li class='rating-place'>" .
                          $diagram_image .
