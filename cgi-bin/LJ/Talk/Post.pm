@@ -618,7 +618,7 @@ sub require_captcha_test {
     ##
     ##
     my $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
-    $soc_cap = $soc_cap->{result}->{authority};
+    $soc_cap = int($soc_cap->{result}->{authority}/1000);
     return if $soc_cap > 15;
  
  
