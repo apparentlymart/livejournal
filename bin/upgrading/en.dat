@@ -5963,6 +5963,20 @@ talk.poll.controls.remove=Remove
 
 talk.poll.controls.up=Up
 
+talk.poll.fields=Fields:
+
+talk.poll.question=Question:
+
+talk.poll.question.by=By:
+
+talk.poll.question.from=From:
+
+talk.poll.question.maxlength=Maxlength:
+
+talk.poll.question.size=Size:
+
+talk.poll.question.to=To:
+
 talk.poll.settings.name=poll name (opt.)
 
 talk.poll.settings.whoview=Who can view the text entry responses and voters in this poll?
