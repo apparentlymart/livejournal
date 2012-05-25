@@ -5979,6 +5979,18 @@ talk.poll.settings.whovote.all=All
 
 talk.poll.settings.whovote.friends=Friends
 
+talk.poll.type.check=Check Boxes
+
+talk.poll.type.dropdown=Dropdown Box
+
+talk.poll.type.radio=Radio Buttons
+
+talk.poll.type.scale=Scale
+
+talk.poll.type.select=Select type of poll
+
+talk.poll.type.text=Text entry
+
 
 talk.postcomment=Add a comment
 
