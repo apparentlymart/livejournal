@@ -365,6 +365,10 @@ sub create {
         $entry_obj = $entry_obj->original_post;
     }
 
+    if ($u->equals($entry_obj->journal)) {
+        return LJ::API::Error->get_error('same_user'); 
+    }
+
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
