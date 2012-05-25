@@ -586,6 +586,11 @@ sub require_captcha_test {
     
     return if $commenter && $commenter->prop('in_whitelist_for_spam');
 
+    ## LJSUP-12322: Do not display captcha if user has social capital more than 15
+    my $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
+    $soc_cap = $soc_cap->{result}->{authority};
+    return if $soc_cap > 15;
+
     ## allow some users (our bots) to post without captchas in any rate
     return if $commenter and 
               grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
