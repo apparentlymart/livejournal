@@ -75,6 +75,7 @@ set text_permalink = "Ссылка";
 set text_edit_entry = "Редактировать запись";
 set text_edit_tags = "Редактировать метки";
 set text_tell_friend = "Рассказать другу";
+set text_delete_repost = "Удалить репост";
 set text_mem_add = "В избранное";
 set text_watch_comments = "Отслеживать";
 set text_unwatch_comments = "Перестать отслеживать";
