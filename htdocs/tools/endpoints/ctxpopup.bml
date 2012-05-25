@@ -124,16 +124,12 @@
 
         $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
             func => 'get_authority',
-            what => $u->journaltype eq 'C' ? 'communities' : 'users',
             journal_id => $u->userid,
-            by => 'friends_weight',
-            type => 0,
-            sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
         });
 
-        if (ref $position eq 'HASH' && ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u) )) {
+        if (ref $position eq 'HASH') {
             $first = $position->{result}->{position}!=0 ? 0 : 1;
-            $soc_capital = int($position->{result}->{value}/1000);
+            $soc_capital = int($position->{result}->{authority}/1000);
             $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
 
             $ret{first}  = $first; 
