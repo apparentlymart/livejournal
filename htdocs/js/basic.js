@@ -441,6 +441,12 @@ LJ.define('LJ.Util.Date');
 					return date.getFullYear();
 				case 'R' :
 					return ('' + date.getHours()).pad(2, '0') + ':' + ('' + date.getMinutes()).pad(2, '0');
+				case 'T' :
+					return [
+						('' + date.getHours()).pad(2, '0'),
+						('' + date.getMinutes()).pad(2, '0'),
+						('' + date.getSeconds()).pad(2, '0')
+					].join(':');
 				default:
 					return str;
 			}
