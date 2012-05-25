@@ -664,7 +664,7 @@
             $country = $u->prop('country') if $u && $country ne 'UA';
             if ($country eq 'UA') {
                 $ua_position = LJ::PersonalStats::DB->fetch_raw('ratings', {
-                        func => 'get_value',
+                        func => 'get_authority',
                         what => $u->journaltype eq 'C' ? 'communities' : 'users',
                         journal_id => $u->userid,
                         by => 'friends_weight',
@@ -676,7 +676,7 @@
         #-------------------------------------------------------------------------------------
 
         $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
-            func => 'get_value',
+            func => 'get_authority',
             what => $u->journaltype eq 'C' ? 'communities' : 'users',
             journal_id => $u->userid,
             by => 'friends_weight',

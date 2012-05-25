@@ -123,7 +123,7 @@
         my ($position, $first, $soc_capital);
 
         $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
-            func => 'get_value',
+            func => 'get_authority',
             what => $u->journaltype eq 'C' ? 'communities' : 'users',
             journal_id => $u->userid,
             by => 'friends_weight',
