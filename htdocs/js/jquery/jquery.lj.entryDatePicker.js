@@ -107,6 +107,7 @@
 				dateInputs: 'input, select',
 				calendar: '.wrap-calendar .i-calendar',
 				editLink: '#currentdate-edit',
+				timezone: 'input[name=timezone]',
 				monthSelect: '#_mm',
 				dateString: '.entrydate-string'
 			}
@@ -137,6 +138,10 @@
 			$.lj.basicWidget.prototype._create.apply(this);
 
 			this._initialUpdateDate = this.options.updateDate;
+
+			if (!this._isOldDesign) {
+				this._el('timezone').val(- (new Date()).getTimezoneOffset()/0.6);
+			}
 
 			if (this._initialUpdateDate) {
 				this.currentDate = new Date();
