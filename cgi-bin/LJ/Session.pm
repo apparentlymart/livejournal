@@ -542,7 +542,10 @@ sub domain_journal {
     $host =~ s/^www\.//;
 
     return wantarray ? ( '__external', "") : '__external' if
-        $host =~ m!^([\w\-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$! or exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
+        exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
+
+    return wantarray ? ( '__external', "") : '__external' unless
+        $host =~ m!^([\w\-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!;
 
     my $subdomain = lc($host);
 
