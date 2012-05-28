@@ -457,21 +457,7 @@ LiveJournal.injectScript = function(url, params, parent) {
 	}
 };
 
-LiveJournal.getLocalizedStr = function(key, dict, def) {
-	dict = dict || {};
-	var str = '';
-	if (key in Site.ml_text) {
-		str = Site.ml_text[ key ];
-
-		for (var tmpl in dict) {
-			str = str.replace('%' + tmpl + '%', dict[ tmpl ]);
-		}
-	} else {
-		str = def || '[' + key + ']';
-	}
-
-	return str;
-};
+LiveJournal.getLocalizedStr = LJ.ml;
 
 LiveJournal.JSON = function() {
 	/**
