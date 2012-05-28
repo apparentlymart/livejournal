@@ -205,7 +205,8 @@ sub enabled { 1 }
 sub unpack_forwhat {
     my ($class, $forwhat) = @_;
 
-    my ($returl, $returl_fail);
+    my ($returl, $returl_fail, $skip_interstitial);
+    $skip_interstitial = 0;
     if ($forwhat eq 'login') {
         $returl = $LJ::SITEROOT;
         $returl_fail = "$LJ::SITEROOT/identity/login.bml?type=" . $class->short_code;
@@ -262,6 +263,7 @@ sub unpack_forwhat {
     } elsif ( $forwhat =~ /^oauth\-([a-z0-9]+)$/i ) {
         $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$1";
         $returl_fail = $returl;
+        $skip_interstitial = 1;
     } else {
         # the warning will sit in error logs, and the exception
         # will be handled
@@ -269,7 +271,7 @@ sub unpack_forwhat {
         die;
     }
 
-    return ($returl, $returl_fail);
+    return ($returl, $returl_fail, $skip_interstitial);
 }
 
 1;
