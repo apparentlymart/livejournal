@@ -4858,7 +4858,7 @@ sub precise_friendsof_count {
     return $counter if $counter;
 
     ## arrayref with all users friends
-    my $uids = $u->_load_friend_friendof_uids_from_db('friendofs');
+    my $uids = $u->_load_friend_friendof_uids_from_db('friendofs', 100_000);
 
     my $res = 0;
     ## work with batches
