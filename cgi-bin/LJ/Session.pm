@@ -541,10 +541,10 @@ sub domain_journal {
 
     $host =~ s/^www\.//;
 
-    return wantarray ? ( '__external', "") : '__external' unless
+    return wantarray ? ( '__external', "") : '__external' if
         $host =~ m!^([\w\-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$! or exists $LJ::DOMAIN_JOURNALS_REVERSE{$host};
 
-    my $subdomain = lc($1);
+    my $subdomain = lc($host);
 
     if ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal") {
         return undef unless $path =~ m!^/(\w{1,15})\b!;
