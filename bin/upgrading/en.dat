@@ -6198,19 +6198,19 @@ talk.result.links.tags=Edit this entry's tags
 
 talk.result.links.view=View the entry
 
-talk.result.success.create=Entry successfuly added. You can view your updated journal <a href="[[href]]">here</a>.
+talk.result.success.create=Entry successfuly added. You can view your updated journal <a href="[[href]]">here</a>
 
-talk.result.success.create.delayed=Entry successfuly added. You can view your scheduled entries <a href="[[href]]">here</a>.
+talk.result.success.create.delayed=Entry successfuly added. You can view your scheduled entries <a href="[[href]]">here</a>
 
-talk.result.success.delete=Delete successful. You can view your updated journal <a href="[[href]]">here</a>.
+talk.result.success.delete=Delete successful. You can view your updated journal <a href="[[href]]">here</a>
 
-talk.result.success.update=Update successful. You can view your updated journal <a href="[[href]]">here</a>.
+talk.result.success.update=Update successful. You can view your updated journal <a href="[[href]]">here</a>
 
-talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>.
+talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>
 
-talk.result.success.queue=Entry successfuly added to moderation queue. You can view other entries <a href="[[href]]">here</a>.
+talk.result.success.queue=Entry successfuly added to moderation queue. You can view other entries <a href="[[href]]">here</a>
 
-talk.result.success.tags=This tags were not added: [[tags]].
+talk.result.success.tags=This tags were not added:
 
 talk.screen=Screen
 

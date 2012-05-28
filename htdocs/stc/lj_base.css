@@ -4912,3 +4912,34 @@ BODY div .b-helplink:active {
 		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3863A0', endColorstr='#369AFF',GradientType=0 );
 		color: #FFF;
 		}
+
+
+
+/* Content plus Aside
+--------------------------------------*/
+.b-contentplus-container {
+	margin: 0;
+	padding: 0;
+	*zoom: 1;
+	}
+.b-contentplus-container:before,
+.b-contentplus-container:after {
+	display: table;
+	border-collapse: collapse;
+	content: "";
+	}
+.b-contentplus-container:after {
+	clear: both;
+	}
+	.b-contentplus-section {
+		float: left;
+		width: 65%;
+		margin: 0;
+		}
+	.b-contentplus-aside {
+		float: right;
+		width: 27%;
+		margin: 0;
+		padding: 0;
+		}
+
