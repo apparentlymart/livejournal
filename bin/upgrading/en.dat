@@ -6047,6 +6047,10 @@ talk.post.expand.extra=Expand mood, music, location
 
 talk.post.expand.options=Expand adult, comments, screen, backdated
 
+talk.post.full=Switch
+
+talk.post.full=Switch
+
 talk.post.html=HTML
 
 talk.post.journal.default=default
@@ -6199,6 +6203,10 @@ talk.result.success.delete=Delete successful. You can view your updated journal 
 talk.result.success.update=Update successful. You can view your updated journal <a href="[[href]]">here</a>.
 
 talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>.
+
+talk.result.success.queue=Entry successfuly added to moderation queue. You can view other entries <a href="[[href]]">here</a>.
+
+talk.result.success.tags=This tags were not added: [[tags]].
 
 talk.screen=Screen
 
