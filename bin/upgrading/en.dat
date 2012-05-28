@@ -6049,8 +6049,6 @@ talk.post.expand.options=Expand adult, comments, screen, backdated
 
 talk.post.full=Switch
 
-talk.post.full=Switch
-
 talk.post.html=HTML
 
 talk.post.journal.default=default
@@ -6141,11 +6139,17 @@ talk.post.sticky=sticky
 
 talk.post.sticky.replace=sticky (will replace existing post)
 
+talk.post.switchfs.open=Switch to full screen
+
+talk.post.switchfs.close=Switch to normal screen
+
 talk.post.subject=Subject
 
 talk.post.submit.delete=Delete Entry
 
 talk.post.submit.post=Post Entry
+
+talk.post.submit.postto=Post to
 
 talk.post.submit.preview=Preview Entry
 
