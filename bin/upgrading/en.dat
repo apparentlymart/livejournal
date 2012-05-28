@@ -5692,6 +5692,10 @@ talk.autoformat=disable autoformat
  
 talk.btn.preview=Preview
 
+talk.changecolor=Change Color
+
+talk.changefont=Change Font
+
 talk.check=Check
 
 talk.checkall=Check All
@@ -5888,9 +5892,13 @@ talk.help=Help
 
 talk.insertbold=Insert Bold (Ctrl+B)
 
+talk.insertcut=Insert Cut
+
 talk.insertitalic=Insert Italic (Ctrl+I)
 
 talk.insertunderline=Insert Underline (Ctrl+U)
+
+talk.insertspoiler=Insert Spoiler
 
 talk.insertstrikethrough=Insert Strikethrough
 
@@ -5909,6 +5917,8 @@ talk.likes.insert=Insert
 talk.link=Link
 
 talk.link.insert=Insert
+
+talk.ljlikes=Insert Social Buttons
 
 talk.cut.main=Cut
 
@@ -6086,6 +6096,8 @@ talk.post.meta.tojournal=to journal
 talk.post.meta.tocommunity=to community
 
 talk.post.meta.tologinpass=to another journal
+
+talk.post.meta.upic=Userpic
 
 talk.post.meta.username=Username
 
