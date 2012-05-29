@@ -364,6 +364,10 @@ class Entry extends EntryLite
 
     var int itemid "Server stored ID number for this entry";
 
+    
+    function builtin get_cutted_text() : string
+        "Returns text withiout text that has been cutted. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
+
     function print_metadata ();
     function builtin plain_subject () : string
         "Return entry's subject as plain text, with all HTML removed.";
@@ -621,6 +625,9 @@ class Page
 
     function builtin get_last_entries( string ljname, int count ) : Entry[]
     "Returns last 'count' entries from selected journal for LJTimes verticals.";
+
+    function builtin get_entry_by_id(int id) : Entry
+    "Returns entry by the specified id";
 
     function builtin get_alien_post( string url ) : Entry
     "Returns any public entry from any journal having give_posts_to_alien prop. Recipient must have get_alien_posts prop";

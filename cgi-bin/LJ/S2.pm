@@ -4517,6 +4517,37 @@ sub Entry__print_ebox {
     $S2::pout->($ad_html) if $ad_html;
 }
 
+sub Entry__get_cutted_text {
+    my ($ctx, $this) = @_;
+    
+    my $text = $this->{'text'};
+    my $url  = $this->{'permalink_url'};
+    
+    warn LJ::D($this);
+
+    my $journal = $this->{'journal'};
+    my $poster  = $this->{'poster'};
+    warn $journal;
+    warn $poster;
+
+    warn "cut cut cut: $text";
+    LJ::CleanHTML::clean_event( \$text, { 
+        'cuturl'                => $url,
+        'entry_url'             => $url,
+        'ljcut_disable'         => 0,
+        'journalid'             => $journal->{'userid'},
+        'posterid'              => $poster->{'userid'},
+
+        # suspended entries parts are not implemented here for now
+        'suspend_msg'           => '',
+        'unsuspend_supportid'   => 0,
+    } );
+
+    warn "text: $text";
+    return $text;
+}
+
+
 sub _get_colors_for_ad {
     my $ctx = shift;
 
@@ -4664,6 +4695,50 @@ sub Page__get_latest_month
 *FriendsPage__get_latest_month = \&Page__get_latest_month;
 *EntryPage__get_latest_month = \&Page__get_latest_month;
 *ReplyPage__get_latest_month = \&Page__get_latest_month;
+
+
+sub Page__get_entry_by_id {
+    my ( $ctx, $this, $entry_id ) = @_;
+    my $journal = $this->{'_u'}; 
+
+    warn $entry_id;
+    my $remote = LJ::get_remote();
+    my $entry = LJ::Entry->new($journal, ditemid => $entry_id);
+
+    return undef unless ($entry && $entry->valid);
+    return undef unless $entry->visible_to($remote);
+
+    my $dateparts = $entry->{eventtime};
+    $dateparts =~ tr/-:/  /;
+    my $system_dateparts = $entry->{logtime};
+    $system_dateparts =~ tr/-:/  /;
+
+    my $pickw   = LJ::Entry->userpic_kw_from_props( $entry->props );
+    my $userpic = LJ::S2::Image_userpic( $entry->poster, 0, $pickw );
+
+    return LJ::S2::Entry(
+        $journal,
+        {
+            'subject'          => clear_entry_subject($entry),
+            'text'             => clear_entry_text($entry),
+            'dateparts'        => $dateparts,
+            'system_dateparts' => $system_dateparts,
+            'security'         => $entry->security,
+            'allowmask'        => $entry->allowmask,
+            'props'            => $entry->{'props'},
+            'itemid'           => $entry->ditemid,
+            'journal'          => LJ::S2::UserLite($journal),
+            'poster'           => LJ::S2::UserLite($entry->poster),
+            'comments'         => get_comments_info($entry),
+            'tags'             => get_sorted_tags($entry),
+            'userpic'          => $userpic,
+            'permalink_url'    => $entry->url,
+
+            # for now, these are not implemented
+            'new_day'          => 0,
+            'end_day'          => 0,
+        });
+}
 
 sub Page__get_last_entries {
     my ( $ctx, $this, $ljuser, $count ) = @_;
