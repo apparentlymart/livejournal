@@ -5932,9 +5932,11 @@ talk.cut.main=Cut
 
 talk.cut.button=Insert
 
-talk.map.main=Map
-
 talk.map.button=Insert
+
+talk.map.example=http://goo.gl/maps/1Zgq
+
+talk.map.main=Map
 
 talk.spoiler.main=Spoiler
 
