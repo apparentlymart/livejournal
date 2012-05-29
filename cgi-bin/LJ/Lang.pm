@@ -969,6 +969,13 @@ sub plural_form_is {
 my ( $current_language, $guessed_language, $language_scope );
 
 sub decide_language {
+    unless ( $LJ::REQ_GLOBAL{'lj_lang_reset'} ) {
+        $LJ::REQ_GLOBAL{'lj_lang_reset'} = 1;
+        undef $current_language;
+        undef $guessed_language;
+        undef $language_scope;
+    }
+
     return $guessed_language if $guessed_language;
 
     my %existing_language =
@@ -1046,6 +1053,13 @@ sub decide_language {
 
 sub current_language {
     my @args = @_;
+
+    unless ( $LJ::REQ_GLOBAL{'lj_lang_reset'} ) {
+        $LJ::REQ_GLOBAL{'lj_lang_reset'} = 1;
+        undef $current_language;
+        undef $guessed_language;
+        undef $language_scope;
+    }
 
     my $ret = $current_language || decide_language();
 
