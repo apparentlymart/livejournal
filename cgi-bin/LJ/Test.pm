@@ -79,9 +79,10 @@ sub create_user {
         my $u;
 
         do {
-            $opts{'user'} = $opts{'user_prefix'} || 't_';
+            my $user_prefix = $opts{'user_prefix'} || 't_';
+            $opts{'user'} = $user_prefix;
 
-            foreach ( 1 .. ( 15 - length( $opts{'user_prefix'} ) ) ) {
+            foreach ( 1 .. ( 15 - length($user_prefix) ) ) {
                 $opts{'user'} .= $chars[ rand($chars_count) ];
             }
 
