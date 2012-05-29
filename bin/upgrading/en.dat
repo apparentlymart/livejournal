@@ -3446,6 +3446,8 @@ fotki.storage.2gb.paid_account_4=up to 2Gb by <a [[link1]]>upgrade to paid accou
 fotki.storage.full.message_free_space_out|staleness=1
 fotki.storage.full.message_free_space_out=Your storage space ends [[date]]. All your images on additional space will be disabled. You can: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>
 
+fotki.storage.full.message_free_space_out.perm=Your storage space ends. All your images on additional space will be disabled.
+
 fotki.storage.full.message_more_space|staleness=1
 fotki.storage.full.message_more_space=You can add more storage space to: <br/><li>[[item1]]</li><li>[[item2]]</li><li>[[item3]]</li><br/>You can get <a [[add_link]]>more options</a>.
 
@@ -3457,6 +3459,8 @@ fotki.storage.full.message_prolong_space=Your storage space ends [[date]]. All y
 
 fotki.storage.title_free_space_out|staleness=1
 fotki.storage.title_free_space_out=Your storage space is near to empty
+
+fotki.storage.title_free_space_out.perm=Your storage space is near to empty
 
 fotki.storage.title_more_space|staleness=1
 fotki.storage.title_more_space=Add more storage space
