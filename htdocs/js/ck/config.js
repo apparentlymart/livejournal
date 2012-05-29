@@ -9,34 +9,39 @@ CKEDITOR.editorConfig = function(config) {
 	config.autoUpdateElement = false;
 	config.docType = '<!DOCTYPE html>';
 	config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
-	config.plugins = 'ajax,' +
-		'basicstyles,' +
-		'bidi,' +
-		'blockquote,' +
-		'button,' +
-		'colorbutton,' +
-		'colordialog,' +
-		'dialog,' +
-		'enterkey,' +
-		'entities,' +
-		'font,' +
-		'format,' +
-		'htmldataprocessor,' +
-		'image,' +
-		'keystrokes,' +
-		'link,' +
-		'list,' +
-		'liststyle,' +
-		'pastefromword,' +
-		'specialchar,' +
-		'tab,' +
-		'table,' +
-		'toolbar,' +
-		'undo,' +
-		'wysiwygarea,';
+
+	config.plugins = [
+		'ajax',
+		'basicstyles',
+		'bidi',
+		'blockquote',
+		'button',
+		'colorbutton',
+		'colordialog',
+		'dialog',
+		'enterkey',
+		'entities',
+		'font',
+		'format',
+		'htmldataprocessor',
+		'image',
+		'keystrokes',
+		'link',
+		'list',
+		'liststyle',
+		'pastefromword',
+		'specialchar',
+		'tab',
+		'table',
+		'toolbar',
+		'undo',
+		'wysiwygarea',
+		'onchange',
+		'livejournal'
+	].join(',');
 
 	if (jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
-		config.plugins += 'contextmenu,';
+		config.plugins += ',contextmenu';
 	}
 	config.autoGrow_maxHeight = 400;
 	config.contentsLangDirection = 'ltr';
@@ -47,7 +52,8 @@ CKEDITOR.editorConfig = function(config) {
 	config.toolbarCanCollapse = false;
 	config.disableNativeSpellChecker = false;
 	config.toolbar_Full = [
-		['Bold',
+		[
+			'Bold',
 			'Italic',
 			'Underline',
 			'Strike',
@@ -56,7 +62,8 @@ CKEDITOR.editorConfig = function(config) {
 			'-',
 			'LJLink',
 			'LJUserLink',
-			'image']
+			'image'
+		]
 	];
 
 	// if (window.ljphotoEnabled) {
@@ -123,7 +130,10 @@ CKEDITOR.editorConfig = function(config) {
 	config.pasteFromWordRemoveFontStyles = false;
 	config.pasteFromWordRemoveStyles = false;
 
-	config.extraPlugins = 'livejournal,onchange';
+	//config.extraPlugins = 'livejournal';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
 };
+
+
+CKEDITOR.editorConfig(CKEDITOR.config);

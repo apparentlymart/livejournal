@@ -1,64 +1,66 @@
-
 (function() {
+	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
+	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
+
 	var likeButtons = [
 		{
-			label: top.CKLang.LJLike_button_facebook,
+			label: CKLang.LJLike_button_facebook,
 			id: 'facebook',
 			abbr: 'fb',
-			html: '<span class="lj-like-item fb">' + top.CKLang.LJLike_button_facebook + '</span>',
-			htmlOpt: '<li class="like-fb"><input type="checkbox" id="like-fb" /><label for="like-fb">' + top.CKLang.LJLike_button_facebook + '</label></li>'
+			html: '<span class="lj-like-item fb">' + CKLang.LJLike_button_facebook + '</span>',
+			htmlOpt: '<li class="like-fb"><input type="checkbox" id="like-fb" /><label for="like-fb">' + CKLang.LJLike_button_facebook + '</label></li>'
 		},
 		{
-			label: top.CKLang.LJLike_button_twitter,
+			label: CKLang.LJLike_button_twitter,
 			id: 'twitter',
 			abbr: 'tw',
-			html: '<span class="lj-like-item tw">' + top.CKLang.LJLike_button_twitter + '</span>',
-			htmlOpt: '<li class="like-tw"><input type="checkbox" id="like-tw" /><label for="like-tw">' + top.CKLang.LJLike_button_twitter + '</label></li>'
+			html: '<span class="lj-like-item tw">' + CKLang.LJLike_button_twitter + '</span>',
+			htmlOpt: '<li class="like-tw"><input type="checkbox" id="like-tw" /><label for="like-tw">' + CKLang.LJLike_button_twitter + '</label></li>'
 		},
 		{
-			label: top.CKLang.LJLike_button_google,
+			label: CKLang.LJLike_button_google,
 			id: 'google',
 			abbr: 'go',
-			html: '<span class="lj-like-item go">' + top.CKLang.LJLike_button_google + '</span>',
-			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + top.CKLang.LJLike_button_google + '</label></li>'
+			html: '<span class="lj-like-item go">' + CKLang.LJLike_button_google + '</span>',
+			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + CKLang.LJLike_button_google + '</label></li>'
 		},
 		{
-			label: top.CKLang.LJLike_button_vkontakte,
+			label: CKLang.LJLike_button_vkontakte,
 			id: 'vkontakte',
 			abbr: 'vk',
-			html: '<span class="lj-like-item vk">' + top.CKLang.LJLike_button_vkontakte + '</span>',
-			htmlOpt: window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + top.CKLang.LJLike_button_vkontakte + '</label></li>' : ''
+			html: '<span class="lj-like-item vk">' + CKLang.LJLike_button_vkontakte + '</span>',
+			htmlOpt: window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
 		},
 		{
-			label: top.CKLang.LJLike_button_give,
+			label: CKLang.LJLike_button_give,
 			id: 'livejournal',
 			abbr: 'lj',
-			html: '<span class="lj-like-item lj">' + top.CKLang.LJLike_button_give + '</span>',
-			htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + top.CKLang.LJLike_button_give + '</label></li>'
+			html: '<span class="lj-like-item lj">' + CKLang.LJLike_button_give + '</span>',
+			htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + CKLang.LJLike_button_give + '</label></li>'
 		}
 	];
 
 	var ljTagsData = {
 		LJPollLink: {
-			html: encodeURIComponent(top.CKLang.Poll_PollWizardNotice + '<br /><a href="#" lj-cmd="LJPollLink">' + top.CKLang.Poll_PollWizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.Poll_PollWizardNotice + '<br /><a href="#" lj-cmd="LJPollLink">' + CKLang.Poll_PollWizardNoticeLink + '</a>')
 		},
 		LJLike: {
-			html: encodeURIComponent(top.CKLang.LJLike_WizardNotice + '<br /><a href="#" lj-cmd="LJLike">' + top.CKLang.LJLike_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJLike_WizardNotice + '<br /><a href="#" lj-cmd="LJLike">' + CKLang.LJLike_WizardNoticeLink + '</a>')
 		},
 		LJUserLink: {
-			html: encodeURIComponent(top.CKLang.LJUser_WizardNotice + '<br /><a href="#" lj-cmd="LJUserLink">' + top.CKLang.LJUser_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJUser_WizardNotice + '<br /><a href="#" lj-cmd="LJUserLink">' + CKLang.LJUser_WizardNoticeLink + '</a>')
 		},
 		LJLink: {
-			html: encodeURIComponent(top.CKLang.LJLink_WizardNotice + '<br /><a href="#" lj-cmd="LJLink">' + top.CKLang.LJLink_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJLink_WizardNotice + '<br /><a href="#" lj-cmd="LJLink">' + CKLang.LJLink_WizardNoticeLink + '</a>')
 		},
 		image: {
-			html: encodeURIComponent(top.CKLang.LJImage_WizardNotice + '<br /><a href="#" lj-cmd="image">' + top.CKLang.LJImage_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJImage_WizardNotice + '<br /><a href="#" lj-cmd="image">' + CKLang.LJImage_WizardNoticeLink + '</a>')
 		},
 		LJCut: {
-			html: encodeURIComponent(top.CKLang.LJCut_WizardNotice + '<br /><a href="#" lj-cmd="LJCut">' + top.CKLang.LJCut_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJCut_WizardNotice + '<br /><a href="#" lj-cmd="LJCut">' + CKLang.LJCut_WizardNoticeLink + '</a>')
 		},
 		LJSpoiler: {
-			html: encodeURIComponent(top.CKLang.LJSpoiler_WizardNotice + '<br /><a href="#" lj-cmd="LJSpoiler">' + top.CKLang.LJSpoiler_WizardNoticeLink + '</a>')
+			html: encodeURIComponent(CKLang.LJSpoiler_WizardNotice + '<br /><a href="#" lj-cmd="LJSpoiler">' + CKLang.LJSpoiler_WizardNoticeLink + '</a>')
 		}
 	};
 
@@ -451,7 +453,7 @@
 				}
 
 				function createRepost(result, firstAttr, secondAttr, content) {
-					var buttonTitle = firstAttr || secondAttr || top.CKLang.LJRepost_Value;
+					var buttonTitle = firstAttr || secondAttr || CKLang.LJRepost_Value;
 					var text = content.replace(/"/g, '&quot;');
 
 					content = text + ('<br /><input type="button" value="' + buttonTitle + '" />').replace(/"/g, '&quot;');
@@ -565,13 +567,13 @@
 						if (LJUser) {
 							CKEDITOR.note && CKEDITOR.note.hide(true);
 							currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
-							userName = prompt(top.CKLang.UserPrompt, currentUserName);
+							userName = prompt(CKLang.UserPrompt, currentUserName);
 						} else if (selection.getType() == 2) {
 							userName = selection.getSelectedText();
 						}
 
 						if (userName == '') {
-							userName = prompt(top.CKLang.UserPrompt, userName);
+							userName = prompt(CKLang.UserPrompt, userName);
 						}
 
 						if (!userName || currentUserName == userName) {
@@ -592,7 +594,7 @@
 				});
 
 				editor.ui.addButton('LJUserLink', {
-					label: top.CKLang.LJUser,
+					label: CKLang.LJUser,
 					command: 'LJUserLink'
 				});
 			})();
@@ -600,7 +602,7 @@
 			// LJ Image Button
 			if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
 				editor.ui.addButton('image', {
-					label: top.CKLang.LJImage_Title,
+					label: CKLang.LJImage_Title,
 					command: 'image'
 				});
 			} else {
@@ -616,7 +618,7 @@
 				});
 
 				editor.ui.addButton('image', {
-					label: top.CKLang.LJImage_Title,
+					label: CKLang.LJImage_Title,
 					command: 'LJImage'
 				});
 			}
@@ -652,14 +654,14 @@
 
 				editor.addCommand('LJEmbedLink', {
 					exec: function() {
-						top.LJ_IPPU.textPrompt(top.CKLang.LJEmbedPromptTitle, top.CKLang.LJEmbedPrompt, doEmbed, {
+						top.LJ_IPPU.textPrompt(CKLang.LJEmbedPromptTitle, CKLang.LJEmbedPrompt, doEmbed, {
 							width: '350px'
 						});
 					}
 				});
 
 				editor.ui.addButton('LJEmbedLink', {
-					label: top.CKLang.LJEmbed,
+					label: CKLang.LJEmbed,
 					command: 'LJEmbedLink'
 				});
 			})();
@@ -738,15 +740,15 @@
 			editor.addCommand('LJCut', {
 				exec: function() {
 					doubleFrameCommand('lj-cut', 'LJCut', {
-						title: top.CKLang.LJCut_PromptTitle,
-						text: top.CKLang.LJCut_PromptText
+						title: CKLang.LJCut_PromptTitle,
+						text: CKLang.LJCut_PromptText
 					});
 				},
 				editorFocus: false
 			});
 
 			editor.ui.addButton('LJCut', {
-				label: top.CKLang.LJCut_Title,
+				label: CKLang.LJCut_Title,
 				command: 'LJCut'
 			});
 
@@ -754,15 +756,15 @@
 			editor.addCommand('LJSpoiler', {
 				exec: function() {
 					doubleFrameCommand('lj-spoiler', 'LJSpoiler', {
-						title: top.CKLang.LJSpoiler_PromptTitle,
-						text: top.CKLang.LJSpoiler_PromptText
+						title: CKLang.LJSpoiler_PromptTitle,
+						text: CKLang.LJSpoiler_PromptText
 					});
 				},
 				editorFocus: false
 			});
 
 			editor.ui.addButton('LJSpoiler', {
-				label: top.CKLang.LJSpoiler_Title,
+				label: CKLang.LJSpoiler_Title,
 				command: 'LJSpoiler'
 			});
 
@@ -1014,7 +1016,7 @@
 					CKEDITOR.env.mac && buttonsDefinition.reverse();
 
 					return {
-						title: top.CKLang.Poll_PollWizardTitle,
+						title: CKLang.Poll_PollWizardTitle,
 						width: 420,
 						height: 270,
 						resizable: false,
@@ -1078,7 +1080,7 @@
 			} else {
 				editor.addCommand('LJPollLink', {
 					exec: function() {
-						CKEDITOR.note && CKEDITOR.note.show(top.CKLang.Poll_AccountLevelNotice, null, null, true);
+						CKEDITOR.note && CKEDITOR.note.show(CKLang.Poll_AccountLevelNotice, null, null, true);
 					}
 				});
 
@@ -1086,7 +1088,7 @@
 			}
 
 			editor.ui.addButton('LJPollLink', {
-				label: top.CKLang.Poll_Title,
+				label: CKLang.Poll_Title,
 				command: 'LJPollLink'
 			});
 
@@ -1165,7 +1167,7 @@
 					CKEDITOR.env.mac && buttonsDefinition.reverse();
 
 					return {
-						title: top.CKLang.LJLike_name,
+						title: CKLang.LJLike_name,
 						width: 145,
 						height: window.isSupUser ? 180 : 145,
 						resizable: false,
@@ -1217,7 +1219,7 @@
 				editor.addCommand('LJLike', new CKEDITOR.dialogCommand('LJLikeDialog'));
 
 				editor.ui.addButton('LJLike', {
-					label: top.CKLang.LJLike_name,
+					label: CKLang.LJLike_name,
 					command: 'LJLike'
 				});
 			})();
