@@ -1204,10 +1204,15 @@ sub trans {
      && $host =~ /[^\d\.]/ )
     {
         my $u = LJ::User->new_from_external_domain($host);
+        my $ru_lj_user;
+
+        if ($host =~ /(.*?)\.?(?:xn--80adlbihqogw6a|xn--f1aa)\.xn--p1ai/) {
+            $ru_lj_user = $1;
+        }
 
         unless ($u) {
-            if ($host =~ /(.*?)\.?(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/) {
-                if ($1 && !$LJ::DOMAIN_JOURNALS_RU_MAINPAGE{$1}) {
+            if ($ru_lj_user) {
+                if (!$LJ::DOMAIN_JOURNALS_RU_MAINPAGE{$ru_lj_user}) {
                     LJ::Request->pnotes ('error' => 'baddomainru');
                     LJ::Request->pnotes ('domainname' => $host);
                     LJ::Request->pnotes ('uri_domain_shop' => "$LJ::SITEROOT/shop/domain_ru.bml");
@@ -1227,7 +1232,7 @@ sub trans {
         my $check_host = lc($host);
         $check_host =~ s/^www\.//;
 
-        if ($LJ::DOMAIN_JOURNALS_REVERSE{$check_host} || $LJ::DOMAIN_JOURNALS{$u->user}) {
+        if (!$ru_lj_user || $LJ::DOMAIN_JOURNALS_REVERSE{$check_host} || $LJ::DOMAIN_JOURNALS{$u->user}) {
             my $view = $determine_view->($u->user, "other:$host$hostport", $uri);
             return $view if defined $view;
         } else {
