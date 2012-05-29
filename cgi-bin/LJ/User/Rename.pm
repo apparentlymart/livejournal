@@ -286,7 +286,7 @@ sub basic_rename {
     }   
 
     unless ($opts->{opt_domainru}) {
-       $dbh->do("DELETE * FROM domains WHERE userid=?", undef, $u->userid); 
+       $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->userid); 
     }
 
     return $to;
