@@ -5896,17 +5896,21 @@ talk.insertcut=Insert Cut
 
 talk.insertitalic=Insert Italic (Ctrl+I)
 
-talk.insertunderline=Insert Underline (Ctrl+U)
+talk.insertlink=Insert Link
+
+talk.insertphoto=Insert Photo
+
+talk.insertpoll=Insert Poll
+
+talk.insertmap=Insert Map
 
 talk.insertspoiler=Insert Spoiler
 
 talk.insertstrikethrough=Insert Strikethrough
 
-talk.insertlink=Insert Link
-
-talk.insertphoto=Insert Photo
-
 talk.insertvideo=Insert Video
+
+talk.insertunderline=Insert Underline (Ctrl+U)
 
 talk.insertuser=Insert LJ User
 
