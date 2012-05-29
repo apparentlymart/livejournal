@@ -4523,14 +4523,9 @@ sub Entry__get_cutted_text {
     my $text = $this->{'text'};
     my $url  = $this->{'permalink_url'};
     
-    warn LJ::D($this);
-
     my $journal = $this->{'journal'};
     my $poster  = $this->{'poster'};
-    warn $journal;
-    warn $poster;
 
-    warn "cut cut cut: $text";
     LJ::CleanHTML::clean_event( \$text, { 
         'cuturl'                => $url,
         'entry_url'             => $url,
@@ -4543,7 +4538,6 @@ sub Entry__get_cutted_text {
         'unsuspend_supportid'   => 0,
     } );
 
-    warn "text: $text";
     return $text;
 }
 
