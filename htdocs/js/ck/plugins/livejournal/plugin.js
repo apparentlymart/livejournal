@@ -608,8 +608,9 @@
 					exec: function () {
 						if (typeof InOb !== 'undefined') {
 							InOb.handleInsertImageBeta('upload');
+						} else {
+							jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
 						}
-						jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
 					},
 					editorFocus: false
 				});
