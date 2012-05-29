@@ -715,7 +715,7 @@
         $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
         $soc_capital = int($soc_capital->{result}->{authority}/1000);
         $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
-        $soc_image ||= "<img src='$LJ::IMGPREFIX/profile_icons/social-capital.png?v=17298";
+        $soc_image ||= "<img src='$LJ::IMGPREFIX/profile_icons/social-capital.png?v=17298/>";
 
         if ($u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
                 $body .= "<li class='rating-social-capital'>" .
