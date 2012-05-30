@@ -3831,6 +3831,9 @@ A.lj-button-link:active {
 		border-bottom: 1px solid #D6D6D6;
 		color: #4F74AE !important;
 		}
+	.b-reposted-popup .b-reposted-popup-footer-hide {
+		display: none;
+		}
 
 /* LJ like buttons 
 -----------------------------------------------*/
