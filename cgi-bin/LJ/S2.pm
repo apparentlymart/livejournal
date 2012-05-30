@@ -1969,6 +1969,9 @@ sub Entry
     if ($e->{'real_journalid'}) {
         $e->{'repost'} = 1;
         $e->{'repost_icon'} = Image_std('reposted-entry');
+
+        my $reposter = LJ::want_user($e->{'real_journalid'});
+        $e->{'reposted_by'} = LJ::Lang::ml( 'entry.reference.reposter', { 'reposter' => LJ::ljuser2($reposter) } );
     }
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating

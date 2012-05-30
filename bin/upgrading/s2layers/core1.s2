@@ -330,6 +330,8 @@ class EntryLite
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
     var int depth "Visual depth of entry.  Top-level journal entries are always depth zero.  Comments have a depth greater than or equal to one, depending on where the thread is rooted at.";
 
+    var readonly string reposted_by "The string about reposter";
+
     var string[] link_keyseq "An array of keys which you should pass to [method[EntryLite.get_link(string key)]] to produce an entry 'toolbar'. Does not contain nav_next and nav_prev for entries; you should retrieve those separately and put them somewhere appropriate for your layout.";
 
     function print_text() [fixed]
