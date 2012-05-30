@@ -114,6 +114,53 @@ Event.prep = function(e){
 LJ = window.LJ || {};
 
 /**
+ * Define a namespace.
+ *
+ * @param {string} path The String with namespace to be created.
+ * @param {Object=} top An optional object. If set then the namespace will be built relative to it. Defaults to the window.
+ */
+LJ.define = function(path, top) {
+	var ns = path.split('.'),
+		name;
+
+	top = top || window;
+
+	while (name = ns.shift()) {
+		top[name] = top[name] || {};
+		top = top[name];
+	}
+
+}
+
+/**
+ * Mark the namespace as a dependency. The function does nothing now.
+ *
+ * @param {string} path Namespace name.
+ */
+LJ.require = function(path) {
+	//fillme
+};
+
+/**
+ * Get a variable, defined especially for this page in the Site.page.
+ * 
+ * @param {string} name Variable name.
+ * @param {boolean} global A flag to check, whether the variable is local to page or not.
+ *
+ * @return {*} Returns a page variable or undefined if not found.
+ */
+LJ.pageVar = function(name, global) {
+	var obj = global ? window.Site : window.Site.page;
+
+	if (obj && obj.hasOwnProperty(name)) {
+		return obj[name];
+	} else {
+		LJ.console
+		return void(0);
+	}
+};
+
+/**
  * @class Class allows to call a function with  some delay and also prevent
  *     its execution if needed.
  * @constructor
@@ -252,9 +299,29 @@ LJ.console = function() {
 	var consoleShim = {
 		log: function() {
 			if (jQuery.browser.msie && consoleExists()) {
-				console.log( [].join.apply(arguments) );
+				var args = [].slice.call(arguments);
+
+				args = args.map(function(el) {
+					if (typeof el === 'object') {
+						try {
+							return LiveJournal.JSON.stringify(el);
+						} catch (e) {
+							return el;
+						}
+					} else {
+						return el;
+					}
+				});
+				console.log( args.join(' ') );
 			} else {
 				runIfExists('log', arguments);
+			}
+		},
+
+		warn: function() {
+			if (!runIfExists('warn', arguments)) {
+				var args = ['Warn: '].concat([].slice.call(arguments, 0));
+				this.log.apply(this, args);
 			}
 		}
 	};
@@ -310,33 +377,54 @@ LJ.getConst = function(name) {
 }
 
 /**
- * Define a namespace.
- *
- * @param {string} path The String with namespace to be created.
- * @param {Object=} top An optional object. If set then the namespace will be built relative to it. Defaults to the window.
+ * @namespace LJ.Util.Journal Utility functions connected with journal
  */
-LJ.define = function(path, top) {
-	var ns = path.split('.'),
-		name;
+LJ.define('LJ.Util.Journal');
 
-	top = top || window;
+(function() {
+	var base = (LJ.pageVar('siteroot', true) || 'http://www.livejournal.com')
+						.replace('http://www', '')
+						.replace(/\./, '\\.'),
+		journalReg  = new RegExp('^http:\\/\\/(\\w+)' + base + '(?:\\/(?:(\\w+)\\/)?(?:(\\d+)\\.html)?)?$');
 
-	while (name = ns.shift()) {
-		top[name] = top[name] || {};
-		top = top[name];
-	}
+	/**
+	 * Parse journal link to retrieve information from it
+	 *
+	 * @param {string} url The string to parse.
+	 * @return {Object} Return object will contain fields journal and ditemid(if availible) or null if the link cannot be parsed.
+	 */
+	LJ.Util.Journal.parseLink = function(url) {
+		if (!url) {
+			return null;
+		}
 
-}
+		if (!url.match(/(\.html|\/)$/)) {
+			url += '/';
+		}
+
+		var regRes = journalReg.exec(url),
+			result = {};
+
+		if (!regRes || !regRes[1]) { return null; }
+		if (regRes[1] !== 'users') {
+			result.journal = regRes[1];
+		} else {
+			if (!regRes[2]) { return null; }
+			result.journal = regRes[2];
+		}
+
+		if (regRes[3]) {
+			result.ditemid = parseInt(regRes[3], 10);
+		}
+
+		return result;
+	};
+
+}());
 
 /**
- * Mark the namespace as a dependency. The function does nothing now.
- *
- * @param {string} path Namespace name.
+ * @namespace LJ.Util.Date The namespace contains utility functions connected with date.
  */
-LJ.require = function(path) {
-	//fillme
-};
-
 LJ.define('LJ.Util.Date');
 
 (function() {
@@ -453,23 +541,27 @@ LJ.define('LJ.Util.Date');
 		});
 	};
 
+	/**
+	 * Get timezone from the date object in the canonical way.
+	 *
+	 * @param {Date} date The date object.
+	 * @return {string} A string representation of timezone, eg +0400
+	 */
+	LJ.Util.Date.timezone = function(date) {
+		var offset = (-(new Date).getTimezoneOffset() / 0.6),
+			str = '';
+
+		if (offset > 0) {
+			str += '+';
+		}
+
+			str += ('' + offset).pad(4, '0');
+
+		return str;
+	}
+
 }());
 
-
-
-/**
- * Get a variable, defined especially for this page in the Site.page.
- * 
- * @param {string} Variable name.
- * @return {*} Returns a page variable or undefined if not found.
- */
-LJ.pageVar = function(name) {
-	if (Site.page && Site.page.hasOwnProperty(name)) {
-		return Site.page[name];
-	} else {
-		return void(0);
-	}
-};
 
 LJ.DOM = LJ.DOM || {};
 
