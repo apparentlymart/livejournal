@@ -343,7 +343,6 @@ class EntryLite
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
     function time_display (string datefmt, string timefmt) : string "time_display, with customized date/time formats.";
     function builtin formatted_subject (string{} opts) : string "formats subject - outputs subject as html-link, gets hash of attributes - class and(or) style ";
-    var readonly string reposted_by "The string about reposter";
 }
 
 class Entry extends EntryLite
@@ -352,9 +351,12 @@ class Entry extends EntryLite
     var readonly string security "The security level of the entry ('private', 'protected'), or blank if public.";
     var readonly bool sticky "Indicates that this entry is sticky";
     var readonly bool delayed "Indicates that this entry is delayed";
+    var readonly bool repost "Indicates that this entry is repost";
+
     var Image security_icon "A little icon which should be displayed somewhere on an entry to represent the security setting";
     var Image sticky_icon "A little icon which should be displyaed somewhere on an entry to represent the sticky setting";
     var Image delayed_icon "A little icon which should be displyaed somewhere on an entry to represent the delayed entry";
+    var Image repost_icon "A little icon which should be displyaed somewhere on an entry to represent the reposted entry";
 
     var Image mood_icon "Mood icon, or null.";
     var CommentInfo comments "Comment information on this entry";
@@ -1906,11 +1908,16 @@ property string text_icon_alt_delayed {
     des = "Alternative text for icons of delayed entries";
     noui = 1;
 }
+property string text_icon_alt_reposted {
+    des = "Alternative text for icons of reposted entries";
+    noui = 1;
+}
 set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
 set text_icon_alt_groups = "[custom friends groups post]";
 set text_icon_alt_sticky = "[sticky post]";
 set text_icon_alt_delayed = "[delayed post]";
+set text_icon_alt_reposted = "[reposted post]";
 
 property string comment_form_text_hint {
     des = "Text hint for comment message";

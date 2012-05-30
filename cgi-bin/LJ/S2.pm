@@ -1957,11 +1957,6 @@ sub Entry
     $e->{'system_time'} = DateTime_parts($arg->{'system_dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
-    if ($e->{'real_journalid'}) {
-        my $reposter = LJ::want_user($e->{'real_journalid'});
-        $e->{'reposted_by'} = LJ::Lang::ml( 'entry.reference.reposter', { 'reposter' => LJ::ljuser2($reposter) } );
-    }
-
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'delete_reference'  if LJ::is_enabled('entry_reference');
     push @$link_keyseq, 'mem_add'           if LJ::is_enabled('memories');
@@ -1970,6 +1965,11 @@ sub Entry
     push @$link_keyseq, 'watch_comments'    if LJ::is_enabled('esn');
     push @$link_keyseq, 'unwatch_comments'  if LJ::is_enabled('esn');
     push @$link_keyseq, 'flag'              if LJ::is_enabled('content_flag');
+
+    if ($e->{'real_journalid'}) {
+        $e->{'repost'} = 1;
+        $e->{'repost_icon'} = Image_std('reposted-entry');
+    }
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -2059,8 +2059,9 @@ sub Entry
         #   layers when they do weird parsing/manipulation of the text member in
         #   untrusted layers.
         $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed|iframe)\b!i;
-            
-        if ($entry->is_sticky() || $arg->{'sticky_type'} ) {
+
+        my $show_sticky = ($entry->is_sticky() || $arg->{'sticky_type'}) && !$e->{'repost'};
+        if ($show_sticky) {
            $e->{'sticky'} = 1;
            $e->{'sticky_icon'} = Image_std("sticky-entry");
         }
@@ -2217,6 +2218,7 @@ sub Image_std
             'security-groups' => Image("$LJ::IMGPREFIX/icon_groups.gif", 19, 16, $ctx->[S2::PROPS]->{'text_icon_alt_groups'}, 'title' => $ctx->[S2::PROPS]->{'text_icon_alt_groups'}),
             'sticky-entry' => Image("$LJ::IMGPREFIX/icon_sticky.png", 13, 15, $ctx->[S2::PROPS]->{'text_icon_alt_sticky'}, 'title' => $ctx->[S2::PROPS]->{'text_icon_alt_sticky'}),
             'delayed-entry' => Image("$LJ::IMGPREFIX/icon_delayed.png", 13, 15, $ctx->[S2::PROPS]->{'text_icon_alt_delayed'}, 'title' => $ctx->[S2::PROPS]->{'text_icon_alt_delayed'}),
+            'reposted-entry' => Image("$LJ::IMGPREFIX/icon_repost.png", 13, 15, $ctx->[S2::PROPS]->{'text_icon_alt_reposted'}, 'title' => $ctx->[S2::PROPS]->{'text_icon_alt_reposted'}),
         };
     }
     return $LJ::S2::RES_CACHE->{$name};
