@@ -120,9 +120,15 @@
     }
 
     if ($u && ($u->is_personal || $u->is_comm)) {
-        my ($position, $first, $soc_capital);
+        my ($position, $first, $soc_capital, %filter);
 
         if ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
+
+            my $country = LJ::GeoLocation->get_country_info_by_ip;
+            $country = $u->prop('country') if $u && $country ne 'UA';
+            if ($country eq 'UA') {
+                $filter{filter} = 'UA';
+            }
 
             $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
                 func => 'get_value',
@@ -131,6 +137,7 @@
                 by => 'friends_weight',
                 type => 0,
                 sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
+                %filter,
             });
 
             $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {
