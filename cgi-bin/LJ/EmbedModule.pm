@@ -126,26 +126,11 @@ sub _expand_tag {
             ">" . $opts{expand_to_link}->{caption} . "</a>";
     } elsif ($opts{get_video_id}) {
         my $code = $class->module_content(moduleid  => $attrs{id}, journalid => $journal->id);
+        my %params = $class->embed_video_info($code);
 
         my $out=  '<lj-embed id="'. $attrs{id} .'" ';
-
-        # LJSUP-8992
-        if ($code =~ m!src=["']?http://www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)['"]?!) {
-            $out .= 'vid="'.$1.'" source="youtube" ';
-        } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! ||
-                 $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
-            $out .= 'vid="'.$1.'" source="vimeo" ';
-        } elsif ($code =~ m!=["']?http://video\.rutube\.ru/([\dabcdef]+)['"]?!) {
-            $out .= 'vid="'.$1.'" source="rutube" ';
-        } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
-            $out .= 'vid="'.$1.'" source="yandex" ';
-        } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) { #"
-            $out .= 'vid="'.$1.'" source="mail.ru" ';
-        } elsif ($code =~ m!http://(vkontakte\.ru|vk\.com)/video_ext!) {
-            $out .= 'source="'.$1.'" ';
-            my %fields = ($code =~ /(oid|id|hash)=([\dabcdef]+)/gm);
-            $fields{vid} =  delete $fields{id};
-            $out .= $_.'="'.$fields{$_}.'" ' foreach (keys %fields);
+        while (my ($name, $val) = each %params){
+            $out .= qq|$name="$val" |;
         }
         $out .= '/>';
 
@@ -156,6 +141,40 @@ sub _expand_tag {
         return $class->module_iframe_tag($journal, $attrs{id}, %opts)
     }
 };
+sub embed_video_info {
+    my ($class, $code) = @_;
+    
+    my %params = ();
+
+    # LJSUP-8992
+    if ($code =~ m!src=["']?http://www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)['"]?!) {
+        $params{vid} = $1;
+        $params{source} = 'youtube';
+
+    } elsif ($code =~ m!src=["']?http://player\.vimeo\.com/video/(\d+)[?'"]?! ||
+             $code =~ m!=["']?http://vimeo\.com/moogaloop\.swf\?[\d\w\_\-\&\;\=]*clip_id=(\d+)[&'"]?! ) {
+        $params{vid}    = $1;
+        $params{source} = 'vimeo';
+    } elsif ($code =~ m!=["']?http://video\.rutube\.ru/([\dabcdef]+)['"]?!) {
+        $params{vid} = $1;
+        $params{source} = 'rutube';
+    } elsif ($code =~ m!=["']?http://static\.video\.yandex\.ru/([\d\w\/\-\_\.]+)['"]?!) {
+        $params{vid} = $1;
+        $params{source} = 'yandex';
+    } elsif ($code =~ m!http://img\.mail\.ru.+movieSrc=([\w\d\/\_\-\.]+)["']?!) { #"
+        $params{vid} = $1;
+        $params{source} = 'mail.ru';
+    } elsif ($code =~ m!http://(vkontakte\.ru|vk\.com)/video_ext!) {
+        my $source = $1;
+        my %fields = ($code =~ /(oid|id|hash)=([\dabcdef]+)/gm);
+        my $vid = delete $fields{id};
+        %params = %fields;
+        $params{source} = $source;
+        $params{vid}    = $vid;
+    }
+
+    return %params;
+}
 
 sub add_user_to_embed {
     my ($class, $user_name, $postref) = @_;
@@ -467,6 +486,11 @@ sub module_iframe_tag {
     my $remote = LJ::get_remote();
     my %params = (moduleid => $moduleid, journalid => $journalid, preview => $preview,);
     LJ::run_hooks('modify_embed_iframe_params', \%params, $u, $remote);
+
+    my %video_params = $class->embed_video_info($content);
+    $params{source} = $video_params{source} if exists $video_params{source};
+    $params{vid}    = $video_params{vid}    if exists $video_params{vid};
+
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', %params));
     my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" .
         join('', map { "&amp;$_=" . LJ::eurl($params{$_}) } keys %params);
