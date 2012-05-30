@@ -435,7 +435,12 @@ font-size: 8pt;
 color: $*stronger_text;
 }
 
-.caption A, .caption A:hover, .caption A:visited {
+.caption A,
+.caption A:hover,
+.caption A:visited,
+.index A,
+.index A:hover,
+.index A:visited {
         color: $*stronger_text;
         text-decoration: none;
 }
@@ -805,6 +810,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 <tr align='left'>
 <td class="caption">""";
 
+    if ($e.repost) { "$e.repost_icon "; }
     if ($e.delayed) { "$e.delayed_icon "; }
     if ($e.sticky) { "$e.sticky_icon "; }
     if ($e.security) { "$e.security_icon "; }
@@ -813,7 +819,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 print $e->formatted_subject({"class"=>"subj-link"});
     } else { print safe "$e.subject"; }
 """</td>
-<td align="right" class="index">[$datetime]</td>
+<td align="right" class="index">[$datetime]""";
+if ($e.reposted_by) {
+    """ [$e.reposted_by]""";
+}
+"""
+</td>
 </tr>
 <tr align='left'>
 <td colspan="2" bgcolor="$*entry_back">

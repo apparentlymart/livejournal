@@ -2959,6 +2959,7 @@ function MonthDay::print_subjectlist() {
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print(); " ";
         }
+        if ($e.repost) {" $e.repost_icon"; }
         if ($e.delayed) {" $e.delayed_icon";}
         if ($e.sticky) {" $e.sticky_icon";}
         if ($e.security) {" $e.security_icon";}
