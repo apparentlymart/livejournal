@@ -1465,10 +1465,22 @@ sub create_view_lastn
             $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
         if ($security eq "usemask" &&
             $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
-        if (LJ::is_enabled("delayed_entries")) {
-            $var .= '_STICKY' if $entry_obj->is_sticky();
-        }
 
+        if (!$repost_entry_obj) {
+            if (LJ::is_enabled("delayed_entries")) {
+                $var .= '_STICKY' if $entry_obj->is_sticky();
+            }
+        } else {
+            if (LJ::is_enabled("entry_reference")) {
+            #    $var .= '_REPOSTED';
+
+                my $reposter = $repost_entry_obj->poster;
+                my $ref_text = LJ::Lang::ml( 'entry.reference.reposter', 
+                                    { 'reposter' => LJ::ljuser2($reposter) } );
+                $lastn_event{'reposted_by'} =  $ref_text;
+            }
+        }
+    
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
