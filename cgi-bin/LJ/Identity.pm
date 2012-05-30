@@ -261,7 +261,7 @@ sub unpack_forwhat {
             die;
         }
     } elsif ( $forwhat =~ /^oauth\-([a-z0-9]+)$/i ) {
-        $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$1";
+        $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$1&auth_type=".$class->short_code;
         $returl_fail = $returl;
         $skip_interstitial = 1;
     } else {
