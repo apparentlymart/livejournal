@@ -412,6 +412,7 @@ sub substitute_content {
         my $link = $entry_obj->prop('repost_link'); 
         if ($link) {
             my ($org_journalid, $org_jitemid) = split(/:/, $link);
+            return 0 unless int($org_journalid);
             my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : undef;
             
             my $fake_entry = LJ::Entry->new( $journal, jitemid => $org_jitemid);
@@ -485,8 +486,6 @@ sub substitute_content {
 
     if ($opts->{'subject_repost'}) {
         my $subject_text = $original_entry_obj->subject_html;
-        my $repost_text = LJ::Lang::ml('entry.reference.subject');
-        $subject_text .= " ( $repost_text )";
         ${$opts->{'subject_repost'}} = $subject_text;
     }
 

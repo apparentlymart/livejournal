@@ -200,8 +200,8 @@ sub MonthPage
             'comments' => $comments,
             'userpic' => $userpic,
             'permalink_url' => $permalink,
-            'original_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
-            'original_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
+            'real_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
+            'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
 
         push @{$day_entries{$day}}, $entry;
