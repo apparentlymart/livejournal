@@ -153,6 +153,7 @@ sub __create_repost {
 
     my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
     $post_obj->convert_to_repost($mark);
+    $post_obj->set_prop( 'repost' => 'e' );
 
     # create record
     my $repost_jitemid = $post_obj->jitemid;
