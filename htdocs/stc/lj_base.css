@@ -3712,7 +3712,14 @@ A.lj-button-link:active {
 	border: none!important;
 	background-color: transparent!important;
 	}
+.lj-button-light.repost-button .lj-button-a,
+.lj-button-light.repost-button .lj-button-c {
+	vertical-align: middle !important;
+	}
 .lj-button-light.repost-button .lj-button-b {
+	position: relative;
+	height: 22px!important;
+	line-height: 22px!important;
 	margin: 0 5px 0 0!important;
 	padding:0 5px!important;
 	border: 1px solid!important;
@@ -3721,17 +3728,20 @@ A.lj-button-link:active {
 	-webkit-border-radius: 2px!important;
 	-moz-border-radius: 2px!important;
 	border-radius: 2px!important;
+	vertical-align: middle !important;
+	text-shadow: 0 1px 0 #FFF;
 	color: #000!important;
 	}
 .lj-button-light.repost-button .lj-button-icon {
+	float: left;
 	width: 16px!important;
-	height: 22px!important;
-	margin: 0 5px 0 0!important;
+	height: 16px!important;
+	margin: 3px 5px 0 0!important;
 	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
 	vertical-align: middle;
 	}
 .lj-button-light.repost-button .lj-button-icon-sinlge {
-	margin: 0!important;
+	margin: 3px 0 0!important;
 	}
 .lj-button-light.repost-button .lj-button-c.empty {
 	margin: 0!important;
@@ -3772,6 +3782,46 @@ A.lj-button-link:active {
 	height: 0!important;
 	font-size: 0!important;
 	}
+.b-reposted-popup {
+	margin: -5px 0 0;
+	width: 600px;
+	line-height: 22px !important;
+	font-size: 12px !important;
+	font-family: Arial, Verdana, sans-serif !important;
+	}
+	.b-reposted-popup A {
+		font-size: 12px !important;
+		}
+	.b-reposted-popup A:link,
+	.b-reposted-popup A:visited {
+		border: none !important;
+		text-decoration: none !important;
+		color: #4F74AE !important;
+		}
+	.b-reposted-popup A:hover,
+	.b-reposted-popup A:active {
+		border: none !important;
+		text-decoration: underline !important;
+		color: #4F74AE !important;
+		}
+	.b-reposted-popup .b-reposted-popup-header {
+		padding: 4px 0 6px;
+		font-size: 15px !important;
+		font-weight: bold !important;
+		color: #2D2D2D !important;
+		}
+	.b-reposted-popup .b-reposted-popup-load {
+		background: url(/img/preloader/preloader-blue-white.gif?v=1) no-repeat 50% 30px; 
+		}
+	.b-reposted-popup .b-reposted-popup-content {
+		overflow-y: auto;
+		max-height: 66px;
+		margin: 0 -14px 6px 0;
+		padding: 4px 0 6px;
+		border-top: 1px solid #D6D6D6;
+		border-bottom: 1px solid #D6D6D6;
+		color: #4F74AE !important;
+		}
 
 /* LJ like buttons 
 -----------------------------------------------*/
