@@ -437,7 +437,7 @@ jQuery(document).click(function(e)
 					likeHtml = jEl.html();
 				
 				jEl.html(likeHtml.slice(4, -3)); // strip '<!--' and '-->'
-				LiveJournal.parseLikeButtons();
+				LiveJournal.parseLikeButtons(jEl);
 
 				like.init = true;
 			});
