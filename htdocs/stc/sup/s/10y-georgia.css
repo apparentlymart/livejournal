@@ -233,6 +233,13 @@ A:visited:hover {
 				text-transform:lowercase;
 				font-family:Georgia, serif;
 				}
+			.content .entry .entry-text .entry-repost {
+				margin:-0.8em 0 1em;
+				font-size:1.1em;
+				font-style:italic;
+				text-transform:lowercase;
+				font-family:Georgia, serif;
+				}
 			.content .entry .entry-text .author DT {
 				float:right;
 				width:120px;
