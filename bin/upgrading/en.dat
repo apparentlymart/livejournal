@@ -4804,11 +4804,17 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+repost.button.label=Repost
+
 repost.default_button|staleness=1
 repost.default_button=repost
 
 repost.default_subject|staleness=1
 repost.default_subject=post
+
+repost.popup.head=Reposted by
+
+repost.popup.footer=Show more…
 
 repost.wrapper=Originally posted by <lj user="[[username]]" /> at <a href="[[url]]">[[subject]]</a><div class="repost">[[text]]</div>
 
