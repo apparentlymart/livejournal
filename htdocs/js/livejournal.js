@@ -37,6 +37,10 @@ LiveJournal.initPage = function () {
 		return;
 	}
 
+	if (LJ.Api) {
+		LJ.Api.init({ auth_token: Site.auth_token });
+	}
+
 	//register system hooks
 	LiveJournal.register_hook('update_wallet_balance', LiveJournal.updateWalletBalance);
 	LiveJournal.register_hook('xdr/message', LiveJournal.processXdr);
@@ -365,7 +369,7 @@ LiveJournal.closeSiteMessage = function(node, e, id) {
 	}, 'json');
 };
 
-LiveJournal.parseLikeButtons = function() {
+LiveJournal.parseLikeButtons = function(ctx) {
 	try {
 		FB.XFBML.parse();
 	} catch(e) {}
@@ -393,7 +397,7 @@ LiveJournal.parseLikeButtons = function() {
 		gapi.plusone.go();
 	} catch(e) {}
 
-	jQuery('a.twitter-share-button').each(function() {
+	jQuery('a.twitter-share-button', ctx || document).each(function() {
 		if (this.href != 'http://twitter.com/share') {
 			return;
 		}
@@ -411,6 +415,27 @@ LiveJournal.parseLikeButtons = function() {
 		})
 		.attr('src', LiveJournal.constructUrl('http://platform.twitter.com/widgets/tweet_button.html', params))
 		.insertBefore(link));
+	});
+
+	var initRepostButton = function(link, url, data) {
+		data = data || {};
+		var reposted = !!data.reposted;
+
+		var repostNode = LJ.UI.template('templates-CleanHtml-Repost', { url: url,
+			count: data.count || 0, reposted: reposted });
+		link.replaceWith(repostNode);
+
+		repostNode.repostbutton({
+			url: url,
+			reposted: reposted
+		});
+	}
+	
+	jQuery('div.lj-like-item-repost > a', ctx || document).each(function() {
+		var link = jQuery(this),
+			url = link.data('url');
+
+		LJ.Api.call('repost.get_status', { url: url }, initRepostButton.bind(null, link, url));
 	});
 };
 
