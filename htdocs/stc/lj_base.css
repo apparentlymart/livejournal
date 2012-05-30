@@ -3732,6 +3732,15 @@ A.lj-button-link:active {
 	text-shadow: 0 1px 0 #FFF;
 	color: #000!important;
 	}
+.lj-button-light.repost-button-active .lj-button-b {
+	background: #E6E7E9 !important;
+	background-image: -moz-linear-gradient(top, #E6E7E9 0%, #E7E8E9 100%) !important;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E6E7E9), color-stop(100%,#E7E8E9)) !important;
+	background-image: -webkit-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: -o-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: -ms-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	}
 .lj-button-light.repost-button .lj-button-icon {
 	float: left;
 	width: 16px!important;
