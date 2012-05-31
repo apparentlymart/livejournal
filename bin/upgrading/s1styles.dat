@@ -10170,16 +10170,7 @@ LASTN_OPEN_SKYSCRAPER_AD<=
 <=LASTN_OPEN_SKYSCRAPER_AD
 
 LASTN_PAGE<=
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">STN_EVENT_PROTECTED<=
-  <div class="H3Holder">
-%%altposter%%
-   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Protected"></h3>
-<p>%%event%%</p>
-%%currents%%
-%%talklinks%%
-  </div>
-
-<=LASTN_EVENT_PROTECTED
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
  <head>
