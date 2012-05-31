@@ -29,12 +29,18 @@ sub prepare_template_params {
                          'repost_obj'        => \$repost_entry_obj, };
 
         my $entry_reposted = LJ::Entry::Repost->substitute_content( $entry, $content );
+        if ($entry_reposted && !$entry->visible_to($remote)) {
+            $entry = $repost_entry_obj,
+            $repost_entry_obj = undef;
+        }
 
         my $entry_id = $entry->is_delayed ? $entry->delayedid : $entry->ditemid;
         my $entry_can_edit = 
             $entry->poster->equals($remote) &&
             ! $entry->journal->is_readonly &&
             ! $entry->poster->is_readonly;
+
+        $entry_can_edit = 0 if $entry_reposted && !$repost_entry_obj;
 
         my $poster_ljuser = $opts->{'show_posters'}
             ? $entry->poster->ljuser_display
@@ -78,7 +84,8 @@ sub prepare_template_params {
         if ($entry->is_delayed) {
             $alldateparts = $entry->alldatepart;
         } else {
-            $alldateparts = LJ::TimeUtil->alldatepart_s2($entry->{'eventtime'});
+            my $eventtime = $repost_entry_obj ? $repost_entry_obj->{'eventtime'} : $entry->{'eventtime'};
+            $alldateparts = LJ::TimeUtil->alldatepart_s2($eventtime);
         }
 
         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $alldateparts);
