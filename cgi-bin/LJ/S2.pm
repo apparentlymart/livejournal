@@ -5317,7 +5317,7 @@ sub _is_secure_resource {
                             (?:[\w\d\-]+\/)*   # path
                             [\w\d\-\.]+     # filename
                             \.
-                            (?:js|css)   # extension
+                            (?:js|css|tmpl)   # extension
                         $/x;
 }
 
