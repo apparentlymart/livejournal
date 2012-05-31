@@ -4532,7 +4532,7 @@ FRIENDS_EVENT_PRIVATE_REPOST<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
-<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Repost">
 <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
@@ -4575,7 +4575,7 @@ FRIENDS_EVENT_REPOST<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
-<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky"></TD>
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Repost"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
 <=FRIENDS_EVENT_REPOST
@@ -4709,7 +4709,7 @@ FRIENDS_EVENT_PROTECTED_REPOST<=
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
-<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 
@@ -4945,7 +4945,7 @@ FRIENDS_EVENT_STICKY<=
 FRIENDS_EVENT_REPOST<=
 <table cellspacing=0 class="entries">
  <tr>
-  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_reopost.png" style="float:left"> %%subject%%</td>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_repost.png" style="float:left"> %%subject%%</td>
   <td class="nopad" valign="bottom">
    <table cellspacing=0 style="float:right;">
     <tr>
@@ -6036,7 +6036,7 @@ FRIENDS_EVENT_PRIVATE_REPOST<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_repost.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_repost.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Repost"><img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -6083,7 +6083,7 @@ FRIENDS_EVENT_REPOST<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span><img src="%%cons:img%%/icon_repost.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Sticky"></h3>
+   <h3><span>%%datetime%%%%subject%%</span><img src="%%cons:img%%/icon_repost.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Repost"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -6211,7 +6211,7 @@ FRIENDS_EVENT_PROTECTED_REPOST<=
     <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
     <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
    </div>
-   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_repost.png" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Sticky"><img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_repost.png" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Repost"><img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
    <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -6275,7 +6275,7 @@ FRIENDS_EVENT_PRIVATE_STICKY<=
 <=FRIENDS_EVENT_PRIVATE_STICKY
 
 FRIENDS_EVENT_PRIVATE_REPOST<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"> <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -6306,7 +6306,7 @@ FRIENDS_EVENT_STICKY<=
 <=FRIENDS_EVENT_STICKY
 
 FRIENDS_EVENT_REPOST<=
-<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -6438,7 +6438,7 @@ FRIENDS_EVENT_PROTECTED_STICKY<=
 
 
 FRIENDS_EVENT_PROTECTED_REPOST<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"> <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"> <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -6602,7 +6602,7 @@ FRIENDS_EVENT_REPOST<=
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Sticky">
+<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Repost">
 </FONT>
 <BR>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -6784,7 +6784,7 @@ FRIENDS_EVENT_PROTECTED_REPOST<=
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected">
+<B>%%datetime%%</B>%%subject%% &nbsp;<IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_repost.png" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"><IMG ALIGN=ABSMIDDLE SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected">
 </FONT>
 <BR>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -7660,7 +7660,7 @@ FRIENDS_EVENT_PROTECTED_REPOST<=
 </TD>
 <TD VALIGN="top">
 <TABLE BORDER="0">
-<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_sticky.png"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
+<TR><TD ROWSPAN="5" VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
 %%subject%%
 %%altposter%%
 <TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
@@ -7732,7 +7732,7 @@ LASTN_EVENT_REPOST<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%<span class="timestamp">%%datetime%%</span>:
-<img src="%%cons:img%%/icon_repost.png" width=13 height=15 vspace=0 hspace=0 alt="[Sticky]"> 
+<img src="%%cons:img%%/icon_repost.png" width=13 height=15 vspace=0 hspace=0 alt="[Repost]"> 
 %%subject%%</span>
 %%event%%
 %%currents%%</div>
@@ -7821,7 +7821,7 @@ LASTN_EVENT_PRIVATE_REPOST<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%<span class="timestamp">%%datetime%%</span>: 
-<img src="%%cons:img%%/icon_repost.gif" width=16 height=16 vspace=0 hspace=0 alt="[Repost]">
+<img src="%%cons:img%%/icon_repost.png" width=16 height=16 vspace=0 hspace=0 alt="[Repost]">
 <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]">
  %%subject%%</span>
 %%event%%
@@ -7911,7 +7911,7 @@ LASTN_EVENT_PROTECTED_REPOST<=
 <div class="entrytext">
 <span class="entryheading">
 %%altposter%%<span class="timestamp">%%datetime%%</span>: 
-<img src="%%cons:img%%/icon_reposted.gif" width=16 height=16 vspace=0 hspace=0 alt="[Reposted]">
+<img src="%%cons:img%%/icon_repost.png" width=16 height=16 vspace=0 hspace=0 alt="[Repost]">
 <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> 
 %%subject%%</span>
 %%event%%
@@ -8234,7 +8234,7 @@ LASTN_EVENT<=
 
 LASTN_EVENT_REPOST<=
 <TR VALIGN=TOP><TD style="text-align: right;" NOWRAP BGCOLOR="%%color:weak_back%%"><FONT COLOR="%%color:weak_text%%" FACE="Arial,Helvetica" SIZE=-1><I>%%datetime%%</I></FONT>%%altposter%%<BR/>
-<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repsted">
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
 </TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 <=LASTN_EVENT_REPOST
@@ -8342,7 +8342,7 @@ LASTN_EVENT_PROTECTED<=
 
 LASTN_EVENT_PROTECTED_REPOST<=
 <TR VALIGN=TOP><TD style="text-align: right;" NOWRAP BGCOLOR=%%color:weak_back%%><FONT COLOR=%%color:weak_text%% FACE="Arial,Helvetica" SIZE=-1><I>%%datetime%%</I></FONT>%%altposter%%<BR>
-<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected">
 </TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
@@ -8830,7 +8830,7 @@ LASTN_EVENT_PROTECTED_REPOST<=
 <table cellspacing=0 class="entries">
  <tr>
   <td colspan=2 rowspan=2 class="metabox">
-  <img src="%%cons:img%%/icon_sticky.png">
+  <img src="%%cons:img%%/icon_repost.png">
   <img src="%%cons:img%%/icon_protected.gif">%%subject%%&nbsp;</td>
   <td class="nopad">%%altposter%%</td>
   <td>&nbsp;</td>
@@ -9930,7 +9930,7 @@ LASTN_EVENT_REPOST<=
   <div class="H3Holder">
 %%altposter%%
    <h3><span>%%datetime%%%%subject%%</span>
-   <img src="%%cons:img%%/icon_repost.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Sticky">
+   <img src="%%cons:img%%/icon_repost.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Repost">
    </h3>
 <p>%%event%%</p>
 %%currents%%
@@ -10376,7 +10376,7 @@ HEIGHT="23"></CENTER></P>
 
 LASTN_EVENT_PROTECTED_REPOST<=
 <IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 
-HSPACE=2 ALT="Sticky">
+HSPACE=2 ALT="Repost">
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2
 HSPACE=2 ALT="Protected"> <FONT
 SIZE="+1">%%datetime%%%%subject%%%%altposter%%</FONT><BR><BR>
@@ -10567,7 +10567,7 @@ LASTN_EVENT_REPOST<=
 %%altposter%%
 <td width="100%"><FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
 <IMG  SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 
-ALT="Delayed">
+ALT="Repost">
 %%event%%
 %%currents%%
 </FONT></td></tr>
@@ -10683,7 +10683,10 @@ ALT="Private">
 LASTN_EVENT_PRIVATE_REPOST<=
 <TR><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-<B>%%datetime%%</B>%%subject%% &nbsp;<IMG 
+<B>%%datetime%%</B>%%subject%% &nbsp;
+<IMG
+SRC="%%cons:img%%/icon_repost.png" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2
+ALT="Repost"><IMG 
 SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 
 ALT="Private">
 </FONT></td></tr>
@@ -10808,8 +10811,8 @@ LASTN_EVENT_PROTECTED_REPOST<=
 <TR><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
 <B>%%datetime%%</B>%%subject%% &nbsp;
-<IMG SRC="%%cons:img%%/icon_sticky.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 
-ALT="Sticky">
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 
+ALT="Repost">
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2
 ALT="Protected">
 </FONT></td></tr>

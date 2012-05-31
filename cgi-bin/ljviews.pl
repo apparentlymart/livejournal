@@ -2104,8 +2104,18 @@ sub create_view_friends {
         if ($security eq "usemask" &&
             $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
 
-        if ($entry_obj->is_sticky) {
-            $var .= '_STICKY';
+        if (!$repost_entry_obj) {
+            if (LJ::is_enabled("delayed_entries")) {
+                $var .= '_STICKY' if $entry_obj->is_sticky();
+            }
+        } else {
+            if (LJ::is_enabled("entry_reference")) {
+                $var .= '_REPOST';
+
+                my $reposter = $repost_entry_obj->poster;
+                my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
+                                    { 'reposter' => LJ::ljuser2($reposter) } );
+            }
         }
 
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
