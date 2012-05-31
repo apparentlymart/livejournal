@@ -2814,6 +2814,8 @@ fcklang.ljlike.button.give=10 Give
 fcklang.ljlike.button.google|staleness=1
 fcklang.ljlike.button.google=Google +1
 
+fcklang.ljlike.button.repost=Repost
+
 fcklang.ljlike.button.twitter|staleness=1
 fcklang.ljlike.button.twitter=Twitter
 
@@ -6022,6 +6024,8 @@ talk.poll.settings.whovote=Who can vote in this poll?
 talk.poll.settings.whovote.all=All
 
 talk.poll.settings.whovote.friends=Friends
+
+talk.poll.type.add=Add question
 
 talk.poll.type.check=Check Boxes
 
