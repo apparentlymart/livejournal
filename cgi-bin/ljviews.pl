@@ -1472,7 +1472,7 @@ sub create_view_lastn
             }
         } else {
             if (LJ::is_enabled("entry_reference")) {
-                $var .= '_REPOSTED';
+                $var .= '_REPOST';
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter', 
