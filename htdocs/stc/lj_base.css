@@ -3732,6 +3732,10 @@ A.lj-button-link:active {
 	text-shadow: 0 1px 0 #FFF;
 	color: #000!important;
 	}
+.lj-button-light.repost-button-inactive .lj-button-b {
+	color: #999 !important;
+	cursor: text !important;
+	}
 .lj-button-light.repost-button-active .lj-button-b {
 	background: #E6E7E9 !important;
 	background-image: -moz-linear-gradient(top, #E6E7E9 0%, #E7E8E9 100%) !important;
@@ -3748,6 +3752,10 @@ A.lj-button-link:active {
 	margin: 3px 5px 0 0!important;
 	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
 	vertical-align: middle;
+	}
+.lj-button-light.repost-button-inactive .lj-button-icon {
+	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	opacity: 0.5;
 	}
 .lj-button-light.repost-button .lj-button-icon-sinlge {
 	margin: 3px 0 0!important;
