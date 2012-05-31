@@ -301,6 +301,7 @@ sub get_list {
     my $reposters_info = { users => {} };
     my $users = $reposters_info->{'users'};
 
+    my $reposters_count = scalar @$repostersids;
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
 
@@ -308,6 +309,7 @@ sub get_list {
                                'url'      => $u->journal_base, };
     }   
     $reposters_info->{'last'} = $repostersids->[-1];
+    $reposters_info->{'nomore'} = 1 if $reposters_count < 25;
 
     __put_reposters_list( $journalid,
                           $jitemid,
@@ -378,9 +380,8 @@ sub create {
     my $repost_itemid = __get_repostid( $entry_obj->journal, $jitemid, $u->userid );
 
     my $error;
-
     if ($repost_itemid) {
-        $error = LJ::Lang::ml('repost.already_exist');
+        $error = LJ::Lang::ml('entry.reference.repost.already_exist');
     } else {
         my $reposted_obj = __create_repost( {'u'          => $u,
                                              'entry_obj'  => $entry_obj,
