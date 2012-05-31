@@ -2193,7 +2193,7 @@ sub talkform {
         captcha_public           => LJ::conf_test( $LJ::RECAPTCHA{'public_key'} ),
 
         need_captcha             => $opts->{'do_captcha'},
-        commentcaptcha           => $journalu->prop("opt_show_captcha_to"),
+        commentcaptcha           => $captcha_html ? $journalu->prop("opt_show_captcha_to") : '',
         notaspammer              => $remote? LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $remote) : 0,
 
         'captcha_html'              => $captcha_html,
