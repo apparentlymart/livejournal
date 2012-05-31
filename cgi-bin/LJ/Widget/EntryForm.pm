@@ -1356,9 +1356,9 @@ sub render_options_block {
     $out .= "</ul>";
 
     if ( $self->should_show_trava ) {
-        $out .= '<script type="text/javascript">';
+        $out .= '<script type="text/javascript">LiveJournal.register_hook(\'page_load\', function() { ';
         $out .= q~jQuery('#entryform-music-wrapper').trava()~ . ( $opts->{'mode'} eq "edit" ? ';' : q~.trava('getNowListen');~ );
-        $out .= '</script>';
+        $out .= ' }); </script>';
     }
 
     return $out;
