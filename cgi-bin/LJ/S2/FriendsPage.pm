@@ -63,6 +63,9 @@ sub FriendsPage
     my $ret;
 
     LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine", "opt_imagelinks", "opt_ljcut_disable_friends");
+    if ($remote) {
+        LJ::need_string(qw/repost.confirm.delete/);
+    }
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }

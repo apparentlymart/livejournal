@@ -66,6 +66,7 @@ body<=
         LJ::need_res(qw(
                         stc/editjournal.css
                         ));
+        LJ::need_string(qw/repost.confirm.delete/);
     }
 
     # append months names tranlation to Site.ml_text['month.names.long']  

@@ -48,6 +48,7 @@ sub DayPage
     my $viewall = 0;
     my $viewsome = 0; # see public posts from suspended users
     if ($remote) {
+        LJ::need_string(qw/repost.confirm.delete/);
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "canview", "suspended")) {
