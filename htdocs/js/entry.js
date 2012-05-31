@@ -22,7 +22,7 @@ function initEntryDate() {
 		updateDate: !!window.updatePostTime,
 		classNames: {
 			'infutureedit': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
-			'future': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until',
+			'future': Site.is_delayed_post === 1 ? 'entrydate-changeit' : 'entrydate-until'
 		}
 	});
 }
