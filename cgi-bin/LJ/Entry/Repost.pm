@@ -362,6 +362,13 @@ sub delete {
     return LJ::API::Error->get_error('entry_not_found');
 }
 
+sub render_delete_js {
+    my ($class, $url) = @_;
+    return
+        qq{<script type="text/javascript">jQuery('a:last').click(function(ev) {
+        ev.preventDefault(); LiveJournal.run_hook('repost.requestRemove', this, $url); });</script>};
+}
+
 sub create {
     my ($class, $u, $entry_obj, $timezone) = @_;
     my $result = {};

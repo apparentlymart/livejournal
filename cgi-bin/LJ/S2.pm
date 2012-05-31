@@ -1958,7 +1958,7 @@ sub Entry
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
     my $link_keyseq = $e->{'link_keyseq'};
-    push @$link_keyseq, 'delete_reference'  if LJ::is_enabled('entry_reference');
+    push @$link_keyseq, 'delete_repost'  if LJ::is_enabled('entry_reference');
     push @$link_keyseq, 'mem_add'           if LJ::is_enabled('memories');
     push @$link_keyseq, 'tell_friend'       if LJ::is_enabled('tellafriend');
     push @$link_keyseq, 'share'             if LJ::is_enabled('sharing');
@@ -3996,14 +3996,16 @@ sub _Entry__get_link
     my $real_user = $this->{'real_journalid'} ? LJ::want_user($this->{'real_journalid'}) : undef;
 
     if ($this->{'real_itemid'}) {
-        if ($key eq 'delete_reference') {
+        if ($key eq 'delete_repost') {
             return $null_link unless $remote;
             return $null_link unless LJ::u_equals($remote, $real_user);
 
             my $entry = LJ::Entry->new($journalu, ditemid => $this->{'itemid'});
-            return LJ::S2::Link($entry->url,
+            my $link = LJ::S2::Link($entry->url,
                             $ctx->[S2::PROPS]->{"text_delete_repost"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
+            $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $entry->url );
+            return $link;
         }
     }
 
