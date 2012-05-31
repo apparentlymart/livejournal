@@ -1642,6 +1642,17 @@ DAY_EVENT<=
 
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<div class="entry" id="entry%%itemid%%" clear="all">
+<div class="entrytext">
+<span class="entryheading"><span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_repost.png" width=13 height=15 vspace=0 hspace=0 alt="[Repost]">  %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <div class="entry" id="entry%%itemid%%" clear="all">
 <div class="entrytext">
@@ -1698,6 +1709,18 @@ DAY_EVENT_PRIVATE<=
 
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_repost.png" width=13 height=15 vspace=0 hspace=0 alt="[Repost]"> <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <div class="entry" id="entry%%itemid%%">
 <div class="entrytext">
@@ -1730,6 +1753,18 @@ DAY_EVENT_PROTECTED<=
 </div>
 
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_repost.png" width=13 height=15 vspace=0 hspace=0 alt="[Repost]"> <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <div class="entry" id="entry%%itemid%%">
@@ -1964,6 +1999,12 @@ DAY_EVENT<=
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT>
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"></TD>
+<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT>
 <IMG SRC="%%cons:img%%/icon_delayed.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Delayed"></TD>
@@ -2017,6 +2058,13 @@ DAY_EVENT_PRIVATE<=
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></TD>
+<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
 <IMG SRC="%%cons:img%%/icon_delayed.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Delayed">
@@ -2033,6 +2081,13 @@ DAY_EVENT_PROTECTED<=
 <IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
+<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
@@ -2142,6 +2197,33 @@ DAY_EVENT<=
 </table>
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_repost.png">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <table cellspacing=0 class="entries">
  <tr>
@@ -2238,6 +2320,34 @@ DAY_EVENT_PRIVATE<=
 </table>
 <=DAY_EVENT_PRIVATE
 
+
+DAY_EVENT_PRIVATE_REPOST<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_repost.png"><img src="%%cons:img%%/icon_private.gif">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <table cellspacing=0 class="entries">
  <tr>
@@ -2300,6 +2410,33 @@ DAY_EVENT_PROTECTED<=
  </tr>
 </table>
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_repost.png"><img src="%%cons:img%%/icon_protected.gif">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <table cellspacing=0 class="entries">
@@ -2529,6 +2666,32 @@ summary="">
 
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0" summary="" class="entrybox">
+<tr>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td class="caption"><img src="%%cons:img%%/icon_repost.png" width="13" height="15"> %%subject%%</td>
+<td align="right" class="index">[%%datetime%%]</td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%currents%%
+%%event%%
+</td>
+</tr>
+%%talklinks%%
+</table>
+</td>
+</tr>
+</table><p>
+
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0" summary="" class="entrybox">
@@ -2659,6 +2822,34 @@ summary="">
 
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0" summary="" class="entrybox">
+<tr>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td class="caption">
+<img src="%%cons:img%%/icon_repost.png" width="13" height="15"> 
+<img src="%%cons:img%%/icon_private.gif" width="14" height="15"> %%subject%%</td>
+<td align="right" class="index">[%%datetime%%]</td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%currents%%
+%%event%%
+</td>
+</tr>
+%%talklinks%%
+</table>
+</td>
+</tr>
+</table><p>
+
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0" summary="" class="entrybox">
@@ -2723,6 +2914,35 @@ summary="">
 </table><p>
 
 <=DAY_EVENT_PROTECTED
+
+
+DAY_EVENT_PROTECTED_REPOST<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0" summary="" class="entrybox">
+<tr>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td class="caption">
+<img src="%%cons:img%%/icon_repost.png" width="13" height="15">
+<img src="%%cons:img%%/icon_protected.gif" width="14" height="15"> %%subject%%</td>
+<td align="right" class="index">[%%datetime%%]</td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%currents%%
+%%event%%
+</td>
+</tr>
+%%talklinks%%
+</table>
+</td>
+</tr>
+</table><p>
+
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <table width="600" cellpadding="2" cellspacing="0"
@@ -2929,9 +3149,24 @@ DAY_EVENT<=
 
 <=DAY_EVENT
 
+
+DAY_EVENT_REPOST<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span>
+   <img src="%%cons:img%%/icon_repost.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Repost">
+   </h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
   <div class="H3Holder">
-   <h3><span>%%datetime%%%%subject%%</span></h3>
+   <h3><span>%%datetime%%%%subject%%</span>
+       <img src="%%cons:img%%/icon_delayed.png" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Delayed">
+   </h3>
 <p>%%event%%</p>
 %%currents%%
 %%talklinks%%
@@ -2981,10 +3216,22 @@ DAY_EVENT_PRIVATE<=
 
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span>
+      <img src="%%cons:img%%/icon_repost.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Repost">
+   <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
   <div class="H3Holder">
    <h3><span>%%datetime%%%%subject%%</span>
-      <img src="%%cons:img%%/icon_delayed.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Delayed">\
+      <img src="%%cons:img%%/icon_delayed.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Delayed">
    <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
 <p>%%event%%</p>
 %%currents%%
@@ -3007,10 +3254,23 @@ DAY_EVENT_PROTECTED<=
 
 <=DAY_EVENT_PROTECTED
 
+
+DAY_EVENT_PROTECTED_REPOST<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span>
+   <img src="%%cons:img%%/icon_repost.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Repost">
+   <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Protected"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT_PROTECTED_REPOST
+
 DAY_EVENT_PROTECTED_DELAYED<=
   <div class="H3Holder">
    <h3><span>%%datetime%%%%subject%%</span>
-   <img src="%%cons:img%%/icon_delayed.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Private">
+   <img src="%%cons:img%%/icon_delayed.png" style="width: 13px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Delayed">
    <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Protected"></h3>
 <p>%%event%%</p>
 %%currents%%
@@ -3096,6 +3356,14 @@ DAY_EVENT<=
 <P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
+%%event%%
+%%currents%%
+%%talklinks%%
+<P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <IMG SRC="%%cons:img%%/icon_delayed.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Delayed"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
@@ -3134,6 +3402,15 @@ DAY_EVENT_PRIVATE<=
 <P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
+%%event%%
+%%currents%%
+%%talklinks%%
+<P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <IMG SRC="%%cons:img%%/icon_delayed.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Delayed">
 <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
@@ -3155,6 +3432,15 @@ DAY_EVENT_PROTECTED<=
 %%talklinks%%
 <P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
+%%event%%
+%%currents%%
+%%talklinks%%
+<P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <IMG SRC="%%cons:img%%/icon_delayed.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Delayed">
@@ -3257,6 +3543,21 @@ DAY_EVENT<=
 </TR>
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<TR><TD VALIGN=TOP>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+<B>%%datetime%%</B>%%subject%% &nbsp;<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+</FONT>
+<BR>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+%%event%%
+</FONT>
+%%currents%% %%talklinks%%
+<P>
+</TD>
+</TR>
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <TR><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -3312,6 +3613,22 @@ DAY_EVENT_PRIVATE<=
 </TR>
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<TR><TD VALIGN=TOP>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+<B>%%datetime%%</B>%%subject%% &nbsp;
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></FONT>
+<BR>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+%%event%%
+</FONT>
+%%currents%% %%talklinks%%
+<P>
+</TD>
+</TR>
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <TR><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -3345,6 +3662,22 @@ DAY_EVENT_PROTECTED<=
 </TD>
 </TR>
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<TR><TD VALIGN=TOP>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+<B>%%datetime%%</B>%%subject%% &nbsp;
+<IMG SRC="%%cons:img%%/icon_repost.png" WIDTH=13 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Repost">
+<IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></FONT>
+<BR>
+<FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
+%%event%%
+</FONT>
+%%currents%% %%talklinks%%
+<P>
+</TD>
+</TR>
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <TR><TD VALIGN=TOP>
@@ -3481,6 +3814,21 @@ DAY_EVENT<=
 <br><br><hr size="1">
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Event type:</b></font></td><td><font class="date">Repost</font></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Public</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <br>
 <table>
@@ -3552,6 +3900,21 @@ DAY_EVENT_PRIVATE<=
 <br><br><hr size="1">
 <=DAY_EVENT_PRIVATE
 
+DAY_EVENT_PRIVATE_REPOST<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Event type:</b></font></td><td><font class="date">Repost</font></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Private</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <br>
 <table>
@@ -3584,6 +3947,22 @@ DAY_EVENT_PROTECTED<=
 <font class="author">%%talklinks%%</font>
 <br><br><hr size="1">
 <=DAY_EVENT_PROTECTED
+
+
+DAY_EVENT_PROTECTED_REPOST<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Event type:</b></font></td><td><font class="date">Repost</font></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Protected</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <br>
@@ -3804,6 +4183,31 @@ DAY_EVENT<=
 <BR>
 <=DAY_EVENT
 
+DAY_EVENT_REPOST<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:weak_back%%">
+<TABLE BORDER="0">
+<TR><TD ROWSPAN="4" VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png"></TD></TR>
+%%subject%%
+%%altposter%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
+%%currents%%
+</TABLE>
+</TD>
+</TR>
+<TR>
+<TD BGCOLOR="%%color:page_back%%">
+%%event%%
+</TD>
+</TR>
+%%talklinks%%
+</TABLE>
+</DIV>
+<BR>
+<=DAY_EVENT_REPOST
+
 DAY_EVENT_DELAYED<=
 <DIV ALIGN="right">
 <TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
@@ -3902,6 +4306,32 @@ DAY_EVENT_PRIVATE<=
 <BR>
 <=DAY_EVENT_PRIVATE
 
+
+DAY_EVENT_PRIVATE_REPOST<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:weak_back%%">
+<TABLE BORDER="0">
+<TR><TD ROWSPAN="4" VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png"><IMG SRC="%%cons:img%%/icon_private.gif"></TD></TR>
+%%subject%%
+%%altposter%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
+%%currents%%
+</TABLE>
+</TD>
+</TR>
+<TR>
+<TD BGCOLOR="%%color:page_back%%">
+%%event%%
+</TD>
+</TR>
+%%talklinks%%
+</TABLE>
+</DIV>
+<BR>
+<=DAY_EVENT_PRIVATE_REPOST
+
 DAY_EVENT_PRIVATE_DELAYED<=
 <DIV ALIGN="right">
 <TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
@@ -3956,6 +4386,31 @@ DAY_EVENT_PROTECTED<=
 </DIV>
 <BR>
 <=DAY_EVENT_PROTECTED
+
+DAY_EVENT_PROTECTED_REPOST<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:weak_back%%">
+<TABLE BORDER="0">
+<TR><TD ROWSPAN="4" VALIGN="top"><IMG SRC="%%cons:img%%/icon_repost.png"><IMG SRC="%%cons:img%%/icon_protected.gif"></TD></TR>
+%%subject%%
+%%altposter%%
+<TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Time:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%datetime%%</FONT></TD></TR>
+%%currents%%
+</TABLE>
+</TD>
+</TR>
+<TR>
+<TD BGCOLOR="%%color:page_back%%">
+%%event%%
+</TD>
+</TR>
+%%talklinks%%
+</TABLE>
+</DIV>
+<BR>
+<=DAY_EVENT_PROTECTED_REPOST
 
 DAY_EVENT_PROTECTED_DELAYED<=
 <DIV ALIGN="right">
