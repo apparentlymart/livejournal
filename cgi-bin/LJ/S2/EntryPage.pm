@@ -42,7 +42,7 @@ sub EntryPage
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
 
     my $itemid    = $entry->jitemid;
-    my $permalink = $entry->url;
+    my $permalink = $entry->permalink_url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
     my $style_set = defined $get->{'s2id'} ? "s2id=" . int( $get->{'s2id'} ) : "";
     my $style_arg = ($stylemine ne '' and $style_set ne '') ? ($stylemine . '&' . $style_set) : ($stylemine . $style_set);

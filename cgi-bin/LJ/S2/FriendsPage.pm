@@ -308,12 +308,6 @@ sub FriendsPage
             $urlopts_style{'style'} = 'mine';
         }
 
-        my %urlopts_nc;
-
-        if ( $replycount && $remote && $remote->{'opt_nctalklinks'} ) {
-            $urlopts_nc{'nc'} .= $replycount;
-        }
-
         my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
 
         LJ::CleanHTML::clean_event(
@@ -396,9 +390,9 @@ sub FriendsPage
         }
 
         my $journalbase = LJ::journal_base($friends{$friendid});
-        my $permalink = $eobj->url;
-        my $readurl   = $eobj->url( %urlopts_style, %urlopts_nc );
-        my $posturl   = $eobj->url( %urlopts_style, 'mode' => 'reply' );
+        my $permalink = $eobj->permalink_url;
+        my $readurl   = $eobj->comments_url(%urlopts_style);
+        my $posturl   = $eobj->reply_url(%urlopts_style);
 
         my $comments = CommentInfo({
             'read_url'    => $readurl,

@@ -261,13 +261,9 @@ sub RecentPage
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
         }
 
-        my $nc = "";
-        $nc .= "nc=$replycount" if $replycount && $remote && $remote->prop('opt_nctalklinks');
-
-        my $permalink = $entry_obj->url;
-        my $readurl = $permalink;
-        $readurl .= "?$nc" if $nc;
-        my $posturl = $permalink . "?mode=reply";
+        my $permalink = $entry_obj->permalink_url;
+        my $readurl   = $entry_obj->comments_url;
+        my $posturl   = $entry_obj->reply_url;
 
         my $has_screened = ($logprops{$itemid}->{'hasscreened'} && $remote && $remote->can_manage($journalu)) ? 1 : 0;
 

@@ -1366,6 +1366,11 @@ sub openid_identity {
 # returns username or identity display name 
 sub display_name {
     my $u = shift;
+
+    my $display_name_override;
+    LJ::run_hooks( 'override_display_name', $u, \$display_name_override );
+    return $display_name_override if $display_name_override;
+
     return $u->username unless $u->is_identity;
 
     my $id = $u->identity;
@@ -3994,6 +3999,10 @@ sub split_by_cluster {
 sub userhead {
     my $u    = shift;
     my $opts = +shift || {};
+
+    my $userhead_override;
+    LJ::run_hooks( 'override_userhead', $u, \$userhead_override );
+    return ( $userhead_override, 16, 16 ) if $userhead_override;
 
     my $head_size = $opts->{head_size};
 
@@ -7937,6 +7946,9 @@ sub ljuser {
         }
     }
 
+    LJ::run_hooks( 'override_profile_url', $u, \$profile_url );
+    LJ::run_hooks( 'override_journal_url', $u, \$journal_url );
+
     my $user_alias       = LJ::ljuser_alias($username);
     my $side_alias       = $opts->{'side_alias'};
     my $show_alias_popup = $user_alias && !$side_alias;
@@ -7981,6 +7993,8 @@ sub ljuser {
         push @link_tag_extra, " title=\"" . LJ::ehtml($user_alias) . "\"";
     }
     my $link_tag_extra = join('', @link_tag_extra);
+
+    LJ::run_hooks( 'override_display_name', $u, \$journal_name );
 
     ### fix $journal_name
     if ($opts->{'title'}) {

@@ -230,9 +230,48 @@ sub ditemid {
     return $self->{ditemid} ||= (($self->{jitemid} * 256) + $self->anum);
 }
 
+sub permalink_url {
+    my ( $self, %opts ) = @_;
+
+    my $overridden_url;
+    LJ::run_hooks( 'override_entry_url', $self->journal, $self,
+        \$overridden_url );
+    return $overridden_url if $overridden_url;
+
+    return $self->url(%opts);
+}
+
 sub reply_url {
-    my $self = shift;
-    return $self->url(mode => 'reply');
+    my ( $self, %opts ) = @_;
+
+    my $overridden_url;
+    LJ::run_hooks( 'override_reply_url', $self->journal, $self,
+        \$overridden_url );
+    return $overridden_url if $overridden_url;
+
+    return $self->url( %opts, 'mode' => 'reply', 'anchor' => 'add_comment' );
+}
+
+sub comments_url {
+    my ( $self, %opts ) = @_;
+
+    my $overridden_url;
+    LJ::run_hooks( 'override_comments_url', $self->journal, $self,
+        \$overridden_url );
+    return $overridden_url if $overridden_url;
+
+    my %opts = ( 'anchor' => 'comments' );
+
+    my $remote     = LJ::get_remote();
+    my $replycount = $self->reply_count;
+
+    if ( $remote && $remote->prop('opt_nctalklinks') && $replycount ) {
+        $opts{'nc'} = $replycount;
+    }
+
+    $opts{'anchor'} = 'comments';
+
+    return $self->url(%opts);
 }
 
 # returns permalink url

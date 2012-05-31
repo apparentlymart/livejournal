@@ -220,10 +220,9 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = $entry_obj->url;
-        my $readurl = $permalink;
-        $readurl .= "?$nc" if $nc;
-        my $posturl = $permalink . "?mode=reply";
+        my $permalink = $entry_obj->permalink_url;
+        my $readurl   = $entry_obj->comments_url;
+        my $posturl   = $entry_obj->reply_url;
 
         my $comments = CommentInfo({
             'read_url' => $readurl,
