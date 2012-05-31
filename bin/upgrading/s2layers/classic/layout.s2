@@ -579,6 +579,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
       "<td style='background-color: $bgcolor;' class='metabar'>";
       # Time
       "<em>$time</em><br />";
+      if ($e.reposted_by) {
+          """<span>$e.reposted_by</span><br />""";
+      }
       # Altposter crap
       if ($p.view == "friends")
       {
@@ -597,6 +600,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
           print $userpic;
       }
       # Icons
+      if ($e.repost) { "$e.repost_icon "; }
       if ($e.delayed) { "$e.delayed_icon "; }
       if ($e.sticky) { "$e.sticky_icon "; }
       if ($e.security) { "$e.security_icon"; }

@@ -885,6 +885,7 @@ function ReplyPage::print_body
     if ($.replyto isa Entry) {
         var Entry en = $.replyto as Entry;
 
+        if ($en.repost) { $security = $security + "$en.repost_icon "; }
         if ($en.delayed) { $security = $security + "$en.delayed_icon "; }
         if ($en.sticky) { $security = $security + "$en.sticky_icon "; }
         if ($en.security) { $security = $security + "$en.security_icon "; }
@@ -1167,8 +1168,9 @@ function Page::print_entry(Entry e) {
       }
 
       "<h3 class='entry-header'>";
-      if (defined $e.security_icon or $e.sticky or $e.delayed) {
+      if (defined $e.security_icon or $e.sticky or $e.delayed or $e.repost) {
           "<span class='lj-entry-securityicon'>";
+          if ($e.repost) { "$e.repost_icon "; }
           if ($e.delayed) { "$e.delayed_icon "; }
           if ($e.sticky) { " $e.sticky_icon "; }
           if ($e.security) { " $e.security_icon"; }
@@ -1191,6 +1193,9 @@ function Page::print_entry(Entry e) {
          "<p class='entry-footer'>";
          if ($showdate or $showtime) {
              print lang_posted_date_and_time($e, $e.time, $showdate, $showtime)+" $sep ";
+         }
+         if ($e.reposted_by) {
+             """<span>$e.reposted_by</span> $sep """;
          }
          "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
