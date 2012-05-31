@@ -21,13 +21,13 @@
 <TMPL_IF entries>
 	<ul class='b-editentries'>
 		<TMPL_LOOP entries>
-			<li id="entry_<TMPL_VAR entry_id>" class='b-editentry'>
+			<li id="entry_<TMPL_VAR entry_id>" class='b-editentry'<TMPL_IF entry_reposted> data-url="<TMPL_VAR entry_url>"</TMPL_IF>>
 				<p class='b-editentry-ctrls'>
 					<TMPL_IF entry_can_edit>
 						<a href='<TMPL_VAR edit_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
 					<TMPL_ELSE>
                         <TMPL_IF entry_reposted>
-    						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-ctrl-btn'></a>
+    						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-del-repost-btn b-editentry-ctrl-btn'></a>
                         <TMPL_ELSE>
                             <a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
                         </TMPL_IF>
@@ -100,4 +100,8 @@
 		</TMPL_IF>
 	</p>
 </TMPL_IF>
+
+<script>
+    jQuery('div.appwidget-entrychooser').editentriesmanager();
+</script>
 
