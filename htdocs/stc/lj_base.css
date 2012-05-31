@@ -4970,8 +4970,6 @@ HTML BODY .i-ljuser {
 		color: #FFF;
 		}
 
-
-
 /* Content plus Aside
 --------------------------------------*/
 .b-contentplus-container {
@@ -5000,3 +4998,52 @@ HTML BODY .i-ljuser {
 		padding: 0;
 		}
 
+/* Popup content
+--------------------------------------*/
+.b-popup-content {
+	max-width: 300px;
+	text-align: left;
+	}
+	.b-popup-content H5 {
+		padding: 0;
+		margin: 0 0 10px 0;
+		font-weight: bold;
+		font-size: 14px;
+		color: #000;
+		}
+	.b-popup-content .b-popup-submit-options {
+		padding-top: 5px !important;
+		border: none;
+		}
+
+/* Preloader */
+.b-popup-preloader .preloader {
+	display: none;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 11px;
+	height: 3px;
+	margin-left: -6px;
+	background: url(/img/preloader-s.gif?ver=1) no-repeat;
+	font-size: 0;
+	}
+	.b-popup-preloader .b-popup-preloader-inner {
+		position: relative;
+		display: inline-block;
+		vertical-align: middle;
+		}
+	.b-popup-preloader-visible INPUT,
+	.b-popup-preloader-visible BUTTON,
+	.b-popup-preloader-visible A,
+	.b-popup-preloader-visible I {
+		visibility: hidden;
+		}
+		.b-popup-preloader-visible I.preloader {
+			visibility: visible;
+			display: block;
+			}
+			.b-popup-preloader-visible .b-popup-cancel {
+				color: #CCC;
+				cursor: default;
+				}
