@@ -5,7 +5,10 @@ use warnings;
 use base qw( LJ::Widget::Template );
 
 sub need_res {
-    qw(stc/widgets/entrychooser.css);
+    qw(
+        stc/widgets/entrychooser.css
+        js/jquery/jquery.lj.editentriesmanager.js
+    );
 }
 
 sub template_filename {

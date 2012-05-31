@@ -383,9 +383,8 @@ LJ.define('LJ.Util.Journal');
 
 (function() {
 	var base = (LJ.pageVar('siteroot', true) || 'http://www.livejournal.com')
-						.replace('http://www', '')
-						.replace(/\./, '\\.'),
-		journalReg  = new RegExp('^http:\\/\\/(\\w+)' + base + '(?:\\/(?:(\\w+)\\/)?(?:(\\d+)\\.html)?)?$');
+						.replace('http://www', ''),
+		journalReg  = new RegExp('^http:\\/\\/(\\w+)' + base.replace(/\./, '\\.') + '(?:\\/(?:(\\w+)\\/)?(?:(\\d+)\\.html)?)?$');
 
 	/**
 	 * Parse journal link to retrieve information from it
@@ -418,6 +417,38 @@ LJ.define('LJ.Util.Journal');
 		}
 
 		return result;
+	};
+
+	/**
+	 * Render journal link according to the standard scheme.
+	 *
+	 * @param {string} journal Journal name.
+	 * @param {string|number}  ditemid Id of the post in the journal.
+	 * @param {boolean} iscomm Whether to treat the journal as community.
+	 *
+	 * @return {string|null} Result is a link to the journal page or null if no journal was specified.
+	 */
+	LJ.Util.Journal.renderLink = function(journal, ditemid, iscomm) {
+		if (!journal) {
+			return null;
+		}
+
+		var url = 'http://';
+		if (iscomm) {
+			url += 'community' + base + '/' + journal;
+		} else if (journal.match(/^_|_$/)) {
+			url += 'users' + base + '/' + journal;
+		} else {
+			url += journal.replace(/_/g, '-') + base;
+		}
+
+		url += '/';
+
+		if (ditemid) {
+			url += ditemid + '.html';
+		}
+
+		return url;
 	};
 
 }());
