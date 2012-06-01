@@ -5722,7 +5722,13 @@ talk.collapseall=Collapse All
 talk.collapselink|staleness=1
 talk.collapselink=Collapse
 
-talk.color.insert=Insert
+talk.color.current=Current
+
+talk.color.insert=Set color
+
+talk.color.hex=Hex
+
+talk.color.new=New
 
 talk.color.sampletitle=Highlight
 
