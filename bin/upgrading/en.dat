@@ -163,6 +163,9 @@ Regards,
 community.members.delayed.remove.email_subject|staleness=1
 community.members.delayed.remove.email_subject=Removing from the community: [[mailusercname]]
 
+confirm.bubble.yes=Yes
+confirm.bubble.no=No
+confirm.bubble.cancel=Cancel
 
 contentflag.viewingconcepts|staleness=1
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
