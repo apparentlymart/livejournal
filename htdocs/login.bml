@@ -3,6 +3,8 @@
     use strict;
     use vars qw($body %GET %POST $title);
 
+    # TODO: use LJ::Auth
+
     my $crumb = $LJ::IS_SSL ? 'securelogin' : 'login';
     LJ::set_active_crumb($crumb);
 

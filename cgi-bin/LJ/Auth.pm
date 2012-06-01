@@ -121,4 +121,135 @@ sub check_sessionless_auth_token {
     return 1;
 }
 
+sub login {
+    my ($class, $params, $errors) = @_;
+    $errors = [] unless $errors && ref($errors) eq 'ARRAY';
+    my $res;
+
+    # ! after username overrides expire to never
+    # < after username overrides ipfixed to yes
+    if ($params->{'user'} =~ s/[!<]{1,2}$//) {
+        $params->{'expire'} = 'never' if index($&, "!") >= 0;
+        $params->{'bindip'} = 'yes' if index($&, "<") >= 0;
+    }
+
+    my $user = LJ::canonical_username($params->{'user'});
+    my $password = $params->{'password'};
+
+    my $remote = LJ::get_remote();
+    my $cursess = $remote ? $remote->session : undef;
+    
+    if ($remote) {
+        if($remote->readonly) {
+            return ($res, error('database_readonly', $errors));
+        }
+        
+        unless ($remote->tosagree_verify) {
+            return ($res, error('tos_required', $errors));
+        }
+                
+        unless ( LJ::check_form_auth( {lj_form_auth => $params->{lj_form_auth}} ) ) {
+            return ($res, error('authorization_failed', $errors));
+        }
+
+        my $bindip;
+        $bindip = BML::get_remote_ip()
+            if $params->{'bindip'} eq "yes";
+        
+        $cursess->set_ipfixed($bindip) or die "failed to set ipfixed";
+        $cursess->set_exptype($params->{expire} eq 'never' ? 'long' : 'short') or die "failed to set exptype";
+        $cursess->update_master_cookie;
+        
+        return {
+            remote      => $remote,
+            session     => $cursess,
+            do_change   => 1,
+        }, $errors;
+    }
+    my $u = LJ::load_user($user);
+
+    if (! $u) {
+        return ($res, error('unknown_user', $errors));
+    } else {
+        return ($res, error('purged_user', $errors))  if $u->is_expunged;
+        return ($res, error('community_disabled_login' , $errors))
+            if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
+    }
+
+    if (LJ::get_cap($u, "readonly")) {
+        return ($res, error('database_readonly', $errors));
+    }
+    
+    my ($banned, $ok);
+    $banned = $ok = 0;
+    my $chal_opts = {};
+
+    if ($params->{response}) {
+        $ok = LJ::challenge_check_login($u, $params->{chal}, $params->{response}, \$banned, $chal_opts);
+    } else {  # js disabled, fallback to plaintext
+        if($params->{md5}) {
+            $ok = LJ::auth_okay($u, undef, $password, undef, \$banned);
+        } else {
+            $ok = LJ::auth_okay($u, $password, undef, undef, \$banned);
+        }
+    }
+
+    return ($res, error('banned_ip', $errors)) if $banned;
+
+    if ($u && ! $ok) {
+        if ($chal_opts->{'expired'}) {
+            return ($res, error('expired_challenge', $errors));
+        } else {
+            return ($res, error('bad_password', $errors));
+        }
+    }
+        
+    return ($res, error('account_locked', $errors)) if $u->{statusvis} eq 'L';
+
+    LJ::load_user_props($u, "browselang", "schemepref", "legal_tosagree");
+
+    unless ($u->tosagree_verify) {
+        if ($params->{agree_tos}) {
+            my $err = "";
+            unless ($u->tosagree_set(\$err)) {
+                # failed to save userprop, why?
+                return ($res, error('fail_tosagree_set', $errors));
+            }
+            # else, successfully set... log them in
+        } else {
+            # didn't check agreement checkbox
+            return ($res, error('tos_required', $errors));
+        }
+    }
+    
+    my $exptype = ($params->{'expire'} eq "never" || $params->{'remember_me'}) ? "long" : "short";
+    my $bindip  = ($params->{'bindip'} eq "yes") ? BML::get_remote_ip() : "";
+    
+    $u->make_login_session($exptype, $bindip);
+    LJ::run_hooks('user_login', $u);
+    $cursess = $u->session;
+
+    LJ::set_remote($u);
+    
+    return {
+        remote   => $u,
+        session  => $cursess,
+        do_login => 1,
+    }, $errors;
+}
+
+sub error {
+    my ($err_code, $ref) = @_;
+
+    if(ref $ref eq 'ARRAY') {
+        push @$ref, $err_code;
+    } elsif(ref $ref eq 'HASH') {
+        $ref->{$err_code} = 1;
+    } elsif (ref $ref eq 'SCALAR') {
+        $$ref = $err_code;
+    }
+
+    return $ref;
+}
+
 1;
