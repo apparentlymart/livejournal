@@ -1211,14 +1211,14 @@ sub trans {
         }
 
         unless ($u) {
-            if ($ru_lj_user) {
-                if (!$LJ::DOMAIN_JOURNALS_RU_MAINPAGE{$ru_lj_user}) {
+            if ($host =~ /(.*?)\.?(?:xn--80adlbihqogw6a|xn--f1aa)\.xn--p1ai/) {
+                if (!$1 || $LJ::DOMAIN_JOURNALS_RU_MAINPAGE{$1}) {
+                    return redir($LJ::SITEROOT);
+                } else {
                     LJ::Request->pnotes ('error' => 'baddomainru');
                     LJ::Request->pnotes ('domainname' => $host);
                     LJ::Request->pnotes ('uri_domain_shop' => "$LJ::SITEROOT/shop/domain_ru.bml");
                     return LJ::Request::NOT_FOUND;
-                } else {
-                    return redir($LJ::SITEROOT);
                 }
             } else {
                 LJ::Request->pnotes ('error' => 'baduser');
