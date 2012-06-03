@@ -4050,7 +4050,8 @@ sub userhead {
             $userhead_w = 16;
         }
     } elsif ($u->is_identity) {
-        my $params = $u->identity->ljuser_display_params($u, $opts);
+        my $ident  = $u->identity;
+        my $params = $ident ? $ident->ljuser_display_params($u, $opts) : {};
         $userhead     = $params->{'userhead'}     || $userhead;
         $userhead_w   = $params->{'userhead_w'}   || $userhead_w;
         $userhead_h   = $params->{'userhead_h'}   || $userhead_h;
@@ -8079,8 +8080,8 @@ sub ljuser2 {
             # Identity
             if ( $u->is_identity ) {
                 $identity  = $u->identity;
-                my $params = $identity->ljuser_display_params($u, $opts);
-                $profile_url  = $params->{'profile_url'};
+                my $params = $identity ? $identity->ljuser_display_params($u, $opts) : {};
+                $profile_url  = $params->{'profile_url'}  || '';
                 $journal_url  = $params->{'journal_url'}  || $journal_url;
                 $journal_name = $params->{'journal_name'} || $journal_name;
             }
