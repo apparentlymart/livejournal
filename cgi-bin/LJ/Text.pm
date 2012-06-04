@@ -40,7 +40,7 @@ Notes:
 =cut
 
 package LJ::Text;
-
+use HTML::Parser;
 use Encode qw(encode_utf8 decode_utf8 is_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
@@ -433,5 +433,203 @@ sub normalize_tag_name {
 
     return $name;
 }
+
+sub extract_links_with_context {
+    my ( $text ) = @_;
+
+    # text can be a plain text or html or combined.
+    # some links can be a well-formed <A> tags, other just a plain text like http://some.domain/page.html
+    # after detecting a link we need to extract a text (context) in which this link is.
+    # To fetching link context in the one way we do process text twice:
+    #   1) convert links in plain text in an <a> tags
+    #   2) extract links and its context.
+
+    # <a href="http://ya.ru">http://ya.ru</a> - well-formed a-tag
+    # <div>well-known search is http://google.ru</div> - link in plain text
+
+    # convert links from plain text in <a> tags.
+    my $normolized_text = '';
+    my $normolize = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [
+            sub {
+                my ($self, $tagname, $text, $attr) = @_;
+                $normolized_text .= $text;
+                $self->{_smplf_in_a} = 1 if $tagname eq 'a';
+            },
+            "self, tagname,text,attr",
+        ],
+        end_h       => [
+            sub {
+                my ($self, $tagname, $text, $attr) = @_;
+                $normolized_text .= $text;
+                $self->{_smplf_in_a} = 0 if $tagname eq 'a';
+            },
+            "self,tagname,text,attr",
+        ],
+        text_h      => [
+            sub {
+                my ($self, $text) = @_;
+
+                unless ( $self->{_smplf_in_a} ) {
+                    $text =~ s|(http://[\w\-\_]{1,16}\.$LJ::DOMAIN/\d+\.html(\?\S*(\#\S*)?)?)|<a href="$1">$1</a>|g;
+                    $text =~ s|(http://community\.$LJ::DOMAIN/[\w\-\_]{1,16}/\d+\.html(\?\S*(\#\S*)?)?)|<a href="$1">$1</a>|g;
+                }
+
+                $normolized_text .= $text;
+            },
+            "self,text",
+        ],
+    );
+
+    $normolize->parse( Encode::decode_utf8($text . "\n") );
+
+    # parse
+    my $parser = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [ \&tag_start, "self,tagname,text,attr" ],
+        end_h       => [ \&tag_end,   "self,tagname,text,attr" ],
+        text_h      => [ \&text,      "self,text"              ],
+    );
+
+    # init
+    $parser->{'res'}           = '';
+    $parser->{'prev_link_end'} = 0;
+    $parser->{'links'}         = [];
+
+    $parser->parse($normolized_text);
+
+    return
+        map { $_->{context} = Encode::encode_utf8($_->{context}); $_ }
+        @{$parser->{'links'}};
+}
+
+sub tag_start {
+    my( $self, $tag_name, $text, $attr ) = @_;
+
+    if ( $tag_name eq 'a' ) {
+        parse_a( $self, $text, $attr )
+    }
+    elsif ( $tag_name =~ m/(br|p|table|hr|object)/ ) {
+        $self->{'res'} .= ' ' if substr( $self->{'res'}, -1, 1 ) ne ' ';
+    }
+}
+
+sub tag_end {
+    my ( $self, $tag_name ) = @_;
+
+    if ( $tag_name eq 'a' ){
+        my $context = substr $self->{'res'}, (length($self->{'res'}) - 100 < $self->{'prev_link_end'} ? $self->{'prev_link_end'} : -100); # last 100 or less unused chars
+
+        if ( length($self->{'res'}) > length($context) ) { # context does not start from the text begining.
+            $context =~ s/^(\S{1,5}\s*)//;
+        }
+
+        $self->{'links'}->[-1]->{context} = $context if scalar @{$self->{'links'}};
+        $self->{'prev_link_end'} = length($self->{'res'});
+    }
+}
+
+sub text {
+    my ( $self, $text ) = @_;
+    my $copy = $text;
+    $copy =~ s/\s+/ /g;
+    $self->{'res'} .= $copy;
+}
+
+sub parse_a {
+    my ( $self, $text, $attr ) = @_;
+    my $uri = URI->new($attr->{href});
+    return unless $uri;
+
+    my $context = $text;
+
+    push @{$self->{'links'}}, { uri => $uri->as_string, context => $context };
+    return;
+}
+
+sub extract_link_with_context {
+    my ( $text, $url ) = @_;
+
+    my $need_text = 0;
+    my $res = {};
+    my $in_title = 0;
+    my $in_a = 0;
+    my $del = 0;
+
+    my $normolized_text = '';
+    my $normolize = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [
+            sub {
+                my ($self, $tagname, $text, $attr) = @_;
+
+                if ( $tagname eq 'title' ) {
+                    $in_title = 1;
+                }
+
+                if ( $tagname eq 'a' ) {
+                    if ( lc $attr->{'href'} eq lc $url && ! $need_text ) {
+                        $res->{'pre'} = $normolized_text;
+                        $in_a = 1;
+                        $need_text = 1;
+                    }
+                };
+
+                if ( $tagname eq 'script' ) {
+                    $del = 1;
+                }
+            },
+            "self, tagname,text,attr",
+        ],
+        end_h       => [
+            sub {
+                my ($self, $tagname, $text, $attr) = @_;
+
+                if ( $tagname eq 'title' ) {
+                    $in_title = 0;
+                }
+
+                if ( $tagname eq 'a' ) {
+                    $in_a = 0;
+                }
+
+                if ( $tagname eq 'script' ) {
+                    $del = 0;
+                }
+
+                $self->{_smplf_in_a} = 0 if $tagname eq 'a';
+            },
+            "self,tagname,text,attr",
+        ],
+        text_h      => [
+            sub {
+                my ($self, $text) = @_;
+
+                return if $del;
+
+                $normolized_text .= ' ' unless $normolized_text =~ /\s$/;
+                $normolized_text .= $text;
+
+                if ( $need_text && ! $in_a ) {
+                    $res->{'post'} .= ' ' . $text;
+                }
+
+                if ( $need_text && $in_a ) {
+                    $res->{'link'} = ' ' . $text;
+                }
+
+                if ( $in_title ) {
+                    $res->{'title'} .= $text;
+                }
+            },
+            "self,text",
+        ],
+    );
+
+    $normolize->parse( $text );
+    return $res;
+}
+
 
 1;
