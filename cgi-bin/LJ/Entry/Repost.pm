@@ -125,8 +125,13 @@ sub __create_post {
 
     my $fail = !defined $res->{itemid} && $res->{message};
     if ($fail) {
-         $$error = $res->{message};
+         $$error = LJ::API::Error->make_error( $res->{message},($err || -10000) );
          return;
+    }
+
+    if ($err) {
+        $$error = LJ::API::Error->get_error('create_entry_failed');
+        return;
     }
 
     return LJ::Entry->new($u, jitemid => $res->{'itemid'} );
@@ -141,13 +146,12 @@ sub __create_repost {
     my $error     = $opts->{'error'};
 
     if (!$entry_obj->visible_to($u)) {
-        $$error = LJ::Lang::ml('repost.access_denied');
+        $$error = LJ::API::Error->make_error( LJ::Lang::ml('repost.access_denied'), -9002);
         return;
     }
 
-    my $post_obj = __create_post($u, $timezone, $entry_obj->url);
+    my $post_obj = __create_post($u, $timezone, $entry_obj->url, $error);
     if (!$post_obj) {
-        $$error = LJ::Lang::ml('repost.unknown_error');
         return;
     }
 
@@ -388,24 +392,23 @@ sub create {
 
     my $error;
     if ($repost_itemid) {
-        $error = LJ::Lang::ml('entry.reference.repost.already_exist');
+        $error = LJ::API::Error->make_error( LJ::Lang::ml('entry.reference.repost.already_exist'), 
+                                             -9000 );
     } else {
         my $reposted_obj = __create_repost( {'u'          => $u,
                                              'entry_obj'  => $entry_obj,
                                              'timezone'   => $timezone,
                                              'error'      => \$error } );
-
         if ($reposted_obj) {
             my $count = __get_count($entry_obj->journal, $entry_obj->jitemid);
             $result->{'result'} = { 'count' => $count };
-        } elsif (!$error) {
-            $error = LJ::Lang::ml('api.error.unknown_error');
-        }
+        } 
     }
 
-    if ($error) {
-        $result->{'error'}  = { 'error_code'    => -9000,
-                                'error_message' => $error };
+    if ($error && !$error->{'error'}) {
+        $result = LJ::API::Error->make_error( LJ::Lang::ml('api.error.unknown_error'), -9000 );
+    } elsif ($error) {
+        $result = $error;
     }
 
     return $result;
