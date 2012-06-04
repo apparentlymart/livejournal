@@ -668,6 +668,40 @@ __________________________________________*/
 	zoom: 1;
 	}
 
+/* Comment From & Updatepage Form
+-----------------------------------------------*/
+*+HTML .s-lanzelot .b-watering-aside {
+	background-image: expression((function(node) {
+		node.runtimeStyle.backgroundImage = 'none';
+		if (!/mode=reply|replyto=|talkpost_do/.test(location.href)) { return; }
+
+		var parent = node.parentNode;
+		var timer = setInterval(function() {
+			var width = parent.clientWidth;
+			if (width) {
+				node.style.marginLeft = (width - parseInt(parent.currentStyle.paddingLeft, 10) -
+												parseInt(parent.currentStyle.paddingRight, 10)) * -1;
+				clearInterval(timer);
+			}
+		}, 100);
+	})(this));
+	}
+*+HTML .s-lanzelot .b-updatepage-common-aside {
+	background-image: expression((function(node) {
+		node.runtimeStyle.backgroundImage = 'none';
+
+		var parent = node.parentNode;
+		var timer = setInterval(function() {
+			var width = parent.clientWidth;
+			if (width) {
+				node.style.marginLeft = (width - parseInt(parent.currentStyle.paddingLeft, 10) -
+												parseInt(parent.currentStyle.paddingRight, 10)) * -1;
+				clearInterval(timer);
+			}
+		}, 0);
+	})(this));
+	}
+
 /* Should be at bottom of the page! */
 * HTML .i-ljtimes-btn,
 * HTML .i-ljtimes-drag,
