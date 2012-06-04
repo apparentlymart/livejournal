@@ -188,7 +188,7 @@ sub _as_email {
         my ($u, $timechange_stamp) = @_;
         my $userid = $u->{userid};
 
-        my $infohistory = LJ::InfoHistory->get( $u, 'username' );
+        my $infohistory = LJ::User::InfoHistory->get( $u, 'username' );
         my ($infohistory_record) =
             grep { $_->timechange_unix == $timechange_stamp }
             @$infohistory;
