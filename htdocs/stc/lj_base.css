@@ -3734,7 +3734,7 @@ A.lj-button-link:active {
 	}
 .lj-button-light.repost-button-inactive .lj-button-b {
 	color: #999 !important;
-	cursor: text !important;
+	cursor: default !important;
 	}
 .lj-button-light.repost-button-active .lj-button-b {
 	background: #E6E7E9 !important;
@@ -3775,6 +3775,10 @@ A.lj-button-link:active {
 	background-color: #FFF!important;
 	color: #000!important;
 	text-shadow: 0 1px 0 #FFF !important;
+	cursor: pointer !important;
+	}
+.lj-button-light.repost-button-inactive .lj-button-c {
+	cursor: default !important;
 	}
 .repost-button .lj-button-c.empty .lj-button-arrow {
 	display: none!important;
@@ -4978,6 +4982,8 @@ HTML BODY .i-ljuser {
 		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3863A0', endColorstr='#369AFF',GradientType=0 );
 		color: #FFF;
 		}
+
+
 
 /* Content plus Aside
 --------------------------------------*/
