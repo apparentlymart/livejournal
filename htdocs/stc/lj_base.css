@@ -3801,7 +3801,8 @@ A.lj-button-link:active {
 	}
 .b-reposted-popup {
 	margin: -5px 0 0;
-	width: 600px;
+	max-width: 600px;
+	min-width: 300px;
 	line-height: 22px !important;
 	font-size: 12px !important;
 	font-family: Arial, Verdana, sans-serif !important;
@@ -5010,14 +5011,14 @@ HTML BODY .i-ljuser {
 --------------------------------------*/
 .b-popup-content {
 	max-width: 300px;
-	text-align: left;
+	text-align: left !important;
 	}
 	.b-popup-content H5 {
 		padding: 0;
 		margin: 0 0 10px 0;
-		font-weight: bold;
-		font-size: 14px;
-		color: #000;
+		font-weight: bold !important;
+		font-size: 14px !important;
+		color: #000 !important;
 		}
 	.b-popup-content A:link,
 	.b-popup-content A:visited {
