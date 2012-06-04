@@ -1105,9 +1105,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url});
         } else {
-        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
     }
 }
@@ -1127,7 +1127,7 @@ function Entry::lay_print_cmdlinks() {
             if ($p.showspam) {
                 $comments_showspam = """<li>""" + get_plural_phrase($.comments.spam_counter, "text_read_spam_comments") + """</li>""";
             } else {
-                $comments_showspam = """<li><a href=\"$.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($.comments.spam_counter, "text_read_all_spam_comments") + """</a></li>""";
+                $comments_showspam = """<li><a href=\"$.comments.read_spam_url\">""" + get_plural_phrase($.comments.spam_counter, "text_read_all_spam_comments") + """</a></li>""";
             }
         }
         if ($p.view == "entry") {print safe "$comments_showspam";}
@@ -1498,7 +1498,7 @@ function EntryPage::lay_print_pager() {
             print "<li class=\"current\">$i</li>";
         }
         else {
-            print "<li><a href=\""+$.comment_pages->url_of($i)+"#$*text_comments_id\">$i</a></li>";
+            print "<li><a href=\""+$.comment_pages->url_of($i)+"\">$i</a></li>";
         }
     }
     print "</ul>";

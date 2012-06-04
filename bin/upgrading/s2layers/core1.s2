@@ -3006,7 +3006,7 @@ function DayPage::print_body() {
 
 function CommentInfo::print_readlink {
     var Page p = get_page();
-    print safe "<a href=\"$.read_url#$*text_comments_id\">"+
+    print safe "<a href=\"$.read_url\">"+
         get_plural_phrase($.count, $p.view == "friends" ?
                           "text_read_comments_friends" : "text_read_comments")+
     "</a>";
@@ -3016,7 +3016,7 @@ function CommentInfo::print_postlink() {
     if ($.maxcomments) {
         print safe "$*text_max_comments";
     } else {
-        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
     }
 }
 function CommentInfo::print() {
@@ -3242,7 +3242,7 @@ function EntryPage::print_body
 
     if ($.entry.comments.enabled) {
         "<hr /><a id='$*text_comments_id'></a>";
-        "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id" }); ")";
+        "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment", "reply_url" => $e.comments.post_url }); ")";
         $this->print_reply_container({ "target" => "topcomment" });
         if ($.comment_pages.total_subitems > 0) {
             "<hr />";
@@ -3250,7 +3250,7 @@ function EntryPage::print_body
             $this->print_multiform_start();
             $this->print_comments($.comments);
             print "<hr />";
-            "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id" }); ")";
+            "("; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment", "reply_url" => $e.comments.post_url }); ")";
             $this->print_reply_container({"target" => "bottomcomment"});
             if ($.comment_pages.all_subitems_displayed) { print "<hr />"; }
             $this->print_multiform_actionline();
@@ -3286,7 +3286,7 @@ function ReplyPage::print_body
     print "<div>"; $.replyto->print_text(); "</div>";
 
     print "\n<hr />\n";
-    print safe """(<a id="$*text_addcomment_id" href="$.entry.permalink_url#$*text_comments_id">$*text_reply_back</a>)""";
+    print safe """(<a id="$*text_addcomment_id" href="$.entry.permalink_url">$*text_reply_back</a>)""";
     $.form->print();
 }
 

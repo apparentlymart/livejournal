@@ -864,7 +864,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         if ($p.showspam) {
             $comments_showspam = """ | """ + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments");
         } else {
-            $comments_showspam = """ | <a href="$e.comments.read_spam_url#$*text_comments_id">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
+            $comments_showspam = """ | <a href="$e.comments.read_spam_url">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
         }
     } else {
         $comments_showspam = "";
@@ -899,9 +899,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url});
         } else {
-        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
     }
 }

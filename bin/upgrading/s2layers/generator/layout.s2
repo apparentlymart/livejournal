@@ -920,7 +920,7 @@ if ($e.reposted_by) {
             $comments_showspam = """ | <span>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</span> """;
 
         } else {
-            $comments_showspam = """ | <a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
+            $comments_showspam = """ | <a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></span> """;
         }
     }
 """</td></tr>
@@ -933,7 +933,7 @@ if ($e.reposted_by) {
     } elseif ($e.comments.enabled) {
         "<td align='right' class='comments'>";
         if (not $e.comments.locked) {
-            $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id"});
+            $p->print_reply_link({"linktext" => $*text_comment_reply, "target" => "topcomment", "reply_url" => $e.comments.post_url});
         }
     } else {
         "<td>";
