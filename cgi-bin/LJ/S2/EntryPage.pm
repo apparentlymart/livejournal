@@ -92,7 +92,9 @@ sub EntryPage
             comment.mark.spam2.subject
             comment.mark.spam2.button
             comment.delete
-            repost.confirm.delete/
+            repost.confirm.delete
+            confirm.bubble.yes
+            confirm.bubble.no/
         ));
     }
 

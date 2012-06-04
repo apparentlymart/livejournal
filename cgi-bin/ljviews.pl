@@ -1271,6 +1271,9 @@ sub create_view_lastn
     my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
 
     # spit out the S1
+    LJ::need_string(qw/confirm.bubble.yes
+                       confirm.bubble.no/);
+
 
   ENTRY:
     foreach my $item (@items) {
@@ -1848,6 +1851,10 @@ sub create_view_friends {
     my $lastday = -1;
     my $eventnum = 0;
 
+    LJ::need_string(qw/confirm.bubble.yes
+                       confirm.bubble.no/);
+
+
   ENTRY:
     foreach my $item (@items)
     {
@@ -2408,6 +2415,9 @@ sub create_view_calendar
         $calendar_page{'yearlinks'} =
             LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
     }
+
+    LJ::need_string(qw/confirm.bubble.yes
+                       confirm.bubble.no/);
 
     foreach my $year (@years)
     {
