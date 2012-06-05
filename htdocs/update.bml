@@ -24,6 +24,8 @@
 
     LJ::set_active_crumb("postentry");
 
+    LJ::Controller::Post->rte_langmap();
+
     # invalid text input?
     unless (LJ::text_in(\%POST)) {
         $$body = "<?badinput?>";

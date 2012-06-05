@@ -40,6 +40,8 @@ body<=
 
     my $editprivacy_link = "<p class='i-bubble b-bubble-lite b-bubble-editprivacy b-bubble-noarrow'>" . BML::ml('.editprivacy', { aopts => "href='editprivacy.bml'" }) . "</p>";
 
+    LJ::Controller::Post->rte_langmap();
+
     if ($mode eq "edit") {
         LJ::need_res(qw(
                         stc/entry.css

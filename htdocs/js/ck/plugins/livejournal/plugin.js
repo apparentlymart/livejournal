@@ -1118,6 +1118,7 @@
 
 				dialogContent += '</ul><p class="cke-dialog-likes-faq">' + window.faqLink + '</p></div>';
 
+
 				CKEDITOR.dialog.add('LJLikeDialog', function() {
 					var buttonsDefinition = [new CKEDITOR.ui.button({
 						type: 'button',
