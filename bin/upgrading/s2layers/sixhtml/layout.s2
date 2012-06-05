@@ -903,7 +903,7 @@ function ReplyPage::print_body
     print "<div>"; $.replyto->print_text(); "</div>";
 
     print "\n<hr />\n";
-    print safe """(<a id="$*text_addcomment_id" href="$.entry.permalink_url#$*text_comments_id">$*text_reply_back</a>)""";
+    print safe """(<a id="$*text_addcomment_id" href="$.entry.permalink_url">$*text_reply_back</a>)""";
     if ($.entry->viewer_sees_ebox()) {
         """<div style="text-aling: center; margin-bottom: 20px;">""";
         $.entry->print_ebox();
@@ -1008,9 +1008,9 @@ function CommentInfo::print_postlink() {
         print safe "$*text_max_comments";
     } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url+"#$*text_addcomment_id"});
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $.post_url});
         } else {
-        print safe "<a href=\"$.post_url#$*text_addcomment_id\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
     }
 }
@@ -1209,7 +1209,7 @@ function Page::print_entry(Entry e) {
                 if ($p.showspam) {
                     print safe """ $sep """ + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments");
                 } else {
-                    print safe """ $sep <a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
+                    print safe """ $sep <a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a>""";
                 }
             }
          }

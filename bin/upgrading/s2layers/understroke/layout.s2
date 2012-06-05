@@ -702,8 +702,8 @@ function _entry_tags(Entry e) : string[][] {
 function _entry_links(Entry e) : string[][] {
 	var Page p = get_page();
 	var string[][] result = (($p.view != "entry") and ($p.view != "reply"))?[
-		["count", $e.comments.show_readlink?get_plural_phrase($e.comments.count,"text_read_comments"):"", $e.comments.read_url + "#$*text_comments_id"],
-		["comments", $e.comments.show_postlink?($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment):"", $e.comments.post_url + "#$*text_addcomment_id" ]
+		["count", $e.comments.show_readlink?get_plural_phrase($e.comments.count,"text_read_comments"):"", $e.comments.read_url],
+		["comments", $e.comments.show_postlink?($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment):"", $e.comments.post_url ]
 	]:[[""]];
 	var string{} link_captions = {
 		"edit_entry" => $*text_edit_entry,
@@ -945,7 +945,7 @@ function EntryPage::print_body {
 	if ($.entry.comments.enabled) {
 		"""$*_{"HR"}<div id="comments">""";
 		"""<div class="comments-links">( $comments_count<span class="replylink">""";
-        $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id" });
+        $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "topcomment", "reply_url" => $e.comments.post_url });
         """</span> )</div>""";
 		$this->print_reply_container({ "target" => "topcomment" });
 		if ($.comment_pages.total_subitems > 0) {
@@ -953,7 +953,7 @@ function EntryPage::print_body {
 			$.comment_pages->print();
 			$this->print_multiform_start();
 			$this->print_comments($.comments);
-			"""<div class="comments-links">( $comments_count<span class="replylink">"""; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment", "reply_url" => $e.comments.post_url+"#$*text_addcomment_id" }); """</span> )</div>""";
+			"""<div class="comments-links">( $comments_count<span class="replylink">"""; $this->print_reply_link({ "linktext" => $*text_post_comment, "target" => "bottomcomment", "reply_url" => $e.comments.post_url }); """</span> )</div>""";
 			$this->print_reply_container({"target" => "bottomcomment"});
 			if ($.comment_pages.all_subitems_displayed) { "$*_{"HR"}"; }
 			$this->print_multiform_actionline();

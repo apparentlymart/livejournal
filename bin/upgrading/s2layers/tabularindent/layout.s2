@@ -586,7 +586,7 @@ function print_entry_box_close (string footer, Entry entry) {
     if ($footer) {
         #TODO - rewrite with this.save
         print  "<tr><td style='white-space: nowrap'>$*text_left_comments";
-        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $e.comments.post_url+"#$*text_addcomment_id"});
+        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment, "reply_url" => $e.comments.post_url});
         " $footer";
         
         if ($p.view == "entry")
@@ -767,7 +767,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $footer = $footer + "$*text_left_comments";
         if ($e.comments.show_readlink) {
             $footer = $footer +
-                      "<a href=\"$e.comments.read_url#$*text_comments_id\">" +
+                      "<a href=\"$e.comments.read_url\">" +
                       get_plural_phrase($e.comments.count, $p.view == "friends" ? "text_read_comments_friends" : "text_read_comments") +
                       "</a>";
         }
@@ -786,7 +786,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                     $footer = "";
                 } else {
                     $footer = $footer +
-                        "<a href=\"$e.comments.post_url#$*text_addcomment_id\">" +
+                        "<a href=\"$e.comments.post_url\">" +
                         ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) +
                         "</a>";
                 }
@@ -1012,7 +1012,7 @@ function EntryPage::print_body () {
 		if ($p.showspam) {
 		    print """<p width='95%' style='text-align:center;'>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</p>""";
 		} else {
-		    print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url#$*text_comments_id\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
+		    print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
 		}
 	}
         if ($.comment_pages.total_subitems > 0) {
