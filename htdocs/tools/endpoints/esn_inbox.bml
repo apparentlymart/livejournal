@@ -73,9 +73,19 @@
             }
         }
 
+        if (scalar @items >= 1) {
+            $remote->log_event('inbox_massdel', {
+                                     remote => $remote,
+                                     actiontarget => scalar @items,
+                                     method => 'delete',
+                                     view   => $cur_folder,
+                                     via    => 'web', });
+        }
+
         $success = 1;
     } elsif ($action eq 'delete_all') {
-        @items = $inbox->delete_all( $cur_folder, { spam => $POST{spam} } );
+        @items = $inbox->delete_all( $cur_folder, interface => 'web',
+                                                  spam => $POST{spam}  );
 
         foreach my $item (@items) {
             push @{$ret{items}}, { qid => $item->{qid}, deleted => 1 };

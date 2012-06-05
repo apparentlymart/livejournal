@@ -105,6 +105,9 @@ FORM
         } elsif ($row->{action} eq 'ban_unset') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Unbanned " . LJ::ljuser($u) if $u;
+        } elsif ($row->{action} eq 'inbox_massdel') {
+             $action = "User delete lots of messages ($row->{actiontarget} messages deleted)" .
+                       " via '$extra->{via}' for '$extra->{view}' view";
         } elsif ($row->{action} eq 'friend_invite_sent') {
             $action = "Friend invite sent to $extra->{extra}";
         } elsif ($row->{action} eq 'maintainer_add') {

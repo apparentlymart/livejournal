@@ -93,7 +93,7 @@ body<=
         if ($POST{markAllRead}) {
             $inbox->mark_all_read( $view );
         } elsif ($POST{deleteAll}) {
-            $inbox->delete_all( $view );
+            $inbox->delete_all( $view,  interface => 'web' );
         } else {
             # go through each item and see if it's checked
             foreach my $item (@$nitems) {
@@ -108,6 +108,15 @@ body<=
                 } elsif ($POST{delete}) {
                     $item->delete;
                 }
+            }
+
+            if ($POST{delete} && scalar @$nitems > 15) {
+                $remote->log_event('inbox_massdel', {
+                                         remote => $remote,
+                                         actiontarget => scalar @$nitems,
+                                         method => 'delete',
+                                         view   => $view,
+                                         via    => 'web', });
             }
 
             # reload inbox after making changes
