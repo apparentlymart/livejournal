@@ -1576,7 +1576,7 @@ sub sendmessage
     @to = keys %to;
 
     my @msg;
-    BML::set_language('en'); # FIXME
+    BML::set_language('en') unless BML::get_language();
 
     foreach my $to (@to) {
         my $tou = LJ::load_user($to);
