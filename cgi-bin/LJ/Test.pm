@@ -116,7 +116,8 @@ sub create_user {
             $opts{'owner'} = $class->create_user(
                 %opts, 'journaltype' => 'P', 'user' => undef );
         }
-
+        $opts{'membership'} ||= 'open';
+        $opts{'postlevel'}  ||= 'members'; 
         $u = LJ::User->create_community(%opts);
     } elsif ( $journaltype eq 'Y' ) {
         unless ( defined $opts{'creator'} ) {
@@ -240,6 +241,27 @@ sub alloc_sms_num {
     }
 
     die "Unable to allocate SMS number after 100 tries";
+}
+
+
+sub create_application {
+    my $class = shift;
+    my %opts = @_;
+    
+    my $prefix = "t_" || $opts{prefix};
+
+    $opts{application_key} ||= $prefix . LJ::rand_chars(8);
+    $opts{name}            ||= $opts{application_key};
+    $opts{type}            ||= 'E'; 
+
+    my $res = LJ::UserApps->add_application(%opts);
+
+    if($res->{errors} && @{$res->{errors}}){
+        use Data::Dumper;
+        die 'Application errors:'.Dumper($res->{errors});
+    }
+    
+    return $res->{application};
 }
 
 package LJ::Test::FakeMemCache;
