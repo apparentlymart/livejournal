@@ -726,6 +726,8 @@ sub new {
         'compress_threshold' => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
         'connect_timeout'    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
         'nowait'             => 1,
+        'max_failures'       => 1,
+        'failure_timeout'    => 25,
     });
 }
 
