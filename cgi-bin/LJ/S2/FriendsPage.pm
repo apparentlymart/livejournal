@@ -451,6 +451,8 @@ sub FriendsPage
             'tags'              => \@taglist,
             'permalink_url'     => $permalink,
             'moodthemeid'       => $moodthemeid,
+            'real_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
+            'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
 
         $entry->{'_ymd'} = join('-', map { $entry->{'time'}->{$_} } qw(year month day));
