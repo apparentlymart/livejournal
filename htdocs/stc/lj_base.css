@@ -4814,6 +4814,7 @@ BODY div .b-helplink:active {
 --------------------------------------*/
 .b-dropover-container {
 	position: relative;
+	z-index: 3;
 	}
 	.b-dropover {
 		display: none;
