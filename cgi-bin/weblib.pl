@@ -1101,7 +1101,7 @@ sub entry_form_tags_widget {
 # args: req, post
 # des-req: protocol request hash to build.
 # des-post: entry_form POST contents.
-# returns: req
+ # returns: req
 # </LJFUNC>
 sub entry_form_decode
 {
@@ -1534,6 +1534,7 @@ sub res_includes {
                 remote_can_track_threads => $remote && $remote->get_cap('track_thread'),
                 remote_is_suspended      => $remote_is_suspended,
                 remote_is_maintainer     => $remote_is_maintainer,
+                remote_is_identity       => $remote && $remote->is_identity,
                 ctx_popup                => $ctxpopup,
                 inbox_update_poll        => $inbox_update_poll,
                 media_embed_enabled      => $embeds_enabled,
