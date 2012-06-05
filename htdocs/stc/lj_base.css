@@ -3731,6 +3731,7 @@ A.lj-button-link:active {
 	vertical-align: middle !important;
 	text-shadow: 0 1px 0 #FFF;
 	color: #000!important;
+	cursor: pointer !important;
 	}
 .lj-button-light.repost-button-inactive .lj-button-b {
 	color: #999 !important;
@@ -3778,9 +3779,10 @@ A.lj-button-link:active {
 	cursor: pointer !important;
 	}
 .lj-button-light.repost-button-inactive .lj-button-c {
-	cursor: default !important;
+	cursor: pointer !important;
 	}
-.repost-button .lj-button-c.empty .lj-button-arrow {
+.repost-button .lj-button-c.empty .lj-button-arrow,
+.repost-button .lj-button-c.empty .lj-like-item-count {
 	display: none!important;
 	}
 .lj-button-light.repost-button .lj-button-arrow {
