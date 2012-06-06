@@ -707,11 +707,11 @@ sub get_entry_by_id {
     my $sql_poster = '';
 
     if ( !($can_see || $viewsome || $viewall) ) {
-        $sql_poster = 'AND posterid = ' . $user->userid . " ";
+        $sql_poster .= 'AND posterid = ' . $user->userid . " ";
     }
 
     unless ($options->{'show_posted'}) {
-        $sql_poster = " AND finaltime IS NULL ";
+        $sql_poster .= " AND finaltime IS NULL ";
     }
 
     my $dbcr = LJ::get_cluster_master($journal)
