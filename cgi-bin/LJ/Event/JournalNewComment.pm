@@ -880,6 +880,7 @@ sub is_tracking {
 sub as_push {
     my $self = shift;
     my $u    = shift;
+    my $lang = shift;
     my %opts = @_;
 
     my $parent = $self->comment->parent;
@@ -892,7 +893,7 @@ sub as_push {
             if $opts{cut} && length($subject) > $opts{cut};
 
     } else {
-        $subject = LJ::Lang::get_text($u->prop('browselang'), "widget.officialjournals.nosubject")
+        $subject = LJ::Lang::get_text($lang, "widget.officialjournals.nosubject")
     }
 
     # tracking event
@@ -901,7 +902,7 @@ sub as_push {
         if($self->event_journal->journaltype eq 'C') {
 
             if($self->comment->parent) {
-                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetstreadinentrytitle", 1, {
+                return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackcommetstreadinentrytitle", 1, {
                     user    => $self->comment->poster->user,
                     subject => $subject, 
                     poster  => $self->comment->parent->poster->user,
@@ -909,14 +910,14 @@ sub as_push {
                 });
 
             } else {
-                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
+                return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
                     user    => $self->comment->poster->user,
                     subject => $subject,
                     journal => $self->event_journal->user,
                 });
             }
         } else {
-                return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
+                return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackcommetsonentrytitle", 1, {
                 user    => $self->comment->poster->user,
                 subject => $subject,
                 journal => $self->event_journal->user,
@@ -926,19 +927,19 @@ sub as_push {
     } else {
 
         if($parent && LJ::u_equals($parent->poster, $u)) {
-            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.commentreply", 1, {
+            return LJ::Lang::get_text($lang, "esn.push.notification.commentreply", 1, {
                 user    => $self->comment->poster->user,
                 journal => $self->event_journal->user,
             });
 
         } elsif($self->event_journal->journaltype eq 'C') {
-            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.communityentryreply", 1, {
+            return LJ::Lang::get_text($lang, "esn.push.notification.communityentryreply", 1, {
                 user        => $self->comment->poster->user,
                 community   => $self->event_journal->user,
             })
 
         } else {
-            return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.journalnewcomment", 1, {
+            return LJ::Lang::get_text($lang, "esn.push.notification.journalnewcomment", 1, {
                 user => $self->comment->poster->user,
             })
         }
@@ -947,7 +948,8 @@ sub as_push {
     
 sub as_push_payload {
     my $self = shift;
-    my $u = shift;
+    my $u    = shift;  
+    my $lang = shift;
 
     my $entry = $self->comment->entry;
     my $parent = $self->comment->parent;

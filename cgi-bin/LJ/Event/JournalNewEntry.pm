@@ -429,16 +429,17 @@ sub eventtime_unix {
 sub zero_journalid_subs_means { undef }
 
 sub as_push {
-    my ($self,$u) = @_;
+    my ($self, $u, $lang) = @_;
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackjournalpostsentry", { user => $u->user }) . 
+    return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackjournalpostsentry", { user => $u->user }) . 
     ($self->entry->tags 
-       ? LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackjournalpostsentry.tagged", { tag => join(', ', $self->entry->tags )})
+       ? LJ::Lang::get_text($lang, "esn.push.notification.eventtrackjournalpostsentry.tagged", { tag => join(', ', $self->entry->tags )})
        : '' );
 }
 
 sub as_push_payload {
     my ($self,$u) = @_;
+
     return { 't' => 19,
              'j' => $u->user,
              'p' => $self->entry->ditemid,

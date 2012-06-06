@@ -105,14 +105,16 @@ sub is_subscription_visible_to  { 1 }
 sub is_tracking { 1 }
 
 sub as_push {
-    my ($self, $u) = @_;
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.eventtrackusernamepurged", 1, {
+    my ($self, $u, $lang) = @_;
+
+    return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackusernamepurged", 1, {
         user => $self->event_journal->user
     })
 }
 
 sub as_push_payload {
     my $self = shift;
+
     return { 't' => 24,
              'j' => $self->event_journal->user,
            };

@@ -160,14 +160,17 @@ sub is_tracking {
 sub as_push {
     my $self = shift;
     my $u = shift;
+    my $lang = shift;
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.newuserpic", 1, {
+    return LJ::Lang::get_text($lang, "esn.push.notification.newuserpic", 1, {
         user        => $self->event_journal->user(),
     })
 }
 
 sub as_push_payload {
     my $self = shift;
+    my $self = shift;
+
     return { 't' => 16,
              'j' => $self->event_journal->user(),
            };

@@ -209,9 +209,10 @@ sub is_tracking {
 
 sub as_push {
     my $self = shift;
-    my $u = shift;
+    my $u    = shift;
+    my $lang = shift;
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.birthday", 1, {
+    return LJ::Lang::get_text($lang, "esn.push.notification.birthday", 1, {
         user    => $self->bdayuser->user(),
         date    => $self->email_bday($u->prop('browselang'))
     })
@@ -219,6 +220,7 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
+
     return { 't' => 17,
              'j' => $self->bdayuser->user(),
              'b' => $self->next_bday(),

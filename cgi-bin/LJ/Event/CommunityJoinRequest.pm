@@ -167,9 +167,10 @@ sub is_tracking { 0 }
 
 sub as_push {
     my $self = shift;
-    my $u = shift;
+    my $u    = shift;
+    my $lang = shift;
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.communityjoinrequest", 1, {
+    return LJ::Lang::get_text($lang, "esn.push.notification.communityjoinrequest", 1, {
         user        => $self->requestor->user(),
         community   => $self->comm->user(),
     })
@@ -177,6 +178,8 @@ sub as_push {
 
 sub as_push_payload {
     my $self = shift;
+    my $lang = shift;
+
     return { 't' => 15,
              'j' => $self->comm->user(),
              'u' => $self->requestor->user(),

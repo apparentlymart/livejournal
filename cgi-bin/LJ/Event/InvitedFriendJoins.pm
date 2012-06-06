@@ -156,14 +156,17 @@ sub is_tracking { 0 }
 sub as_push {
     my $self = shift;
     my $u = shift;
+    my $lang = shift;
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.invitedfriendjoins", 1, {
+    return LJ::Lang::get_text($lang, "esn.push.notification.invitedfriendjoins", 1, {
         journal => $self->friend->user,
     })
 }
 
 sub as_push_payload {
     my $self = shift;
+    my $lang = shift;
+
     return '"t":13,"j":"'.$self->friend->user.'"';
 }
 

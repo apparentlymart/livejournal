@@ -184,8 +184,10 @@ sub is_subscription_visible_to { 1 }
 
 sub as_push {
     my $self = shift;
-    my $u = shift;
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.offcialpost", 1, {
+    my $u    = shift;
+    my $lang = shift;
+
+    return LJ::Lang::get_text($lang, "esn.push.notification.offcialpost", 1, {
         community => $self->event_journal->user,
     })
 }

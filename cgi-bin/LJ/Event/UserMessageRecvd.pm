@@ -201,6 +201,7 @@ sub as_alert {
 sub as_push {
     my $self = shift;
     my $u = shift;
+    my $lang = shift;
     my %opts = @_;
    
     if (exists $opts{'message'}) {
@@ -208,13 +209,14 @@ sub as_push {
         return $msg->body; 
     }
 
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.usermessagerecvd", 1, {
+    return LJ::Lang::get_text($lang, "esn.push.notification.usermessagerecvd", 1, {
         user => $self->load_message->other_u->{user},
     })
 }
 
 sub as_push_payload {
-    my $self = shift; 
+    my $self = shift;
+    my $lang = shift; 
     my $os = shift;
 
     return { 'm' => int($self->arg1),

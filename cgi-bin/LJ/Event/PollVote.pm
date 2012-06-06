@@ -190,8 +190,10 @@ sub is_tracking { 0 }
 
 sub as_push {
     my $self = shift;
-    my $u = shift;
-    return LJ::Lang::get_text($u->prop('browselang'), "esn.push.notification.pollvote", 1, {
+    my $u    = shift;
+    my $lang = shift;
+
+    return LJ::Lang::get_text($lang, "esn.push.notification.pollvote", 1, {
         user    => $self->voter->user,
         journal => $u->user,
     })
