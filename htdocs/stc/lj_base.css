@@ -3336,7 +3336,7 @@ DIV.lj_ippu_app {
 	width: 16px;
 	height: 16px;
 	margin:0 2px 0 0;
-	background-image: url(/img/icon-social-capital.png?v=1);
+	background-image: url(/img/icon-social-capital.png?v=19876);
 	background-repeat: no-repeat;
 	background-position: 0 50%;
 	}
@@ -3502,7 +3502,7 @@ DIV.lj_ippu_app {
 			text-align: center;
 			}
 			.b-subjecticon {
-				background-image: url(/img/subjecticons.gif?v=1);
+				background-image: url(/img/subjecticons.gif?v=19333);
 				background-repeat: no-repeat;
 				cursor: pointer;
 				}
@@ -4547,7 +4547,7 @@ BODY div .b-helplink:active {
 		margin: 0;
 		padding: 0;
 		font: 0/0 serif;
-		background-image: url(/img/btn_actions.png?v=15742);
+		background-image: url(/img/btn_actions.png?v=19689);
 		background-repeat: no-repeat;
 		cursor: pointer;
 		}
