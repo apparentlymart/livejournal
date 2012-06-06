@@ -4811,6 +4811,10 @@ quote.right="
 
 repost.button.label=Repost
 
+repost.button.title=Repost me
+
+repost.button.counter=Repost counter
+
 repost.default_button|staleness=1
 repost.default_button=repost
 
