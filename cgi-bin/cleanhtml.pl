@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 
+# This file is provided under the GNU General Public License.
+# A copy of that license can be found in the LICENSE-LiveJournal.txt file included as
+# part of this distribution.
+
+# Original code related to the 'cut_retrieve' option of the 'clean' method by Afuna in Dreamwidth (http://www.dreamwidth.org/)
+
 use strict;
 use Class::Autouse qw(
                       URI
@@ -157,6 +163,7 @@ sub clean {
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
+    my $cut_retrieve     =  $opts->{cut_retrieve} || 0;
 
     my $enable_dynamic_elements = $EnableDynamicElements;
     unless ( defined $enable_dynamic_elements ) {
@@ -327,6 +334,11 @@ sub clean {
 
     my $ljspoilers_open = 0;
 
+    # if we're retrieving a cut tag, then we want to eat everything 
+    # until we hit the first cut tag.
+    my @cuttag_stack = ();
+    my $eatall = $cut_retrieve ? 1 : 0;
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -343,6 +355,14 @@ sub clean {
             my $attr = $token->[2];  # hashref
 
             $good_until = length $newdata;
+
+            # stupid hack to remove the class='ljcut' from divs when we're
+            # disabling them, so we account for the open div normally later.
+            my $ljcut_div = $tag eq "div" && lc $attr->{class} eq "ljcut";
+            if ($ljcut_div && $ljcut_disable) {
+                $ljcut_div = 0;
+            }
+
 
             if (LJ::is_enabled('remove_allowscriptaccess')) {
                 ## TODO: remove closing </param> tag,
@@ -362,6 +382,13 @@ sub clean {
                 }
                 next TOKEN;
             }
+
+            # if we're looking for cut tags, ignore everything that's
+            # not a cut tag.
+            if ( $eatall && $tag ne "lj-cut" && !$ljcut_div ) {
+                next TOKEN;
+            }
+
 
             if ( $opts->{'img_placeholders'} ) {
                 if ( $tag eq 'a' ) {
@@ -661,13 +688,6 @@ sub clean {
 
             }
 
-            # stupid hack to remove the class='ljcut' from divs when we're
-            # disabling them, so we account for the open div normally later.
-            my $ljcut_div = $tag eq "div" && lc $attr->{class} eq "ljcut";
-            if ($ljcut_div && $ljcut_disable) {
-                $ljcut_div = 0;
-            }
-
             # no cut URL, record the anchor, but then fall through
             if (0 && $ljcut_div && !$cut) {
                 $cutcount++;
@@ -703,6 +723,18 @@ sub clean {
             if (($tag eq "lj-cut" || $ljcut_div)) {
                 next TOKEN if $ljcut_disable;
                 $cutcount++;
+
+                # if this is the cut tag we're looking for, then push it
+                # onto the stack (in case there are nested cut tags) and
+                # start including the content.
+                if ( $eatall ) {
+                    if ( $cutcount == $cut_retrieve ) {
+                        $eatall = 0;
+                        push @cuttag_stack, $tag;
+                    }
+                    next TOKEN;
+                }
+
                 my $link_text = sub {
                     my $text =  LJ::Lang::ml('fcklang.readmore');
                     $text = Encode::decode_utf8($text) if $text;
@@ -1321,6 +1353,20 @@ sub clean {
                 next TOKEN if @eatuntil;
             }
 
+            # if we're just getting the contents of a cut tag, then pop the
+            # tag off the stack.  if this is the last tag on the stack, then
+            # go back to eating the rest of the content.
+            if ( @cuttag_stack ) {
+                if ( $cuttag_stack[-1] eq $tag ) {
+                    pop @cuttag_stack;
+                    last TOKEN unless ( @cuttag_stack );
+                }
+            }
+
+            if ( $eatall ) {
+                next TOKEN;
+            }
+
             if ($eating_ljuser_span && $tag eq "span") {
                 $eating_ljuser_span = 0;
                 $newdata .= $opts->{'textonly'} ? $ljuser_text_node : LJ::ljuser($ljuser_text_node);
@@ -1483,6 +1529,10 @@ sub clean {
 
             if (@eatuntil) {
                 push @capture, $token if $capturing_during_eat;
+                next TOKEN;
+            }
+
+            if ( $eatall ) {
                 next TOKEN;
             }
 
