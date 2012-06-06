@@ -253,6 +253,9 @@ sub create_application {
     $opts{application_key} ||= $prefix . LJ::rand_chars(8);
     $opts{name}            ||= $opts{application_key};
     $opts{type}            ||= 'E'; 
+    $opts{status}          ||= 'A';
+    $opts{primary}         ||= [@{$LJ::USERAPPS_ACCESS_LISTS}[0..2]];
+    $opts{secondary}       ||= [@{$LJ::USERAPPS_ACCESS_LISTS}[3..5]];
 
     my $res = LJ::UserApps->add_application(%opts);
 
@@ -260,8 +263,16 @@ sub create_application {
         use Data::Dumper;
         die 'Application errors:'.Dumper($res->{errors});
     }
+
+    my $app = $res->{application};
+
+    $app->set_status($opts{status}) unless $opts{status} eq 'R';
+    $app->set_primary($opts{primary}) if $opts{primary};
+    $app->set_secondary($opts{secondary}) if $opts{secondary};
     
-    return $res->{application};
+    $app->{non} = [@{$LJ::USERAPPS_ACCESS_LISTS}[6..$#$LJ::USERAPPS_ACCESS_LISTS]];
+
+    return $app;
 }
 
 package LJ::Test::FakeMemCache;
