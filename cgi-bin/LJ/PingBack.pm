@@ -21,6 +21,10 @@ sub ping_post {
         return "Unknown entry";
     }
 
+    if ($target_entry->original_post) {
+        return "fast repost";
+    }
+
     # empty object means, that sourceURI is not LJ.com's page.
     # it's an usual case.
     my $source_entry = LJ::Entry->new_from_url($sourceURI);
