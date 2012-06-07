@@ -4,6 +4,13 @@
 
 	var likeButtons = [
 		{
+			label: CKLang.LJLike_button_repost,
+			id:'repost',
+			abbr: 'rp',
+			html: '<span class="lj-like-item rp">' + CKLang.LJLike_button_repost + '</span>',
+			htmlOpt: '<li class="like-rp"><input type="checkbox" id="like-rp" /><label for="like-rp">' + CKLang.LJLike_button_repost + '</label></li>'
+		},
+		{
 			label: CKLang.LJLike_button_facebook,
 			id: 'facebook',
 			abbr: 'fb',
