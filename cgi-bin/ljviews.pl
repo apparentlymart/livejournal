@@ -1301,7 +1301,7 @@ sub create_view_lastn
                          'journalu'          => \$journalu,
                          'posterid'          => \$posterid,
                          'security'          => \$security,
-                         'event'             => \$event,
+                         'event_raw'         => \$event,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount };
 
@@ -1896,7 +1896,7 @@ sub create_view_friends {
                          'journalu'          => \$journalu,
                          'posterid'          => \$posterid,
                          'security'          => \$security,
-                         'event'             => \$event,
+                         'event_raw'         => \$event,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
                          'cluster_id'        => \$clusterid, };
@@ -2727,7 +2727,7 @@ sub create_view_day
                          'journalu'          => \$journalu,
                          'posterid'          => \$posterid,
                          'security'          => \$security,
-                         'event'             => \$event,
+                         'event_raw'         => \$event,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount };
 
