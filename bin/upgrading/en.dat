@@ -6018,6 +6018,8 @@ talk.poll.question.from=From:
 
 talk.poll.question.maxlength=Maxlength:
 
+talk.poll.question.scaletoobig=Limit of 20 selections (to-from)/by > 20
+
 talk.poll.question.size=Size:
 
 talk.poll.question.to=To:
