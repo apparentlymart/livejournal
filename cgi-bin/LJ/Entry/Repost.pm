@@ -309,17 +309,20 @@ sub get_list {
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
 
-        $users->{$u->user} = { 'userhead' => $u->userhead_url,
+        $users->{$u->user} = { #'userhead' => $u->userhead_url,
                                'url'      => $u->journal_base, };
     }   
-    $reposters_info->{'last'} = $repostersids->[-1];
+    $reposters_info->{'last'}   = $repostersids->[-1];
     $reposters_info->{'nomore'} = 1 if $reposters_count < 25;
+    $reposters_info->{'count'}  = __get_count($entry->journal, 
+                                              $entry->jitemid);
 
     __put_reposters_list( $journalid,
                           $jitemid,
                           $reposters_info, 
                           $lastuserid );
 
+    
     return $reposters_info; 
 }
 
@@ -485,6 +488,10 @@ sub substitute_content {
 
     if ($opts->{'eventtime'}) {
         ${$opts->{'eventtime'}} = $entry_obj->eventtime_mysql;
+    }
+
+    if ($opts->{'event_raw'}) {
+        ${$opts->{'event_raw'}} = $original_entry_obj->event_raw;
     }
 
     if ($opts->{'event'}) {
