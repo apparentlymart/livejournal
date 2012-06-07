@@ -193,7 +193,10 @@ sub RecentPage
 
             $lite_journalu = UserLite($entry_obj->journal);
             $apu_lite{$entry_obj->journalid} = $lite_journalu;
+            $apu{$entry_obj->journalid} = $entry_obj->journal;
+
             if (!$apu_lite{$posterid}) {
+                $apu{$posterid} = $entry_obj->poster;
                 $apu_lite{$posterid} = UserLite($entry_obj->poster);
             }
         }
@@ -289,6 +292,7 @@ sub RecentPage
         }
         my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
         my $userpic = Image_userpic($pu, 0, $pickw);
+        warn $pu->user;
 
         if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {
             $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $text;

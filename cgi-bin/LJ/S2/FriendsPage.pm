@@ -282,7 +282,8 @@ sub FriendsPage
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
             next ENTRY unless $entry_obj->visible_to($remote);
 
-            $friend   = $poster = $entry_obj->journal;
+            $friend   = $entry_obj->journal;
+            $poster   = $entry_obj->poster;
 
             $posters{$posterid} = $poster;
             $friends{$friendid} = $friend;
