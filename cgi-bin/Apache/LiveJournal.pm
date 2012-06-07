@@ -2111,7 +2111,11 @@ sub journal_content
 
     # add crap before </body>
     my $before_body_close = "";
-    LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+
+    unless ($LJ::DISABLED_LJTIMES{$user}) {
+        LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+    }
+
     LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close);
     {
         my $journalu = LJ::load_user($user);
