@@ -147,7 +147,7 @@ sub DayPage
                          'posterid'          => \$posterid,
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
-                         'event'             => \$text,
+                         'event_raw'         => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
                          'userlite'          => \$lite_journalu, };

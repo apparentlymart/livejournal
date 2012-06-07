@@ -180,7 +180,7 @@ sub RecentPage
                          'posterid'          => \$posterid,
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
-                         'event'             => \$text,
+                         'event_raw'         => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
                          'userlite'          => \$lite_journalu, };
@@ -292,7 +292,6 @@ sub RecentPage
         }
         my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
         my $userpic = Image_userpic($pu, 0, $pickw);
-        warn $pu->user;
 
         if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {
             $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $text;
@@ -302,6 +301,7 @@ sub RecentPage
             }
         }
 
+        warn "text $text";
         my $entry = $lastentry = Entry($journalu, {
             'subject' => $subject,
             'text' => $text,
