@@ -1380,7 +1380,7 @@ li.cke_panel_listItem {
 		.cke-dialog-likes-list LI LABEL {
 			float: left;
 			display: block;
-			background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
+			background: url(/js/ck/images/lj-like-buttons.png?v=2) no-repeat;
 			text-indent: -3333px;
 			cursor: pointer;
 			}
@@ -1408,6 +1408,11 @@ li.cke_panel_listItem {
 			width: 67px;
 			height: 24px;
 			background-position: 0 -21px;
+			}
+		.cke-dialog-likes-list .like-rp LABEL {
+			width: 68px;
+			height: 24px;
+			background-position: 0 -111px;
 			}
 .cke-dialog-likes-faq {
     margin: 0;

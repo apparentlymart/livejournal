@@ -229,7 +229,7 @@ lj\:cut {
 	.lj-like-item {
 		display: inline-block;
 		margin-right: 15px;
-		background: url(/js/ck/images/lj-like-buttons.png) no-repeat;
+		background: url(/js/ck/images/lj-like-buttons.png?v=2) no-repeat;
 		vertical-align: middle;
 		font-size: 0;
 		cursor: pointer;
@@ -258,6 +258,11 @@ lj\:cut {
 		width: 67px;
 		height: 24px;
 		background-position: 0 -21px;
+		}
+	.rp {
+		width: 68px;
+		height: 24px;
+		background-position: 0 -111px;
 		}
 /* LJ map */
 P.lj-map,
