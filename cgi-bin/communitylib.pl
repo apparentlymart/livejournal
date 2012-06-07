@@ -942,7 +942,7 @@ sub maintainer_linkbar {
             "<a href='$LJ::SITEROOT/community/members.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actmembers2') . "</a>",
     );
 
-    if (LJ::SUP->is_sup_enabled($comm)) {
+    if (LJ::SUP->is_sup_enabled($comm) && LJ::is_enabled('wishlist_v2')) {
         push @links, $page eq "wishlist" ?
             "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.wishlist') . "</strong>" :
             "<a href='".$comm->wishlist_url."'>" . LJ::Lang::ml('/community/manage.bml.commlist.wishlist') . "</a>";
