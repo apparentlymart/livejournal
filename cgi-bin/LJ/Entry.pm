@@ -260,8 +260,6 @@ sub comments_url {
         \$overridden_url );
     return $overridden_url if $overridden_url;
 
-    my %opts = ( 'anchor' => 'comments' );
-
     my $remote     = LJ::get_remote();
     my $replycount = $self->reply_count;
 
