@@ -384,7 +384,7 @@ LJ.define('LJ.Util.Journal');
 (function() {
 	var base = (LJ.pageVar('siteroot', true) || 'http://www.livejournal.com')
 						.replace('http://www', ''),
-		journalReg  = new RegExp('^http:\\/\\/(\\w+)' + base.replace(/\./, '\\.') + '(?:\\/(?:(\\w+)\\/)?(?:(\\d+)\\.html)?)?$');
+		journalReg  = new RegExp('^http:\\/\\/([\\w-]+)' + base.replace(/\./, '\\.') + '(?:\\/(?:([\\w-]+)\\/)?(?:(\\d+)\\.html)?)?$');
 
 	/**
 	 * Parse journal link to retrieve information from it
