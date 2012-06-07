@@ -6042,7 +6042,7 @@ talk.poll.type.add=Add question
 
 talk.poll.type.check=Check Boxes
 
-talk.poll.type.dropdown=Dropdown Box
+talk.poll.type.drop=Dropdown Box
 
 talk.poll.type.radio=Radio Buttons
 
