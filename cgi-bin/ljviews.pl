@@ -1888,7 +1888,7 @@ sub create_view_friends {
         my $event      = $logtext->{$datakey}->[1];
 
         my $repost_entry_obj;
-        my $journalu;
+        my $journalu = $entry_obj->journal;
 
         my $content =  { 'original_post_obj' => \$entry_obj,
                          'repost_obj'        => \$repost_entry_obj,
@@ -1902,6 +1902,7 @@ sub create_view_friends {
                          'cluster_id'        => \$clusterid, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+
             $friendid = $journalu->userid;
             $logprops{$itemid} = $entry_obj->props;
             $friends{$friendid} = $journalu;
