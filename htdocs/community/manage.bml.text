@@ -23,6 +23,8 @@
 
 .commlist.header=Your communities
 
+.commlist.mailing2=Mass mailing
+
 .commlist.moderation=Awaiting Moderation
 
 .commlist.moderation.num2=[<a [[aopts]]>[[num]] in queue</a>]

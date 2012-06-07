@@ -124,7 +124,7 @@ body<=
                 'link'=>"<a href='/update.bml?usejournal=$user'>$ML{'.commlist.post'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= LJ::run_hook('community_manage_actionlink', $user);
             $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/manage/profile/?authas=$user'>$ML{'.commlist.actinfo2'}</a>"}) . "&nbsp;&nbsp;";
+                'link'=>"<a href='/community/mailing.bml?authas=$user'>$ML{'.commlist.mailing2'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='$LJ::SITEROOT/customize/?authas=$user'>$ML{'.commlist.customize2'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
