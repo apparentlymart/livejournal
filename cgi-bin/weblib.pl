@@ -2135,6 +2135,11 @@ sub journal_js_inject
                     js/journal.js
                     ));
 
+
+    LJ::need_res(qw{js/jquery/jquery.lj.repostbutton.js
+                    templates/CleanHtml/reposted.tmpl
+                    templates/CleanHtml/Repost.tmpl});
+
     LJ::run_hooks('extra_journal_js');
 }
 

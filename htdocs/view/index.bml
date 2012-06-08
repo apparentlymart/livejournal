@@ -181,7 +181,6 @@ LJ::Request->notes("codepath" => "bml.view.index");
 
      my $entry = LJ::Entry->new($u, jitemid => $itemid);
 
-     warn "it1: $itemid";
      my $journalu = $u;
      my ($repost_entry_obj, $subject);
      my $content =  { 'original_post_obj' => \$entry,
@@ -196,7 +195,7 @@ LJ::Request->notes("codepath" => "bml.view.index");
                       'allowmask'         => \$allowmask,
                       'reply_count'       => \$replycount, };
 
-     if (LJ::EntryReference->substitute_content( $entry, $content )) {
+     if (LJ::Entry::Repost->substitute_content( $entry, $content )) {
          next unless $entry->visible_to($remote);
          $apu{$posterid} = $entry->poster;
      }
@@ -263,7 +262,6 @@ LJ::Request->notes("codepath" => "bml.view.index");
 
      LJ::CleanHTML::clean_subject_all(\$subject);
 
-     warn "it2:  $itemid " .  LJ::item_link($journalu, $itemid, $anum);
      $body .= "<td><a href='" . LJ::item_link($journalu, $itemid, $anum) . "'>$subject</a>$sec$rep</td></tr>\n";
  }
  if ($lday) { $body .= "</table></dd>\n"; }
