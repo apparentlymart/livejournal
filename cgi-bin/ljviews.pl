@@ -1470,7 +1470,7 @@ sub create_view_lastn
             }
         } else {
             if (LJ::is_enabled("entry_reference")) {
-                $var .= '_REPOST';
+#                $var .= '_REPOST';
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter', 
@@ -2110,7 +2110,7 @@ sub create_view_friends {
             }
         } else {
             if (LJ::is_enabled("entry_reference")) {
-                $var .= '_REPOST';
+#                $var .= '_REPOST';
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
@@ -2841,7 +2841,7 @@ sub create_view_day
             }
         } else {
             if (LJ::is_enabled("entry_reference")) {
-                $var .= '_REPOST';
+#                $var .= '_REPOST';
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
