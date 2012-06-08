@@ -270,9 +270,24 @@ sub create_application {
     $app->set_primary($opts{primary}) if $opts{primary};
     $app->set_secondary($opts{secondary}) if $opts{secondary};
     
-    $app->{non} = [@{$LJ::USERAPPS_ACCESS_LISTS}[6..$#$LJ::USERAPPS_ACCESS_LISTS]];
+    $app->{non} = $opts{non} || [@{$LJ::USERAPPS_ACCESS_LISTS}[6..$#$LJ::USERAPPS_ACCESS_LISTS]];
 
     return $app;
+}
+
+sub get_access_token {
+    use LJ::OAuth::AccessToken;
+
+    my $class = shift;
+    my %opts = @_;
+    $opts{access} ||= [];
+    my $app = $opts{app} or die "Application is not specified";
+    $app->authorize( userid => $opts{userid}, access => $opts{access} );
+    my $token =  LJ::OAuth::AccessToken->generate(
+                                                  consumer_key => $opts{consumer_key},
+                                                  userid       => $opts{userid},
+                                                  );
+    return $token;
 }
 
 package LJ::Test::FakeMemCache;
