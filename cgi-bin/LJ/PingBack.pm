@@ -21,10 +21,6 @@ sub ping_post {
         return "Unknown entry";
     }
 
-    if ($target_entry->original_post) {
-        return "fast repost";
-    }
-
     # empty object means, that sourceURI is not LJ.com's page.
     # it's an usual case.
     my $source_entry = LJ::Entry->new_from_url($sourceURI);
@@ -99,6 +95,7 @@ sub should_entry_recieve_pingback {
 
     return 0 if $LJ::DISABLED{'pingback_receive'};
     return 0 if $target_entry->is_suspended;
+
     # Pingback is open for all users
     # return 0 unless $target_entry->journal->get_cap('pingback');
 
