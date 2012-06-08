@@ -301,7 +301,6 @@ sub RecentPage
             }
         }
 
-        warn "text $text";
         my $entry = $lastentry = Entry($journalu, {
             'subject' => $subject,
             'text' => $text,
