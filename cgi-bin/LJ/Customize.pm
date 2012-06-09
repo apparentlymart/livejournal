@@ -730,6 +730,9 @@ sub get_cats {
         writing => {
             text => LJ::Lang::ml('customize.cats.writing'),
         },
+        sports => {
+            text => LJ::Lang::ml('customize.cats.sports'),
+        },
     );
     
     LJ::run_hooks("modify_cat_list", \@categories, user => $u,);
