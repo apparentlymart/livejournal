@@ -150,6 +150,7 @@ sub FriendsPage
     my %friends;
     my %friends_row;
     my %idsbycluster;
+    my %reposts;
 
     my @items = LJ::get_friend_items({
         'u'                 => $u,
@@ -253,7 +254,6 @@ sub FriendsPage
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
         }
 
-
         if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
             LJ::item_toutf8($friends{$friendid}, \$subject, \$text, $logprops{$datakey});
         }
@@ -289,6 +289,12 @@ sub FriendsPage
             $friends{$friendid} = $friend;
             $datakey  = "repost $friendid $itemid";    
 
+            if (!$reposts{$datakey}) {
+                $reposts{$datakey} = 1;
+            } else {
+                $reposts{$datakey}++;
+            }
+
             if (!$logprops{$datakey}) {
                 $logprops{$datakey} = $entry_obj->props;
  
@@ -300,10 +306,11 @@ sub FriendsPage
             }
         }
 
-        if ( $remote && 
-             $logprops{$datakey}->{'repost'} && 
-             $remote->prop('hidefriendsreposts') && 
-             ! $remote->prop('opt_ljcut_disable_friends') ) 
+        if ( ($remote && 
+              $logprops{$datakey}->{'repost'} && 
+              $remote->prop('hidefriendsreposts') && 
+              ! $remote->prop('opt_ljcut_disable_friends')) ||
+              $reposts{$datakey} > 1 ) 
         {
             $text = LJ::Lang::ml(
                 'friendsposts.reposted',

@@ -1617,6 +1617,7 @@ sub create_view_friends {
     my ($ret, $u, $vars, $remote, $opts) = @_;
     my $sth;
     my $user = $u->{'user'};
+    my %reposts;
 
     # Check if we should redirect due to a bad password
     $opts->{'redir'} = LJ::bad_password_redirect({ 'returl' => 1 });
@@ -1894,13 +1895,18 @@ sub create_view_friends {
                          'cluster_id'        => \$clusterid, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
-
             $friendid = $journalu->userid;
             $logprops{$itemid} = $entry_obj->props;
             $friends{$friendid} = $journalu;
             $pu = $entry_obj->poster;
 
-            $datakey = "$friendid $itemid";
+            $datakey = "repost $friendid $itemid";
+
+            if (!$reposts{$datakey}) {
+                $reposts{$datakey} = 1;
+            } else {
+                $reposts{$datakey}++;
+            }
 
             if (!$logprops{$datakey}) {
                 $logprops{$datakey} = $entry_obj->props;
@@ -1913,7 +1919,12 @@ sub create_view_friends {
             }
         }
 
-        if ( $logprops{$datakey}->{'repost'} && $remote && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+        if ( ($logprops{$datakey}->{'repost'} &&
+              $remote && 
+              $remote->prop('hidefriendsreposts') && \
+              ! $remote->prop('opt_ljcut_disable_friends')) ||
+              $reposts{$datakey} > 1 ) 
+        {
             $event = LJ::Lang::ml(
                 'friendsposts.reposted',
                 {
