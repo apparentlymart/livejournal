@@ -287,10 +287,24 @@ sub FriendsPage
 
             $posters{$posterid} = $poster;
             $friends{$friendid} = $friend;
-            $datakey   = "$friendid $itemid";
+            $datakey  = "repost $friendid $itemid";    
+
+            if (!$logprops{$datakey}) {
+                $logprops{$datakey} = $entry_obj->props;
+ 
+                # mark as repost
+                $logprops{$datakey}->{'repost'}         = 'e';
+                $logprops{$datakey}->{'repost_author'}  = $entry_obj->poster->user; 
+                $logprops{$datakey}->{'repost_subject'} = $entry_obj->subject_html;
+                $logprops{$datakey}->{'repost_url'}     = $entry_obj->url;
+            }
         }
 
-        if ( $remote && $logprops{$datakey}->{'repost'} && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
+        if ( $remote && 
+             $logprops{$datakey}->{'repost'} && 
+             $remote->prop('hidefriendsreposts') && 
+             ! $remote->prop('opt_ljcut_disable_friends') ) 
+        {
             $text = LJ::Lang::ml(
                 'friendsposts.reposted',
                 {

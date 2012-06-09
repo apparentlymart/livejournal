@@ -1899,6 +1899,18 @@ sub create_view_friends {
             $logprops{$itemid} = $entry_obj->props;
             $friends{$friendid} = $journalu;
             $pu = $entry_obj->poster;
+
+            $datakey = "$friendid $itemid";
+
+            if (!$logprops{$datakey}) {
+                $logprops{$datakey} = $entry_obj->props;
+
+                # mark as repost
+                $logprops{$datakey}->{'repost'}         = 'e';
+                $logprops{$datakey}->{'repost_author'}  = $entry_obj->poster->user;
+                $logprops{$datakey}->{'repost_subject'} = $entry_obj->subject_html;
+                $logprops{$datakey}->{'repost_url'}     = $entry_obj->url;
+            }
         }
 
         if ( $logprops{$datakey}->{'repost'} && $remote && $remote->prop('hidefriendsreposts') && ! $remote->prop('opt_ljcut_disable_friends') ) {
