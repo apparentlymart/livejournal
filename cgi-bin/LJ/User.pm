@@ -2457,6 +2457,11 @@ sub is_validated {
     return $u->email_status eq "A";
 }
 
+sub receives_html_emails {
+    my $u = shift;
+    return $u->{opt_htmlemail} eq 'Y';
+}
+
 sub update_email_alias {
     my $u = shift;
 
