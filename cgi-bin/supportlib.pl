@@ -486,10 +486,12 @@ sub file_request
     my $log = { 'uniq' => $o->{'uniq'},
                 'email' => $email };
     my $userid = 0;
+    my $html;
+    my $u;
 
     unless ($email) {
         if ($o->{'reqtype'} eq "user") {
-            my $u = LJ::load_userid($o->{'requserid'});
+            $u = LJ::load_userid($o->{'requserid'});
             $userid = $u->{'userid'};
 
             $log->{'user'} = $u->user;
@@ -504,6 +506,7 @@ sub file_request
             }
 
             $email = $u->email_raw || $o->{'reqemail'};
+            $html  = $u->receives_html_emails;
         }
     }
 
@@ -531,6 +534,15 @@ sub file_request
     push @$errors, $BML::ML{'error.invalid.support.category'} unless $cats->{$o->{'spcatid'}+0};
 
     if (@$errors) { return 0; }
+
+    my ($lang, $username, $ljuser);
+    if ($userid) {
+         $lang     = $u->prop('browselang') ||
+                     $o->{'language'} ||
+                     $LJ::DEFAULT_LANG;
+         $username = $u->{user};
+         $ljuser   = $u->ljuser_display;
+    }
 
     if (LJ::is_enabled("support_request_language")) {
         $o->{'language'} = undef unless grep { $o->{'language'} eq $_ } (@LJ::LANGS, "xx");
@@ -569,7 +581,7 @@ sub file_request
         }
     }
 
-    my ($urlauth, $url, $spid);  # used at the bottom
+    my ($urlauth, $url, $spid, $closeurl);  # used at the bottom
 
     my $sql = "INSERT INTO support (spid, reqtype, requserid, reqname, reqemail, state, authcode, spcatid, subject, timecreate, timetouched, timeclosed, timelasthelp) VALUES (NULL, $qreqtype, $qrequserid, $qreqname, $qreqemail, 'open', $qauthcode, $qspcatid, $qsubject, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)";
     $sth = $dbh->prepare($sql);
@@ -615,30 +627,86 @@ sub file_request
         LJ::ContentFlag->set_supportid($o->{flagid}, $spid);
     }
 
-    my $body;
     my $miniauth = mini_auth({ 'authcode' => $authcode });
     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
     $urlauth = "$url&auth=$miniauth";
-
-    $body = "Your $LJ::SITENAME support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
-    $body .= "You can track your request's progress or add information here:\n\n  ";
-    $body .= $urlauth . "\n\n";
-
-    if ($scat->{user_closeable}) {
-        $body .= "If you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
-        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
-    }
+    $closeurl = "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
 
     # disable auto-replies for the entire category, or per request
-    unless ($scat->{'no_autoreply'} || $o->{'no_autoreply'}) {
-        LJ::send_mail({
-            'to' => $email,
-            'from' => $LJ::BOGUS_EMAIL,
-            'fromname' => "$LJ::SITENAME Support",
-            'charset' => 'utf-8',
-            'subject' => "Support Request \#$spid",
-            'body' => $body
+    if (! $scat->{'no_autoreply'} && ! $o->{'no_autoreply'}) {
+
+        my $closeable = sub {
+            return "" unless $scat->{user_closeable};
+            my $text =  LJ::Lang::get_text (
+                            $lang,
+                            'notification.support.submit.request.closeable',
+                            undef,
+                            { closeurl => $closeurl }
+                        );
+            if ($html) {
+                $text =~ s/\n/<br \/>/g;
+            }
+            return $text;
+        };
+
+        my $subject = LJ::Lang::get_text (
+                        $lang,
+                        'notification.support.submit.request.subject',
+                        undef,
+                        { request_id => $spid }
+                    );
+        my $body = LJ::Lang::get_text (
+                        $lang,
+                        'notification.support.submit.request.body.plain',
+                        undef,
+                        {
+                            username    => $username ||
+                                           $o->{'reqname'} ||
+                                           'User',
+                            subject     => $o->{'subject'},
+                            request_id  => $spid,
+                            urlauth     => $urlauth,
+                            close_it    => $closeable->(),
+                            sitename    => $LJ::SITENAMESHORT,
+                            siteroot    => $LJ::SITEROOT,
+                        }
+                );
+        if ($html) {
+            my $html_body = LJ::Lang::get_text (
+                                $lang,
+                                'notification.support.submit.request.body.html',
+                                undef,
+                                {
+                                    username    => $ljuser ||
+                                                   $o->{'reqname'} ||
+                                                   'User',
+                                    subject     => $o->{'subject'},
+                                    request_id  => $spid,
+                                    urlauth     => $urlauth,
+                                    close_it    => $closeable->(),
+                                    sitename    => $LJ::SITENAMESHORT,
+                                    siteroot    => $LJ::SITEROOT,
+                                }
+                            );
+            LJ::send_mail({
+                to          => $email,
+                from        => $LJ::BOGUS_EMAIL,
+                fromname    => "$LJ::SITENAME Support",
+                charset     => 'utf-8',
+                subject     => $subject,
+                body        => $body,
+                html        => $html_body,
             });
+        } else {
+            LJ::send_mail({
+                to          => $email,
+                from        => $LJ::BOGUS_EMAIL,
+                fromname    => "$LJ::SITENAME Support",
+                charset     => 'utf-8',
+                subject     => $subject,
+                body        => $body,
+            });
+        }
     }
 
     support_notify({ spid => $spid, type => 'new' });
