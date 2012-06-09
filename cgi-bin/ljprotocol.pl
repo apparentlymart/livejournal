@@ -2893,6 +2893,7 @@ sub postevent {
         'jobs'      => \@jobs,  # for hooks to push jobs onto
         'req'       => $req,
         'res'       => $res,
+        'entryrepost' => $flags->{'entryrepost'},
     });
 
     # cluster tracking

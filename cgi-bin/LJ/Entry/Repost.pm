@@ -112,7 +112,8 @@ sub __create_post {
     my $err = 0;
     my $flags = { 'noauth'             => 1,
                   'use_custom_time'    => 0,
-                  'u'                  => $u };
+                  'u'                  => $u,
+                  'entryrepost'        => 1, };
 
     my %req = ( 'username'    => $u->user,
                 'event'       => LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url}),
