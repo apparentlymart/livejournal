@@ -926,20 +926,6 @@ sub setdomsess_handler {
 
         return "$LJ::SITEROOT" unless valid_destination($dest);
         return $dest unless valid_domain_cookie($domcook, $cookie, $BML::COOKIE{'ljloggedin'});
-
-        # If it is not the master domain
-
-        if ($dest =~ m!^https?://(.+?)(/.*)$!) {
-            my ($host, $url_path) = (lc($1), $2);
-            my ($subdomain, $user);
-
-            if (    $host =~ m!^([\w-\.]{1,50})\.\Q$LJ::USER_DOMAIN\E$!
-                && ($subdomain = lc($1))                                # undef: not on a user-subdomain
-                && ($LJ::SUBDOMAIN_FUNCTION{$subdomain} eq "journal")
-                && ($url_path =~ m!^/(\w{1,15})\b!) ) {
-                    $path = '/' . lc($1) . '/' if $1;
-            }
-        }
     }
 
     set_cookie(

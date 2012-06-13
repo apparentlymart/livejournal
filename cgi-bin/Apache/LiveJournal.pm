@@ -1088,6 +1088,7 @@ sub trans {
     if ( ($LJ::USER_VHOSTS || $LJ::ONLY_USER_VHOSTS ) &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
         $1 ne "www" &&
+        LJ::Request->uri !~ m{^/__rpc} &&
 
         # 1xx: info, 2xx: success, 3xx: redirect, 4xx: client err, 5xx: server err
         # let the main server handle any errors
@@ -1201,7 +1202,8 @@ sub trans {
      && $host ne $LJ::DOMAIN_WEB
      && $host ne $LJ::DOMAIN
      && $host =~ /\./
-     && $host =~ /[^\d\.]/ )
+     && $host =~ /[^\d\.]/
+     && LJ::Request->uri !~ m{^/__rpc} )
     {
         my $u = LJ::User->new_from_external_domain($host);
         my $ru_lj_user;
@@ -1255,11 +1257,13 @@ sub trans {
 
     # normal (non-domain) journal view
     if (
-        $uri =~ m!
-        ^/(users\/|community\/|\~)  # users/community/tilde
-        ([^/]+)                     # potential username
-        (.*)?                       # rest
-        !x && $uri !~ /\.bml/)
+        $uri =~ m{
+            ^/(users\/|community\/|\~)  # users/community/tilde
+            ([^/]+)                     # potential username
+            (.*)?                       # rest
+        }x &&
+        $uri !~ /\.bml/ &&
+        LJ::Request->uri !~ m{^/__rpc} )
     {
         my ($part1, $user, $rest) = ($1, $2, $3);
 
