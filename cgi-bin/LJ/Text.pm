@@ -41,6 +41,8 @@ Notes:
 
 package LJ::Text;
 use HTML::Parser;
+use URI;
+use URI::QueryParam;
 use Encode qw(encode_utf8 decode_utf8 is_utf8);
 use Carp qw(confess cluck);
 use UNIVERSAL qw(isa);
@@ -631,5 +633,23 @@ sub extract_link_with_context {
     return $res;
 }
 
+sub canonical_uri {
+    my( $raw_uri ) = @_;
+    my $uri = URI->new($raw_uri)->canonical;
+
+    # regexp from https://metacpan.org/module/URI#PARSING-URIs-WITH-REGEXP
+    my( $scheme, $authority, $path, $query, $fragment ) =
+        $uri->as_string =~ m|(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|;
+
+    $query = '';
+    my @query = ();
+
+    for my $key ( sort $uri->query_param ) {
+        push @query, map { "$key=$_" } sort $uri->query_param($key);
+    }
+
+    $query = join( '&', @query );
+    return ( $scheme ? "$scheme://" : '' ) . ( $authority ? $authority : '') . ( $path ? $path : '' ) . ( $query ? "?$query" : '' ) . ( $fragment ? $fragment : '' );
+}
 
 1;
