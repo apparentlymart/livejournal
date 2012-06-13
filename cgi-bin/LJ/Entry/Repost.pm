@@ -435,8 +435,7 @@ sub substitute_content {
             my $event = LJ::Lang::ml( 'entry.reference.journal.delete',
                                       'datetime'     => $entry_obj->eventtime_mysql, 
                                       'url'          => $fake_entry->url);
-
-
+            
             ${$opts->{'event'}} = $event;
             return 1;    
         }

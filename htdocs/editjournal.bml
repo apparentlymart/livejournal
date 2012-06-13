@@ -38,7 +38,8 @@ body<=
     my $ret;
     my $getextra = undef;
 
-    my $editprivacy_link = "<p class='i-bubble b-bubble-lite b-bubble-editprivacy b-bubble-noarrow'>" . BML::ml('.editprivacy', { aopts => "href='editprivacy.bml'" }) . "</p>";
+    my $editprivacy_link = "<p class='i-bubble b-bubble-lite b-bubble-editprivacy b-bubble-noarrow'>" . 
+                           BML::ml('.editprivacy', { aopts => "href='editprivacy.bml'" }) . "</p>";
 
     LJ::Controller::Post->rte_langmap();
 
@@ -67,8 +68,12 @@ body<=
     } else {
         LJ::need_res(qw(
                         stc/editjournal.css
+                        js/jquery/jquery.lj.confirmbubble.js
+                        templates/Widgets/popupcontent.tmpl
                         ));
-        LJ::need_string(qw/repost.confirm.delete/);
+        LJ::need_string(qw/repost.confirm.delete
+                        confirm.bubble.yes
+                        confirm.bubble.no/);
     }
 
     # append months names tranlation to Site.ml_text['month.names.long']  

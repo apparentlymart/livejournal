@@ -25,13 +25,22 @@ sub prepare_template_params {
 
     foreach my $entry (@$entries) {
         my $repost_entry_obj;
+        my $replacement_event_text;\
+        my $repost_url; 
+        
         my $content =  { 'original_post_obj' => \$entry,
+                         'event'             => \$replacement_event_text,
                          'repost_obj'        => \$repost_entry_obj, };
 
+        # substute content of original post
         my $entry_reposted = LJ::Entry::Repost->substitute_content( $entry, $content );
+
+        # can we show it?
         if ($entry_reposted && !$entry->visible_to($remote)) {
-            $entry = $repost_entry_obj,
-            $repost_entry_obj = undef;
+            $repost_url             = $entry->url;
+            $entry                  = $repost_entry_obj;
+            $replacement_event_text = $entry->event_raw;
+            $repost_entry_obj       = undef;
         }
 
         my $entry_id = $entry->is_delayed ? $entry->delayedid : $entry->ditemid;
@@ -40,7 +49,7 @@ sub prepare_template_params {
             ! $entry->journal->is_readonly &&
             ! $entry->poster->is_readonly;
 
-        $entry_can_edit = 0 if $entry_reposted && !$repost_entry_obj;
+        $entry_can_edit = 0 if $entry_reposted;
 
         my $poster_ljuser = $opts->{'show_posters'}
             ? $entry->poster->ljuser_display
@@ -76,6 +85,13 @@ sub prepare_template_params {
 
         my $edit_link   = $edit_link_base . 'mode=edit';
         my $delete_link = $edit_link_base . 'mode=delete';
+        my $delete_real_link;
+
+        if ($repost_entry_obj) {
+           $delete_real_link = "$LJ::SITEROOT/editjournal.bml?" . 
+                               'usejournal=' . $repost_entry_obj->journal->user . '&' .
+                               'itemid=' . $repost_entry_obj->ditemid;
+        }
 
         my $entry_url =  $entry->url;
         my $entry_subject = $entry->subject_text;
@@ -112,12 +128,14 @@ sub prepare_template_params {
             'entry_security'     => $entry_security,
             'edit_link'          => $edit_link,
             'delete_link'        => $delete_link,
-            'entry_url'          => $entry_url,
+            'entry_url'          => $repost_url ? $repost_url :  $entry_url,
             'entry_subject'      => $entry_subject,
             'date_display'       => $date_display,
-            'entry_text_display' => $entry_text_display,
+            'entry_text_display' => $replacement_event_text ? $replacement_event_text :
+                                                              $entry_text_display,
             'entry_taglist'      => $entry_taglist,
             'entry_reposted'     => $entry_reposted,
+            'delete_real_link'   => $delete_real_link,
         };
     }
 
