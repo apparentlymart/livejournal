@@ -2138,7 +2138,11 @@ sub journal_js_inject
 
     LJ::need_res(qw{js/jquery/jquery.lj.repostbutton.js
                     templates/CleanHtml/reposted.tmpl
-                    templates/CleanHtml/Repost.tmpl});
+                    templates/CleanHtml/Repost.tmpl
+                    js/s2.js
+                    js/jquery/jquery.lj.confirmbubble.js
+                    templates/Widgets/popupcontent.tmpl
+                   });
 
     LJ::run_hooks('extra_journal_js');
 }

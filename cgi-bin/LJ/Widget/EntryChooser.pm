@@ -25,7 +25,7 @@ sub prepare_template_params {
 
     foreach my $entry (@$entries) {
         my $repost_entry_obj;
-        my $replacement_event_text;\
+        my $replacement_event_text;
         my $repost_url; 
         
         my $content =  { 'original_post_obj' => \$entry,
