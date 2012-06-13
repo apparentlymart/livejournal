@@ -671,11 +671,29 @@ create.steps.reg=1. Registration
 
 create.steps.finish=2. Finish
 
+create.reg.birthday=Birthday
+
+create.reg.birthday.day=Day
+
+create.reg.birthday.month=Month
+
+create.reg.birthday.year=Year
+
 create.reg.create=Create account
 
 create.reg.email=Email
 
+create.reg.gender=I am
+
+create.reg.gender.female=Female
+
+create.reg.gender.male=Male
+
+create.reg.gender.unspecified=Unspecified
+
 create.reg.password=Password
+
+create.reg.passwordconfirm=Password confirm
 
 create.reg.tos=By creating an account on LiveJournal, you agree to our <a href="#">User Agreement</a> and <a href="#">Privacy Policy</a>.
 
