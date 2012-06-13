@@ -6030,6 +6030,8 @@ talk.poll.controls.remove=Remove
 
 talk.poll.controls.up=Up
 
+talk.poll.create=Poll Creator
+
 talk.poll.fields=Fields:
 
 talk.poll.question=Question:
@@ -6073,6 +6075,8 @@ talk.poll.type.radio=Radio Buttons
 talk.poll.type.scale=Scale
 
 talk.poll.type.select=Select type of poll
+
+talk.poll.type.submit=Add question
 
 talk.poll.type.text=Text entry
 
