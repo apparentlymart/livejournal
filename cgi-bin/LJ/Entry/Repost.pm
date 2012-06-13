@@ -115,8 +115,11 @@ sub __create_post {
                   'u'                  => $u,
                   'entryrepost'        => 1, };
 
+    my $event_text_stub = LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url}) | 
+                          "Entry reposted from $url";
+
     my %req = ( 'username'    => $u->user,
-                'event'       => LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url}),
+                'event'       => $event_text_stub,
                 'subject'     => '',
                 'tz'          => $timezone,
               );
