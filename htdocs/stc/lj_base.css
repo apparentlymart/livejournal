@@ -4990,6 +4990,27 @@ HTML BODY .i-ljuser {
 
 /* Content plus Aside
 --------------------------------------*/
+.b-contentplus-header {
+	position: relative;
+	margin: 0;
+	padding: 0 30px;
+	border-bottom: 2px solid #47619C;
+	background: #F4FBFF;
+	background: #F4FBFF -moz-linear-gradient(top, #F4FBFF 0%, #E4F3FF 100%);
+	background: #F4FBFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F4FBFF), color-stop(100%,#E4F3FF));
+	background: #F4FBFF -webkit-linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
+	background: #F4FBFF -o-linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
+	background: #F4FBFF -ms-linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
+	background: #F4FBFF linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F4FBFF', endColorstr='#E4F3FF',GradientType=0 );
+	}
+	.b-contentplus-head {
+		margin: 0;
+		padding: 15px 0 17px;
+		font-size: 160%;
+		font-weight: normal;
+		color: #000;
+		}
 .b-contentplus-container {
 	margin: 0;
 	padding: 0;
@@ -5015,6 +5036,8 @@ HTML BODY .i-ljuser {
 		margin: 0;
 		padding: 0;
 		}
+
+
 
 /* Popup content
 --------------------------------------*/
