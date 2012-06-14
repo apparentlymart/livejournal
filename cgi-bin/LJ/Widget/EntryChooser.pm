@@ -43,7 +43,7 @@ sub prepare_template_params {
             $removed                 = 1;
             $entry                  = $repost_entry_obj;
             $repost_url             = $entry->url;
-            $replacement_event_text = $entry->event_raw;
+            $replacement_event_text =  LJ::Lang::ml( 'entry.reference.journal.delete');
             $repost_entry_obj       = undef;
         }
 
