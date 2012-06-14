@@ -266,6 +266,7 @@ sub FriendsPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         my $repost_entry_obj;
+        my $removed;
         
         my $content =  { 'original_post_obj' => \$entry_obj,
                          'repost_obj'        => \$repost_entry_obj,
@@ -277,9 +278,11 @@ sub FriendsPage
                          'allowmask'         => \$allowmask,
                          'event_raw'         => \$text,
                          'subject'           => \$subject,
+                         'removed'           => \$removed,
                          'reply_count'       => \$replycount, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY if $removed;
             next ENTRY unless $entry_obj->visible_to($remote);
 
             $friend   = $entry_obj->journal;
@@ -428,6 +431,7 @@ sub FriendsPage
             'screened'    => ($logprops{$datakey}->{'hasscreened'} && $remote &&
                                ($remote->{'user'} eq $fr->{'user'} || $remote->can_manage($fr))) ? 1 : 0,
         });
+
         $comments->{show_postlink} = $eobj->posting_comments_allowed;
         $comments->{show_readlink} = $eobj->comments_shown && ($replycount || $comments->{'screened'});
 

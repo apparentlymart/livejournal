@@ -4004,14 +4004,29 @@ sub _Entry__get_link
     if ($this->{'real_itemid'}) {
         if ($key eq 'delete_repost') {
             return $null_link unless $remote;
-            return $null_link unless LJ::u_equals($remote, $real_user);
 
-            my $link = LJ::S2::Link($entry->url,
-                            $ctx->[S2::PROPS]->{"text_delete_repost"},
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
-            $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $entry->url );
-            return $link;
+            unless (LJ::u_equals($remote, $real_user)) {
+                my $link = $entry->prop('repost_link');
+                my ($journalid, $jitemid) = split(/:/, $link);
+            
+                my $reposted_entry = LJ::Entry->new(int($journalid), 
+                                                    jitemid => int($jitemid));
+
+                my $link = LJ::S2::Link($reposted_entry->url,
+                                $ctx->[S2::PROPS]->{"text_delete_repost"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
+
+                $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $reposted_entry->url );
+                return $link;
+            } else {
+                my $link = LJ::S2::Link($entry->url,
+                                $ctx->[S2::PROPS]->{"text_delete_repost"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif", 24, 24));
+                $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $entry->url );
+                return $link;
+            }
         }
+        return $null_link unless LJ::u_equals($remote, $real_user);
     }
 
     if ($key eq "edit_entry") {

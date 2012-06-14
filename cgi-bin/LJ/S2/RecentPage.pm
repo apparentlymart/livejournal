@@ -162,7 +162,8 @@ sub RecentPage
         my $ditemid   = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
        
-        my $repost_entry_obj; 
+        my $repost_entry_obj;
+        my $removed; 
 
         next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall, 
                                                             'viewsome' => $viewsome});
@@ -183,9 +184,11 @@ sub RecentPage
                          'event_raw'         => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
+                         'removed'           => \$removed,
                          'userlite'          => \$lite_journalu, };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {        
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY if $removed && !LJ::u_equals($u, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
                                                                 'viewsome' => $viewsome});
 
@@ -266,7 +269,7 @@ sub RecentPage
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
         }
 
-        my $permalink = $entry_obj->permalink_url;
+        my $permalink = $removed ? '' : $entry_obj->permalink_url;
         my $readurl   = $entry_obj->comments_url;
         my $posturl   = $entry_obj->reply_url;
 
@@ -283,6 +286,9 @@ sub RecentPage
             'show_readlink' => $entry_obj->comments_shown && ($replycount || $has_screened),
             'show_postlink' => $entry_obj->posting_comments_allowed,
         });
+    
+        $comments->{show_postlink} = $removed ? 0 : $comments->{show_postlink};
+        $comments->{show_readlink} = $removed ? 0 : $comments->{show_readlink};
 
         my $userlite_poster = $lite_journalu;
         my $pu = $journalu;

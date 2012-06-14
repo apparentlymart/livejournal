@@ -138,6 +138,7 @@ sub DayPage
         }
 
         my $repost_entry_obj;
+        my $removed;
         my $lite_journalu =  $userlite_journal;
 
         my $content =  { 'original_post_obj' => \$entry_obj,
@@ -150,18 +151,20 @@ sub DayPage
                          'event_raw'         => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
-                         'userlite'          => \$lite_journalu, };
+                         'userlite'          => \$lite_journalu,
+                         'removed'           => \$removed, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY if $removed && !LJ::u_equals($user, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
                                                                 'viewsome' => $viewsome});
 
             $logprops{$itemid} = $entry_obj->props;
 
             $lite_journalu = UserLite($entry_obj->journal);
-
             $apu_lite{$entry_obj->journalid} = $lite_journalu;
             $apu{$entry_obj->journalid} = $entry_obj->journal;
+
             if (!$apu_lite{$posterid} || !$apu{$posterid}) {
                 $apu_lite{$posterid} = UserLite($entry_obj->poster);
                 $apu{$posterid} = $entry_obj->poster; 
@@ -222,7 +225,7 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $permalink = $entry_obj->permalink_url;
+        my $permalink = $removed ? '' : $entry_obj->permalink_url;
         my $readurl   = $entry_obj->comments_url;
         my $posturl   = $entry_obj->reply_url;
 
@@ -236,8 +239,8 @@ sub DayPage
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $u->{'user'} || $remote->can_manage($u))) ? 1 : 0,
         });
-        $comments->{show_postlink} = $entry_obj->posting_comments_allowed;
-        $comments->{show_readlink} = $entry_obj->comments_shown && ($replycount || $comments->{'screened'});
+        $comments->{show_postlink} = $removed ? 0 : $entry_obj->posting_comments_allowed;
+        $comments->{show_readlink} = $removed ? 0 : ($entry_obj->comments_shown && ($replycount || $comments->{'screened'}));
 
         my $userlite_poster = $userlite_journal;
         $pu = $u;

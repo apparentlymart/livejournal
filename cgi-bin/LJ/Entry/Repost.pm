@@ -434,15 +434,43 @@ sub substitute_content {
             my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : undef;
             
             my $fake_entry = LJ::Entry->new( $journal, jitemid => $org_jitemid);
-             
-            my $event = LJ::Lang::ml( 'entry.reference.journal.delete',
-                                      'datetime'     => $entry_obj->eventtime_mysql, 
-                                      'url'          => $fake_entry->url);
-            
-            ${$opts->{'event'}} = $event;
+
+            my $subject = LJ::Lang::ml( 'entry.reference.journal.delete.subject' );   
+            my $event   = LJ::Lang::ml( 'entry.reference.journal.delete',
+                                        'datetime'     => $entry_obj->eventtime_mysql, 
+                                        'url'          => $fake_entry->url);
+
+            if ($opts->{'removed'}) {
+                ${$opts->{'removed'}} = 1;
+            }
+           
+            if ($opts->{'repost_obj'}) {
+                ${$opts->{'repost_obj'}} = $fake_entry;
+            }
+ 
+            if ($opts->{'subject_repost'}) {
+                ${$opts->{'subject_repost'}} = $subject;
+            }
+
+            if ($opts->{'subject'}) {
+                ${$opts->{'subject'}}  = $subject;
+            }
+ 
+            if ($opts->{'event_raw'}) {
+                ${$opts->{'event_raw'}} = $event;
+            }
+
+            if ($opts->{'event'}) {
+                ${$opts->{'event'}} = $event;
+            }
+
             return 1;    
         }
         return 0;
+    }
+
+    if ($opts->{'removed'}) {
+        ${$opts->{'removed'}} = 0;
     }
 
     if ($opts->{'anum'}) {

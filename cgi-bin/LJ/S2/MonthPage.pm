@@ -28,7 +28,6 @@ sub MonthPage
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
-
     my ($year, $month);
     if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)\b!) {
         ($year, $month) = ($1, $2);
@@ -114,6 +113,7 @@ sub MonthPage
         $entry_obj->handle_prefetched_props($logprops{$itemid}); 
 
         my $repost_entry_obj;
+        my $removed;
         my $lite_journalu = $userlite_journal;
 
         my $content =  { 'original_post_obj' => \$entry_obj,
@@ -125,9 +125,11 @@ sub MonthPage
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
                          'subject_repost'    => \$subject,
+                         'removed'           => \$removed,
                          'reply_count'       => \$replycount, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+            next ENTRY if $removed; 
             next ENTRY unless $entry_obj->visible_to($remote);
 
             $pu{$posterid} = $entry_obj->poster;

@@ -1290,6 +1290,8 @@ sub create_view_lastn
 
         my $username = $user;
         my $repost_entry_obj;
+        my $removed;
+
         my $content =  { 'original_post_obj' => \$entry_obj,
                          'repost_obj'        => \$repost_entry_obj,
                          'ditemid'           => \$ditemid,
@@ -1298,10 +1300,14 @@ sub create_view_lastn
                          'security'          => \$security,
                          'event_raw'         => \$event,
                          'subject'           => \$subject,
+                         'removed'           => \$removed,
                          'reply_count'       => \$replycount };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
-            next ENTRY unless $entry_obj->visible_to($remote, {'viewall' => $viewall, 'viewsome' => $viewsome});
+            next ENTRY if $removed && !LJ::u_equals($user, $remote);
+            next ENTRY unless $entry_obj->visible_to($remote, {'viewall'  => $viewall, 
+                                                               'viewsome' => $viewsome});
+
             $username = $entry_obj->poster->username;
             $posteru{$posterid} = $entry_obj->poster;
             $logprops{$itemid} = $entry_obj->props;
@@ -2734,6 +2740,7 @@ sub create_view_day
         my $event = $logtext->{$itemid}->[1];
 
         my $repost_entry_obj;
+        my $removed;
         my $content =  { 'original_post_obj' => \$entry_obj,
                          'repost_obj'        => \$repost_entry_obj,
                          'ditemid'           => \$ditemid,
@@ -2742,9 +2749,11 @@ sub create_view_day
                          'security'          => \$security,
                          'event_raw'         => \$event,
                          'subject'           => \$subject,
+                         'removed'           => \$removed,
                          'reply_count'       => \$replycount };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        if (LJ::Entry::Repost->substitute_conten( $entry_obj, $content )) {
+            next ENTRY if $removed;
             $username = $entry_obj->poster->user;
             $logprops{$itemid} = $entry_obj->props;
         }
