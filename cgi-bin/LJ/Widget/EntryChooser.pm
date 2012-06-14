@@ -40,6 +40,7 @@ sub prepare_template_params {
 
         # can we show it?
         if ($entry_reposted && !$entry->visible_to($remote)) {
+            $removed                 = 1;
             $entry                  = $repost_entry_obj;
             $repost_url             = $entry->url;
             $replacement_event_text = $entry->event_raw;
@@ -99,7 +100,7 @@ sub prepare_template_params {
             $delete_real_attr_link = $entry->url;
         }
 
-        my $entry_url =  $entry->url;
+        my $entry_url = $entry->url;
         my $entry_subject = $entry->subject_text;
 
         my $alldateparts;
