@@ -26,10 +26,12 @@ sub prepare_template_params {
     foreach my $entry (@$entries) {
         my $repost_entry_obj;
         my $replacement_event_text;
-        my $repost_url; 
+        my $repost_url;
+        my $removed; 
         
         my $content =  { 'original_post_obj' => \$entry,
                          'event'             => \$replacement_event_text,
+                         'removed'           => \$removed,
                          'repost_obj'        => \$repost_entry_obj, };
 
         # substute content of original post
@@ -37,8 +39,8 @@ sub prepare_template_params {
 
         # can we show it?
         if ($entry_reposted && !$entry->visible_to($remote)) {
-            $repost_url             = $entry->url;
             $entry                  = $repost_entry_obj;
+            $repost_url             = $entry->url;
             $replacement_event_text = $entry->event_raw;
             $repost_entry_obj       = undef;
         }
@@ -54,6 +56,7 @@ sub prepare_template_params {
         my $poster_ljuser = $opts->{'show_posters'}
             ? $entry->poster->ljuser_display
             : '';
+        $poster_ljuser = '' if $removed;
 
         my $entry_is_delayed = $entry->is_delayed;
         my $entry_is_sticky  = ($entry->is_sticky
@@ -85,8 +88,8 @@ sub prepare_template_params {
 
         my $edit_link   = $edit_link_base . 'mode=edit';
         my $delete_link = $edit_link_base . 'mode=delete';
+ 
         my $delete_real_link;
-
         if ($repost_entry_obj) {
            $delete_real_link = "$LJ::SITEROOT/editjournal.bml?" . 
                                'usejournal=' . $repost_entry_obj->journal->user . '&' .
@@ -100,7 +103,8 @@ sub prepare_template_params {
         if ($entry->is_delayed) {
             $alldateparts = $entry->alldatepart;
         } else {
-            my $eventtime = $repost_entry_obj ? $repost_entry_obj->{'eventtime'} : $entry->{'eventtime'};
+            my $eventtime = $repost_entry_obj ? $repost_entry_obj->eventtime_mysql : $entry->{'eventtime'};
+            $eventtime ||= $entry->eventtime_mysql;
             $alldateparts = LJ::TimeUtil->alldatepart_s2($eventtime);
         }
 
@@ -119,6 +123,9 @@ sub prepare_template_params {
             $entry_taglist = join( ', ', @taglist );
         }
 
+        my $final_entry_url = $repost_url ? $repost_url : $entry_url;
+        $final_entry_url = '' if $removed;
+
         push @entries_display, {
             'entry_id'           => $entry_id,
             'entry_can_edit'     => $entry_can_edit,
@@ -128,7 +135,7 @@ sub prepare_template_params {
             'entry_security'     => $entry_security,
             'edit_link'          => $edit_link,
             'delete_link'        => $delete_link,
-            'entry_url'          => $repost_url ? $repost_url :  $entry_url,
+            'entry_url'          => $final_entry_url,
             'entry_subject'      => $entry_subject,
             'date_display'       => $date_display,
             'entry_text_display' => $replacement_event_text ? $replacement_event_text :
