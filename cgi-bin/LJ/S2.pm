@@ -4009,7 +4009,7 @@ sub _Entry__get_link
                 my $link = $entry->prop('repost_link');
                 my ($journalid, $jitemid) = split(/:/, $link);
             
-                return $nulll_link unless int($journalid);
+                return $null_link unless int($journalid);
                 my $reposted_entry = LJ::Entry->new(int($journalid), 
                                                     jitemid => int($jitemid));
 
