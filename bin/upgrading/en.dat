@@ -6036,6 +6036,12 @@ talk.placeholder.userpass=Password
 
 talk.poll.head=Poll Creator
 
+talk.poll.button.preview=See preview →
+
+talk.poll.button.startover=← Start over
+
+talk.poll.code=Code
+
 talk.poll.controls.down=Down
 
 talk.poll.controls.remove=Remove
@@ -6045,6 +6051,8 @@ talk.poll.controls.up=Up
 talk.poll.create=Poll Creator
 
 talk.poll.fields=Fields:
+
+talk.poll.fields.more=More fields
 
 talk.poll.question=Question:
 
