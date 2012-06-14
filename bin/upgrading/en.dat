@@ -5889,6 +5889,18 @@ talk.error.notamember=Comments allowed for members only
 
 talk.error.nouser=No username sent
 
+talk.error.poll.answer=You must have at least one item in a non-text poll question
+
+talk.error.poll.from=Scale 'from' value must be less than 'to' value
+
+talk.error.poll.parameter=Invalid parameter
+
+talk.error.poll.question=You need text explaining your question
+
+talk.error.poll.range=Value not in range [[min]]-[[max]]
+
+talk.error.poll.steps=Limit of 20 selections (to-from)/by > 20
+
 talk.error.purged|staleness=1
 talk.error.purged=This journal has been deleted and purged.
 
