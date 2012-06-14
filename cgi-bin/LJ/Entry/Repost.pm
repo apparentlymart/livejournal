@@ -440,6 +440,10 @@ sub substitute_content {
                                         'datetime'     => $entry_obj->eventtime_mysql, 
                                         'url'          => $fake_entry->url);
 
+            if ($opts->{'original_post_obj'}) {
+                ${$opts->{'original_post_obj'}}= $entry_obj;
+            }
+
             if ($opts->{'removed'}) {
                 ${$opts->{'removed'}} = 1;
             }
