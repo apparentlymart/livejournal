@@ -405,12 +405,15 @@ LJ.define('LJ.Util.Journal');
 			result = {};
 
 		if (!regRes || !regRes[1]) { return null; }
-		if (regRes[1] !== 'users') {
+
+		if (!regRes[1].match(/^(?:users|community)$/)) {
 			result.journal = regRes[1];
 		} else {
 			if (!regRes[2]) { return null; }
 			result.journal = regRes[2];
 		}
+
+			result.journal = result.journal.replace(/-/g, '_');
 
 		if (regRes[3]) {
 			result.ditemid = parseInt(regRes[3], 10);
