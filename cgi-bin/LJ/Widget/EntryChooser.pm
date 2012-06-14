@@ -27,7 +27,8 @@ sub prepare_template_params {
         my $repost_entry_obj;
         my $replacement_event_text;
         my $repost_url;
-        my $removed; 
+        my $removed;
+        my $delete_real_attr_link;
         
         my $content =  { 'original_post_obj' => \$entry,
                          'event'             => \$replacement_event_text,
@@ -88,12 +89,14 @@ sub prepare_template_params {
 
         my $edit_link   = $edit_link_base . 'mode=edit';
         my $delete_link = $edit_link_base . 'mode=delete';
- 
+
         my $delete_real_link;
-        if ($repost_entry_obj) {
-           $delete_real_link = "$LJ::SITEROOT/editjournal.bml?" . 
+        if ($repost_entry_obj && !$repost_entry_obj) {
+            $delete_real_link = "$LJ::SITEROOT/editjournal.bml?" . 
                                'usejournal=' . $repost_entry_obj->journal->user . '&' .
                                'itemid=' . $repost_entry_obj->ditemid;
+        } elsif ($removed) {
+            $delete_real_attr_link = $entry->url;
         }
 
         my $entry_url =  $entry->url;
@@ -143,6 +146,7 @@ sub prepare_template_params {
             'entry_taglist'      => $entry_taglist,
             'entry_reposted'     => $entry_reposted,
             'delete_real_link'   => $delete_real_link,
+            'delete_real_attr_link' => $delete_real_attr_link,
         };
     }
 

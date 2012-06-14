@@ -27,7 +27,9 @@
 						<a href='<TMPL_VAR edit_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
 					<TMPL_ELSE>
                         <TMPL_IF entry_reposted>
-    						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-del-btn b-editentry-del-repost-btn b-editentry-ctrl-btn'></a>
+    						<a href='<TMPL_VAR delete_link ESCAPE=HTML>' 
+                               data-url='<TMPL_VAR delete_real_attr_link>' 
+                              class='b-editentry-del-btn b-editentry-del-repost-btn b-editentry-ctrl-btn'></a>
                         <TMPL_ELSE>
                             <a href='<TMPL_VAR delete_link ESCAPE=HTML>' class='b-editentry-edit-btn b-editentry-ctrl-btn'></a>
                         </TMPL_IF>
