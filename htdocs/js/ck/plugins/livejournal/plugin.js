@@ -36,7 +36,7 @@
 			id: 'vkontakte',
 			abbr: 'vk',
 			html: '<span class="lj-like-item vk">' + CKLang.LJLike_button_vkontakte + '</span>',
-			htmlOpt: window.isSupUser ? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
+			htmlOpt: Site.remote_is_sup? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
 		},
 		{
 			label: CKLang.LJLike_button_give,
@@ -1177,7 +1177,7 @@
 					return {
 						title: CKLang.LJLike_name,
 						width: 145,
-						height: window.isSupUser ? 180 : 145,
+						height: Site.remote_is_sup? 180 : 145,
 						resizable: false,
 						contents: [
 							{

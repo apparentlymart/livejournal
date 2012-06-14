@@ -782,8 +782,6 @@ head<=
     # The draft might contain BML like syntax and cause problems
     BML::noparse();
 
-    my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
-  
     LJ::need_string('entryform.close.confirm'); 
     
     # append months names tranlation to Site.ml_text['month.names.long']  
@@ -805,7 +803,6 @@ head<=
         var cb_url = "&url=" + escape(seedurl);
 
         function initUpdateBml() {
-            window.isSupUser = $is_sup;
             $initDraft
             $_[0]->{'onload'}
             window.initEditor({

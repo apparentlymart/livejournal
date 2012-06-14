@@ -612,7 +612,6 @@ LIKE_FAQ
             #    be placed in the correct BML head portion later
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
-            my $is_sup = LJ::SUP->is_remote_sup() ? 1 : 0;
             LJ::need_string('entryform.close.confirm');
 
             $$head .= qq|
@@ -624,7 +623,6 @@ LIKE_FAQ
 
 
         function initUpdateBml() {
-            window.isSupUser = $is_sup;
             $onload
             window.initEditor();
         }

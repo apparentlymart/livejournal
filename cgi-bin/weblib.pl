@@ -1535,6 +1535,7 @@ sub res_includes {
                 remote_is_suspended      => $remote_is_suspended,
                 remote_is_maintainer     => $remote_is_maintainer,
                 remote_is_identity       => $remote && $remote->is_identity,
+                remote_is_sup            => LJ::SUP->is_remote_sup()? 1 : 0,
                 ctx_popup                => $ctxpopup,
                 inbox_update_poll        => $inbox_update_poll,
                 media_embed_enabled      => $embeds_enabled,
