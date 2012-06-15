@@ -58,6 +58,7 @@ sub RecentPage
     if ($remote) {
         LJ::need_string(qw/repost.confirm.delete
                         entry.reference.label.reposted
+                        entry.reference.label.title
                         confirm.bubble.yes
                         confirm.bubble.no/);
     }
