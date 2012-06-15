@@ -124,25 +124,32 @@ sub __create_post {
                 'tz'          => $timezone,
               );
 
-    warn "----------------------------";
-    warn "request " . LJ::D(%req);
-
     # move to LJ::API
     my $res = LJ::Protocol::do_request("postevent", \%req, \$err, $flags);
 
-    $flags->{u} = undef;
-    warn "flags: " . LJ::D($flags);
-    warn "result: " . LJ::D($res);
-    warn "error: $err" if $err;
-    warn "---------------------------------";
 
     my $fail = !defined $res->{itemid} && $res->{message};
     if ($fail) {
+         warn "----------------------------";
+         warn "request " . LJ::D(%req);
+         warn "flags: " . LJ::D($flags);
+         warn "result: " . LJ::D($res);
+         warn "error: $err" if $err;
+         warn "---------------------------------";
+
          $$error = LJ::API::Error->make_error( $res->{message},($err || -10000) );
          return;
     }
 
     if ($err) {
+            
+        warn "----------------------------";
+        warn "request " . LJ::D(%req);
+        warn "flags: " . LJ::D($flags);
+        warn "result: " . LJ::D($res);
+        warn "error: $err";
+        warn "---------------------------------";
+
         $$error = LJ::API::Error->get_error('create_entry_failed');
         return;
     }
