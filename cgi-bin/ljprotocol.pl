@@ -5476,7 +5476,7 @@ sub geteventsrating {
 
     if ($req->{getselfpromo}) {
         return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
-        my $sp = $res->{selfpromo}->get_template_params()->[0];
+        my $sp = $res->{selfpromo}->get_template_params();
         $sp->{ditemid}   = delete $sp->{post_id} if $sp->{post_id};
         $sp->{journalid} = delete $sp->{journal_id} if $sp->{journal_id};
         LJ::get_aggregated_entry($sp, $entry_opts);
