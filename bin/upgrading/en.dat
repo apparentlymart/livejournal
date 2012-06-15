@@ -6050,6 +6050,10 @@ talk.poll.controls.up=Up
 
 talk.poll.create=Poll Creator
 
+talk.poll.extra.head=Creating a Poll
+
+talk.poll.extra.text=The Poll Creator will generate your poll's code for you, allow you to preview your poll, and create a journal entry containing the poll code.
+
 talk.poll.fields=Fields:
 
 talk.poll.fields.more=More fields

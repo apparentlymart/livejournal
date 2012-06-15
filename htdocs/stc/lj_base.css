@@ -4519,6 +4519,7 @@ BODY div .b-helplink:active {
 
 /* Posts Controls
 --------------------------------------*/
+.b-controls,
 .b-controls:link,
 .b-controls:visited,
 .b-controls:hover,
@@ -4539,6 +4540,7 @@ BODY div .b-helplink:active {
 	*font: 0/0 serif;
 	*zoom: 1;
 	}
+.b-controls::no-images,
 .b-controls:link::no-images,
 .b-controls:visited::no-images,
 .b-controls:hover::no-images,
@@ -5043,6 +5045,54 @@ HTML BODY .i-ljuser {
 		margin: 0;
 		padding: 0;
 		}
+
+
+
+/* Content plus Aside
+--------------------------------------*/
+.b-extracontent {
+	position: relative;
+	margin: 0;
+	padding: 30px;
+	line-height: 1.4;
+	}
+	.b-extracontent-head {
+		margin: 0 0 1em;
+		font-size: 1em;
+		font-style: normal;
+		font-weight: bold;
+		color: #000;
+		}
+	.b-extracontent P {
+		margin: 0 0 1em;
+		}
+	.b-extracontent-more {
+		padding-top: 1em;
+		border-top: 2px solid #C8CFD5;
+		}
+	.b-extracontent-shadow {
+		overflow: hidden;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 27px;
+		margin: 0;
+		padding: 0;
+		}
+		.b-extracontent-shadow-inner {
+			position: absolute;
+			top: 20px;
+			bottom: 20px;
+			right: 27px;
+			width: 300%;
+			-webkit-box-shadow: 0 0 10px 0 #99A7BC;
+			-moz-box-shadow: 0 0 10px 0 #99A7BC;
+			box-shadow: 0 0 10px 0 #324F7A;
+			-moz-border-radius: 30px / 100px;
+			border-radius: 30px / 100px;
+			}
+
 
 
 
