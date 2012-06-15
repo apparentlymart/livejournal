@@ -4,41 +4,54 @@
  */
 
 CKEDITOR.editorConfig = function(config) {
+	var ljplugins = ['ljspell', 'livejournal'],
+		plugins = [
+			'ajax',
+			'basicstyles',
+			'bidi',
+			'blockquote',
+			'button',
+			'colorbutton',
+			'colordialog',
+			'dialog',
+			'enterkey',
+			'entities',
+			'font',
+			'format',
+			'htmldataprocessor',
+			'image',
+			'keystrokes',
+			'link',
+			'list',
+			'liststyle',
+			'pastefromword',
+			'specialchar',
+			'tab',
+			'table',
+			'toolbar',
+			'undo',
+			'wysiwygarea',
+			'onchange'
+		];
+
 	config.language = 'ru';
 	config.autoParagraph = false;
 	config.autoUpdateElement = false;
 	config.docType = '<!DOCTYPE html>';
 	config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
 
-	config.plugins = [
-		'ajax',
-		'basicstyles',
-		'bidi',
-		'blockquote',
-		'button',
-		'colorbutton',
-		'colordialog',
-		'dialog',
-		'enterkey',
-		'entities',
-		'font',
-		'format',
-		'htmldataprocessor',
-		'image',
-		'keystrokes',
-		'link',
-		'list',
-		'liststyle',
-		'pastefromword',
-		'specialchar',
-		'tab',
-		'table',
-		'toolbar',
-		'undo',
-		'wysiwygarea',
-		'onchange',
-		'livejournal'
-	].join(',');
+	//config.scayt_autoStartup = true;
+
+	config.fillEmptyBlocks = false;
+
+	/* Livejournal files on dev servers should be loaded as external plugins */
+	if (Site.is_dev_server) {
+		config.extraPlugins = ljplugins.join(',');
+	} else {
+		Array.prototype.push.apply(plugins, ljplugins);
+	}
+
+	config.plugins = plugins.join(',');
 
 	if (jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
 		config.plugins += ',contextmenu';
@@ -130,10 +143,8 @@ CKEDITOR.editorConfig = function(config) {
 	config.pasteFromWordRemoveFontStyles = false;
 	config.pasteFromWordRemoveStyles = false;
 
-	//config.extraPlugins = 'livejournal';
 	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
 };
-
 
 CKEDITOR.editorConfig(CKEDITOR.config);
