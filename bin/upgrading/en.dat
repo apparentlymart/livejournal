@@ -4445,7 +4445,7 @@ pending.mail.reject.subject=Your Request to Join [[community]] community
 pingback.ljping.comment.text|staleness=1
 pingback.ljping.comment.text=User <lj user="[[poster]]"> referenced to your post from <a href="[[sourceURI]]">[[subject]]</a> saying: [...] [[context]] [...]
 
-pingback.external.comment.text=Your post has been referenced on [[partner.site.name]] in <a href="[[link]]">[[partner.post.title]]</a> saying: [...] [[pre]] [[context]] [[post]] [...]
+pingback.external.comment.text=Your post has been referenced on [[partner.site.name]] in <a href="[[link]]">[[partner.post.title]]</a>
 
 pingback.option.disabled|staleness=1
 pingback.option.disabled=Disabled
