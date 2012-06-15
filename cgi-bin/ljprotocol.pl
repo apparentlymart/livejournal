@@ -22,12 +22,15 @@ use Class::Autouse qw(
                       LJ::PersistentQueue
                       LJ::PersonalStats::Ratings::Posts
                       LJ::PersonalStats::Ratings::Journals
+                      LJ::API::RateLimiter
                       );
 
 use LJ::TimeUtil;
 use POSIX;
 
 LJ::Config->load;
+
+
 
 use lib "$ENV{LJHOME}/cgi-bin";
 
@@ -126,7 +129,13 @@ my %e = (
      "328" => E_PERM,
      "329" => E_PERM,
      "330" => E_PERM,
-
+     "331" => E_TEMP,
+     "332" => E_TEMP,
+     "333" => E_PERM,
+     "334" => E_PERM,
+     "335" => E_PERM,
+     "336" => E_TEMP,
+    
      # Limit errors
      "402" => E_TEMP,
      "404" => E_TEMP,
@@ -138,6 +147,7 @@ my %e = (
      "410" => E_PERM,
      "411" => E_TEMP,
      "412" => E_TEMP,
+     "413" => E_TEMP,
 
      # Server Errors
      "500" => E_TEMP,
@@ -317,7 +327,7 @@ sub do_request
 sub getpoll
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getpoll');
     my $u = $flags->{'u'};
 
     # check arguments
@@ -414,7 +424,7 @@ sub getpoll
 sub editpoll
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editpoll');
     my $u = $flags->{'u'};
 
     # check arguments
@@ -453,7 +463,7 @@ sub editpoll
 sub votepoll
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'votepoll');
     my $u = $flags->{'u'};  # remote_id
 
     # check pollid
@@ -491,7 +501,7 @@ sub votepoll
 sub checksession {
     my ($req, $err, $flags) = @_;
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'checksession');
 
     my $u = $flags->{'u'};
 
@@ -511,7 +521,7 @@ sub checksession {
 sub addcomment
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'addcomment');
     my $u = $flags->{'u'};
 
     return fail($err,200,"body") unless($req->{body});
@@ -574,7 +584,7 @@ sub getcomments {
 
     $flags->{allow_anonymous} = 1;
 
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getcomments');
     my $u = $flags->{'u'};
 
     my $journal;
@@ -785,7 +795,7 @@ sub getcomments {
 =cut
 sub deletecomments {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'deletecomments');
 
     my $u = $flags->{'u'};
     my $journal;
@@ -913,7 +923,7 @@ sub deletecomments {
 
 sub updatecomments {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'updatecomments');
 
     my $u = $flags->{'u'};
     my $journal;
@@ -1110,7 +1120,7 @@ sub unfreezecomments {
 =cut
 sub editcomment {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editcomment');
 
     my $remote = $flags->{'u'};
     return fail($err, 318) if $remote && $remote->is_readonly;
@@ -1162,7 +1172,7 @@ sub editcomment {
 
 sub getrecentcomments {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getrecentcomments');
     my $u = $flags->{'u'};
 
     my $journal;
@@ -1240,7 +1250,7 @@ sub getrecentcomments {
 sub getfriendspage
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getfriendspage');
     my $u = $flags->{'u'};
 
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
@@ -1385,7 +1395,7 @@ sub getfriendspage
 sub getinbox
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getinbox');
     my $u = $flags->{'u'};
 
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
@@ -1490,7 +1500,7 @@ sub getinbox
 sub setmessageread {
     my ($req, $err, $flags) = @_;
 
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'setmessageread');
 
     my $u = $flags->{'u'};
 
@@ -1542,7 +1552,7 @@ sub sendmessage
 
     return fail($err, 315) if $LJ::DISABLED{user_messaging};
 
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'sendmessage');
     my $u = $flags->{'u'};
 
     return fail($err, 305) if $u->statusvis eq 'S'; # suspended cannot send private messages
@@ -1615,7 +1625,7 @@ sub sendmessage
 sub login
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'login');
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -1711,6 +1721,7 @@ sub login
     $res->{'fastserver'} = 1 if LJ::get_cap($uowner, "fastserver");
 
     ## user info
+    $res->{'username'} = $uowner->{'user'};
     $res->{'userid'} = $uowner->{'userid'};
     $res->{'fullname'} = $uowner->{'name'};
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
@@ -1752,7 +1763,7 @@ sub login
 sub getfriendgroups
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getfriendgroups');
     my $u = $flags->{'u'};
     my $res = {
         xc3 => {
@@ -1774,7 +1785,7 @@ sub getfriendgroups
 sub getusertags
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getusertags');
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -1795,7 +1806,7 @@ sub getuserpics
     my ($req, $err, $flags) = @_;
 
     $flags->{'allow_anonymous'} = 1;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getuserpics');
     $flags->{'ignorecanuse'} = 1;   #    function return public info
     return undef unless check_altusage($req, $err, $flags);
 
@@ -1831,7 +1842,8 @@ sub getuserpics
 sub getfriends
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getfriends');
+
     return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
     my $res = {
@@ -1874,7 +1886,7 @@ sub getfriends
 sub friendof
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'friendof');
     return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
     my $res = {
@@ -1898,7 +1910,7 @@ sub friendof
 sub checkfriends
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'checkfriends');
     my $u = $flags->{'u'};
     my $res = {
         xc3 => {
@@ -1981,7 +1993,7 @@ sub checkfriends
 sub getdaycounts
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getdaycounts');
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -2178,8 +2190,8 @@ sub postevent {
     un_utf8_request($req);
 
     my $post_noauth = LJ::run_hook('post_noauth', $req);
-    return undef unless $post_noauth || authenticate($req, $err, $flags);
 
+    return undef unless $post_noauth || authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'postevent');
     my $spam = 0;
     LJ::run_hook('spam_detector', $req, \$spam);
     return fail($err,320) if $spam;
@@ -2938,7 +2950,7 @@ sub editevent {
     my ($req, $err, $flags) = @_;
     un_utf8_request($req);
 
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editevent');
 
     my $spam = 0;
     return undef unless LJ::run_hook('spam_detector', $req, \$spam);
@@ -3451,7 +3463,7 @@ sub getevents {
     my ($req, $err, $flags) = @_;
 
     $flags->{allow_anonymous} = 1;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getevents');
 
     $flags->{'ignorecanuse'} = 1; # later we will check security levels, so allow some access to communities
     return undef unless check_altusage($req, $err, $flags);
@@ -4124,7 +4136,7 @@ sub getevents {
 sub editfriends
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editfriends');
 
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
@@ -4340,7 +4352,7 @@ sub editfriends
 sub editfriendgroups
 {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editfriendgroups');
 
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
@@ -4517,7 +4529,7 @@ sub editfriendgroups
 
 sub sessionexpire {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'sessionexpire');
     my $u = $flags->{u};
     my $res = {
         xc3 => {
@@ -4545,7 +4557,7 @@ sub sessionexpire {
 sub sessiongenerate {
     # generate a session
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'sessiongenerate');
 
     # sanitize input
     $req->{expiration} = 'short' unless $req->{expiration} eq 'long';
@@ -4673,7 +4685,7 @@ sub list_friends {
 
 sub syncitems {
     my ($req, $err, $flags) = @_;
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'syncitems');
     return undef unless check_altusage($req, $err, $flags);
     return fail($err, 506) if $LJ::DISABLED{'syncitems'};
 
@@ -4779,7 +4791,7 @@ sub consolecommand {
     my ($req, $err, $flags) = @_;
 
     # logging in isn't necessary, but most console commands do require it
-    LJ::set_remote($flags->{'u'}) if authenticate($req, $err, $flags);
+    LJ::set_remote($flags->{'u'}) if authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'consolecommand');
 
     my $res = {
         xc3 => {
@@ -5025,40 +5037,43 @@ sub authenticate
 {
     my ($req, $err, $flags) = @_;
 
-    my $username = $req->{'username'};
+    my $u;
 
-    # add flag to avoid authentication
-    if (!$username && $flags->{'allow_anonymous'}) {
-        undef $flags->{'u'};
+    my $auth_meth = $req->{'auth_method'} || "clear";
+    my $username  = $req->{'username'} || '';
+
+    my $check_user = sub {
+        return fail($err,100) unless $u;
+        return fail($err,100) if ($u->{'statusvis'} eq "X");
+        return fail($err,505) unless $u->{'clusterid'};
         return 1;
-    }
+    };
 
-    return fail($err,200) unless $username;
-    return fail($err,100) unless LJ::canonical_username($username);
+    unless ($auth_meth eq "oauth") {
+  
+        # add flag to avoid authentication
+        if (!$username && $flags->{'allow_anonymous'}) {
+            undef $flags->{'u'};
+            return 1;
+        }
 
-    my $u = $flags->{'u'};
-    unless ($u) {
-        my $dbr = LJ::get_db_reader();
-        return fail($err,502) unless $dbr;
-        $u = LJ::load_user($username);
-    }
+        return fail($err,200) unless $username;
+        return fail($err,100) unless LJ::canonical_username($username);
 
-    return fail($err,100) unless $u;
-    return fail($err,100) if ($u->{'statusvis'} eq "X");
-    return fail($err,505) unless $u->{'clusterid'};
+        $u = $flags->{'u'};
+        unless ($u) {
+            my $dbr = LJ::get_db_reader();
+            return fail($err,502) unless $dbr;
+            $u = LJ::load_user($username);
+        }
 
-    my $ip;
-    if (LJ::Request->is_inited) {
-        LJ::Request->notes("ljuser" => $u->{'user'}) unless LJ::Request->notes("ljuser");
-        LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
-        $ip = LJ::Request->connection->remote_ip;
+        return unless $check_user->();
     }
 
     my $ip_banned = 0;
     my $chal_expired = 0;
     my $auth_check = sub {
 
-        my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
             my $res = LJ::auth_okay($u,
                                     $req->{'password'},
@@ -5089,25 +5104,89 @@ sub authenticate
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
+        if ($auth_meth eq "oauth"){
+            my $rate_limiter = LJ::Request->is_inited ? 
+              LJ::API::RateLimiter->new(LJ::Request->request) :
+              LJ::API::RateLimiter->new();
+
+            my $oauth = LJ::OAuth->new(rate_limiter => $rate_limiter);
+            
+            my $result = $oauth->have_access;
+            unless ($result->{http_status} == 200) {
+                return fail($err,331,$result->{oauth_problem}) if $result->{http_status} == 400;
+                return fail($err,332,$result->{oauth_problem}) if $result->{http_status} == 401;
+                return fail($err,334,$result->{oauth_problem}) if $result->{http_status} == 403;
+                return fail($err,413,$result->{oauth_problem}) if $result->{http_status} == 503;
+                return fail($err,101);
+            } 
+            $u = $result->{user};
+            return unless $check_user->();
+            $flags->{'user_access'} = $result->{access};
+            LJ::Session->record_login($u);
+        }
     };
 
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
             $auth_check->() )
     {
+        return undef if $$err;
         return fail($err,402) if $ip_banned;
         return fail($err,105) if $chal_expired;
         return fail($err,101);
     }
+
+    return 1 if ($flags->{'allow_anonymous'} && !$u);
 
     # if there is a require TOS revision, check for it now
     return fail($err, 156) unless $u->tosagree_verify;
 
     # remember the user record for later.
     $flags->{'u'} = $u;
+
+    if (LJ::Request->is_inited) {
+        LJ::Request->notes("ljuser" => $u->{'user'}) unless LJ::Request->notes("ljuser");
+        LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
+    }
+
     return 1;
 }
 
+sub authorize
+{
+    my ($req, $err, $flags, $method) = @_;
+    
+    my $auth_method = $req->{'auth_method'};
+
+    return 1 if ($flags->{noauth});
+
+    if ($auth_method eq 'oauth') {
+
+        return fail($err,333) unless $flags->{'user_access'};
+        return fail($err,333) unless defined $LJ::XMLRPC_USER_ACCESS{$method};
+        
+        my $access_required = ref $LJ::XMLRPC_USER_ACCESS{$method} ? $LJ::XMLRPC_USER_ACCESS{$method} : [$LJ::XMLRPC_USER_ACCESS{$method}];
+        
+        my %user_access = map {$_ => 1} @{$flags->{'user_access'}};
+ 
+        foreach my $p (@$access_required){
+            return fail($err,333) unless ( $user_access{$p} || ($p =~ /(.+)_ro$/) && $user_access{"$1_rw"} );
+        }
+    } 
+
+    if ($LJ::XMLRPC_VALIDATION_METHOD{$method}) {
+        # Deny access for accounts that have not validated their email
+        my $u = $flags->{'u'} || LJ::load_user($req->{'username'});
+        unless ($u){
+            return fail($err,335);
+        }
+        unless ($u->is_validated) {
+            return fail($err,336);
+        }
+    }
+    
+    return 1;
+}
 
 sub fail
 {
@@ -5182,7 +5261,7 @@ sub registerpush {
     my ($req, $err, $flags) = @_;
 
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'registerpush');
 
     my $u = $flags->{u};
 
@@ -5207,7 +5286,7 @@ sub registerpush {
 sub unregisterpush {
     my ($req, $err, $flags) = @_;
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'unregisterpush');
 
     my $u = $flags->{u};
 
@@ -5225,7 +5304,7 @@ sub unregisterpush {
 sub pushsubscriptions {
     my ($req, $err, $flags) = @_;
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'pushsubscriptions');
 
     my $u = $flags->{u};
     my @errors;
@@ -5260,7 +5339,7 @@ sub pushsubscriptions {
 sub resetpushcounter {
     my ($req, $err, $flags) = @_;
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'resetpushcounter');
 
     my $u = $flags->{u};
 
@@ -5282,7 +5361,7 @@ sub resetpushcounter {
 sub getpushlist {
     my ($req, $err, $flags) = @_;
     return undef
-        unless authenticate($req, $err, $flags);
+        unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getpushlist');
 
     my $u = $flags->{u};
 
@@ -5327,7 +5406,9 @@ sub getpushlist {
 sub geteventsrating {
     my ($req, $err, $flags) = @_;
 
-    authenticate($req, $err, {%$flags, allow_anonymous => 1});
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'geteventsrating');
+
     my $user_id = $flags->{u} ? $flags->{u}->id : 0;
     
     return fail($err, 200, 'region') unless $req->{region};
@@ -5426,7 +5507,9 @@ sub geteventsrating {
 sub getusersrating {
     my ($req, $err, $flags) = @_;
 
-    authenticate($req, $err, {%$flags, allow_anonymous => 1});
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getusersrating');
+
     my $user_id = $flags->{u} ? $flags->{u}->id : 0;
 
     return fail($err, 200, 'region') unless $req->{region};
