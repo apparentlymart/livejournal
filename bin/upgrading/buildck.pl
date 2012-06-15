@@ -54,16 +54,23 @@ plugins
 
 print `cp -vur $files ./`;
 
+`grep -v "'plugins/" < ckeditor.pack > ckeditor-dev.pack`;
+
+print `java -jar ckpackager.jar ckeditor-dev.pack`;
+print `mv ckeditor.js ckeditor-dev.js`;
+
 print `java -jar ckpackager.jar ckeditor.pack`;
 
 die 'Build failed' if $?;
+print "Build complete\n"
 
-print "Build complete. Clean up\n";
+print "Clean up\n" if $clean;
+`rm -rf \$(ls | grep -Pv '(?:ckeditor(?:-dev)?.js|ckeditor.tar.gz)')` if $clean;
 
-`rm -rf \$(ls | grep -Pv '(?:ckeditor.js|ckeditor.tar.gz)')` if $clean;
-
-if ( -f 'ckeditor.js' ) {
-    print `cp -v ckeditor.js $ljsource` if $deploy;
+if ( -f 'ckeditor.js' and -f 'ckeditor-dev.js' ) {
+    print `cp -v ckeditor.js ckeditor-dev.js $ljsource` if $deploy;
 } else {
     die 'Build failed';
 }
+
+print "Done\n";
