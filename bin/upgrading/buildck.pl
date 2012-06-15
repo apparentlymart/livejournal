@@ -31,7 +31,7 @@ chdir $build or die "Failed to change directory to $build: $!";
 
 die 'Failed to fetch tarball' if $?;
 
-`tar xpf source.tar.gz`;
+`tar xpf ckeditor.tar.gz`;
 `mv ckeditor/* ./`;
 `rm -rf ckeditor`;
 
