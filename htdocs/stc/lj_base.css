@@ -3738,6 +3738,7 @@ A.lj-button-link:active {
 	cursor: default !important;
 	}
 .lj-button-light.repost-button-active .lj-button-b {
+	display: none !important;
 	background: #E6E7E9 !important;
 	background-image: -moz-linear-gradient(top, #E6E7E9 0%, #E7E8E9 100%) !important;
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E6E7E9), color-stop(100%,#E7E8E9)) !important;
@@ -3745,6 +3746,12 @@ A.lj-button-link:active {
 	background-image: -o-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
 	background-image: -ms-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
 	background-image: linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	}
+.lj-button-light .lj-button-b-reposted {
+	display: none !important;
+	}
+.lj-button-light.repost-button-active .lj-button-b-reposted {
+	display: inline-block !important;
 	}
 .lj-button-light.repost-button .lj-button-icon {
 	float: left;
