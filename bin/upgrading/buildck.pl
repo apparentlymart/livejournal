@@ -62,7 +62,7 @@ print `mv ckeditor.js ckeditor-dev.js`;
 print `java -jar ckpackager.jar ckeditor.pack`;
 
 die 'Build failed' if $?;
-print "Build complete\n"
+print "Build complete\n";
 
 print "Clean up\n" if $clean;
 `rm -rf \$(ls | grep -Pv '(?:ckeditor(?:-dev)?.js|ckeditor.tar.gz)')` if $clean;
