@@ -7,6 +7,7 @@
 			label: CKLang.LJLike_button_repost,
 			id:'repost',
 			abbr: 'rp',
+			checked: true,
 			html: '<span class="lj-like-item rp">' + CKLang.LJLike_button_repost + '</span>',
 			htmlOpt: '<li class="like-rp"><input type="checkbox" id="like-rp" /><label for="like-rp">' + CKLang.LJLike_button_repost + '</label></li>'
 		},
@@ -14,6 +15,7 @@
 			label: CKLang.LJLike_button_facebook,
 			id: 'facebook',
 			abbr: 'fb',
+			checked: true,
 			html: '<span class="lj-like-item fb">' + CKLang.LJLike_button_facebook + '</span>',
 			htmlOpt: '<li class="like-fb"><input type="checkbox" id="like-fb" /><label for="like-fb">' + CKLang.LJLike_button_facebook + '</label></li>'
 		},
@@ -21,6 +23,7 @@
 			label: CKLang.LJLike_button_twitter,
 			id: 'twitter',
 			abbr: 'tw',
+			checked: true,
 			html: '<span class="lj-like-item tw">' + CKLang.LJLike_button_twitter + '</span>',
 			htmlOpt: '<li class="like-tw"><input type="checkbox" id="like-tw" /><label for="like-tw">' + CKLang.LJLike_button_twitter + '</label></li>'
 		},
@@ -28,6 +31,7 @@
 			label: CKLang.LJLike_button_google,
 			id: 'google',
 			abbr: 'go',
+			checked: true,
 			html: '<span class="lj-like-item go">' + CKLang.LJLike_button_google + '</span>',
 			htmlOpt: '<li class="like-go"><input type="checkbox" id="like-go" /><label for="like-go">' + CKLang.LJLike_button_google + '</label></li>'
 		},
@@ -35,6 +39,7 @@
 			label: CKLang.LJLike_button_vkontakte,
 			id: 'vkontakte',
 			abbr: 'vk',
+			checked: true,
 			html: '<span class="lj-like-item vk">' + CKLang.LJLike_button_vkontakte + '</span>',
 			htmlOpt: Site.remote_is_sup? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
 		},
@@ -42,6 +47,7 @@
 			label: CKLang.LJLike_button_give,
 			id: 'livejournal',
 			abbr: 'lj',
+			checked: false,
 			html: '<span class="lj-like-item lj">' + CKLang.LJLike_button_give + '</span>',
 			htmlOpt: '<li class="like-lj"><input type="checkbox" id="like-lj" /><label for="like-lj">' + CKLang.LJLike_button_give + '</label></li>'
 		}
@@ -1196,7 +1202,9 @@
 							CKEDITOR.note && CKEDITOR.note.hide(true);
 
 							for (; i < buttonsLength; i++) {
-								var isChecked = buttons ? !!(buttons.indexOf(likeButtons[i].abbr) + 1 || buttons.indexOf(likeButtons[i].id) + 1) : true,
+								var isChecked = buttons?
+										!!(buttons.indexOf(likeButtons[i].abbr) + 1 || buttons.indexOf(likeButtons[i].id) + 1):
+										likeButtons[i].checked,
 									input = document.getElementById('like-' + likeButtons[i].abbr);
 
 								if (input) {
