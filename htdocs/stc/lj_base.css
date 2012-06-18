@@ -4534,6 +4534,7 @@ BODY div .b-helplink:active {
 	border: 0;
 	text-indent: 30px;
 	text-decoration: none;
+	cursor: pointer;
 	*overflow: visible;
 	*display: inline;
 	*text-indent: 0;
