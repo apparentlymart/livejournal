@@ -1594,8 +1594,8 @@ sub clean {
 
             if ($auto_format && ! $noautolinks && ! $opencount{'a'} && ! $opencount{'textarea'}) {            
                 ## Convert %username%.жж.рф and %username%.живойжурнал.рф to urls
-                $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0436}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
-                $token->[1] =~ s!(([^\s]*?)\.?\x{0436}\x{0438}\x{0432}\x{043E}\x{0439}\x{0436}\x{0443}\x{0440}\x{043D}\x{0430}\x{043B}\.\x{0440}\x{0444})!<a href="http://$1">$1</a>!g;
+                $token->[1] =~ s/(?<!http:\/\/)\b([\w]+\.\x{0436}\x{0436}\.\x{0440}\x{0444})/<a href="http:\/\/$1">$1<\/a>/g;
+                $token->[1] =~ s/(?<!http:\/\/)\b([\w]+\.\x{0436}\x{0438}\x{0432}\x{043E}\x{0439}\x{0436}\x{0443}\x{0440}\x{043D}\x{0430}\x{043B}\.\x{0440}\x{0444})/<a href="http:\/\/$1">$1<\/a>/g;
             } 
 
             # put <wbr> tags into long words, except inside <pre> and <textarea>.
