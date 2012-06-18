@@ -178,11 +178,16 @@ sub need_res {
 
     my @ret;
 
+    if ( $LJ::IS_DEV_SERVER ) {
+        push @ret, 'js/ck/ckeditor-dev.js';
+    } else {
+        push @ret, 'js/ck/ckeditor.js';
+    }
+
     push @ret, qw(
         js/ippu.js
         js/lj_ippu.js
         js/ljapp_ippu.js
-        js/ck/ckeditor.js
         js/rte.js
         js/jquery/jquery.lj.basicWidget.js
         js/jquery/jquery.xdomainrequest.js
