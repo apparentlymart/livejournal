@@ -578,18 +578,20 @@ LJ.define('LJ.Util.Date');
 	/**
 	 * Get timezone from the date object in the canonical way.
 	 *
-	 * @param {Date} date The date object.
 	 * @return {string} A string representation of timezone, eg +0400
 	 */
-	LJ.Util.Date.timezone = function(date) {
+	LJ.Util.Date.timezone = function() {
 		var offset = (-(new Date).getTimezoneOffset() / 0.6),
 			str = '';
 
 		if (offset > 0) {
 			str += '+';
+		} else if (offset < 0) {
+			str += '-';
+			offset = -offset;
 		}
 
-			str += ('' + offset).pad(4, '0');
+		str += ('' + offset).pad(4, '0');
 
 		return str;
 	}
