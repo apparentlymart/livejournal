@@ -6036,7 +6036,13 @@ talk.placeholder.userpass=Password
 
 talk.poll.head=Poll Creator
 
+talk.poll.button.editpoll=← Edit poll
+
+talk.poll.button.postpoll=Post poll →
+
 talk.poll.button.preview=See preview →
+
+talk.poll.button.reload=Reload code
 
 talk.poll.button.startover=← Start over
 
@@ -6052,11 +6058,17 @@ talk.poll.create=Poll Creator
 
 talk.poll.extra.head=Creating a Poll
 
+talk.poll.extra.preview.head=Poll Preview
+
+talk.poll.extra.preview.text=Below is a preview of your poll. This is exactly how it will look once it is placed on your journal. Use the buttons below to go back and make changes or post this poll to your journal.
+
 talk.poll.extra.text=The Poll Creator will generate your poll's code for you, allow you to preview your poll, and create a journal entry containing the poll code.
 
 talk.poll.fields=Fields:
 
 talk.poll.fields.more=More fields
+
+talk.poll.preview=Preview
 
 talk.poll.question=Question:
 
