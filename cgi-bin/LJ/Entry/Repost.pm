@@ -83,8 +83,11 @@ sub __create_repost_record {
 
     __clear_reposters_list($journalid, $itemid);
 
-    LJ::MemCache::incr($memcache_key_count, 1) ||
-            (LJ::MemCache::add($memcache_key_count, 0),  LJ::MemCache::incr($memcache_key_count, 1));
+    if (!LJ::MemCache::incr($memcache_key_count, 1)) {
+        my $count = __get_count($u, $itemid);
+        LJ::MemCache::add($memcache_key_count, int($count));
+    }
+
     LJ::MemCache::set($memcache_key_status, $repost_itemid, KEYS_EXPIRING);
 }
 
