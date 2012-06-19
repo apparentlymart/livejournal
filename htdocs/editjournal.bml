@@ -585,14 +585,7 @@ body<=
             my $onload;
             $ret .= LJ::entry_form($entry, \$$head, \$onload, undef, \$js);
             $ret .= "</form></div>";
-            my $like_faq_link = LJ::help_icon_html('like', undef, undef, BML::ml('fcklang.ljlike.faq'));
-            $ret .= <<LIKE_FAQ;
-            <script type="text/javascript">
-            // <![CDATA[
-                window.faqLink = '$like_faq_link';
-            // ]]>
-            </script>
-LIKE_FAQ
+            LJ::need_var(faqLink => LJ::help_icon_html('like', undef, undef, BML::ml('fcklang.ljlike.faq')));
             $ret .= $js;
 
             $ret .= "</td>";

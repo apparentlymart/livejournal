@@ -1869,6 +1869,7 @@ sub render_body {
 
             'LJLike_name'             => 'ljlike.name',
             'LJLike_dialogText'       => 'ljlike.dialog.text',
+            'LJLike_button_repost'    => 'ljlike.button.repost',
             'LJLike_button_google'    => 'ljlike.button.google',
             'LJLike_button_facebook'  => 'ljlike.button.facebook',
             'LJLike_button_vkontakte' => 'ljlike.button.vkontakte',
