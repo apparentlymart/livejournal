@@ -157,7 +157,7 @@ sub DayPage
                          'removed'           => \$removed, };
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
-            next ENTRY if $removed && !LJ::u_equals($user, $remote);
+            next ENTRY if $removed && !LJ::u_equals($u, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
                                                                 'viewsome' => $viewsome});
 
