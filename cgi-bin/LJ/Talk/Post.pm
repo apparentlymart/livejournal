@@ -617,8 +617,11 @@ sub require_captcha_test {
     ## 3. Do not display captcha if user has social capital more than 15
     ##
     ##
-    my $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
-    $soc_cap = int($soc_cap->{result}->{authority}/1000);
+    my $soc_cap = 0;
+    unless ($anon_commenter) {
+        $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
+        $soc_cap = int($soc_cap->{result}->{authority}/1000);
+    }
     return if $soc_cap > 15;
  
  
