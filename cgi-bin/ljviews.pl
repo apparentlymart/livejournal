@@ -2752,7 +2752,7 @@ sub create_view_day
                          'removed'           => \$removed,
                          'reply_count'       => \$replycount };
 
-        if (LJ::Entry::Repost->substitute_conten( $entry_obj, $content )) {
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
             next ENTRY if $removed;
             $username = $entry_obj->poster->user;
             $logprops{$itemid} = $entry_obj->props;
