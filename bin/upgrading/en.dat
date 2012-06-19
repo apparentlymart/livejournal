@@ -2831,6 +2831,9 @@ fcklang.ljimage.wizardnoticelink=Go to Image wizard
 fcklang.ljlike.button.facebook|staleness=1
 fcklang.ljlike.button.facebook=Facebook
 
+fcklang.ljlike.button.repost|staleness=1
+fcklang.ljlike.button.repost=Repost
+
 fcklang.ljlike.button.give|staleness=1
 fcklang.ljlike.button.give=10 Give
 
@@ -5986,6 +5989,12 @@ talk.ljlikes=Insert Social Buttons
 talk.cut.main=Cut
 
 talk.cut.button=Insert
+
+talk.font.tiny=Tiny
+talk.font.small=Small
+talk.font.normal=Normal
+talk.font.large=Large
+talk.font.huge=Huge
 
 talk.map.button=Insert
 
