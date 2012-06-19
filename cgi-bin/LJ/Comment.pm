@@ -88,7 +88,7 @@ sub instance {
         $jtalkid = int($dtalkid / 256);
     }
 
-    croak("need to supply jtalkid or dtalkid")
+    return undef 
         unless $jtalkid;
 
     croak("unknown parameter: " . join(", ", keys %opts))

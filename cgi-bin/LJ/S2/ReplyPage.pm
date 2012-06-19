@@ -65,6 +65,12 @@ sub ReplyPage
     if ($editid) {
         my $errref;
         $comment = LJ::Comment->new($u, dtalkid => $editid);
+
+        unless ($comment) {
+            my $comment = LJ::Lang::ml('comment.not.found');
+            $opts->{status} = "404 $comment)";
+            return "<p>$comment</p>";
+        }
         unless ($remote) {
             my $redir = LJ::eurl( LJ::Request->current_page_url );
             $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir&errmsg=notloggedin";
