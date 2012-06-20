@@ -172,7 +172,7 @@ ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
         //we use bind because DOM.addEventListener doesn't handle differences in the this value in different browsers
         delItem = $(folder + "_Delete_" + i);
         if( delItem ) {
-            DOM.addEventListener(delItem, "click", (function(e) { ESN_Inbox.deleteItems(e, this, folder) }).bind(delItem));
+            DOM.addEventListener(delItem, "click", (function(e) { ESN_Inbox.deleteItems(e, this, folder, cur_folder) }).bind(delItem));
         }
         if( $(folder + "_UnSpam_" + i) ) {
             DOM.addEventListener($(folder + "_UnSpam_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
@@ -259,15 +259,15 @@ ESN_Inbox.markUnread = function (evt, folder) {
     return false;
 };
 
-ESN_Inbox.deleteItems = function (evt, element, folder) {
+ESN_Inbox.deleteItems = function (evt, element, folder, cur_folder) {
     Event.stop(evt);
 
     if( cur_folder === 'spam' ) {
         ESN_Inbox.confirmSpam( element, function( banUser ) {
             if( banUser ) {
-                ESN_Inbox.updateItems('deleteban', evt, folder, '');
+                ESN_Inbox.updateItems('deleteban', evt, folder, '', cur_folder);
             } else {
-                ESN_Inbox.updateItems('delete', evt, folder, '');
+                ESN_Inbox.updateItems('delete', evt, folder, '', cur_folder);
             }
         }, true );
     } else {
@@ -278,7 +278,7 @@ ESN_Inbox.deleteItems = function (evt, element, folder) {
         var msg = ESN_Inbox.confirmDelete;
         if (has_bookmark && msg && !confirm(msg)) return false;
 
-        ESN_Inbox.updateItems('delete', evt, folder, '');
+        ESN_Inbox.updateItems('delete', evt, folder, '', cur_folder);
     }
     return false;
 };
