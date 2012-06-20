@@ -22,22 +22,22 @@
 		templates: {
 		},
 
-		_create: {
+		_create: function () {
 			$.lj.basicWidget.prototype._create.apply(this);
 
 			this._bindControls();
 		},
 
-		_bindControls: {
+		_bindControls: function () {
 		}<TMPL_IF has_private>,<TMPL_ELSE><TMPL_IF has_public>,</TMPL_IF></TMPL_IF><TMPL_LOOP private>
 
-		_<TMPL_VAR method>: {
+		_<TMPL_VAR method>: function () {
 		}<TMPL_UNLESS __last__>,</TMPL_UNLESS></TMPL_LOOP><TMPL_LOOP public><TMPL_IF __first__>,
 		</TMPL_IF>
 		/**
 		 * TODO: Write description here
 		 */
-		<TMPL_VAR method>: {
+		<TMPL_VAR method>: function () {
 		}<TMPL_UNLESS __last__>,</TMPL_UNLESS>
 		</TMPL_LOOP>
 	});
