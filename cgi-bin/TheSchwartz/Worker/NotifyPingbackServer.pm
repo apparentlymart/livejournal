@@ -37,7 +37,7 @@ sub send_ping {
         my $target_entry = LJ::Entry->new_from_url($link->{uri});
 
         next unless $target_entry;
-        next unless $target_entry->original_post;
+        next if $target_entry->original_post;
         next unless LJ::PingBack->should_entry_recieve_pingback($target_entry);
         next unless log_ping($source_entry, $target_entry);
 
