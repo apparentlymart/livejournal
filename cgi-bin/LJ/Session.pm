@@ -466,11 +466,11 @@ sub helper_url {
 
     unless ($u) {
         LJ::Session->clear_master_cookie;
-        return;
+        return $dest;
     }
 
     my $domcook = LJ::Session->domain_cookie($dest) or
-        return;
+        return $dest;
 
     my $sess = $u->session;
     my $cookie = $sess->domsess_cookie_string($domcook);
@@ -495,7 +495,7 @@ sub helper_url {
              . "&v=" . LJ::eurl($cookie);
     }
 
-    return;
+    return $dest;
 }
 
 # given a URL (or none, for current url), what domain cookie represents this URL?
