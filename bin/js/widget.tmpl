@@ -1,0 +1,44 @@
+/**
+ * @name $.lj.<TMPL_VAR name>
+ * @requires $.ui.core, $.ui.widget, $.lj.basicWidget<TMPL_IF extends>, $.lj.<TMPL_VAR extends></TMPL_IF>
+ * @class TODO: Write description here
+<TMPL_IF author> * @author <TMPL_VAR author>
+</TMPL_IF> */
+
+(function($, window) {
+	'use strict';
+
+	/** @lends $.lj.<TMPL_VAR name>.prototype */
+	$.widget('lj.<TMPL_VAR name>', <TMPL_IF extends>$.lj.<TMPL_VAR extends><TMPL_ELSE>$.lj.basicWidget</TMPL_IF>, {
+		options: {
+		},
+
+		classNames: {
+		},
+
+		selectors: {
+		},
+
+		templates: {
+		},
+
+		_create: {
+			$.lj.basicWidget.prototype._create.apply(this);
+
+			this._bindControls();
+		},
+
+		_bindControls: {
+		}<TMPL_IF has_private>,<TMPL_ELSE><TMPL_IF has_public>,</TMPL_IF></TMPL_IF><TMPL_LOOP private>
+
+		_<TMPL_VAR method>: {
+		}<TMPL_UNLESS __last__>,</TMPL_UNLESS></TMPL_LOOP><TMPL_LOOP public><TMPL_IF __first__>,
+		</TMPL_IF>
+		/**
+		 * TODO: Write description here
+		 */
+		<TMPL_VAR method>: {
+		}<TMPL_UNLESS __last__>,</TMPL_UNLESS>
+		</TMPL_LOOP>
+	});
+})(jQuery, window);
