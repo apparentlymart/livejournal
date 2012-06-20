@@ -192,16 +192,17 @@ sub EntryPage
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});
-            my $datetime_remote = $tz_remote || undef;
+            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
             my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
-            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
-
+            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $tz_remote);
             my ($edited, $edit_url, $edittime, $edittime_remote, $edittime_poster);
+
             if ($com->{_loaded}) {
                 my $comment = LJ::Comment->new($u, jtalkid => $com->{talkid});
 
                 $edited = $comment->is_edited;
                 $edit_url = LJ::Talk::talkargs($comment->edit_url, $style_arg);
+
                 if ($edited) {
                     $edittime = DateTime_unix($comment->edit_time);
                     $edittime_remote = $tz_remote ? DateTime_tz($comment->edit_time, $tz_remote) : undef;
@@ -269,9 +270,9 @@ sub EntryPage
                 'talkid' => $dtalkid,
                 'text' => $text,
                 'userpic' => $comment_userpic,
-                'time' => $datetime,
+                'time' => $datetime_remote,
                 'system_time' => $datetime, # same as regular time for comments
-                'edittime' => $edittime,
+                'edittime' => $edittime_remote,
                 'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'show' => $com->{'_show'} ? 1 : 0,
