@@ -2,6 +2,8 @@
 	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
 	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
 
+	CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
+
 	var likeButtons = [
 		{
 			label: CKLang.LJLike_button_repost,
@@ -973,9 +975,7 @@
 			})();
 
 			// LJ Poll Button
-			if (top.canmakepoll) {
-				var currentPoll;
-
+			if (Site.page.makepoll) {
 				CKEDITOR.dialog.add('LJPollDialog', function() {
 					var isAllFrameLoad = 0, okButtonNode, questionsWindow, setupWindow, onLoadPollPage = function() {
 						if (this.removeListener) {
