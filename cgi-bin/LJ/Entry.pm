@@ -2383,8 +2383,9 @@ sub set_logprop {
            "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
 
     if ($kill_mem) {
-        LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]) if $kill_mem;
-        $singletons{$uid}->{$jitemid} = undef if $singletons{$uid};
+        LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]);
+        my $cached_entry =  $singletons{$uid}->{$jitemid};
+        $cached_entry->{_loaded_props} = 0 if $cached_entry;
     }
 }
 
