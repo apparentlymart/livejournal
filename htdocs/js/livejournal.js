@@ -41,6 +41,8 @@ LiveJournal.initPage = function () {
 		LJ.Api.init({ auth_token: Site.auth_token });
 	}
 
+	LJ.UI.bootstrap();
+
 	//register system hooks
 	LiveJournal.register_hook('update_wallet_balance', LiveJournal.updateWalletBalance);
 	LiveJournal.register_hook('xdr/message', LiveJournal.processXdr);

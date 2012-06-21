@@ -710,6 +710,110 @@ LJ.UI.mixin = function(name, module) {
 	}
 };
 
+(function () {
+	var widgets = {},
+		unique = 1,
+		baseClass = 'lj-widget',
+		selector = '.' + baseClass;
+
+	LJ.UI._widgets = widgets;
+
+	/**
+	 * Init widget on node
+	 *
+	 * @param {jQuery} node Node
+	 */
+	LJ.UI.initWidget = function (node, force) {
+		var widget = node.data('widget'),
+			bootstrap = node.data('bootstrap') || null;
+
+		if (node.attr('data-widget-id')) {
+			/* Widget already has unique id */
+			return;
+		}
+
+		if (force) {
+			if (typeof jQuery.fn[widget] === 'function') {
+				jQuery.fn[widget].apply(node);
+			} else {
+				LJ.console.warn('Widget ' + widget + ' was not loaded');
+				return;
+			}
+		}
+
+		widgets[++unique] = {
+			ready: !!force,
+			entryPoint: bootstrap,
+			name: widget,
+			node: node
+		};
+
+		node
+			.attr('data-widget-id', unique)
+			.addClass(baseClass)
+			.addClass(baseClass + '-' + unique);
+	};
+
+	/**
+	 * Cleanup widget by node
+	 *
+	 * @param {jQuery} node Node
+	 */
+	LJ.UI.removeWidget = function (node) {
+		var id = node.data('widget-id');
+
+		if (!node.is(baseClass)) {
+			LJ.console.warn('Widget was not found on node');
+			return;
+		}
+
+		if (!id in widgets) {
+			LJ.console.warn('Widget ' + id + ' was removed already or never created');
+			return;
+		}
+
+		delete widgets[id];
+	};
+
+	/**
+	 * Init widgets with specific entry point or all remaining 
+	 *
+	 * @param {String} entryPoint Entry point name
+	 */
+	LJ.UI.bootstrap = function (entryPoint) {
+		var widget, unique, fn;
+
+		jQuery(selector).each(function () {
+			LJ.UI.initWidget(jQuery(this));
+		});
+
+		for (unique in widgets) {
+			if (!widgets.hasOwnProperty(unique)) {
+				continue;
+			}
+
+			widget = widgets[unique];
+
+			if (widget.ready) {
+				continue;
+			}
+
+			if (!entryPoint || widget.entryPoint === entryPoint) {
+				fn = jQuery.fn[widget.name];
+
+				if (typeof fn === 'function') {
+					fn.apply(widget.node);
+					widget.ready = true;
+				} else {
+					LJ.console.warn('Widget ' + widget.name + ' was not loaded');
+					continue;
+				}
+			} 
+		}
+	};
+}());
+
+
 LJ.ml = function(key, dict, def) {
 	var str = '', tmpl;
 	dict = dict || {};
