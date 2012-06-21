@@ -2382,7 +2382,10 @@ sub set_logprop {
     $u->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
            "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
 
-    LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]) if $kill_mem;
+    if ($kill_mem) {
+        LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]) if $kill_mem;
+        $singletons{$uid}->{$jitemid} = undef if $singletons{$uid};
+    }
 }
 
 # <LJFUNC>
