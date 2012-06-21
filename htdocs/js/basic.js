@@ -719,6 +719,27 @@ LJ.UI.mixin = function(name, module) {
 	LJ.UI._widgets = widgets;
 
 	/**
+	 * Init widget node
+	 *
+	 * @param {jQuery} node Node
+	 * @param {String} widget Widget name
+	 * @param {String} entryPoint Leave empty to init when page is ready
+	 */
+	LJ.UI.initWidgetNode = function (node, widget, entryPoint) {
+		if (node.hasClass(baseClass)) {
+			LJ.console.warn('Node already has class ' + baseClass);
+			return;
+		}
+
+		node.addClass(baseClass);
+		node.attr('data-widget', widget);
+
+		if (entryPoint) {
+			node.attr('data-bootstrap', entryPoint);
+		}
+	};
+
+	/**
 	 * Init widget on node
 	 *
 	 * @param {jQuery} node Node
