@@ -9294,6 +9294,8 @@ widget.vgifts.title=Virtual Gifts
 widget.vgifts.viewall|staleness=1
 widget.vgifts.viewall=more
 
+qotd.disabled=Writer's block is disabled
+
 xmlrpc.client_error=Client error: 
 
 xmlrpc.des.and=[[first]] and [[second]]

@@ -10,6 +10,9 @@ body<=
 
     $title = "Writer's Block Report";
 
+    return LJ::error_list( BML::ml('qotd.disabled', { sitename => $LJ::SITENAMESHORT } ))
+        if !LJ::is_enabled('qotd');
+
     return "<?needlogin?>"
         unless $remote;
 

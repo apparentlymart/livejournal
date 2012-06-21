@@ -7,6 +7,9 @@ body<=
 
     $title = $ML{'.title'};
 
+    return LJ::error_list( BML::ml('qotd.disabled', { sitename => $LJ::SITENAMESHORT } ))
+        if !LJ::is_enabled('qotd');
+
     my $page = defined $GET{page} ? $GET{page} : 1;
 
     return LJ::Widget::QotDArchive->render( page => $page );

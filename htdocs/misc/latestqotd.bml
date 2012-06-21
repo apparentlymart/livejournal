@@ -5,6 +5,9 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
+    return LJ::error_list( BML::ml('qotd.disabled', { sitename => $LJ::SITENAMESHORT } ))
+        if !LJ::is_enabled('qotd');
+
     my $remote = LJ::get_remote(); # used to check entry security
 
     $title = "Writer's Block";

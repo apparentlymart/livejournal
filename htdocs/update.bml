@@ -16,6 +16,13 @@
     my $update_type = $POST{'type'} || $GET{'type'};
     $$title = ($update_type eq 'sticky') ?  $ML{'.title2_sticky'} : $ML{'.title2'};
 
+    if ($GET{qotd} && !LJ::is_enabled('qotd')) {
+        $$body = LJ::error_list( BML::ml('qotd.disabled',
+                                { sitename => $LJ::SITENAMESHORT } ));
+        return;
+    }
+
+
     # server down?
     if ($LJ::SERVER_DOWN) {
         $$body = LJ::server_down_html();
