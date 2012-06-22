@@ -2918,7 +2918,8 @@ sub postevent {
     $res->{'url'} = $entry->url;
 
     push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
-    if (!$LJ::DISABLED{'esn-userevents'} || $LJ::_T_FIRE_USERNEWENTRY) {
+    if (!$flags->{'entryrepost'} && 
+            (!$LJ::DISABLED{'esn-userevents'} || $LJ::_T_FIRE_USERNEWENTRY)) {
         push @jobs, LJ::Event::UserNewEntry->new($entry)->fire_job
     }
 
