@@ -262,8 +262,11 @@ EMBED
 
     if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
         $did_spellcheck++;
-        my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
-                                     'color' => '<?hotcolor?>', };
+        my $s = LJ::SpellCheck->new({
+            'spellcommand' => $LJ::SPELLER,
+            'color'        => '<?hotcolor?>',
+            'lang'         => $remote ? $remote->prop('browselang') : $LJ::DEFAULT_LANG,
+        });
         $spellcheck_html = $s->check_html(\$event);
         $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
 

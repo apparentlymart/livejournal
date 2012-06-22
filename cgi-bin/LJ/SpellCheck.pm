@@ -33,6 +33,7 @@ my $LANGUAGES = {
     'en_lj' => 'en',    # lower case of 'en_LJ'
     'en_gb' => 'en_GB',
     'de'    => 'de',
+    'en_LJ' => 'en',
 };
 
 sub new {
@@ -40,8 +41,9 @@ sub new {
     my $self = {};
     bless $self, ref $class || $class;
 
-    $self->{command} = $args->{spellcommand} || [ @DEFAULT_COMMAND ];
-    $self->{color} = $args->{color} || "#FF0000";
+    $self->{'command'} = $args->{'spellcommand'} || [ @DEFAULT_COMMAND ];
+    $self->{'color'}   = $args->{'color'}        || "#FF0000";
+    $self->{'lang'}    = $args->{'lang'}         || $LJ::DEFAULT_LANG;
     return $self;
 }
 
@@ -57,6 +59,7 @@ sub run_aspell {
     $opts = {} unless defined($opts) && ref($opts) eq 'HASH';
 
     my $command = $opts->{command};
+
     if ($command) {
         if (ref($command) ne 'ARRAY') {
             die "Invalid parameter 'command' - need arrayref";
@@ -64,6 +67,7 @@ sub run_aspell {
     }
     else {
         $command = [ @DEFAULT_COMMAND ];
+
         if (my $language = $opts->{language}) {
             $language = $LANGUAGES->{lc($language)};
             return (0, 'unsupported_language') unless $language;
@@ -77,7 +81,7 @@ sub run_aspell {
 
     {
         my ($in, $out, $err);
-        
+
         ## ! = turn terse mode on (don't write correct words to output)
         ## ^ = escape each line (i.e. each line is text, not control command for aspell)
         $in = "!\n" . join("\n", map { "^$_" } @in_lines);
@@ -98,7 +102,7 @@ sub run_aspell {
     INPUT_LINE:
     foreach my $input_line (@in_lines) {
         my $text_pos = 0;
-        ASPELL_LINE: 
+        ASPELL_LINE:
         while (my $aspell_line = shift @out_lines) {
             my ($word, $offset, $suggestions_str);
 
@@ -124,7 +128,7 @@ sub run_aspell {
 
         $handler_text->(substr($input_line, $text_pos, length($input_line) - $text_pos) . "\n") if $handler_text && $text_pos < length($input_line);
     }
-  
+
     return (1, 'ok');
 }
 
@@ -201,7 +205,7 @@ sub check_html {
         $output .= $text;
     };
 
-    my ($result, $status) = run_aspell($text_ref, {language => 'ru'}, $handler_misspelled, $handler_text);
+    my ($result, $status) = run_aspell($text_ref, {language => $self->{'lang'}}, $handler_misspelled, $handler_text);
 
     return '' unless $result;
 

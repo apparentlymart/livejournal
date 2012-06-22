@@ -850,9 +850,14 @@ sub make_preview {
     # clean first; if the cleaner finds it invalid, don't spellcheck, so that we
     # can show the user the error.
     my $cleanok = LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
+    my $remote = LJ::get_remote();
+
     if (defined($cleanok) && $LJ::SPELLER && $form->{'do_spellcheck'}) {
-        my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
-                                     'color' => '#ff0000', };
+        my $s = LJ::SpellCheck->new({
+            'spellcommand' => $LJ::SPELLER,
+            'color'        => '#ff0000',
+            'lang'         => $remote ? $remote->prop('browselang') : $LJ::DEFAULT_LANG,
+        });
         $spellcheck_html = $s->check_html(\$event);
     }
 
