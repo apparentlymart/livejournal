@@ -1138,7 +1138,7 @@
 						id: 'LJLike_Ok',
 						label: editor.lang.common.ok,
 						onClick: function() {
-							var attr = [], likeHtml = '<span class="lj-like-wrapper">', likeNode = ljTagsData.LJLike.node;
+							var attr = [], likeHtml = '<span class="lj-like-wrapper">', likeNode = ljTagsData.LJLike.node, wasChanged = false;
 
 							if (ljLikeDialog.getButton('LJLike_Ok').getElement().hasClass('btn-disabled')) {
 								return false;
@@ -1151,6 +1151,10 @@
 								if ((input && input.checked) || (currentBtn && !button.htmlOpt && (currentBtn.indexOf(button.abbr) + 1 || currentBtn.indexOf(button.id) + 1))) {
 									attr.push(button.id);
 									likeHtml += button.html;
+								}
+
+								if (input.checked != likeButtons[i].checked) {
+									wasChanged = true;
 								}
 							}
 
@@ -1168,6 +1172,9 @@
 									likeNode.setAttribute('lj-cmd', 'LJLike');
 									likeNode.setAttribute('frameBorder', 0);
 									likeNode.setAttribute('allowTransparency', 'true');
+
+									likeNode.setAttribute('defaults', !wasChanged);
+
 									editor.insertElement(likeNode);
 								}
 							} else if (likeNode) {
@@ -1291,7 +1298,7 @@
 						for (var i = 0; i < length; i++) {
 							var buttonName = currentButtons[i].replace(/^\s*([a-z]{2,})\s*$/i, '$1');
 							var button = likeButtons[buttonName];
-							if (button) {
+							if (button && button.checked) {
 								fakeElement.attributes['lj-content'] += encodeURIComponent(button.html);
 								attr.push(buttonName);
 							}
@@ -1502,7 +1509,11 @@
 						switch (className) {
 							case 'lj-like':
 								newElement = new CKEDITOR.htmlParser.element('lj-like');
-								newElement.attributes.buttons = element.attributes.buttons;
+
+								if (element.attributes.defaults != 'true') {
+									newElement.attributes.buttons = element.attributes.buttons;
+								}
+								
 								if (element.attributes.hasOwnProperty('lj-style')) {
 									newElement.attributes.style = element.attributes['lj-style'];
 								}
