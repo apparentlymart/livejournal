@@ -434,9 +434,13 @@ jQuery(document).click(function(e)
 
 			toInit.forEach(function(like) {
 				var jEl = jQuery(like.el),
-					likeHtml = jEl.html();
+					internal = (jEl.get(0) || {}).childNodes;
+
+				if (!internal || !internal[0]) {
+					return;
+				}
 				
-				jEl.html(likeHtml.slice(4, -3)); // strip '<!--' and '-->'
+				jEl.html(internal[0].nodeValue); // strip '<!--' and '-->'
 				LiveJournal.parseLikeButtons(jEl);
 
 				like.init = true;
