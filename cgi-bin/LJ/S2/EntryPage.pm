@@ -192,9 +192,9 @@ sub EntryPage
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix($com->{'datepost_unix'});
-            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : undef;
+            my $datetime_remote = $tz_remote ? DateTime_tz($com->{'datepost_unix'}, $tz_remote) : $datetime;
             my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
-            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $tz_remote);
+            my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
             my ($edited, $edit_url, $edittime, $edittime_remote, $edittime_poster);
 
             if ($com->{_loaded}) {
@@ -205,7 +205,7 @@ sub EntryPage
 
                 if ($edited) {
                     $edittime = DateTime_unix($comment->edit_time);
-                    $edittime_remote = $tz_remote ? DateTime_tz($comment->edit_time, $tz_remote) : undef;
+                    $edittime_remote = $tz_remote ? DateTime_tz($comment->edit_time, $tz_remote) : $edittime;
                     $edittime_poster = DateTime_tz($comment->edit_time, $pu);
                 }
             }
@@ -270,7 +270,7 @@ sub EntryPage
                 'talkid' => $dtalkid,
                 'text' => $text,
                 'userpic' => $comment_userpic,
-                'time' => $datetime_remote,
+                'time' => $datetime,
                 'system_time' => $datetime, # same as regular time for comments
                 'edittime' => $edittime_remote,
                 'tags' => [],
@@ -288,10 +288,10 @@ sub EntryPage
                 'dom_id' => "ljcmt$dtalkid",
                 'comment_posted' => $commentposted,
                 'edited' => $edited ? 1 : 0,
-                'time_remote' => $datetime_remote,
+                'time_remote' => $tz_remote ? $datetime_remote : undef,
                 'time_poster' => $datetime_poster,
                 'seconds_since_entry' => $seconds_since_entry,
-                'edittime_remote' => $edittime_remote,
+                'edittime_remote' => $tz_remote ? $edittime_remote : undef,
                 'edittime_poster' => $edittime_poster,
                 'edit_url' => $edit_url,
             };
