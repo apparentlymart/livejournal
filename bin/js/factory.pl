@@ -71,8 +71,6 @@ $template->param(
     name        => $name,
     author      => $author,
     extends     => $extends,
-    has_public  => $public?  1 : 0,
-    has_private => $private? 1 : 0,
     public      => $public  || [],
     private     => $private || [],
 );

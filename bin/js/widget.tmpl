@@ -28,7 +28,7 @@
 		},
 
 		_bindControls: function () {
-		}<TMPL_IF has_private>,<TMPL_ELSE><TMPL_IF has_public>,</TMPL_IF></TMPL_IF><TMPL_LOOP private>
+		}<TMPL_LOOP private><TMPL_IF __first__>,</TMPL_IF>
 
 		_<TMPL_VAR method>: function () {
 		}<TMPL_UNLESS __last__>,</TMPL_UNLESS></TMPL_LOOP><TMPL_LOOP public><TMPL_IF __first__>,
