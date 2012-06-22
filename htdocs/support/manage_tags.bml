@@ -74,7 +74,8 @@ body<=
         my $spcatid     = int($FORM{'spcatid'});
         my $everywhere  = $FORM{'everywhere'};
         my $allowmerge  = $FORM{'allowmerge'};
-        my $new_name    = lc($FORM{'new_name'});
+        my $new_name    = $FORM{'new_name'};
+        $new_name = LJ::Support::Request::Tag::normalize_tag_name($new_name);
 
         my $cats = LJ::Support::load_cats();
         my $name = LJ::Support::Request::Tag::tag_id_to_name($sptagid);
