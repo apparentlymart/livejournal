@@ -5798,6 +5798,8 @@ talk.curname_Music=<b>Current music:</b>
 
 talk.curname_Tags=<b>Entry tags:</b>
 
+talk.default.userpic=default userpic
+
 talk.delandspamall=Delete All and mark as spam
 
 talk.delete=Delete
