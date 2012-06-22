@@ -1762,6 +1762,8 @@ sub can_use_layer
 sub can_use_prop
 {
     my ($u, $uniq, $prop) = @_;  # $uniq = redist_uniq value
+    my $user_basic =  LJ::run_hook("user_is_basic", $u);
+    return 0 if $prop eq 'old_s1' && $user_basic;
     return 1 if LJ::get_cap($u, "s2styles");
     return 1 if LJ::get_cap($u, "s2props");
     my $pol = get_policy();
