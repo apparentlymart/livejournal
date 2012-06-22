@@ -278,7 +278,7 @@ sub FriendsPage
                          'posterid'          => \$posterid,
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
-                         'event_raw'         => \$text,
+                         'event_friend'      => \$text,
                          'subject'           => \$subject,
                          'removed'           => \$removed,
                          'reply_count'       => \$replycount, };
