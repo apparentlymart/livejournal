@@ -712,7 +712,7 @@ LJ.UI.mixin = function(name, module) {
 
 (function () {
 	var widgets = {},
-		unique = 1,
+		unique = 0,
 		baseClass = 'lj-widget',
 		selector = '.' + baseClass;
 
@@ -746,16 +746,26 @@ LJ.UI.mixin = function(name, module) {
 	 */
 	LJ.UI.initWidget = function (node, force) {
 		var widget = node.data('widget'),
+			options = node.data('widget-options'),
 			bootstrap = node.data('bootstrap') || null;
+
 
 		if (node.attr('data-widget-id')) {
 			/* Widget already has unique id */
 			return;
 		}
 
+		if (typeof options !== 'object') {
+			if (options) {
+				LJ.console.warn('Invalid options string: ' + options);
+			}
+
+			options = {};
+		}
+
 		if (force) {
 			if (typeof jQuery.fn[widget] === 'function') {
-				jQuery.fn[widget].apply(node);
+				jQuery.fn[widget].apply(node, [options]);
 			} else {
 				LJ.console.warn('Widget ' + widget + ' was not loaded');
 				return;
@@ -765,6 +775,7 @@ LJ.UI.mixin = function(name, module) {
 		widgets[++unique] = {
 			ready: !!force,
 			entryPoint: bootstrap,
+			options: options,
 			name: widget,
 			node: node
 		};
@@ -823,7 +834,7 @@ LJ.UI.mixin = function(name, module) {
 				fn = jQuery.fn[widget.name];
 
 				if (typeof fn === 'function') {
-					fn.apply(widget.node);
+					fn.apply(widget.node, [widget.options]);
 					widget.ready = true;
 				} else {
 					LJ.console.warn('Widget ' + widget.name + ' was not loaded');
