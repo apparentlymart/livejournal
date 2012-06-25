@@ -449,7 +449,14 @@ sub render_metainfo_block {
     });
 
     $out .= "<script>try { \$('journal_timezone').value = - (new Date).getTimezoneOffset()/0.6; } catch(e) {} </script>";
-    $out .= "<div id='metainfo-wrap'><ul id='metainfo'>";
+    $out .= "<div id='metainfo-wrap'>";
+    $out .= "<p class=\"b-updatepage-switchver\">";
+    $out .= "<button type=\"submit\" name=\"ljpost:on\" value=\"ljpost:off\" class=\"b-updatepage-switchver-button\">";
+    $out .= "<span class=\"b-updatepage-switchver-inner\">". LJ::Lang::ml('talk.post.beta.turn.on') ."</span>";
+    $out .= "</button>";
+    $out .= " (". LJ::Lang::ml('talk.post.beta.about') .")";
+    $out .= "</p>";
+    $out .= "<ul id='metainfo'>";
 
     my $can_edit_date = 1;
 

@@ -6143,6 +6143,12 @@ talk.post.adult.none=none
 
 talk.post.backdated=do not add to friends page and RSS
 
+talk.post.beta.about=<a href="#" target="_blank">About</a>
+
+talk.post.beta.turn.off=Switch to old version
+
+talk.post.beta.turn.on=Switch to new version
+
 talk.post.change=change
 
 talk.post.change.back=change back
