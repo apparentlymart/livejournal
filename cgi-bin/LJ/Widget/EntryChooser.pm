@@ -80,7 +80,7 @@ sub prepare_template_params {
 
         my $edit_link_base = "$LJ::SITEROOT/editjournal.bml?";
         my $usejournal = $entry->journal->username;
-        $edit_link_base .= 'usejournal=' . $usejournal . '&';
+        $edit_link_base .= 'journal=' . $usejournal . '&';
 
         if ( $entry->is_delayed ) {
             $edit_link_base .= 'delayedid=' . $entry->delayedid . '&';
