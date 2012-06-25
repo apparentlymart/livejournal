@@ -216,7 +216,7 @@ sub output_prop {
     my $name = $prop->{name};
     my $type = $prop->{type};
 
-    my $can_use = LJ::S2::can_use_prop($u, $theme->layout_uniq, $name);
+    my $can_use = LJ::S2::can_use_prop($u, $theme->layout_uniq, $name, \$prop->{note});
 
     my %prop_values = LJ::Customize->get_s2_prop_values($name, $u, $style);
     my $existing = $prop_values{existing};

@@ -87,6 +87,8 @@ comment.mark.spam2.subject=Do you really want to mark this comment as a spam?
 
 comment.mark.spam2.title=Mark as a spam
 
+comment.classic.not.available=This option not available for Basic accounts
+
 community.election.owner.election.link|staleness=1
 community.election.owner.election.link=The owner of the [[community]] community is not selected yet. You can <a [[href]]>vote for owner here</a>.
 
