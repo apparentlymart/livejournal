@@ -346,6 +346,7 @@ sub get_cluster_master
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
     my $id = LJ::isu($arg) ? $arg->{'clusterid'} : $arg;
+    return undef unless ($id);
     return undef if $LJ::READONLY_CLUSTER{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }
