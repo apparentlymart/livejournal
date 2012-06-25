@@ -454,9 +454,9 @@ sub clean {
             #
             if ($tag eq "lj-repost" and $ljrepost_allowed){
                 next TOKEN if ref $opencount{$tag}; # no support for nested <lj-repost> tags
-                my $button = LJ::ehtml($attr->{button}) || LJ::Lang::ml("repost.default_button");
+                my $button = LJ::ehtml($attr->{button}) ||
+                         Encode::decode_utf8(LJ::Lang::ml("repost.default_button"));
                 if ($attr->{'/'}){
-                    $button = Encode::decode_utf8($button); 
                     # short <lj-repost /> form of tag
                     $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
                              .  qq[<input type="hidden" name="repost" value="$opts->{cuturl}" />]
