@@ -304,8 +304,12 @@
 			var current = new Date();
 			current.setMilliseconds(0);
 			current.setSeconds(0);
+			current.setMinutes(0);
+			current.setHours(0);
 			date.setMilliseconds(0);
 			date.setSeconds(0);
+			date.setMinutes(0);
+			date.setHours(0);
 
 			var delta = +date - (+new Date());
 			this._setTime(date);
