@@ -477,6 +477,12 @@ sub as_email_headers {
 # if ($evt->need_standard_footer) { $html .= BML::ml('esn.email.html.footer'); }
 sub need_standard_footer { 1 }
 
+# return a boolean value indicating that email notifications of this event need
+# a promo appended to them.
+#
+# this is a virtual function; the base class function returns 1 for "yes".
+sub show_promo { 1 }
+
 # return a string representing an "SMS" (TxtLJ) notification sent to the passed
 # user notifying them that this event has happened.
 #

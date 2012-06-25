@@ -199,4 +199,6 @@ sub as_push_payload {
            };
 }
 
+sub show_promo { 0 }
+
 1;
