@@ -141,7 +141,7 @@
                                             sprintf("%02d", $now->minute));
 
     my $subject = $POST{'subject'} || $GET{'subject'};
-    my $event   = $POST{'event'}   || $GET{'event'};
+    my $event   = $POST{'event'}   || $GET{'event'} || $POST{'body'};
     my $tags    = $POST{'prop_taglist'} || $GET{'prop_taglist'};
     my $url     = $GET{'url'};
 
@@ -254,7 +254,7 @@ EMBED
 
     # Check for errors, store in hash to render later
     my $errors = {};
-    my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
+    my $showform = $POST{'showform'} || $auth_missing || exists $POST{'ljpost:off'}; # show entry form
     my $preview = $POST{'action:preview'};
 
     # are we spellchecking before we post?
