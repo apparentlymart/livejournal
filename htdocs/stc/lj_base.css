@@ -5109,6 +5109,14 @@ HTML BODY .i-ljuser {
 		font-size: 14px !important;
 		color: #000 !important;
 		}
+	.b-popup-content-header {
+		padding-right: 10px;
+		margin-bottom: 10px;
+		line-height: 16px;
+		font-size: 14px;
+		font-weight: bold;
+		color: #000;
+		}
 	.b-popup-content A:link,
 	.b-popup-content A:visited {
 		color: #3F5F9E !important;
