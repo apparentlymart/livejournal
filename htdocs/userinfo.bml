@@ -1653,7 +1653,7 @@
 
         foreach (sort keys %$apps_list) {
             my $app = LJ::UserApps->get_application( id => $_ );
-            next unless $app && $app->can_show_restricted;
+            next unless $app && $app->can_show_restricted && $app->{type} ne 'E'; 
             my $app_img;
             if ($app->icon) {
                 $app_img = '<img src='.$app->icon.' width="16" height="16" alt="' . $app->name . '" /> ';
