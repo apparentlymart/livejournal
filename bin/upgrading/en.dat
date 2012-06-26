@@ -6185,7 +6185,11 @@ talk.post.journal.default=default
 
 talk.post.find=find
 
+talk.post.find.title=Detect your location
+
 talk.post.identify=identify
+
+talk.post.identify.title=Detect your current music
 
 talk.post.infobox.all=All variants to post
 
@@ -6258,6 +6262,8 @@ talk.post.screen.friends=non friends
 talk.post.screen.none=none
 
 talk.post.select=select
+
+talk.post.select.title=Select your current mood
 
 talk.post.security=Security
 
