@@ -44,6 +44,10 @@ body<=
     LJ::Controller::Post->rte_langmap();
 
     if ($mode eq "edit") {
+        if ( exists $POST{'ljpost:off'} ) {
+            LJ::Request->delete_cookie("ljpost");
+        }
+
         LJ::need_res(qw(
                         stc/entry.css
                         stc/trava.css

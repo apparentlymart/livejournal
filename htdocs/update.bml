@@ -257,6 +257,10 @@ EMBED
     my $showform = $POST{'showform'} || $auth_missing || exists $POST{'ljpost:off'}; # show entry form
     my $preview = $POST{'action:preview'};
 
+    if ( exists $POST{'ljpost:off'} ) {
+        LJ::Request->delete_cookie("ljpost");
+    }
+
     # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
 
