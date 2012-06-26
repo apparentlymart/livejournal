@@ -2549,7 +2549,7 @@ sub get_replycount {
 
     $count = $dbcr->selectrow_array("SELECT replycount FROM log2 WHERE " .
                                     "journalid=? AND jitemid=?", undef,
-                                    $ju->{'userid'}, $jitemid);
+                                    $ju->{'userid'}, $jitemid) || 0;
     LJ::MemCache::add($memkey, $count);
     return $count;
 }
