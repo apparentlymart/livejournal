@@ -258,6 +258,9 @@ propgroup text {
   property string text_security {
     des = "Text for security label on entries";
   }
+  property string text_repost {
+    des = "Text for repost label on entries";
+  }
   property use text_post_comment;
   property use text_read_comments;
   property use text_post_comment_friends;
@@ -322,6 +325,7 @@ propgroup text {
   set text_date                  = "Date:";
   set text_subject               = "Subject:";
   set text_security              = "Security:";
+  set text_repost                = "Repost:";
   set text_post_comment          = "Post A Comment";
   set text_read_comments         = "# Comment // # Comments";
   set text_post_comment_friends  = "Post A Comment";
@@ -1195,6 +1199,7 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   var string icon       = $e->lay_make_icon();
   var string subject    = $e.subject != "" ? $e.subject : """<i class="nosubject">$*text_nosubject</i>""";
   var string security   = "";
+  var string repost     = "";
   var string screenedbg = "";
   var string screenedfg = "";
   
@@ -1206,12 +1211,17 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   if ($e isa Entry) {
     var Entry en = $e as Entry;
 
-    if ($en.security != "" or $en.sticky or $en.delayed) {
+    if ($en.security != "" or $en.sticky or $en.delayed or $en.repost) {
+        if ($en.repost) { $security = $security + "$en.repost_icon "; }
         if ($en.delayed) { $security = $security + "$en.delayed_icon "; }
         if ($en.sticky) { $security = $security + "$en.sticky_icon "; }
         if ($en.security) { $security = $security + "$en.security_icon "; }
     } else {
         $security = "Public";
+    }
+
+    if ($en.reposted_by) {
+        $repost = """$e.reposted_by""";
     }
 
   }
@@ -1262,6 +1272,14 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
     <tr>
       <td class="dateheader"$screenedfg>$*text_security</td>
       <td class="datecontent"$screenedfg>$security</td>
+    </tr>
+    """;
+  }
+  if($repost != "") {
+    """
+    <tr>
+      <td class="dateheader"$screenedfg>$*text_repost</td>
+      <td class="datecontent"$screenedfg>$repost</td>
     </tr>
     """;
   }

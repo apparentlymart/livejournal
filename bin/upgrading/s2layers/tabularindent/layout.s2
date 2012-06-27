@@ -717,6 +717,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     # Security Icon
     var string posticon = "";
 
+    if ($e.repost) { $posticon = $posticon + "$e.repost_icon "; }
     if ($e.delayed) { $posticon = $posticon + "$e.delayed_icon "; }
     if ($e.sticky) { $posticon = $posticon + "$e.sticky_icon "; }
     if ($e.security) { $posticon = $posticon + "$e.security_icon "; }
@@ -751,6 +752,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             $meta{"$key:"} = $val;
         }
     }
+
+    # Repost
+    if ($e.reposted_by) {
+      $meta{"Repost:"} = """$e.reposted_by""";
+    }
+
     # Tags
     if ($e.tags) {
         var int tcount = 0;
@@ -1008,13 +1015,13 @@ function EntryPage::print_body () {
         $this->print_multiform_start();
 
         print_header("Comments:", $*text_comments_id);
-	if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
-		if ($p.showspam) {
-		    print """<p width='95%' style='text-align:center;'>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</p>""";
-		} else {
-		    print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
-		}
-	}
+  if ($e.comments.spam_counter > 0 and $e.comments.read_spam_url != "") {
+    if ($p.showspam) {
+        print """<p width='95%' style='text-align:center;'>""" + get_plural_phrase($e.comments.spam_counter, "text_read_spam_comments") + """</p>""";
+    } else {
+        print """<p width='95%' style='text-align:center;'><a href=\"$e.comments.read_spam_url\">""" + get_plural_phrase($e.comments.spam_counter, "text_read_all_spam_comments") + """</a></p>""";
+    }
+  }
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
