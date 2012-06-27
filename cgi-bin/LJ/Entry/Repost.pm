@@ -72,7 +72,11 @@ sub __create_repost_record {
 
     my $journalid = $u->userid;
 
-    $u->do('INSERT INTO repost2 VALUES(?,?,?,?, NOW())',
+    $u->do('INSERT INTO repost2(journalid,
+                                jitemid,
+                                reposterid,
+                                reposted_jitemid,
+                                repost_time)  VALUES(?,?,?,?, NOW())',
             undef,
             $u->userid,
             $itemid,
