@@ -7,7 +7,8 @@ require 'ljlib.pl';
 require 'ljprotocol.pl';
 use LJ::Lang;
 
-use constant { KEYS_EXPIRING => 30
+use constant {  REPOST_KEYS_EXPIRING => 0,
+                REPOST_USERS_LIST_LIMIT => 25,
              };
 
 
@@ -31,7 +32,7 @@ sub __get_count {
                                                    $u->userid,
                                                    $jitemid, );
 
-    LJ::MemCache::set($memcache_key, $count_jitemid, KEYS_EXPIRING);
+    LJ::MemCache::set($memcache_key, $count_jitemid, REPOST_KEYS_EXPIRING);
 
     return $count_jitemid;
 }
@@ -59,7 +60,7 @@ sub __get_repostid {
                                                   $reposterid, );
 
     if (@repost_jitemid) {
-        LJ::MemCache::set($memcache_key, $repost_jitemid[0], KEYS_EXPIRING);
+        LJ::MemCache::set($memcache_key, $repost_jitemid[0], REPOST_KEYS_EXPIRING);
         return $repost_jitemid[0];
     }
 
@@ -71,7 +72,7 @@ sub __create_repost_record {
 
     my $journalid = $u->userid;
 
-    $u->do('INSERT INTO repost2 VALUES(?,?,?,?)',
+    $u->do('INSERT INTO repost2 VALUES(?,?,?,?, NOW())',
             undef,
             $u->userid,
             $itemid,
@@ -88,7 +89,7 @@ sub __create_repost_record {
         LJ::MemCache::add($memcache_key_count, int($count));
     }
 
-    LJ::MemCache::set($memcache_key_status, $repost_itemid, KEYS_EXPIRING);
+    LJ::MemCache::set($memcache_key_status, $repost_itemid, REPOST_KEYS_EXPIRING);
 }
 
 sub __delete_repost_record {
@@ -230,41 +231,35 @@ sub __clear_reposters_list {
     if ($keys_list) {
         my @keys = split(/:/, $keys_list);
         foreach my $key (@keys) {
-            my $memcache_key = "reposters_list:$subkey";
-            if ($key) {
-                $memcache_key .= ":$key";
-            }
+            my $memcache_key = "reposters_list_chunk:$subkey:$key";
+
             LJ::MemCache::delete($memcache_key);
         }
-    } else {
-        my $memcache_list_key = "reposters_list:$subkey";
-        LJ::MemCache::delete($memcache_list_key);
     }
     LJ::MemCache::delete($memcached_key_list);
 }
 
 sub __put_reposters_list {
-    my ($journalid, $jitemid, $data, $lastitem) = @_;
+    my ($journalid, $jitemid, $data, $lastrequest) = @_;
 
     my $subkey = "$journalid:$jitemid";
-    my $memcache_key = "reposters_list:$subkey";
+    my $memcache_key = "reposters_list_chunk:$subkey:$lastrequest";
+    my $memcache_keys_list = "reposters_keys_list:$subkey";
 
-    if ($lastitem) {
-        $memcache_key .=  ":$lastitem";
-
-        my $memcache_keys_list = "reposters_keys_list:$subkey";
-        LJ::MemCache::add($memcache_keys_list, ":$lastitem", KEYS_EXPIRING);
+    if ($lastrequest) {
+        LJ::MemCache::append($memcache_keys_list,":$lastrequest");
+    } else {
+        LJ::MemCache::add($memcache_keys_list, "$lastrequest", REPOST_KEYS_EXPIRING);
     }
-
+    
     my $serialized = LJ::JSON->to_json( $data );
-    LJ::MemCache::set( $memcache_key, $serialized, KEYS_EXPIRING );
+    LJ::MemCache::set( $memcache_key, $serialized, REPOST_KEYS_EXPIRING );
 }
 
 sub __get_reposters_list {
-    my ($journalid, $jitemid, $lastitem) = @_;
+    my ($journalid, $jitemid, $lastrequest) = @_;
 
-    my $memcache_key = "reposters_list:$journalid:$jitemid";
-    $memcache_key .= $lastitem ? ":$lastitem" : "";
+    my $memcache_key = "reposters_list_chunk:$journalid:$jitemid:$lastrequest";
 
     my $data;
     my $reposters = LJ::MemCache::get($memcache_key);
@@ -280,21 +275,18 @@ sub __get_reposters_list {
 }
 
 sub __get_reposters {
-    my ($u, $jitemid, $lastuserid) = @_;
+    my ($u, $jitemid, $lastrequest) = @_;
     return [] unless $u;
 
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
-    my $after = '';
-    if ( $lastuserid ) {
-        $after = "AND reposterid > $lastuserid ";
-    }
-
+    my $final_limit = REPOST_USERS_LIST_LIMIT + 1;
     my $reposters = $dbcr->selectcol_arrayref( 'SELECT reposterid ' .
                                                'FROM repost2 ' .
-                                               'WHERE journalid = ? AND jitemid = ? ' . $after . 
-                                               'LIMIT 25',
+                                               'WHERE journalid = ? AND jitemid = ? ' . 
+                                               'ORDER BY repost_time ' .
+                                               "LIMIT $lastrequest, $final_limit",
                                                undef,
                                                $u->userid,
                                                $jitemid,);
@@ -304,41 +296,51 @@ sub __get_reposters {
 
 
 sub get_list {
-    my ($class, $entry, $lastuserid) = @_;
+    my ($class, $entry, $lastrequest) = @_;
 
     my $journalid = $entry->journalid;
     my $jitemid   = $entry->jitemid;
 
+    if (!$lastrequest || $lastrequest < 0) {
+        $lastrequest = 0;
+    }
+
     my $cached_reposters = __get_reposters_list($journalid, 
                                                 $jitemid, 
-                                                $lastuserid);
+                                                $lastrequest);
     if ($cached_reposters) {
         return $cached_reposters;
     }
 
     my $repostersids = __get_reposters( $entry->journal,
                                         $jitemid,
-                                        $lastuserid );
+                                        $lastrequest );
 
     my $reposters_info = { users => {} };
     my $users = $reposters_info->{'users'};
 
     my $reposters_count = scalar @$repostersids;
+    $reposters_info->{'last'}   = $lastrequest + 1;
+    if ($reposters_count < REPOST_USERS_LIST_LIMIT + 1) {
+        $reposters_info->{'nomore'} = 1;
+    } else {
+        pop @$repostersids;
+    }
+
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
 
-        $users->{$u->user} = { #'userhead' => $u->userhead_url,
-                               'url'      => $u->journal_base, };
-    }   
-    $reposters_info->{'last'}   = $repostersids->[-1];
-    $reposters_info->{'nomore'} = 1 if $reposters_count < 25;
+        $users->{$u->user} = { 'url' => $u->journal_base, };
+    }  
+ 
+    $reposters_info->{'last'}   = $lastrequest + 1;
     $reposters_info->{'count'}  = __get_count($entry->journal, 
                                               $entry->jitemid);
 
     __put_reposters_list( $journalid,
                           $jitemid,
                           $reposters_info, 
-                          $lastuserid );
+                          $lastrequest );
 
     
     return $reposters_info; 

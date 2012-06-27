@@ -4471,6 +4471,20 @@ register_alter(sub {
     my $dbh = shift;
     my $runsql = shift;
 
+    unless (column_type("repost2", "repost_time")) {
+        do_alter( "repost2",
+                  "ALTER TABLE repost2 " .
+                  "ADD repost_time int(10) unsigned DEFAULT NULL" );
+    }
+
+});
+
+
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
     unless (column_type("send_email_errors", "message")) {
         do_alter("send_email_errors",
                  "ALTER TABLE send_email_errors " .
