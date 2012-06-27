@@ -2279,11 +2279,7 @@ sub get_latest_ditemid {
     }
 
     # Do I need to skip sticky entry?
-    my $skip_sticky_item_sql = '';
     my $sticky_id = $u->get_sticky_entry_id;
-    if ( $opts->{'skip_sticky_item'} && $sticky_id ) {
-        #$skip_sticky_item_sql = "AND jitemid <> $sticky_id";
-    }
 
     my $jid = $u->userid;
     my $field = $u->is_person ? "revttime" : "rlogtime";
@@ -2302,7 +2298,7 @@ sub get_latest_ditemid {
     }
 
     my $res = $dbr->selectcol_arrayref( "SELECT jitemid, anum FROM log2 use index (rlogtime,revttime) ".
-                                        "WHERE journalid=? $skip_sticky_item_sql ".
+                                        "WHERE journalid=? ".
                                         $secwhere. " ".
                                         "ORDER BY $field LIMIT 1", undef, $jid);
     my $itemid = $res->[0];
