@@ -1,6 +1,7 @@
 <?_code
 {
     use strict;
+    use LJ::Draft qw{ get_draft_text };
     use vars qw(%GET %POST %ML);
     BML::decl_params(_default => qr/./);
 
@@ -757,7 +758,7 @@ head<=
     my $remote = LJ::get_remote();
     my $draft = '""';
     if ($remote) {
-        $draft = LJ::ejs_string($remote->prop('entry_draft'));
+        $draft = LJ::ejs_string(get_draft_text($remote->draft_text));
     }
 
     my $eMLautosave = LJ::ejs(BML::ml('.draft.autosave', { 'time' => '[[time]]' }));

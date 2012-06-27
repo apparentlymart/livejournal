@@ -1,6 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
+    use LJ::Draft qw{ encode decode };
     use vars qw(%POST);
 
     my $err = sub {
@@ -20,15 +21,19 @@
     }
 
     my $ret = {};
+    my $draft = delete $POST{'saveDraft'};
 
-    if (defined $POST{'saveDraft'}) {
-        $u->set_draft_text($POST{'saveDraft'});
-
-    } elsif ($POST{'clearDraft'}) {
+    if ( defined $draft ) {
+        $u->set_draft_text(encode($draft));
+    } elsif ( $POST{'clearDraft'} ) {
         $u->set_draft_text('');
-
     } else {
-        $ret->{draft} = $u->draft_text;
+        my $decoded = decode($u->draft_text);
+        if ( ref $decoded ) {
+            %$ret = (%$ret, %$decoded);
+        } else {
+            $ret->{'draft'} = $decoded;
+        }
     }
 
     sleep 1 if $LJ::IS_DEV_SERVER;
