@@ -2342,7 +2342,7 @@ sub get_before_item_link {
     my $jumpid = get_itemid_near2( $u,
                                    $itemid,
                                    'before',
-                                   { 'skip_stucky' => $use_sticky });
+                                   { 'skip_sticky' => $use_sticky });
     if (!$jumpid) {
         return undef;
     }
