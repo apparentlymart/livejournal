@@ -6237,6 +6237,8 @@ talk.post.meta.when=Date
 
 talk.post.mood=Mood
 
+talk.post.mood.noneother=none or other
+
 talk.post.music=Music
 
 talk.post.nosubject=no subject
