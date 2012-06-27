@@ -28,6 +28,7 @@
 		},
 
 		_bindControls: function () {
+			$.lj.basicWidget.prototype._bindControls.apply(this);
 		}<TMPL_LOOP private><TMPL_IF __first__>,</TMPL_IF>
 
 		_<TMPL_VAR method>: function () {
@@ -40,4 +41,4 @@
 		}<TMPL_UNLESS __last__>,</TMPL_UNLESS>
 		</TMPL_LOOP>
 	});
-})(jQuery, window);
+}(jQuery, window));
