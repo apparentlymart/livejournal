@@ -6165,6 +6165,8 @@ talk.post.comments.noemail=no email
 
 talk.post.create.title=New entry
 
+talk.post.delete.confirm=Are you sure you want to delete this entry?
+
 talk.post.draft.autosave=Draft autosaved
 
 talk.post.draft.restore=Restore draft?
