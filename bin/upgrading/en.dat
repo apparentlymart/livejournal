@@ -6405,6 +6405,8 @@ talk.user=User
 
 talk.userhint.default=igrick
 
+talk.user.error=No such user
+
 talk.user.hint=Example:
 
 talk.user.insert=Insert user
