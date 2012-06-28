@@ -2418,7 +2418,7 @@ sub get_body_class_for_service_pages {
     if ($uri =~ m!^/index\.bml$!) {
         push @classes, "index-page";
     } elsif ($uri =~ m{^/stats/latest\.bml$}) {
-        push @classes, "b-lenta";
+        push @classes, "p-lenta";
     } elsif ($uri =~ m!^/shop(/.*)?$!) {
         push @classes, "shop-page";
     } elsif ($uri =~ m!^/pics(/.*)?$!) {
