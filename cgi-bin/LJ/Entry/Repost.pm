@@ -298,6 +298,16 @@ sub __get_reposters {
     return $reposters;
 }
 
+sub is_repost {
+    my ($class, $u, $itemid) = @_;
+    my $jitemid = int($itemid / 256);
+    
+    my $props = {};
+    LJ::load_log_props2($u, [ $jitemid ], $props);
+    my $item_props = $props->{ $jitemid};
+
+    return !!$item_props->{'repost_link'};
+}
 
 sub get_list {
     my ($class, $entry, $lastrequest) = @_;

@@ -2315,10 +2315,15 @@ sub get_after_item_link {
     my $use_sticky = $opts->{'use_sticky'} && LJ::is_enabled('sticky_entries');
 
     my $itemid = $opts->{'itemid'};
-    my $jumpid = get_itemid_near2( $u,
-                                   $itemid,
-                                   'after',
-                                   { 'skip_sticky' => $use_sticky } );
+
+    my $jumpid;
+    do {
+        $jumpid = get_itemid_near2( $u,
+                                    $itemid,
+                                    'after',
+                                    { 'skip_sticky' => $use_sticky } );
+        $itemid = int($jumpid/256);
+    } while (LJ::Entry::Repost->is_repost($u, $jumpid));
     
     if (!$jumpid) {
         return undef;
@@ -2335,10 +2340,14 @@ sub get_before_item_link {
 
     my $itemid = $opts->{'itemid'};
 
-    my $jumpid = get_itemid_near2( $u,
+    my $jumpid;
+    do {
+        $jumpid = get_itemid_near2( $u,
                                    $itemid,
                                    'before',
                                    { 'skip_sticky' => $use_sticky });
+        $itemid = int($jumpid/256);
+    } while (LJ::Entry::Repost->is_repost($u, $jumpid));
     if (!$jumpid) {
         return undef;
     }
