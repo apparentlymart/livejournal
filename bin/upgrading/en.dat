@@ -6165,8 +6165,6 @@ talk.post.comments.noemail=no email
 
 talk.post.create.title=New entry
 
-talk.post.delete.confirm=Are you sure you want to delete this entry?
-
 talk.post.draft.autosave=Draft autosaved
 
 talk.post.draft.restore=Restore draft?
@@ -6346,15 +6344,39 @@ talk.result.links.view=View the entry
 
 talk.result.success.create=Entry successfuly added. You can view your updated journal <a href="[[href]]">here</a>
 
+talk.result.success.create.extra=Tags added to entry
+
+talk.result.success.create.short=Entry added
+
 talk.result.success.create.delayed=Entry successfuly added. You can view your scheduled entries <a href="[[href]]">here</a>
+
+talk.result.success.create.delayed.extra=Tags added to entry
+
+talk.result.success.create.delayed.short=Entry added
 
 talk.result.success.delete=Delete successful. You can view your updated journal <a href="[[href]]">here</a>
 
+talk.result.success.delete.extra=Entry can be available on google cache
+
+talk.result.success.delete.short=Delete successful
+
 talk.result.success.update=Update successful. You can view your updated journal <a href="[[href]]">here</a>
+
+talk.result.success.update.extra=Tags updated also
+
+talk.result.success.update.short=Update successful
 
 talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>
 
+talk.result.success.update.delayed.extra=Tags updated also
+
+talk.result.success.update.delayed.short=Update successful
+
 talk.result.success.queue=Entry successfuly added to moderation queue. You can view other entries <a href="[[href]]">here</a>
+
+talk.result.success.queue.extra=Tags added to entry. Moderator can remove some
+
+talk.result.success.queue.short=Entry added
 
 talk.result.success.tags=This tags were not added:
 
