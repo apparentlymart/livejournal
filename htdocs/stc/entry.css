@@ -915,6 +915,7 @@ td.tabs {
 	font: 14px/1.3 Arial,sans-serif;
 	}
 	.b-updatepage-switchver-button {
+		overflow: visible;
 		margin: 0;
 		padding: 0;
 		border: 0;
