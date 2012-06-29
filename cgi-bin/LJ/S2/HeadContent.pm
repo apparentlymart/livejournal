@@ -153,17 +153,17 @@ sub _entry_page_head {
         my %meta = %{ $opts->{entry_metadata} };
         $head_content .= qq(<meta property="og:title" name="title" );
         $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'title'} );
+        $head_content .= LJ::ehtml( $meta{'title'} ) || '';
         $head_content .= qq(" />\n);
 
         $head_content .= qq(<meta property="og:description" );
         $head_content .= qq(name="description" content=");
-        $head_content .= LJ::ehtml( $meta{'description'} );
+        $head_content .= LJ::ehtml( $meta{'description'} ) || '';
         $head_content .= qq(" />\n);
 
         $head_content .= qq(<meta property="og:image" );
         $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'image'} );
+        $head_content .= LJ::ehtml( $meta{'image'} ) || '';
         $head_content .= qq( " />\n);
     }
 
