@@ -855,12 +855,14 @@ sub convert_lj_tags_to_links {
     $args{event} =~ s#<lj\-embed[^>]+/>#<a href="$args{embed_url}">View movie.</a>#g;
     while ( $args{event} =~ /<lj\s+user="([^>"]+)"\s*\/?>/g ){
         # follow the documentation - no about communites, openid or syndicated, just user
-        my $user = LJ::load_user($1); 
+        my $username = $1;
+        my $user = LJ::load_user($username); 
+        # $username may be not equal to $name (if $username is not canonical username)
         my $name = $user->username;
         my $html = '<a href="' . $user->profile_url . '" target="_blank"><img src="' 
         . $LJ::IMGPREFIX . '/userinfo.gif?v=17080" alt=""></a><a href="'
         . $user->journal_base . '" target="_blank">' . $name . '</a>';
-        $args{event} =~ s#<lj\s+user="$name"\s*\/?>#$html#g;
+        $args{event} =~ s#<lj\s+user="$username"\s*\/?>#$html#g;
     }
     $args{event} =~ s#</?lj-cut[^>]*>##g;
     
