@@ -4199,11 +4199,13 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 /* Help Link
 ----------------------------------- */
 .b-helplink {
-	display: inline;
+	display: inline-block;
 	position: relative;
+	min-height: 16px;
 	margin: 0 0 0 0.5em;
 	padding: 0 0 0 20px;
 	border: 0;
+	vertical-align: -3px;
 	}
 BODY div .b-helplink:link,
 BODY div .b-helplink:visited,
@@ -5161,3 +5163,11 @@ HTML BODY .i-ljuser {
 				color: #CCC;
 				cursor: default;
 				}
+
+
+
+/* lj-cut preloader */
+.ljcut-link-expanding {
+	padding: 0 20px 0 0;
+	background: url(/img/preloader-s.gif?v=1) no-repeat 100% 60%;
+	}
