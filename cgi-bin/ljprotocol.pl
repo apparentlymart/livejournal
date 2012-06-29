@@ -3912,9 +3912,7 @@ sub getevents {
         my $evt = {};
         $evt->{'itemid'} = $itemid;
 
-        # now my own post, so need to check for suspended prop
-        if ($jposterid != $posterid) {
-            my $entry = LJ::Entry->new_from_row(
+        my $entry = LJ::Entry->new_from_row(
                 'journalid' => $ownerid,
                 'jitemid'   => $itemid,
                 'allowmask' => $mask,
@@ -3924,6 +3922,20 @@ sub getevents {
                 'anum'      => $anum,
             );
 
+        my $content =  { 'original_post_obj' => \$entry,
+                         'journalid'         => \$ownerid,
+                         'itemid'            => \$itemid,
+                         'allowmask'         => \$mask,
+                         'posterid'          => \$jposterid,
+                         'eventtime'         => \$eventtime,
+                         'security'          => \$sec,
+                         'anum'              => \$anum,
+                         'reply_count'       => \$replycount,};
+
+        LJ::Entry::Repost->substitute_content( $entry, $content );
+
+        # now my own post, so need to check for suspended prop
+        if ($jposterid != $posterid) {
             next if($entry->is_suspended_for($u));
         }
 
