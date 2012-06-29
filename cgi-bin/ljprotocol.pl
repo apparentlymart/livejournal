@@ -1726,6 +1726,19 @@ sub login
     $res->{'fullname'} = $uowner->{'name'};
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
+    # Identity info 
+    if ($uowner->is_identity){
+        my $i = $uowner->identity;
+        $res->{'identity_type'}    = $i->pretty_type;
+        $res->{'identity_value'}   = $i->value;
+        $res->{'identity_url'}     = $i->url($uowner);
+        $res->{'identity_display'} = $uowner->display_name;
+    } else {
+        foreach (qw(identity_display identity_url identity_value identity_type)) {
+            $res->{$_} = '';
+        }
+    }
+
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
         eval {
             LJ::Request->notes("clientver", $req->{'clientversion'});
