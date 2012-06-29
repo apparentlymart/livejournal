@@ -310,7 +310,7 @@ sub raw_info {
         $res->{'poster_identity_type'}    = $i->pretty_type;
         $res->{'poster_identity_value'}   = $i->value;
         $res->{'poster_identity_url'}     = $i->url($poster);
-        $res->{'poster_identity_display'} = $msg->other_u->display_name;
+        $res->{'poster_identity_display'} = $poster->display_name;
     }
 
     $res->{from} = $msg->other_u->user;
