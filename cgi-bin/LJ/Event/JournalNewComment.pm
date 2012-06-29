@@ -685,7 +685,16 @@ sub raw_info {
 
     $res->{entry}   = $entry->url;
     $res->{comment} = $comment->url;
-    $res->{poster}  = $comment->poster->user if $comment->poster;
+    if (my $poster = $comment->poster) {
+        $res->{poster}  = $poster->user;
+        if($poster->is_identity){
+            my $i = $poster->identity;
+            $res->{'poster_identity_type'}    = $i->pretty_type;
+            $res->{'poster_identity_value'}   = $i->value;
+            $res->{'poster_identity_url'}     = $i->url($poster);
+            $res->{'poster_identity_display'} = $poster->display_name;
+        }
+    }
     $res->{subject} = $comment->subject_text;
 
     if ($extended){
