@@ -4,15 +4,15 @@
  */
 
 CKEDITOR.editorConfig = function(config) {
-	var ljplugins = ['ljspell', 'livejournal'],
+	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
+
+	var ljplugins = [/*'ljspell', */'livejournal', 'ljcolor'],
 		plugins = [
 			'ajax',
 			'basicstyles',
 			'bidi',
 			'blockquote',
 			'button',
-			'colorbutton',
-			'colordialog',
 			'dialog',
 			'enterkey',
 			'entities',
@@ -39,6 +39,8 @@ CKEDITOR.editorConfig = function(config) {
 	config.autoUpdateElement = false;
 	config.docType = '<!DOCTYPE html>';
 	config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
+
+	config.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
 
 	//config.scayt_autoStartup = true;
 
@@ -70,7 +72,7 @@ CKEDITOR.editorConfig = function(config) {
 			'Italic',
 			'Underline',
 			'Strike',
-			'TextColor',
+			'LJColor',
 			'FontSize',
 			'-',
 			'LJLink',

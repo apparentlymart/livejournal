@@ -547,11 +547,12 @@
 
 			// LJ User Button
 			(function () {
-				var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml';
+				var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
+					button = 'LJUserLink';
 
 				function onData(data, userName, LJUser) {
 					if (data.error) {
-						alert(data.error);
+						LiveJournal.run_hook('incorrect_user');
 						return;
 					}
 
@@ -572,6 +573,7 @@
 
 				}
 
+				var hooked = false;
 				editor.addCommand('LJUserLink', {
 					exec: function(editor) {
 						var userName = '',
@@ -579,32 +581,52 @@
 							LJUser = ljTagsData.LJUserLink.node,
 							currentUserName;
 
+						function checkInsert(username) {
+							parent.HTTPReq.getJSON({
+								data: parent.HTTPReq.formEncoded({
+									username: username
+								}),
+								method: 'POST',
+								url: url,
+								onData: function (data) {
+									onData(data, username, ljTagsData.LJUserLink.node);
+								}
+							});
+						}
+
+						if (!hooked) {
+							var lj = LJUser;
+							LiveJournal.register_hook('buttonResponse', function(type, user) {
+								console.log('got response', arguments);
+								checkInsert(user);
+							});
+							hooked = true;
+						}
+
 						if (LJUser) {
 							CKEDITOR.note && CKEDITOR.note.hide(true);
 							currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
-							userName = prompt(CKLang.UserPrompt, currentUserName);
+
+							console.log(LJUser);
+							LiveJournal.run_hook('rteButton', 'user', jQuery('.cke_button_' + button), {
+								user: currentUserName
+							});
+
+							return;
 						} else if (selection.getType() == 2) {
 							userName = selection.getSelectedText();
 						}
 
 						if (userName == '') {
-							userName = prompt(CKLang.UserPrompt, userName);
+							LiveJournal.run_hook('rteButton', 'user', jQuery('.cke_button_' + button));
+							return;
 						}
 
 						if (!userName || currentUserName == userName) {
 							return;
 						}
 
-						parent.HTTPReq.getJSON({
-							data: parent.HTTPReq.formEncoded({
-								username: userName
-							}),
-							method: 'POST',
-							url: url,
-							onData: function (data) {
-								onData(data, userName, LJUser);
-							}
-						});
+						checkInsert(userName, LJUser);
 					}
 				});
 
