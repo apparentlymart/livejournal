@@ -10903,10 +10903,27 @@ sub get_aggregated_user {
 
     return unless $opts->{attrs} && ref $opts->{attrs};
 
+    my @identity_methods;
+
     foreach my $method (@{$opts->{attrs}}) {
+        if($method =~ /^identity_(.+)/) {
+            push @identity_methods, $1;
+            next;
+        }
+
         my @result = eval {$user->$method};
         ($row->{$method}) = @result > 1 ? \@result : @result;
     }
+
+    return unless (@identity_methods && $user->is_identity);
+
+    my $i = $user->identity;
+
+    foreach my $method (@identity_methods) {
+        my @result = eval {$i->$method};
+        ($row->{'identity_'.$method}) = @result > 1 ? \@result : @result;
+    }
+
 }
 
     

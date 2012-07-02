@@ -5567,7 +5567,8 @@ sub getusersrating {
     my (@users, $selfpromo);
 
     my $user_opts = {
-        attrs => [qw(username display_name profile_url journal_base userpic userhead_url name_raw)],
+        attrs => [qw(username display_name profile_url journal_base userpic userhead_url name_raw 
+                     identity_pretty_type identity_value identity_url )],
     };
 
     foreach my $row (@{$res->{data}}) {
@@ -5585,7 +5586,9 @@ sub getusersrating {
             # user data
             username         => $row->{username},
             identity_display => $row->{display_name},
-            identity_url     => $row->{profile_url},
+            identity_url     => $row->{identity_url},
+            identity_type    => $row->{identity_pretty_type},
+            identity_value   => $row->{identity_value},
             userpic_url      => $row->{userpic} ? $row->{userpic}->url : '',
             journal_url      => $row->{journal_base},
             userhead_url     => $row->{userhead_url},
@@ -5596,7 +5599,7 @@ sub getusersrating {
     if ($req->{getselfpromo}) {
         return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
       
-        my $sp = $res->{selfpromo}->get_template_params()->[0];
+        my $sp = $res->{selfpromo}->get_template_params();
         $sp->{userid} = delete $sp->{journal_id} if  $sp->{journal_id};
         LJ::get_aggregated_user($sp, $user_opts);
 
@@ -5607,7 +5610,9 @@ sub getusersrating {
             # user data
             username         => $sp->{username},
             identity_display => $sp->{display_name},
-            identity_url     => $sp->{profile_url},
+            identity_url     => $sp->{identity_url},
+            identity_type    => $sp->{identity_pretty_type},
+            identity_value   => $sp->{identity_value},
             userpic_url      => $sp->{userpic} ? $sp->{userpic}->url : '',
             journal_url      => $sp->{journal_base},
             userhead_url     => $sp->{userhead_url},
