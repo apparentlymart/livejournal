@@ -301,17 +301,18 @@
 				return;
 			}
 
-			var current = new Date();
+			var current = new Date(),
+				toSet = new Date(date);
 			current.setMilliseconds(0);
 			current.setSeconds(0);
 			current.setMinutes(0);
 			current.setHours(0);
-			date.setMilliseconds(0);
-			date.setSeconds(0);
-			date.setMinutes(0);
-			date.setHours(0);
+			toSet.setMilliseconds(0);
+			toSet.setSeconds(0);
+			toSet.setMinutes(0);
+			toSet.setHours(0);
 
-			var delta = +date - (+new Date());
+			var delta = +toSet - (+new Date());
 			this._setTime(date);
 
 			if (delta > 0) {
