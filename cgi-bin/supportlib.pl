@@ -535,13 +535,14 @@ sub file_request
 
     if (@$errors) { return 0; }
 
-    my ($lang, $username, $ljuser);
-    if ($userid) {
-         $lang     = $u->prop('browselang') ||
-                     $o->{'language'} ||
-                     $LJ::DEFAULT_LANG;
-         $username = $u->{user};
-         $ljuser   = $u->ljuser_display;
+    my $lang = $o->{'language'} || $LJ::DEFAULT_LANG;
+    my ($username, $ljuser);
+    if ($u) {
+        if ($u->prop('browselang')) {
+            $lang  = $u->prop('browselang');
+        }
+        $username = $u->display_username;
+        $ljuser   = $u->ljuser_display;
     }
 
     if (LJ::is_enabled("support_request_language")) {
@@ -649,6 +650,7 @@ sub file_request
             return $text;
         };
 
+        my $requester = LJ::Lang::get_text ($lang,'notification.support.requester');
         my $subject = LJ::Lang::get_text (
                         $lang,
                         'notification.support.submit.request.subject',
@@ -662,7 +664,7 @@ sub file_request
                         {
                             username    => $username ||
                                            $o->{'reqname'} ||
-                                           'User',
+                                           $requester,
                             subject     => $o->{'subject'},
                             request_id  => $spid,
                             urlauth     => $urlauth,
@@ -679,7 +681,7 @@ sub file_request
                                 {
                                     username    => $ljuser ||
                                                    $o->{'reqname'} ||
-                                                   'User',
+                                                   $requester,
                                     subject     => $o->{'subject'},
                                     request_id  => $spid,
                                     urlauth     => $urlauth,
@@ -903,18 +905,19 @@ sub mail_response_to_user
 
     my $res = load_response($splid);
 
-    my $email;
+    my ($u, $email, $html, $email_format);
     if ($sp->{'reqtype'} eq "email") {
         $email = $sp->{'reqemail'};
     } else {
-        my $u = LJ::load_userid($sp->{'requserid'});
+        $u = LJ::load_userid($sp->{'requserid'});
         $email = $u->email_raw || $sp->{'reqemail'};
+        $html  = $u->receives_html_emails;
     }
 
-    my $spid = $sp->{'spid'}+0;
+    $email_format = $html ? 'html' : 'plain';
+    my $spid  = $sp->{'spid'}+0;
     my $faqid = $res->{'faqid'}+0;
-
-    my $type = $res->{'type'};
+    my $type  = $res->{'type'};
 
     # don't mail internal comments (user shouldn't see) or
     # screened responses (have to wait for somebody to approve it first)
@@ -928,41 +931,57 @@ sub mail_response_to_user
     # also, don't send them their own replies:
     return if ($sp->{'requserid'} == $res->{'userid'});
 
-    my $body = "";
-    my $dbh = LJ::get_db_writer();
-    my $what = $type eq "answer" ? "an answer to" : "a comment on";
-    $body .= "Below is $what your support question regarding \"$sp->{'subject'}\"\n";
-
-    my $miniauth = mini_auth($sp);
-    $body .= "($LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth).\n\n";
-
-    $body .= "="x70 . "\n\n";
-    if ($faqid) {
-        # default language is used here deliberately because the emails
-        # are not yet English-stripped. English-stripping them is a TODO though.
-        my $faq = LJ::Faq->load($faqid);
-        $faq->render_in_place;
-        my $faqname = $faq->question_raw;
-
-        if ($faqname) {
-            $body .= "FAQ REFERENCE: $faqname\n";
-            $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid&view=full";
-            $body .= "\n\n";
+    my $lang = $sp->{'language'} || $LJ::DEFAULT_LANG;
+    my ($username, $ljuser);
+    if ($u) {
+        if ($u->prop('browselang')) {
+            $lang  = $u->prop('browselang');
         }
+        $username = $u->display_username;
+        $ljuser   = $u->ljuser_display;
     }
 
-    $body .= "$res->{'message'}\n\n";
+    my $dbh = LJ::get_db_writer();
+    my $miniauth = mini_auth($sp);
+    my $urlauth  = "$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth";
 
+    # preparing [[faqref]] param
+    my $faqref='';
+    if ($faqid) {
+        my $faq = LJ::Faq->load($faqid, lang => $lang);
+        $faq->render_in_place;
+        my $faqname = $faq->question_raw || '';
+        $faqref = LJ::Lang::get_text (
+                    $lang,
+                    "notification.support.reply.request.faqref." . $email_format,
+                    undef,
+                    {
+                        faqname =>  $faqname,
+                        faqurl  =>  "$LJ::SITEROOT/support/faqbrowse.bml?" .
+                                    "faqid=$faqid&view=full",
+                    }
+                  );
+    }
+
+    #preparting [[closeable]] param
+    my $closeable='';
     if ($sp->{_cat}->{user_closeable}) {
-        $body .= "Did this answer your question?\nYES:\n";
-        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
-        $body .= ";$splid" if $type eq "answer";
-        $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
+        my $closeurl = "$LJ::SITEROOT/support/act.bml?" .
+                       "close;$spid;$sp->{'authcode'}";
+        $closeurl .= ";$splid" if $type eq "answer";
+        $closeable = LJ::Lang::get_text (
+                    $lang,
+                    "notification.support.reply.request.closeable." . $email_format,
+                    undef,
+                    {
+                        closeurl => $closeurl,
+                        urlauth  => $urlauth,
+                    }
+                  );
     }
-
-    $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
 
     my $fromemail;
+    my $bogus_note = '';
     if ($sp->{_cat}->{'replyaddress'}) {
         my $miniauth = mini_auth($sp);
         $fromemail = $sp->{_cat}->{'replyaddress'};
@@ -971,17 +990,84 @@ sub mail_response_to_user
         $fromemail =~ s/\@/$rep/;
     } else {
         $fromemail = $LJ::BOGUS_EMAIL;
-        $body .= "\n\nReplies to this address are not monitored. To reply to your request, use the links above.";
+        $bogus_note = LJ::Lang::get_text (
+                        $lang,
+                        'notification.support.bogus_email.note'
+                      );
     }
 
-    LJ::send_mail({
-        'to' => $email,
-        'from' => $fromemail,
-        'fromname' => "$LJ::SITENAME Support",
-        'charset' => 'utf-8',
-        'subject' => "Re: $sp->{'subject'}",
-        'body' => $body
+    my $requester = LJ::Lang::get_text ($lang,'notification.support.requester');
+    my $reply_type = LJ::Lang::get_text ( $lang, "support.request." . $type );
+    my $subject = LJ::Lang::get_text (
+                    $lang,
+                    'notification.support.reply.request.subject',
+                    undef,
+                    {
+                        subject     => $sp->{'subject'},
+                        request_id  => $spid
+                    }
+                  );
+    my $body = LJ::Lang::get_text (
+                        $lang,
+                        'notification.support.reply.request.body.plain',
+                        undef,
+                        {
+                            username    => $username ||
+                                           $sp->{'reqname'} ||
+                                           $requester,
+                            reply_type  => $reply_type,
+                            subject     => $sp->{'subject'},
+                            request_id  => $spid,
+                            urlauth     => $urlauth,
+                            faqref      => $faqref,
+                            reply_text  => $res->{'message'},
+                            closeable   => $closeable,
+                            sitename    => $LJ::SITENAMESHORT,
+                            siteroot    => $LJ::SITEROOT,
+                            bogus_note  => $bogus_note,
+                        }
+                );
+    if ($html) {
+        my $html_body = LJ::Lang::get_text (
+                            $lang,
+                            'notification.support.reply.request.body.html',
+                            undef,
+                            {
+                                username    => $ljuser ||
+                                               $sp->{'reqname'} ||
+                                               $requester,
+                                reply_type  => $reply_type,
+                                subject     => $sp->{'subject'},
+                                request_id  => $spid,
+                                urlauth     => $urlauth,
+                                faqref      => $faqref,
+                                reply_text  => LJ::html_newlines(
+                                                  LJ::ehtml($res->{'message'})),
+                                closeable   => $closeable,
+                                sitename    => $LJ::SITENAMESHORT,
+                                siteroot    => $LJ::SITEROOT,
+                                bogus_note  => $bogus_note,
+                            }
+                        );
+        LJ::send_mail({
+            to          => $email,
+            from        => $fromemail,
+            fromname    => "$LJ::SITENAMESHORT Support",
+            charset     => 'utf-8',
+            subject     => $subject,
+            body        => $body,
+            html        => $html_body,
         });
+    } else {
+        LJ::send_mail({
+            to          => $email,
+            from        => $fromemail,
+            fromname    => "$LJ::SITENAMESHORT Support",
+            charset     => 'utf-8',
+            subject     => $subject,
+            body        => $body,
+        });
+    }
 
     if ($type eq "answer") {
         $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
