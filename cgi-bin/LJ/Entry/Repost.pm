@@ -72,11 +72,15 @@ sub __create_repost_record {
 
     my $journalid = $u->userid;
 
-    $u->do('INSERT INTO repost2(journalid,
-                                jitemid,
-                                reposterid,
-                                reposted_jitemid,
-                                repost_time)  VALUES(?,?,?,?, NOW())',
+    my $query = 'INSERT INTO repost2(journalid,
+                                    jitemid,
+                                    reposterid,
+                                    reposted_jitemid';
+    $query .= LJ::is_enabled('repost2_with_time') ? 
+                            ',repost_time) VALUES(?,?,?,?,NOW())' :
+                            ') VALUES(?,?,?,?)'; 
+                                    
+    $u->do( $query,
             undef,
             $u->userid,
             $itemid,
@@ -231,12 +235,11 @@ sub __clear_reposters_list {
     my $subkey = "$journalid:$jitemid";
     my $memcached_key_list = "reposters_keys_list:$subkey";
 
-    my ($keys_list) = LJ::MemCache::get($memcached_key_list);
-    if ($keys_list) {
+    my ($keys_list) = LJ::MemCache::get($memcached_key_list) ;
+    if (length $keys_list) {
         my @keys = split(/:/, $keys_list);
         foreach my $key (@keys) {
             my $memcache_key = "reposters_list_chunk:$subkey:$key";
-
             LJ::MemCache::delete($memcache_key);
         }
     }
@@ -253,7 +256,7 @@ sub __put_reposters_list {
     if ($lastrequest) {
         LJ::MemCache::append($memcache_keys_list,":$lastrequest");
     } else {
-        LJ::MemCache::add($memcache_keys_list, "$lastrequest", REPOST_KEYS_EXPIRING);
+        LJ::MemCache::set($memcache_keys_list, "$lastrequest", REPOST_KEYS_EXPIRING);
     }
     
     my $serialized = LJ::JSON->to_json( $data );
@@ -267,6 +270,7 @@ sub __get_reposters_list {
 
     my $data;
     my $reposters = LJ::MemCache::get($memcache_key);
+
     if ($reposters) {
         eval {
             $data = LJ::JSON->from_json($reposters);
@@ -286,11 +290,14 @@ sub __get_reposters {
         or die "get cluster for journal failed";
 
     my $final_limit = REPOST_USERS_LIST_LIMIT + 1;
-    my $reposters = $dbcr->selectcol_arrayref( 'SELECT reposterid ' .
-                                               'FROM repost2 ' .
-                                               'WHERE journalid = ? AND jitemid = ? ' . 
-                                               'ORDER BY repost_time ' .
-                                               "LIMIT $lastrequest, $final_limit",
+    my $query_reposters = 'SELECT reposterid ' .
+                          'FROM repost2 ' .
+                          'WHERE journalid = ? AND jitemid = ? ';
+
+    $query_reposters .=  LJ::is_enabled('repost2_with_time') ? 'ORDER BY repost_time ' :  '';
+    $query_reposters .= "LIMIT $lastrequest, $final_limit";
+
+    my $reposters = $dbcr->selectcol_arrayref( $query_reposters,
                                                undef,
                                                $u->userid,
                                                $jitemid,);
