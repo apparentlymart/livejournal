@@ -71,13 +71,13 @@ sub __create_repost_record {
     my ($u, $itemid, $repost_journalid, $repost_itemid) = @_;
 
     my $journalid = $u->userid;
-
+    my $time  = time();
     my $query = 'INSERT INTO repost2(journalid,
                                     jitemid,
                                     reposterid,
                                     reposted_jitemid';
     $query .= LJ::is_enabled('repost2_with_time') ? 
-                            ',repost_time) VALUES(?,?,?,?,NOW())' :
+                            ',repost_time) VALUES(?,?,?,?,?)' :
                             ') VALUES(?,?,?,?)'; 
                                     
     $u->do( $query,
@@ -85,7 +85,8 @@ sub __create_repost_record {
             $u->userid,
             $itemid,
             $repost_journalid,
-            $repost_itemid, );
+            $repost_itemid,
+            $time );
 
     my $memcache_key_count = "reposted_count:$journalid:$itemid";
     my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$repost_journalid";
@@ -236,7 +237,7 @@ sub __clear_reposters_list {
     my $memcached_key_list = "reposters_keys_list:$subkey";
 
     my ($keys_list) = LJ::MemCache::get($memcached_key_list) ;
-    if (length $keys_list) {
+    if (defined $keys_list) {
         my @keys = split(/:/, $keys_list);
         foreach my $key (@keys) {
             my $memcache_key = "reposters_list_chunk:$subkey:$key";
