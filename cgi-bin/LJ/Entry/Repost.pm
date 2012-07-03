@@ -459,7 +459,7 @@ sub create {
 }
 
 sub substitute_content {
-    my ($class, $entry_obj, $opts) = @_;
+    my ($class, $entry_obj, $opts, $props) = @_;
 
     my $remote = LJ::get_remote();
     my $original_entry_obj = $entry_obj->original_post;
@@ -563,51 +563,46 @@ sub substitute_content {
         ${$opts->{'eventtime'}} = $entry_obj->eventtime_mysql;
     }
 
-    if ($opts->{'event_raw'}) {
-        my $text_var =  LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' :
-                                                                    'entry.reference.journal.guest';
-
-        my $event_text = $original_entry_obj->event_raw;
-        my $event =  LJ::Lang::ml($text_var,
-                                    { 'author'       => LJ::ljuser2($original_entry_obj->poster),
-                                      'reposter'     => LJ::ljuser2($entry_obj->poster),
-                                      'datetime'     => $entry_obj->eventtime_mysql,
-                                      'text'         => $event_text, });
-
-        ${$opts->{'event_raw'}} = $event;
-    }
-
     if ($opts->{'event'}) {
-        my $text_var =  LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' : 
-                                                                    'entry.reference.journal.guest';
-
         my $event_text = $original_entry_obj->event_raw;
-        my $event =  LJ::Lang::ml($text_var,  
-                                    { 'author'       => LJ::ljuser2($original_entry_obj->poster),
-                                      'reposter'     => LJ::ljuser2($entry_obj->poster),
-                                      'datetime'     => $entry_obj->eventtime_mysql,
-                                      'text'         => $event_text, });
 
-        ${$opts->{'event'}} = $event;
+        if ($opts->{use_repost_signature}) { 
+            my $text_var =  LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' : 
+                                                                        'entry.reference.journal.guest';
+    
+            my $event =  LJ::Lang::ml($text_var,  
+                                        { 'author'       => LJ::ljuser2($original_entry_obj->poster),
+                                          'reposter'     => LJ::ljuser2($entry_obj->poster),
+                                          'datetime'     => $entry_obj->eventtime_mysql,
+                                          'text'         => $event_text, });
+            ${$opts->{'event'}} = $event;
+        } else {
+            ${$opts->{'event'}} = $event_text;
+        }
     }
 
     if ($opts->{'event_friend'}) {
         my $event_text = $original_entry_obj->event_raw;
-        my $journal = $original_entry_obj->journal;
-        
-        my $text_var = $journal->is_community ? 'entry.reference.friends.community' :
-                                                'entry.reference.friends.journal';
 
-        $text_var .= LJ::u_equals($remote, $entry_obj->poster) ? '.owner' : '.guest';
+        if ($opts->{use_repost_signature}) {
+            my $journal = $original_entry_obj->journal;
+            
+            my $text_var = $journal->is_community ? 'entry.reference.friends.community' :
+                                                    'entry.reference.friends.journal';
 
-        my $event = LJ::Lang::ml($text_var, 
-                                   { 'author'           => LJ::ljuser2($original_entry_obj->poster),
-                                     'communityname'    => LJ::ljuser2($original_entry_obj->journal),
-                                     'reposter'         => LJ::ljuser2($entry_obj->poster),
-                                     'datetime'         => $entry_obj->eventtime_mysql,
-                                     'text'             => $event_text, });
+            $text_var .= LJ::u_equals($remote, $entry_obj->poster) ? '.owner' : '.guest';
+    
+            my $event = LJ::Lang::ml($text_var, 
+                                       { 'author'           => LJ::ljuser2($original_entry_obj->poster),
+                                         'communityname'    => LJ::ljuser2($original_entry_obj->journal),
+                                         'reposter'         => LJ::ljuser2($entry_obj->poster),
+                                         'datetime'         => $entry_obj->eventtime_mysql,
+                                         'text'             => $event_text, });
 
-        ${$opts->{'event_friend'}} = $event;
+            ${$opts->{'event_friend'}} = $event;
+        } else {
+            ${$opts->{'event_friend'}} = $event_text;
+        }
     }
 
     if ($opts->{'subject_repost'}) {

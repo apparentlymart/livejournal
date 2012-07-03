@@ -118,6 +118,8 @@ sub DayPage
     my $replace_video = $remote ? $remote->opt_embedplaceholders : 0;
     my $ljcut_disable = $remote ? $remote->{'opt_ljcut_disable_friends'} : undef;
 
+    my $ctx = $opts->{'ctx'};
+
   ENTRY:
     foreach my $item (@items)
     {
@@ -150,13 +152,16 @@ sub DayPage
                          'posterid'          => \$posterid,
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
-                         'event_raw'         => \$text,
+                         'event'             => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
                          'userlite'          => \$lite_journalu,
                          'removed'           => \$removed, };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        my $repost_props = { 'use_repost_signature' => !$ctx->[S2::PROPS]->{'repost_aware'},
+                           };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed && !LJ::u_equals($u, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
                                                                 'viewsome' => $viewsome});
@@ -261,7 +266,7 @@ sub DayPage
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
-            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+            $text .= LJ::S2::get_tags_text($ctx, \@taglist);
         }
 
         if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {

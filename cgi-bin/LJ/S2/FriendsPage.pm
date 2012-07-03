@@ -71,7 +71,8 @@ sub FriendsPage
                         confirm.bubble.no/);
     }
 
-    my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
+    my $ctx = $opts->{'ctx'};
+    my $itemshow = S2::get_property_value($ctx, "page_friends_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
 
@@ -283,7 +284,10 @@ sub FriendsPage
                          'removed'           => \$removed,
                          'reply_count'       => \$replycount, };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        my $repost_props = { 'use_repost_signature' => !$ctx->[S2::PROPS]->{'repost_aware'},
+                             };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed;
             next ENTRY unless $entry_obj->visible_to($remote);
 
@@ -403,7 +407,7 @@ sub FriendsPage
         my $picid = 0;
         my $picu = undef;
 
-        if ($friendid != $posterid && S2::get_property_value($opts->{ctx}, 'use_shared_pic')) {
+        if ($friendid != $posterid && S2::get_property_value($ctx, 'use_shared_pic')) {
             # using the community, the user wants to see shared pictures
             $picu = $friends{$friendid};
 
@@ -450,7 +454,7 @@ sub FriendsPage
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
-            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+            $text .= LJ::S2::get_tags_text($ctx, \@taglist);
         }
 
         if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {

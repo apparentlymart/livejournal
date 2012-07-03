@@ -2074,7 +2074,11 @@ property string text_comments_id {
 }
 set text_comments_id = "comments";
 
-
+property bool repost_aware { 
+    des = "When enabled, style is responsible for show reposter name. When disabled, infomration about reposter is  automatically inserted into entry bodies.";
+    noui = 1; 
+} 
+set tags_aware = false; 
 
 ###[ global function implementations ]
 

@@ -69,8 +69,9 @@ sub RecentPage
         $opts->{'badargs'} = 1;
         return 1;
     }
-    
-    my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
+
+    my $ctx = $opts->{'ctx'}; 
+    my $itemshow = S2::get_property_value($ctx, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50 && !$LJ::S2_TRUSTED{ $u->{'userid'} } ) { $itemshow = 50; }
 
@@ -183,13 +184,16 @@ sub RecentPage
                          'posterid'          => \$posterid,
                          'security'          => \$security,
                          'allowmask'         => \$allowmask,
-                         'event_raw'         => \$text,
+                         'event'             => \$text,
                          'subject'           => \$subject,
                          'reply_count'       => \$replycount,
                          'removed'           => \$removed,
                          'userlite'          => \$lite_journalu, };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        my $repost_props = { 'use_repost_signature' => !$ctx->[S2::PROPS]->{'repost_aware'},
+                             };
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed && !LJ::u_equals($u, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall,
                                                                 'viewsome' => $viewsome});
@@ -268,7 +272,7 @@ sub RecentPage
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
-            $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
+            $text .= LJ::S2::get_tags_text($ctx, \@taglist);
         }
 
         my $permalink = $removed ? '' : $entry_obj->permalink_url;
