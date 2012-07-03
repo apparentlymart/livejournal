@@ -338,7 +338,7 @@ sub get_list {
                                         $jitemid,
                                         $lastrequest );
 
-    my $reposters_info = { users => {} };
+    my $reposters_info = { users => [] };
     my $users = $reposters_info->{'users'};
 
     my $reposters_count = scalar @$repostersids;
@@ -351,8 +351,7 @@ sub get_list {
 
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
-
-        $users->{$u->user} = { 'url' => $u->journal_base, };
+        push @$users, { user => $u->user,  'url' => $u->journal_base, };
     }  
  
     $reposters_info->{'last'}   = $lastrequest + 1;
