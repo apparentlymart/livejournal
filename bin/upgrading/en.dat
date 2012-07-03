@@ -4836,6 +4836,10 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+rating.timeswitcher.all=All time
+
+rating.timeswitcher.day=For 24 hour
+
 repost.button.label=Repost
 
 repost.button.title=Repost me
