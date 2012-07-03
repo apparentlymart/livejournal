@@ -1686,7 +1686,7 @@
          LJ::is_enabled('userplaylist') &&
          ($u->is_personal || $u->is_identity) &&
          (( $remote && $remote->can_manage($u) && LJ::Setting::Music->should_show_playlist($u) ) ||
-          ( $remote && ! $remote->can_manage($u) && LJ::Setting::Music::Trava->good_ip() && $playlist_id ))
+          $playlist_id)
        ) {
         my $res = '';
 
