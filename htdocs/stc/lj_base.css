@@ -3847,6 +3847,7 @@ A.lj-button-link:active {
 	.b-reposted-popup .b-reposted-popup-content {
 		overflow-y: auto;
 		max-height: 66px;
+		min-width: 300px;
 		margin: 0 -14px 6px 0;
 		padding: 4px 0 6px;
 		border-top: 1px solid #D6D6D6;
