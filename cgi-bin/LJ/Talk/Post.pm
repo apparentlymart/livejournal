@@ -581,7 +581,7 @@ sub require_captcha_test {
 
     ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/" 
     ##             we shouldn't display captcha for him
-            
+ 
     return if $commenter && LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $commenter);
     
     return if $commenter && $commenter->prop('in_whitelist_for_spam');
@@ -674,6 +674,7 @@ sub require_captcha_test {
         # or if it's obviously spam
         return 1 if $body =~ /\s*message\s*/is;
     }
+    return 0;
 }
 
 
