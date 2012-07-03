@@ -566,7 +566,7 @@ sub substitute_content {
     if ($opts->{'event'}) {
         my $event_text = $original_entry_obj->event_raw;
 
-        if ($opts->{use_repost_signature}) { 
+        if ($props->{use_repost_signature}) { 
             my $text_var =  LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' : 
                                                                         'entry.reference.journal.guest';
     
@@ -584,7 +584,7 @@ sub substitute_content {
     if ($opts->{'event_friend'}) {
         my $event_text = $original_entry_obj->event_raw;
 
-        if ($opts->{use_repost_signature}) {
+        if ($props->{use_repost_signature}) {
             my $journal = $original_entry_obj->journal;
             
             my $text_var = $journal->is_community ? 'entry.reference.friends.community' :
