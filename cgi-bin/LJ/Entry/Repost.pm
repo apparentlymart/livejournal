@@ -141,25 +141,10 @@ sub __create_post {
     my $res = LJ::Protocol::do_request("postevent", \%req, \$err, $flags);
 
     $flags->{u} = undef;
-    my $fail = !defined $res->{itemid} && $res->{message};
-    if ($fail) {
-         warn "repost_create: 1, request " . LJ::compact_dumper(%req);
-              " flags: " . LJ::compact_dumper($flags) .
-              " result: " . LJ::compact_dumper($res) .
-              " error: $err" if $err;
-
-         $$error = LJ::API::Error->make_error( $res->{message},($err || -10000) );
+    if ($err) {
+         my ($code, $text) = split(/:/, $err);
+         $$error = LJ::API::Error->make_error( $text, -$code );
          return;
-    }
-
-    if ($err) {    
-        warn "repost_create: 2, request " . LJ::compact_dumper(%req) .
-            " flags: " . LJ::compact_dumper($flags) .
-            " result: " . LJ::compact_dumper($res) .
-            " error: $err";
-
-        $$error = LJ::API::Error->get_error('create_entry_failed');
-        return;
     }
 
     return LJ::Entry->new($u, jitemid => $res->{'itemid'} );
