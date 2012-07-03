@@ -243,6 +243,8 @@ propgroup customcss {
 
 set tags_aware = true;
 
+set repost_aware = true;
+
 function prop_init () {
     if ($*control_strip_bgcolor.as_string == "") {
         $*control_strip_bgcolor = $*main_bgcolor;

@@ -349,6 +349,8 @@ set date_daypage_format = "%%month%% %%dayord%%, %%yyyy%%";
 
 set tags_aware = true;
 
+set repost_aware = true;
+
 function prop_init () {
     if ($*control_strip_bgcolor.as_string == "") {
         $*control_strip_bgcolor = $*entry_back;

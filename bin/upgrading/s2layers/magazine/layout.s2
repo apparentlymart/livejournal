@@ -231,6 +231,8 @@ propgroup customcss {
 
 set tags_aware = true;
 
+set repost_aware = true;
+
 function prop_init() {
     if ($*content_width > 100) {
         $*content_width = 100;

@@ -78,6 +78,7 @@ propgroup presentation {
   set linklist_support       = true;
   set external_stylesheet    = true;
   set tags_aware             = true;
+  set repost_aware           = true;
   set counter_code           = "";
 }
 

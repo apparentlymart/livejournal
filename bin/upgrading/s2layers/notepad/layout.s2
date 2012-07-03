@@ -198,6 +198,8 @@ propgroup customcss {
   property use custom_css;
 }
 
+set repost_aware = true;
+
 function prop_init()
 {
     if ($*imguri == "") { $*imguri = "$*SITEROOT/img/style/notepad"; }
