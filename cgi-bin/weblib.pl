@@ -1520,6 +1520,8 @@ sub res_includes {
         my $remote_is_maintainer = ($remote && $remote->can_manage($ju)) ? 1 : 0;
 
         my $default_copyright = $remote ? ($remote->prop("default_copyright") || 'P') : 'P';
+        my $locale = LJ::Lang::current_language();
+        $locale = $locale eq 'debug'? $locale : LJ::lang_to_locale($locale);
 
         my $ljentry = LJ::Request->notes('ljentry') || ''; # url
         my %site = (
@@ -1544,6 +1546,7 @@ sub res_includes {
                 remoteJournalBase        => $remote && $remote->journal_base,
                 remoteUser               => $remote && $remote->user,
                 remoteLocale             => LJ::lang_to_locale( LJ::Lang::get_remote_lang() ),
+                locale                   => $locale,
                 pics_production          => LJ::is_enabled('pics_production'),
                 v                        => stc_0_modtime($now),
         );
