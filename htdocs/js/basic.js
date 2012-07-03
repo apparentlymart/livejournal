@@ -845,25 +845,158 @@ LJ.UI.mixin = function(name, module) {
 	};
 }());
 
+(function() {
 
-LJ.ml = function(key, dict, def) {
-	var str = '', tmpl;
-	dict = dict || {};
+	var locale = (LJ.pageVar('locale', true) || 'en_LJ').substr(0, 2),
+		//All handlers were directly copied from LJ::Lang code
+		handlers = {
+			be: plural_form_ru,
+			en: plural_form_en,
+			fr: plural_form_fr,
+			hu: plural_form_singular,
+			is: plural_form_is,
+			ja: plural_form_singular,
+			lt: plural_form_lt,
+			lv: plural_form_lv,
+			pl: plural_form_pl,
+			pt: plural_form_fr,
+			ru: plural_form_ru,
+			tr: plural_form_singular,
+			uk: plural_form_ru
+		};
 
-	if (Site.ml_text.hasOwnProperty(key)) {
-		str = Site.ml_text[key];
-
-		for (tmpl in dict) {
-			if (dict.hasOwnProperty(tmpl)) {
-				str = str.replace('%' + tmpl + '%', dict[tmpl]);
-			}
-		}
-	} else {
-		str = def || '[' + key + ']';
+// English, Danish, German, Norwegian, Swedish, Estonian, Finnish, Greek,
+// Hebrew, Italian, Spanish, Esperanto
+function plural_form_en(count) {
+	if (count == 1) {
+		return 0;
 	}
 
-	return str;
-};
+	return 1;
+}
+
+// French, Portugese, Brazilian Portuguese
+function plural_form_fr(count) {
+	if (count > 1) {
+		return 1;
+	}
+
+	return 0;
+}
+
+// Croatian, Czech, Russian, Slovak, Ukrainian, Belarusian
+function plural_form_ru(count) {
+	if (typeof count === 'undefined') { return 0; }
+
+	if (count % 10 == 1 && count % 100 != 11) {
+		return 0;
+	}
+
+	if ((count % 10 >= 2 && count % 10 <= 4) &&
+		(count % 100 < 10 || count % 100 >= 20)) {
+		return 1;
+	}
+
+	return 2;
+}
+
+// Polish
+function plural_form_pl(count) {
+	if (count === 1) {
+		return 0;
+	}
+
+	if ((count % 10 >= 2 && count % 10 <= 4) &&
+		(count % 100 < 10 || count % 100 >= 20)) {
+		return 1;
+	}
+
+	return 2;
+}
+
+// Lithuanian
+function plural_form_lt(count) {
+	if (count % 10 == 1 && count % 100 != 11) {
+		return 0;
+	}
+
+	if ((count % 10 >= 2) &&
+		(count % 100 < 10 || count % 100 >= 20)) {
+		return 1;
+	}
+
+	return 2;
+}
+
+// Hungarian, Japanese, Korean (not supported), Turkish
+function plural_form_singular(count) {
+	return 0;
+}
+
+// Latvian
+function plural_form_lv(count) {
+	if (count % 10 === 1 && count % 100 !== 11) {
+		return 0;
+	}
+
+	if (count != 0) {
+		return 1;
+	}
+
+	return 2;
+}
+
+// Icelandic
+function plural_form_is(count) {
+	if (count % 10 === 1 && count % 100 !== 11) {
+		return 0;
+	}
+	return 1;
+}
+
+	function pluralize(num, forms) {
+		var handler = handlers.hasOwnProperty(locale) ? handlers[locale] : handlers['en'],
+			form = handler(num);
+		return forms[form] ? forms[form] : '';
+	}
+
+	/**
+	 * Get localized string.
+	 *
+	 * @param {string} key A key to search.
+	 * @param {Object} dict A hash to search values for substitution.
+	 * @param {string=} def A default value to return if the string was not returned from the server.
+	 *
+	 * @return {string} Localized value for string.
+	 */
+	LJ.ml = function(key, dict, def) {
+		var str = '', tmpl;
+		dict = dict || {};
+
+		if (Site.ml_text.hasOwnProperty(key)) {
+			str = Site.ml_text[key];
+
+			str = str.replace( /\[\[\?([\w-]+)\|(.*)\]\]/g, function(str, numstr, forms) {
+				if (!dict.hasOwnProperty(numstr)) { return str; }
+
+				var num = parseInt(dict[numstr], 10);
+				return pluralize(num, forms.split('|'));
+			});
+
+			for (tmpl in dict) {
+				if (dict.hasOwnProperty(tmpl)) {
+					str = str.replace('%' + tmpl + '%', dict[tmpl]);
+					str = str.replace('[[' + tmpl + ']]', dict[tmpl]);
+				}
+			}
+		} else {
+			str = def || '[' + key + ']';
+		}
+
+		return str;
+	};
+
+}());
 
 /**
  * @namespace LJ.Support The namespace should contain variables to check whether some funcionality is availible in the current browser.
