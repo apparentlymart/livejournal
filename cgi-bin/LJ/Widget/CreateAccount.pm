@@ -657,4 +657,6 @@ sub handle_post {
     return %from_post;
 }
 
+sub need_form_auth { 0 }
+
 1;

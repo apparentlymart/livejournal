@@ -30,6 +30,8 @@ sub render_body {
 
 sub collapsable { } ## true for collapsable widget
 
+sub need_form_auth { 1 }
+
 sub start_form {
     my $class = shift;
     my %opts = @_;
@@ -44,7 +46,10 @@ sub start_form {
     }
 
     my $ret = "<form method='POST'$eopts>";
-    $ret .= LJ::form_auth();
+
+    if ( $class->need_form_auth ) {
+        $ret .= LJ::form_auth();
+    }
 
     if ($class->authas) {
         my $u = $opts{authas} || $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
@@ -287,12 +292,24 @@ sub handle_post {
     # is this widget disabled?
     return () if $class->is_disabled;
 
-    # require form auth for widget submissions
     my $errorsref = \@BMLCodeBlock::errors;
 
-    unless ( $LJ::WIDGET_NO_AUTH_CHECK || LJ::check_form_auth($post->{lj_form_auth}) ) {
-        push @$errorsref, BML::ml('error.invalidform');
-        return;
+    my $need_form_auth;
+    foreach my $widget_class (@widgets) {
+        my $subclass = $widget_class;
+        unless ( $subclass =~ /^LJ::Widget::/ ) {
+            $subclass = "LJ::Widget::$subclass";
+        }
+
+        $need_form_auth ||= $subclass->need_form_auth;
+    }
+
+    if ( $need_form_auth && ! $LJ::WIDGET_NO_AUTH_CHECK ) {
+        # require form auth for widget submissions
+        unless ( LJ::check_form_auth( $post->{'lj_form_auth'} ) ) {
+            push @$errorsref, BML::ml('error.invalidform');
+            return;
+        }
     }
 
     my $per_widget = $class->post_fields_by_widget(
