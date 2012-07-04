@@ -282,11 +282,11 @@ LJ.throttle = function(func, delay) {
 		if (timer) { return; }
 
 		return callFunc();
-	}
+	};
 };
 
 LJ.console = function() {
-	var consoleExists = function() { return 'console' in window },
+	var consoleExists = function() { return 'console' in window; },
 		runIfExists = function(method, args) {
 			if (consoleExists() && console[method]) {
 				console[method].apply(console, args);
@@ -331,7 +331,7 @@ LJ.console = function() {
 		if (!runIfExists('time', arguments) && !timers[label]) {
 			timers[label] = +new Date();
 		}
-	}
+	};
 
 	consoleShim.timeEnd = function(label) {
 		if (!runIfExists('timeEnd', arguments) && timers[label]) {
@@ -339,7 +339,7 @@ LJ.console = function() {
 			consoleShim.log(label + ': ' + (now - timers[label]) + 'ms');
 			delete timers[label];
 		}
-	}
+	};
 
 	return consoleShim;
 }();
@@ -361,8 +361,7 @@ LJ.defineConst = function(name, value) {
 	} else {
 		LJ._const[name] = value;
 	}
-
-}
+};
 
 /**
  * Get the value of the constant.
@@ -374,7 +373,7 @@ LJ.getConst = function(name) {
 	name = name.toUpperCase().replace(/\s+/g, '_');
 
 	return (LJ._const.hasOwnProperty(name) ? LJ._const[name] : void 0);
-}
+};
 
 /**
  * @namespace LJ.Util.Journal Utility functions connected with journal
@@ -581,7 +580,7 @@ LJ.define('LJ.Util.Date');
 	 * @return {string} A string representation of timezone, eg +0400
 	 */
 	LJ.Util.Date.timezone = function() {
-		var offset = (-(new Date).getTimezoneOffset() / 0.6),
+		var offset = (-(new Date()).getTimezoneOffset() / 0.6),
 			str = '';
 
 		if (offset > 0) {
@@ -594,7 +593,7 @@ LJ.define('LJ.Util.Date');
 		str += ('' + offset).pad(4, '0');
 
 		return str;
-	}
+	};
 
 }());
 
@@ -617,6 +616,124 @@ LJ.DOM.injectStyle = function(fileName, _window) {
 	cssNode.href = fileName;
 	
 	head.appendChild(cssNode);
+};
+
+/**
+ * Get field's selection
+ * @param  {jQuery/DOM} node jQuery or DOM node
+ * @return {Object}      Object, contains { start, end } coordinates of selection
+ */
+LJ.DOM.getSelection = function (node) {
+	var start = 0,
+		end = 0,
+		range,
+		dup,
+		regexp = null;
+
+	if (!node.nodeName) {
+		node = node.get(0);
+	}
+
+	if ( 'selectionStart' in node ) {
+		return {
+			start: node.selectionStart,
+			end: node.selectionEnd
+		};
+	}
+
+	if ( 'createTextRange' in node ) {
+		range = document.selection.createRange();
+		if ( range.parentElement() == node ) {
+			dup = range.duplicate();
+			if ( node.type === 'text' ) {
+				node.focus();
+				start = -dup.moveStart('character', -node.value.length);
+				end = start + range.text.length;
+			} else {
+				// textarea
+				regexp = /\r/g;
+				dup.moveToElementText(node);
+				dup.setEndPoint('EndToStart', range);
+				start = dup.text.replace(regexp, '').length;
+				dup.setEndPoint('EndToEnd', range);
+				end = dup.text.replace(regexp, '').length;
+				dup = document.selection.createRange();
+				dup.moveToElementText(node);
+				dup.moveStart('character', start);
+				while (dup.move('character', -dup.compareEndPoints('StartToStart', range))) {
+					start += 1;
+				}
+				dup.moveStart('character', end - start);
+				while (dup.move('character', -dup.compareEndPoints('StartToEnd', range))) {
+					end += 1;
+				}
+			}
+		}
+	}
+
+	return {
+		start: start,
+		end: end
+	};
+};
+
+/**
+ * Set selection for node
+ * @param {jQuery/DOM} node jQuery or native DOM node
+ * @param {number} start Selection start position
+ * @param {number} end   Selection end position
+ */
+LJ.DOM.setSelection = function (node, start, end) {
+	var range;
+	if (!node.nodeName) {
+		node = node.get(0);
+	}
+	// see https://bugzilla.mozilla.org/show_bug.cgi?id=265159
+	node.focus();
+	if( node.setSelectionRange ){
+		node.setSelectionRange(start, end);
+	}
+	// IE, "else" for opera 10
+	else if (document.selection && document.selection.createRange){
+		range = node.createTextRange();
+		range.collapse(true);
+		range.moveEnd('character', end);
+		range.moveStart('character', start);
+		range.select();
+	}
+};
+
+/**
+ * Set cursor position inside of input/textarea element
+ * @param {jQuery/DOM} node     jQuery or DOM node
+ * @param {[type]} position Cursor position
+ */
+LJ.DOM.setCursor = function (node, position) {
+	var text, length, absPosition;
+	if (!node.nodeName) {
+		node = node.get(0);
+	}
+	
+	text = ( 'value' in node ? node.value : node.text ).replace(/\r/, ''),
+	length = text.length;
+
+	// convenient positions
+	if (position === 'end') {
+		return LJ.DOM.setSelection(node, length, length);
+	}
+	if (position === 'start') {
+		return LJ.DOM.setSelection(node, 0, 0);
+	}
+	// calculation of correct caret position
+	if (position > 0) {
+		if (position > length) {
+			position = length;
+		}
+	} else if (position !== 0) {
+		absPosition = Math.abs(position);
+		position = absPosition > length ? 0 : length - absPosition;
+	}
+	LJ.DOM.setSelection(node, position, position);
 };
 
 /**
@@ -651,11 +768,11 @@ LJ.UI.registerTemplate = function(name, id, type) {
 
 	LJ.UI._templates[name] = {
 		type: type
-	}
+	};
 
 	var tmplObject = LJ.UI._templates[name];
 
-	switch(type) {
+	switch (type) {
 		case 'JQuery':
 			jQuery.template(name, template);
 			break;
@@ -1015,13 +1132,13 @@ LJ.Support.cors = window.XMLHttpRequest && 'withCredentials' in new XMLHttpReque
 if (!Object.extend)
 	Object.extend = function (d, s){
 		if(d) for(var p in s) if(!d[p]) d[p] = s[p];
-		return d
+		return d;
 	};
 
 if (!Object.override)
 	Object.override = function (d, s){
 		if(d) for(var p in s) d[p] = s[p];
-		return d
+		return d;
 	};
 
 /* function extensions */
@@ -1073,7 +1190,7 @@ Object.extend(Function.prototype, {
 				);
 
 			}
-		}
+		};
 
 		return bound;
 	},
@@ -1089,7 +1206,7 @@ Object.extend(Function.prototype, {
 
 Object.extend(Function, {
 	defer: function(func, args/*, more than one*/) {
-		var args = [].slice.call(arguments, 1);
+		args = Array.prototype.slice.call(arguments, 1);
 
 		setTimeout(function() {
 			func.apply(null, args);
@@ -1114,14 +1231,14 @@ Class = function(superClass){
 	superClass = superClass || function(){
 	};
 	superClassFunc = function(){
-	}
-	Object.extend(superClassFunc.prototype, superClass.prototype)
+	};
+	Object.extend(superClassFunc.prototype, superClass.prototype);
 	Object.extend(superClassFunc.prototype, {
 		init: function(){
 		},
 		destroy: function(){
 		}
-	})
+	});
 	Object.override(constructor, superClass); // inherit static methods from the superClass
 	constructor.superClass = superClassFunc.prototype;
 
@@ -1273,7 +1390,7 @@ Object.extend(Date, {
 	 * @return {Number} A Timestamp.
 	 */
 	now: function() {
-		return +new Date;
+		return new Date().valueOf();
 	}
 });
 
@@ -1828,7 +1945,7 @@ DOM = {
 		var s = {
 			left: 0,
 			top: 0
-		}
+		};
 
 		if(!w) w = window;
 		var d = w.document;
@@ -2001,64 +2118,9 @@ DOM = {
 		return r;
 	},
 
-	getSelectedRange: function(node){
-		var start = 0,
-			end = 0;
-		if('selectionStart' in node){
-			start = node.selectionStart;
-			end = node.selectionEnd;
-		} else if(node.createTextRange){
-			var range = document.selection.createRange();
-			if(range.parentElement() == node){
-				var dup = range.duplicate();
-
-				if(node.type == 'text'){
-					node.focus();
-					start = -dup.moveStart('character', -node.value.length);
-					end = start + range.text.length;
-				} else {// textarea
-					var rex = /\r/g;
-					dup.moveToElementText(node);
-					dup.setEndPoint('EndToStart', range);
-					start = dup.text.replace(rex, '').length;
-					dup.setEndPoint('EndToEnd', range);
-					end = dup.text.replace(rex, '').length;
-					dup = document.selection.createRange();
-					dup.moveToElementText(node);
-					dup.moveStart('character', start);
-					while(dup.move('character', -dup.compareEndPoints('StartToStart', range))){
-						start++;
-					}
-					dup.moveStart('character', end - start);
-					while(dup.move('character', -dup.compareEndPoints('StartToEnd', range))){
-						end++;
-					}
-				}
-
-			}
-		}
-
-		return {
-			start: start,
-			end: end
-		}
-	},
-
-	setSelectedRange: function(node, start, end){
-		// see https://bugzilla.mozilla.org/show_bug.cgi?id=265159
-		node.focus();
-		if(node.setSelectionRange){
-			node.setSelectionRange(start, end);
-		}
-		// IE, "else" for opera 10
-		else if(document.selection && document.selection.createRange){
-			var range = node.createTextRange();
-			range.collapse(true);
-			range.moveEnd('character', end);
-			range.moveStart('character', start);
-			range.select();
-		}
-	}
+	// deprecated: use LJ.DOM.* instead
+	getSelectedRange: LJ.DOM.getSelection,
+	setSelectedRange: LJ.DOM.setSelection
 };
 
 $ = DOM.getElement;

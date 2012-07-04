@@ -12,6 +12,30 @@ jQuery.fn.ljAddContextualPopup = function(){
 	});
 };
 
+/**
+ * jQuery plugin that works with caret (it uses LJ.DOM.* methods and added for convenience only)
+ * - if two arguments have been provided: setting selection from startPos to endPos
+ * - if one argument: set cursor to startPos
+ * - if no arguments: get selection of field
+ * 
+ * @param  {number} startPos Start caret position
+ * @param  {number} endPos   End caret position.
+ */
+jQuery.fn.caret = function (startPos, endPos) {
+	var $el = this.length > 1 ? this.first() : this;
+
+	if (typeof startPos === 'number') {
+		if (typeof endPos !== 'number') {
+			LJ.DOM.setCursor($el, startPos);
+		} else {
+			LJ.DOM.setSelection($el, startPos, endPos);
+		}
+		return this;
+	} else {
+		return LJ.DOM.getSelection($el);
+	}
+};
+
 jQuery.fn.hourglass = function(xhr){
 	var hourglasses = [];
 	this.each(function(){
