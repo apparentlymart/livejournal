@@ -4840,6 +4840,8 @@ rating.timeswitcher.all=All time
 
 rating.timeswitcher.day=For 24 hour
 
+repost.button.verify_email=You need verify your e-mail to make repost
+
 repost.button.label=Repost
 
 repost.button.title=Repost me
