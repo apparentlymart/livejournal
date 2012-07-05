@@ -82,8 +82,11 @@ LiveJournal.initResizeHelper = function() {
 			}
 		}, 500);
 
-	$window.on('resize', resizeFunc);
-	resizeFunc();
+	//Only older ies need thes (caniuse.com)
+	if (jQuery.browser.msie && Number(jQuery.browser.version) <= 8) {
+		$window.on('resize', resizeFunc);
+		resizeFunc();
+	}
 };
 
 /**
