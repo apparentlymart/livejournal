@@ -541,15 +541,16 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			var rex_userid = /\?userid=(\d+)/,
 				rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/,
 				class_nopopup = 'noctxpopup',
-				ljusers = jQuery('span.ljuser>a>img', node),
+				ljusers = jQuery('span.ljuser:not(.' + class_nopopup + ')>a>img', node),
 				i = -1, userid, ljuser, parent;
 
 			// use while for speed
 			while (ljusers[++i]) {
 				ljuser = ljusers[i];
 				parent = ljuser.parentNode;
+				userid = parent.href.match(rex_userid);
 
-				if (parent.href && (userid = parent.href.match(rex_userid)) && parent.className.indexOf(class_nopopup) < 0) {
+				if (parent.href && userid) {
 					ljuser.userid = userid[1];
 				} else if (parent.parentNode.getAttribute('lj:user')) {
 					ljuser.username = parent.parentNode.getAttribute('lj:user');
@@ -557,9 +558,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					continue;
 				}
 
-				if (parent.parentNode.getAttribute('data-journal')) {
-					ljuser.posted_in = parent.parentNode.getAttribute('data-journal');
-				}
+				ljuser.posted_in = parent.parentNode.getAttribute('data-journal');
 				ljuser.className += ' ContextualPopup';
 			}
 			

@@ -8121,9 +8121,11 @@ sub ljuser2 {
         journal_url    => $journal_url,
         profile_url    => $profile_url,
         userhead_url   => $userhead,
+        noctxpopup     => 0,
         is_identity    => $identity? 1 : 0,
     }};
 
+    $user{'noctxpopup'}   = 1                      if $opts->{'noctxpopup'};
     $user{'bold'}         = 1                      if $opts->{'bold'} or not exists $opts->{'bold'};
     $user{'inline_css'}   = 1                      if $opts->{'inline_css'};
     $user{'journal'}      = $opts->{'title'}       if $opts->{'title'};
