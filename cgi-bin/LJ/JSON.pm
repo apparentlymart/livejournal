@@ -76,6 +76,8 @@ sub traverse_fix_encoding {
     return $class->traverse($what, sub {
         my ($scalar) = @_;
 
+        return $scalar unless Encode::is_utf8($scalar);
+
         # if the string does indeed contain wide characters (which happens
         # in case the source string literals contained chars specified as
         # '\u041c'), encode stuff as utf8
