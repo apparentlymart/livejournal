@@ -103,6 +103,13 @@ body<=
 
     # saving a form submission
     if ($POST{'select_as_sm'}) {
+        unless ($remote->can_super_manage($c)) {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            $ret .= BML::ml('.error.noaccess_sm',
+                            { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
+            $ret .= " p?>";
+            return $print_with_ad->($ret);
+        }
         my $new_sm = $POST{'uid_to_sm'};
         my $new_sm_u = LJ::load_userid($new_sm);
         ## Is user exist, active and maintainer?

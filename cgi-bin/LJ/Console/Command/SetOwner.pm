@@ -42,9 +42,11 @@ sub execute {
     }
 
     my $s_maints = LJ::load_rel_user($c->{userid}, 'S');
-    my $s_maint_u = @$s_maints ? LJ::load_userid($s_maints->[0]) : undef;
-    if ($s_maint_u) {
-        LJ::clear_rel($c->{userid}, $s_maint_u->{userid}, 'S');
+    my $s_maint_us = @$s_maints ? LJ::load_userids(@$s_maints) || {} : {};
+    if (%$s_maint_us) {
+        foreach my $u (values %$s_maint_us) {
+            LJ::clear_rel($c->{userid}, $u->{userid}, 'S');
+        }
     }
 
     $c->log_event('set_owner', { actiontarget => $u->{userid}, remote => $remote });

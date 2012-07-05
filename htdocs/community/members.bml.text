@@ -26,6 +26,8 @@
 
 .error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
+.error.noaccess_sm=Only community owners are able to set a new owner. You are not a owner of community [[comm]].
+
 .error.noattr=No attributes selected for user: [[user]]
 
 .error.nocomm=Community not found.
