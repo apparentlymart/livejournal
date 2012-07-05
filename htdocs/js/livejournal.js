@@ -52,6 +52,7 @@ LiveJournal.initPage = function () {
 
 	LiveJournal.initNotificationStream();
 	LiveJournal.initSpoilers();
+	LiveJournal.initResizeHelper();
 
 	//ljuniq cookie is checked in PageStats/Omniture.pm now
 
@@ -60,6 +61,30 @@ LiveJournal.initPage = function () {
 };
 
 jQuery(LiveJournal.initPage);
+
+/**
+ * Special helper class is added to the body if browser doesn't support media queries and
+ * screen width is less then 1000px.
+ */
+LiveJournal.initResizeHelper = function() {
+	var $window = jQuery(window),
+		$body = jQuery('body'),
+		hasClass = false,
+		resizeFunc = LJ.throttle(function() {
+			if ($window.width() <= 1000) {
+				if (!hasClass) {
+					$body.addClass('l-width1000');
+					hasClass = true;
+				}
+			} else if (hasClass) {
+				$body.removeClass('l-width1000');
+				hasClass = false;
+			}
+		}, 500);
+
+	$window.on('resize', resizeFunc);
+	resizeFunc();
+};
 
 /**
  * Spoilers functionality - expand hidden text in posts when user clicks on corresponding link
