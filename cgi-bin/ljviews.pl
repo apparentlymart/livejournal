@@ -1302,8 +1302,10 @@ sub create_view_lastn
                          'subject'           => \$subject,
                          'removed'           => \$removed,
                          'reply_count'       => \$replycount };
+                         
+        my $repost_props = { 'use_repost_signature' => 1};
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed && !LJ::u_equals($u, $remote);
             next ENTRY unless $entry_obj->visible_to($remote, {'viewall'  => $viewall, 
                                                                'viewsome' => $viewsome});
@@ -1900,7 +1902,9 @@ sub create_view_friends {
                          'reply_count'       => \$replycount,
                          'cluster_id'        => \$clusterid, };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        my $repost_props = { 'use_repost_signature' => 1};
+
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             $friendid = $journalu->userid;
             $logprops{$itemid} = $entry_obj->props;
             $friends{$friendid} = $journalu;
@@ -2752,7 +2756,9 @@ sub create_view_day
                          'removed'           => \$removed,
                          'reply_count'       => \$replycount };
 
-        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content )) {
+        my $repost_props = { 'use_repost_signature' => 1};
+ 
+        if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed;
             $username = $entry_obj->poster->user;
             $logprops{$itemid} = $entry_obj->props;
