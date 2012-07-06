@@ -7887,167 +7887,11 @@ sub get_all_aliases {
 #           Key 'no_follow', when true, disables traversal of renamed users.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
-sub ljuser {
-    my ($user, $opts) = @_;
-
-    my ($u, $username);
-    if (isu($user)) {
-        $u = $user;
-        $username = $u->username;
-    } else {
-        $u = LJ::load_user($user);
-        $username = $user;
-    }
-
-    my ( @span_classes,
-         @span_styles,
-         $profile_url,
-         @profile_link_tag_extra,
-         $userhead,
-         $userhead_w,
-         $userhead_h,
-         $journal_url,
-         @link_tag_extra,
-         $journal_name,
-         @link_extra,
-         @extra,
-         $journal,
-    );
-
-    $profile_url = $opts->{'profile_url'};
-
-    # if invalid user, link to dummy userinfo page
-    if (!$u || !LJ::isu($u)) {
-        $username = LJ::canonical_username($username);
-        $journal_url = "$LJ::SITEROOT/userinfo.bml?user=$username";
-        $profile_url ||= $journal_url;
-        $userhead = 'userinfo.gif';
-        $userhead_w = 16;
-    } else {
-        # Traverse the renames to the final journal
-        if (!$opts->{'no_follow'}) {
-            $u = $u->get_renamed_user;
-            $username = $u->username;
-        }
-
-        if (!$profile_url) {
-            $profile_url = $u->profile_url;
-            $profile_url .= '?mode=full' if $opts->{'full'};
-        }
-
-        # Mark accounts as deleted that aren't visible, memorial, locked, or
-        # read-only
-        if ($u->statusvis !~ /[VMLO]/) {
-            push @span_styles, 'text-decoration:line-through';
-        }
-
-        $journal_name = $username;
-
-        $journal_url = $u->journal_base . "/";
-        ($userhead, $userhead_w, $userhead_h) = $u->userhead($opts);
-        if ($u->is_identity) {
-            my $params = $u->identity->ljuser_display_params($u, $opts);
-            $profile_url  = $params->{'profile_url'}  || $profile_url;
-            $journal_url  = $params->{'journal_url'}  || $journal_url;
-            $journal_name = $params->{'journal_name'} || $journal_name;
-        }
-    }
-
-    LJ::run_hooks( 'override_profile_url', $u, \$profile_url );
-    LJ::run_hooks( 'override_journal_url', $u, \$journal_url );
-
-    my $user_alias       = LJ::ljuser_alias($username);
-    my $side_alias       = $opts->{'side_alias'};
-    my $show_alias_popup = $user_alias && !$side_alias;
-    my $target           = $opts->{'target'};
-    my $link_color       = $opts->{'link_color'};
-
-    # verify that it's indeed a color:
-    if ($link_color !~ /^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/) {
-        $link_color = '';
-    }
-
-    ### populate @span_classes
-    unshift @span_classes, 'ljuser';
-    if ($show_alias_popup)   { push @span_classes, 'with-alias'; }
-    if ($opts->{side_alias}) { push @span_classes, 'with-alias-value'; }
-
-    # add class as "ljuser-name_*username*" for find user on page to
-    # change alias
-    push @span_classes, 'ljuser-name_' . LJ::canonical_username($user);
-    my $span_classes = join(' ', @span_classes);
-
-    ### populate @span_styles
-    unshift @span_styles, 'white-space:nowrap';
-    my $span_styles = join(';', @span_styles);
-
-    ### populate @profile_link_tag_extra
-    if ($target) { push @profile_link_tag_extra, " target=\"$target\""; }
-    my $profile_link_tag_extra = join('', @profile_link_tag_extra);
-
-    ### populate userhead data
-    if ($userhead !~ /^https?:\/\//) {
-        my $imgroot = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-        $userhead = $imgroot . '/' . $userhead . "?v=$LJ::CURRENT_VERSION";
-    }
-
-    $userhead_h ||= $userhead_w;  # make square if only one dimension given
-
-    ### populate @link_tag_extra
-    if ($link_color) { push @link_tag_extra, " style=\"color:$link_color\""; }
-    if ($target)     { push @link_tag_extra, " target=\"$target\""; }
-    if ($show_alias_popup) {
-        push @link_tag_extra, " title=\"" . LJ::ehtml($user_alias) . "\"";
-    }
-    my $link_tag_extra = join('', @link_tag_extra);
-
-    LJ::run_hooks( 'override_display_name', $u, \$journal_name );
-
-    ### fix $journal_name
-    if ($opts->{'title'}) {
-        $journal_name = $opts->{'title'};
-    }
-    if (!exists $opts->{'bold'} || $opts->{'bold'} != 0) {
-        $journal_name = "<b>$journal_name</b>";
-    }
-
-    ### populate @link_extra
-    if ($show_alias_popup) {
-        push @link_extra, "<span class='useralias-value'>*</span>";
-    }
-    my $link_extra = join('', @link_extra);
-
-    ### populate @extra
-    if ($user_alias and $side_alias) {
-        push @extra, "<span class='alias-value'> &mdash; " .
-                     LJ::ehtml($user_alias) . "</span>";
-    }
-    my $extra = join('', @extra);
-
-    if ( exists $opts->{in_journal} && $opts->{in_journal} ) {
-        my $cu = LJ::load_user( $opts->{in_journal} );
-        $journal = $cu ? ' data-journal="' . $cu->journal_base . '"' : '';
-    }
-
-    return
-        "<span class='$span_classes' lj:user='$username'$journal style='$span_styles'>" .
-        "<a href='$profile_url'$profile_link_tag_extra>" .
-        "<img src='$userhead' alt='[info]' " .
-            "width='$userhead_w' height='$userhead_h' " .
-            "style='vertical-align: bottom; border: 0; padding-right: 1px;'" .
-        "/>" .
-        "</a>" .
-        "<a href='$journal_url'$link_tag_extra>" .
-        $journal_name . $link_extra .
-        "</a>" .
-        "</span>" .
-        $extra;
-}
 
 my $ljuser_tmpl_path = join('/', $ENV{'LJHOME'}, 'templates', 'User');
 my $ljuser_cache     = {};
 
-sub ljuser2 {
+sub ljuser {
     my ($user, $opts) = @_;
     my ($u, $username, $journal_url, $striked);
     my ($journal_name, $journal, $userhead);
@@ -8170,16 +8014,6 @@ sub ljuser2 {
             file   => 'Display.tmpl',
             params => \%user,
         )->raw_output();
-    }
-} # ljuser2
-
-if ( not $LJ::DISABLED{'ljuser_templates'} ) {
-    unless ( $ENV{'MOD_PERL'} ) {
-        # Sometimes we need style inlined
-        # In emails, for example
-        *ljuser = sub { ljuser2($_[0], { %{ $_[1] || {} }, inline_css => 1 }) };
-    } else {
-        *ljuser = \&ljuser2;
     }
 }
 

@@ -1482,7 +1482,7 @@ sub create_view_lastn
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter', 
-                                    { 'reposter' => LJ::ljuser2($reposter) } );
+                                    { 'reposter' => LJ::ljuser($reposter) } );
                 $lastn_event{'reposted_by'} =  $ref_text;
             }
         }
@@ -2147,7 +2147,7 @@ sub create_view_friends {
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
-                                    { 'reposter' => LJ::ljuser2($reposter) } );
+                                    { 'reposter' => LJ::ljuser($reposter) } );
             }
         }
 
@@ -2883,7 +2883,7 @@ sub create_view_day
 
                 my $reposter = $repost_entry_obj->poster;
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
-                                    { 'reposter' => LJ::ljuser2($reposter) } );
+                                    { 'reposter' => LJ::ljuser($reposter) } );
             }
         }
 

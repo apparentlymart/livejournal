@@ -1978,7 +1978,7 @@ sub Entry
         $e->{'repost_icon'} = Image_std('reposted-entry');
 
         my $reposter = LJ::want_user($e->{'real_journalid'});
-        $e->{'reposted_by'} = LJ::Lang::ml( 'entry.reference.reposter', { 'reposter' => LJ::ljuser2($reposter) } );
+        $e->{'reposted_by'} = LJ::Lang::ml( 'entry.reference.reposter', { 'reposter' => LJ::ljuser($reposter) } );
     }
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating

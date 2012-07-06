@@ -564,9 +564,9 @@ sub substitute_content {
             }
 
             my $event =  LJ::Lang::ml($text_var,  
-                                        { 'author'          => LJ::ljuser2($original_entry_obj->poster),
-                                          'reposter'        => LJ::ljuser2($entry_obj->poster),
-                                          'communityname'   => LJ::ljuser2($original_entry_obj->journal),
+                                        { 'author'          => LJ::ljuser($original_entry_obj->poster),
+                                          'reposter'        => LJ::ljuser($entry_obj->poster),
+                                          'communityname'   => LJ::ljuser($original_entry_obj->journal),
                                           'datetime'        => $entry_obj->eventtime_mysql,
                                           'text'            => $event_text, });
             ${$opts->{'event'}} = $event;
@@ -587,9 +587,9 @@ sub substitute_content {
             $text_var .= LJ::u_equals($remote, $entry_obj->poster) ? '.owner' : '.guest';
     
             my $event = LJ::Lang::ml($text_var, 
-                                       { 'author'           => LJ::ljuser2($original_entry_obj->poster),
-                                         'communityname'    => LJ::ljuser2($original_entry_obj->journal),
-                                         'reposter'         => LJ::ljuser2($entry_obj->poster),
+                                       { 'author'           => LJ::ljuser($original_entry_obj->poster),
+                                         'communityname'    => LJ::ljuser($original_entry_obj->journal),
+                                         'reposter'         => LJ::ljuser($entry_obj->poster),
                                          'datetime'         => $entry_obj->eventtime_mysql,
                                          'text'             => $event_text, });
 
