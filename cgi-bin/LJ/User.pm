@@ -8102,6 +8102,10 @@ sub ljuser2 {
             $profile_url ||= $journal_url;
             $userhead      = 'userinfo.gif';
         }
+
+        LJ::run_hooks( 'override_display_name', $u, \$journal_name );
+        LJ::run_hooks( 'override_profile_url',  $u, \$profile_url );
+        LJ::run_hooks( 'override_journal_url',  $u, \$journal_url );
     }
 
     if ( $color = $opts->{'link_color'} ) {
