@@ -30,6 +30,9 @@ sub EntryPage
     }
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
+    if ($entry && $entry->original_post) {
+        $opts->{'redir'} = $entry->original_post->url; 
+    }
 
     return if $opts->{'suspendeduser'};
     return if $opts->{'suspendedentry'};
