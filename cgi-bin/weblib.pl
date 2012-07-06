@@ -1563,6 +1563,10 @@ sub res_includes {
         my $jsvar_out         = LJ::JSON->to_json(\%LJ::JSVAR);
         my $site_version      = LJ::ejs($LJ::CURRENT_VERSION);
 
+        # LJSUP-12854: Fix escape for Site object
+        $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
+        $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
+
         $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
