@@ -348,6 +348,7 @@
 					break;
 				case 'default':
 					this.options.updateDate = this._initialUpdateDate;
+					this._dateInputs.custom_time.val(0);
 					this._startTimer();
 					break;
 			}
