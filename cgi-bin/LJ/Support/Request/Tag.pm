@@ -111,6 +111,8 @@ sub rename_tag {
     if ( !$sptagid || !$spcatid || !$new_name ) {
         return 0;
     }
+    
+    warn "rename everywhere : $everywhere";
 
     # do we need to rename everywhery ?
     if ($everywhere) {
@@ -143,6 +145,8 @@ sub __rename_tag_everywhere {
     if (!$old_name) {
         return;
     }
+    
+    return if $old_name eq $new_name; 
 
     #
     # Receive all categories where rename will be done
@@ -166,6 +170,9 @@ sub __rename_tag_everywhere {
                                    'spcatid',
                                    undef,
                                    $new_name );
+                                   
+    warn LJ::D($destination);
+    warn LJ::D($source);
 
     # Does name exist already?
     if (!$destination || !%$destination) {
@@ -181,12 +188,6 @@ sub __rename_tag_everywhere {
         # update all in 'supporttag'
         #
         foreach my $spcatid (keys %$source) {
-            #
-            # if no needs to merge
-            #
-            if (!$destination->{$spcatid}) {
-                next;
-            }
 
             #
             # Get a destination id
@@ -200,44 +201,31 @@ sub __rename_tag_everywhere {
             my $source_hash       = delete $source->{$spcatid};
             my $source_id         = $source_hash->{'sptagid'};
 
-            warn LJ::D($destination_hash);
-            warn LJ::D($source_hash);
-
             #
-            # get current spid
+            # get spids
             #
-            my $current_spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
-                                                          'FROM supporttagmap ' .
-                                                          'WHERE sptagid = ?',
-                                                          undef,
-                                                          $source_id);
-
-            # get current tag id
-            my $spids = $dbh->selectcol_arrayref( 'SELECT spid ' .
-                                                  'FROM supporttagmap ' .
-                                                  'WHERE sptagid = ?',
-                                                  undef,
-                                                  $sptagid );
+            my $spids_to_set = $dbh->selectcol_arrayref( 'SELECT spid ' .
+                                                         'FROM supporttagmap ' .
+                                                         'WHERE sptagid = ?',
+                                                         undef,
+                                                         $source_id);
 
             $dbh->do( "DELETE FROM supporttag WHERE sptagid = $source_id");
             $dbh->do( "DELETE FROM supporttagmap WHERE sptagid = $source_id");
 
-            foreach my $current_spid (@$current_spids) {
-                foreach my $spid (@$spids) {
-
-                    eval {
-                        $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
-                                  'VALUES (?, ?) ',
-                                  undef,
-                                  $current_spid,
-                                  $destination_id );
-                    };
-                }
+            foreach my $spid (@$spids_to_set) {
+                eval {
+                    $dbh->do( 'INSERT INTO supporttagmap (spid, sptagid) ' .
+                              'VALUES (?, ?) ',
+                              undef,
+                              $spid,
+                              $destination_id );
+                };               
             }
         }
 
         foreach my $spcatid (keys %$source) {
-            my $source_hash = delete $source->{$spcatid};
+            my $source_hash = $source->{$spcatid};
             my $source_id   = $source_hash->{'sptagid'};
 
             $dbh->do( 'UPDATE supporttag ' . 
@@ -252,6 +240,7 @@ sub __rename_tag_everywhere {
             if (exists $destination->{$spcatid}) {
                 next;
             }
+
             my $source_hash = delete $source->{$spcatid};
             my $source_id   = $source_hash->{'sptagid'};
 
