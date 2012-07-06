@@ -285,6 +285,51 @@ LJ.throttle = function(func, delay) {
 	};
 };
 
+/**
+ * Create function that will call target function at most once 
+ * per every delay. Arguments are queued and when delay ends 
+ * function is called with last supplied arguments set. Optionally
+ * arguments queue can be preserved on call, so all sheduled will be done.
+ *
+ * @param {Function} f The function to call.
+ * @param {Number} delay Delay between the calls in ms.
+ * @param {Boolean} preserve Run all queued sequentially
+ */
+
+LJ.threshold = function (f, delay, preserve) {
+	var queue = [],
+		lock = false,
+
+		callback = function () {
+			var caller = this;
+			if (lock || !queue.length) {
+				return;
+			}
+
+			if (queue.length) {
+				lock = true;
+
+				if (preserve) {
+					f.apply(caller, queue[0]);
+					queue.shift();
+				} else {
+					f.apply(caller, queue[-1]);
+					queue = [];
+				}
+
+				setTimeout(function () {
+					lock = false;
+					callback.apply(caller);
+				}, delay); 
+			}
+		};
+
+	return function () {
+		queue.push([].slice.call(arguments));
+		callback.apply(this);
+	};
+};
+
 LJ.console = function() {
 	var consoleExists = function() { return 'console' in window; },
 		runIfExists = function(method, args) {
