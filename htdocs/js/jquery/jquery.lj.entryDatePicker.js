@@ -15,13 +15,11 @@
 	var listeners = {
 		onStartEdit: function(evt) {
 			evt.data._setState('edit');
-			evt.data._isCalendarOpen = true;
 			evt.preventDefault();
 		},
 
 		onStopEdit: function(evt) {
 			evt.data.reset();
-			evt.data._isCalendarOpen = false;
 			evt.preventDefault();
 		},
 
@@ -218,7 +216,6 @@
 			this._el('calendar').calendar(calOptions)
 				.bind('daySelected', function(evt, date) {
 				var currentDate = $(this).calendar('option', 'currentDate');
-				delete self._isCalendarOpen;
 				self._isEvent = false; //we're not a blur event
 
 				if (currentDate.getMonth() !== date.getMonth() || currentDate.getDate() !== date.getDate() || currentDate.getFullYear() !== date.getFullYear()) {
@@ -374,7 +371,11 @@
 					inputs.date.val(LJ.Util.Date.format(date, 'short'));
 				}
 
-				if(!this._isCalendarOpen) {
+				var calDate = this._calendar.calendar('option', 'currentDate');
+
+				if (calDate.getFullYear() !== date.getFullYear() ||
+						calDate.getMonth() !== date.getMonth() ||
+						calDate.getDate() !== date.getDate()) {
 					this._calendar.calendar('option', 'currentDate', date);
 				}
 
