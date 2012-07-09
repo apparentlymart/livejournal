@@ -451,7 +451,7 @@ sub render_metainfo_block {
     $out .= "<script>try { \$('journal_timezone').value = - (new Date).getTimezoneOffset()/0.6; } catch(e) {} </script>";
     $out .= "<div id='metainfo-wrap'>";
 
-    if ( LJ::is_enabled('post_controller') ) {
+    if ( LJ::is_enabled('post_controller') and $remote ) {
         $out .= "<p class=\"b-updatepage-switchver\">";
         $out .= "<button type=\"submit\" name=\"ljpost:on\" value=\"1\" class=\"b-updatepage-switchver-button\">";
         $out .= "<span class=\"b-updatepage-switchver-inner\">". LJ::Lang::ml('talk.post.beta.turn.on') ."</span>";
