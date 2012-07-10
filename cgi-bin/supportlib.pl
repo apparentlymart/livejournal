@@ -931,7 +931,7 @@ sub mail_response_to_user
     # also, don't send them their own replies:
     return if ($sp->{'requserid'} == $res->{'userid'});
 
-    my $lang = $sp->{'language'} || $LJ::DEFAULT_LANG;
+    my $lang = LJ::Support::prop($sp->{'spid'}, 'language') || $LJ::DEFAULT_LANG;
     my ($username, $ljuser);
     if ($u) {
         if ($u->prop('browselang')) {
@@ -963,7 +963,7 @@ sub mail_response_to_user
                   );
     }
 
-    #preparting [[closeable]] param
+    #preparing [[closeable]] param
     my $closeable='';
     if ($sp->{_cat}->{user_closeable}) {
         my $closeurl = "$LJ::SITEROOT/support/act.bml?" .
