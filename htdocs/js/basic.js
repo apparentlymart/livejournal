@@ -911,18 +911,25 @@ LJ.UI.mixin = function(name, module) {
 			options = node.data('widget-options'),
 			bootstrap = node.data('bootstrap') || null;
 
-
 		if (node.attr('data-widget-id')) {
 			/* Widget already has unique id */
 			return;
 		}
 
-		if (typeof options !== 'object') {
-			if (options) {
-				LJ.console.warn('Invalid options string: ' + options);
-			}
+		switch (typeof options) {
+			case 'object':
+				/* jQuery parsing was successfull */
+				break;
 
-			options = {};
+			case 'string':
+				/* Sometimes detection fails (when options string has line breaks) */
+				try {
+					options = JSON.parse(options || '{}');
+				} catch (error) {
+					LJ.console.warn('Invalid options string: ' + options);
+					options = {};
+				}
+				break;
 		}
 
 		if (force) {
