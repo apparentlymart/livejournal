@@ -1183,13 +1183,14 @@ sub trans {
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
         } 
-        elsif (my $url = $LJ::DOMAIN_JOURNALS{$user}) {
-            $url = "http://".$url unless $url =~ m!https?://!;
-            return redir($url);
-        }
         else {
             my $u = LJ::load_user($user);
             LJ::set_active_journal($u) if $u;
+
+            if ($u && (my $url = $LJ::DOMAIN_JOURNALS{$u->user})) {
+                $url = "http://".$url unless $url =~ m!https?://!;
+                return redir($url);
+            }
 
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
