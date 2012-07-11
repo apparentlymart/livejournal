@@ -66,51 +66,92 @@ CKEDITOR.editorConfig = function(config) {
 	config.autoGrow_maxHeight = 400;
 	config.contentsLangDirection = 'ltr';
 	config.fillEmptyBlocks = false;
-	config.tabIndex = 1;
+	config.tabIndex = 41;
 	config.tabSpaces = 2;
 	config.startupShowBorders = false;
 	config.toolbarCanCollapse = false;
 	config.disableNativeSpellChecker = false;
-	config.toolbar_Full = [
-		[
+	
+	var toolbar = [];
+
+
+	function ifEnabled(condition, what) {
+		return condition ? what : undefined;
+	}
+
+	if (Site.page.ljpost) {
+		toolbar = [
+			'Bold', 'Italic', 'Underline', 'Strike', 'FontSize', 'LJColor',
+
+			'-',
+
+			'LJLink2', 'LJUserLink',
+
+			'-',
+
+			'image',
+			ifEnabled(Site.media_embed_enabled, 'LJEmbedLink'),
+
+			'LJCut',
+			'LJSpoiler',
+			
+			'LJLike',
+
+			'LJPollLink',
+			'NumberedList',
+			'BulletedList',
+
+			'LJJustifyLeft',
+			'LJJustifyCenter',
+			'LJJustifyRight',
+
+			'Undo',
+			'Redo'
+		];
+	} else {
+		toolbar = [
 			'Bold',
 			'Italic',
 			'Underline',
 			'Strike',
-			(Site.page.ljpost) ? 'LJColor' : 'TextColor',
+			'TextColor',
 			'FontSize',
+
 			'-',
-			(Site.page.ljpost) ? 'LJLink2' : 'LJLink',
+
+			'LJLink',
 			'LJUserLink',
-			'image'
-		]
-	];
+			'image',
 
-	// if (window.ljphotoEnabled) {
-	// 	config.toolbar_Full[0].push('LJImage_beta');
-	// }
+			'LJPollLink',
+			'LJCutLink',
+			'LJCut',
+			'LJLike',
+			'LJSpoiler',
 
-	if (top.Site.media_embed_enabled) {
-		config.toolbar_Full[0].push('LJEmbedLink');
+			'-',
+
+			'UnorderedList',
+			'OrderedList',
+			'NumberedList',
+			'BulletedList',
+
+			'-',
+
+			'LJJustifyLeft',
+			'LJJustifyCenter',
+			'LJJustifyRight',
+
+			'-',
+
+			'Undo',
+			'Redo'
+		];
 	}
 
-	config.toolbar_Full[0].push('LJPollLink',
-		'LJCutLink',
-		'LJCut',
-		'LJLike',
-		'LJSpoiler',
-		'-',
-		'UnorderedList',
-		'OrderedList',
-		'NumberedList',
-		'BulletedList',
-		'-',
-		'LJJustifyLeft',
-		'LJJustifyCenter',
-		'LJJustifyRight',
-		'-',
-		'Undo',
-		'Redo');
+	config.toolbar_Full = [
+		toolbar.filter(function(el) { return el; })
+	];
 
 	config.enterMode = CKEDITOR.ENTER_BR;
 	config.shiftEnterMode = CKEDITOR.ENTER_P;
