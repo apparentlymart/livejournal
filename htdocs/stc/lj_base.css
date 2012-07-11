@@ -4728,9 +4728,9 @@ BODY div .b-helplink:active {
 	display: inline-block;
 	min-width: 1em;
 	margin: 0 0.1em;
-	padding: 0.2em 0.3em 0.1em;
+	padding: 0.2em 0.4em 0.1em;
 	*display: inline;
-	*padding: 0 0.3em 0.1em;
+	*padding: 0 0.4em 0.1em;
 	*zoom: 1;
 	}
 	.b-pager-page A:link,
@@ -4739,8 +4739,8 @@ BODY div .b-helplink:active {
 	.b-pager-page A:active {
 		display: inline-block;
 		min-width: 1em;
-		margin: -0.2em -0.3em -0.1em;
-		padding: 0.2em 0.3em 0.1em;
+		margin: -0.2em -0.4em -0.1em;
+		padding: 0.2em 0.4em 0.1em;
 		}
 	.b-pager-page A:hover,
 	.b-pager-page A:active {
