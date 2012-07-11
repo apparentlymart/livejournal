@@ -3,16 +3,21 @@
  For licensing, see LICENSE.html or http://ckeditor.com/license
  */
 
+
+
 CKEDITOR.editorConfig = function(config) {
 	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
+	CKEDITOR.plugins.addExternal( 'ljlink', 'plugins/lj/ljlink/plugin.js' );
 
-	var ljplugins = [/*'ljspell', */'livejournal', 'ljcolor'],
+	var ljplugins = [/*'ljspell', */ (Site.page.ljpost) ? 'livejournal' : 'livejournal_old', 'ljcolor', 'ljlink'],
 		plugins = [
 			'ajax',
 			'basicstyles',
 			'bidi',
 			'blockquote',
 			'button',
+			'colorbutton',
+			'colordialog',
 			'dialog',
 			'enterkey',
 			'entities',
@@ -21,7 +26,6 @@ CKEDITOR.editorConfig = function(config) {
 			'htmldataprocessor',
 			'image',
 			'keystrokes',
-			'link',
 			'list',
 			'liststyle',
 			'pastefromword',
@@ -31,7 +35,8 @@ CKEDITOR.editorConfig = function(config) {
 			'toolbar',
 			'undo',
 			'wysiwygarea',
-			'onchange'
+			'onchange',
+			'link'
 		];
 
 	config.language = 'ru';
@@ -72,10 +77,10 @@ CKEDITOR.editorConfig = function(config) {
 			'Italic',
 			'Underline',
 			'Strike',
-			'LJColor',
+			(Site.page.ljpost) ? 'LJColor' : 'TextColor',
 			'FontSize',
 			'-',
-			'LJLink',
+			(Site.page.ljpost) ? 'LJLink2' : 'LJLink',
 			'LJUserLink',
 			'image'
 		]
