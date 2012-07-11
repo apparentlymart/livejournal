@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+    #!/usr/bin/perl
 #
 
 package LJ;
@@ -2168,6 +2168,7 @@ sub rte_js_vars {
     $canmakepoll = "false" if ($remote && !LJ::get_cap($remote, 'makepoll'));
     $ret .= "<script type='text/javascript'>\n";
     $ret .= "    var RTEdisabled = new Array();\n";
+    LJ::need_var(makepoll => $canmakepoll eq 'true'? 1 : 0);
     my $rte_disabled = $LJ::DISABLED{rte_buttons} || {};
     foreach my $key (keys %$rte_disabled) {
         $ret .= "    RTEdisabled['$key'] = true;" if $rte_disabled->{$key};
