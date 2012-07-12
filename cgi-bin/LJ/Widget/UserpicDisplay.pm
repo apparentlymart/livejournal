@@ -100,7 +100,7 @@ sub render_body {
         $$head .= qq {
             <script type="text/javascript" language="JavaScript">
             // <![CDATA[
-                DOM.addEventListener(window, "load", function (evt) {
+                LiveJournal.register_hook('page_load'), function() {
                 // attach userpicselect code to userpicbrowse button
                     var ups_btn = \$("lj_userpicselect");
                     var ups_btn_img = \$("lj_userpicselect_img");
