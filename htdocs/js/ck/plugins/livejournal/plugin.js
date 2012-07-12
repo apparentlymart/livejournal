@@ -41,7 +41,7 @@
 			label: CKLang.LJLike_button_vkontakte,
 			id: 'vkontakte',
 			abbr: 'vk',
-			checked: true,
+			checked: Site.remote_is_sup ? true : false,
 			html: '<span class="lj-like-item vk">' + CKLang.LJLike_button_vkontakte + '</span>',
 			htmlOpt: Site.remote_is_sup? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
 		},
@@ -1010,13 +1010,13 @@
 			// LJ NEW POLL
 			(function() {
 				LiveJournal.register_hook('poll_response', function(ljData) {
-					console.log('got poll poll_response', ljData);
+					//console.log('got poll poll_response', ljData);
 
 					var poll = new Poll(ljData);
 					var pollSource = poll.outputHTML();
 					var pollLJTags = poll.outputLJtags();
 
-					console.log('res', ljData, pollSource, pollLJTags);
+					//console.log('res', ljData, pollSource, pollLJTags);
 
 					var node = ljTagsData.LJPollLink.node;
 					if (node) {
@@ -1211,7 +1211,7 @@
 						likeHtml = [],
 						isDefaultSet = typeof buttons === 'string';
 
-					console.log(buttons);
+					//console.log(buttons);
 
 					for (var i = 0; i < likeButtons.length; i++) {
 						button = likeButtons[i];
@@ -1249,7 +1249,7 @@
 					exec: function(editor) {
 						var button = 'LJLike';
 
-						console.log(ljTagsData.LJLike.node);
+						//console.log(ljTagsData.LJLike.node);
 
 						if (ljTagsData.LJLike.node) {
 							LiveJournal.run_hook('rteButton', 'like', jQuery('.cke_button_' + button), {
@@ -1260,7 +1260,7 @@
 						}
 
 						
-						console.log(arguments);
+						//console.log(arguments);
 					},
 					editorFocus: false
 				});
@@ -1317,27 +1317,24 @@
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
-						var currentButtons = element.attributes.buttons && element.attributes.buttons.split(',') || likeButtons.defaultButtons;
-
-						console.log(currentButtons);
+						var currentButtons = element.attributes.buttons && element.attributes.buttons.split(',') || likeButtons.defaultButtons,
+							isDefault = element.attributes.buttons ? true : false;
 
 						var length = currentButtons.length;
 						for (var i = 0; i < length; i++) {
 							var buttonName = currentButtons[i].replace(/^\s*([a-z]{2,})\s*$/i, '$1');
 							var button = likeButtons[buttonName];
-							console.log(button, buttonName);
-							if (button && button.checked) {
-								
+							if (button && (isDefault || button.checked)) {
 								fakeElement.attributes['lj-content'] += encodeURIComponent(button.html);
 								attr.push(buttonName);
 							}
 						}
 
+						if (!element.attributes.buttons) fakeElement.attributes['defaults'] = true;
+
 						fakeElement.attributes['lj-content'] += '</span>';
 
 						fakeElement.attributes.buttons = attr.join(',');
-
-						console.log(fakeElement);
 
 						return fakeElement;
 					},
