@@ -155,7 +155,6 @@ LJ.pageVar = function(name, global) {
 	if (obj && obj.hasOwnProperty(name)) {
 		return obj[name];
 	} else {
-		LJ.console
 		return void(0);
 	}
 };
@@ -1263,6 +1262,23 @@ Object.extend(Function, {
 		setTimeout(function() {
 			func.apply(null, args);
 		}, 0);
+	},
+
+	/**
+	 * Create a function that will call a function func with arguments
+	 * through setTimeout set to zero.
+	 * @param {Function} func The function to wrap.
+	 * @param {Object} args Any arguments to attach to function call.
+	 *
+	 * @return {Function} Return newly created delayed function.
+	 */
+	defered: function(func, args) {
+		args = args || [];
+		return function() {
+			var args2 = args.concat([].slice.call(arguments, 0));
+
+			Function.defer(func, args2);
+		};
 	}
 });
 
