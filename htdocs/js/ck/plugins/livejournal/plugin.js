@@ -1227,6 +1227,7 @@
 					if (likeNode) {
 						likeNode.setAttribute('buttons', attr.join(','));
 						likeNode.setAttribute('lj-content', encodeURIComponent('<span class="lj-like-wrapper">' + likeHtml.join('') + '</span>'));
+						likeNode.removeAttribute('defaults');
 					} else {
 						likeNode = new CKEDITOR.dom.element('iframe', editor.document);
 						likeNode.setAttribute('lj-class', 'lj-like');
