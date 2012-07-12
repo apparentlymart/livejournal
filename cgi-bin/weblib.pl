@@ -2498,9 +2498,8 @@ sub need_var {
     }
 
     while (my ($k, $v) = each %vars) {
-        if ( exists $LJ::JSVAR{$k} ) {
-            warn 'JS Variable override: '. $k;
-        }
+        warn 'JS Variable override: '. $k
+            if $LJ::IS_DEV_SERVER and exists $LJ::JSVAR{$k};
 
         $LJ::JSVAR{$k} = $v;
     }
