@@ -20,6 +20,9 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning commenturl.\n";
     $dbh->do("DELETE FROM commenturls WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 50000");
 
+    print "-I- Cleaning syslog table.\n";
+    $dbh->do("DELETE FROM syslog WHERE log_time < UNIX_TIMESTAMP() - 86400 * 30 * 2");  ## 2 months
+
     if ($LJ::COPPA_CHECK && $LJ::UNIQ_COOKIES) {
         print "-I- Cleaning underage uniqs.\n";
         $dbh->do("DELETE FROM underage WHERE timeof < (UNIX_TIMESTAMP() - 86400*90) LIMIT 2000");
