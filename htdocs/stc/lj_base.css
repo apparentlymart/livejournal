@@ -4651,15 +4651,39 @@ BODY div .b-helplink:active {
 	.b-pager-prev A:visited,
 	.b-pager-next A,
 	.b-pager-next A:link,
-	.b-pager-next A:visited {
-		text-decoration: underline;
+	.b-pager-next A:visited,
+	.b-singlepost .b-pager-prev A,
+	.b-singlepost .b-pager-prev A:link,
+	.b-singlepost .b-pager-prev A:visited,
+	.b-singlepost .b-pager-next A,
+	.b-singlepost .b-pager-next A:link,
+	.b-singlepost .b-pager-next A:visited {
 		color: #0051B7 !important;
+		text-decoration: underline;
 		}
 	.b-pager-prev A:hover,
 	.b-pager-prev A:active,
 	.b-pager-next A:hover,
-	.b-pager-next A:active {
+	.b-pager-next A:active,
+	.b-singlepost .b-pager-prev A:hover,
+	.b-singlepost .b-pager-prev A:active,
+	.b-singlepost .b-pager-next A:hover,
+	.b-singlepost .b-pager-next A:active {
 		color: #C00 !important;
+		}
+	.b-pager-first .b-pager-prev A,
+	.b-pager-first .b-pager-prev A:link,
+	.b-pager-first .b-pager-prev A:visited,
+	.b-pager-first .b-pager-prev A:hover,
+	.b-pager-first .b-pager-prev A:active,
+	.b-pager-last .b-pager-next A,
+	.b-pager-last .b-pager-next A:link,
+	.b-pager-last .b-pager-next A:visited,
+	.b-pager-last .b-pager-next A:hover,
+	.b-pager-last .b-pager-next A:active {
+		color: #777 !important;
+		text-decoration: none;
+		cursor: default;
 		}
 .b-pager-prev {
 	margin-right: 10px;
@@ -4777,8 +4801,18 @@ BODY div .b-helplink:active {
 	.b-pager-page-active A:link,
 	.b-pager-page-active A:visited,
 	.b-pager-page-active A:hover,
-	.b-pager-page-active A:active {
+	.b-pager-page-active A:active,
+	.b-singlepost .b-pager-page-active A:link,
+	.b-singlepost .b-pager-page-active A:visited,
+	.b-singlepost .b-pager-page-active A:hover,
+	.b-singlepost .b-pager-page-active A:active {
 		border: 0;
+		-moz-border-radius: 0;
+		border-radius: 0;
+		-moz-box-shadow: none;
+		-webkit-box-shadow: none;
+		box-shadow: none;
+		background: transparent;
 		color: #FFF !important;
 		text-decoration: none;
 		cursor: default;
