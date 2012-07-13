@@ -8,7 +8,7 @@ require 'ljprotocol.pl';
 use LJ::Lang;
 
 use constant { REPOST_KEYS_EXPIRING    => 60*60*2,
-               REPOST_USERS_LIST_LIMIT => 0,
+               REPOST_USERS_LIST_LIMIT => 25,
              };
 
 sub __get_count {
