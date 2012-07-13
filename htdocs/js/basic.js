@@ -1177,6 +1177,7 @@ LJ.Support.geoLocation = 'geolocation' in navigator;
 //Incomplete implementation from modernizr
 LJ.Support.touch = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
 LJ.Support.cors = window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest();
+LJ.Support.history = !!window.history.pushState;
 
 
 /* object extensions */
