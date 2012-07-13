@@ -2376,7 +2376,11 @@ sub db_logger
         return if $uri =~ m!^/(img|userpic)/!;
     }
 
-    my $rec = LJ::AccessLogRecord->new(LJ::Request->r);
+    my @recs = ( LJ::AccessLogRecord->new );
+    if ( my $additional_records = $LJ::REQ_GLOBAL{'deferred_log_records'} ) {
+        push @recs, @$additional_records;
+    }
+
     my @sinks = (
                  LJ::AccessLogSink::Database->new,
                  LJ::AccessLogSink::DInsertd->new,
@@ -2389,7 +2393,9 @@ sub db_logger
     }
 
     foreach my $sink (@sinks) {
-        $sink->log($rec);
+        foreach my $rec (@recs) {
+            $sink->log($rec);
+        }
     }
 }
 
