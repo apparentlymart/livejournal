@@ -7,16 +7,16 @@ require 'ljlib.pl';
 require 'ljprotocol.pl';
 use LJ::Lang;
 
-use constant {  REPOST_KEYS_EXPIRING => 0,
-                REPOST_USERS_LIST_LIMIT => 25,
+use constant { REPOST_KEYS_EXPIRING => 60*60*2,
+               REPOST_USERS_LIST_LIMIT => 25,
              };
-
 
 sub __get_count {
     my ($u, $jitemid) = @_;
 
     my $journalid = $u->userid;
     my $memcache_key = "reposted_count:$journalid:$jitemid";
+
     my ($count) = LJ::MemCache::get($memcache_key);
     if ($count) {
         return $count;
@@ -32,7 +32,9 @@ sub __get_count {
                                                    $u->userid,
                                                    $jitemid, );
 
-    LJ::MemCache::set($memcache_key, $count_jitemid, REPOST_KEYS_EXPIRING);
+    LJ::MemCache::set(  $memcache_key,
+                        $count_jitemid,
+                        REPOST_KEYS_EXPIRING );
 
     return $count_jitemid;
 }
@@ -52,12 +54,12 @@ sub __get_repostid {
         or die "get cluster for journal failed";
 
     my @repost_jitemid = $dbcr->selectrow_array( 'SELECT reposted_jitemid ' .
-                                                  'FROM repost2 ' .
-                                                  'WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
-                                                  undef,
-                                                  $u->userid,
-                                                  $jitemid,
-                                                  $reposterid, );
+                                                 'FROM repost2 ' .
+                                                 'WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
+                                                 undef,
+                                                 $u->userid,
+                                                 $jitemid,
+                                                 $reposterid, );
 
     if (@repost_jitemid) {
         LJ::MemCache::set($memcache_key, $repost_jitemid[0], REPOST_KEYS_EXPIRING);
@@ -68,55 +70,68 @@ sub __get_repostid {
 }
 
 sub __create_repost_record {
-    my ($u, $itemid, $repost_journalid, $repost_itemid) = @_;
+    my ($u, $jitemid, $repost_journalid, $repost_itemid) = @_;
 
     my $journalid = $u->userid;
     my $time  = time();
-    my $query = 'INSERT INTO repost2(journalid,
-                                    jitemid,
-                                    reposterid,
-                                    reposted_jitemid';
-    $query .= LJ::is_enabled('repost2_with_time') ? 
-                            ',repost_time) VALUES(?,?,?,?,?)' :
-                            ') VALUES(?,?,?,?)'; 
-                                    
+    my $query = 'INSERT INTO repost2 (journalid,' .
+                                     'jitemid,' .
+                                     'reposterid, ' .
+                                     'reposted_jitemid' .
+                                     ',repost_time) VALUES(?,?,?,?,?)'; 
+
     $u->do( $query,
             undef,
             $u->userid,
-            $itemid,
+            $jitemid,
             $repost_journalid,
             $repost_itemid,
             $time );
 
-    my $memcache_key_count = "reposted_count:$journalid:$itemid";
-    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$repost_journalid";
+    # 
+    # remove last users list block from cache
+    # 
+    my $current_count = __get_count($u, $jitemid);
+    my $last_block_id = int( $current_count / REPOST_USERS_LIST_LIMIT );    
+    LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id");
+    
+    #
+    # inc or add reposters counter
+    #
+    my $memcache_key_count = "reposted_count:$journalid:$jitemid";
+    LJ::MemCache::incr($memcache_key_count, 1);       
 
-    __clear_reposters_list($journalid, $itemid);
-
-    if (!LJ::MemCache::incr($memcache_key_count, 1)) {
-        my $count = __get_count($u, $itemid);
-        LJ::MemCache::add($memcache_key_count, int($count));
-    }
-
+    my $memcache_key_status = "reposted_itemid:$journalid:$jitemid:$repost_journalid";
     LJ::MemCache::set($memcache_key_status, $repost_itemid, REPOST_KEYS_EXPIRING);
 }
 
 sub __delete_repost_record {
-    my ($u, $itemid, $reposterid) = @_;
-
+    my ($u, $jitemid, $reposterid) = @_;
     my $journalid = $u->userid;
-    my $memcache_key = "reposted_count:$journalid:$itemid";
-    my $memcache_key_status = "reposted_itemid:$journalid:$itemid:$reposterid";
-    LJ::MemCache::delete($memcache_key);
-    LJ::MemCache::delete($memcache_key_status);
 
-    __clear_reposters_list($journalid, $itemid);
-
+    #
+    # remove users list
+    #
+    __clean_reposters_list($u, $jitemid);
+    
+    #
+    # remove record from db
+    #
     $u->do('DELETE FROM repost2 WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
             undef,
             $u->userid,
-            $itemid,
+            $jitemid,
             $reposterid,);
+
+    #
+    # remove cached reposts count 
+    #
+    LJ::MemCache::delete("reposted_count:$journalid:$jitemid");
+        
+    #
+    # remove cached status
+    #
+    LJ::MemCache::delete("reposted_itemid:$journalid:$jitemid:$reposterid");
 }
 
 sub __create_post {
@@ -131,23 +146,31 @@ sub __create_post {
     my $event_text_stub = LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url}) | 
                           "Entry reposted from $url";
 
+    #
+    # Needs to create new entry
+    #
     my %req = ( 'username'    => $u->user,
                 'event'       => $event_text_stub,
                 'subject'     => '',
                 'tz'          => $timezone,
               );
 
-    # move to LJ::API
-    my $res = LJ::Protocol::do_request("postevent", \%req, \$err, $flags);
-
-    $flags->{u} = undef;
+    #
+    # Sends request to create new 
+    #
+    my $res = LJ::Protocol::do_request("postevent", 
+                                        \%req, 
+                                        \$err, 
+                                        $flags);
+                                        
     if ($err) {
          my ($code, $text) = split(/:/, $err);
          $$error = LJ::API::Error->make_error( $text, -$code );
          return;
     }
 
-    return LJ::Entry->new($u, jitemid => $res->{'itemid'} );
+    return LJ::Entry->new(  $u, 
+                            jitemid => $res->{'itemid'} );
 }
 
 sub __create_repost {
@@ -159,11 +182,15 @@ sub __create_repost {
     my $error     = $opts->{'error'};
 
     if (!$entry_obj->visible_to($u)) {
-        $$error = LJ::API::Error->make_error( LJ::Lang::ml('repost.access_denied'), -9002);
+        $$error = LJ::API::Error->make_error( LJ::Lang::ml('repost.access_denied'), 
+                                              -9002);
         return;
     }
 
-    my $post_obj = __create_post($u, $timezone, $entry_obj->url, $error);
+    my $post_obj = __create_post($u, 
+                                 $timezone, 
+                                 $entry_obj->url, 
+                                 $error);
     if (!$post_obj) {
         return;
     }
@@ -172,7 +199,9 @@ sub __create_repost {
     $post_obj->convert_to_repost($mark);
     $post_obj->set_prop( 'repost' => 'e' );
 
+    #
     # create record
+    #
     my $repost_jitemid = $post_obj->jitemid;
     
     my $journalid = $entry_obj->journalid;
@@ -215,35 +244,27 @@ sub __reposters {
     return $reposted;
 }
 
-sub __clear_reposters_list {
-    my ($journalid, $jitemid) = @_;
+sub __clean_reposters_list {
+    my ($u, $jitemid) = @_;
 
-    my $subkey = "$journalid:$jitemid";
-    my $memcached_key_list = "reposters_keys_list:$subkey";
+    # get blocks count
+    my $blocks_count = int(__get_count($u, $jitemid)/REPOST_USERS_LIST_LIMIT) + 1;
+ 
+    # construct memcache keys base
+    my $journalid = $u->userid;
+    my $key_base = "reposters_list_chunk:$journalid:$jitemid";
 
-    my ($keys_list) = LJ::MemCache::get($memcached_key_list) ;
-    if (defined $keys_list) {
-        my @keys = split(/:/, $keys_list);
-        foreach my $key (@keys) {
-            my $memcache_key = "reposters_list_chunk:$subkey:$key";
-            LJ::MemCache::delete($memcache_key);
-        }
+    # clean all blocks
+    for (my $i = 0; $i < $blocks_count; $i++) {
+        LJ::MemCache::delete("$key_base:$i");
     }
-    LJ::MemCache::delete($memcached_key_list);
 }
 
 sub __put_reposters_list {
     my ($journalid, $jitemid, $data, $lastrequest) = @_;
 
-    my $subkey = "$journalid:$jitemid";
+    my $subkey       = "$journalid:$jitemid";
     my $memcache_key = "reposters_list_chunk:$subkey:$lastrequest";
-    my $memcache_keys_list = "reposters_keys_list:$subkey";
-
-    if ($lastrequest) {
-        LJ::MemCache::append($memcache_keys_list,":$lastrequest");
-    } else {
-        LJ::MemCache::set($memcache_keys_list, "$lastrequest", REPOST_KEYS_EXPIRING);
-    }
     
     my $serialized = LJ::JSON->to_json( $data );
     LJ::MemCache::set( $memcache_key, $serialized, REPOST_KEYS_EXPIRING );
@@ -278,16 +299,14 @@ sub __get_reposters {
     my $final_limit = REPOST_USERS_LIST_LIMIT + 1;
     my $query_reposters = 'SELECT reposterid ' .
                           'FROM repost2 ' .
-                          'WHERE journalid = ? AND jitemid = ? ';
-
-    $query_reposters .=  LJ::is_enabled('repost2_with_time') ? 'ORDER BY repost_time ' :  '';
-    $query_reposters .= "LIMIT $lastrequest, $final_limit";
+                          'WHERE journalid = ? AND jitemid = ? ' .
+                          'ORDER BY repost_time ' .
+                          "LIMIT $lastrequest, $final_limit";
 
     my $reposters = $dbcr->selectcol_arrayref( $query_reposters,
                                                undef,
                                                $u->userid,
                                                $jitemid,);
-
     return $reposters;
 }
 
@@ -308,26 +327,42 @@ sub get_list {
     my $journalid = $entry->journalid;
     my $jitemid   = $entry->jitemid;
 
+    #
+    # $lastrequest should be >= 0
+    #
     if (!$lastrequest || $lastrequest < 0) {
         $lastrequest = 0;
     }
 
+    #
+    # Try to get value from cache
+    #
     my $cached_reposters = __get_reposters_list($journalid, 
                                                 $jitemid, 
                                                 $lastrequest);
     if ($cached_reposters) {
+        $cached_reposters->{'count'}  = __get_count($entry->journal, 
+                                                    $entry->jitemid);
         return $cached_reposters;
     }
+    
 
+    #
+    # If there is no cache then get from db
+    #
     my $repostersids = __get_reposters( $entry->journal,
                                         $jitemid,
                                         $lastrequest );
 
+    #
+    # construct answer structure
+    #
     my $reposters_info = { users => [] };
     my $users = $reposters_info->{'users'};
 
     my $reposters_count = scalar @$repostersids;
     $reposters_info->{'last'}   = $lastrequest + 1;
+
     if ($reposters_count < REPOST_USERS_LIST_LIMIT + 1) {
         $reposters_info->{'nomore'} = 1;
     } else {
@@ -340,15 +375,21 @@ sub get_list {
     }  
  
     $reposters_info->{'last'}   = $lastrequest + 1;
-    $reposters_info->{'count'}  = __get_count($entry->journal, 
-                                              $entry->jitemid);
 
+    #
+    # put data structure to cache
+    #
     __put_reposters_list( $journalid,
                           $jitemid,
                           $reposters_info, 
                           $lastrequest );
 
-    
+    #
+    # no need to cache 'count' 
+    #
+    $reposters_info->{'count'}  = __get_count($entry->journal, 
+                                              $entry->jitemid);
+
     return $reposters_info; 
 }
 
@@ -379,15 +420,43 @@ sub delete_all_reposts_records {
 
 sub delete {
     my ($class, $u, $entry_obj) = @_;
-    my $repost_itemid = __get_repostid( $entry_obj->journal, $entry_obj->jitemid, $u->userid );
+    
+    #
+    # Get entry id to delete
+    #
+    my $repost_itemid = __get_repostid( $entry_obj->journal, 
+                                        $entry_obj->jitemid, 
+                                        $u->userid );
 
-    if ($repost_itemid) {
-        LJ::set_remote($u);
-        my $result = LJ::API::Event->delete({ itemid => $repost_itemid, journalid => $u->userid} ); 
-        if ($result->{'error'}) { 
+    #
+    # If entry exists in db 
+    #
+    if ($repost_itemid) {        
+        LJ::set_remote($u);    
+        
+        #
+        # Try to delete entry
+        #
+        my $result = LJ::API::Event->delete({ itemid => $repost_itemid, 
+                                              journalid => $u->userid   } );
+    
+        #
+        # If entry doesnt't exists then it should be removed from db
+        #
+        my $entry_not_found_code = LJ::API::Error->get_error_code('entry_not_found');        
+        my $error = $result->{'error'};
+        
+        #
+        # Error is deversed from 'entry not found'  
+        #
+        if ($error && $error->{'error_code'} != $entry_not_found_code) { 
             return $result;
         }
-        __delete_repost_record($entry_obj->journal, $entry_obj->jitemid, $u->userid);
+        
+        
+        __delete_repost_record( $entry_obj->journal, 
+                                $entry_obj->jitemid, 
+                                $u->userid);
     
         return  { 'delete' => 'OK' };
     }
@@ -417,7 +486,9 @@ sub create {
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
-    my $repost_itemid = __get_repostid( $entry_obj->journal, $jitemid, $u->userid );
+    my $repost_itemid = __get_repostid( $entry_obj->journal, 
+                                        $jitemid, 
+                                        $u->userid );
 
     my $error;
     if ($repost_itemid) {
@@ -429,13 +500,16 @@ sub create {
                                              'timezone'   => $timezone,
                                              'error'      => \$error } );
         if ($reposted_obj) {
-            my $count = __get_count($entry_obj->journal, $entry_obj->jitemid);
+            my $count = __get_count($entry_obj->journal, 
+                                    $entry_obj->jitemid);
+
             $result->{'result'} = { 'count' => $count };
         } 
     }
 
     if ($error && !$error->{'error'}) {
-        $result = LJ::API::Error->make_error( LJ::Lang::ml('api.error.unknown_error'), -9000 );
+        $result = LJ::API::Error->make_error( LJ::Lang::ml('api.error.unknown_error'), 
+                                              -9000 );
     } elsif ($error) {
         $result = $error;
     }
@@ -454,7 +528,9 @@ sub substitute_content {
         if ($link) {
             my ($org_journalid, $org_jitemid) = split(/:/, $link);
             return 0 unless int($org_journalid);
-            my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : undef;
+
+            my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : 
+                                                undef;
             
             my $fake_entry = LJ::Entry->new( $journal, jitemid => $org_jitemid);
 
