@@ -7,8 +7,8 @@ require 'ljlib.pl';
 require 'ljprotocol.pl';
 use LJ::Lang;
 
-use constant { REPOST_KEYS_EXPIRING => 60*60*2,
-               REPOST_USERS_LIST_LIMIT => 25,
+use constant { REPOST_KEYS_EXPIRING    => 60*60*2,
+               REPOST_USERS_LIST_LIMIT => 0,
              };
 
 sub __get_count {
@@ -66,11 +66,13 @@ sub __get_repostid {
         return $repost_jitemid[0];
     }
 
-    return 0;;
+    return 0;
 }
 
 sub __create_repost_record {
     my ($u, $jitemid, $repost_journalid, $repost_itemid) = @_;
+
+    my $current_count = __get_count($u, $jitemid);
 
     my $journalid = $u->userid;
     my $time  = time();
@@ -91,7 +93,6 @@ sub __create_repost_record {
     # 
     # remove last users list block from cache
     # 
-    my $current_count = __get_count($u, $jitemid);
     my $last_block_id = int( $current_count / REPOST_USERS_LIST_LIMIT );    
     LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id");
     
@@ -296,12 +297,13 @@ sub __get_reposters {
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
+    my $block_begin = $lastrequest * REPOST_USERS_LIST_LIMIT;
     my $final_limit = REPOST_USERS_LIST_LIMIT + 1;
     my $query_reposters = 'SELECT reposterid ' .
                           'FROM repost2 ' .
                           'WHERE journalid = ? AND jitemid = ? ' .
                           'ORDER BY repost_time ' .
-                          "LIMIT $lastrequest, $final_limit";
+                          "LIMIT $block_begin, $final_limit";
 
     my $reposters = $dbcr->selectcol_arrayref( $query_reposters,
                                                undef,
