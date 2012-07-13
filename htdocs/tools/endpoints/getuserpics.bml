@@ -17,27 +17,36 @@
     # get userpics
     my @userpics = LJ::Userpic->load_user_userpics($u);
 
-    my %upics = (); # info to return
-    $upics{pics} = {}; # upicid -> hashref of metadata
+    my $pics = {};
 
     foreach my $upic (@userpics) {
         next if $upic->inactive;
 
         my $id = $upic->id;
-        $upics{pics}{$id} = {
-            url => $upic->url,
-            state => $upic->state,
-            width => $upic->width,
-            height => $upic->height,
-            comment => LJ::strip_html($upic->comment),
-            id => $id,
+
+        $pics->{$id} = {
+            url      => $upic->url,
+            state    => $upic->state,
+            width    => $upic->width,
+            height   => $upic->height,
+            comment  => LJ::strip_html($upic->comment),
+            id       => $id,
             keywords => [ map { LJ::strip_html($_) } $upic->keywords],
+            keyword  => scalar $upic->keywords,
         };
     }
 
-    $upics{ids} = [keys %{$upics{pics}}];
     sleep 1 if $LJ::IS_DEV_SERVER;
 
-    return LJ::JSON->to_json(\%upics);
+    return LJ::JSON->to_json({
+        pics => $pics,
+        ids  => [
+            map {
+                $_->{'id'}
+            } sort {
+                $a->{'keyword'} cmp $b->{'keyword'}
+            } values %$pics
+        ],
+    });
 }
 _code?>
