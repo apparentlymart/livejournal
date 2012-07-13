@@ -3,8 +3,6 @@
  For licensing, see LICENSE.html or http://ckeditor.com/license
  */
 
-
-
 CKEDITOR.editorConfig = function(config) {
 	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljlink', 'plugins/lj/ljlink/plugin.js' );
@@ -74,7 +72,6 @@ CKEDITOR.editorConfig = function(config) {
 	
 	var toolbar = [];
 
-
 	function ifEnabled(condition, what) {
 		return condition ? what : undefined;
 	}
@@ -122,6 +119,7 @@ CKEDITOR.editorConfig = function(config) {
 			'LJLink',
 			'LJUserLink',
 			'image',
+			ifEnabled(Site.media_embed_enabled, 'LJEmbedLink'),
 
 			'LJPollLink',
 			'LJCutLink',
@@ -191,7 +189,10 @@ CKEDITOR.editorConfig = function(config) {
 	config.pasteFromWordRemoveFontStyles = false;
 	config.pasteFromWordRemoveStyles = false;
 
-	config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
+	if (!Site.page.ljpost) {
+		config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
+	}
+	
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
 };
 
