@@ -349,10 +349,16 @@ LiveJournal.parseGetArgs = function (url) {
  * @return {String}
  */
 LiveJournal.constructUrl = function(base, args, escapeArgs) {
-	var queryStr = base + ( base.indexOf('?') === -1 ? '?' : '&' ), queryArr = [];
+	base = base.replace(/(\&|\?)+$/g, '');
+	var queryStr = base,
+		queryArr = [];
+	
+	if (args) {
+		queryStr += ( base.indexOf('?') === -1 ? '?' : '&' );
 
-	for (var i in args) {
-		queryArr.push(i + '=' + ( ( escapeArgs ) ? encodeURIComponent(args[i]) : args[i] ));
+		for (var i in args) {
+			queryArr.push(i + '=' + ( ( escapeArgs ) ? encodeURIComponent(args[i]) : args[i] ));
+		}
 	}
 
 	return queryStr + queryArr.join('&');
