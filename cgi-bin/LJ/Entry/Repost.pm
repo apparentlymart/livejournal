@@ -97,6 +97,14 @@ sub __create_repost_record {
     LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id");
     
     #
+    # remove prev block too
+    #
+    if ($last_block_id > 0) {
+        $last_block_id--;
+        LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id")
+    }
+    
+    #
     # inc or add reposters counter
     #
     my $memcache_key_count = "reposted_count:$journalid:$jitemid";
