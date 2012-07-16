@@ -76,6 +76,9 @@
 		},
 		LJSpoiler: {
 			html: encodeURIComponent(CKLang.LJSpoiler_WizardNotice + '<br /><a href="#" lj-cmd="LJSpoiler">' + CKLang.LJSpoiler_WizardNoticeLink + '</a>')
+		},
+		LJEmbedLink: {
+
 		}
 	};
 
@@ -447,7 +450,6 @@
 				noteData ? CKEDITOR.note.show(noteData) : CKEDITOR.note.hide();
 			}
 
-
 			// Configure editor
 			(function () {
 				function closeTag(result) {
@@ -457,6 +459,10 @@
 				function createPoll(ljtags) {
 					var poll = new Poll(ljtags);
 					return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
+				}
+
+				function createUneditablePoll(ljtags, pollId) {
+					return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + escape(ljtags) + '" lj-content="Poll id: ' + pollId + '" data-disabledPoll="true"></iframe>';
 				}
 
 				function createEmbed(result, attrs, data) {
@@ -483,6 +489,7 @@
 						.replace(/(<lj-cut[^>]*?)\/>/gi, '$1>')
 						.replace(/<((?!br)[^\s>]+)([^>]*?)\/>/gi, '<$1$2></$1>')
 						.replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi, createPoll)
+						.replace(/<lj-poll-([0-9]+)>/gi, createUneditablePoll)
 						.replace(/<lj-repost\s*(?:button\s*=\s*(?:"([^"]*?)")|(?:"([^']*?)"))?.*?>([\s\S]*?)<\/lj-repost>/gi, createRepost)
 						.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, createEmbed);
 
@@ -541,11 +548,9 @@
 				updateFrames();
 			});
 
-
-
 			// LJ Buttons
 
-			// LJ User Button
+			// LJ User
 			(function () {
 				var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
 					button = 'LJUserLink';
@@ -634,31 +639,31 @@
 				});
 			})();
 
-			// LJ Image Button
-			if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
-				editor.ui.addButton('image', {
-					label: CKLang.LJImage_Title,
-					command: 'image'
-				});
-			} else {
-				editor.addCommand('LJImage', {
-					exec: function () {
-						if (typeof InOb !== 'undefined') {
-							InOb.handleInsertImageBeta('upload');
-						} else {
+			// LJ Image
+			(function() {
+				var button = "LJImage";
+
+				if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
+					editor.ui.addButton('image', {
+						label: CKLang.LJImage_Title,
+						command: 'image'
+					});
+				} else {
+					editor.addCommand(button, {
+						exec: function () {
 							jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
-						}
-					},
-					editorFocus: false
-				});
+						},
+						editorFocus: false
+					});
 
-				editor.ui.addButton('image', {
-					label: CKLang.LJImage_Title,
-					command: 'LJImage'
-				});
-			}
+					editor.ui.addButton('image', {
+						label: CKLang.LJImage_Title,
+						command: button
+					});
+				}
+			})();
 
-			// LJ Embed Media Button
+			// LJ Embed
 			(function () {
 				function doEmbed(content) {
 					if (content && content.length && window.switchedRteOn) {
@@ -738,7 +743,7 @@
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								// https://jira.sup.com/browse/LJSV-2328
 								ranges[i].enlarge( CKEDITOR.ENLARGE_ELEMENT );
-								
+
 								fragment.append(ranges[i].extractContents());
 							}
 						}
@@ -763,61 +768,69 @@
 
 			}
 
-			// LJ Cut Button
-			LiveJournal.register_hook('cut_response', function(text) {
-				doubleFrameCommand('lj-cut', 'LJCut', {
-					title: CKLang.LJCut_PromptTitle,
-					text: CKLang.LJCut_PromptText,
+			// LJ Cut
+			(function() {
+				var button = "LJCut",
+					widget = "cut";
 
-					skip: text
-				});
-			});
+				LiveJournal.register_hook('cut_response', function(text) {
+					doubleFrameCommand('lj-cut', button, {
+						title: CKLang.LJCut_PromptTitle,
+						text: CKLang.LJCut_PromptText,
 
-			editor.addCommand('LJCut', {
-				exec: function() {
-					var button = 'LJCut',
-						node = ljTagsData[button].node;
-
-					LiveJournal.run_hook('rteButton', 'cut', jQuery('.cke_button_' + button), {
-						defaultText: node ? node.getAttribute('text') : '',
-						editMode: node? true : false
+						skip: text
 					});
-				},
-				editorFocus: false
-			});
-
-			editor.ui.addButton('LJCut', {
-				label: CKLang.LJCut_Title,
-				command: 'LJCut'
-			});
-
-			// LJ Spoiler Button
-			LiveJournal.register_hook('spoiler_response', function(text) {
-				doubleFrameCommand('lj-spoiler', 'LJSpoiler', {
-					title: CKLang.LJCut_PromptTitle,
-					text: CKLang.LJCut_PromptText,
-
-					skip: text
 				});
-			});
 
-			editor.addCommand('LJSpoiler', {
-				exec: function() {
-					var button = 'LJSpoiler',
-						node = ljTagsData[button].node;
+				editor.addCommand('LJCut', {
+					exec: function() {
+						var node = ljTagsData[button].node;
 
-					LiveJournal.run_hook('rteButton', 'spoiler', jQuery('.cke_button_' + button), {
-						defaultText: node ? node.getAttribute('text') : '',
-						editMode: node? true : false
+						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+							defaultText: node ? node.getAttribute('text') : '',
+							editMode: node? true : false
+						});
+					},
+					editorFocus: false
+				});
+
+				editor.ui.addButton(button, {
+					label: CKLang.LJCut_Title,
+					command: button
+				});
+			})();
+
+			// LJ Spoiler
+			(function() {
+				var button = "LJSpoiler",
+					widget = "spoiler";
+
+				LiveJournal.register_hook('spoiler_response', function(text) {
+					doubleFrameCommand('lj-spoiler', button, {
+						title: CKLang.LJCut_PromptTitle,
+						text: CKLang.LJCut_PromptText,
+
+						skip: text
 					});
-				},
-				editorFocus: false
-			});
+				});
 
-			editor.ui.addButton('LJSpoiler', {
-				label: CKLang.LJSpoiler_Title,
-				command: 'LJSpoiler'
-			});
+				editor.addCommand(button, {
+					exec: function() {
+						var node = ljTagsData[button].node;
+
+						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+							defaultText: node ? node.getAttribute('text') : '',
+							editMode: node? true : false
+						});
+					},
+					editorFocus: false
+				});
+
+				editor.ui.addButton(button, {
+					label: CKLang.LJSpoiler_Title,
+					command: button
+				});
+			})();
 
 			// LJ Justify
 			(function() {
@@ -1010,19 +1023,16 @@
 				editor.on('dirChanged', onDirChanged);
 			})();
 
-
-			// LJ NEW POLL
+			// LJ Poll
 			(function() {
+				var button = 'LJPollLink';
+
 				LiveJournal.register_hook('poll_response', function(ljData) {
-					//console.log('got poll poll_response', ljData);
+					var poll = new Poll(ljData), // Poll.js
+						pollSource = poll.outputHTML(),
+						pollLJTags = poll.outputLJtags();
 
-					var poll = new Poll(ljData);
-					var pollSource = poll.outputHTML();
-					var pollLJTags = poll.outputLJtags();
-
-					//console.log('res', ljData, pollSource, pollLJTags);
-
-					var node = ljTagsData.LJPollLink.node;
+					var node = ljTagsData[button].node;
 					if (node) {
 						node.setAttribute('lj-content', pollSource);
 						node.setAttribute('lj-data', pollLJTags);
@@ -1042,164 +1052,34 @@
 					updateFrames();
 				});
 
-				editor.addCommand('LJPollLink', {
+				editor.addCommand(button, {
 					exec: function(editor) {
-						var button = 'LJPollLink';
+						var node = ljTagsData.LJPollLink.node;
 
-						if (ljTagsData.LJPollLink.node) {
+						if (node) {
 							LiveJournal.run_hook('rteButton', 'poll', jQuery('.cke_button_' + button), {
-								ljData: decodeURIComponent(ljTagsData.LJPollLink.node.getAttribute('lj-data')),
-								editMode: true
+								ljData: decodeURIComponent(node.getAttribute('lj-data')),
+								editMode: true,
+								disabled: node && (node.getAttribute('data-disabledPoll') ? true : false)
 							});
 						} else {
 							LiveJournal.run_hook('rteButton', 'poll', jQuery('.cke_button_' + button));
 						}
-
-						
 					},
 					editorFocus: false
 				});
 
-				editor.ui.addButton('LJPollLink', {
+				editor.ui.addButton(button, {
 					label: CKLang.LJPoll_Title,
-					command: 'LJPollLink'
+					command: button
 				});
 			})();
 
-			// // LJ Poll Button
-			// if (Site.page.makepoll) {
-			// 	CKEDITOR.dialog.add('LJPollDialog', function() {
-			// 		var isAllFrameLoad = 0, okButtonNode, questionsWindow, setupWindow, onLoadPollPage = function() {
-			// 			if (this.removeListener) {
-			// 				this.removeListener('load', onLoadPollPage);
-			// 			}
-			// 			if (isAllFrameLoad && okButtonNode) {
-			// 				currentPoll = new Poll(ljTagsData.LJPollLink.node && decodeURIComponent(ljTagsData.LJPollLink.node.getAttribute('lj-data')), questionsWindow.document, setupWindow.document, questionsWindow.Questions);
-
-			// 				questionsWindow.ready(currentPoll);
-			// 				setupWindow.ready(currentPoll);
-
-			// 				okButtonNode.style.display = 'block';
-			// 				CKEDITOR.note && CKEDITOR.note.hide(true);
-			// 			} else {
-			// 				isAllFrameLoad++;
-			// 			}
-			// 		}, buttonsDefinition = [new CKEDITOR.ui.button({
-			// 			type: 'button',
-			// 			id: 'LJPoll_Ok',
-			// 			label: editor.lang.common.ok,
-			// 			onClick: function(evt) {
-			// 				evt.data.dialog.hide();
-			// 				var poll = new Poll(currentPoll, questionsWindow.document, setupWindow.document, questionsWindow.Questions);
-			// 				var pollSource = poll.outputHTML();
-			// 				var pollLJTags = poll.outputLJtags();
-
-			// 				if (pollSource.length > 0) {
-			// 					var node = ljTagsData.LJPollLink.node;
-			// 					if (node) {
-			// 						node.setAttribute('lj-content', pollSource);
-			// 						node.setAttribute('lj-data', pollLJTags);
-			// 						node.removeAttribute('style');
-			// 						node.$.contentWindow.document.body.className = 'lj-poll';
-			// 					} else {
-			// 						node = new CKEDITOR.dom.element('iframe', editor.document);
-			// 						node.setAttribute('lj-content', pollSource);
-			// 						node.setAttribute('lj-cmd', 'LJPollLink');
-			// 						node.setAttribute('lj-data', pollLJTags);
-			// 						node.setAttribute('lj-class', 'lj-poll');
-			// 						node.setAttribute('class', 'lj-poll-wrap');
-			// 						node.setAttribute('frameBorder', 0);
-			// 						node.setAttribute('allowTransparency', 'true');
-			// 						editor.insertElement(node);
-			// 					}
-			// 					ljTagsData.LJPollLink.node = null;
-			// 					updateFrames();
-			// 				}
-			// 			}
-			// 		}), CKEDITOR.dialog.cancelButton];
-
-			// 		CKEDITOR.env.mac && buttonsDefinition.reverse();
-
-			// 		return {
-			// 			title: CKLang.Poll_PollWizardTitle,
-			// 			width: 420,
-			// 			height: 270,
-			// 			resizable: false,
-			// 			onShow: function() {
-			// 				if (isAllFrameLoad) {
-			// 					currentPoll = new Poll(ljTagsData.LJPollLink.node && unescape(ljTagsData.LJPollLink.node.getAttribute('data')), questionsWindow.document, setupWindow.document, questionsWindow.Questions);
-			// 					questionsWindow.ready(currentPoll);
-			// 					setupWindow.ready(currentPoll);
-			// 				}
-			// 			},
-			// 			contents: [
-			// 				{
-			// 					id: 'LJPoll_Setup',
-			// 					label: 'Setup',
-			// 					padding: 0,
-			// 					elements: [
-			// 						{
-			// 							type: 'html',
-			// 							html: '<iframe src="/tools/ck_poll_setup.bml" allowTransparency="true" frameborder="0" style="width:100%; height:320px;"></iframe>',
-			// 							onShow: function(data) {
-			// 								if (!okButtonNode) {
-			// 									(okButtonNode = document.getElementById(data.sender.getButton('LJPoll_Ok').domId).parentNode).style.display = 'none';
-			// 								}
-			// 								var iframe = this.getElement('iframe');
-			// 								setupWindow = iframe.$.contentWindow;
-			// 								if (setupWindow.ready) {
-			// 									onLoadPollPage();
-			// 								} else {
-			// 									iframe.on('load', onLoadPollPage);
-			// 								}
-			// 							}
-			// 						}
-			// 					]
-			// 				},
-			// 				{
-			// 					id: 'LJPoll_Questions',
-			// 					label: 'Questions',
-			// 					padding: 0,
-			// 					elements:[
-			// 						{
-			// 							type: 'html',
-			// 							html: '<iframe src="/tools/ck_poll_questions.bml" allowTransparency="true" frameborder="0" style="width:100%; height:320px;"></iframe>',
-			// 							onShow: function() {
-			// 								var iframe = this.getElement('iframe');
-			// 								questionsWindow = iframe.$.contentWindow;
-			// 								if (questionsWindow.ready) {
-			// 									onLoadPollPage();
-			// 								} else {
-			// 									iframe.on('load', onLoadPollPage);
-			// 								}
-			// 							}
-			// 						}
-			// 					]
-			// 				}
-			// 			],
-			// 			buttons: buttonsDefinition
-			// 		};
-			// 	});
-
-			// 	editor.addCommand('LJPollLink', new CKEDITOR.dialogCommand('LJPollDialog'));
-			// } else {
-			// 	editor.addCommand('LJPollLink', {
-			// 		exec: function() {
-			// 			CKEDITOR.note && CKEDITOR.note.show(CKLang.Poll_AccountLevelNotice, null, null, true);
-			// 		}
-			// 	});
-
-			// 	editor.getCommand('LJPollLink').setState(CKEDITOR.TRISTATE_DISABLED);
-			// }
-
-			// editor.ui.addButton('LJPollLink', {
-			// 	label: CKLang.Poll_Title,
-			// 	command: 'LJPollLink'
-			// });
-
-
-			// LJ New Like
+			// LJ Like
 			(function() {
+				var button = 'LJLike',
+					widget = "like";
+
 				likeButtons.defaultButtons = [];
 				for (var i = 0; i < likeButtons.length; i++) {
 					button = likeButtons[i];
@@ -1214,8 +1094,6 @@
 					var attr = [],
 						likeHtml = [],
 						isDefaultSet = typeof buttons === 'string';
-
-					//console.log(buttons);
 
 					for (var i = 0; i < likeButtons.length; i++) {
 						button = likeButtons[i];
@@ -1250,29 +1128,24 @@
 					updateFrames();
 				});
 
-				editor.addCommand('LJLike', {
+				editor.addCommand(button, {
 					exec: function(editor) {
-						var button = 'LJLike';
+						var node = ljTagsData.LJLike.node;
 
-						//console.log(ljTagsData.LJLike.node);
-
-						if (ljTagsData.LJLike.node) {
-							LiveJournal.run_hook('rteButton', 'like', jQuery('.cke_button_' + button), {
-								buttons: ljTagsData.LJLike.node.getAttribute('buttons')
+						if (node) {
+							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+								buttons: node.getAttribute('buttons')
 							});
 						} else {
-							LiveJournal.run_hook('rteButton', 'like', jQuery('.cke_button_' + button));
+							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button));
 						}
-
-						
-						//console.log(arguments);
 					},
 					editorFocus: false
 				});
 
-				editor.ui.addButton('LJLike', {
+				editor.ui.addButton(button, {
 					label: CKLang.LJLike_Title,
-					command: 'LJLike'
+					command: button
 				});
 			})();
 
