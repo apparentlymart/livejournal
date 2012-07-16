@@ -736,6 +736,9 @@
 
 						if (range.collapsed === false) {
 							for (var i = 0, l = ranges.length; i < l; i++) {
+								// https://jira.sup.com/browse/LJSV-2328
+								ranges[i].enlarge( CKEDITOR.ENLARGE_ELEMENT );
+								
 								fragment.append(ranges[i].extractContents());
 							}
 						}
