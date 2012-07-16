@@ -660,6 +660,31 @@ sub substitute_content {
             ${$opts->{'event'}} = $event_text;
         }
     }
+    
+    if ($opts->{'head_mob'}) {
+        my $event_text = $original_entry_obj->event_raw;
+
+        if ($props->{use_repost_signature}) {
+            my $journal = $original_entry_obj->journal; 
+
+            my $text_var;
+            if ($journal->is_community) {
+                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.community.owner' : 
+                                                                        'entry.reference.journal.community.guest';
+            } else {
+                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' :
+                                                                        'entry.reference.journal.guest';
+            }
+
+            my $event =  LJ::Lang::ml($text_var,  
+                                        { 'author'          => LJ::ljuser($original_entry_obj->poster),
+                                          'reposter'        => LJ::ljuser($entry_obj->poster),
+                                          'communityname'   => LJ::ljuser($original_entry_obj->journal),,
+                                          'datetime'        => $entry_obj->eventtime_mysql,
+                                          'text'            => "", });
+            ${$opts->{'head_mob'}} = $event;
+        }
+    }
 
     if ($opts->{'event_friend'}) {
         my $event_text = $original_entry_obj->event_raw;
