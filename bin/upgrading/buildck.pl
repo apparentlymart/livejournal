@@ -6,7 +6,7 @@ use Getopt::Long;
 # This script downloads CKEditor source tarball, builds it and installs
 #
 
-my $version  = '3.6.3';
+my $version  = '3.6.2';
 my $build    = join('/', $ENV{'LJHOME'}, qw{ build });
 my $ljsource = join('/', $ENV{'LJHOME'}, qw{ htdocs js ck });
 my $clean    = 0;
@@ -27,11 +27,11 @@ unless ( -d $build ) {
 
 chdir $build or die "Failed to change directory to $build: $!";
 
-`wget $source -O ckeditor.tar.gz` unless -f 'ckeditor.tar.gz';
+`wget $source -O ckeditor-$version.tar.gz` unless -f "ckeditor-$version.tar.gz";
 
 die 'Failed to fetch tarball' if $?;
 
-`tar xpf ckeditor.tar.gz`;
+`tar xpf ckeditor-$version.tar.gz`;
 `mv ckeditor/* ./`;
 `rm -rf ckeditor`;
 
@@ -65,7 +65,7 @@ die 'Build failed' if $?;
 print "Build complete\n";
 
 print "Clean up\n" if $clean;
-`rm -rf \$(ls | grep -Pv '(?:ckeditor(?:-dev)?.js|ckeditor.tar.gz)')` if $clean;
+`rm -rf \$(ls | grep -Pv '(?:ckeditor(?:-dev)?.js|ckeditor(.*).tar.gz)')` if $clean;
 
 if ( -f 'ckeditor.js' and -f 'ckeditor-dev.js' ) {
     print `cp -v ckeditor.js ckeditor-dev.js $ljsource` if $deploy;
