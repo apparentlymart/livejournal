@@ -751,6 +751,7 @@
 
 						selection.selectRanges(ranges);
 
+						editor.fire('updateSnapshot');
 						updateFrames();
 					}
 
