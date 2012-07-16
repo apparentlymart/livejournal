@@ -44,7 +44,7 @@
             map {
                 $_->{'id'}
             } sort {
-                $a->{'keyword'} cmp $b->{'keyword'}
+                lc $a->{'keyword'} cmp lc $b->{'keyword'}
             } values %$pics
         ],
     });
