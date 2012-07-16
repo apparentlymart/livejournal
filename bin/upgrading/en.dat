@@ -6075,6 +6075,8 @@ talk.poll.controls.up=Up
 
 talk.poll.create=Poll Creator
 
+talk.poll.disabled=Editing poll is disabled
+
 talk.poll.extra.head=Creating a Poll
 
 talk.poll.extra.preview.head=Poll Preview
