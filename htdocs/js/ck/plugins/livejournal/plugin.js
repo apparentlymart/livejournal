@@ -1082,12 +1082,10 @@
 
 				likeButtons.defaultButtons = [];
 				for (var i = 0; i < likeButtons.length; i++) {
-					button = likeButtons[i];
-
+					btn = likeButtons[i];
 					// WTF
-					likeButtons[button.id] = likeButtons[button.abbr] = button;
-
-					likeButtons.defaultButtons.push(button.id);
+					likeButtons[btn.id] = likeButtons[btn.abbr] = btn;
+					likeButtons.defaultButtons.push(btn.id);
 				}
 
 				LiveJournal.register_hook('like_response', function(buttons) {
@@ -1095,16 +1093,16 @@
 						likeHtml = [],
 						isDefaultSet = typeof buttons === 'string';
 
-					for (var i = 0; i < likeButtons.length; i++) {
-						button = likeButtons[i];
+					for (var i = 0, btn; i < likeButtons.length; i++) {
+						btn = likeButtons[i];
 
-						if ((isDefaultSet && button.checked) || buttons.indexOf(button.id) != -1) {
-							attr.push(button.id);
-							likeHtml.push(button.html);
+						if ((isDefaultSet && btn.checked) || buttons.indexOf(btn.id) != -1) {
+							attr.push(btn.id);
+							likeHtml.push(btn.html);
 						}
 					}
 
-					var likeNode = ljTagsData.LJLike.node;
+					var likeNode = ljTagsData[button].node;
 
 					if (likeNode) {
 						likeNode.setAttribute('buttons', attr.join(','));
@@ -1130,7 +1128,7 @@
 
 				editor.addCommand(button, {
 					exec: function(editor) {
-						var node = ljTagsData.LJLike.node;
+						var node = ljTagsData[button].node;
 
 						if (node) {
 							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
@@ -1148,7 +1146,6 @@
 					command: button
 				});
 			})();
-
 		},
 		afterInit: function(editor) {
 			var dataProcessor = editor.dataProcessor;
