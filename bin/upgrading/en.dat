@@ -1829,6 +1829,19 @@ Regards,
 
 .
 
+esn.comm_join_approve.email_html<<
+Dear [[username]],<br />
+<br />
+Your request to join the "[[community]]" community has been approved. The community has been added to your 'Watching' list, so that its entries appear on your Friends page.<br />
+<br />
+Please note that replies to this email are not sent to the community's maintainer(s). If you <br />
+have any questions, you will need to contact them directly.<br/>
+<br />
+Regards,<br />
+[[sitename]] Team<br />
+.
+
+
 esn.comm_join_reject.alert|staleness=1
 esn.comm_join_reject.alert=Your request to join [[community]] community has been declined.
 

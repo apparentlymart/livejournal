@@ -37,6 +37,7 @@ my @_ml_strings_en = (
                                             #[[sitename]] Team
                                             #
                                             #',
+    'esn.comm_join_approve.email_html',
 );
 
 sub as_email_subject {
@@ -67,7 +68,10 @@ sub _as_email {
                 'esn.add_friend_community'  => [ 1, "$LJ::SITEROOT/friends/add.bml?user=" . $cu->{user} ],
             });
 
-    return LJ::Lang::get_text($lang, 'esn.comm_join_approve.email_text', undef, $vars);
+    my $lang_var = $is_html ? 'esn.comm_join_approve.email_html' :
+                              'esn.comm_join_approve.email_text';
+
+    return LJ::Lang::get_text($lang, $lang_var, undef, $vars);
 }
 
 sub as_email_string {
