@@ -923,7 +923,7 @@ LJ.UI.mixin = function(name, module) {
 			case 'string':
 				/* Sometimes detection fails (when options string has line breaks) */
 				try {
-					options = JSON.parse(options || '{}');
+					options = LiveJournal.JSON.parse(options || '{}');
 				} catch (error) {
 					LJ.console.warn('Invalid options string: ' + options);
 					options = {};
