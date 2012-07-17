@@ -137,7 +137,7 @@
 
 			this._initialUpdateDate = this.options.updateDate;
 
-			if (!this._isOldDesign) {
+			if (!this._isOldDesign && !LJ.pageVar('is_edit')) {
 				this._el('timezone').val(- (new Date()).getTimezoneOffset()/0.6);
 			}
 
