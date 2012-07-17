@@ -427,9 +427,10 @@ sub trans {
     }
 
     if ($host=~m!^(?:http://)?([\w-]+)\.\Q$LJ::USER_DOMAIN\E(?:$|/)!xo) {
-        if ($1 && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($1)})) {
+        my $username = $1;
+        if ($username && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($username)})) {
             $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
-                return redir($redir_url.$uri);
+            return redir($redir_url.$uri);
         }
     }
 
