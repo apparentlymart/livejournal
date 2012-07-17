@@ -426,6 +426,12 @@ sub trans {
         }
     }
 
+    if ($host=~m!^(?:http://)?([\w-]+)\.\Q$LJ::USER_DOMAIN\E(?:$|/)!xo) {
+        if ($1 && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($1)})) {
+            $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
+                return redir($redir_url.$uri);
+        }
+    }
 
     # process controller
     # if defined
@@ -1186,11 +1192,6 @@ sub trans {
         else {
             my $u = LJ::load_user($user);
             LJ::set_active_journal($u) if $u;
-
-            if ($u && (my $url = $LJ::DOMAIN_JOURNALS{$u->user})) {
-                $url = "http://".$url unless $url =~ m!https?://!;
-                return redir($url);
-            }
 
             my $view = $determine_view->($user, "users", $uri);
             return $view if defined $view;
