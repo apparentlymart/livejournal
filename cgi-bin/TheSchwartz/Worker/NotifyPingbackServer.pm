@@ -3,6 +3,7 @@ use strict;
 use base 'TheSchwartz::Worker';
 use LJ::Entry;
 use LJ::PingBack;
+use LJ::ExtBlock;
 
 sub work {
     my ($class, $job) = @_;
@@ -27,6 +28,18 @@ sub send_ping {
 
     my $source_entry = LJ::Entry->new_from_url($source_uri);
     return unless $source_entry;
+    
+    my $antispam_params = &_get_antispam_params();
+    if ( $antispam_params->{enable_reader_weight} ) {
+
+        my $weight_data = LJ::PersonalStats::DB->fetch_raw('ratings', {
+            func => 'get_reader_weight',
+            journal_id => $source_entry->posterid,
+        });
+        if ($weight_data && $weight_data->{status} eq 'Ok') {
+            return if $weight_data->{reader_weight} < $antispam_params->{min_reader_weight};
+        }
+    }
 
     my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw);
     # use Data::Dumper;
@@ -101,6 +114,29 @@ sub drop_relation {
         ) or return 0;
 
     return 1;
+}
+
+sub _get_antispam_params {
+
+    my $result = {
+        enable_reader_weight => 0,
+        min_reader_weight    => 0,
+    };
+
+    my $ext_block;
+    my $eval_res = eval { $ext_block = LJ::ExtBlock->load_by_id('antispam_params'); 1 };
+    if ($eval_res) {
+        my $values = $ext_block ? LJ::JSON->from_json($ext_block->blocktext) : { c => {} };
+        if ( $values->{c}->{enable_reader_weight} && $values->{c}->{min_reader_weight} ) {
+            $result->{enable_reader_weight} = $values->{c}->{enable_reader_weight};
+            $result->{min_reader_weight}    = $values->{c}->{min_reader_weight};
+        }
+    } else {
+        warn $@;
+    }
+
+    return $result;
+
 }
 
 package ExtractLinksWithContext;
