@@ -3922,9 +3922,11 @@ sub getevents {
 
     while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid, $replycount, $event_timestamp, $logtime) = $sth->fetchrow_array) {
         $count++;
-        my $evt = {};
-        $evt->{'itemid'} = $itemid;
 
+        #
+        # construct LJ::Entry object from row
+        #
+        my $evt = {};
         my $entry = LJ::Entry->new_from_row(
                 'journalid' => $ownerid,
                 'jitemid'   => $itemid,
@@ -3935,23 +3937,55 @@ sub getevents {
                 'anum'      => $anum,
             );
 
+        #
+        # final_ownerid, final_anum and $final_itemid could be different
+        # from ownerid if entry is a repost
+        #
+        my $final_ownerid = $ownerid;
+        my $final_itemid  = $itemid;
+        my $final_anum    = $anum;
+
+        #
+        # repost_text and repost_subject are using for repost only
+        #
+        my $repost_text;
+        my $repost_subject;
+
+        #
+        # prepare list of variables to substiture values
+        #
         my $content =  { 'original_post_obj' => \$entry,
-                         'journalid'         => \$ownerid,
-                         'itemid'            => \$itemid,
+                         'journalid'         => \$final_ownerid,
+                         'itemid'            => \$final_itemid,
                          'allowmask'         => \$mask,
                          'posterid'          => \$jposterid,
                          'eventtime'         => \$eventtime,
                          'security'          => \$sec,
                          'anum'              => \$anum,
-                         'reply_count'       => \$replycount,};
+                         'event'             => \$repost_text,
+                         'subject'           => \$repost_subject,
+                         'reply_count'       => \$replycount, };
 
-        LJ::Entry::Repost->substitute_content( $entry, $content );
+        #
+        # use repost signnture before event text
+        #
+        my $repost_props = { use_repost_signature => 1 };
+
+        if (LJ::Entry::Repost->substitute_content( $entry, $content, $repost_props )) {
+             $evt->{'repost_text'}    = $repost_text;
+             $evt->{'repost_subject'} = $repost_subject;
+             $evt->{'repost_ownerid'} = $final_ownerid;
+             $evt->{'repost_itemid'}  = $final_itemid;
+             $evt->{'repost_anum'}    = $final_anum;
+             $evt->{'repoost_props'}  = $entry->props;
+        }
 
         # now my own post, so need to check for suspended prop
         if ($jposterid != $posterid) {
             next if($entry->is_suspended_for($u));
         }
 
+        $evt->{'itemid'} = $itemid;
         push @itemids, $itemid;
 
         $evt_from_itemid{$itemid} = $evt;
@@ -3969,7 +4003,7 @@ sub getevents {
         $evt->{'anum'} = $anum;
         $evt->{'ditemid'} = $itemid * 256 + $anum;
 
-        if ($jposterid != $ownerid) {
+        if ($jposterid != $final_ownerid) {
             my $uposter = LJ::load_userid($jposterid);
             $evt->{'poster'} = $uposter->username;
 
@@ -3982,7 +4016,13 @@ sub getevents {
             }
         }
 
-        $evt->{'url'}         = LJ::item_link($uowner, $itemid, $anum);
+        #
+        # There is using final_ variabled to get correct link
+        #
+        $evt->{'url'}         = LJ::item_link($final_ownerid, 
+                                              $final_itemid, 
+                                              $final_anum);
+
         $evt->{'reply_count'} = $replycount;
 
         if ( $itemid == $sticky_id && $req->{'selecttype'} eq "lastn") {
@@ -4044,6 +4084,24 @@ sub getevents {
         my $t = $text->{$i};
         my $evt = $evt_from_itemid{$i};
 
+        my $real_uowner = $uowner;
+
+        if ($evt->{'repost_text'}) {
+            $t->[0] = delete $evt->{'repost_subject'};
+            $t->[1] = delete $evt->{'repost_text'};
+            
+            $evt->{'props'}    = delete $evt->{'repost_props'}
+                unless $req->{'noprops'};
+
+            $evt->{'itemid'}   = delete $evt->{'repost_itemid'};
+            $evt->{'anum'}     = delete $evt->{'repost_anum'};
+            $evt->{'ownerid'}  = delete $evt->{'repost_ownerid'};
+            $evt->{'repost'}   = 1; 
+            
+            $real_uowner = LJ::want_user($evt->{'ownerid'});
+        } 
+  
+
         # if they want subjects to be events, replace event
         # with subject when requested.
         if ($req->{'prefersubject'} && length($t->[0])) {
@@ -4056,11 +4114,11 @@ sub getevents {
         if ($LJ::UNICODE && $req->{'ver'} >= 1 &&
                 $evt->{'props'}->{'unknown8bit'}) {
             my $error = 0;
-            $t->[0] = LJ::text_convert($t->[0], $uowner, \$error);
-            $t->[1] = LJ::text_convert($t->[1], $uowner, \$error);
+            $t->[0] = LJ::text_convert($t->[0], $real_uowner, \$error);
+            $t->[1] = LJ::text_convert($t->[1], $real_uowner, \$error);
 
             foreach (keys %{$evt->{'props'}}) {
-                $evt->{'props'}->{$_} = LJ::text_convert($evt->{'props'}->{$_}, $uowner, \$error);
+                $evt->{'props'}->{$_} = LJ::text_convert($evt->{'props'}->{$_}, $real_uowner, \$error);
             }
 
             return fail($err, 208, 'xmlrpc.des.cannnot_display_post',{'siteroot'=>$LJ::SITEROOT})
@@ -4096,11 +4154,11 @@ sub getevents {
             'read_more'  => '<a href="' . $evt->{url} . '"> ...</a>',
         ) if $req->{trim_widgets};
 
-        LJ::EmbedModule->expand_entry($uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
+        LJ::EmbedModule->expand_entry($real_uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
         LJ::Poll->expand_entry(\$t->[1], getpolls => 1, viewer => $u) if $req->{get_polls};
 
         if ($req->{view}) {
-            LJ::EmbedModule->expand_entry($uowner, \$t->[1], edit => 1) if $req->{view} eq 'stored';
+            LJ::EmbedModule->expand_entry($real_uowner, \$t->[1], edit => 1) if $req->{view} eq 'stored';
         }
         elsif ($req->{parseljtags}) {
             $t->[1] = LJ::convert_lj_tags_to_links(
@@ -4108,6 +4166,7 @@ sub getevents {
                 embed_url => $evt->{url});
         }
 
+        
         # truncate
         if ($req->{'truncate'} >= 4) {
             my $original = $t->[1];
