@@ -466,7 +466,7 @@
 				}
 
 				function createEmbed(result, attrs, data) {
-					return '<iframe class="lj-embed-wrap" lj-class="lj-embed" frameborder="0" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + '></iframe>';
+					return '<iframe class="lj-embed-wrap" lj-class="lj-embed" frameborder="0" lj-cmd="LJEmbedLink" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + '></iframe>';
 				}
 
 				function createLJRaw(result, open, content, close) {
@@ -665,30 +665,46 @@
 
 			// LJ Embed
 			(function () {
-				function doEmbed(content) {
-					if (content && content.length && window.switchedRteOn) {
-						var iframe = new CKEDITOR.dom.element('iframe', editor.document);
-						iframe.setAttribute('lj-data', encodeURIComponent(content));
-						iframe.setAttribute('lj-class', 'lj-embed');
-						iframe.setAttribute('class', 'lj-embed-wrap');
-						iframe.setAttribute('frameBorder', 0);
-						iframe.setAttribute('allowTransparency', 'true');
-						editor.insertElement(iframe);
-						updateFrames();
-					}
+				var button = "LJEmbedLink",
+					widget = 'video';
+
+				function insertEmbed(content) {
+					var iframe = new CKEDITOR.dom.element('iframe', editor.document);
+
+					iframe.setAttribute('lj-data', encodeURIComponent(content));
+					iframe.setAttribute('lj-class', 'lj-embed');
+					iframe.setAttribute('lj-cmd', button);
+					iframe.setAttribute('class', 'lj-embed-wrap');
+					iframe.setAttribute('frameBorder', 0);
+					iframe.setAttribute('allowTransparency', 'true');
+
+					editor.insertElement(iframe);
+					updateFrames();
 				}
 
-				editor.addCommand('LJEmbedLink', {
+				LiveJournal.register_hook(widget + '_response', function(content) {
+					insertEmbed(content);
+				});
+
+				editor.addCommand(button, {
 					exec: function() {
-						top.LJ_IPPU.textPrompt(CKLang.LJEmbedPromptTitle, CKLang.LJEmbedPrompt, doEmbed, {
-							width: '350px'
-						});
+						var node = ljTagsData[button].node;
+
+						if (node) {
+							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+								defaultText: node && decodeURIComponent(node.getAttribute('lj-data')),
+								editMode: true
+							});
+						} else {
+							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button));
+						}
+
 					}
 				});
 
-				editor.ui.addButton('LJEmbedLink', {
+				editor.ui.addButton(button, {
 					label: CKLang.LJEmbed,
-					command: 'LJEmbedLink'
+					command: button
 				});
 			})();
 
