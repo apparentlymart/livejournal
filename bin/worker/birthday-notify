@@ -128,6 +128,9 @@ sub work {
 
         debug("Firing off notification for " . $u->user);
         LJ::Event::Birthday->new($u)->fire;
+
+        my $birthday_time = time() - $bdays->{$u->id} - 86400;
+        LJ::Event::Birthday->new($u, $birthday_time)->fire;
         $ct++;
     }
 

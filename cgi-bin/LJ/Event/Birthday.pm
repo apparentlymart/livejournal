@@ -7,10 +7,10 @@ use LJ::Client::BitLy;
 use Carp qw(croak);
 
 sub new {
-    my ($class, $u) = @_;
+    my ($class, $u, $delay) = @_;
     croak "No user" unless $u && LJ::isu($u);
 
-    return $class->SUPER::new($u);
+    return $class->SUPER::new($u, $delay);
 }
 
 sub bdayuser {
@@ -57,8 +57,11 @@ sub as_string {
     $tinyurl = LJ::Client::BitLy->shorten($tinyurl);
     undef $tinyurl if $tinyurl =~ /^500/;
 
+    my $lang_var =  $self->arg1 ? 'notification.sms.birthday_today' : 
+                                  'notification.sms.birthday';
+
 # [[user]]'s birthday is on [[bday]]!
-    return LJ::Lang::get_text($lang, 'notification.sms.birthday', undef, {
+    return LJ::Lang::get_text($lang, $lang_var, undef, {
         user       => $self->bdayuser->display_username(1),
         bday       => $self->bday,
         mobile_url => $tinyurl,
@@ -73,8 +76,11 @@ sub as_alert {
     my $self = shift;
     my $u = shift;
 
+    my $lang_var = $self->arg1 ? 'esn.bday.alert_today' :
+                                 'esn.bday.alert';
+
     return LJ::Lang::get_text($u->prop('browselang'),
-        'esn.bday.alert', undef,
+            $lang_var, undef,
             {
                 who     => $self->bdayuser->ljuser_display(),
                 bdate   => $self->bday,
@@ -83,10 +89,17 @@ sub as_alert {
 
 sub as_html {
     my $self = shift;
+    my $u    = shift;
 
-    return sprintf("%s's birthday is on %s!",
-                   $self->bdayuser->ljuser_display,
-                   $self->bday);
+    my $lang_var = $self->arg1 ? 'html.notify.bday_today' :
+                                 'html.notify.bday';
+   
+    return LJ::Lang::get_text($u->prop('browselang'),
+           $lang_var, undef,
+            {
+                who     => $self->bdayuser->ljuser_display(),
+                bdate   => $self->bday,
+            });
 }
 
 sub as_html_actions {
@@ -106,33 +119,42 @@ sub as_html_actions {
 }
 
 my @_ml_strings = (
-    'esn.month.day_jan',    #January [[day]]
-    'esn.month.day_feb',    #February [[day]]
-    'esn.month.day_mar',    #March [[day]]
-    'esn.month.day_apr',    #April [[day]]
-    'esn.month.day_may',    #May [[day]]
-    'esn.month.day_jun',    #June [[day]]
-    'esn.month.day_jul',    #July [[day]]
-    'esn.month.day_aug',    #August [[day]]
-    'esn.month.day_sep',    #September [[day]]
-    'esn.month.day_oct',    #October [[day]]
-    'esn.month.day_nov',    #November [[day]]
-    'esn.month.day_dec',    #December [[day]]
-    'esn.bday.subject',     #[[bdayuser]]'s birthday is coming up!
-    'esn.bday.email',       #Hi [[user]],
-                            #
-                            #[[bdayuser]]'s birthday is coming up on [[bday]]!
-                            #
-                            #You can:
-    'esn.post_happy_bday'   #[[openlink]]Post to wish them a happy birthday[[closelink]]
+    'esn.month.day_jan',      #January [[day]]
+    'esn.month.day_feb',      #February [[day]]
+    'esn.month.day_mar',      #March [[day]]
+    'esn.month.day_apr',      #April [[day]]
+    'esn.month.day_may',      #May [[day]]
+    'esn.month.day_jun',      #June [[day]]
+    'esn.month.day_jul',      #July [[day]]
+    'esn.month.day_aug',      #August [[day]]
+    'esn.month.day_sep',      #September [[day]]
+    'esn.month.day_oct',      #October [[day]]
+    'esn.month.day_nov',      #November [[day]]
+    'esn.month.day_dec',      #December [[day]]
+    'esn.bday.subject',       #[[bdayuser]]'s birthday is coming up!
+    'esn.bday.subject_today', #
+    'esn.bday.email',         #Hi [[user]],
+                              #
+                              #[[bdayuser]]'s birthday is coming up on [[bday]]!
+                              #
+                              #You can:
+    'esn.bday.email_today',   #Hi [[user]],
+                              #
+                              #[[bdayuser]]'s birthday is today!
+                              # 
+                              #You can:
+    'esn.post_happy_bday'     #[[openlink]]Post to wish them a happy birthday[[closelink]]
 );
 
 sub as_email_subject {
     my $self = shift;
     my $u    = shift;
 
+    my $lang_var = $self->arg1 ? 'esn.bday.subject_today' :
+                                 'esn.bday.subject';
+
     return LJ::Lang::get_text($u->prop('browselang'),
-        'esn.bday.subject', undef,
+        $lang_var, undef,
         { bdayuser => $self->bdayuser->display_username } );
 }
 
@@ -154,8 +176,11 @@ sub _as_email {
     # Precache text lines
     LJ::Lang::get_text_multi($lang, undef, \@_ml_strings);
 
+    my $lang_var = $self->arg1 ? 'esn.bday.email_today' : 
+                                 'esn.bday.email';
+
     return LJ::Lang::get_text($lang,
-       'esn.bday.email', undef,
+        $lang_var, undef,
         {
             user        => $is_html ? $u->ljuser_display : $u->display_username,
             bday        => $self->email_bday($lang),
@@ -212,7 +237,10 @@ sub as_push {
     my $u    = shift;
     my $lang = shift;
 
-    return LJ::Lang::get_text($lang, "esn.push.notification.birthday", 1, {
+    my $lang_var = $self->arg1 ? "esn.push.notification.birthday_today" :
+                                 "esn.push.notification.birthday";
+
+    return LJ::Lang::get_text($lang, $lang_var, 1, {
         user    => $self->bdayuser->user(),
         date    => $self->email_bday($u->prop('browselang'))
     })
@@ -225,6 +253,24 @@ sub as_push_payload {
              'j' => $self->bdayuser->user(),
              'b' => $self->next_bday(),
            };
+}
+
+sub fire {
+    my ($self, $timeout) = @_;
+    return 0 if $LJ::DISABLED{'esn'};
+
+    my $sclient = LJ::theschwartz( { role => $self->schwartz_role } );
+    return 0 unless $sclient;
+
+    my $job = $self->fire_job or
+        return 0;
+
+    $job->run_after($self->arg1)
+        if $self->arg1;
+
+
+    my $h = $sclient->insert($job);
+    return $h ? 1 : 0;
 }
 
 1;

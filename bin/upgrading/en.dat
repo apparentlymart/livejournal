@@ -1753,8 +1753,20 @@ Hi [[user]],
 You can:
 .
 
+esn.bday.email_today|staleness=1
+esn.bday.email_today<<
+Hi [[user]],
+
+[[bdayuser]]'s birthday is today!
+
+You can:
+.
+
 esn.bday.subject|staleness=1
 esn.bday.subject=[[bdayuser]]'s birthday is coming up!
+
+esn.bday.subject_today|staleness=1
+esn.bday.subject_today=[[bdayuser]]'s birthday is today!
 
 esn.befriended.alert|staleness=1
 esn.befriended.alert=[[who]] has added you as a friend.
@@ -2606,6 +2618,12 @@ esn.you_can=You can:
 
 esn.you_must_unscreen|staleness=1
 esn.you_must_unscreen=You must respond to it or unscreen it before others can see it.
+
+html.notify.bday|staleness=1
+html.notify.bday=[[who]]'s birthday is on [[bdate]]!
+
+html.notify.bday_today|staleness=1
+html.notify.bday_today=[[who]]'s birthday is today!
 
 event.befriended.me|staleness=1
 event.befriended.me=Someone adds me as a friend
