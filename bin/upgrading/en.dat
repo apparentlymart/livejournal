@@ -3835,6 +3835,7 @@ multisearch.error.user_not_found=No user found
 notification.sms.befriended=User '[[friend]]' has added you to their friends list. [[mobile_url]]
 
 notification.sms.birthday=[[user]]'s birthday is on [[bday]]! [[mobile_url]]
+notification.sms.birthday=[[user]]'s birthday is today! [[mobile_url]]
 
 notification.sms.communityinvite|staleness=1
 notification.sms.communityinvite=[[inviter]] sent you an invitation to join the community [[comm]]. Visit the invitation page to accept
