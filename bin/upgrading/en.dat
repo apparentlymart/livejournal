@@ -3203,6 +3203,8 @@ fotki.album.paste.url.here=Paste image url here
 fotki.album.post.images|staleness=1
 fotki.album.post.images=Add to post
 
+fotki.album.comment.images=Add to comment
+
 fotki.album.remove|staleness=1
 fotki.album.remove=Remove
 
