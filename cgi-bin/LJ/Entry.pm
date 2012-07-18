@@ -290,6 +290,9 @@ sub url {
     my $override = LJ::run_hook("entry_permalink_override", $self, %opts);
     return $override if $override;
 
+    LJ::run_hook('override_entry_url', $u, $self, \$override);
+    return $override if $override;
+
     $self->{'url'} ||= $u->journal_base . "/" . $self->ditemid . ".html";
     my $url = $self->{'url'};
 
