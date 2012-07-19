@@ -3089,6 +3089,10 @@ fotki.album.click.image=Click on image to remove it
 fotki.album.close.without.saving.confirm|staleness=1
 fotki.album.close.without.saving.confirm=Do you really want to close without saving?
 
+fotki.album.copy_url_link=Link
+
+fotki.album.copy_url_size=Size
+
 fotki.album.create.new|staleness=1
 fotki.album.create.new=(Create new)
 
