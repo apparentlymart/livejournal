@@ -140,16 +140,12 @@
                 %filter,
             });
 
-            $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {
-                func => 'get_authority',
-                journal_id => $u->userid,
-            });
+            $soc_capital = $u->get_social_capital(); 
 
             if (ref $position eq 'HASH') {
                 $first = $position->{result}->{position}!=0 ? 0 : 1;
             }
 
-            $soc_capital = int($soc_capital->{result}->{authority}/1000);
             $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
 
         }

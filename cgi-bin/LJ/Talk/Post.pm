@@ -619,11 +619,9 @@ sub require_captcha_test {
     ##
     my $soc_cap = 0;
     unless ($anon_commenter) {
-        $soc_cap = LJ::PersonalStats::DB->fetch_raw('ratings', { func => 'get_authority', journal_id => $commenter->userid });
-        $soc_cap = int($soc_cap->{result}->{authority}/1000);
+        $soc_cap = $commenter->get_social_capital();
     }
     return if $soc_cap > 15;
- 
  
     ##
     ## 4. Don't show captcha to the owner of the journal, no more checks
