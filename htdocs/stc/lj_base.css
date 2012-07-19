@@ -5203,3 +5203,19 @@ HTML BODY .i-ljuser {
 	padding: 0 20px 0 0;
 	background: url(/img/preloader-s.gif?v=1) no-repeat 100% 60%;
 	}
+	
+/* Update button */
+.b-updater {
+	width: 100%;
+	padding: 8px 0;
+	border: 0;
+	cursor: pointer;
+	background: #DDDDDD;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid #CCC;
+	font-size: 1em;
+	}
+	
+	
