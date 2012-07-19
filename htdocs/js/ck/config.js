@@ -34,7 +34,8 @@ CKEDITOR.editorConfig = function(config) {
 			'undo',
 			'wysiwygarea',
 			'onchange',
-			'link'
+			'link',
+			'autogrow'
 		];
 
 	config.language = 'ru';
@@ -61,7 +62,7 @@ CKEDITOR.editorConfig = function(config) {
 	if (jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
 		config.plugins += ',contextmenu';
 	}
-	config.autoGrow_maxHeight = 400;
+
 	config.contentsLangDirection = 'ltr';
 	config.fillEmptyBlocks = false;
 	config.tabIndex = 41;
