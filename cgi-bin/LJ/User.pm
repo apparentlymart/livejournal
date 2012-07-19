@@ -33,6 +33,7 @@ use LJ::TimeUtil;
 use LJ::User::InfoHistory;
 use LJ::User::PropStorage;
 use LJ::Response::CachedTemplate;
+use LJ::PersonalStats::DB;
 
 # TODO: get rid of Class::Autouse, maybe? it's pretty useless
 # in web context and leads to some nasty bugs otherwise, so probably
@@ -2874,6 +2875,19 @@ sub share_contactinfo {
     return 0 if ($u->opt_showcontact eq 'R' && !$remote);
     return 0 if ($u->opt_showcontact eq 'F' && !$u->is_friend($remote));
     return 1;
+}
+
+# return social capital by user
+sub get_social_capital {
+    my ($u) = @_;
+
+    my $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
+
+    if ($soc_capital) {
+        return int($soc_capital->{result}->{authority}/1000);
+    }
+
+    return 0;
 }
 
 # <LJFUNC>
