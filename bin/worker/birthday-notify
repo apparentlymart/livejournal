@@ -105,7 +105,14 @@ sub work {
     # have already passed (eg, worker backlog)
     my $bdays = LJ::User->next_birthdays(@uids);
 
+    my $purge_is_needed = 0;
+
     foreach my $u (values %$us) {
+        unless ($u) {
+            $purge_is_needed = 1;
+            next;
+        }
+
         # don't want to process read-only users (being moved?)
         next if $u->readonly;
 
@@ -132,6 +139,13 @@ sub work {
         my $birthday_time = $bdays->{$u->id} - time() - 86400;
         LJ::Event::Birthday->new($u, $birthday_time)->fire;
         $ct++;
+    }
+
+    if ($purge_is_needed) {
+        foreach my $uid (keys %$us) {
+            remove_userid_from_cluster($uid, $working_clusterid)
+                unless $us->{$uid};
+        }
     }
 
     # return and release our lock as it falls out of scope
@@ -179,6 +193,17 @@ sub get_users_from_cluster {
     die $dbcr->errstr if $dbcr->err;
 
     return @$userids;
+}
+
+sub remove_userid_from_cluster {
+    my ($uid, $cid) = @_;
+    debug("Cleaning up for userid: " . $uid);
+
+    my $dbh = LJ::get_cluster_master($cid)
+        or die "Unable to get cluster reader for cluster: $cid";
+
+    $dbh->do("DELETE FROM birthdays WHERE userid = ?", undef, $uid);
+    die $dbh->errstr if $dbh->err;
 }
 
 sub remove_user_from_cluster {
