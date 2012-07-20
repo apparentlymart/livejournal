@@ -54,52 +54,39 @@ sub render_body {
     ## Auth types.
     ## User type (LJ.com) is always enabled.
     my @types;
-
-    if ($opts{'lj_auth'}) {
-        my $type_display = {
-            'type'            => 'user',
-            'ml_tab_heading'  => LJ::Lang::ml("/identity/login.bml.tab.user"),
-            'user_returnto'   => $opts{'user_returnto'},
-        };
-
-        if ($current_type eq 'user') {
-            $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
-        }
-
-        if ( $opts{'embedded'} ) {
-            $template->param( 'type_user' => [ $type_display ] );
-        }
-
-        push @types, $type_display;
-    }
+    my $auth_types = ['user', @LJ::IDENTITY_TYPES];
+    LJ::run_hook('override_auth_sequence', $opts{'partner'}->{'journal'}, $auth_types);
 
     ## external auth
-    foreach my $type (@LJ::IDENTITY_TYPES) {
-        my $idclass = LJ::Identity->find_class($type);
-        next unless $idclass->enabled;
+    foreach my $type (@$auth_types) {
+        if ($type eq 'user') {
+            next unless $opts{'lj_auth'};
+        } else {
+            my $idclass = LJ::Identity->find_class($type);
+            next unless $idclass->enabled;
+        }
 
         my $type_display = {
             'type' => $type,
             'ml_tab_heading' => LJ::Lang::ml("/identity/login.bml.tab.$type"),
+            'user_returnto'   => $type eq 'user' && $opts{'user_returnto'},
         };
 
         if ($type eq $current_type) {
             $type_display->{'errors'} = [ map { { 'error' => $_ } } @errors ];
         }
 
-        if ( $opts{'embedded'}
-          && $opts{'partner'}->identity_type_enabled($type) )
-      {
-            $template->param( 'type_' . $type => [ $type_display ] );
+        if ( $opts{'embedded'} && ($type eq 'user' || $opts{'partner'}->identity_type_enabled($type)) )
+        {
+           $template->param( 'type_' . $type => [ $type_display ] );
         }
         push @types, $type_display;
     }
 
-    unless ( $opts{'embedded'} ) {
-        $template->param( 'types' => \@types );
-    }
-
     $template->param(
+        'types'             => \@types,
+        'primary_types'     => [@types[0 .. int(@types/2)-1]],
+        'secondary_types'   => [@types[int(@types/2) .. @types-1]],
         'current_type'      => $current_type,
         'returnto'          => $thispage,
         'js_check_domain'   => $opts{'js_check_domain'},
