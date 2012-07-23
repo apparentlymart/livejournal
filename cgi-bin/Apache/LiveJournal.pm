@@ -341,7 +341,7 @@ sub trans {
     ## and LJTimes (e.g. http://stat.livejournal.com/tools/endpoints/lj_times_full_js.bml?lang=ru)
     ## Production static files are served by CDN (http://l-stat.livejournal.com)
     if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com' 
-        && $uri !~ m!^/(stc|img|js)! && $uri !~ m!\.bml$!) 
+        && $uri !~ m!^/(stc|img|js|palimg)! && $uri !~ m!\.bml$!) 
     {
          $uri = "/stc$uri";
          LJ::Request->uri($uri);
