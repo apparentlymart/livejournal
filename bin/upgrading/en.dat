@@ -6355,6 +6355,8 @@ talk.post.tags=Tags
 
 talk.post.tags.done=Done
 
+talk.post.tags.input=Separate tags by commas
+
 talk.post.tags.filter=filter tags
 
 talk.post.tags.new=New tags
