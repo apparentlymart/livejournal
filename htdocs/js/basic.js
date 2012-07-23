@@ -309,10 +309,9 @@ LJ.threshold = function (f, delay, preserve) {
 				lock = true;
 
 				if (preserve) {
-					f.apply(caller, queue[0]);
-					queue.shift();
+					f.apply(caller, queue.shift());
 				} else {
-					f.apply(caller, queue[-1]);
+					f.apply(caller, queue.pop());
 					queue = [];
 				}
 
