@@ -75,6 +75,7 @@ my %e = (
      "158" => E_TEMP,
      "159" => E_PERM,
      "160" => E_TEMP,
+     "161" => E_PERM,    
 
      # Client Errors
      "200" => E_PERM,
@@ -2832,9 +2833,9 @@ sub postevent {
         unless ( $offer_id ) {
             LJ::delete_entry($uowner, $jitemid, undef, $anum); # roll-back
             return fail($err,160,$error);
+        } else {
+            $req->{props}->{repost_offer} = $offer_id;
         }
-        
-        $req->{props}->{repost_offer} = $offer_id;
     }
 
     # Entry tags
@@ -3269,11 +3270,27 @@ sub editevent {
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
-    # edit or create repost_offer
-    my $repost_offer;
 
-    if (defined $req->{repost_budget} && LJ::is_enabled("paid_repost") ) {
+    # create, edit, revoke repost offer
+    my ($repost_offer, $repost_offer_action);
+    
+    if( LJ::is_enabled("paid_repost") 
+        && $req->{revoke_repost_offer} 
+        && $curprops{$itemid}->{repost_offer} ) {
 
+        # cannot revoke repost offer via api
+        return fail($err,222) unless $flags->{noauth};
+
+        $repost_offer_action = 'revoke';
+
+        $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer(
+            $posterid,
+            $curprops{$itemid}->{repost_offer},
+        );
+    }
+
+    if (LJ::is_enabled("paid_repost") && defined $req->{repost_budget} && !$req->{revoke_repost_offer}) {
+      
         # cannot create or edit repost offer via api
         return fail($err,222) unless $flags->{noauth};
 
@@ -3297,10 +3314,18 @@ sub editevent {
         return fail($err,160,$error) unless $res;
       
         if ($repost_offer->{id}) {
-            # no need to update repost offer
-            undef $repost_offer if ($previous->budget == $repost_offer->{budget});
+
+            unless ($repost_offer->{budget} == $previous->budget) {
+                $repost_offer_action = 'edit';
+                $repost_offer = $previous;
+            } else {
+                # no need to update repost offer
+                undef $repost_offer;
+            }
+
         } else {
-            # no need to create repost offer
+            $repost_offer_action = 'create';
+            # no need to create repost offer with zero budget
             undef $repost_offer unless $repost_offer->{budget};
         }
     }
@@ -3455,33 +3480,29 @@ sub editevent {
 
     # update or create repost offer
     if ($repost_offer) {
-        my $error = '';
+        my ($error, $warning); 
 
-        unless($repost_offer->{id}) {
-            my $offer_id = LJ::Pay::Repost::Offer->create(
-                \$error,
-                %$repost_offer,
-            );
+        if($repost_offer_action eq 'create') {
 
-            unless ($offer_id) {
-                my $warning;
+            my $offer_id = LJ::Pay::Repost::Offer->create(\$error, %$repost_offer) or 
                 fail(\$warning,160,$error);
-                push @{$res->{warnings} ||= []}, error_message($warning); 
-            }
+            
+            $req->{props}->{repost_offer} = $offer_id if $offer_id;
+            
+        } elsif($repost_offer_action eq 'edit') {
+            
+            $repost_offer->mark_active if $repost_offer->inactive;
 
-            $req->{props}->{repost_offer} = $offer_id;
-        } else {
-            my $res = LJ::Pay::Repost::Offer->set_budget(
-                \$error,
-                $repost_offer,
-            );
-              
-            unless ($res) {
-                my $warning;
+            $repost_offer->set_budget(\$error, int $req->{repost_budget}) or 
                 fail(\$warning,160,$error);
-                push @{$res->{warnings} ||= []}, error_message($warning);
-            }
+       
+        } elsif($repost_offer_action eq 'revoke') {
+            
+            $repost_offer->revoke(\$error) or 
+                fail(\$warning,161,$error);
         }
+
+        push @{$res->{warnings} ||= []}, error_message($warning) if $warning;
     }
 
 

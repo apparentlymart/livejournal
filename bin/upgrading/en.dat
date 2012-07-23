@@ -9441,6 +9441,7 @@ xmlrpc.error.157=Tags error
 xmlrpc.error.158=You have no rights to make this entry sticky
 xmlrpc.error.159=Cannot create scheduled entry containing paid repost button
 xmlrpc.error.160=Cannot create or edit paid repost offer
+xmlrpc.error.161=Cannot revoke paid repost offer
 xmlrpc.error.200=Missing required argument(s)
 xmlrpc.error.201=Unknown method
 xmlrpc.error.202=Too many arguments
