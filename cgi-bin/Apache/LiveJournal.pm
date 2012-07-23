@@ -383,7 +383,10 @@ sub trans {
     ## JS/CSS file concatenation
     ## skip it for .bml.
     if (
-        ($host eq "stat.$LJ::DOMAIN" and LJ::Request->uri !~ /\.bml$/) or
+        ($host eq "stat.$LJ::DOMAIN" 
+            and LJ::Request->uri !~ /\.bml$/        ## BML is allowed on stat. domain
+            and LJ::Request->uri !~ m|/palimg/|     ## PaletteModify actions are processed by other handler
+            ) or
         ($LJ::IS_SSL and LJ::Request->unparsed_uri =~ /\?\?/)
     ){
         Apache::LiveJournal::ConcatHeadFiles->load;
@@ -393,7 +396,7 @@ sub trans {
     }
 
     ##
-    ## Process old/non-cacnonical URL and renamed accounts.
+    ## Process old/non-canonical URL and renamed accounts.
     if ($host !~ /^www\./){
         my $uri         = LJ::Request->uri;
         my $current_url = "http://$host$uri";
