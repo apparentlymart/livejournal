@@ -1382,6 +1382,7 @@ sub getfriendspage
                 $_->{'identity_display'} = $users->{ $_->{posterid} }->display_name;
         }
         delete $_->{posterid};
+        delete $_->{props}->{repost_offer};
     }
 
     LJ::run_hooks("getfriendspage", {userid => $u->userid, });
