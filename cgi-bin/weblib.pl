@@ -1157,7 +1157,8 @@ sub entry_form_decode
                 prop_opt_screening prop_opt_noemail
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
-                prop_taglist prop_qotdid prop_give_features)) {
+                prop_taglist prop_qotdid prop_give_features 
+                repost_budget)) {
         $req->{$_} = $POST->{$_};
     }
 

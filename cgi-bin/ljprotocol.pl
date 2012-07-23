@@ -23,6 +23,7 @@ use Class::Autouse qw(
                       LJ::PersonalStats::Ratings::Posts
                       LJ::PersonalStats::Ratings::Journals
                       LJ::API::RateLimiter
+                      LJ::Pay::Repost::Offer
                       );
 
 use LJ::TimeUtil;
@@ -72,6 +73,8 @@ my %e = (
      "156" => E_TEMP,
      "157" => E_TEMP,
      "158" => E_TEMP,
+     "159" => E_PERM,
+     "160" => E_TEMP,
 
      # Client Errors
      "200" => E_PERM,
@@ -96,6 +99,7 @@ my %e = (
      "219" => E_PERM,
      "220" => E_PERM,
      "221" => E_PERM,
+     "222" => E_PERM,    
 
      # Access Errors
      "300" => E_TEMP,
@@ -2419,6 +2423,28 @@ sub postevent {
         return fail($err,103,$error) if $error;
     }
 
+    my $repost_offer;
+
+    if ($req->{'repost_budget'} && LJ::is_enabled("paid_repost")) {
+    
+        # cannot create paid repost via api
+        return fail($err,222) unless $flags->{noauth};
+
+        $repost_offer = {
+             userid    => $posterid,
+             journalid => $ownerid,
+             budget    => $req->{repost_budget},
+        };
+
+        my $error = '';
+        my $res = LJ::Pay::Repost::Offer->check(
+            \$error,
+            $repost_offer,
+        );
+
+        return fail($err,160,$error) unless $res;
+    }
+
     # convert RTE lj-embeds to normal lj-embeds
     $event = LJ::EmbedModule->transform_rte_post($event);
 
@@ -2519,6 +2545,8 @@ sub postevent {
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         if ( $req->{'custom_time'} && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
+
+            return fail($err, 159) if $repost_offer;
 
             # if posting to a moderated community, store and bail out here
             if ( !LJ::DelayedEntry::can_post_to($uowner, $u, $req)) {
@@ -2788,6 +2816,24 @@ sub postevent {
             LJ::delete_entry($uowner, $jitemid, undef, $anum);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
+    }    
+    
+    if ($repost_offer) {
+        my $error = '';
+        
+        $repost_offer->{jitemid} = $jitemid;
+
+        my $offer_id = LJ::Pay::Repost::Offer->create(
+            \$error,
+            %$repost_offer,
+        );
+
+        unless ( $offer_id ) {
+            LJ::delete_entry($uowner, $jitemid, undef, $anum); # roll-back
+            return fail($err,160,$error);
+        }
+        
+        $req->{props}->{repost_offer} = $offer_id;
     }
 
     # Entry tags
@@ -3039,6 +3085,8 @@ sub editevent {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
             return fail( $err, 215 ) unless $req->{tz};
 
+            return fail($err, 159) if $req->{repost_budget};
+
             $req->{ext}->{flags} = $flags;
             $req->{usejournal} = $req->{usejournal}  || '';
 
@@ -3061,7 +3109,7 @@ sub editevent {
 
                 return $res;
             }
-
+            
             # updating an entry:
             return undef
                 unless common_event_validation($req, $err, $flags);
@@ -3220,6 +3268,42 @@ sub editevent {
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
+    # edit or create repost_offer
+    my $repost_offer;
+
+    if (defined $req->{repost_budget} && LJ::is_enabled("paid_repost") ) {
+
+        # cannot create or edit repost offer via api
+        return fail($err,222) unless $flags->{noauth};
+
+        $repost_offer = {
+            id        => $curprops{$itemid}->{repost_offer},
+            userid    => $posterid,
+            journalid => $ownerid,
+            jitemid   => $itemid,
+            budget    => int $req->{repost_budget},
+        };
+
+        my $previous;
+
+        my $error = '';
+        my $res = LJ::Pay::Repost::Offer->check(
+            \$error,
+            $repost_offer,
+            \$previous,
+        );
+   
+        return fail($err,160,$error) unless $res;
+      
+        if ($repost_offer->{id}) {
+            # no need to update repost offer
+            undef $repost_offer if ($previous->budget == $repost_offer->{budget});
+        } else {
+            # no need to create repost offer
+            undef $repost_offer unless $repost_offer->{budget};
+        }
+    }
+
     # make post sticky
     if ( $req->{sticky} ) {
         if( $uowner->get_sticky_entry_id() != $itemid ) {
@@ -3367,6 +3451,38 @@ sub editevent {
     $req->{'props'}->{'revtime'} = time();
 
     my $res = { 'itemid' => $itemid };
+
+    # update or create repost offer
+    if ($repost_offer) {
+        my $error = '';
+
+        unless($repost_offer->{id}) {
+            my $offer_id = LJ::Pay::Repost::Offer->create(
+                \$error,
+                %$repost_offer,
+            );
+
+            unless ($offer_id) {
+                my $warning;
+                fail(\$warning,160,$error);
+                push @{$res->{warnings} ||= []}, error_message($warning); 
+            }
+
+            $req->{props}->{repost_offer} = $offer_id;
+        } else {
+            my $res = LJ::Pay::Repost::Offer->set_budget(
+                \$error,
+                $repost_offer,
+            );
+              
+            unless ($res) {
+                my $warning;
+                fail(\$warning,160,$error);
+                push @{$res->{warnings} ||= []}, error_message($warning);
+            }
+        }
+    }
+
 
     # handle tags if they're defined
     if ($do_tags) {
@@ -4059,6 +4175,10 @@ sub getevents {
             # FIXME: this goes away after we restructure APIs and
             # replycounts cease being transferred in props
             delete $props{$itemid}->{'replycount'};
+
+            unless ($flags->{noauth}) {
+                delete $props{$itemid}->{repost_offer};
+            }
 
             my $evt = $evt_from_itemid{$itemid};
             $evt->{'props'} = {};

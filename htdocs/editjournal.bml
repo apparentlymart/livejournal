@@ -13,6 +13,7 @@ body<=
     use LJ::Widget::Fotki::Upload;
     use LJ::Widget::Calendar;
     use List::Util;
+    use LJ::Pay::Repost::Offer;
 
     my $title = BML::ml('.title');
 
@@ -576,6 +577,14 @@ body<=
                 'sticky' => $entry_obj->is_sticky,
                 'opt_backdated' => $entry_obj->prop('opt_backdated'),
             };
+
+            if($entry_obj->prop('repost_offer')) {
+                my $offer = LJ::Pay::Repost::Offer->get_repost_offer(
+                                                        $entry_obj->posterid,
+                                                        $entry_obj->prop('repost_offer'),
+                                                        );
+                $entry->{'repost_budget'} = $offer->budget if $offer && $offer->is_active;
+            }
 
             for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};

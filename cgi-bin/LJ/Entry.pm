@@ -2603,6 +2603,8 @@ sub delete_entry
 
     # delete all comments
     LJ::delete_all_comments($u, 'L', $jitemid);
+    
+    $u->clear_prop('dupsig_post');
 
     return 1;
 }

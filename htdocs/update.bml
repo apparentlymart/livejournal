@@ -343,6 +343,7 @@ EMBED
             'qid'                   => $qid,
             'albums_id'             => $POST{'albums_id'} || $GET{'albums_id'},
             'photos_id'             => $POST{'photos_id'} || $GET{'photos_id'},
+            'repost_budget'         => $POST{'repost_budget'},
         };
 
         if ($remote) {
@@ -528,6 +529,7 @@ EMBED
                     'custom_time' => $custom_time,
                     'tz'          => $timezone,
                     'posttype'    => $type,
+                    'repost_budget' => $POST{'repost_budget'},
                     );
 
         $flags->{'use_custom_time'} = 1; 
