@@ -351,11 +351,11 @@ body<=
         $ret .= "<input type='hidden' name='modid' value='$modid'>";
         $ret .= "<input type='hidden' name='auth' value='" . $req->{'_moderate'}->{'authcode'} . "'>";
         $ret .= "<input type='hidden' name='mark_as_spam' value='1'>" if $POST{'action:mark_as_spam'};
-        $ret .= "<input type='submit' value='$ML{'.reject.button'}'>";
+        $ret .= "<input type='submit' value='$ML{'.reject.button'}' tabindex='60'>";
         $ret .= "</center>";
         if ($poster->{'status'} eq 'A') {
             $ret .= "<?p $ML{'.reject.reason'} p?>";
-            $ret .= "<?p <textarea rows='10' cols='60' wrap='soft' name='why'></textarea> p?>";
+            $ret .= "<?p <textarea rows='10' cols='60' wrap='soft' name='why' tabindex='50'></textarea> p?>";
         }
         $ret .= "</form>";
         return $ret;
