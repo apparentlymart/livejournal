@@ -59,6 +59,8 @@
         }
     }
 
+    LJ::need_var( 'preview' => 1);
+
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
     LJ::CleanHTML::clean_subject(\$subject);
 
