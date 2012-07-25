@@ -2889,6 +2889,8 @@ sub get_social_capital {
             LJ::MemCache::set( $u->user."_soc_cap", $value, 60*60);
             return $value;
         }
+    } else {
+        return $soc_capital;
     }
 
     return 0;
