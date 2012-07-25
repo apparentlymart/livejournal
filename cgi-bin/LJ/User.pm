@@ -2882,18 +2882,14 @@ sub get_social_capital {
     my ($u) = @_;
 
     my $soc_capital = LJ::MemCache::get( $u->user."_soc_cap" );
-    unless ($soc_capital) {
-        $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
-        if ($soc_capital) {
-            my $value = int($soc_capital->{result}->{authority}/1000);
-            LJ::MemCache::set( $u->user."_soc_cap", $value, 60*60);
-            return $value;
-        }
-    } else {
+    if ($soc_capital) {
         return $soc_capital;
+    } else {  
+        $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
+        my $value = $soc_capital ? int($soc_capital->{result}->{authority}/1000) : 0;
+        LJ::MemCache::set( $u->user."_soc_cap", $value, 60*60);
+        return $value;
     }
-
-    return 0;
 }
 
 # <LJFUNC>
