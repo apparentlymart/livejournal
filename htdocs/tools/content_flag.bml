@@ -18,6 +18,14 @@ body<=
     my $journal = LJ::load_user($user) or return $ML{'.error.invalidusername'};
     my $content = $ditemid ? LJ::Entry->new($journal, ditemid => $ditemid) : $journal;
 
+    my $entry_url_ref;
+    if ($ditemid) {
+        LJ::run_hook( 'override_entry_url', $journal, $content, \$entry_url_ref );     
+    } else {
+        LJ::run_hook( 'override_journal_url', $content, \$entry_url_ref );     
+    }
+    return BML::redirect($entry_url_ref) if $entry_url_ref; 
+
     return $ML{'.error.cantflag'}
         unless $remote->can_flag_content( content => $content );
 

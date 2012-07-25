@@ -98,6 +98,10 @@
      return;
  }
 
+ my $entry_url_ref;
+ LJ::run_hook( 'override_entry_url', $ju, LJ::Entry->new($ju, jitemid => $itemid), \$entry_url_ref );     
+ return BML::redirect($entry_url_ref) if $entry_url_ref; 
+
  my $dbcr = LJ::get_cluster_reader($ju);
 
  my $log = LJ::get_log2_row($ju, $itemid);
@@ -358,6 +362,7 @@
      $body .= "<?p $ML{'.body.added.text'} p?>";
 
      my $entry = LJ::Entry->new($ju, jitemid => $itemid);
+
      $body .= "<ul>";
      $body .= "<li><a href='" . $entry->url . "'>$ML{'.body.added.next.entry'}</a></li>";
      $body .= "<li><a href='$LJ::SITEROOT/tools/memories.bml?user=" . $memoryu->user . "'>"

@@ -36,6 +36,10 @@ body<=
 
     my $ret = '';
 
+    my $entry_url_ref;
+    LJ::run_hook( 'override_entry_url', $journal, $entry, \$entry_url_ref );     
+    return BML::redirect($entry_url_ref) if $entry_url_ref; 
+
     my $set = LJ::Subscription::GroupSet->fetch_for_user($u, sub {
         my ($subhash) = @_;
 
