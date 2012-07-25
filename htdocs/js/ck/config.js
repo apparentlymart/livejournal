@@ -5,7 +5,8 @@
 
 CKEDITOR.editorConfig = function(config) {
 	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
-	CKEDITOR.plugins.addExternal( 'ljlink', 'plugins/lj/ljlink/plugin.js' );
+	CKEDITOR.plugins.addExternal( 'ljlink',  'plugins/lj/ljlink/plugin.js' );
+	CKEDITOR.plugins.addExternal( 'ljfont',  'plugins/lj/ljfont/plugin.js' );
 
 	var ljplugins = [/*'ljspell', */ (Site.page.ljpost) ? 'livejournal' : 'livejournal_old', 'ljcolor', 'ljlink'],
 		plugins = [
@@ -37,6 +38,10 @@ CKEDITOR.editorConfig = function(config) {
 			'link',
 			'autogrow'
 		];
+
+	if (Site.page.ljpost) {
+		ljplugins.push('ljfont');
+	}
 
 	config.language = 'ru';
 	config.autoParagraph = false;
@@ -79,7 +84,7 @@ CKEDITOR.editorConfig = function(config) {
 
 	if (Site.page.ljpost) {
 		toolbar = [
-			'Bold', 'Italic', 'Underline', 'Strike', 'FontSize', 'LJColor',
+			'Bold', 'Italic', 'Underline', 'Strike', 'ljFontSize', 'LJColor',
 
 			'-',
 
