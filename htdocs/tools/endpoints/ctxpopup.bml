@@ -185,8 +185,6 @@
         your_friend you_member you_subscribed you_watching ljtalk online offline
     /;
 
-    LJ::run_hook('override_ctxpopup_keys', $u, \@ml_keys);
-
     ## optimization: load all ML strings into local cache at once
     LJ::Lang::get_text_multi(BML::get_language(), undef, [map { "$language_scope.$_" } @ml_keys]);
 
