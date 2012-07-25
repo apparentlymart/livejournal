@@ -435,6 +435,9 @@ sub trans {
             $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
             return redir($redir_url.$uri);
         }
+        my $partner_url;
+        LJ::run_hook('override_journal_url', LJ::load_user($username), \$partner_url);
+        return redir($partner_url) if $partner_url;
     }
 
     # process controller
