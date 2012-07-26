@@ -2,7 +2,12 @@
 	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
 	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
 
-	CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
+	if (Site.page.ljpost) {
+		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents_new.css?t=' + Site.version;
+	} else {
+		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
+	}
+	
 
 	var likeButtons = [
 		{
@@ -405,7 +410,7 @@
 						if (frame.$ != node.$) {
 							body = frame.$.contentWindow.document.body;
 							body.className = frame.getAttribute('lj-class') || '';
-							if (frame.getAttribute('lj-cmd') == 'LJPollLink' && body.className == 'lj-poll') {
+							if (frame.getAttribute('lj-cmd') == 'LJPollLink' && body.className.indexOf('lj-poll') != -1 ) {
 								frame.removeAttribute('style');
 							}
 						}
@@ -457,16 +462,19 @@
 				}
 
 				function createPoll(ljtags) {
-					var poll = new Poll(ljtags);
-					return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + poll.outputLJtags() + '" lj-content="' + poll.outputHTML() + '"></iframe>';
+					var poll = new Poll(ljtags),
+						content = "<div class='lj-poll-inner lj-rtebox-inner'>" + poll.outputHTML() + "</div>";
+					return '<iframe class="lj-poll-wrap lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + poll.outputLJtags() + '" lj-content="' + content + '"></iframe>';
 				}
 
 				function createUneditablePoll(ljtags, pollId) {
-					return '<iframe class="lj-poll-wrap" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + escape(ljtags) + '" lj-content="Poll id: ' + pollId + '" data-disabledPoll="true"></iframe>';
+					var content = "<div class='lj-poll-inner lj-rtebox-inner'>Poll id: " + pollId + "</div>";
+					return '<iframe class="lj-poll-wrap lj-poll-wrap-done lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + escape(ljtags) + '" lj-content="' + content + '" data-disabledPoll="true"></iframe>';
 				}
 
 				function createEmbed(result, attrs, data) {
-					return '<iframe class="lj-embed-wrap" lj-class="lj-embed" frameborder="0" lj-cmd="LJEmbedLink" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + '></iframe>';
+					var content = "<div class='lj-embed-inner lj-rtebox-inner'>Embed video</div>";
+					return '<iframe class="lj-embed-wrap lj-rtebox" lj-class="lj-embed" frameborder="0" lj-cmd="LJEmbedLink" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + 'lj-content="' + content + '"></iframe>';
 				}
 
 				function createLJRaw(result, open, content, close) {
@@ -672,9 +680,10 @@
 					var iframe = new CKEDITOR.dom.element('iframe', editor.document);
 
 					iframe.setAttribute('lj-data', encodeURIComponent(content));
+					iframe.setAttribute('lj-content', encodeURIComponent("<div class='lj-embed-inner lj-rtebox-inner'>Embed video</div>"));
 					iframe.setAttribute('lj-class', 'lj-embed');
 					iframe.setAttribute('lj-cmd', button);
-					iframe.setAttribute('class', 'lj-embed-wrap');
+					iframe.setAttribute('class', 'lj-embed-wrap lj-rtebox');
 					iframe.setAttribute('frameBorder', 0);
 					iframe.setAttribute('allowTransparency', 'true');
 
@@ -1045,20 +1054,20 @@
 
 				LiveJournal.register_hook('poll_response', function(ljData) {
 					var poll = new Poll(ljData), // Poll.js
-						pollSource = poll.outputHTML(),
+						content = "<div class='lj-poll-inner lj-rtebox-inner'>" + poll.outputHTML() + '</div>',
 						pollLJTags = poll.outputLJtags();
 
 					var node = ljTagsData[button].node;
 					if (node) {
-						node.setAttribute('lj-content', pollSource);
+						node.setAttribute('lj-content', content);
 						node.setAttribute('lj-data', pollLJTags);
 						node.removeAttribute('style');
 					} else {
 						node = new CKEDITOR.dom.element('iframe', editor.document);
-						node.setAttribute('lj-content', pollSource);
+						node.setAttribute('lj-content', content);
 						node.setAttribute('lj-cmd', 'LJPollLink');
 						node.setAttribute('lj-data', pollLJTags);
-						node.setAttribute('lj-class', 'lj-poll');
+						node.setAttribute('lj-class', 'lj-poll lj-rtebox');
 						node.setAttribute('class', 'lj-poll-wrap');
 						node.setAttribute('frameBorder', 0);
 						node.setAttribute('allowTransparency', 'true');
@@ -1118,18 +1127,19 @@
 						}
 					}
 
-					var likeNode = ljTagsData[button].node;
+					var likeNode = ljTagsData[button].node,
+						content = encodeURIComponent('<div class="lj-rtebox-inner lj-like-inner"><span class="lj-like-wrapper">' + likeHtml.join('') + '</span></div>');
 
 					if (likeNode) {
 						likeNode.setAttribute('buttons', attr.join(','));
-						likeNode.setAttribute('lj-content', encodeURIComponent('<span class="lj-like-wrapper">' + likeHtml.join('') + '</span>'));
+						likeNode.setAttribute('lj-content', content);
 						likeNode.removeAttribute('defaults');
 					} else {
 						likeNode = new CKEDITOR.dom.element('iframe', editor.document);
 						likeNode.setAttribute('lj-class', 'lj-like');
-						likeNode.setAttribute('class', 'lj-like-wrap');
+						likeNode.setAttribute('class', 'lj-like-wrap lj-rtebox');
 						likeNode.setAttribute('buttons', attr.join(','));
-						likeNode.setAttribute('lj-content', encodeURIComponent('<span class="lj-like-wrapper">' + likeHtml.join('') + '</span>'));
+						likeNode.setAttribute('lj-content', content);
 						likeNode.setAttribute('lj-cmd', 'LJLike');
 						likeNode.setAttribute('frameBorder', 0);
 						likeNode.setAttribute('allowTransparency', 'true');
@@ -1148,7 +1158,8 @@
 
 						if (node) {
 							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
-								buttons: node.getAttribute('buttons')
+								buttons: node.getAttribute('buttons'),
+								editMode: true
 							});
 						} else {
 							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button));
@@ -1199,12 +1210,12 @@
 
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
 						fakeElement.attributes['lj-class'] = 'lj-like';
-						fakeElement.attributes['class'] = 'lj-like-wrap';
+						fakeElement.attributes['class'] = 'lj-like-wrap lj-rtebox';
 						if (element.attributes.hasOwnProperty('style')) {
 							fakeElement.attributes['lj-style'] = element.attributes.style;
 						}
 						fakeElement.attributes['lj-cmd'] = 'LJLike';
-						fakeElement.attributes['lj-content'] = '<span class="lj-like-wrapper">';
+						fakeElement.attributes['lj-content'] = '<div class="lj-rtebox-inner lj-like-inner"><span class="lj-like-wrapper">';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1223,7 +1234,7 @@
 
 						if (!element.attributes.buttons) fakeElement.attributes['defaults'] = true;
 
-						fakeElement.attributes['lj-content'] += '</span>';
+						fakeElement.attributes['lj-content'] += '</span></div>';
 
 						fakeElement.attributes.buttons = attr.join(',');
 
@@ -1330,8 +1341,8 @@
 
 						fakeElement.attributes['lj-url'] = element.attributes.url ? encodeURIComponent(element.attributes.url) : '';
 						fakeElement.attributes['lj-class'] = 'lj-map';
-						fakeElement.attributes['class'] = 'lj-map-wrap';
-						fakeElement.attributes['lj-content'] = '<p class="lj-map">map</p>';
+						fakeElement.attributes['class'] = 'lj-map-wrap lj-rtebox';
+						fakeElement.attributes['lj-content'] = '<div class="lj-map-inner lj-rtebox-inner"><p class="lj-map">map</p></div>';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1386,8 +1397,8 @@
 
 						fakeElement.attributes['lj-url'] = element.attributes.src ? encodeURIComponent(element.attributes.src) : '';
 						fakeElement.attributes['lj-class'] = 'lj-iframe';
-						fakeElement.attributes['class'] = 'lj-iframe-wrap';
-						fakeElement.attributes['lj-content'] = '<p class="lj-iframe">iframe</p>';
+						fakeElement.attributes['class'] = 'lj-iframe-wrap lj-rtebox';
+						fakeElement.attributes['lj-content'] = '<div class="lj-rtebox-inner"><p class="lj-iframe">iframe</p></div>';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
@@ -1425,7 +1436,7 @@
 						} else {
 							return element;
 						}
-
+						
 						switch (className) {
 							case 'lj-like':
 								newElement = new CKEDITOR.htmlParser.element('lj-like');

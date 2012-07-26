@@ -35,11 +35,11 @@ CKEDITOR.editorConfig = function(config) {
 			'undo',
 			'wysiwygarea',
 			'onchange',
-			'link',
-			'autogrow'
+			'link'
 		];
 
 	if (Site.page.ljpost) {
+		plugins.push('autogrow');
 		ljplugins.push('ljfont');
 	}
 
@@ -47,9 +47,14 @@ CKEDITOR.editorConfig = function(config) {
 	config.autoParagraph = false;
 	config.autoUpdateElement = false;
 	config.docType = '<!DOCTYPE html>';
-	config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
 
-	config.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
+	if (Site.page.ljpost) {
+		config.contentsCss = '/js/ck/contents_new.css?t=' + Site.version;
+		config.styleText = Site.statprefix + '/js/ck/contents_new.css?t=' + Site.version;
+	} else {
+		config.contentsCss = '/js/ck/contents.css?t=' + Site.version;
+		config.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
+	}
 
 	//config.scayt_autoStartup = true;
 
