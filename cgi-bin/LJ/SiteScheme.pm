@@ -360,9 +360,12 @@ sub common_template_params {
     my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code }); 
 
     if ($remote_is_sup && lentaru_branding) {
-        LJ::need_res('js/jquery/jquery.lj.lentaRu.js');
-        LJ::need_res('stc/widgets/flags.css');
-        LJ::need_res('stc/widgets/olympics.css');
+        LJ::need_res(qw{ 
+            js/jquery/jquery.lj.lentaRu.js
+            stc/widgets/flags.css
+            stc/widgets/olympics.css
+            templates/Widgets/olympics/olympics_bubble.tmpl
+        });
     }
 
     return {
