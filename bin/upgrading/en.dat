@@ -6165,6 +6165,8 @@ talk.poll.settings.whovote.all=All
 
 talk.poll.settings.whovote.friends=Friends
 
+talk.poll.title=Create Poll
+
 talk.poll.type.add=Add question
 
 talk.poll.type.check=Check Boxes
