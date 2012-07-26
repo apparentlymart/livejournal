@@ -274,6 +274,13 @@
         }
     }
 
+    my $partner = LJ::PartnerSite->find_by_journal_username( $u->user );
+    if ($partner && $partner->overrides->{'ctxpopup'}) {
+        $ret{partner} = 1;
+    } else {
+        $ret{partner} = 0;
+    }
+
     $ret{success} = 1;
     return LJ::JSON->to_json(\%ret);
 }
