@@ -4432,6 +4432,11 @@ register_alter(sub {
         do_alter("domains", "ALTER TABLE domains ADD UNIQUE (domain)");
     }
 
+    unless (column_type("repost2", "cost")) {
+        do_alter("repost2", "ALTER TABLE repost2 ADD COLUMN cost int(11) NOT NULL DEFAULT '0'");
+        do_alter("repost2", "ALTER TABLE repost2 ADD COLUMN blid int(11) NOT NULL DEFAULT '0'");
+    }
+    
 });
 
 register_alter(sub {
