@@ -455,6 +455,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				first: !!data.first
 			};
 
+			buildObject.partner = !!data.partner;
+
 			if (data.value) { buildObject.socialCap.value = data.value; }
 
 			this.element
@@ -622,7 +624,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 		showPopup: function(ctxPopupId, ele) {
 			var showNow = popup.element.is(':visible');
-
 			jQuery(this.currentElement)
 				.unbind('mouseenter mouseleave');
 
