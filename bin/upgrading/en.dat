@@ -5862,6 +5862,35 @@ talk.editcomment=Save comment
 
 talk.edited=Edited:
 
+talk.editpic.blank=open in new window
+
+talk.editpic.border=Border
+
+talk.editpic.default=Default
+
+talk.editpic.head=Image Properties
+
+talk.editpic.height=Height
+
+talk.editpic.horizontal=Horizontal
+
+talk.editpic.left=&larr; Left
+
+talk.editpic.none=None
+
+talk.editpic.right=Right &rarr;
+
+talk.editpic.save=Save
+talk.editpic.src=Image URL
+
+talk.editpic.title=Title
+
+talk.editpic.url=Link URL
+
+talk.editpic.width=Width
+
+talk.editpic.vertical=Vertical
+
 talk.edittags=Tags
 
 talk.emptypostalert=You need to write something first
