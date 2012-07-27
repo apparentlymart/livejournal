@@ -22,7 +22,19 @@ jQuery.fn.ljAddContextualPopup = function(){
  * @param  {number} endPos   End caret position.
  */
 jQuery.fn.caret = function (startPos, endPos) {
-	var $el = this.length > 1 ? this.first() : this;
+	var $el = this.length > 1 ? this.first() : this,
+		length;
+
+	if (startPos === 'start') {
+		length = $el.val().length;
+		LJ.DOM.setSelection($el, 0, 0);
+		return this;
+	}
+	if (startPos === 'end') {
+		length = $el.val().length;
+		LJ.DOM.setSelection($el, length, length);
+		return this;
+	}
 
 	if (typeof startPos === 'number') {
 		if (typeof endPos !== 'number') {
