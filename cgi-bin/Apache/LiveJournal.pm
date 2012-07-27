@@ -763,7 +763,7 @@ sub trans {
             return redir($u->profile_url . $mode);
         }
 
-        if ($opts->{'mode'} eq "profile" && $LJ::DISABLED{profile_controller}) {
+        if ($opts->{'mode'} eq "profile" && $LJ::DISABLED{profile_controller} && $GET{ver} != 2) {
             my $burl = LJ::remote_bounce_url();
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
