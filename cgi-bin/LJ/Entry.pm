@@ -10,6 +10,7 @@ use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
 use LJ::TimeUtil;
 use LJ::Entry::Repost;
+use LJ::Pay::Repost::Offer;
 
 # internal fields:
 #
@@ -1551,6 +1552,22 @@ sub original_post {
     my ($class) = @_;
 
     return $class->{'original_post_obj'};
+}
+
+sub repost_offer {
+    my $self = shift;
+    return $self->prop('repost_offer');
+}
+
+sub repost_budget {
+    my $self = shift;
+
+    return unless $self->repost_offer;
+
+    return LJ::Pay::Repost::Offer->get_budget(
+                                              $self->posterid,
+                                              $self->repost_offer,
+                                              );
 }
 
 package LJ;

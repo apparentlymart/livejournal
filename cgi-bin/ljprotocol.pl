@@ -3289,7 +3289,9 @@ sub editevent {
         );
     }
 
-    if (LJ::is_enabled("paid_repost") && defined $req->{repost_budget} && !$req->{revoke_repost_offer}) {
+    if (LJ::is_enabled("paid_repost") 
+        && defined $req->{repost_budget} 
+        && !$req->{revoke_repost_offer}) {
       
         # cannot create or edit repost offer via api
         return fail($err,222) unless $flags->{noauth};
