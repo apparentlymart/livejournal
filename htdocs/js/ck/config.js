@@ -40,7 +40,9 @@ CKEDITOR.editorConfig = function(config) {
 
 	if (Site.page.ljpost) {
 		plugins.push('autogrow');
-		ljplugins.push('ljfont');
+		config.autoGrow_minHeight = 400;
+
+		ljplugins.push(/*'ljspell',*/ 'ljfont');
 	}
 
 	config.language = 'ru';
