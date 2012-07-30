@@ -366,6 +366,19 @@ sub common_template_params {
             stc/widgets/olympics.css
             templates/Widgets/olympics/olympics_bubble.tmpl
         });
+
+        my $json = LJ::MemCache::get('lentaru_olympics_json');
+        if ($json) {
+            LJ::need_var(lentaRu => {result => $json});
+        } else {    
+            my $browser = LWP::UserAgent->new;
+            my $response = $browser->get( 'http://olympic2012.lenta.ru/export/medals-top.json' );
+            if ($response->is_success) {
+                $json = eval { LJ::JSON->from_json($response->decoded_content) };
+                LJ::MemCache::set('lentaru_olympics_json', $json, 1800);
+                LJ::need_var(lentaRu => {result => $json});
+            }
+        }
     }
 
     return {
