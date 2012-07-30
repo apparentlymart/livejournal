@@ -4983,6 +4983,12 @@ HTML BODY .i-ljuser {
 	-moz-border-radius: 100px / 50px;
 	border-radius: 100px / 50px;
 	}
+@media screen and (max-width: 1300px) {
+	.b-panel:before {
+		content: "";
+		display: none;
+		}
+}
 
 
 
@@ -5127,6 +5133,15 @@ HTML BODY .i-ljuser {
 			-moz-border-radius: 30px / 100px;
 			border-radius: 30px / 100px;
 			}
+@media screen and (max-width: 1300px) {
+	.b-extracontent {
+		padding-right: 0;
+		padding-left: 0;
+		}
+		.b-extracontent-shadow-inner {
+			display: none;
+			}
+}
 
 
 
