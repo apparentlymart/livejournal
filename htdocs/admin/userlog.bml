@@ -163,7 +163,7 @@ FORM
             $action = "Screened in customized rating " . LJ::ljuser($u) if $u;
         } elsif ($row->{action} eq 'custom_ratings_unscreen') {
             my $u = LJ::load_userid($row->{actiontarget});
-            $action = "Uncreened in customized rating0 " . LJ::ljuser($u) if $u;
+            $action = "Uncreened in customized rating " . LJ::ljuser($u) if $u;
         } else {
             $action = "Unknown action ($row->{action})";
         }
