@@ -25,7 +25,7 @@ sub expand_ljmap_tag {
                 $iframe_url->query_form(%url_params);
             } elsif ($host eq 'maps.yandex.ru') {
                 $iframe_url = 
-                    "http://$LJ::EMBED_MODULE_DOMAIN?mode=lj-map&url=" . LJ::eurl($url) 
+                    "http://$LJ::EMBED_MODULE_DOMAIN_CDN?mode=lj-map&url=" . LJ::eurl($url) 
                     . "&width=" . LJ::eurl($width) . "&height=" . LJ::eurl($height);
             }
             
