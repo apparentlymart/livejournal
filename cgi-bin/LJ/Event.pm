@@ -25,6 +25,7 @@ event-specific functionality.
 
 Guide to subclasses:
 * JournalNewEntry    -- a journal has a new entry in it
+* JoutnalNewEntry    -- a journal has a new repost in it
 * JournalNewComment  -- a journal has a new comment in it
   * CommunityEntryReply -- a user's community entry has received a comment
   * CommentReply        -- someone replied to a user's comment
