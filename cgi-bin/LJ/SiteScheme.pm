@@ -460,6 +460,7 @@ sub common_template_params {
 
         'branding'            => $branding,
         'lentaru_branding'    => ($remote_is_sup || LJ::GeoLocation->get_country_info_by_ip() =~ m/^(RU|UA|BY)$/) && lentaru_branding,
+        'random_value'        => int(rand(999999999)),
     };
 }
 
