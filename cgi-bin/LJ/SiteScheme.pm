@@ -1,6 +1,6 @@
 package LJ::SiteScheme;
 use strict;
-use warnings;
+#use warnings;
 
 use LJ::Lang qw( ml );
 use LJ::Widget::SGMessages;
