@@ -782,7 +782,11 @@ sub friendplus_event_list {
 }
 
 sub entrycomment_event_list {
-    my @events = ( 'JournalNewEntry', 'JournalNewComment');
+    my @events = qw( 
+                     JournalNewEntry
+                     JournalNewRepost
+                     JournalNewComment 
+                     );
     return @events;
 }
 
