@@ -73,7 +73,7 @@
             }
         }
 
-        if (scalar @items >= 15) {
+        if (scalar @items > 1) {
             $remote->log_event('inbox_massdel', {
                                      remote => $remote,
                                      actiontarget => scalar @items,

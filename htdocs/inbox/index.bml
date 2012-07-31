@@ -115,7 +115,7 @@ body<=
                                          remote => $remote,
                                          actiontarget => scalar @$nitems,
                                          method => 'delete',
-                                         view   => $view,
+                                         view   => $view || '(all)',
                                          via    => 'web', });
             }
 
