@@ -2106,8 +2106,13 @@ sub profile_url {
 
     my $url;
     if ($u->{journaltype} eq "I") {
-        $url = "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
-        $url .= "&mode=full" if $opts{full};
+        if ($LJ::DISABLED{profile_controller}) {
+            $url = "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
+            $url .= "&mode=full" if $opts{full};
+        } else {
+            $url = "$LJ::SITEROOT/profile?userid=$u->{'userid'}&t=I";
+            $url .= "&mode=full" if $opts{full};
+        }
     } else {
         $url = $u->journal_base . "/profile";
         $url .= "?mode=full" if $opts{full};
