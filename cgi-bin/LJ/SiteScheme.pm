@@ -359,7 +359,7 @@ sub common_template_params {
     ## see also cgi-bin/LJ/Hooks/Homepage.pm
     my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code }); 
 
-    if ($remote_is_sup && lentaru_branding) {
+    if (($remote_is_sup || LJ::GeoLocation->get_country_info_by_ip() =~ m/^(RU|UA|BY)$/) && lentaru_branding) {
         LJ::need_res(qw{ 
             js/jquery/jquery.lj.lentaRu.js
             stc/widgets/flags.css
@@ -459,7 +459,7 @@ sub common_template_params {
         'ml_copyright_header' => $ml_copyright_header,
 
         'branding'            => $branding,
-        'lentaru_branding'    => $remote_is_sup && lentaru_branding,
+        'lentaru_branding'    => ($remote_is_sup || LJ::GeoLocation->get_country_info_by_ip() =~ m/^(RU|UA|BY)$/) && lentaru_branding,
     };
 }
 
