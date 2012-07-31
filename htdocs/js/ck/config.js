@@ -42,7 +42,7 @@ CKEDITOR.editorConfig = function(config) {
 		plugins.push('autogrow');
 		config.autoGrow_minHeight = 400;
 
-		ljplugins.push(/*'ljspell',*/ 'ljfont');
+		ljplugins.push('ljspell', 'ljfont');
 	}
 
 	config.language = 'ru';
@@ -114,6 +114,8 @@ CKEDITOR.editorConfig = function(config) {
 			'LJJustifyLeft',
 			'LJJustifyCenter',
 			'LJJustifyRight',
+
+			'LJSpell',
 
 			'Undo',
 			'Redo'
