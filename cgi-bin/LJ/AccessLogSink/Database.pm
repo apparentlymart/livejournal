@@ -111,6 +111,9 @@ sub log {
     $copy->{$_} = $rec->{$_} foreach $rec->keys;
     $self->extra_values($rec, $copy);
 
+    # FIXME: add "accept" column to the SQL above
+    delete $copy->{'accept'};
+
     my $ins = sub {
         my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
         $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$copy) . ") ".
