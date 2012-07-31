@@ -492,7 +492,7 @@ sub module_iframe_tag {
     $params{vid}    = $video_params{vid}    if exists $video_params{vid};
 
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', %params));
-    my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN/?auth_token=$auth_token" .
+    my $iframe_link = "http://$LJ::EMBED_MODULE_DOMAIN_CDN/?auth_token=$auth_token" .
         join('', map { "&amp;$_=" . LJ::eurl($params{$_}) } keys %params);
     my $iframe_tag = qq {<iframe src="$iframe_link" } .
         qq{width="$width" height="$height" frameborder="0" class="lj_embedcontent" $id></iframe>};
