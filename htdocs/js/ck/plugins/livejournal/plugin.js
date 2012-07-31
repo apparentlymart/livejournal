@@ -767,11 +767,16 @@
 						if (range.collapsed === false) {
 							for (var i = 0, l = ranges.length; i < l; i++) {
 								// https://jira.sup.com/browse/LJSV-2328
-								ranges[i].enlarge( CKEDITOR.ENLARGE_ELEMENT );
+								// https://jira.sup.com/browse/LJSUP-13130
+								if (selection.getSelectedElement()) {
+									ranges[i].enlarge( CKEDITOR.ENLARGE_ELEMENT );
+								}
 
 								fragment.append(ranges[i].extractContents());
 							}
 						}
+
+						console.log(fragment);
 
 						fragment.append(lastBR);
 						editor.insertElement(iframeClose);
