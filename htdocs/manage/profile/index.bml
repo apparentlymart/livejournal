@@ -556,6 +556,8 @@ body<=
             $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
             if($country eq 'KZ'){
                 $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_kz'} . '</span></li>';                
+            }elsif($country eq 'TJ'){
+                $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_tj'} . '</span></li>';                
             }elsif($country eq 'RU'){
                 $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_ru'} . '</span></li>';                
             }else{
@@ -635,15 +637,19 @@ body<=
             my $phone = LJ::SMS::API::RU::Phone->normalize($tminfo->{'number'});
             my $status = LJ::SMS::API::RU::Phone->get_status($u->{'userid'}, $phone);
             $ret .= "smsNotifyInitialState = \"".$status."\";";
-            $ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_def}}) . "];";
+            $ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_code_def}}) . "];";
             $ret .= "var smsCountry = '$country';";
+
+            my $prefix = '';
+            $prefix = '.kz' if $country eq 'KZ';
+            $prefix = '.tj' if $country eq 'TJ';
 
             my $dict_out = LJ::JSON->to_json({
                 'sendsmsbut'        => $ML{'.section.textmsg.button'},
                 'resendsmsbut'      => $ML{'.section.textmsg.button.resend'},
-                'initial'           => $ML{'.section.textmsg.info' . ($country eq 'KZ' ? '.kz':'')},
-                'badNum'            => $ML{'.section.textmsg.info.badnum' . ($country eq 'KZ' ? '.kz':'')},
-                'unsupporteddef'    => $ML{'.section.textmsg.info.unsupporteddef' . ($country eq 'KZ' ? '.kz':'')},
+                'initial'           => $ML{'.section.textmsg.info' . $prefix},
+                'badNum'            => $ML{'.section.textmsg.info.badnum' . $prefix},
+                'unsupporteddef'    => $ML{'.section.textmsg.info.unsupporteddef' . $prefix},
 
                 map { $_ => $ML{".section.textmsg.info.$_"} }
                     qw( already_use correctNum requestsent smssent
