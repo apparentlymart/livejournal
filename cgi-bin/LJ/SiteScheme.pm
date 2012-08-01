@@ -116,7 +116,7 @@ sub lentaru_branding {
 
     return unless time > $time_start && time < $time_end;
 
-    if ($remote) {
+    if ( LJ::get_remote() ) {
         return LJ::SUP->is_remote_sup();
     }
 
