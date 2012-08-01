@@ -60,16 +60,11 @@ sub as_string {
     my $lang_var =  $self->arg1 ? 'notification.sms.birthday_today' : 
                                   'notification.sms.birthday';
 
-# [[user]]'s birthday is on [[bday]]!
     return LJ::Lang::get_text($lang, $lang_var, undef, {
         user       => $self->bdayuser->display_username(1),
         bday       => $self->bday,
         mobile_url => $tinyurl,
     });
-
-#    return sprintf("%s's birthday is on %s!",
-#                   $self->bdayuser->display_username,
-#                   $self->bday);
 }
 
 sub as_alert {
@@ -268,9 +263,9 @@ sub fire {
     $job->run_after($self->arg1)
         if $self->arg1;
 
-
     my $h = $sclient->insert($job);
     return $h ? 1 : 0;
 }
 
 1;
+

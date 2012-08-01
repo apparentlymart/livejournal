@@ -137,6 +137,9 @@ sub work {
         LJ::Event::Birthday->new($u)->fire;
 
         my $birthday_time = $bdays->{$u->id} - time() - 86400;
+        if ($birthday_time < 86400) {
+            $birthday_time = 1;
+        }
         LJ::Event::Birthday->new($u, $birthday_time)->fire;
         $ct++;
     }
