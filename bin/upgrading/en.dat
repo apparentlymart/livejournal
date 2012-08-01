@@ -2252,7 +2252,7 @@ esn.user_new_repost_community.ashtml|staleness=1
 esn.user_new_repost_community.ashtml=[[reposter]] has reposted entry posted by [[poster]] in [[community]]
 
 esn.user_new_repost.ashtml|staleness=1
-esn.user_new_repost.ashtml=[[reposter]] has repost entry [[about]].[[tags]]
+esn.user_new_repost.ashtml=[[reposter]] has reposted entry posted by [[poster]]
 
 esn.mail_comments.alert.anonymous_edited_reply_to_a_comment|staleness=1
 esn.mail_comments.alert.anonymous_edited_reply_to_a_comment=Anonymous user edited a [[openlink]]reply[[closelink]] to a comment.
