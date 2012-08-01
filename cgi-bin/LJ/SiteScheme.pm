@@ -1,6 +1,6 @@
 package LJ::SiteScheme;
 use strict;
-#use warnings;
+use warnings;
 
 use LJ::Lang qw( ml );
 use LJ::Widget::SGMessages;
@@ -111,12 +111,20 @@ sub show_mobile_link {
 }
 
 sub lentaru_branding {
-    my $time = time;
     my $time_start = 1343332800; # 27.07.2012 00:00 MSK
     my $time_end   = 1344801599; # 12.08.2012 23:59 MSK
 
-    return 1 if ($time > $time_start && $time < $time_end);
-    return 0;
+    return unless time > $time_start && time < $time_end;
+
+    if ($remote) {
+        return LJ::SUP->is_remote_sup();
+    }
+
+    # no remote here
+    my $country = LJ::GeoLocation->get_country_info_by_ip();
+
+    return unless $country;
+    return $country eq 'RU' || $country eq 'UA' || $country eq 'BY';
 }
 
 sub common_template_params {
@@ -359,7 +367,7 @@ sub common_template_params {
     ## see also cgi-bin/LJ/Hooks/Homepage.pm
     my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code }); 
 
-    if (($remote_is_sup || (!$remote && LJ::GeoLocation->get_country_info_by_ip() =~ m/^(RU|UA|BY)$/)) && lentaru_branding) {
+    if ( lentaru_branding() ) {
         LJ::need_res(qw{ 
             js/jquery/jquery.lj.lentaRu.js
             stc/widgets/flags.css
@@ -459,7 +467,7 @@ sub common_template_params {
         'ml_copyright_header' => $ml_copyright_header,
 
         'branding'            => $branding,
-        'lentaru_branding'    => ($remote_is_sup || (!$remote && LJ::GeoLocation->get_country_info_by_ip() =~ m/^(RU|UA|BY)$/)) && lentaru_branding,
+        'lentaru_branding'    => lentaru_branding() || undef,
         'random_value'        => int(rand(999999999)),
     };
 }
