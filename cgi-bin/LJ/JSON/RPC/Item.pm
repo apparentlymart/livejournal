@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use LJ::API::Error;
-use LJ::API::RpcAuth;
+use LJ::API::Auth;
 
 #
 # json request and response jpc 2.0
