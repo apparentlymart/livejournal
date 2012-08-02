@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+require 'ljprotocol.pl';
+use LJ::Lang;
+use LJ::NewWorker::TheSchwartz;
+use LJ::ESN;
+LJ::NewWorker::TheSchwartz::ProcessSubMass->start();
+
+package LJ::NewWorker::TheSchwartz::ProcessSubMass;
+use base 'LJ::NewWorker::TheSchwartz';
+sub capabilities { "LJ::Worker::ProcessSubMass" }
+
+1;

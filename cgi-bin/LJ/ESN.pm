@@ -15,6 +15,7 @@ sub schwartz_capabilities {
             "LJ::Worker::FindSubsByCluster",  # step 2: can go to 3 or 4
             "LJ::Worker::FilterSubs",         # step 3: goes to step 4
             "LJ::Worker::ProcessSub",         # step 4
+            "LJ::Worker::ProcessSubMass",     # alternative step 4
             );
 }
 
@@ -326,7 +327,7 @@ sub work {
 
         my $params = $evt->raw_params;
         push @jobs, TheSchwartz::Job->new(
-            'funcname' => 'LJ::Worker::ProcessSub',
+            'funcname' => 'LJ::Worker::ProcessSubMass',
             'arg' => {
                 'userid'    => $sub->userid, 
                 'subdump'   => $sub->dump,
@@ -581,6 +582,9 @@ sub retry_delay {
     my ($class, $fails) = @_;
     return (10, 30, 60, 300, 600)[$fails];
 }
+
+package LJ::Worker::ProcessSubMass;
+use base qw( LJ::Worker::ProcessSub );
 
 1;
 
