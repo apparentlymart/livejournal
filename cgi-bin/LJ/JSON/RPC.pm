@@ -39,7 +39,7 @@ sub new {
 
     if ($@) {
         warn $@ if $LJ::IS_DEV_SERVER;
-        my $fatal = { 'error_code' => -32700, 
+        my $fatal = { 'error_code'    => -32700, 
                       'error_message' => 'Parse error' };
 
         my $item = LJ::JSON::RPC::Item->new({ 'fatal' =>  $fatal });
