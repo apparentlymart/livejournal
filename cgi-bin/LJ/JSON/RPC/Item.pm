@@ -4,17 +4,14 @@ use strict;
 use warnings;
 
 use LJ::API::Error;
-use LJ::API::Auth;
+use LJ::API::RpcAuth;
 
 #
 # json request and response jpc 2.0
 #
 
-use LJ::JSON;
-
 sub new {
     my ($class, $uri, $data) = @_;
-
     my $self = bless {}, $class;
 
     if ($data->{'fatal'}) {
@@ -25,40 +22,38 @@ sub new {
     my $jsonrpc = $data->{'jsonrpc'};
     my $method  = $data->{'method'};
     my $params  = $data->{'params'};
+
     if (exists $data->{'id'}) {
         $self->{'id'} = $data->{'id'};
     }
 
-    $self->{'fatal'} = { 'error_code' => -32602, 'error_message' => 'Invalid params' } unless $params;
-    $self->{'fatal'} = { 'error_code' => -32602, 'error_message' => 'Invalid params' } if ref $params eq 'ARRAY';
-    if ($self->{'fatal'}) {
+    if (!$params || ref $params ne 'HASH') { 
+        $self->{'fatal'} = { 'error_code'    => -32602, 
+                             'error_message' => 'Invalid params' };
         return $self;
     }
 
-    my $access = LJ::API::Auth->rpc_access($uri, $params);
+    #
+    # Check for auth information
+    #
+    my $access = LJ::API::RpcAuth->rpc_access($uri, $params);
     $self->{'fatal'} = $access->{'error'};
     if ($self->{'fatal'}) {
         return $self;
     }
- 
+
+    if (!$method || !$jsonrpc || $jsonrpc ne '2.0') { 
+        $self->{'fatal'} = { 'error_code'    => -32600, 
+                             'error_message' => 'Invalid Request' };
+        return $self;                             
+    }
+
+    $self->{'uri'}         = $uri;
+    $self->{'method'}      = $method;
+    $self->{'params'}      = $params;
     $self->{'access_type'} = $access->{'type'};
-
-    $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } unless $method;
-    $self->{'fatal'} = { 'error_code' => -32600, 'error_message' => 'Invalid Request' } if !$jsonrpc || $jsonrpc ne '2.0';
-
-    if ($self->{'fatal'}) {
-        return $self;
-    }
-
-
-    $self->{'uri'}    = $uri;
-    $self->{'method'} = $method;
-    $self->{'params'} = $params;
-    if (exists $data->{'id'}) {
-        $self->{'id'}     = $data->{'id'};
-    }
  
-    return $self,
+    return $self;
 }
 
 
@@ -70,7 +65,7 @@ sub new {
 # - data
 #
 sub __construct_error_object {
-    LJ::API::Error->get_error 
+    LJ::API::Error->get_error;
 }
 
 sub response {
@@ -79,13 +74,15 @@ sub response {
     my $result = $options->{'result'};
     my $error  = $options->{'error'};
     my $fatal  = $self->{'fatal'};
+    
     return if ($self->is_notitification && !$fatal);
     
     my $resp = { 'jsonrpc' => '2.0' };
             
     if ($result && $error) {
         # internal error
-        $fatal = { 'error_code' => -32603, 'error_message' => 'Internal error' };
+        $fatal = { 'error_code'    => -32603, 
+                   'error_message' => 'Internal error' };
     }
 
     ############################################################################
@@ -129,28 +126,18 @@ sub response {
     #
     #############################################################################
     if ($error || $fatal) {
-        $error = $fatal if ($fatal);
-        my $error_information;
-
-        my $error_data; 
-        if ($error->{'defined'}) {
-            my $error_type     = $error->{'error_type'};
-            my $error_options  = $error->{'error_options'};
-
-            $error = LJ::API::Error->get_error($error_type, $error_options)->{'error'};
-        } 
-
-        my $error_code = $error->{'error_code'};
-        my $error_msg  = $error->{'error_message'};
-
-        $error_data->{'code'}   = $error_code;
-        $error_data->{'message'}= $error_msg; 
+        if ($fatal) {
+             $error = $fatal;
+        }
         
+        my %error_data = { 'code'    => $error->{'error_code'},
+                           'message' => $error->{'error_message'}, };
+       
         if ($error->{'data'}) {
-            $error_data->{'data'} = $error->{'data'};
+            $error_data{'data'} = $error->{'data'};
         }
 
-        $resp->{'error'} = $error_data;
+        $resp->{'error'} = \%error_data;
     }
 
     ##############################################################################

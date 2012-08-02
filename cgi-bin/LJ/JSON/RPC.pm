@@ -15,25 +15,35 @@ sub new {
 
     eval {
         my $data = LJ::JSON->from_json($request);
+        
+        $self->{'is_array'} = ref $data eq 'ARRAY';
 
-        if (ref $data eq 'ARRAY') {
+        if ($self->{'is_array'}) {
             foreach my $entry (@$data) {
-                push @{$self->{'items'}}, { 'item'  => LJ::JSON::RPC::Item->new($uri, $entry), };
+                my $item = LJ::JSON::RPC::Item->new($uri, $entry);
+                push @{$self->{'items'}}, { 'item' => $item, };
             }
 
             unless (@$data) {
-                my $fatal = { 'error_code' => -32600, 'error_message' => 'Invalid Request' };
-                $self->{'items'} = { 'item' => LJ::JSON::RPC::Item->new({ 'fatal' =>  $fatal })};
+                my $fatal = { 'error_code'    => -32600, 
+                              'error_message' => 'Invalid Request' };
+                              
+                my $item = LJ::JSON::RPC::Item->new( { 'fatal' =>  $fatal } );
+                $self->{'items'} = { 'item' => $item, };
             }
         } else {
-            $self->{'items'} = { 'item'   => LJ::JSON::RPC::Item->new($uri, $data),};
+            my $item = LJ::JSON::RPC::Item->new($uri, $data);
+            $self->{'items'} = { 'item' => $item, };
         }
     };
 
     if ($@) {
         warn $@ if $LJ::IS_DEV_SERVER;
-        my $fatal = { 'error_code' => -32700, 'error_message' => 'Parse error' };
-        $self->{'items'} = { 'item' => LJ::JSON::RPC::Item->new({ 'fatal' =>  $fatal })};
+        my $fatal = { 'error_code' => -32700, 
+                      'error_message' => 'Parse error' };
+
+        my $item = LJ::JSON::RPC::Item->new({ 'fatal' =>  $fatal });
+        $self->{'items'} = { 'item' => $item };
     }
 
     return $self;
@@ -42,30 +52,36 @@ sub new {
 sub call {
     my ($self, $callback) = @_;
     my $items = $self->{'items'};
+    
+    if ($self->{'is_array'}){
+        $self->__call_array($items, $callback);
+    } else {
+        $self->__call_item($items, $callback);
+    }
+}
+
+sub __call_array {
+    my ($self, $items, $callback) = @_;
+
+    foreach my $entry (@$items) {
+        $self->__call_item($entry, $callback);
+    } 
+}
+
+sub __call_item {
+    my ($self, $entry, $callback) = @_;
 
     my $call_info = { 
         'source' => 'jsonrpc',
     };
 
-    if (ref $items eq 'ARRAY') {
-        foreach my $entry (@$items) {
-            my $item = $entry->{'item'};
-            next if $item->error;            
+    my $item   = $entry->{'item'};
+    return if $item->error;
 
-            my $method = $item->method;
-            my $params = $item->params;
+    my $method = $item->method;
+    my $params = $item->params;
 
-            $entry->{'result'} = $callback->($method, $params, $call_info);
-        }
-    } else {
-        my $item   = $items->{'item'};
-        return if $item->error;
-
-        my $method = $item->method;
-        my $params = $item->params;
-
-       $items->{'result'} = $callback->($method, $params, $call_info);
-    }
+    $entry->{'result'} = $callback->($method, $params, $call_info);
 }
 
 sub response {
@@ -73,10 +89,11 @@ sub response {
     my $items = $self->{'items'};
     my $resp_data;
     
-    if (ref $items eq 'ARRAY') {
+    if ($self->{'is_array'}) {
         foreach my $entry (@$items) {
-            my $item   = $entry->{'item'};
+            my $item     = $entry->{'item'};
             my $response = $item->response($entry->{'result'});
+
             push @{$resp_data}, $response if $response;
         }
     } else {
