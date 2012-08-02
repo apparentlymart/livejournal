@@ -24,6 +24,8 @@ sub render_page {
     my $filename = "$ENV{'LJHOME'}/templates/SiteScheme/"
         . $handler->template_filename . '.tmpl';
 
+    LJ::need_var(scheme => $handler->template_filename);
+
     # cast all keys to lowercase because uppercase everywhere is creepy
     my $args_normalized = {};
     foreach my $k ( keys %$args ) {
