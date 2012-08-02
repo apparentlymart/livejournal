@@ -40,7 +40,7 @@ sub poster {
     my ($self) = @_;
     my $entry  = $self->entry;
 
-    return $self->u;
+    return $entry->poster;
 }
 
 sub posterid {
@@ -321,8 +321,9 @@ sub _as_email {
     # make hyperlinks for options
     # tags 'poster' and 'journal' cannot contain html <a> tags
     # when it used between [[openlink]] and [[closelink]] tags.
-    my $vars = { poster  => $poster_text, 
-                 journal => $journal_text, };
+    my $vars = { poster    => $poster_text, 
+                 journal   => $reposter_name,
+                 community => $journal, };
 
     $email .= LJ::Lang::get_text($lang, $ml_head_string, undef,
                 {
@@ -351,12 +352,10 @@ sub _as_email {
                                                     "$LJ::SITEROOT/community/join.bml?comm=$journal_user" ],
                 'esn.read_user_entries'     => [ 1, $journal_url ],
                 'esn.add_friend'            => [ LJ::is_friend($u, $self->reposter)? 0 : 5,
-                                                    "$LJ::SITEROOT/friends/add.bml?user=" . $u->user  ],
+                                                    "$LJ::SITEROOT/friends/add.bml?user=" . $reposter->user  ],
             });
 
-    return $email;
-
-    
+    return $email; 
 }
 
 sub as_email_string {
