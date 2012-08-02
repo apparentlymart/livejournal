@@ -297,15 +297,17 @@ LJ.throttle = function(func, delay) {
 
 LJ.threshold = function (f, delay, preserve) {
 	var queue = [],
+		batchSize, batch,
 		lock = false,
 
 		callback = function () {
 			var caller = this;
+
 			if (lock || !queue.length) {
 				return;
 			}
 
-			if (queue.length) {
+			while (queue.length) {
 				lock = true;
 
 				if (preserve) {
@@ -315,17 +317,40 @@ LJ.threshold = function (f, delay, preserve) {
 					queue = [];
 				}
 
+				if (batch && --batch) {
+					lock = false;
+					continue;
+				}
+
 				setTimeout(function () {
 					lock = false;
-					callback.apply(caller);
+					batch = batchSize;
+					callback.call(caller);
 				}, delay); 
+
+				break;
 			}
+		},
+
+		threshold = function () {
+			queue.push([].slice.call(arguments));
+			callback.call(this);
 		};
 
-	return function () {
-		queue.push([].slice.call(arguments));
-		callback.apply(this);
+	threshold.resetQueue = function () {
+		queue = [];
 	};
+
+	threshold.batch = function (size) {
+		if (size !== undefined) {
+			batchSize = size >>> 0;
+			if (!lock) {
+				batch = batchSize;
+			}
+		}
+	}; 
+
+	return threshold;
 };
 
 LJ.console = function() {
