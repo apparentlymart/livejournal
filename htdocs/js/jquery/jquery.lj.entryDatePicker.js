@@ -187,6 +187,7 @@
 				ml: {
 					caption: LiveJournal.getLocalizedStr('entryform.choose_date', null, 'Choose date:')
 				},
+				startMonth: new Date(1970, 0, 1),
 				endMonth: new Date(2037, 11, 31),
 				showCellHovers: true
 			};
