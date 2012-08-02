@@ -36,7 +36,7 @@ sub new {
     #
     # Check for auth information
     #
-    my $access = LJ::API::RpcAuth->rpc_access($uri, $params);
+    my $access = LJ::API::Auth->rpc_access($uri, $params);
     $self->{'fatal'} = $access->{'error'};
     if ($self->{'fatal'}) {
         return $self;
