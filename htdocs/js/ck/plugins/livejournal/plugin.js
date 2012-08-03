@@ -84,6 +84,9 @@
 		},
 		LJEmbedLink: {
 
+		},
+		LJMap: {
+
 		}
 	};
 
@@ -776,8 +779,6 @@
 							}
 						}
 
-						console.log(fragment);
-
 						fragment.append(lastBR);
 						editor.insertElement(iframeClose);
 						br.clone().insertAfter(iframeClose);
@@ -797,6 +798,65 @@
 				}
 
 			}
+
+			// LJ Map
+			(function() {
+				var button = "LJMap",
+					widget = "map";
+
+				LiveJournal.register_hook('map_response', function(text) {
+					var iframe = new CKEDITOR.dom.element('iframe', editor.document);
+
+					var width = 800,
+						height = 600,
+						frameStyle = "", bodyStyle = "";
+
+					if (!isNaN(width)) {
+						frameStyle += 'width:' + width + 'px;';
+						bodyStyle += 'width:' + (width - 2) + 'px;';
+					}
+
+					if (!isNaN(height)) {
+						frameStyle += 'height:' + height + 'px;';
+						bodyStyle += 'height:' + (height - 2) + 'px;';
+					}
+
+					iframe.setAttributes({
+						'lj-url': text,
+						'class': 'lj-map-wrap lj-rtebox',
+
+						'lj-content': '<div class="lj-map-inner lj-rtebox-inner"><p class="lj-map">map</p></div>',
+
+						'lj-cmd': 'LJMap',
+						'lj-class': 'lj-map',
+						'frameborder': 0,
+						'allowTransparency': 'true',
+
+						'style': frameStyle,
+						'lj-style': bodyStyle
+					});
+
+					editor.insertElement(iframe);
+					updateFrames();
+				});
+
+				editor.addCommand(button, {
+					exec: function() {
+						var node = ljTagsData[button].node;
+
+						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+							defaultText: node ? node.getAttribute('text') : '',
+							editMode: node? true : false
+						});
+					},
+					editorFocus: false
+				});
+
+				editor.ui.addButton(button, {
+					label: CKLang.LJMap_Title,
+					command: button
+				});
+			})();
 
 			// LJ Cut
 			(function() {

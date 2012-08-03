@@ -106,6 +106,7 @@ CKEDITOR.editorConfig = function(config) {
 			'LJSpoiler',
 			
 			'LJLike',
+			'LJMap',
 
 			'LJPollLink',
 			'NumberedList',
