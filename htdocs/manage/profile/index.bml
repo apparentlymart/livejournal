@@ -553,7 +553,7 @@ body<=
             $ret .= '<ul class="b-manage-smsn b-manage-smsn-hide">';
             $ret .= '<li class="b-manage-smsn-sms">';
             #$ret .= '<select name="txtmsg_number_code" class="b-manage-smsn-code" disabled="disabled"><option value="+7">+7</option></select>' . ' ';
-            $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '16', 'maxlength' => '16', 'class' => 'b-manage-smsn-phone' });
+            $ret .= LJ::html_text({ 'name' => 'txtmsg_number', 'value' => $tminfo->{'number'}, 'size' => '18', 'maxlength' => '18', 'class' => 'b-manage-smsn-phone' });
             if($country eq 'KZ'){
                 $ret .= '<br /><span class="helper">' . $ML{'.section.textmsg.example_kz'} . '</span></li>';                
             }elsif($country eq 'TJ'){
