@@ -3832,7 +3832,7 @@ A.lj-button-link:active {
 	border: 1px solid!important;
 	border-color: #C9C9C9 #B4B4B4 #AAA!important;
 	border-right: 1px solid #AAA!important;
-	line-height: 22px!important;
+	line-height: 23px!important;
 	-webkit-border-radius: 2px!important;
 	-moz-border-radius: 2px!important;
 	border-radius: 2px!important;
@@ -3922,17 +3922,22 @@ A.lj-button-link:active {
 	}
 .paidrepost-button-label {
 	float: left;
+	height: 22px;
 	margin: 0 6px 0 0;
 	}
-	
+
+.lj-button-light.paidrepost-button-inactive .paidrepost-button-cost {
+	opacity: 0.4;
+	color: #000!important;
+	}
 .paidrepost-button-cost {
 	float: right;
 	position: relative;
 	padding: 0 14px 0 5px;
 	margin: 0;
-	min-height: 22px;
+	height: 22px;
 	background: url(/img/icons/paidrepost.png?v=1) no-repeat 100% 50%!important;
-	line-height: 22px;
+	line-height: 23px;
 	}
 	.paidrepost-button-cost:before {
 		content: "";
@@ -3966,6 +3971,39 @@ A.lj-button-link:active {
 		background-image: -ms-linear-gradient(top,  #FFF 0%,#ECEDEE 100%);
 		background-image: linear-gradient(to bottom,  #FFF 0%,#ECEDEE 100%);
 		}
+
+.paidrepost-button-active .paidrepost-button-cost:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 1px;
+	height: 100%;
+	background: #B9B9B9;
+	background-image: -moz-linear-gradient(top,  #E4E4E4 0%, #B9B9B9 50%, #E4E4E4 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E4E4E4), color-stop(50%,#B9B9B9), color-stop(100%,#E4E4E4));
+	background-image: -webkit-linear-gradient(top,  #E4E4E4 0%,#B9B9B9 50%,#E4E4E4 100%);
+	background-image: -o-linear-gradient(top,  #E4E4E4 0%,#B9B9B9 50%,#E4E4E4 100%);
+	background-image: -ms-linear-gradient(top,  #E4E4E4 0%,#B9B9B9 50%,#E4E4E4 100%);
+	background-image: linear-gradient(to bottom,  #E4E4E4 0%,#B9B9B9 50%,#E4E4E4 100%);
+	}
+.paidrepost-button-active .paidrepost-button-cost:after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 1px;
+	width: 1px;
+	height: 100%;
+	background: #EDEDED;
+	background-image: -moz-linear-gradient(top,  #EEE 0%, #EDEDED 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EEE), color-stop(100%,#EDEDED));
+	background-image: -webkit-linear-gradient(top,  #EEE 0%,#EDEDED 100%);
+	background-image: -o-linear-gradient(top,  #EEE 0%,#EDEDED 100%);
+	background-image: -ms-linear-gradient(top,  #EEE 0%,#EDEDED 100%);
+	background-image: linear-gradient(to bottom,  #EEE 0%,#EDEDED 100%);
+	}
 
 /* Reposted popup */
 .b-reposted-popup {

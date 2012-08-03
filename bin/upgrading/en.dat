@@ -1735,9 +1735,6 @@ error.username_notfound=Username not found.
 esn.add_friend|staleness=1
 esn.add_friend=[[openlink]]Add [[journal]] to your Friends list[[closelink]]
 
-esn.add_friend_reposter|staleness=1
-esn.add_friend_reposter=[[openlink]]Add [[reposter]] to your Friends list[[closelink]]
-
 esn.add_friend_community|staleness=1
 esn.add_friend_community=[[openlink]]Add community "[[community]]" to your friends page reading list[[closelink]]
 
@@ -4905,6 +4902,10 @@ paidrepost.button.label=Repost
 paidrepost.button.label.done=Already reposted
 
 paidrepost.button.title=Repost me
+
+paidrepost.button.title.owner=Your repost total budget: 
+
+paidrepost.button.title.curr= LJ Tokens
 
 paidrepost.button.title.delete=Delete repost
 
