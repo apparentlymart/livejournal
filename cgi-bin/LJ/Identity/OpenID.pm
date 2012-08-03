@@ -80,6 +80,7 @@ sub attempt_login {
     $errs ||= [];
     my $returl = $opts{'returl'} || $LJ::SITEROOT;
     my $returl_fail = $opts{'returl_fail'} || $returl || $LJ::SITEROOT;
+    my $forwhat = $opts{'forwhat'} || '';
 
     my $csr = $class->consumer;
     my $url = LJ::Request->post_param('openid:url');
@@ -110,7 +111,8 @@ sub attempt_login {
     my $check_url = $claimed_id->check_url(
         return_to => "$LJ::SITEROOT/identity/callback-openid.bml?" .
                      'ret=' . LJ::Text->eurl($returl) . '&' .
-                     'ret_fail=' . LJ::Text->eurl($returl_fail),
+                     'ret_fail=' . LJ::Text->eurl($returl_fail) . '&' .
+                     'forwhat=' . LJ::Text->eurl($forwhat),
         trust_root => "$LJ::SITEROOT/",
         delayed_return => 1,
     );

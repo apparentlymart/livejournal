@@ -69,6 +69,17 @@ body<=
     LJ::set_remote($u);
 
     my $returl = LJ::Request->get_param('ret') || $LJ::SITEROOT;
+    
+    my $forwhat = LJ::Request->get_param('forwhat');
+
+    if($forwhat && $forwhat ne 'login') {
+        my $url;
+        eval {
+            ($url) = LJ::Identity::OpenID->unpack_forwhat($forwhat);
+        };
+        $returl = $url if $url;
+    }
+
     return LJ::Request->redirect($returl);
 
 }
