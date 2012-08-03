@@ -2885,6 +2885,14 @@ fcklang.ljimage.wizardnoticelink=Go to Image wizard
 fcklang.ljlike.button.facebook|staleness=1
 fcklang.ljlike.button.facebook=Facebook
 
+fcklang.ljlike.button.paidrepost.curr=LJ Tokens
+
+fcklang.ljlike.button.paidrepost.title=Total budget
+
+fcklang.ljlike.button.paidrepost.decline=decline from paid repost
+
+fcklang.ljlike.button.paidrepost.make=make paid repost
+
 fcklang.ljlike.button.repost|staleness=1
 fcklang.ljlike.button.repost=Repost
 
