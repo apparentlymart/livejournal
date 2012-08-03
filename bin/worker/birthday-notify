@@ -137,18 +137,12 @@ sub work {
         debug("Firing off notification for " . $u->user);
         LJ::Event::Birthday->new($u)->fire;
 
-        my     #  0    1    2     3     4    5     6     7  
-            ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
-                                            gmtime(time);
+        my $notify = DateTime->from_epoch( epoch => $bdays->{$u->id} );
+        $notify->set_second(0);
+        $notify->set_minute(0);
+        $notify->set_hour($notify->hour % 12);
 
-        $sec  = 0;
-        $min  = 0;
-        $hour = ($hour % 12);
-
-        my $notify_time 
-            = POSIX::mktime($sec, $min, $hour, $mday, $mon, $year, $wday, $yday);
-
-        LJ::Event::Birthday->new($u, $notify_time)->fire;
+        LJ::Event::Birthday->new($u, $notify->epoch)->fire;
         $ct++;
     }
 
