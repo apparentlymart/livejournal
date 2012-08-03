@@ -72,7 +72,9 @@ sub __call_item {
     my ($self, $entry, $callback) = @_;
 
     my $call_info = { 
-        'source' => 'jsonrpc',
+        'source'   => 'jsonrpc',
+        'type'     => $self->{'callback'} ? 'jsonp' : 'CORS',
+        'hostname' => LJ::Request->hostname,
     };
 
     my $item   = $entry->{'item'};
