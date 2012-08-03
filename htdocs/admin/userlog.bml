@@ -75,7 +75,7 @@ FORM
 
         my $cmd = LJ::eurl("finduser $email");
         return qq{
-            <a href="$LJ::SITEROOT/admin/console?prefill=$cmd">$email</a>
+            <a href="$LJ::SITEROOT/admin/console/?prefill=$cmd">$email</a>
         };
     };
 
@@ -164,6 +164,15 @@ FORM
         } elsif ($row->{action} eq 'custom_ratings_unscreen') {
             my $u = LJ::load_userid($row->{actiontarget});
             $action = "Uncreened in customized rating " . LJ::ljuser($u) if $u;
+        } elsif ( $row->{'action'} eq 'photo_delete' ) {
+            $action = 'Deleted photo ' . $extra->{'id'} .
+                ' from album ' . $extra->{'album'};
+        } elsif ( $row->{'action'} eq 'album_delete' ) {
+            $action = 'Deleted album ' . $extra->{'id'} . ' with ' .
+                $extra->{'photos_count'} . ' photo(s)';
+        } elsif ( $row->{'action'} eq 'photo_tag_delete' ) {
+            $action = 'Deleted tag "' . $extra->{'id'} .
+                '" in the photo hosting';
         } else {
             $action = "Unknown action ($row->{action})";
         }
