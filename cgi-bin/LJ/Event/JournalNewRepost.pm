@@ -314,7 +314,7 @@ sub _as_email {
 
     my $email = LJ::Lang::get_text($lang, 'esn.hi', undef, $opts);
 
-    $email .= $is_html ? '<br /><br />' : '\n\n';
+    $email .= $is_html ? '<br /><br />' : "\n\n";
     my $ml_head_string = $is_community ? 'esn.journal_new_repost.head_comm' :
                                          'esn.journal_new_repost.head_user';
 
@@ -335,7 +335,7 @@ sub _as_email {
                     about       => $about,
                 });
 
-    $email .= $is_html ? '<br /><br />' : '\n\n';
+    $email .= $is_html ? '<br /><br />' : "\n\n";
 
     my $show_join_option = $self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u);
 
