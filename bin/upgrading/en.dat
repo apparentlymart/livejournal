@@ -1735,6 +1735,9 @@ error.username_notfound=Username not found.
 esn.add_friend|staleness=1
 esn.add_friend=[[openlink]]Add [[journal]] to your Friends list[[closelink]]
 
+esn.add_friend_reposter|staleness=1
+esn.add_friend_reposter=[[openlink]]Add [[reposter]] to your Friends list[[closelink]]
+
 esn.add_friend_community|staleness=1
 esn.add_friend_community=[[openlink]]Add community "[[community]]" to your friends page reading list[[closelink]]
 

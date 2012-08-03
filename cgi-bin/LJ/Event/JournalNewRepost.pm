@@ -341,6 +341,15 @@ sub _as_email {
 
     # Some special community (e.g. writersblock) don't want join option in esn.
     $show_join_option = 0 if $show_join_option && LJ::run_hook('esn_hide_join_option_for_' . $self->entry->journal->user);
+    
+    # make hyperlinks for options
+    # tags 'poster' and 'journal' cannot contain html <a> tags
+    # when it used between [[openlink]] and [[closelink]] tags.
+    my $vars = { poster    => $reposter_name,
+                 reposter  => $reposter_name,
+                 journal   => $journal,
+                 community => $journal, };
+
 
     $email .= LJ::Lang::get_text($lang, 'esn.you_can', undef) .
         $self->format_options($is_html, $lang, $vars,
@@ -351,7 +360,7 @@ sub _as_email {
                 'esn.join_community'        => [ $show_join_option ? 3 : 0,
                                                     "$LJ::SITEROOT/community/join.bml?comm=$journal_user" ],
                 'esn.read_user_entries'     => [ 1, $journal_url ],
-                'esn.add_friend'            => [ LJ::is_friend($u, $self->reposter)? 0 : 5,
+                'esn.add_friend_reposter'   => [ LJ::is_friend($u, $self->reposter)? 0 : 5,
                                                     "$LJ::SITEROOT/friends/add.bml?user=" . $reposter->user  ],
             });
 
