@@ -3707,7 +3707,7 @@ A.lj-button-link:active {
 	}
 	
 
-/* repost button */
+/* Repost button */
 .lj-button-light.repost-button {
 	border: none!important;
 	background-color: transparent!important;
@@ -3812,6 +3812,162 @@ A.lj-button-link:active {
 	height: 0!important;
 	font-size: 0!important;
 	}
+
+
+/* Paid repost button */
+.lj-button-light.paidrepost-button {
+	border: none!important;
+	background-color: transparent!important;
+	}
+.lj-button-light.paidrepost-button .lj-button-a,
+.lj-button-light.paidrepost-button .lj-button-c {
+	vertical-align: middle !important;
+	}
+.lj-button-light.paidrepost-button .lj-button-b {
+	position: relative;
+	overflow: hidden;
+	height: 22px!important;
+	margin: 0 5px 0 0!important;
+	padding:0 5px!important;
+	border: 1px solid!important;
+	border-color: #C9C9C9 #B4B4B4 #AAA!important;
+	border-right: 1px solid #AAA!important;
+	line-height: 22px!important;
+	-webkit-border-radius: 2px!important;
+	-moz-border-radius: 2px!important;
+	border-radius: 2px!important;
+	vertical-align: middle !important;
+	text-shadow: 0 1px 0 #FFF;
+	color: #000!important;
+	cursor: pointer !important;
+	}
+.lj-button-light.paidrepost-button-inactive .lj-button-b {
+	color: #999 !important;
+	cursor: default !important;
+	}
+.lj-button-light.paidrepost-button-active .lj-button-b {
+	display: none !important;
+	background: #E6E7E9 !important;
+	background-image: -moz-linear-gradient(top, #E6E7E9 0%, #E7E8E9 100%) !important;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E6E7E9), color-stop(100%,#E7E8E9)) !important;
+	background-image: -webkit-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: -o-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: -ms-linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	background-image: linear-gradient(top, #E6E7E9 0%,#E7E8E9 100%) !important;
+	}
+.lj-button-light .lj-button-b-reposted {
+	display: none !important;
+	}
+.lj-button-light.paidrepost-button-active .lj-button-b-reposted {
+	display: inline-block !important;
+	}
+.lj-button-light.paidrepost-button .lj-button-icon {
+	float: left;
+	width: 16px!important;
+	height: 16px!important;
+	margin: 3px 5px 0 0!important;
+	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	vertical-align: middle;
+	}
+.lj-button-light.paidrepost-button-inactive .lj-button-icon {
+	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	opacity: 0.5;
+	}
+.lj-button-light.paidrepost-button .lj-button-icon-sinlge {
+	margin: 3px 0 0!important;
+	}
+.lj-button-light.paidrepost-button .lj-button-c.empty {
+	margin: 0!important;
+	padding: 0!important;
+	border: none!important;
+	}
+.lj-button-light.paidrepost-button .lj-button-c {
+	position: relative!important;
+	padding: 0 5px!important;
+	border: 1px solid #CCC!important;
+	-webkit-border-radius: 3px!important;
+	-moz-border-radius: 3px!important;
+	border-radius: 3px!important;
+	background-color: #FFF!important;
+	color: #000!important;
+	text-shadow: 0 1px 0 #FFF !important;
+	cursor: pointer !important;
+	}
+.lj-button-light.paidrepost-button-inactive .lj-button-c {
+	cursor: pointer !important;
+	}
+.paidrepost-button .lj-button-c.empty .lj-button-arrow,
+.paidrepost-button .lj-button-c.empty .lj-like-item-count {
+	display: none!important;
+	}
+.lj-button-light.paidrepost-button .lj-button-arrow {
+	position: absolute!important;
+	top: 6px!important;
+	left: -9px!important;
+	border: 4px solid!important;
+	border-color: transparent #CCC transparent transparent!important;
+	width: 0!important;
+	height: 0!important;
+	font-size: 0!important;
+	}
+.lj-button-light.paidrepost-button .lj-button-arrow-bg {
+	position: absolute!important;
+	top: -4px!important;
+	left: -3px!important;
+	border: 4px solid!important;
+	border-color: transparent #FFF transparent transparent!important;
+	width: 0!important;
+	height: 0!important;
+	font-size: 0!important;
+	}
+.paidrepost-button-label {
+	float: left;
+	margin: 0 6px 0 0;
+	}
+	
+.paidrepost-button-cost {
+	float: right;
+	position: relative;
+	padding: 0 14px 0 5px;
+	margin: 0;
+	min-height: 22px;
+	background: url(/img/icons/paidrepost.png?v=1) no-repeat 100% 50%!important;
+	line-height: 22px;
+	}
+	.paidrepost-button-cost:before {
+		content: "";
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 1px;
+		height: 100%;
+		background: #BABABA;
+		background-image: -moz-linear-gradient(top,  #F6F6F6 0%, #BABABA 50%, #E1E2E3 100%);
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F6F6F6), color-stop(50%,#BABABA), color-stop(100%,#E1E2E3));
+		background-image: -webkit-linear-gradient(top,  #F6F6F6 0%,#BABABA 50%,#E1E2E3 100%);
+		background-image: -o-linear-gradient(top,  #F6F6F6 0%,#BABABA 50%,#E1E2E3 100%);
+		background-image: -ms-linear-gradient(top,  #F6F6F6 0%,#BABABA 50%,#E1E2E3 100%);
+		background-image: linear-gradient(to bottom,  #F6F6F6 0%,#BABABA 50%,#E1E2E3 100%);
+		}
+	.paidrepost-button-cost:after {
+		content: "";
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 1px;
+		width: 1px;
+		height: 100%;
+		background: #ECEDEE;
+		background-image: -moz-linear-gradient(top,  #FFF 0%, #ECEDEE 100%);
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF), color-stop(100%,#ECEDEE));
+		background-image: -webkit-linear-gradient(top,  #FFF 0%,#ECEDEE 100%);
+		background-image: -o-linear-gradient(top,  #FFF 0%,#ECEDEE 100%);
+		background-image: -ms-linear-gradient(top,  #FFF 0%,#ECEDEE 100%);
+		background-image: linear-gradient(to bottom,  #FFF 0%,#ECEDEE 100%);
+		}
+
+/* Reposted popup */
 .b-reposted-popup {
 	margin: -5px 0 0;
 	max-width: 600px;

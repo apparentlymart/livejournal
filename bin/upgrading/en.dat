@@ -4896,6 +4896,18 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
+
+paidrepost.button.label=Repost
+
+paidrepost.button.label.done=Already reposted
+
+paidrepost.button.title=Repost me
+
+paidrepost.button.title.delete=Delete repost
+
+paidrepost.button.title.counter=Repost counter
+
+
 rating.timeswitcher.all=All time
 
 rating.timeswitcher.day=For 24 hour
