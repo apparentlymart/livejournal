@@ -821,22 +821,28 @@
 						bodyStyle += 'height:' + (height - 2) + 'px;';
 					}
 
-					iframe.setAttributes({
-						'lj-url': text,
-						'class': 'lj-map-wrap lj-rtebox',
+					var node = ljTagsData[button].node;
+					if (node) {
+						node.setAttributes({
+							'lj-url': text
+						});
+					} else {
+						iframe.setAttributes({
+							'lj-url': text,
+							'class': 'lj-map-wrap lj-rtebox',
 
-						'lj-content': '<div class="lj-map-inner lj-rtebox-inner"><p class="lj-map">map</p></div>',
+							'lj-content': '<div class="lj-map-inner lj-rtebox-inner"><p class="lj-map">map</p></div>',
 
-						'lj-cmd': 'LJMap',
-						'lj-class': 'lj-map',
-						'frameborder': 0,
-						'allowTransparency': 'true',
+							'lj-cmd': 'LJMap',
+							'lj-class': 'lj-map',
+							'frameborder': 0,
+							'allowTransparency': 'true',
 
-						'style': frameStyle,
-						'lj-style': bodyStyle
-					});
-
-					editor.insertElement(iframe);
+							'style': frameStyle,
+							'lj-style': bodyStyle
+						});
+						editor.insertElement(iframe);
+					}
 					updateFrames();
 				});
 
@@ -845,7 +851,7 @@
 						var node = ljTagsData[button].node;
 
 						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
-							defaultText: node ? node.getAttribute('text') : '',
+							defaultText: node ? node.getAttribute('lj-url') : '',
 							editMode: node? true : false
 						});
 					},
