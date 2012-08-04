@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use LJ::API::Error;
-use LJ::API::Auth;
+use LJ::API::RpcAuth;
 
 #
 # json request and response jpc 2.0
@@ -36,7 +36,7 @@ sub new {
     #
     # Check for auth information
     #
-    my $access = LJ::API::Auth->rpc_access($uri, $params);
+    my $access = LJ::API::RpcAuth->rpc_access($uri, $params);
     $self->{'fatal'} = $access->{'error'};
     if ($self->{'fatal'}) {
         return $self;
