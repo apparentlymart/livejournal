@@ -83,7 +83,7 @@ sub attempt_login {
     my $forwhat = $opts{'forwhat'} || '';
 
     my $csr = $class->consumer;
-    my $url = LJ::Request->post_param('openid:url');
+    my $url = LJ::Request->post_param('openid:url') || $opts{'openidurl'};
 
     if ($url =~ /[\<\>\s]/) {
         push @$errs, "Invalid characters in identity URL.";
