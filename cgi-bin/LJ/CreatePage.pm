@@ -14,15 +14,18 @@ sub verify_username {
     $given_username = LJ::trim($given_username);
     
     unless ($given_username) {
-        return LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.mustenter');
+        return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.mustenter') 
+                                                : LJ::Widget::CreateAccount->ml('createaccount.error.username.mustenter');
     }
     if (length $given_username > 15) {
-        return LJ::Lang::ml('error.usernamelong');
+        return $LJ::DISABLED{create_controller} ? LJ::Lang::ml('error.usernamelong') 
+                                                : LJ::Lang::ml('createaccount.error.usernamelong');
     }
 
     my $user = LJ::canonical_username($given_username);
     if (!$user) {
-        return LJ::Lang::ml('error.usernameinvalid');
+        return $LJ::DISABLED{create_controller} ? LJ::Lang::ml('error.usernameinvalid') 
+                                                : LJ::Lang::ml('createaccount.error.usernameinvalid');
     }
 
     # you can give people sharedjournal priv ahead of time to create
@@ -30,7 +33,8 @@ sub verify_username {
     if (! LJ::check_priv(LJ::get_remote(), "sharedjournal", $user)) {
         foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
             if ($user =~ /$re/) {
-                return LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.reserved');
+                return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.reserved') 
+                                                        : LJ::Widget::CreateAccount->ml('createaccount.error.username.reserved');
             }
         }
     }
@@ -50,10 +54,10 @@ sub verify_username {
         } else {
             if ($u->is_expunged) {
                 # do not create if this account name is purged
-                return LJ::Widget::CreateAccount->ml(
-                        'widget.createaccount.error.username.purged', 
-                        { aopts => "href='$LJ::SITEROOT/rename/'" }
-                );
+                return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml(
+                                                          'widget.createaccount.error.username.purged', 
+                                                          { aopts => "href='$LJ::SITEROOT/rename/'" })
+                                                        : LJ::Widget::CreateAccount->ml('createaccount.error.username.purged');
             } else {
                 my $in_use = 1;
                 # only do these checks on POST
@@ -75,7 +79,8 @@ sub verify_username {
                     }
                 }
                 if ($in_use) {
-                    return LJ::Widget::CreateAccount->ml( 'widget.createaccount.error.username.inuse');
+                    return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml( 'widget.createaccount.error.username.inuse') 
+                                                            : LJ::Widget::CreateAccount->ml( 'createaccount.error.username.inuse');
                 }
             }
         }
