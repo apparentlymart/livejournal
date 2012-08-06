@@ -39,12 +39,14 @@ sub is_common { 0 }
 sub poster {
     my ($self) = @_;
     my $entry  = $self->entry;
+    return unless $entry;
 
     return $entry->poster;
 }
 
 sub posterid {
     my $self = shift;
+    return unless $self->poster;
 
     return $self->poster->userid;
 }
@@ -53,13 +55,15 @@ sub posterid {
 sub journal {
     my ($self) = @_;
     my $entry  = $self->entry;
+    return unless $entry;
 
     return $entry->journal;
 }
 
 sub journalid {
     my ($self) = @_;
-    my $entry  = $self->entry; 
+    my $entry  = $self->entry;
+    return unless $entry;
 
     return $entry->journalid;
 }
@@ -71,7 +75,6 @@ sub reposter {
 
 sub reposterid {
     my ($self) = @_;
-
     return $self->u->userid;
 }
 
@@ -127,11 +130,19 @@ sub as_string {
     my $entry    = $self->entry;
     my $journal  = $self->journal;
 
+    if (!$entry) {
+        my $ml_string = 'notification.string.usernewrepost.deleted';
+        return LJ::Lang::get_text($lang, $ml_string, undef,
+                                {
+                                    reposter => $self->reposter->display_username,
+                                });
+    }
+
     my $about = $entry->subject_text ? "\"" . $entry->subject_text . "\"" : '';
 
     my $ml_string = $journal->is_community ? 'notification.string.usernewrepost_comm' : 
                                              'notification.string.usernewrepost';
-
+                             
     return LJ::Lang::get_text($lang, $ml_string, undef,
                         {
                             reposter      => $self->reposter->display_username,
@@ -146,8 +157,10 @@ sub as_sms {
     my ($self, $u, $opt) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
 
-    my $entry    = $self->entry;
-    my $journalu = $self->journal;
+    my $entry     = $self->entry;
+    return unless $entry;
+
+    my $journalu  = $self->journal;
     my $ml_string = $journalu->is_community ? 'notification.sms.usernewrepost_comm' : 
                                               'notification.sms.usernewrepost';
 
@@ -193,7 +206,16 @@ sub as_html {
     my $lang    = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
     my $entry   = $self->entry;
     my $journal = $self->journal;
-    return "(Invalid entry)" unless $entry && $entry->valid;
+
+    if (!$entry || !$entry->valid) {
+        my $ml_string = 'notification.string.usernewrepost.deleted';
+        return LJ::Lang::get_text($lang, $ml_string, undef,
+                                {
+                                    reposter => $self->reposter->display_username,
+                                });
+    }
+
+
     my $url = $entry->url;
 
     my $ml_string = $journal->is_community ? 'esn.user_new_repost_community.ashtml' :
@@ -234,8 +256,8 @@ sub content {
     my ($self, $target) = @_;
     my $entry = $self->entry;
 
-    return undef unless $entry && $entry->valid;
-    return undef unless $entry->visible_to($target);
+    return unless $entry && $entry->valid;
+    return unless $entry->visible_to($target);
 
     return $entry->event_html . $self->as_html_actions;
 }
