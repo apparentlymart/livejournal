@@ -178,7 +178,7 @@ sub common_template_params {
     if ($show_mobile_link) {
         my $uri = '';
 
-        $uri .= $LJ::IS_SSL ? 'http://' : 'https://';
+        $uri .= $LJ::IS_SSL ? 'https://' : 'http://';
         $uri .= LJ::Request->hostname;
         $uri .= LJ::Request->uri;
 
