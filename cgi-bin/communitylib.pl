@@ -383,7 +383,13 @@ sub accept_comm_invite {
             $flag_set_owner_error = 1;
         } else {
             LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
-            $cu->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => LJ::load_userid($maintid) || $u }) if $_ eq 'admin' && $args->{$_};
+
+            if ( $_ eq 'admin' && $args->{$_} ) {
+                LJ::User::UserlogRecord::MaintainerAdd->create( $cu,
+                    'maintid' => $u->userid,
+                    'remote'  => LJ::load_userid($maintid) || $u,
+                );
+            }
         }
     }
 

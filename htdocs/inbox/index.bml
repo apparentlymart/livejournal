@@ -111,12 +111,13 @@ body<=
             }
 
             if ($POST{delete} && scalar @$nitems > 15) {
-                $remote->log_event('inbox_massdel', {
-                                         remote => $remote,
-                                         actiontarget => scalar @$nitems,
-                                         method => 'delete',
-                                         view   => $view || '(all)',
-                                         via    => 'web', });
+                LJ::User::UserlogRecord::InboxMassDelete->create( $remote,
+                    'remote' => $remote,
+                    'items'  => scalar(@$nitems),
+                    'method' => 'delete',
+                    'view'   => $view || '(all)',
+                    'via'    => 'web',
+                );
             }
 
             # reload inbox after making changes

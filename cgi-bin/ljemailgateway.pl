@@ -731,7 +731,7 @@ sub dblog
 {
     my ( $u, $info ) = @_;
     chomp $info->{s};
-    $u->log_event( 'emailpost', $info );
+    LJ::User::UserlogRecord::EmailPost->create( $u, 'extra' => $info );
     return;
 }
 

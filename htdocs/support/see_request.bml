@@ -490,7 +490,7 @@ body<=
             $ret .= "<br />$ML{'.view'}: ";
             $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a>&nbsp;&nbsp;&nbsp;"
                 if $view_history;
-            $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a>&nbsp;&nbsp;&nbsp;"
+            $ret .= "<a href='$LJ::SITEROOT/admin/userlog/$u->{user}'>userlog</a>&nbsp;&nbsp;&nbsp;"
                 if $view_userlog;
             $ret .= "<a href='$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$u->{user}'>payments</a>&nbsp;&nbsp;&nbsp;"
                 if $view_money;

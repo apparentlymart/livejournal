@@ -46,8 +46,8 @@
 
             return $error->($ML{'.label.lastmaintainer'}) unless $othermaints;
 
-            # log maint removal to userlog
-            $cu->log_event('maintainer_remove', { actiontarget => $remote->id, remote => $remote });
+            LJ::User::UserlogRecord::MaintainerRemove->create( $cu,
+                'maintid' => $remote->userid, 'remote' => $remote );
         }
 
         # remove user from community's friends list

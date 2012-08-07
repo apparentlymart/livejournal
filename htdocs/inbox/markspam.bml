@@ -46,7 +46,8 @@ body<=
         # Ban user
         if ($POST{'ban'}) {
             LJ::set_rel($remote_id, $msg->otherid, 'B');
-            $remote->log_event('ban_set', { actiontarget => $msg->otherid, remote => $remote });
+            LJ::User::UserlogRecord::BanSet->create( $remote,
+                'bannedid' => $msg->otherid, 'remote' => $remote );
             $body .= '<li>User banned.</li>';
         }
 

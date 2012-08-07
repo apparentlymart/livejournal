@@ -167,7 +167,10 @@
                     if (LJ::Talk::can_mark_spam($remote, $u)) {
                         LJ::set_rel($u, $poster, 'D');
                         $u->ban_user($poster);
-                        $u->log_event('spam_set', { actiontarget => $poster->id, remote => $remote });
+                        LJ::User::UserlogRecord::SpamSet->create( $u,
+                            'spammerid' => $poster->userid,
+                            'remote'    => $remote
+                        );
                         LJ::run_hook('auto_suspender_for_spam', $poster->id);
                     }
                 }

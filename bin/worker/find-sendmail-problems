@@ -30,11 +30,11 @@ sub work {
                     if ($u->is_validated) {
                         $complete = 0;
                     } else {
-                        $u->log_event('revoke_validation',
-                            {
-                                email   => $email,
-                                message => $emails->{$email}->{message}
-                            });
+                        LJ::User::UserlogRecord::RevokeEmailValidation->create(
+                            $u,
+                            'email'   => $email,
+                            'message' => $emails->{$email}->{'message'},
+                        );
                         warn "Validation for user with id $uid and email <$email>".
                             " has been revoked.\n"
                                 if LJ::NewWorker::Manual::SendEmailErrorsFind->verbose;

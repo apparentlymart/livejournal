@@ -80,6 +80,7 @@ body<=
         return $ret;
     }
 
+    # TODO: change this to use LJ::User::Userlog
     my $dbcr = LJ::get_cluster_reader( $u );
     my $sql = qq{
         SELECT

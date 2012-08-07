@@ -424,17 +424,21 @@ body<=
                     my $deleted_extras = LJ::run_hook('entry_deleted_page_extras');
                     $result .= $deleted_extras if defined $deleted_extras;
 
+                    my $logu = $usejournal ? $usejournal_u : $remote;
                     # now log the event created abovei
                     if ($entry_obj->is_delayed) {
-                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_delayed_entry', {
-                                                                           remote => $remote,
-                                                                           actiontarget => $delayedid,
-                                                                           method => 'web',});
+                        LJ::User::UserlogRecord::DeleteDelayedEntry->create(
+                            $logu,
+                            'remote'    => $remote,
+                            'delayedid' => $delayedid,
+                            'method'    => 'web',
+                        );
                     } else {
-                       ($usejournal ? $usejournal_u : $remote)->log_event('delete_entry', {
-                                                                           remote => $remote,
-                                                                           actiontarget => $ditemid,
-                                                                           method => 'web',});
+                        LJ::User::UserlogRecord::DeleteEntry->create($logu,
+                            'remote'  => $remote,
+                            'ditemid' => $ditemid,
+                            'method'  => 'web',
+                        );
                     }
                 } else {
                     $result .= "<?p $ML{'.success.edited'} p?>";

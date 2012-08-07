@@ -23,6 +23,7 @@ sub new {
         # $action == 1 -- deleted
         my $extra = (1 == $action) ? 'new=D&old=V' : 'new=V&old=D';
 
+        # TODO: change this to use LJ::User::Userlog
         my $dbr = LJ::get_cluster_reader($u);
         my $sth = $dbr->prepare(
             "SELECT logtime, ip".
@@ -168,6 +169,7 @@ sub _as_email {
     my $_get_params_from_logtime = sub {
         my ($u, $logtime) = @_;
 
+        # TODO: change this to use LJ::User::Userlog
         my $userid = $u->{userid};
         my $dbr = LJ::get_cluster_reader($u);
         my ($datetime, $remoteid, $ip, $uniq) = $dbr->selectrow_array(

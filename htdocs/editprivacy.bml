@@ -208,11 +208,14 @@ body<=
                                             'e_unixtime' => $POST{e_unixtime} );
 
             if ($handle) {
-                $u->log_event('mass_privacy_change', {     remote => $remote,
-                                                       s_security => $security{$POST{s_security}}[0],
-                                                       e_security => $security{$POST{e_security}}[0],
-                                                       s_unixtime => $POST{s_unixtime},
-                                                       e_unixtime => $POST{e_unixtime} } );
+                LJ::User::UserlogRecord::MassPrivacyChange->create( $u,
+                    'remote'     => $remote,
+                    's_security' => $security{ $POST{'s_security'} }->[0],
+                    'e_security' => $security{ $POST{'e_security'} }->[0],
+                    's_unixtime' => $POST{'s_unixtime'},
+                    'e_unixtime' => $POST{'e_unixtime'},
+                );
+
                 return BML::redirect("$LJ::SITEROOT/editprivacy.bml?mode=secured");
             }
         }

@@ -863,7 +863,8 @@ body<=
             LJ::User::InfoHistory->add( $u,
                 'email', $u->email_raw, $u->email_status );
 
-            $u->log_event('email_change', { remote => $remote, new => $POST{'email'} });
+            LJ::User::UserlogRecord::EmailChange->create( $u,
+                'new' => $POST{'email'}, 'remote' => $remote );
 
             LJ::run_hook('post_email_change',
                          {

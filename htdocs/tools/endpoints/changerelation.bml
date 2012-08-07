@@ -92,8 +92,8 @@
         if ($ismaint) {
             return $err->(BML::ml('/community/leave.bml.label.lastmaintainer')) unless $othermaints;
 
-            # log to userlog
-            $targetu->log_event('maintainer_remove', { actiontarget => $remote->id, remote => $remote });
+            LJ::User::UserlogRecord::MaintainerRemove->create( $targetu,
+                'maintid' => $remote->userid, 'remote' => $remote );
         }
 
         $success = LJ::leave_community($remote, $targetu);

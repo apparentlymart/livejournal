@@ -74,12 +74,13 @@
         }
 
         if (scalar @items > 1) {
-            $remote->log_event('inbox_massdel', {
-                                     remote => $remote,
-                                     actiontarget => scalar @items,
-                                     method => 'delete',
-                                     view   => $cur_folder,
-                                     via    => 'web', });
+            LJ::User::UserlogRecord::InboxMassDelete->create( $remote,
+                'remote' => $remote,
+                'items'  => scalar(@items),
+                'method' => 'delete',
+                'view'   => $cur_folder,
+                'via'    => 'web',
+            );
         }
 
         $success = 1;

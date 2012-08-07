@@ -841,7 +841,8 @@ sub is_closed {
             $self->close_poll;
 
             my $system = LJ::load_user('system');
-            $comm->log_event('set_owner', { actiontarget => $winner->{userid}, remote => $system });
+            LJ::User::UserlogRecord::SetOwner->create( $comm,
+                'ownerid' => $winner->userid, 'remote' => $system );
 
             LJ::statushistory_add($comm, $system, 'set_owner', "Poll set owner as ".$winner->{user});
 

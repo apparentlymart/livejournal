@@ -254,7 +254,10 @@ _code?>
             my @banlist = split(/,/, $POST{'unban'});
             my $bannedin = join(",", map { $dbh->quote($_); } @banlist);
             $dbh->do("DELETE FROM reluser WHERE userid=? AND type='B' AND targetid IN ($bannedin)", undef, $u->{'userid'});
-            $u->log_event('ban_unset', { actiontarget => $_, remote => $remote }) foreach (@banlist);
+            foreach my $bannedid (@banlist) {
+                LJ::User::UserlogRecord::BanUnset->create( $u,
+                    'bannedid' => $bannedid, 'remote' => $remote );
+            }
         }
 
         # tell the user all is well

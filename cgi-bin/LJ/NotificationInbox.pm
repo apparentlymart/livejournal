@@ -601,12 +601,13 @@ sub delete_all {
     my $u = $self->u;
     my $interface = $opts{'interface'};
 
-    $u->log_event('inbox_massdel', {
-                         remote => $u,
-                         actiontarget => scalar @items,
-                         method => 'delete_all',
-                         view   => $view,  
-                         via    => $interface, });
+    LJ::User::UserlogRecord::InboxMassDelete->create( $u,
+        'remote' => $u,
+        'items'  => scalar @items,
+        'method' => 'delete_all',
+        'view'   => $view,
+        'via'    => $interface,
+    );
 
     # Delete items
     foreach my $item (@items) {

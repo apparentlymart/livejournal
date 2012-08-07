@@ -49,7 +49,8 @@ sub execute {
         }
     }
 
-    $c->log_event('set_owner', { actiontarget => $u->{userid}, remote => $remote });
+    LJ::User::UserlogRecord::SetOwner->create( $journal,
+        'ownerid' => $u->userid, 'remote' => $remote );
 
     ## Close election poll if exist and open
     my $poll_id = $c->prop("election_poll_id");
@@ -67,7 +68,9 @@ sub execute {
     LJ::set_rel($c->{userid}, $u->{userid}, 'S');
     ## Set a new supermaintainer as maintainer too.
     LJ::set_rel($c->{userid}, $u->{userid}, 'A');
-    $c->log_event('maintainer_add', { actiontarget => $u->{userid}, remote => $remote });
+
+    LJ::User::UserlogRecord::MaintainerAdd->create( $journal,
+        'maintid' => $u->userid, 'remote' => $remote );
 
     $self->print("User '$user' setted as supermaintainer for '$comm'". $reason);
 

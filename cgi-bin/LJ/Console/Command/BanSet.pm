@@ -53,7 +53,9 @@ sub execute {
         if scalar(@$banlist) >= ($LJ::MAX_BANS || 5000);
 
     LJ::set_rel($journal, $banuser, 'B');
-    $journal->log_event('ban_set', { actiontarget => $banuser->id, remote => $remote });
+
+    LJ::User::UserlogRecord::BanSet->create( $journal,
+        'bannedid' => $banuser->userid, 'remote' => $remote );
 
     LJ::run_hooks('ban_set', $journal, $banuser);
 

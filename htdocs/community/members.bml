@@ -116,7 +116,8 @@ body<=
         if ($new_sm_u && $new_sm_u->is_visible && $new_sm_u->can_manage($c)) {
             LJ::clear_rel($c->{userid}, $remote->{userid}, 'S');
             LJ::set_rel($c->{userid}, $new_sm_u->{userid}, 'S');
-            $c->log_event('set_owner', { actiontarget => $new_sm_u->{userid}, remote => $remote });
+            LJ::User::UserlogRecord::SetOwner->create( $c,
+                'ownerid' => $new_sm_u->userid, 'remote' => $remote );
             LJ::statushistory_add($c, $remote, 'set_owner', $new_sm_u->{user} . " set as owner by " . $remote->{user});
         }
     }
@@ -384,7 +385,8 @@ body<=
 
         foreach my $uid (keys %{$delete{admin} || {}}) {
             # log maintainer deletions
-            $c->log_event('maintainer_remove', { actiontarget => $uid, remote => $remote });
+            LJ::User::UserlogRecord::MaintainerRemove->create( $c,
+                'maintid' => $uid, 'remote' => $remote );
 
             my $delmaintu = $changedmaintainers->{$uid};
             next unless $delmaintu;
@@ -461,7 +463,8 @@ body<=
 
         foreach my $uid (keys %{$add{admin} || {}}) {
             # log maintainer additions
-            $c->log_event('maintainer_add', { actiontarget => $uid, remote => $remote });
+            LJ::User::UserlogRecord::MaintainerAdd->create( $c,
+                'maintid' => $uid, 'remote' => $remote );
 
             my $newmaintu = $changedmaintainers->{$uid};
             next unless $newmaintu;

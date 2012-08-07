@@ -818,7 +818,9 @@ sub mark_as_spam {
     return 0 if $dbh->err;
 
     LJ::set_rel($self->_orig_u, $self->other_u, 'D');                                                                                                               
-    $self->_orig_u->log_event('spam_set', { actiontarget => $self->otherid });    
+
+    LJ::User::UserlogRecord::SpamSet->create( $self->_orig_u,
+        'spammerid' => $self->otherid );
 
     $self->_orig_u->ban_user($self->other_u);    
             

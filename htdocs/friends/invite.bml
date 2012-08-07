@@ -127,10 +127,8 @@
                 body     => "$msg_body_top\n\n$given_msg_custom$msg_body_bottom\n\n$msg_sig\n\n$msg_footer",
             });
 
-            $u->log_event('friend_invite_sent', {
-                remote => $u,
-                extra => $email,
-            });
+            LJ::User::UserlogRecord::FriendInviteSent->create( $u,
+                'recipient' => $email, 'remote' => $remote );
 
             # Blank email so the form is redisplayed for a new
             # recipient, but with the same message

@@ -32,6 +32,7 @@ use LJ::Session;
 use LJ::TimeUtil;
 use LJ::User::InfoHistory;
 use LJ::User::PropStorage;
+use LJ::User::Userlog;
 use LJ::Response::CachedTemplate;
 use LJ::PersonalStats::DB;
 
@@ -96,7 +97,7 @@ sub create {
                           'email' => $email, 'password' => $password, %LJ::USER_INIT });
 
     my $remote = LJ::get_remote();
-    $u->log_event('account_create', { remote => $remote });
+    LJ::User::UserlogRecord::AccountCreate->create( $u, 'remote' => $remote );
 
     while (my ($name, $val) = each %LJ::USERPROP_INIT) {
         $u->set_prop($name, $val);
@@ -218,7 +219,10 @@ sub create_community {
     LJ::set_rel($u, $remote, "A");  # maintainer
 
     LJ::set_rel($u, $remote, "S");  # supermaintainer
-    $u->log_event('set_owner', { actiontarget => $remote->{userid}, remote => $remote });
+
+    LJ::User::UserlogRecord::SetOwner->create( $u,
+        'ownerid' => $remote->userid, 'remote' => $remote );
+
     LJ::statushistory_add($u, $remote, 'set_owner', "Set supermaintainer on created time as " . $remote->{user});
 
     LJ::set_rel($u, $remote, "M") if $opts{moderated} =~ /^[AF]$/; # moderator if moderated
@@ -1442,7 +1446,7 @@ sub load_identity_user {
 
     # record create information
     my $remote = LJ::get_remote();
-    $u->log_event('account_create', { remote => $remote });
+    LJ::User::UserlogRecord::AccountCreate->create( $u, 'remote' => $remote );
 
     return $u;
 }
@@ -4372,16 +4376,15 @@ sub statusvisdate_unix {
 # in order from newest to oldest
 sub get_previous_statusvis {
     my $u = shift;
-    
-    my $extra = $u->selectcol_arrayref(
-        "SELECT extra FROM userlog WHERE userid=? AND action='accountstatus' ORDER BY logtime DESC",
-        undef, $u->{userid});
+
+    my $records = LJ::User::Userlog->get_records( $u,
+        'action' => 'accountstatus' );
+
     my @statusvis;
-    foreach my $e (@$extra) {
-        my %fields;
-        LJ::decode_url_string($e, \%fields, []);
-        push @statusvis, $fields{old};
+    foreach my $record (@$records) {
+        push @statusvis, $record->extra_unpacked->{'old'};
     }
+
     return @statusvis;
 }
 
@@ -4401,12 +4404,13 @@ sub set_statusvis {
             R        # renamed
                                 )$/x;
 
-    # log the change to userlog
-    $u->log_event('accountstatus', {
-            # remote looked up by log_event
-            old => $u->statusvis,
-            new => $statusvis,
-        }) if $u->clusterid; # purged user can get suspended, but have no clusterid at that moment
+    # log the change to userlog, but only in case we have a valid clusterid;
+    # this check addresses the case when an expunged user gets suspended
+    if ( $u->clusterid ) {
+        # remote looked up by create()
+        LJ::User::UserlogRecord::AccountStatus->create( $u,
+            'old' => $u->statusvis, 'new' => $statusvis );
+    }
 
     # do update
     my $ret = LJ::update_user($u, { statusvis => $statusvis,
@@ -5275,7 +5279,9 @@ sub ban_user {
     my ($u, $ban_u) = @_;
 
     my $remote = LJ::get_remote();
-    $u->log_event('ban_set', { actiontarget => $ban_u->id, remote => $remote });
+    LJ::User::UserlogRecord::BanSet->create( $u,
+        'bannedid' => $ban_u->userid, 'remote' => $remote );
+
     LJ::run_hooks('ban_set', $u, $ban_u);
 
     return LJ::set_rel($u->id, $ban_u->id, 'B');
@@ -5287,8 +5293,11 @@ sub ban_user_multi {
     LJ::set_rel_multi(map { [$u->id, $_, 'B'] } @banlist);
 
     my $us = LJ::load_userids(@banlist);
+    my $remote = LJ::get_remote();
     foreach my $banuid (@banlist) {
-        $u->log_event('ban_set', { actiontarget => $banuid, remote => LJ::get_remote() });
+        LJ::User::UserlogRecord::BanSet->create( $u,
+            'bannedid' => $banuid, 'remote' => $remote );
+
         LJ::run_hooks('ban_set', $u, $us->{$banuid}) if $us->{$banuid};
     }
 
@@ -5301,8 +5310,11 @@ sub unban_user_multi {
     LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
 
     my $us = LJ::load_userids(@unbanlist);
+    my $remote = LJ::get_remote();
     foreach my $banuid (@unbanlist) {
-        $u->log_event('ban_unset', { actiontarget => $banuid, remote => LJ::get_remote() });
+        LJ::User::UserlogRecord::BanUnset->create( $u,
+            'bannedid' => $banuid, 'remote' => $remote );
+
         LJ::run_hooks('ban_unset', $u, $us->{$banuid}) if $us->{$banuid};
     }
 

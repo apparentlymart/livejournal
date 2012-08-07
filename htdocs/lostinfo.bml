@@ -188,11 +188,11 @@ body<=
         }
 
         my $data = $u->get_email_data($email);
-        $u->log_event('pwd_reset_req', {
-            email => $email,
-            email_state => $data->{'email_state'},
-            time => $data->{'time'},
-        });
+        LJ::User::UserlogRecord::PasswordResetRequest->create( $u,
+            'email'       => $email,
+            'email_state' => $data->{'email_state'},
+            'time'        => $data->{'time'},
+        );
 
         LJ::send_mail({
             'to' => $email,

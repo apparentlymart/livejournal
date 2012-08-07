@@ -906,7 +906,10 @@ sub deletecomments {
         my $poster = $comment->poster;
         LJ::Talk::mark_comment_as_spam( $journal, $comment->jtalkid );
         LJ::set_rel($journal, $poster, 'D');
-        $journal->log_event('spam_set', { actiontarget => $poster->{userid}, remote => $u });
+
+        LJ::User::UserlogRecord::SpamSet->create( $journal,
+            'spammerid' => $poster->userid, 'remote' => $u );
+
         LJ::run_hook('auto_suspender_for_spam', $poster->{userid});
     }
     
@@ -3107,11 +3110,14 @@ sub editevent {
                 $entry->delete();
                 $res->{delayedid} = $delayedid;
 
-                $uowner->log_event('delete_entry', {
-                                            remote => $u,
-                                            actiontarget => $delayedid,
-                                            method => 'protocol', })
-                        unless $flags->{noauth};
+                unless ( $flags->{'noauth'} ) {
+                    LJ::User::UserlogRecord::DeleteDelayedEntry->create(
+                        $uowner,
+                        'remote'    => $u,
+                        'delayedid' => $delayedid,
+                        'method'    => 'protocol',
+                    );
+                }
 
                 return $res;
             }
@@ -3207,12 +3213,13 @@ sub editevent {
         # rely on them to log why they're deleting the entry if they need to.  that way we don't have
         # double entries, and we have as much information available as possible at the location the
         # delete is initiated.
-        $uowner->log_event('delete_entry', {
-                remote => $u,
-                actiontarget => ($itemid * 256 + $oldevent->{anum}),
-                method => 'protocol',
-            })
-            unless $flags->{noauth};
+        unless ( $flags->{'noauth'} ) {
+            LJ::User::UserlogRecord::DeleteEntry->create( $uowner,
+                'remote'  => $u,
+                'ditemid' => $itemid * 256 + $oldevent->{'anum'},
+                'method'  => 'protocol',
+            );
+        }
 
         # We must use property 'dupsig_post' in author of entry to be deleted, not in
         # remote user or journal owner!

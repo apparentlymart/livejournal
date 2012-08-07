@@ -176,7 +176,9 @@ foreach my $c_id (@$communities) {
         my $user = $alive_maintainers[0];
         _log "Set user ".$user->user." as supermaintainer for ".$comm->user."\n";
         unless ($no_job) {
-            $comm->log_event('set_owner', { actiontarget => $user->{userid}, remote => $system });
+            LJ::User::UserlogRecord::SetOwner->create( $comm,
+                'ownerid' => $user->userid, 'remote' => $system );
+
             LJ::statushistory_add($comm, $system, 'set_owner', "LJ script set owner as ".$user->{user});
             LJ::set_rel($c_id, $user->{userid}, 'S')
                 or die "Can't set 'owner' status for community " . $comm->{'user'} . "\n";
@@ -189,7 +191,9 @@ foreach my $c_id (@$communities) {
         if ($u) {
             _log "Set user ".$u->user." as supermaintainer for ".$comm->user."\n";
             unless ($no_job) {
-                $comm->log_event('set_owner', { actiontarget => $u->{userid}, remote => $system });
+                LJ::User::UserlogRecord::SetOwner->create( $comm,
+                    'ownerid' => $u->userid, 'remote' => $system );
+
                 LJ::set_rel($c_id, $u->{userid}, 'S')
                     or die "Can't set 'owner' status for community " . $comm->{'user'} . "\n";
                 _send_email_to_sm ($comm, $u->{userid});
@@ -263,14 +267,18 @@ sub _send_email_to_sm {
 sub _check_maintainers {
     my $comm = shift;
 
-    my $dbcr = LJ::get_cluster_reader($comm)
-        or die "Unable to get user cluster reader.";
-    $dbcr->{RaiseError} = 1;
+    my $create_records = LJ::User::Userlog->get_records(
+        $comm, 'action' => 'account_create' );
 
-    my $sth = $dbcr->prepare("SELECT action, actiontarget, remoteid FROM userlog WHERE userid = ? AND action = ? ORDER BY logtime ASC");
-    $sth->execute($comm->{userid}, 'account_create');
+    my $row;
+    if ( $create_records && @$create_records ) {
+        my ($record) = @$create_records;
+        $row = {
+            'action'   => $record->action,
+            'remoteid' => $record->remoteid,
+        };
+    }
 
-    my $row = $sth->fetchrow_hashref;
     if ($row) {
         my $u_id = $row->{'remoteid'};
         my $u = LJ::load_userid ($u_id);

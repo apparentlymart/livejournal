@@ -140,7 +140,8 @@ body<=
                         $ban_skipped++;
                     } else {
                         LJ::set_rel($c, $us->{$id}, 'B');
-                        $c->log_event('ban_set', { actiontarget => $id, remote => $remote });
+                        LJ::User::UserlogRecord::BanSet->create( $c,
+                            'bannedid' => $id, 'remote' => $remote );
                         LJ::run_hooks('ban_set', $c, $us->{$id});
                         $banned++;
 
