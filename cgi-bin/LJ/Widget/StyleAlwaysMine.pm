@@ -36,13 +36,13 @@ sub render_body {
             if ($u->opt_stylealwaysmine) {
                 $ret .= $class->html_hidden( feature => 'off', user => $u->user );
                 $ret .= "<div class=\"w-cs-view-style\">" .
-                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" checked=\"checked\" class=\"checkbox\" onchange='document.setstyle_form.submit();'/>" .
+                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" checked=\"checked\" class=\"w-cs-checkbox\" onchange='document.setstyle_form.submit();'/>" .
                         $class->ml("web.controlstrip.links.viewownstyle") .
                         "</label></div>";
             } else {
                 $ret .= $class->html_hidden( feature => 'on', user => $u->user );
                 $ret .= "<div class=\"w-cs-view-style\">" .
-                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" class=\"checkbox\" onchange='document.setstyle_form.submit();'/>" .
+                        "<label for=\"view-own\"><input type=\"checkbox\" id=\"view-own\" class=\"w-cs-checkbox\" onchange='document.setstyle_form.submit();'/>" .
                         $class->ml("web.controlstrip.links.viewownstyle") .
                         "</label></div>";
             }
