@@ -8,6 +8,8 @@ body<=
     use LJ::SiteMessages;
     use LJ::Widget::SiteMessages;
     use LJ::Widget::AddSiteMessages;
+	
+	LJ::need_res('stc/admin/sitemessages.css');
 
     my $remote = LJ::get_remote();
 
@@ -23,7 +25,7 @@ body<=
     LJ::Widget->handle_post(\%POST, qw(AddSiteMessages));
     
     # site messages preview
-    $ret .= "<div style='float: right; width: 400px;'>";
+    $ret .= "<div style='float: right; position: relative; z-index: 2; width: 400px;'>";
     $ret .= LJ::Widget::SiteMessages->render( all => 1 ) . "</div>";
     
     # add message form

@@ -44,7 +44,7 @@ sub render_body {
     my @this_months_messages = LJ::SiteMessages->get_all_messages_for_month($year, $month);
     return $ret . "<?p No messages started during the selected month. p?>" unless @this_months_messages;
 
-    $ret .= "<table border='1' cellpadding='3'>";
+    $ret .= "<div class='b-sitemessages'><table border='1' cellpadding='3'>";
     $ret .= "<tr><th>Message</th><th>Countries</th><th>Account type</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
     foreach my $row (@this_months_messages) {
         my $start_date = DateTime->from_epoch( epoch => $row->{time_start}, time_zone => 'America/Los_Angeles' );
@@ -60,7 +60,7 @@ sub render_body {
         $ret .= "<td>(<a href='$LJ::SITEROOT/admin/sitemessages/add.bml?mid=$row->{mid}'>edit</a>)</td>";
         $ret .= "</tr>";
     }
-    $ret .= "</table>";
+    $ret .= "</table></div>";
 
     $ret .= $class->end_form;
 

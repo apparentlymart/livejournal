@@ -67,7 +67,7 @@ sub render_body {
 
     $ret .= $class->start_form;
 
-    $ret .= "<table><tr><td>Start Date:</td><td>";
+    $ret .= "<div class='b-sitemessages'><table><tr><td>Start Date:</td><td>";
     $ret .= $class->html_select
         ( name => 'month_start',
           selected => $start_month,
@@ -167,7 +167,7 @@ sub render_body {
 
     $ret .= "<tr><td colspan='2' align='left'>";
     $ret .= $class->html_submit('Submit') . "</td></tr>";
-    $ret .= "</table>";
+    $ret .= "</table></div>";
     $ret .= $class->end_form;
 
     return $ret;

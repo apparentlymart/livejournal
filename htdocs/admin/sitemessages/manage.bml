@@ -5,6 +5,8 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::SiteMessages );
+	
+	LJ::need_res('stc/admin/sitemessages.css');
 
     my $remote = LJ::get_remote();
 
@@ -20,7 +22,7 @@ body<=
     LJ::Widget->handle_post(\%POST, qw(ManageSiteMessages));
 
     # spotlight preview
-    $ret .= "<div style='float: right; width: 400px;'>";
+    $ret .= "<div style='float: right; position: relative; z-index: 2; width: 400px;'>";
     $ret .= LJ::Widget::SiteMessages->render( all => 1 ) . "</div>";
 
     # activate/inactive site messages form
