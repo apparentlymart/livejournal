@@ -5994,6 +5994,8 @@ talk.error.deleted=This journal is deleted.
 
 talk.error.deleted.title=Deleted
 
+talk.error.invalidusejournal=No such journal or community
+
 talk.error.mustlogin=You must be logged in to view this protected entry.
 
 talk.error.noaccess=Access denied
