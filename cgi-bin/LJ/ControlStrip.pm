@@ -217,7 +217,12 @@ sub render
                         name  => lc($group{$g}->{name}),
                         value => $group{$g}->{name},
                     };
-                    $item->{selected} = 1 if $item->{name} eq lc($selected_group);
+
+                    if ($item->{name} eq lc($selected_group)) {
+                        $item->{selected} = 1;
+                        $data_remote->{has_selected_groups} = 1;
+                    }
+
                     push @{$data_remote->{friend_groups}}, $item;
                 }
             }
