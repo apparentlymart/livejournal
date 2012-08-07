@@ -476,7 +476,7 @@ sub calculate_recent_logtags {
 }
 
 # <LJFUNC>
-# name: LJ::Tags::get_entry_tags
+# name: LJ::Tags::get_logtags
 # class: tags
 # des: Gets tags that have been used on an entry.
 # args: uuserid, jitemid
