@@ -654,6 +654,129 @@
 			(function() {
 				var button = "LJImage";
 
+				editor.on('selectionChange', function(event) {
+					var editor = event.editor,
+						command = "LJImage",
+						selected = event.editor.getSelection().getSelectedElement();
+						
+					if (selected && selected.is('img')) {
+						editor.getCommand(command).setState(CKEDITOR.TRISTATE_ON);
+					} else {
+						editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
+					}
+				});
+
+				// registered in jquery/mixins/editpic.js
+				LiveJournal.register_hook('editpic_response', function(data) {
+					var selected = editor.getSelection().getSelectedElement(),
+						parent = selected && selected.getParent();
+
+					if (!selected) return;
+
+					if (data.url) {
+						selected.setAttribute('src', data.url);
+						selected.setAttribute('data-cke-saved-src', data.url);
+					} else {
+						if (parent && parent.getName() === 'a') {
+							parent.remove();
+						} else {
+							selected.remove();
+						}
+						return;
+					}
+
+					if (data.width) {
+						selected.setAttribute('width', data.width);
+					} else {
+						selected.removeAttribute('width');
+					}
+
+					//
+					if (data.height) {
+						selected.setAttribute('height', data.height);
+					} else {
+						selected.removeAttribute('height');
+					}
+
+					// title
+					if (data.title) {
+						selected.setAttribute('title', data.title);
+					} else {
+						selected.removeAttribute('title');
+					}
+
+					// image border
+					if (data.border) {
+						selected.setStyle('border-width', data.border + "px");
+					} else {
+						selected.removeStyle('border-width');
+						selected.removeStyle('border-style');
+					}
+
+					// vertical space
+					if (data.vspace) {
+						selected.setStyles({
+							'margin-top'   : data.vspace + 'px',
+							'margin-bottom': data.vspace + 'px'
+						});
+					} else {
+						selected.removeStyle('margin-top');
+						selected.removeStyle('margin-bottom');
+					}
+
+					// horizontal space
+					if (data.hspace) {
+						selected.setStyles({
+							'margin-left' : data.hspace + 'px',
+							'margin-right': data.hspace + 'px'
+						});
+					} else {
+						selected.removeStyle('margin-left');
+						selected.removeStyle('margin-right');
+					}
+
+					// image link
+					var parent = selected && selected.getParent();
+					if (data.link) {
+						// change parent link if exists
+						if (parent && parent.getName() === 'a') {
+							parent.setAttribute('href', data.link);
+							parent.setAttribute('data-cke-saved-href', data.link);
+							
+							if (data.blank) {
+								parent.setAttribute('target', '_blank');
+							} else {
+								parent.removeAttribute('target');
+							}
+						} else {
+							// or create a new one
+							var link = new CKEDITOR.dom.element('a', editor.document);
+							link.setAttribute('href', data.link);
+							if (data.blank) {
+								link.setAttribute('target', '_blank');
+							}
+
+							selected.insertBeforeMe(link);
+							link.append(selected);
+
+							editor.getSelection().selectElement(link);
+						}
+					} else {
+						// on empty link remove parent 'a' and replace it with selected image
+						if (parent.getName() === 'a') {
+							parent.insertBeforeMe(selected);
+							parent.remove();
+						}
+					}
+
+					// image aligment
+					if (data.aligment && data.aligment !== 'none') {
+						selected.setStyle('float', data.aligment);
+					} else {
+						selected.removeStyle('float');
+					}
+				});
+
 				if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
 					editor.ui.addButton('image', {
 						label: CKLang.LJImage_Title,
@@ -661,8 +784,36 @@
 					});
 				} else {
 					editor.addCommand(button, {
-						exec: function () {
-							jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
+						exec: function (editor) {
+							var selected = editor.getSelection().getSelectedElement();
+								
+							if (selected) {
+								var parent = selected && selected.getParent(),
+									hasParentLink = parent.getName() === 'a',
+									parentLink = hasParentLink && parent,
+									parentHref = hasParentLink && parent.getAttribute('href');
+
+								LiveJournal.run_hook('rteButton', 'editpic', jQuery('.cke_button_' + button), {
+									picData: {
+										url: selected.getAttribute('src'),
+										title: selected.getAttribute('title'),
+
+										width: selected.getAttribute('width'),
+										height: selected.getAttribute('height'),
+
+										link: parentHref || "",
+										blank: hasParentLink && parentLink.getAttribute('target'),
+
+										border: parseInt(selected.getStyle('border-width'), 10),
+										vspace: parseInt(selected.getStyle('margin-top'), 10),
+										hspace: parseInt(selected.getStyle('margin-left'), 10),
+
+										aligment: selected.getStyle('float') || 'none'
+									}
+								});
+							} else {
+								jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
+							}
 						},
 						editorFocus: false
 					});
