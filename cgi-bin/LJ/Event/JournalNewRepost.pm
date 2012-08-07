@@ -111,6 +111,26 @@ sub matches_filter {
     return 0 unless $entry && $entry->valid; # TODO: throw error?
     return 0 unless $entry->visible_to($subscr->owner);
 
+    my $or_entry = $entry->original_post;
+    if (!$or_entry || !$or_entry->valid) {
+        return;
+    }
+
+    #
+    # filtering by tags
+    #
+    my $stagid = $subscr->arg1;
+    if ($stagid) {
+        my $reposter_tags = LJ::Tags::get_usertags($entry->journal);
+
+        if ($reposter_tags) {
+            my $reposter_taginfo = $reposter_tags->{$stagid};
+            my $reposter_tag_name = $reposter_taginfo->{'name'} || '';
+
+            return 0 unless grep { $_ eq $reposter_tag_name } $or_entry->tags;
+        }
+    }
+
     # all posts by friends
     return 1 if ! $subscr->journalid && LJ::is_friend($subscr->owner, $self->event_journal);
 
@@ -411,6 +431,7 @@ sub subscriptions {
         my $row = { userid      => $subsc->{'userid'},
                     journalid   => $subsc->{'journalid'},
                     ntypeid     => $subsc->{'ntypeid'},
+                    arg1        => $subsc->{'arg1'},
                   };
 
         push @subs, LJ::Subscription->new_from_row($row);
