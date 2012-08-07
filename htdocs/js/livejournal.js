@@ -455,16 +455,30 @@ LiveJournal.parseLikeButtons = function(ctx) {
 
 	var initRepostButton = function(link, url, data) {
 		data = data || {};
-		var reposted = !!data.reposted;
 
-		var repostNode = LJ.UI.template('templates-CleanHtml-Repost', { url: url,
-			count: data.count || 0, reposted: reposted });
+		var meta = {
+				paid: !!data.paid,
+				url: url,
+				cost: Number(data.cost || 0),
+				budget: Number(data.budget || 0),
+				count: Number(data.count || 0),
+				reposted: !!data.reposted
+			},
+			template = 'templates-CleanHtml-Repost',
+			options = {};
+
+		if (meta.paid) {
+			template = 'templates-CleanHtml-PaidRepost';
+			meta.owner = !meta.cost;
+			options.classNames = {
+				active: 'paidrepost-button-active',
+				inactive: 'paidrepost-button-inactive'
+			};
+		}
+
+		var repostNode = LJ.UI.template(template, meta);
 		link.replaceWith(repostNode);
-
-		repostNode.repostbutton({
-			url: url,
-			reposted: reposted
-		});
+		repostNode.repostbutton(jQuery.extend(options, meta));
 	}
 	
 	jQuery('div.lj-like-item-repost > a', ctx || document).each(function() {
