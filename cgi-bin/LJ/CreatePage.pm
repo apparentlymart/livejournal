@@ -25,7 +25,7 @@ sub verify_username {
     my $user = LJ::canonical_username($given_username);
     if (!$user) {
         return $LJ::DISABLED{create_controller} ? LJ::Lang::ml('error.usernameinvalid') 
-                                                : LJ::Lang::ml('createaccount.error.usernameinvalid');
+                                                : LJ::Lang::ml('createaccount.error.username.invalid');
     }
 
     # you can give people sharedjournal priv ahead of time to create
