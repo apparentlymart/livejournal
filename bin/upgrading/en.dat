@@ -6059,6 +6059,8 @@ talk.error.suspendedentry=This entry is suspended. You can visit the journal <a 
 talk.error.suspendedentryreply|staleness=1
 talk.error.suspendedentryreply=This entry is suspended. You cannot reply to it. You can visit the journal <a [[aopts]]>here</a>.
 
+talk.error.usernotexist=No such user
+
 talk.expandall=Expand All
 
 talk.expandchilds=Expand Childs
@@ -7969,8 +7971,12 @@ web.controlstrip.btn.logout=Log out
 web.controlstrip.btn.password|staleness=1
 web.controlstrip.btn.password=Password
 
+web.controlstrip.btn.search=Find
+
 web.controlstrip.btn.searchall|staleness=1
 web.controlstrip.btn.searchall=Search at LiveJournal
+
+web.controlstrip.btn.searchjournal=Search at [[journal]]
 
 web.controlstrip.btn.username|staleness=1
 web.controlstrip.btn.username=Username
@@ -7999,6 +8005,8 @@ web.controlstrip.links.create=Create an Account
 
 web.controlstrip.links.customgroups|staleness=1
 web.controlstrip.links.customgroups=Custom groups
+
+web.controlstrip.links.default=Default
 
 web.controlstrip.links.editcommmembers=Edit Members
 
