@@ -71,17 +71,19 @@ sub __call_array {
 sub __call_item {
     my ($self, $entry, $callback) = @_;
 
-    my $call_info = { 
-        'source'   => 'jsonrpc',
-        'type'     => $self->{'callback'} ? 'jsonp' : 'CORS',
-        'hostname' => LJ::Request->hostname,
-    };
-
     my $item   = $entry->{'item'};
     return if $item->error;
 
     my $method = $item->method;
     my $params = $item->params;
+
+    my $call_info = {
+        'source'        => 'jsonrpc',
+        'type'          => $self->{'callback'} ? 'jsonp' : 'CORS',
+        'hostname'      => LJ::Request->hostname,
+        'access_type'   => $item->access_type,
+        'access_data'   => $item->access_data,
+    };
 
     $entry->{'result'} = $callback->($method, $params, $call_info);
 }

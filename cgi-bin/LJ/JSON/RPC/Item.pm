@@ -52,7 +52,8 @@ sub new {
     $self->{'method'}      = $method;
     $self->{'params'}      = $params;
     $self->{'access_type'} = $access->{'type'};
- 
+    $self->{'access_data'} = $access->{'data'};
+
     return $self;
 }
 
@@ -153,6 +154,16 @@ sub response {
     $resp->{'id'} = $self->{'id'};
 
     return $resp;
+}
+
+sub access_type {
+    my ($self) = @_;
+    return $self->{'access_type'};
+}
+
+sub access_data {
+    my ($self) = @_;
+    return $self->{'access_data'};
 }
 
 sub error {
