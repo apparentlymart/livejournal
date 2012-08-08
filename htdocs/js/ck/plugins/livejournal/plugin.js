@@ -668,11 +668,11 @@
 
 			// LJ Image
 			(function() {
-				var button = "LJImage";
+				var button = "LJImage", selectedImage = null;
 
 				// registered in jquery/mixins/editpic.js
 				LiveJournal.register_hook('editpic_response', function(data) {
-					var selected = editor.getSelection().getSelectedElement(),
+					var selected = selectedImage,
 						parent = selected && selected.getParent();
 
 					if (!selected) return;
@@ -763,7 +763,7 @@
 							selected.insertBeforeMe(link);
 							link.append(selected);
 
-							editor.getSelection().selectElement(link);
+							editor.getSelection() && editor.getSelection().selectElement(link);
 						}
 					} else {
 						// on empty link remove parent 'a' and replace it with selected image
@@ -779,11 +779,14 @@
 					} else {
 						selected.removeStyle('float');
 					}
+
+					selectedImage = null;
 				});
 
 				editor.addCommand(button, {
 					exec: function (editor, fromDoubleClick) {
 						var selected = editor.getSelection().getSelectedElement();
+						selectedImage = selected;
 							
 						if (selected) {
 							var parent = selected && selected.getParent(),
