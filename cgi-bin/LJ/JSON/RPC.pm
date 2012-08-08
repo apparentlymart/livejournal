@@ -106,7 +106,7 @@ sub response {
 
         $resp_data = $item->response($result);
         if ($self->{'callback'} && !$resp_data->{'error'}) {
-            $headers = __get_headers($result);
+            $headers = $self->__get_headers($result);
         }
     }
 
@@ -119,6 +119,7 @@ sub response {
 
 sub __get_headers {
     my ($self, $result) = @_;
+
     if (LJ::Request->hostname eq 'stat.' . $LJ::DOMAIN) {
         if ($result->{'properties'}) {
             my $properties = $result->{'properties'};
