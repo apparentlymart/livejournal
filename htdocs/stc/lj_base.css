@@ -4391,6 +4391,7 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 			}
 
 
+
 /* Help Link
 ----------------------------------- */
 .b-helplink {
@@ -4429,7 +4430,8 @@ BODY div .b-helplink:active {
 		font: 0/0 serif;
 		cursor: pointer;
 		}
-	.b-helplink:hover .b-helplink-icon {
+	.b-helplink:hover .b-helplink-icon,
+	.b-helplink:focus .b-helplink-icon {
 		background-position: -16px 0;
 		}
 
@@ -5177,7 +5179,7 @@ HTML BODY .i-ljuser {
 	-moz-border-radius: 100px / 50px;
 	border-radius: 100px / 50px;
 	}
-@media screen and (max-width: 1300px) {
+@media screen and (max-width: 1000px) {
 	.b-panel:before {
 		content: "";
 		display: none;
@@ -5281,6 +5283,17 @@ HTML BODY .i-ljuser {
 		padding: 0;
 		}
 
+@media screen and (max-width: 1000px) {
+	.b-contentplus-section {
+		float: none;
+		width: auto;
+		}
+	.b-contentplus-aside {
+		float: none;
+		width: auto;
+		}
+}
+
 
 
 /* Content plus Aside
@@ -5327,7 +5340,7 @@ HTML BODY .i-ljuser {
 			-moz-border-radius: 30px / 100px;
 			border-radius: 30px / 100px;
 			}
-@media screen and (max-width: 1300px) {
+@media screen and (max-width: 1000px) {
 	.b-extracontent {
 		padding-right: 0;
 		padding-left: 0;
