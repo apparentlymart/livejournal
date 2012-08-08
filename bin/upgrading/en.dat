@@ -2237,7 +2237,7 @@ esn.journal_new_entry.updated_their_journal|staleness=1
 esn.journal_new_entry.updated_their_journal=[[who]] updated their journal!
 
 esn.journal_new_repost.head_comm|staleness=1
-esn.journal_new_repost.head_comm=There is a new repost by [[reposter]] posted by [[poster]] [[about]] in [[community]]![[tags]]
+esn.journal_new_repost.head_comm=There is a new repost by [[reposter]] posted by [[poster]] [[about]] in [[community]]. [[tags]]
 
 esn.journal_new_repost.head_user|staleness=1
 esn.journal_new_repost.head_user=[[reposter]] has repost entry [[about]].[[tags]]
@@ -2249,7 +2249,7 @@ esn.journal_new_repost.subject|staleness=1
 esn.journal_new_repost.subject=[[reposter]] has reposted post from [[poster]]
 
 esn.user_new_repost_community.ashtml|staleness=1
-esn.user_new_repost_community.ashtml=[[reposter]] has reposted entry posted by [[poster]] in [[community]]
+esn.user_new_repost_community.ashtml=[[reposter]] has reposted entry posted by [[poster]] in [[community]]. [[tags]]
 
 esn.user_new_repost.ashtml|staleness=1
 esn.user_new_repost.ashtml=[[reposter]] has reposted entry posted by [[poster]]
