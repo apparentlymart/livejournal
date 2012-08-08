@@ -246,6 +246,15 @@ sub as_html {
     my $reposter = LJ::ljuser($self->reposter);
     my $entry    = $self->entry; 
 
+    my $tags = '';
+    # add tag info for entries that have tags
+    if ($entry->tags) {
+        $tags = ' ' . LJ::Lang::get_text($lang, 'esn.tags', undef,
+                        {
+                            tags => join(', ', $entry->tags )
+                        });
+    }
+
     my $about = $entry->subject_text ? "\"" . $entry->subject_text . "\"" : '';
 
     return LJ::Lang::get_text($lang, $ml_string, undef, 
@@ -254,6 +263,7 @@ sub as_html {
             poster    => $poster,
             community => $journal,
             about     => $about,
+            tags      => $tags,
         }); 
 }
 
