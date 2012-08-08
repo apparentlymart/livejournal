@@ -224,7 +224,7 @@ sub __create_repost {
         }
         
         if ($cost > $budget) {
-            $$error = LJ::API::Error->get_error('repost_blocking_error');
+            $$error = LJ::API::Error->get_error('repost_budget_error');
             return;
         }
 
