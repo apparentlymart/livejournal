@@ -626,13 +626,14 @@ sub create {
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
+    my $error;
 
     my $memcache_key = join ':', 'reposted_item', $entry_obj->journalid, $entry_obj->jitemid, $u->id;
     if (LJ::MemCache::get($memcache_key)) {
-        return LJ::API::Error->get_error('repost_already_exist');
+        $error = LJ::API::Error->get_error('repost_already_exist');
+        $error->{'error'}->{'data'} = $class->get_status($entry_obj, $u);
+        return $error;
     }
-
-    my $error;
 
     my $reposted_obj = __create_repost( {'u'          => $u,
                                          'entry_obj'  => $entry_obj,
@@ -648,10 +649,14 @@ sub create {
         
         return $result;
         
-    } elsif ($error && $error->{'error'}) {
-         return $error;
     } else {
-        return LJ::API::Error->get_error('unknown_error');
+        unless ($error && $error->{'error'}) {
+            $error = LJ::API::Error->get_error('unknown_error');
+        }
+
+        $error->{'error'}->{'data'} = $class->get_status($entry_obj, $u);
+
+        return $error;
     } 
 }
 
