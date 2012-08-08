@@ -80,9 +80,8 @@ sub __call_item {
     my $call_info = {
         'source'        => 'jsonrpc',
         'type'          => $self->{'callback'} ? 'jsonp' : 'CORS',
-        'hostname'      => LJ::Request->hostname,
-        'access_type'   => $item->access_type,
         'access_data'   => $item->access_data,
+        'access_type'   => $item->access_type,
     };
 
     $entry->{'result'} = $callback->($method, $params, $call_info);
@@ -92,6 +91,7 @@ sub response {
     my ($self) = @_;
     my $items = $self->{'items'};
     my $resp_data;
+    my $headers = {};
     
     if ($self->{'is_array'}) {
         foreach my $entry (@$items) {
@@ -102,13 +102,41 @@ sub response {
         }
     } else {
         my $item = $items->{'item'};
-        $resp_data = $item->response($items->{'result'});
+        my $result = $items->{'result'};
+
+        $resp_data = $item->response($result);
+        if ($self->{'callback'} && !$resp_data->{'error'}) {
+            $headers = __get_headers($result);
+        }
     }
 
     return LJ::Response::JSON->new( 
-                'data'     => $resp_data,
-                'callback' => $self->{'callback'} );
+                'data'          => $resp_data,
+                'callback'      => $self->{'callback'},
+                'http_headers'  => $headers, );
 
+}
+
+sub __get_headers {
+    my ($self, $result) = @_;
+    if (LJ::Request->hostname eq 'stat.' . $LJ::DOMAIN) {
+        if ($result->{'properties'}) {
+            my $properties = $result->{'properties'};
+            if ($properties->{'cache-time'}) {
+                my $max_age = $properties->{'cache-time'};
+                my $expires_out = HTTP::Date::time2str( time + $max_age );
+
+                return  { 'Cache-Control' => "public, max-age=$max_age",
+                          'Expires'       => $expires_out, };
+            }
+        }
+
+        return { 'Cache-Control' => 'private, must-revalidate',
+                 'Expires'       => '0', };
+
+    }
+
+    return;
 }
 
 1;
