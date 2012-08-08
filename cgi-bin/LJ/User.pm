@@ -2902,6 +2902,34 @@ sub get_social_capital {
 }
 
 # <LJFUNC>
+# name: LJ::User::get_reader_weight
+# des: returns reader_weight of user
+# </LJFUNC>
+
+sub get_reader_weight {
+    my ($u) = @_;
+
+    my $memkey = join ':', $u->userid, 'reader_weight';
+
+    my $reader_weight = LJ::MemCache::get( $memkey );
+
+    return $reader_weight if defined $reader_weight;
+
+    my $resp = LJ::PersonalStats::DB->fetch_raw('ratings', {
+        func => 'get_reader_weight',
+        journal_id => $u->userid,
+    });
+
+    return undef unless $resp;
+ 
+    $reader_weight = $resp->{reader_weight};
+
+    LJ::MemCache::set( $memkey, $reader_weight, 60*60);
+
+    return $reader_weight;
+}
+
+# <LJFUNC>
 # name: LJ::User::activate_userpics
 # des: Sets/unsets userpics as inactive based on account caps.
 # returns: nothing
