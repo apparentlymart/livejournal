@@ -242,6 +242,39 @@ sub __create_repost {
         return;
     }
 
+    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
+    $post_obj->convert_to_repost($mark);
+    $post_obj->set_prop( 'repost' => 'e' );
+
+    my $lock_name = join ':', ('repost', 
+                               $entry_obj->journalid, 
+                               $entry_obj->jitemid, 
+                               $u->id);
+                                         
+    my $get_lock = sub {
+        LJ::get_lock( LJ::get_db_writer(), 'global', $lock_name );
+    };
+    
+    my $release_lock = sub {
+        LJ::release_lock( LJ::get_db_writer(), 'global', $lock_name );
+    };
+    
+    my $fail = sub {
+        $$error = shift;
+        $release_lock->();
+        LJ::delete_entry($u->id, $post_obj->jitemid, undef, $post_obj->anum);
+        return;
+    };
+
+    $get_lock->() or return $fail->(LJ::API::Error->get_error('unknown_error'));
+
+    my ($repost_itemid) = __get_repost( $entry_obj->journal,
+                                        $entry_obj->jitemid,
+                                        $u->userid );
+    if ($repost_itemid) {
+        return $fail->(LJ::API::Error->get_error('repost_already_exist'));
+    }
+
     my $blid = 0;
 
     if ($cost) {
@@ -257,22 +290,14 @@ sub __create_repost {
                                                   qty              => $cost,
                                                   );
         unless($blid){
-            LJ::delete_entry($u->id, $post_obj->jitemid, undef, $post_obj->anum);
-            $$error = $err || LJ::API::Error->get_error('repost_blocking_error');
-            return;  
+            return $fail->($err || LJ::API::Error->get_error('repost_blocking_error'));
         }
     }
-
-    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
-    $post_obj->convert_to_repost($mark);
-    $post_obj->set_prop( 'repost' => 'e' );
 
     #
     # create record
     #
     my $repost_jitemid = $post_obj->jitemid;
-    
-    my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
     __create_repost_record($entry_obj->journal,
@@ -282,6 +307,8 @@ sub __create_repost {
                            $cost,
                            $blid,
                            );
+
+    $release_lock->();
 
     return $post_obj;
 }
@@ -599,16 +626,14 @@ sub create {
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
-    my ($repost_itemid) = __get_repost( $entry_obj->journal, 
-                                      $jitemid, 
-                                      $u->userid );
-    my $error;
-    if ($repost_itemid) {
 
+    my $memcache_key = join ':', 'reposted_item', $entry_obj->journalid, $entry_obj->jitemid, $u->id;
+    if (LJ::MemCache::get($memcache_key)) {
         return LJ::API::Error->get_error('repost_already_exist');
+    }
 
-    } 
-      
+    my $error;
+
     my $reposted_obj = __create_repost( {'u'          => $u,
                                          'entry_obj'  => $entry_obj,
                                          'timezone'   => $timezone,
