@@ -7,6 +7,18 @@
 	} else {
 		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
 	}
+
+	function rteButton(button, widget, options) {
+		options = options || {};
+
+		options && jQuery.extend(options, {
+			fromDoubleClick: this.execFromEditor
+		});
+
+		LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), options);
+
+		this.execFromEditor = false;
+	}
 	
 
 	var likeButtons = [
@@ -73,8 +85,8 @@
 		LJLink2: {
 			html: encodeURIComponent(CKLang.LJLink_WizardNotice + '<br /><a href="#" lj-cmd="LJLink2">' + CKLang.LJLink_WizardNoticeLink + '</a>')
 		},
-		image: {
-			html: encodeURIComponent(CKLang.LJImage_WizardNotice + '<br /><a href="#" lj-cmd="image">' + CKLang.LJImage_WizardNoticeLink + '</a>')
+		LJImage: {
+			html: encodeURIComponent(CKLang.LJImage_WizardNotice + '<br /><a href="#" lj-cmd="LJImage">' + CKLang.LJImage_WizardNoticeLink + '</a>')
 		},
 		LJCut: {
 			html: encodeURIComponent(CKLang.LJCut_WizardNotice + '<br /><a href="#" lj-cmd="LJCut">' + CKLang.LJCut_WizardNoticeLink + '</a>')
@@ -91,7 +103,6 @@
 	};
 
 	var ljUsers = {};
-	var execFromEditor;
 
 	function createNote(editor) {
 		var timer,
@@ -175,7 +186,7 @@
 				ljTagsData[cmd].node = currentData[cmd].node;
 				var selection = new CKEDITOR.dom.selection(editor.document);
 				selection.selectElement(ljTagsData[cmd].node);
-				execFromEditor = true;
+				editor.execFromEditor = true;
 				editor.execCommand(cmd);
 				CKEDITOR.note.hide(true);
 			}
@@ -293,6 +304,8 @@
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
+			editor.rteButton = rteButton;
+
 			// The editor event listeners
 			function onDoubleClick(evt) {
 				var node = evt.data.element || evt.data.getTarget();
@@ -310,8 +323,11 @@
 							ljTagsData[cmdName].node = node.is('body') ? new CKEDITOR.dom.element.get(node.getWindow().$.frameElement) : node;
 							selection.selectElement(ljTagsData[cmdName].node);
 							evt.data.dialog = '';
-							execFromEditor = true;
-							cmd.exec();
+							editor.execFromEditor = true;
+							// cmd.exec();
+
+							editor.execCommand(cmdName, true);
+
 							break;
 						}
 					}
@@ -361,7 +377,7 @@
 
 			function updateFrames() {
 				var frames = editor.document.getElementsByTag('iframe'), length = frames.count(), frame, cmd, frameWin, doc, ljStyle;
-				execFromEditor = false;
+				editor.execFromEditor = false;
 
 				while (length--) {
 					frame = frames.getItem(length), cmd = frame.getAttribute('lj-cmd'), frameWin = frame.$.contentWindow, doc = frameWin.document, ljStyle = frame.getAttribute('lj-style') || '';
@@ -426,7 +442,7 @@
 					if (!attr && node.type == 1) {
 						var parent = node.getParent();
 						if (node.is('img') && parent.getParent() && !parent.getParent().hasAttribute('lj:user')) {
-							attr = 'image';
+							attr = 'LJImage';
 							node.setAttribute('lj-cmd', attr);
 						} else if (node.is('a') && !parent.hasAttribute('lj:user')) {
 							attr = 'LJLink2';
@@ -622,7 +638,7 @@
 							CKEDITOR.note && CKEDITOR.note.hide(true);
 							currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
 
-							LiveJournal.run_hook('rteButton', 'user', jQuery('.cke_button_' + button), {
+							rteButton(button, 'user', {
 								user: currentUserName
 							});
 
@@ -632,7 +648,7 @@
 						}
 
 						if (userName == '') {
-							LiveJournal.run_hook('rteButton', 'user', jQuery('.cke_button_' + button));
+							rteButton(button, 'user');
 							return;
 						}
 
@@ -653,18 +669,6 @@
 			// LJ Image
 			(function() {
 				var button = "LJImage";
-
-				editor.on('selectionChange', function(event) {
-					var editor = event.editor,
-						command = "LJImage",
-						selected = event.editor.getSelection().getSelectedElement();
-						
-					if (selected && selected.is('img')) {
-						editor.getCommand(command).setState(CKEDITOR.TRISTATE_ON);
-					} else {
-						editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
-					}
-				});
 
 				// registered in jquery/mixins/editpic.js
 				LiveJournal.register_hook('editpic_response', function(data) {
@@ -777,52 +781,45 @@
 					}
 				});
 
-				if (window.ljphotoEnabled && window.ljphotoMigrationStatus === LJ.getConst('LJPHOTO_MIGRATION_NONE')) {
-					editor.ui.addButton('image', {
-						label: CKLang.LJImage_Title,
-						command: 'image'
-					});
-				} else {
-					editor.addCommand(button, {
-						exec: function (editor) {
-							var selected = editor.getSelection().getSelectedElement();
-								
-							if (selected) {
-								var parent = selected && selected.getParent(),
-									hasParentLink = parent.getName() === 'a',
-									parentLink = hasParentLink && parent,
-									parentHref = hasParentLink && parent.getAttribute('href');
+				editor.addCommand(button, {
+					exec: function (editor, fromDoubleClick) {
+						var selected = editor.getSelection().getSelectedElement();
+							
+						if (selected) {
+							var parent = selected && selected.getParent(),
+								hasParentLink = parent.getName() === 'a',
+								parentLink = hasParentLink && parent,
+								parentHref = hasParentLink && parent.getAttribute('href');
 
-								LiveJournal.run_hook('rteButton', 'editpic', jQuery('.cke_button_' + button), {
-									picData: {
-										url: selected.getAttribute('src'),
-										title: selected.getAttribute('title'),
+							editor.rteButton(button, 'editpic', {
+								picData: {
+									url: selected.getAttribute('src'),
+									title: selected.getAttribute('title'),
 
-										width: selected.getAttribute('width'),
-										height: selected.getAttribute('height'),
+									width: selected.getAttribute('width'),
+									height: selected.getAttribute('height'),
 
-										link: parentHref || "",
-										blank: hasParentLink && parentLink.getAttribute('target'),
+									link: parentHref || "",
+									blank: hasParentLink && parentLink.getAttribute('target'),
 
-										border: parseInt(selected.getStyle('border-width'), 10),
-										vspace: parseInt(selected.getStyle('margin-top'), 10),
-										hspace: parseInt(selected.getStyle('margin-left'), 10),
+									border: parseInt(selected.getStyle('border-width'), 10),
+									vspace: parseInt(selected.getStyle('margin-top'), 10),
+									hspace: parseInt(selected.getStyle('margin-left'), 10),
 
-										aligment: selected.getStyle('float') || 'none'
-									}
-								});
-							} else {
-								jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
-							}
-						},
-						editorFocus: false
-					});
+									aligment: selected.getStyle('float') || 'none'
+								}
+							});
+						} else {
+							jQuery('.b-updatepage-event-section').editor('handleImageUpload', 'upload');
+						}
+					},
+					editorFocus: false
+				});
 
-					editor.ui.addButton('image', {
-						label: CKLang.LJImage_Title,
-						command: button
-					});
-				}
+				editor.ui.addButton(button, {
+					label: CKLang.LJImage_Title,
+					command: button
+				});
 			})();
 
 			// LJ Embed
@@ -854,12 +851,12 @@
 						var node = ljTagsData[button].node;
 
 						if (node) {
-							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+							rteButton(button, widget, {
 								defaultText: node && decodeURIComponent(node.getAttribute('lj-data')),
 								editMode: true
 							});
 						} else {
-							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button));
+							rteButton(button, widget);
 						}
 
 					}
@@ -1001,7 +998,7 @@
 					exec: function() {
 						var node = ljTagsData[button].node;
 
-						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+						rteButton(button, widget, {
 							defaultText: node ? node.getAttribute('lj-url') : '',
 							editMode: node? true : false
 						});
@@ -1033,7 +1030,7 @@
 					exec: function() {
 						var node = ljTagsData[button].node;
 
-						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+						rteButton(button, widget, {
 							defaultText: node ? node.getAttribute('text') : '',
 							editMode: node? true : false
 						});
@@ -1065,7 +1062,7 @@
 					exec: function() {
 						var node = ljTagsData[button].node;
 
-						LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+						rteButton(button, widget, {
 							defaultText: node ? node.getAttribute('text') : '',
 							editMode: node? true : false
 						});
@@ -1304,13 +1301,13 @@
 						var node = ljTagsData.LJPollLink.node;
 
 						if (node) {
-							LiveJournal.run_hook('rteButton', 'poll', jQuery('.cke_button_' + button), {
+							rteButton(button, 'poll', {
 								ljData: decodeURIComponent(node.getAttribute('lj-data')),
 								editMode: true,
 								disabled: node && (node.getAttribute('data-disabledPoll') ? true : false)
 							});
 						} else {
-							LiveJournal.run_hook('rteButton', 'poll', jQuery('.cke_button_' + button));
+							rteButton(button, 'poll');
 						}
 					},
 					editorFocus: false
@@ -1379,12 +1376,12 @@
 						var node = ljTagsData[button].node;
 
 						if (node) {
-							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button), {
+							rteButton(button, widget, {
 								buttons: node.getAttribute('buttons'),
 								editMode: true
 							});
 						} else {
-							LiveJournal.run_hook('rteButton', widget, jQuery('.cke_button_' + button));
+							rteButton(button, widget);
 						}
 					},
 					editorFocus: false
@@ -1634,7 +1631,7 @@
 					img: function(element) {
 						var parent = element.parent && element.parent.parent;
 						if (!parent || !parent.attributes || !parent.attributes['lj:user']) {
-							element.attributes['lj-cmd'] = 'image';
+							element.attributes['lj-cmd'] = 'LJImage';
 						}
 					},
 					div: function(element) {

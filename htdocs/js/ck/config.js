@@ -17,13 +17,11 @@ CKEDITOR.editorConfig = function(config) {
 			'button',
 			'colorbutton',
 			'colordialog',
-			'dialog',
 			'enterkey',
 			'entities',
 			'font',
 			'format',
 			'htmldataprocessor',
-			'image',
 			'keystrokes',
 			'list',
 			'liststyle',
@@ -43,6 +41,9 @@ CKEDITOR.editorConfig = function(config) {
 		config.autoGrow_minHeight = 400;
 
 		ljplugins.push('ljspell', 'ljfont');
+	} else {
+		plugins.push('dialog');
+		plugins.push('image');
 	}
 
 	config.language = 'ru';
@@ -99,7 +100,7 @@ CKEDITOR.editorConfig = function(config) {
 
 			'-',
 
-			'image',
+			'LJImage',
 			ifEnabled(Site.media_embed_enabled, 'LJEmbedLink'),
 
 			'LJCut',
