@@ -49,7 +49,7 @@ sub execute {
         }
     }
 
-    LJ::User::UserlogRecord::SetOwner->create( $journal,
+    LJ::User::UserlogRecord::SetOwner->create( $c,
         'ownerid' => $u->userid, 'remote' => $remote );
 
     ## Close election poll if exist and open
@@ -69,7 +69,7 @@ sub execute {
     ## Set a new supermaintainer as maintainer too.
     LJ::set_rel($c->{userid}, $u->{userid}, 'A');
 
-    LJ::User::UserlogRecord::MaintainerAdd->create( $journal,
+    LJ::User::UserlogRecord::MaintainerAdd->create( $c,
         'maintid' => $u->userid, 'remote' => $remote );
 
     $self->print("User '$user' setted as supermaintainer for '$comm'". $reason);
