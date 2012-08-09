@@ -24,6 +24,7 @@ use Class::Autouse qw(
                       LJ::PersonalStats::Ratings::Journals
                       LJ::API::RateLimiter
                       LJ::Pay::Repost::Offer
+                      LJ::CleanHtml::Like
                       );
 
 use LJ::TimeUtil;
@@ -2430,24 +2431,31 @@ sub postevent {
 
     my $repost_offer;
 
-    if ($req->{'repost_budget'} && LJ::is_enabled("paid_repost")) {
+    if (LJ::is_enabled("paid_repost")) {
+
+        my $repost_budget = LJ::CleanHtml::Like->extract_repost_budget(\$event) || $req->{'repost_budget'};
+        
+        if ($repost_budget) {
     
-        # cannot create paid repost via api
-        return fail($err,222) unless $flags->{noauth};
+            # cannot create paid repost via api
+            return fail($err,222) unless $flags->{noauth};
 
-        $repost_offer = {
-             userid    => $posterid,
-             journalid => $ownerid,
-             budget    => $req->{repost_budget},
-        };
+            $repost_offer = {
+                userid    => $posterid,
+                journalid => $ownerid,
+                budget    => $repost_budget,
+            };
 
-        my $error = '';
-        my $res = LJ::Pay::Repost::Offer->check(
-            \$error,
-            $repost_offer,
-        );
+            my $error = '';
+            my $res = LJ::Pay::Repost::Offer->check(
+                \$error,
+                \$repost_offer,
+            );
 
-        return fail($err,160,$error) unless $res;
+            return fail($err,160,$error) unless $res;
+
+            LJ::CleanHtml::Like->clean_repost_budget(\$event);
+        }
     }
 
     # convert RTE lj-embeds to normal lj-embeds
@@ -3094,7 +3102,9 @@ sub editevent {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
             return fail( $err, 215 ) unless $req->{tz};
 
-            return fail($err, 159) if $req->{repost_budget};
+            if ( $req->{repost_budget} || LJ::CleanHtml::Like->extract_repost_budget(\$req->{event}) ) {
+                return fail($err, 159);
+            }
 
             $req->{ext}->{flags} = $flags;
             $req->{usejournal} = $req->{usejournal}  || '';
@@ -3281,68 +3291,58 @@ sub editevent {
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
-
     # create, edit, revoke repost offer
     my ($repost_offer, $repost_offer_action);
     
-    if( LJ::is_enabled("paid_repost") 
-        && $req->{revoke_repost_offer} 
-        && $curprops{$itemid}->{repost_offer} ) {
+    if(LJ::is_enabled("paid_repost") && $req->{'event'} =~ /\S/) {
+        
+        my $curr_repost_offer = $curprops{$itemid}->{repost_offer} || '';
+        my $repost_budget = $req->{repost_budget};
+        my $contains_repost_button = LJ::CleanHtml::Like->contains_repost_button(\$req->{event});
 
-        # cannot revoke repost offer via api
-        return fail($err,222) unless $flags->{noauth};
+        if ($contains_repost_button && $repost_budget) { 
+            # cannot create or edit repost offer via api
+            return fail($err,222) unless $flags->{noauth};
 
-        $repost_offer_action = 'revoke';
+            $repost_offer = {
+                id        => $curr_repost_offer,
+                userid    => $posterid,
+                journalid => $ownerid,
+                jitemid   => $itemid,
+                budget    => int $repost_budget,
+            };
 
-        $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer(
-            $posterid,
-            $curprops{$itemid}->{repost_offer},
-        );
-    }
-
-    if (LJ::is_enabled("paid_repost") 
-        && defined $req->{repost_budget} 
-        && !$req->{revoke_repost_offer}) {
-      
-        # cannot create or edit repost offer via api
-        return fail($err,222) unless $flags->{noauth};
-
-        $repost_offer = {
-            id        => $curprops{$itemid}->{repost_offer},
-            userid    => $posterid,
-            journalid => $ownerid,
-            jitemid   => $itemid,
-            budget    => int $req->{repost_budget},
-        };
-
-        my $previous;
-
-        my $error = '';
-        my $res = LJ::Pay::Repost::Offer->check(
-            \$error,
-            $repost_offer,
-            \$previous,
-        );
+            my $error = '';
+            my $res = LJ::Pay::Repost::Offer->check(
+                \$error,
+                \$repost_offer,
+            );
    
-        return fail($err,160,$error) unless $res;
-      
-        if ($repost_offer->{id}) {
-
-            unless ($repost_offer->{budget} == $previous->budget) {
-                $repost_offer_action = 'edit';
-                $repost_offer = $previous;
-            } else {
-                # no need to update repost offer
-                undef $repost_offer;
+            return fail($err,160,$error) unless $res;
+            
+            # no need to update repost offer
+            if ($curr_repost_offer) {
+                undef $repost_offer if $repost_offer->budget == $repost_budget;
             }
 
-        } else {
-            $repost_offer_action = 'create';
-            # no need to create repost offer with zero budget
-            undef $repost_offer unless $repost_offer->{budget};
-        }
-    }
+            $repost_offer_action = $curr_repost_offer ? 'edit' : 'create';
 
+        } elsif ( $curr_repost_offer && 
+                  defined $repost_budget && !$repost_budget or
+                  !$contains_repost_button ) {
+            
+            # cannot revoke repost offer via api
+            return fail($err,222) unless $flags->{noauth};
+
+            $repost_offer_action = 'revoke';
+            
+            $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer(
+                $posterid,
+                $curprops{$itemid}->{repost_offer},
+            );
+        } 
+    }
+    
     # make post sticky
     if ( $req->{sticky} ) {
         if( $uowner->get_sticky_entry_id() != $itemid ) {
