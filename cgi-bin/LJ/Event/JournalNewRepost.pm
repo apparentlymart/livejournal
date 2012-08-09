@@ -380,7 +380,7 @@ sub _as_email {
     $email .= LJ::Lang::get_text($lang, $ml_head_string, undef,
                 {
                     reposter    => $reposter_name,
-                    poster      => $reposter_name,
+                    poster      => $poster,
                     community   => $journal,
                     url         => $entry_url,
                     tags        => $tags,
