@@ -79,7 +79,7 @@ CKEDITOR.editorConfig = function(config) {
 	config.tabSpaces = 2;
 	config.startupShowBorders = false;
 	config.toolbarCanCollapse = false;
-	config.disableNativeSpellChecker = false;
+	config.disableNativeSpellChecker = true;
 	
 	var toolbar = [];
 
