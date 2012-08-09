@@ -19,7 +19,6 @@ CKEDITOR.editorConfig = function(config) {
 			'colordialog',
 			'enterkey',
 			'entities',
-			'font',
 			'format',
 			'htmldataprocessor',
 			'keystrokes',
@@ -33,7 +32,6 @@ CKEDITOR.editorConfig = function(config) {
 			'undo',
 			'wysiwygarea',
 			'onchange',
-			'link'
 		];
 
 	if (Site.page.ljpost) {
@@ -42,8 +40,7 @@ CKEDITOR.editorConfig = function(config) {
 
 		ljplugins.push('ljspell', 'ljfont');
 	} else {
-		plugins.push('dialog');
-		plugins.push('image');
+		plugins.push('dialog', 'image', 'link', 'font');
 	}
 
 	config.language = 'ru';
