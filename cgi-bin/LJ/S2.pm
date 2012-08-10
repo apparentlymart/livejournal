@@ -4721,7 +4721,6 @@ sub Page__get_entry_by_id {
     my ( $ctx, $this, $entry_id ) = @_;
     my $journal = $this->{'_u'}; 
 
-    warn $entry_id;
     my $remote = LJ::get_remote();
     my $entry = LJ::Entry->new($journal, ditemid => $entry_id);
 
