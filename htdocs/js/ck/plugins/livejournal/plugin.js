@@ -800,8 +800,8 @@
 									url: selected.getAttribute('src'),
 									title: selected.getAttribute('title'),
 
-									width: selected.getAttribute('width'),
-									height: selected.getAttribute('height'),
+									width: selected.getAttribute('width') || selected.$.width,
+									height: selected.getAttribute('height') || selected.$.height,
 
 									link: parentHref || "",
 									blank: (hasParentLink? !!parentLink.getAttribute('target') : true),
