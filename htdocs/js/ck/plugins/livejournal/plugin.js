@@ -803,7 +803,7 @@
 									height: selected.getAttribute('height'),
 
 									link: parentHref || "",
-									blank: hasParentLink && parentLink.getAttribute('target'),
+									blank: (hasParentLink? !!parentLink.getAttribute('target') : true),
 
 									border: parseInt(selected.getStyle('border-width'), 10),
 									vspace: parseInt(selected.getStyle('margin-top'), 10),
