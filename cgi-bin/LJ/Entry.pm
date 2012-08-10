@@ -3232,12 +3232,6 @@ sub get_aggregated_entry {
         LJ::Poll->expand_entry(\$row->{event_raw}, getpolls => 1, viewer => $remote );
     }
 
-    if ($opts->{asxml}) {
-        my $tidy = LJ::Tidy->new();
-        $row->{event_raw} ||= $entry->event_raw;
-        $row->{event_raw} = $tidy->clean( $row->{event_raw} );
-    }
-    
     if ($opts->{parseljtags}) {
         $row->{event_raw} ||= $entry->event_raw;
         $row->{event_raw} = LJ::convert_lj_tags_to_links(
@@ -3245,6 +3239,12 @@ sub get_aggregated_entry {
             embed_url => $entry->url);
     }
 
+    if ($opts->{asxml}) {
+        my $tidy = LJ::Tidy->new();
+        $row->{event_raw} ||= $entry->event_raw;
+        $row->{event_raw} = $tidy->clean( $row->{event_raw} );
+    }
+    
 }
 
 1;
