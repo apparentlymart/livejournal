@@ -742,6 +742,7 @@
 					// image link
 					var parent = selected && selected.getParent();
 					if (data.link) {
+						data.link = data.link.replace(/^[\s\t]*(?:http:\/\/)?/, 'http://');
 						// change parent link if exists
 						if (parent && parent.getName() === 'a') {
 							parent.setAttribute('href', data.link);
