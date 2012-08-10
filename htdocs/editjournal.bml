@@ -582,7 +582,7 @@ body<=
                 'opt_backdated' => $entry_obj->prop('opt_backdated'),
             };
 
-            if($entry_obj->prop('repost_offer')) {
+            if($entry->{'repost_offer'} = $entry_obj->prop('repost_offer')) {
                 my $offer = LJ::Pay::Repost::Offer->get_repost_offer(
                                                         $entry_obj->posterid,
                                                         $entry_obj->prop('repost_offer'),

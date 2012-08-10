@@ -886,6 +886,62 @@ sub render_options_block {
     $out .= "<ul id='options' class='pkg'>";
 
     my %blocks = (
+        'paid_repost' => sub {
+            return '' unless LJ::is_enabled("paid_repost");
+            
+            my ($offer, $budget) = ($opts->{repost_offer}, $opts->{repost_budget});
+            
+            my $out = '';
+
+            my $checkbox = LJ::html_check({
+                'type'     => 'check',
+                'class'    => 'paid_repost_on',
+                'value'    => '1',
+                'name'     => 'paid_repost_on',
+                'id'       => 'paid_repost_on',
+                'selected' => ($budget > 0 ? 1 : 0),
+                $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
+                'label'    => "",
+            });
+            my $checkbox_text = LJ::Lang::ml('entryform.paid_repost.checkbox');
+            
+            my $current_budget = $offer && $budget > 0 ? 
+                LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $budget}) : 
+                '' ;
+
+            $out .= qq{$checkbox $checkbox_text $current_budget <br />};
+
+            $out .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
+            
+            my ($label, $opts);
+            unless ($offer) {
+                $opts = {
+                    'name'  => 'repost_budget',
+                    'id'    => 'repost_budget',
+                    'value' => $budget,
+                };
+                $label = LJ::Lang::ml('entryform.paid_repost.budget');
+            } else {
+                $opts = {
+                    'name'  => 'add_repost_budget',
+                    'value' => $opts->{add_repost_budget},
+                };
+
+                $label =  $budget > 0 ? 
+                    LJ::Lang::ml('entryform.paid_repost.add_budget') :
+                    LJ::Lang::ml('entryform.paid_repost.budget');
+            }
+
+            my $field = LJ::html_text({
+                'size'     => '10',
+                'raw'      => "autocomplete='off'",
+                %$opts,
+            });
+
+            $out .= "$label  $field";
+
+            return $out;
+        },         
         'sticky' => sub {
             return '' unless LJ::is_enabled("delayed_entries");
             my $journalu = LJ::load_user($opts->{'usejournal'}) || $remote;
@@ -1328,6 +1384,7 @@ sub render_options_block {
         [ 'music', 'content_flag' ],
         [ 'spellcheck', 'do_not_add' ],
         [ 'none','sticky'],
+        [ 'paid_repost' ],
         'extra',
         [ 'lastfm_logo'  ],
     );

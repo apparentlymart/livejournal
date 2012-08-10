@@ -2433,9 +2433,13 @@ sub postevent {
 
     if (LJ::is_enabled("paid_repost")) {
 
-        my $repost_budget = LJ::CleanHtml::Like->extract_repost_budget(\$event) || $req->{'repost_budget'};
+        my $repost_button = LJ::CleanHtml::Like->contains_repost_button(\$event);
         
-        if ($repost_budget) {
+        my $budget_from_html = $repost_button ? LJ::CleanHtml::Like->extract_repost_budget(\$event) : undef;
+
+        my $repost_budget = $budget_from_html || $req->{'repost_budget'};
+        
+        if ($repost_button && $repost_budget) {
     
             # cannot create paid repost via api
             return fail($err,222) unless $flags->{noauth};
@@ -2454,7 +2458,7 @@ sub postevent {
 
             return fail($err,160,$error) unless $res;
 
-            LJ::CleanHtml::Like->clean_repost_budget(\$event);
+            LJ::CleanHtml::Like->clean_repost_budget(\$event) if defined $budget_from_html;
         }
     }
 
@@ -3291,48 +3295,62 @@ sub editevent {
     my %curprops;
     LJ::load_log_props2($dbcm, $ownerid, [ $itemid ], \%curprops);
 
+
     # create, edit, revoke repost offer
     my ($repost_offer, $repost_offer_action);
     
-    if(LJ::is_enabled("paid_repost") && $req->{'event'} =~ /\S/) {
+    if (LJ::is_enabled("paid_repost") && $req->{'event'} =~ /\S/) {
         
+        my $repost_button = LJ::CleanHtml::Like->contains_repost_button(\$req->{event});
         my $curr_repost_offer = $curprops{$itemid}->{repost_offer} || '';
-        my $repost_budget = $req->{repost_budget};
-        my $contains_repost_button = LJ::CleanHtml::Like->contains_repost_button(\$req->{event});
+        
+        LJ::CleanHtml::Like->clean_repost_budget(\$req->{event}) if $repost_button;
 
-        if ($contains_repost_button && $repost_budget) { 
-            # cannot create or edit repost offer via api
+        my $is_active = $repost_button && !$req->{revoke_repost_offer};
+        
+        # create
+        if ( !$curr_repost_offer && $req->{repost_budget} && $is_active ) {
+            # cannot create repost offer via api
             return fail($err,222) unless $flags->{noauth};
+            
+            $repost_offer_action = 'create';
 
             $repost_offer = {
-                id        => $curr_repost_offer,
                 userid    => $posterid,
                 journalid => $ownerid,
                 jitemid   => $itemid,
-                budget    => int $repost_budget,
+                budget    => int $req->{repost_budget},
             };
+        }
+        
+        # edit
+        if( $curr_repost_offer && $req->{add_repost_budget} && $is_active ) {
+            # cannot edit repost offer via api
+            return fail($err,222) unless $flags->{noauth};
+            
+            $repost_offer_action = 'edit';
 
+            $repost_offer = {
+                id            => $curr_repost_offer,
+                userid        => $posterid,
+                add_budget    => int $req->{add_repost_budget},
+            };
+        }
+
+        if( $repost_offer ) {
             my $error = '';
             my $res = LJ::Pay::Repost::Offer->check(
                 \$error,
                 \$repost_offer,
             );
-   
             return fail($err,160,$error) unless $res;
-            
-            # no need to update repost offer
-            if ($curr_repost_offer) {
-                undef $repost_offer if $repost_offer->budget == $repost_budget;
-            }
+        }
 
-            $repost_offer_action = $curr_repost_offer ? 'edit' : 'create';
-
-        } elsif ( $curr_repost_offer && 
-                  defined $repost_budget && !$repost_budget or
-                  !$contains_repost_button ) {
+        # revoke
+        if ( $curr_repost_offer && !$is_active ) { 
             
             # cannot revoke repost offer via api
-            return fail($err,222) unless $flags->{noauth};
+            #return fail($err,222) unless $flags->{noauth};
 
             $repost_offer_action = 'revoke';
             
@@ -3504,9 +3522,7 @@ sub editevent {
             
         } elsif($repost_offer_action eq 'edit') {
             
-            $repost_offer->mark_active if $repost_offer->inactive;
-
-            $repost_offer->set_budget(\$error, int $req->{repost_budget}) or 
+            $repost_offer->add_budget(\$error, int $req->{add_repost_budget}) or 
                 fail(\$warning,160,$error);
        
         } elsif($repost_offer_action eq 'revoke') {
