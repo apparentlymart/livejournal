@@ -905,14 +905,12 @@ sub render_options_block {
             });
             my $checkbox_text = LJ::Lang::ml('entryform.paid_repost.checkbox');
             
-            my $current_budget = $offer && $budget > 0 ? 
+            my $current_budget = $offer && $budget ? 
                 LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $budget}) : 
                 '' ;
 
             $out .= qq{$checkbox $checkbox_text $current_budget <br />};
 
-            $out .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
-            
             my ($label, $opts);
             unless ($offer) {
                 $opts = {
@@ -922,6 +920,8 @@ sub render_options_block {
                 };
                 $label = LJ::Lang::ml('entryform.paid_repost.budget');
             } else {
+                $out .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
+                
                 $opts = {
                     'name'  => 'add_repost_budget',
                     'value' => $opts->{add_repost_budget},
