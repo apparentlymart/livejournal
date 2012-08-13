@@ -1411,7 +1411,7 @@ sub res_includes {
     if ( $opts->{'only_tmpl'} ) {
         my %loaded;
         foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
-            if (LJ::is_enabled('template_from_stat')) {
+            if (LJ::is_enabled('templates_from_stat')) {
                 # Create template id
                 my $key = $template;
                 $key =~ s{(?<!\\)/} {-}g;
@@ -1420,7 +1420,7 @@ sub res_includes {
                 my $stat_prefix = 'l-stat';
                 my $debug_data  = '';
 
-                if ($LJ::IS_DEV_SERVER) {
+                if ($LJ::IS_DEV_SERVER || $LJ::CURRENT_VERSION eq 'trunk') {
                     $stat_prefix =  'stat';
 
                     $debug_data = sprintf q{
@@ -1429,7 +1429,7 @@ sub res_includes {
                         $template, $LJ::TEMPLATE_TRANSLATION;
                 }
 
-                my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template";
+                my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template?v=" . $LJ::CURRENT_VERSION;
                 $ret .= sprintf q{<script type="text/plain" id="%s" src="%s" %s>}, 
                         $key, $address, $debug_data;
                 $ret .= '</script>';
