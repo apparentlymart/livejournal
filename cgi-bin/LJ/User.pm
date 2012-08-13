@@ -9106,6 +9106,16 @@ sub add_friend
                                               ) unless $LJ::DISABLED{'friendchange-schwartz'};
 
             $sclient->insert_jobs(@jobs) if @jobs;
+
+            # For Profile
+            LJ::MemCache::incr($friender->user.'_count_friends');
+
+            LJ::MemCache::incr($friender->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
+            LJ::MemCache::incr($friender->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
+            LJ::MemCache::incr($friender->user.'_count_yfriends') if $friendee->is_syndicated;
+
+            LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
+            LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
         }
     }
 
@@ -9159,6 +9169,16 @@ sub remove_friend {
                                               ) unless $LJ::DISABLED{'friendchange-schwartz'};
  
             $sclient->insert_jobs(@jobs);
+
+            # For Profile
+            LJ::MemCache::decr($u->user.'_count_friends');
+
+            LJ::MemCache::decr($u->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
+            LJ::MemCache::decr($u->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
+            LJ::MemCache::decr($u->user.'_count_yfriends') if $friendee->is_syndicated;
+    
+            LJ::MemCache::decr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
+            LJ::MemCache::decr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
         }
     }
 

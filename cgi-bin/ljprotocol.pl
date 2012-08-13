@@ -4519,11 +4519,26 @@ sub editfriends
             LJ::memcache_kill($friendid, 'friendofs2');
 
             if ($sclient && !$currently_is_friend && !$currently_is_banned) {
+
+                # For Profile
+                my $friender = LJ::load_userid($userid);
+                my $friendee = LJ::load_userid($friendid);
+
+                LJ::MemCache::incr($friender->user.'_count_friends');
+
+                LJ::MemCache::incr($friender->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
+                LJ::MemCache::incr($friender->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
+                LJ::MemCache::incr($friender->user.'_count_yfriends') if $friendee->is_syndicated;
+
+                LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
+                LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
+ 
+
                 ## delay event to accumulate users activity
                 require LJ::Event::BefriendedDelayed;
                 LJ::Event::BefriendedDelayed->send(
-                                                    LJ::load_userid($friendid), ## to user
-                                                    LJ::load_userid($userid)    ## from user
+                                                    $friendee,  ## to user
+                                                    $friender   ## from user
                                                     );
                 my @jobs;
                 push @jobs, TheSchwartz::Job->new(
