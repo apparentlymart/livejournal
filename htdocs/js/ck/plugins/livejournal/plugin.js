@@ -786,14 +786,31 @@
 
 				editor.addCommand(button, {
 					exec: function (editor, fromDoubleClick) {
-						var selected = editor.getSelection().getSelectedElement();
+						var selected = editor.getSelection();
+
+						selected = selected? selected.getSelectedElement() : null;
 						selectedImage = selected;
-							
+
 						if (selected) {
 							var parent = selected && selected.getParent(),
 								hasParentLink = parent.getName() === 'a',
 								parentLink = hasParentLink && parent,
-								parentHref = hasParentLink && parent.getAttribute('href');
+								parentHref = hasParentLink && parent.getAttribute('href'),
+								natural = {};
+
+							if ('naturalWidth' in selected.$) {
+								natural.width = selected.$.naturalWidth;
+								natural.height = selected.$.naturalHeight;
+							} else {
+								// IE 8 or lower
+								var img = new Image();
+								img.src = selected.$.src;
+
+								natural = {
+									width: img.width,
+									height: img.height
+								};
+							}
 
 							editor.rteButton(button, 'editpic', {
 								picData: {
@@ -802,6 +819,9 @@
 
 									width: selected.getAttribute('width') || selected.$.width,
 									height: selected.getAttribute('height') || selected.$.height,
+
+									defaultWidth: natural.width,
+									defaultHeight: natural.height,
 
 									link: parentHref || "",
 									blank: (hasParentLink? !!parentLink.getAttribute('target') : true),
