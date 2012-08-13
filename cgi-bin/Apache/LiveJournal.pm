@@ -387,6 +387,7 @@ sub trans {
             and LJ::Request->uri !~ /\.bml$/        ## BML is allowed on stat. domain
             and LJ::Request->uri !~ m|/palimg/|     ## PaletteModify actions are processed by other handler
             and LJ::Request->uri !~ m|^/__api/?|
+            and LJ::Request->uri !~ m|^/__tmpl/|
             ) or
         ($LJ::IS_SSL and LJ::Request->unparsed_uri =~ /\?\?/)
     ){

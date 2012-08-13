@@ -1411,65 +1411,92 @@ sub res_includes {
     if ( $opts->{'only_tmpl'} ) {
         my %loaded;
         foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
-            my $path = [split m{(?<!\\)/}, $template];
-            my $file = pop @$path;
-            my ($type, $filter);
+            if (LJ::is_enabled('template_from_stat')) {
+                # Create template id
+                my $key = $template;
+                $key =~ s{(?<!\\)/} {-}g;
+                $key =~ s{\.(?:jq)?tmpl$} {}g;
 
-            shift @$path if $path->[0] eq 'templates';
+                my $stat_prefix = 'l-stat';
+                my $debug_data  = '';
 
-            $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
-            my $fpath = join '/', $path, $file;
-            
-            -f $fpath             or warn 'Missing template '. $fpath and next;
-            $loaded{lc $fpath}++ and next;
+                if ($LJ::IS_DEV_SERVER) {
+                    $stat_prefix =  'stat';
 
-            for ($file) {
-                m{\.jqtmpl$}i and do {
-                    $type   = 'JQuery.tmpl';
-                    $filter = 'jqtmpl';
-                };
+                    $debug_data = sprintf q{
+                        data-template="%s"
+                        data-translation="%s"},
+                        $template, $LJ::TEMPLATE_TRANSLATION;
+                }
 
-                m{\.tmpl$}i   and do {
-                    $type   = 'HTML::Template';
-                    $filter = $LJ::TEMPLATE_FILTER;
-                };
-            }
-
-            $type or next;
-
-            my $data = LJ::Response::CachedTemplate->new(
-                file               => $file,
-                path               => $path,
-                type               => $type,
-                translate          => $LJ::TEMPLATE_TRANSLATION,
-                filter             => $filter,
-            );
-
-            # Create template id
-            my $key = $template;
-            $key =~ s{(?<!\\)/} {-}g;
-            $key =~ s{\.(?:jq)?tmpl$} {}g;
-
-            # TODO: </script> in template can ruin your day
-            if ( $LJ::IS_DEV_SERVER ) {
-                $ret .= sprintf q{<script type="text/plain"
-                    id="%s"
-                    data-path="%s"
-                    data-file="%s"
-                    data-type="%s"
-                    data-filter="%s"
-                    data-translation="%s">},
-                $key, $path, $file, $type, $filter, $LJ::TEMPLATE_TRANSLATION;
-                $ret .= $data->raw_output();
+                my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template";
+                $ret .= sprintf q{<script type="text/plain" id="%s" src="%s" %s>}, 
+                        $key, $address, $debug_data;
                 $ret .= '</script>';
+
+                $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, 
+                    $key, $key, $LJ::TEMPLATE_TRANSLATION;
             } else {
-                $ret .= sprintf q{<script type="text/plain" id="%s">}, $key;
-                $ret .= $data->raw_output();
-                $ret .= '</script>';
-            }
+                my $path = [split m{(?<!\\)/}, $template];
+                my $file = pop @$path;
+                my ($type, $filter);
 
-            # Let js know about template 
-            $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
+                shift @$path if $path->[0] eq 'templates';
+
+                $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
+                my $fpath = join '/', $path, $file;
+            
+                -f $fpath             or warn 'Missing template '. $fpath and next;
+                $loaded{lc $fpath}++ and next;
+
+                for ($file) {
+                    m{\.jqtmpl$}i and do {
+                        $type   = 'JQuery.tmpl';
+                        $filter = 'jqtmpl';
+                    };
+
+                    m{\.tmpl$}i   and do {
+                        $type   = 'HTML::Template';
+                        $filter = $LJ::TEMPLATE_FILTER;
+                    };
+                }
+
+                $type or next;
+
+                my $data = LJ::Response::CachedTemplate->new(
+                    file               => $file,
+                    path               => $path,
+                    type               => $type,
+                    translate          => $LJ::TEMPLATE_TRANSLATION,
+                    filter             => $filter,
+                );
+
+                # Create template id
+                my $key = $template;
+                $key =~ s{(?<!\\)/} {-}g;
+                $key =~ s{\.(?:jq)?tmpl$} {}g;
+
+                # TODO: </script> in template can ruin your day
+                if ( $LJ::IS_DEV_SERVER ) {
+                    $ret .= sprintf q{<script type="text/plain"
+                        id="%s"
+                        data-path="%s"
+                        data-file="%s"
+                        data-type="%s"
+                        data-filter="%s"
+                        data-translation="%s">},
+                    $key, $path, $file, $type, $filter, $LJ::TEMPLATE_TRANSLATION;
+                    $ret .= $data->raw_output();
+                    $ret .= '</script>';
+                } else {
+                    $ret .= sprintf q{<script type="text/plain" id="%s">}, $key;
+                    $ret .= $data->raw_output();
+                    $ret .= '</script>';
+                }
+
+                # Let js know about template 
+                $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
+            }
         }
 
         return $ret;
