@@ -1558,6 +1558,8 @@ sub res_includes {
 
         LJ::run_hooks('add_to_site_js', \%site);
 
+        LJ::need_var(D => \%LJ::JS_D);
+
         my $site_params = LJ::js_dumper(\%site);
 
         my $journal_info_json = LJ::JSON->to_json(\%journal_info);
