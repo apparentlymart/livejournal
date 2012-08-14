@@ -120,10 +120,21 @@ sub _load {
     my @items;
     while (my $row = $sth->fetchrow_hashref) {
         my $qid = $row->{qid} or next;
-        my $singleton = $u->{_inbox_items}->{$qid} or next;
-
-        push @items, $singleton->absorb_row($row);
+        $u->{_inbox_items}->{$qid} or next;
+        push @items => $row;
     }
+
+    ## preload journal objects
+    LJ::load_userids( map { $_->{journalid} } @items );
+
+    @items = map {
+            my $row = $_;
+            my $qid = $row->{qid} or next;
+            my $singleton = $u->{_inbox_items}->{$qid} or next;
+
+            $singleton->absorb_row($row);
+        } @items;
+    
 }
 
 # fills in a skeleton item from a database row hashref
