@@ -453,40 +453,41 @@ LiveJournal.parseLikeButtons = function(ctx) {
 		.insertBefore(link));
 	});
 
-	var initRepostButton = function(link, url, data) {
-		data = data || {};
-
-		var meta = {
-				paid: !!data.paid,
-				url: url,
-				cost: Number(data.cost || 0),
-				budget: Number(data.budget || 0),
-				count: Number(data.count || 0),
-				reposted: !!data.reposted
-			},
-			template = 'templates-CleanHtml-Repost',
-			options = {};
-
-		if (meta.paid) {
-			template = 'templates-CleanHtml-PaidRepost';
-			meta.owner = !meta.cost;
-			options.classNames = {
-				active: 'paidrepost-button-active',
-				inactive: 'paidrepost-button-inactive'
-			};
-		}
-
-		var repostNode = LJ.UI.template(template, meta);
-		link.replaceWith(repostNode);
-		repostNode.repostbutton(jQuery.extend(options, meta));
-	}
-	
 	jQuery('div.lj-like-item-repost > a', ctx || document).each(function() {
 		var link = jQuery(this),
 			url = link.data('url');
 
-		LJ.Api.call('repost.get_status', { url: url }, initRepostButton.bind(null, link, url));
+		LJ.Api.call('repost.get_status', { url: url }, function (data) {
+			link.replaceWith(LiveJournal.renderRepostButton(url, data));
+		});
 	});
+};
+
+LiveJournal.renderRepostButton = function (url, data) {
+	data = data || {};
+
+	var meta = {
+			paid: !!data.paid,
+			url: url,
+			cost: Number(data.cost || 0),
+			budget: Number(data.budget || 0),
+			count: Number(data.count || 0),
+			reposted: !!data.reposted
+		},
+		template = 'templates-CleanHtml-Repost',
+		options = {},
+		node;
+
+	if (meta.paid) {
+		template = 'templates-CleanHtml-PaidRepost';
+		meta.owner = !meta.cost;
+		options.classNames = {
+			active: 'paidrepost-button-active',
+			inactive: 'paidrepost-button-inactive'
+		};
+	}
+
+	return LJ.UI.template(template, meta).repostbutton(jQuery.extend(options, meta));
 };
 
 /**
