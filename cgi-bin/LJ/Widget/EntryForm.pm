@@ -1734,10 +1734,14 @@ sub render_ljphoto_block {
                 $res;
             } @photos ];
 
+        my $user_selected_image_size =
+            $remote->prop('user_selected_image_size') ||
+            $LJ::PICS_DEFAULT_IMAGE_SIZE;
+
         my @photo_sizes = map { {
             'size'       => $_,
             'text'       => LJ::Lang::ml("fotki.size.$_.text"),
-            'is_default' => ( $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
+            'is_default' => ( $_ eq $user_selected_image_size  ) ? 1 : 0,
         } } @LJ::Pics::Photo::DISPLAYED_SIZES;
 
         my $album_list = [];
@@ -1773,10 +1777,17 @@ sub render_ljphoto_block {
 
         $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
     } else {
+        my $user_selected_image_size = $LJ::PICS_DEFAULT_IMAGE_SIZE;
+        if ($remote) {
+            $user_selected_image_size =
+                $remote->prop('user_selected_image_size') ||
+                $LJ::PICS_DEFAULT_IMAGE_SIZE;
+        }
+
         my @photo_sizes = map { {
             'size'       => $_,
             'text'       => LJ::Lang::ml("fotki.size.$_.text"),
-            'is_default' => ( $remote && $_ == $remote->prop ('user_selected_image_size') ) ? 1 : 0,
+            'is_default' => $_ eq $user_selected_image_size ? 1 : 0,
         } } @LJ::Pics::Photo::DISPLAYED_SIZES;
 
 
