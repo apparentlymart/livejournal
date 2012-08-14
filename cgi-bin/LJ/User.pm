@@ -9115,8 +9115,14 @@ sub add_friend
             LJ::MemCache::incr($friender->user.'_count_yfriends') if $friendee->is_syndicated;
 
             LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
+            
             LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
-        }
+ 
+            if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $friender->userid)) {
+                LJ::MemCache::incr($friender->user.'_count_mutual');
+                LJ::MemCache::incr($friendee->user.'_count_mutual');
+            }
+       }
     }
 
     # WARNING: always returns "true". Check result of executing "REPLACE INTO friends ..." statement above.
@@ -9178,7 +9184,13 @@ sub remove_friend {
             LJ::MemCache::decr($u->user.'_count_yfriends') if $friendee->is_syndicated;
     
             LJ::MemCache::decr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
+
             LJ::MemCache::decr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
+
+            if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $u->userid)) {
+                LJ::MemCache::decr($friendee->user.'_count_mutual');
+                LJ::MemCache::decr($u->user.'_count_mutual');
+            }
         }
     }
 

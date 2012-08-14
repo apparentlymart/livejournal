@@ -4532,7 +4532,11 @@ sub editfriends
 
                 LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
                 LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
- 
+
+                if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $friender->userid)) {
+                    LJ::MemCache::incr($friender->user.'_count_mutual');
+                    LJ::MemCache::incr($friendee->user.'_count_mutual');
+                }
 
                 ## delay event to accumulate users activity
                 require LJ::Event::BefriendedDelayed;
