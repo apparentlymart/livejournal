@@ -143,7 +143,7 @@ sub display_name {
     unless ($u->name_orig =~ m!(\w+\.\w{2,4})|(https?://)!){
         my $uri = URI->new( $self->value );
         my $domain = $self->value;
-        ($domain) = $uri->host =~ /(\w+\.\w{2,4})$/
+        ($domain) = $uri->host =~ /([\w-]+\.\w{2,4})$/
             if $uri->can('host');
         return $u->name_orig ." [$domain]";
     }
