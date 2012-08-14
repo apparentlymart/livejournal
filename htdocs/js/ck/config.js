@@ -89,7 +89,7 @@ CKEDITOR.editorConfig = function(config) {
 
 	if (Site.page.ljpost) {
 		toolbar = [
-			'Bold', 'Italic', 'Underline', 'Strike', 'ljFontSize', 'LJColor',
+			'Bold', 'Italic', 'Underline', 'Strike', 'LJFont', 'LJColor',
 
 			'-',
 
