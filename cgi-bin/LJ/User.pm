@@ -9046,6 +9046,10 @@ sub add_friend
     my @add_ids = ref $to_add eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_add : ( LJ::want_userid($to_add) );
     return 0 unless @add_ids;
 
+    # clean widget cache
+    my $widget_key = "friend_birthdays:" . $userid;
+    LJ::MemCache::delete($widget_key);
+
     my $friender = LJ::load_userid($userid);
 
     # check action rate
