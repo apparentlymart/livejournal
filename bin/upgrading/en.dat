@@ -2839,6 +2839,8 @@ eventrates.users_who_like_it=Users who like it
 eventrates.view_all|staleness=1
 eventrates.view_all=View all
 
+fcklang.ljfont=Change font
+
 fcklang.ljimage=Insert/Edit Image
 fcklang.ljimage.beta=Insert/Edit Image Beta
 

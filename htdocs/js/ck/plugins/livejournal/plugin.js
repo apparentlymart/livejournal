@@ -658,7 +658,7 @@
 				});
 
 				editor.ui.addButton(button, {
-					label: CKLang[button] || 'BUTTON',
+					label: CKLang[button],
 					command: button
 				});
 
