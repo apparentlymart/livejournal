@@ -1094,8 +1094,8 @@
 				LiveJournal.register_hook('map_response', function(text) {
 					var iframe = new CKEDITOR.dom.element('iframe', editor.document);
 
-					var width = 800,
-						height = 600,
+					var width = 425,
+						height = 350,
 						frameStyle = "", bodyStyle = "";
 
 					if (!isNaN(width)) {
