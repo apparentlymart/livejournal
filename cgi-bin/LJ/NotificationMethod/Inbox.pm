@@ -77,6 +77,13 @@ sub notify {
         $q->enqueue(event => $ev);
     }
 
+    # widget reset
+    my $cache_friends_update_key  = "friend_updates:" . $u->userid;
+    LJ::MemCache::delete($cache_friends_update_key);
+
+    my $cache_update_for_user     = "update_for_users:" . $u->userid;
+    LJ::MemCache::delete($cache_update_for_user);
+
     return 1;
 }
 
