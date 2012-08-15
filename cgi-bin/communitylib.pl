@@ -285,8 +285,11 @@ sub send_comm_invite {
     my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ?',
                                         undef, $u->{userid}, $cu->{userid});
 
-    # step 4: exceeded outstanding invitation limit?  only if no outstanding invite
-    unless ($argstr) {
+    # step 4: exceeded outstanding invitation limit?  
+    # should be checked when 
+    # - there is no outstanding invite for this user AND 
+    # - maintainer has no unlimited invites ability
+    if (!$argstr && !$LJ::UNLIMITED_INVITES_TO_COMMUNITIES{ $mu->user }) {
         my $cdbcr = LJ::get_cluster_def_reader($cu);
         return LJ::error('db') unless $cdbcr;
         my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? " .
