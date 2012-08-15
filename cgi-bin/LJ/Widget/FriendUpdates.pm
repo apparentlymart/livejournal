@@ -20,6 +20,12 @@ sub render_body {
 
     my $limit = defined $opts{limit} ? $opts{limit} : 5;
 
+    my $cache_inbox_key  = "friend_updates:" . $u->userid;
+    my $cache_inbox_data = LJ::MemCache::get($cache_inbox_key);
+    if ($cache_inbox_data) {
+        return $cache_inbox_data;
+    }
+
     my $inbox = $u->notification_inbox;
     my @notifications = ();
     if ($inbox) {
@@ -51,6 +57,7 @@ sub render_body {
 
     $ret .= '</div></div></div></div></div></div>';
 
+    LJ::MemCache::set($cache_inbox_key, $ret, 84600);
 
     return $ret;
 }
