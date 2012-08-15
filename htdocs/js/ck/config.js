@@ -206,6 +206,22 @@ CKEDITOR.editorConfig = function(config) {
 	if (!Site.page.ljpost) {
 		config.protectedSource.push(/<lj-poll-\d+\s*\/?>/gi); // created lj polls;
 	}
+
+	config.LJFontDefault = 'normal'; 
+
+	config.LJFontStyle = {
+		element: 'span',
+		styles: { 'font-size' : '#(size)' },
+		overrides: [ { element : 'font', attributes : { 'size' : null } } ]
+	};
+
+	config.LJFontSize = {
+		tiny: '0.7em',
+		small: '0.9em',
+		normal: '1.0em',
+		large: '1.4em',
+		huge: '1.8em'
+	};
 	
 	config.protectedSource.push(/<lj-replace name="first_post"\s*\/?>/gi);
 };

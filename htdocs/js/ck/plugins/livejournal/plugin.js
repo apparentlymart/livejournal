@@ -584,30 +584,15 @@
 					hooked = false,
 					styles = {},
 					defaultFont = 'normal',  // This value probably should not be hardcoded
-					currentFont = defaultFont,
-					sizes = config.fontSize_sizes,
-					style = config.fontSize_style,
+					currentFont = config.LJFontDefault,
+					sizes = config.LJFontSize,
+					style = config.LJFontStyle,
 					selectedItem = 'b-fontsize-select-item-active',
 					i, part, vars, name, $items = jQuery();
 
-				sizes = sizes.split(';');
-
-				for (i = 0; i < sizes.length; i++) {
-					part = sizes[i];
-
-					if (part) {
-						part = part.split( '/' );
-
-						vars = {};
-						name = sizes[i] = part[0].toLowerCase();
-
-						vars['size'] = part[1] || name;
-
-						styles[name] = new CKEDITOR.style(style, vars);
-						styles[name]._.definition.name = name;
-					} else {
-						sizes.splice(i--, 1);
-					}
+				for (name in sizes) {
+					styles[name] = new CKEDITOR.style(style, { size: sizes[name] });
+					styles[name]._.definition.name = name;
 				}
 
 				function setValue(value) {
