@@ -172,12 +172,13 @@ sub skip_prop {
 
     my $props_to_skip = $opts{props_to_skip};
     my $theme = $opts{theme};
+    my $style = $opts{style};
 
     if (!$prop) {
         return 1 unless $prop_name eq "linklist_support" && $theme && $theme->linklist_support_tab;
     }
 
-    return 1 if $prop->{noui};
+    return 1 if $prop->{noui} && !S2::is_property_use ([$style->{'layer'}{'theme'}], $prop->{'name'});
 
     return 1 if $props_to_skip && $props_to_skip->{$prop_name};
 

@@ -544,7 +544,9 @@ sub get_propgroups {
             $prop = S2::get_property($lyr_core->{'s2lid'}, $prop);
             next unless ref $prop;
         }
-       
+
+        next if (S2::is_property_hidden([$style->{'layer'}{'theme'}], $prop->{'name'}));
+
         if (LJ::is_enabled("delayed_entries")) { 
             if ($prop->{'name'} eq 'sticky_subject' ||
                 $prop->{'name'} eq 'sticky_post' ) {
