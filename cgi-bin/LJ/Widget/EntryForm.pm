@@ -895,7 +895,7 @@ sub render_options_block {
 
             my $checkbox = LJ::html_check({
                 'type'     => 'check',
-                'class'    => 'paid_repost_on',
+                'class'    => 'b-updatepage-paidrepost-check',
                 'value'    => '1',
                 'name'     => 'paid_repost_on',
                 'id'       => 'paid_repost_on',
@@ -909,7 +909,14 @@ sub render_options_block {
                 LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $budget}) : 
                 '' ;
 
-            $out .= qq{$checkbox $checkbox_text $current_budget <br />};
+            my $help = LJ::help_icon_html('paid_repost');
+
+            $out .= qq{<span class="b-updatepage-paidrepost-agreement">};
+            $out .= qq{$checkbox};
+            $out .= qq{<label for="paid_repost_on" class="b-updatepage-paidrepost-label">$checkbox_text</label>};
+            $out .= qq{$help};
+            $out .= qq{<strong class="b-updatepage-paidrepost-current">$current_budget</strong>};
+            $out .= qq{</span>};
 
             my ($label, $opts);
             unless ($offer) {
@@ -920,10 +927,11 @@ sub render_options_block {
                 };
                 $label = LJ::Lang::ml('entryform.paid_repost.budget');
             } else {
-                $out .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
+                $label .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
                 
                 $opts = {
                     'name'  => 'add_repost_budget',
+                    'id'    => 'repost_budget',
                     'value' => $opts->{add_repost_budget},
                 };
 
@@ -938,7 +946,10 @@ sub render_options_block {
                 %$opts,
             });
 
-            $out .= "$label  $field";
+            $out .= qq{<span class="b-updatepage-paidrepost-fields">};
+            $out .= qq{<label for="repost_budget" class="b-updatepage-paidrepost-label">$label</label>};
+            $out .= qq{<span class="b-updatepage-paidrepost-budget">$field</span>};
+            $out .= qq{</span>};
 
             return $out;
         },         
