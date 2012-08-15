@@ -4136,6 +4136,8 @@ sub getevents {
 
         $evt->{'reply_count'} = $replycount;
 
+        $evt->{'can_comment'} = $u ? $entry->remote_can_comment($u) : $entry->everyone_can_comment; 
+
         if ( $itemid == $sticky_id && $req->{'selecttype'} eq "lastn") {
             unshift @$events, $evt,
         }

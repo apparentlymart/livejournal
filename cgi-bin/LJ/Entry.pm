@@ -1453,6 +1453,25 @@ sub friends_can_comment {
     return 0;
 }
 
+sub remote_can_comment {
+    my ($self, $remote) = @_;
+
+    return 0 unless $self->posting_comments_allowed;
+
+    my $journalu = $self->journal;
+
+    return 0 if LJ::is_banned($remote, $journalu);
+
+    return 0 if $journalu->{'opt_whocanreply'} eq 'none';
+    
+    if ($journalu->{'opt_whocanreply'} eq 'friends') {
+        return 0 unless $journalu->is_friend($remote);
+    }
+
+    return 1;
+}
+
+
 # mark/unmark entry in 'compressed' field to skip/include it in LJ::get_recent_items() call
 sub mark_suspended {
     my $self = shift;
