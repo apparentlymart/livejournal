@@ -5082,7 +5082,6 @@ BODY div .b-helplink:active {
 		background: -o-linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
 		background: -ms-linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
 		background: linear-gradient(top, #FAFCFE 0%,#E2E3E7 25%,#FAFAFA 100%);
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FAFCFE', endColorstr='#FAFAFA',GradientType=0 );
 		}
 	.b-dropover-open .b-dropover {
 		display: block;
