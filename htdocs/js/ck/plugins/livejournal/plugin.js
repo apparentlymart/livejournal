@@ -1410,6 +1410,10 @@
 			(function() {
 				var button = 'LJPollLink';
 
+				if (!LJ.pageVar('remoteUser', true)) {
+					return;
+				}
+
 				LiveJournal.register_hook('poll_response', function(ljData) {
 					var poll = new Poll(ljData), // Poll.js
 						content = "<div class='lj-poll-inner lj-rtebox-inner'>" + poll.outputHTML() + '</div>',
