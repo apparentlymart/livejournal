@@ -239,16 +239,30 @@ sub strip_html {
                     text  => [sub { $_[0]->{res} .= $_[1] }, 'self, text'], # concat plain text
                     # handle tags
                     start => [sub { 
-                                    my ($self, $tag, $attrs) = @_;
+                                    my ($self, $tag, $attrs, $origtext) = @_;
                                     if ($tag =~ /lj/i){
                                         $self->{res} .= $attrs->{user} || $attrs->{comm};  # <lj user="username" title=".."> -> username
                                     } else {
                                         $self->{res} .= ' ' if $opts->{use_space}; # for other tags add spaces if needed.
                                     }
+                                    if ($opts->{noparse_tags}) {
+                                        for (@{$opts->{noparse_tags}}) {
+                                            $self->{res} .= $origtext if $tag eq $_;
+                                        }
+                                    }
                                    },
-                                   'self, tagname, attr, text'
+                                  'self, tagname, attr, text'
                                ],
-                },
+                    end => [sub {
+                                 my ($self, $tag, $origtext) = @_;
+                                 if ($opts->{noparse_tags}) {
+                                     for (@{$opts->{noparse_tags}}) {
+                                        $self->{res} .= $origtext if $tag eq $_;
+                                     }
+                                 }
+                            }, 'self, tagname, text'
+                           ]   
+                 },
             );
     $p->parse($str);
     $p->eof; 

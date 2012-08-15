@@ -253,6 +253,8 @@ sub truncate_to_word_with_ellipsis {
     my $fill_empty = delete $opts{'fill_empty'} ? 1 : 0;
     my $punct_space = delete $opts{'punct_space'} ? 1 : 0;
     my $strip_html = delete $opts{'strip_html'} ? 1 : 0;
+    my $noparse_tags = delete $opts{'noparse_tags'} || [];
+
     my $force_ellipsis;
 
     cluck "unknown options: " . Dumper(\%opts)
@@ -260,10 +262,10 @@ sub truncate_to_word_with_ellipsis {
 
     cluck "not actually truncating"
         unless $bytes || $chars;
-        
+
     if($strip_html) {
         $force_ellipsis = ($str =~ /<(img|embed|object|iframe|lj\-embed)/i) ? 1 : 0;
-        $str = LJ::strip_html($str, { use_space => 1 });
+        $str = LJ::strip_html($str, { use_space => 1, noparse_tags => $noparse_tags });
     }
 
     my $remove_last_word = sub {
