@@ -27,6 +27,12 @@ sub render_body {
 
     return "" unless @bdays;
 
+    my $cache_key  = "friend_birthdays:" . $u->userid;
+    my $cache_data = LJ::MemCache::get($cache_key);
+    if ($cache_data) { 
+        return $cache_data;
+    }
+
     my $ret;
 
     $ret .= '<div class="right-mod"><div class="mod-tl"><div class="mod-tr"><div class="mod-br"><div class="mod-bl">';
@@ -71,8 +77,9 @@ sub render_body {
     $ret .= "</ul>"  if  $opts{friends_link} or $opts{paidtime_link};
 
     $ret .= '</div></div></div></div></div></div>';
-    
-        
+
+    LJ::MemCache::set($cache_key, $ret, 60*60*12);
+ 
     return $ret;
 }
 
