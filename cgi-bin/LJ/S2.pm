@@ -29,6 +29,8 @@ use LJ::Share;
 use LJ::TimeUtil;
 use LJ::Setting::Music;
 
+use LJ::Widget::Calendar;
+
 # TEMP HACK
 sub get_s2_reader {
     return LJ::get_dbh("s2slave", "slave", "master");
@@ -44,6 +46,8 @@ sub make_journal
 
     my ($entry, $page);
     my $con_opts = {};
+
+    LJ::Widget::Calendar->render();
 
     if ($view eq "res") {
         # the s1shortcomings virtual styleid doesn't have a styleid
