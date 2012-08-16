@@ -1329,14 +1329,7 @@ sub need_res {
         return;
     }
 
-    my $insert_head = !!$opts->{insert_head};
-
-    if ($opts->{resource_package}) {
-        my $name = $opts->{resource_package};
-
-        return if $LJ::NAMED_NEED_RES{$name};
-        $LJ::NAMED_NEED_RES{$name} = 1;
-    }
+    my $insert_head = $opts->{insert_head} ? 1 : 0;
 
     my @reskeys = ();
     foreach my $key (@keys) {
@@ -1360,13 +1353,11 @@ sub need_res {
         $LJ::NEEDED_RES{$reskey} = $resopts;
     }
 
-    if (@reskeys) {
-        if ($insert_head) {
-            unshift @LJ::NEEDED_RES, @reskeys;
-        } else {
-            push @LJ::NEEDED_RES, @reskeys;
-        }
-    }   
+    if ($insert_head) {
+        unshift @LJ::NEEDED_RES, @reskeys;
+    } else {
+        push @LJ::NEEDED_RES, @reskeys;
+    }
 }
 
 sub include_raw  {
