@@ -5792,18 +5792,22 @@ sub getusersrating {
             title            => $row->{name_raw},
         }
     }
-   
-    if ($req->{getselfpromo}) {
-        return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
-      
-        my $sp = $res->{selfpromo}->get_template_params();
+           
+    if (my $sp = $res->{selfpromo} && $res->{selfpromo}->get_template_params ) {
+
+        $selfpromo = {
+            # selfpromo data
+            remaning_time    => $sp->{timeleft},
+            price            => $sp->{buyout},
+        };
+
+        $sp = $sp->{object}->[0];
+
         $sp->{userid} = delete $sp->{journal_id} if  $sp->{journal_id};
         LJ::get_aggregated_user($sp, $user_opts);
 
         $selfpromo = {
-            # selfpromo data
-            remaning_time    => $sp->{timeleft}, 
-            price            => $sp->{buyout},
+            %$selfpromo,
             # user data
             username         => $sp->{username},
             identity_display => $sp->{display_name},
@@ -5812,7 +5816,7 @@ sub getusersrating {
             identity_value   => $sp->{identity_value},
             userpic_url      => $sp->{userpic} ? $sp->{userpic}->url : '',
             journal_url      => $sp->{journal_base},
-            userhead_url     => $sp->{userhead_url},
+            userhead_url     => $sp->{headicon},
             title            => $sp->{name_raw},
         };
     }
