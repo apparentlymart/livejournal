@@ -259,7 +259,10 @@ EMBED
     my $preview = $POST{'action:preview'};
 
     if ( exists $POST{'ljpost:off'} ) {
-        LJ::Request->delete_cookie("ljpost");
+        LJ::Request->set_cookie(
+            ljpost  => 0,
+            expires => time + 86400 * 7,
+        );
     }
 
     # are we spellchecking before we post?
