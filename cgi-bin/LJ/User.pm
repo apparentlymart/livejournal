@@ -2040,7 +2040,9 @@ sub clear_prop {
 
 sub journal_base {
     my $u = shift;
-    return LJ::journal_base($u);
+    return $u->{'journal_base'} if $u->{'journal_base'};
+    $u->{'journal_base'} = LJ::journal_base($u);
+    return $u->{'journal_base'};
 }
 
 sub allpics_base {
