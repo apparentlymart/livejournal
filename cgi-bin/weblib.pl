@@ -1355,16 +1355,18 @@ sub need_res {
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
 
         unless (exists $LJ::NEEDED_RES{$reskey}) {
-            push @reskeys => $reskey;
+            push @reskeys, $reskey;
         }
         $LJ::NEEDED_RES{$reskey} = $resopts;
     }
 
-    if ($insert_head) {
-        unshift @LJ::NEEDED_RES, @reskeys;
-    } else {
-        push @LJ::NEEDED_RES, @reskeys;
-    }
+    if (@reskeys) {
+        if ($insert_head) {
+            unshift @LJ::NEEDED_RES, @reskeys;
+        } else {
+            push @LJ::NEEDED_RES, @reskeys;
+        }
+    }   
 }
 
 sub include_raw  {
