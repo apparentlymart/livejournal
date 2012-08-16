@@ -1839,6 +1839,17 @@ JS
 JS
     }
 
+    if (LJ::is_enabled('paid_repost')) {
+        LJ::need_res('js/jquery/post/jquery.lj.paidRepost.js');
+        $out .= <<JS
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery('#entryform-paid_repost-wrapper').paidRepost();
+    });
+</script>
+JS
+    }
+
     return $out;
 }
 
