@@ -5677,6 +5677,7 @@ sub geteventsrating {
         LJ::get_aggregated_entry($row, $entry_opts);
 
         $row->{userid} = delete $row->{journalid} if  $row->{journalid};
+
         LJ::get_aggregated_user($row, $user_opts);
 
         push @events, {
@@ -5695,27 +5696,28 @@ sub geteventsrating {
         } 
     }
 
-    if ($req->{getselfpromo}) {
-        return fail($err, 500) unless $res->{selfpromo} && ref $res->{selfpromo};
-        my $sp = $res->{selfpromo}->get_template_params();
-        $sp->{ditemid}   = delete $sp->{post_id} if $sp->{post_id};
-        $sp->{journalid} = delete $sp->{journal_id} if $sp->{journal_id};
-        LJ::get_aggregated_entry($sp, $entry_opts);
+    if (my $sp = $res->{selfpromo} && $res->{selfpromo}->get_template_params ) {
 
+        my $obj = $sp->{object}->[0];
+        
+        $obj->{ditemid}   = delete $obj->{post_id} if $obj->{post_id};
+        $obj->{journalid} = delete $obj->{journal_id} if $obj->{journal_id};
+        LJ::get_aggregated_entry($obj, $entry_opts);
+        
         $selfpromo = {
             # selfpromo data
-            remaning_time => $sp->{timeleft}, 
-            price         => $sp->{buyout},
+            remaning_time => $obj->{timeleft},
+            price         => $obj->{buyout},
             # entry data
-            ditemid       => $sp->{ditemid},
-            subject       => $sp->{subject_raw},
-            event         => $sp->{event_raw},
+            ditemid       => $obj->{ditemid},
+            subject       => $obj->{subject_raw},
+            event         => $obj->{event_raw},
             # user data
-            posterid      => $sp->{journal_id},
-            poster        => $sp->{username},
+            posterid      => $obj->{journalid},
+            poster        => $obj->{username},
         };
     }
-    
+
     return {
         status => 'OK',
         skip   => $req->{skip} || 0,
