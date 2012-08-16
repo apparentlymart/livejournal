@@ -1323,14 +1323,19 @@ sub need_res {
 
     if ($opts->{clean_list}) {
         %LJ::NEEDED_RES = ();
+        %LJ::NAMED_NEED_RES = ();
         @LJ::NEEDED_RES = ();
         @LJ::INCLUDE_TEMPLATE = ();
         return;
     }
 
-    my $insert_head = 0;
-    if ($opts->{insert_head}){
-        $insert_head = 1;
+    my $insert_head = !!$opts->{insert_head};
+
+    if ($opts->{resource_package}) {
+        my $name = $opts->{resource_package};
+
+        return if $LJ::NAMED_NEED_RES{$name};
+        $LJ::NAMED_NEED_RES{$name} = 1;
     }
 
     my @reskeys = ();
@@ -1355,12 +1360,11 @@ sub need_res {
         $LJ::NEEDED_RES{$reskey} = $resopts;
     }
 
-    if ($insert_head){
+    if ($insert_head) {
         unshift @LJ::NEEDED_RES, @reskeys;
     } else {
         push @LJ::NEEDED_RES, @reskeys;
     }
-
 }
 
 sub include_raw  {
@@ -1371,6 +1375,101 @@ sub include_raw  {
         unless $type =~ m!^(?:js|css|js_link|css_link|html)$!;
 
     push @LJ::INCLUDE_RAW => [$type, $code];
+}
+
+sub res_template_includes {
+    my $ret = shift;
+    my %loaded;
+    foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
+        if (LJ::is_enabled('templates_from_stat')) {
+            # Create template id
+            my $key = $template;
+            $key =~ s{(?<!\\)/} {-}g;
+            $key =~ s{\.(?:jq)?tmpl$} {}g;
+
+            my $stat_prefix = 'l-stat';
+            my $debug_data  = '';
+
+            if ($LJ::IS_DEV_SERVER || $LJ::CURRENT_VERSION eq 'trunk') {
+                $stat_prefix =  'stat';
+
+                $debug_data = sprintf q{
+                    data-template="%s"
+                    data-translation="%s"},
+                    $template, $LJ::TEMPLATE_TRANSLATION;
+            }
+
+            my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template?v=" . $LJ::CURRENT_VERSION;
+            $ret .= sprintf q{<script type="text/plain" id="%s" src="%s" %s>}, 
+                        $key, $address, $debug_data;
+            $ret .= '</script>';
+
+            $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, 
+                    $key, $key, $LJ::TEMPLATE_TRANSLATION;
+        } else {
+            my $path = [split m{(?<!\\)/}, $template];
+            my $file = pop @$path;
+            my ($type, $filter);
+
+            shift @$path if $path->[0] eq 'templates';
+
+            $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
+            my $fpath = join '/', $path, $file;
+            
+            -f $fpath             or warn 'Missing template '. $fpath and next;
+            $loaded{lc $fpath}++ and next;
+
+            for ($file) {
+                m{\.jqtmpl$}i and do {
+                    $type   = 'JQuery.tmpl';
+                    $filter = 'jqtmpl';
+                };
+
+                m{\.tmpl$}i   and do {
+                     $type   = 'HTML::Template';
+                    $filter = $LJ::TEMPLATE_FILTER;
+                };
+            }
+
+            $type or next;
+
+            my $data = LJ::Response::CachedTemplate->new(
+                file               => $file,
+                path               => $path,
+                type               => $type,
+                translate          => $LJ::TEMPLATE_TRANSLATION,
+                filter             => $filter,
+            );
+
+            # Create template id
+            my $key = $template;
+            $key =~ s{(?<!\\)/} {-}g;
+            $key =~ s{\.(?:jq)?tmpl$} {}g;
+
+            # TODO: </script> in template can ruin your day
+            if ( $LJ::IS_DEV_SERVER ) {
+                $ret .= sprintf q{<script type="text/plain"
+                    id="%s"
+                    data-path="%s"
+                    data-file="%s"
+                    data-type="%s"
+                    data-filter="%s"
+                    data-translation="%s">},
+                $key, $path, $file, $type, $filter, $LJ::TEMPLATE_TRANSLATION;
+                $ret .= $data->raw_output();
+                $ret .= '</script>';
+            } else {
+                $ret .= sprintf q{<script type="text/plain" id="%s">}, $key;
+                $ret .= $data->raw_output();
+                $ret .= '</script>';
+            }
+
+            # Let js know about template 
+            $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
+        }
+    }
+
+    return $ret;
 }
 
 sub res_includes {
@@ -1406,100 +1505,10 @@ sub res_includes {
         $jsprefix    = $LJ::JSPREFIX;
         $wstatprefix = $LJ::WSTATPREFIX;
     }
-
+    
     # add jQuery.tmpl templates
     if ( $opts->{'only_tmpl'} ) {
-        my %loaded;
-        foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
-            if (LJ::is_enabled('templates_from_stat')) {
-                # Create template id
-                my $key = $template;
-                $key =~ s{(?<!\\)/} {-}g;
-                $key =~ s{\.(?:jq)?tmpl$} {}g;
-
-                my $stat_prefix = 'l-stat';
-                my $debug_data  = '';
-
-                if ($LJ::IS_DEV_SERVER || $LJ::CURRENT_VERSION eq 'trunk') {
-                    $stat_prefix =  'stat';
-
-                    $debug_data = sprintf q{
-                        data-template="%s"
-                        data-translation="%s"},
-                        $template, $LJ::TEMPLATE_TRANSLATION;
-                }
-
-                my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template?v=" . $LJ::CURRENT_VERSION;
-                $ret .= sprintf q{<script type="text/plain" id="%s" src="%s" %s>}, 
-                        $key, $address, $debug_data;
-                $ret .= '</script>';
-
-                $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, 
-                    $key, $key, $LJ::TEMPLATE_TRANSLATION;
-            } else {
-                my $path = [split m{(?<!\\)/}, $template];
-                my $file = pop @$path;
-                my ($type, $filter);
-
-                shift @$path if $path->[0] eq 'templates';
-
-                $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
-                my $fpath = join '/', $path, $file;
-            
-                -f $fpath             or warn 'Missing template '. $fpath and next;
-                $loaded{lc $fpath}++ and next;
-
-                for ($file) {
-                    m{\.jqtmpl$}i and do {
-                        $type   = 'JQuery.tmpl';
-                        $filter = 'jqtmpl';
-                    };
-
-                    m{\.tmpl$}i   and do {
-                        $type   = 'HTML::Template';
-                        $filter = $LJ::TEMPLATE_FILTER;
-                    };
-                }
-
-                $type or next;
-
-                my $data = LJ::Response::CachedTemplate->new(
-                    file               => $file,
-                    path               => $path,
-                    type               => $type,
-                    translate          => $LJ::TEMPLATE_TRANSLATION,
-                    filter             => $filter,
-                );
-
-                # Create template id
-                my $key = $template;
-                $key =~ s{(?<!\\)/} {-}g;
-                $key =~ s{\.(?:jq)?tmpl$} {}g;
-
-                # TODO: </script> in template can ruin your day
-                if ( $LJ::IS_DEV_SERVER ) {
-                    $ret .= sprintf q{<script type="text/plain"
-                        id="%s"
-                        data-path="%s"
-                        data-file="%s"
-                        data-type="%s"
-                        data-filter="%s"
-                        data-translation="%s">},
-                    $key, $path, $file, $type, $filter, $LJ::TEMPLATE_TRANSLATION;
-                    $ret .= $data->raw_output();
-                    $ret .= '</script>';
-                } else {
-                    $ret .= sprintf q{<script type="text/plain" id="%s">}, $key;
-                    $ret .= $data->raw_output();
-                    $ret .= '</script>';
-                }
-
-                # Let js know about template 
-                $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
-            }
-        }
-
-        return $ret;
+        return res_template_includes;  
     }
 
     # include standard JS info
@@ -1765,20 +1774,23 @@ sub res_includes {
     ## To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript.
     ##  (C) http://code.google.com/speed/page-speed/
     ##
-    $ret .= $ret_css unless $opts->{only_js};
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>")  unless $opts->{only_js};
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>") unless $opts->{only_js};
+    unless ($opts->{only_js}) {
+        $ret .= $ret_css;
+        $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
+        $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
+    }
     
-    unless ($opts->{only_css}){
+    unless ($opts->{only_css}) {
         $ret .= $ret_js;
         foreach my $library (@LJ::JS_SOURCES_ORDER){ ## add libraries in strict order
             next unless $libs{$library};
             $tags->("js$library", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
         }
-        $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>")  unless $opts->{only_css};
-        $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>")    unless $opts->{only_css};
-        $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>")  unless $opts->{only_css};
-        $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>") unless $opts->{only_css};
+
+        $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+        $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+        $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
+        $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
     }
 
     return $ret if $only_needed;
