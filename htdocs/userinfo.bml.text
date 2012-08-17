@@ -157,6 +157,8 @@
 .details.nudge|staleness=1
 .details.nudge=Nudge
 
+.details.pics=[[num_comma]] <a href="[[link]]">[[?num_raw|photo|photos|photos]]</a>
+
 .details.search|staleness=1
 .details.search=Search
 

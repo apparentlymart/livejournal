@@ -736,29 +736,6 @@
     my $memcount = LJ::Memories::count($userid) || 0;
     my $userpiccount = LJ::userpic_count($u);
 
-    ## fotobilder gallery count
-    my $ct_str;
-    my $ct;
-    if ($u && (($u->get_cap('fb_account') && $u->get_cap('fb_can_upload')) || ($u->can_use_ljphoto)) && ($u->prop('fb_num_pubpics') + $u->prop('fotki_all_photos_count') + 0 > 0)) {
-        # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
-        # estimate in a way that makes it clear it's not an exact number. rules are:
-        #
-        #    * < 10    == "under 10"
-        #    * 10..999 == "at least 150" (rounded down to nearest 10)
-        #    * 1000+   == "at least 1500" (rounded down to nearest 100)
-        #
-        $ct = $u->{fb_num_pubpics} + $u->prop('fotki_all_photos_count');
-        if ($ct < 10) {
-            $ct_str = "<10";
-        } else {
-            my $order = $ct < 100 ? 10 : 100;
-            my $base = POSIX::floor($ct / $order);
-            $ct_str = LJ::commafy($base * $order) . "+";
-        }
-    } else {
-        $ct_str = "0";
-    }
-
     push @view_links_l, '<li>' . BML::ml('.details.entries3', { num_raw => $entry_count, num_comma => LJ::commafy($entry_count), aopts => "href='" . $u->journal_base . "'" }) . '</li>'
         unless $u->is_identity;
     push @view_links_l, '<li>'. BML::ml('.details.comments.received2', { num_raw => $num_comments_received, num_comma => LJ::commafy($num_comments_received) }). '</li>' unless $u->is_identity;
@@ -770,15 +747,18 @@
     push @view_links_l, '<li>' . BML::ml('.details.supportpoints2', { aopts => "href='$LJ::SITEROOT/support/'", num => LJ::commafy($supportpoints), num_raw => $supportpoints }) . '</li>' if $supportpoints;
     push @view_links_r, '<li>' . BML::ml('.details.memories2', { num_raw => $memcount, num_comma => LJ::commafy($memcount), aopts => "href='$LJ::SITEROOT/tools/memories.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
-    my $fh_url = "";
-    if ($u && $u->get_cap('fb_account') && $u->get_cap('fb_can_upload')) {
-        $fh_url = "href='$LJ::FB_SITEROOT/$user/'";
+
+    if ( my $photos_count = LJ::Pics->get_photos_count($u) ) {
+        my $photos_count_display = LJ::commafy($photos_count);
+        push @view_links_r, '<li>' .
+            LJ::Lang::ml( '/userinfo.bml.details.pics', {
+                'num_raw'   => $photos_count,
+                'num_comma' => $photos_count_display,
+                'link'      => $u->journal_base . '/pics/catalog',
+            } ) .
+            '</li>';
     }
-    if ($u && $u->can_use_ljphoto) {
-        $fh_url = "href='".$u->journal_base."/pics/catalog/'";
-    }
-    push @view_links_r, '<li>' . BML::ml('.details.fotobilder', { num_raw => $ct, num_comma => $ct_str, aopts => $fh_url }) . '</li>'
-        if $ct_str;
+
     push @view_links_r, '<li>' . BML::ml('.details.userpics', { num_raw => $userpiccount, num_comma => LJ::commafy($userpiccount), aopts => "href='$LJ::SITEROOT/allpics.bml?user=$user'" }) . '</li>'
         unless $u->is_syndicated;
 
