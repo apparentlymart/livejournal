@@ -147,6 +147,29 @@ sub get_memcache_by_uniq {
     return LJ::MemCache::get("uniq2uids:$uniq");
 }
 
+# straight db request instead of loading is used, because we need pure results
+# and do not need any uniqs to be cleaned
+sub get_shared_uniqs {
+    my ($uid, $threshold) = @_;
+    $uid ||= 0;
+    $threshold ||= 1;
+
+    my $dbr = LJ::get_db_reader();
+    my $rows = $dbr->selectall_arrayref(qq{
+            SELECT   m2.userid AS uid, 
+                     count(m2.uniq) AS qty
+            FROM     uniqmap m1 INNER JOIN uniqmap m2 
+            USING    (uniq)
+            WHERE    m1.userid = ? 
+            GROUP BY m2.userid
+            HAVING   qty >= ?
+            ORDER BY qty DESC
+            LIMIT    2000
+       }, { Slice => {} },$uid, $threshold);
+
+    return @$rows;
+}
+
 sub save_mapping {
     my $class = shift;
     return if $class->is_disabled;
