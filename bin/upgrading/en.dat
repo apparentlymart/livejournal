@@ -1,6 +1,4 @@
 ;; -*- coding: utf-8 -*-
-.error.user_not_exist=User  does not exist
-
 Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
