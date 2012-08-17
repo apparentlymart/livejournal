@@ -2584,7 +2584,9 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ($uowner->is_community) {
+    if ( $uowner->is_community && 
+         $uowner->user eq $LJ::WIDGET_FEATURED_COMMUNITY_NAME ) {
+
         #reset widget featured_communities
         my $featured_communities_key  = 'featured_communities:items:' .  $uowner->userid;
         LJ::MemCache::delete($featured_communities_key);
