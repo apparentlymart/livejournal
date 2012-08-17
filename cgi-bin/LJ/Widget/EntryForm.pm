@@ -927,8 +927,6 @@ sub render_options_block {
                 };
                 $label = LJ::Lang::ml('entryform.paid_repost.budget');
             } else {
-                $label .= LJ::html_hidden({ 'name' => 'revoke_repost_offer' });
-                
                 $opts = {
                     'name'  => 'add_repost_budget',
                     'id'    => 'repost_budget',

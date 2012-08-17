@@ -3300,7 +3300,7 @@ sub editevent {
                 jitemid     => $itemid,
                 budget      => $req->{repost_budget},
                 add_budget  => $req->{add_repost_budget},
-                revoke      => $req->{revoke_repost_offer},
+                revoke      => !$req->{paid_repost_on},
             },
             \$error,
         );
