@@ -47,7 +47,8 @@ sub make_journal
     my ($entry, $page);
     my $con_opts = {};
 
-    LJ::Widget::Calendar->render();
+    LJ::Widget::Calendar->render()
+        unless LJ::run_hook('show_control_strip', { user => $u->{user} });
 
     if ($view eq "res") {
         # the s1shortcomings virtual styleid doesn't have a styleid
