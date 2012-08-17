@@ -2584,6 +2584,12 @@ sub postevent {
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
+    if ($uowner->is_community) {
+        #reset widget featured_communities
+        my $featured_communities_key  = 'featured_communities:items:' .  $uowner->userid;
+        LJ::MemCache::delete($featured_communities_key);
+    }
+
 
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
