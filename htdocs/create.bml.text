@@ -17,7 +17,7 @@
 
 .btn.create=Create Journal
 
-.btn.proceed=Proceed...
+.btn.proceed=Proceed
 
 .captcha.answer|staleness=1
 .captcha.answer=Answer:
@@ -136,7 +136,7 @@ Thanks for supporting [[sitename]]!
 
 .password.text=Select a password.
 
-.proceed.btn.proceed=Proceed...
+.proceed.btn.proceed=Proceed
 
 .proceed.warning=Only press <b>Proceed</b> <i>once</i>!
 

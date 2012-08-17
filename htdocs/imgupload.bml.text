@@ -3,10 +3,12 @@
 
 .login.message2=Login is required to upload an image from file or insert image from Scrapbook.
 
+.msg.newalbums=Try new Scrapbook.
+
+.msg.newalbums.organise=Organize your photos and images with LiveJournal Scrapbook.
+
 .msg.unavailable|staleness=1
 .msg.unavailable=This service is temporarily unavailable.
-.msg.newalbums=Try new PhotoAlbums.
-.msg.newalbums.organise=Organise your photos and images with LiveJournal PhotoAlbums.
 
 .size=When uploading from file or from a gallery, the image will display as 320 x 240 (medium) and will link to the image in the gallery.
 

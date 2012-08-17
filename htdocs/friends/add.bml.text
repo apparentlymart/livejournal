@@ -85,7 +85,7 @@
 
 .error1.title=Add Friend
 
-.error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
+.error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page or click "Add Friend" in his profile.
 
 .error3.text1=[[user]] is on your Friends list. You can modify the custom friends groups you've chosen for him/her.
 

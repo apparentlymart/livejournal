@@ -4,17 +4,18 @@
 .back_to_recent_entries|staleness=1
 .back_to_recent_entries=Or <a [[aopts]]>back to recent entries</a>
 
-.btn.proceed=Proceed...
+.btn.proceed=Proceed
 
-.btn.search|staleness=1
-.btn.search=Search...
+.btn.search=Search
 
 .certainday=Certain Day:
 
-.choose_date|staleness=1
-.choose_date=Choose date
+.choose_date=(choose date)
 
 .desc=Please use the form below to find the entry you would like to edit.
+
+.editprivacy|staleness=1
+.editprivacy=You can edit <a [[aopts]]>Your Privacy List</a>
 
 .event.no_subject.title|staleness=1
 .event.no_subject.title=No Subject
@@ -74,4 +75,3 @@
 
 .viewwhat=View What Entries:
 
-.editprivacy=You can edit <a [[aopts]]>Your Privacy List</a>

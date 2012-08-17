@@ -20,8 +20,7 @@
 .error.too.long|staleness=1
 .error.too.long=You've reached the limit of the aliases.
 
-.error.user_not_exist|staleness=1
-.error.user_not_exist=User "[[username]]" is not exist.
+.error.user_not_exist=User "[[username]]" does not exist
 
 .error.yourself|staleness=1
 .error.yourself=You can not set an alias to yourself.

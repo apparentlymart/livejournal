@@ -1,5 +1,5 @@
 ;; -*- coding: utf-8 -*-
-.btn.proceed=Proceed...
+.btn.proceed=Proceed
 
 .description=This feature lets you download your entire journal to a custom format for backup purposes.
 

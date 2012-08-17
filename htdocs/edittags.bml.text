@@ -19,7 +19,7 @@
 
 .invalid.notauthorized=You do not have access to view that entry.
 
-.permissions.add.yes=You may add tags from the list above.
+.permissions.add.yes=Add tags from the list above.
 
 .permissions.control.yes=You may remove tags or create new ones.
 

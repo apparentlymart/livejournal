@@ -7,7 +7,7 @@
 
 .btn.update=Update Journal
 
-.currmusic=Current Music:
+.currmusic=Music:
 
 .date=Date:
 
@@ -19,6 +19,7 @@
 
 .draft.confirm=Restore from saved draft?
 
+.draft.confirm.add_photos|staleness=1
 .draft.confirm.add_photos=Restore from saved draft?
 
 .draft.restored=Restored last saved draft
@@ -60,9 +61,9 @@
 
 .loggingin=Logging in to server...
 
-.msg.newalbums=Try new PhotoAlbums.
+.msg.newalbums=Try new Scrapbook.
 
-.msg.newalbums.organise=Organise your photos and images with LiveJournal PhotoAlbums.
+.msg.newalbums.organise=Organize your photos and images with LiveJournal Scrapbook.
 
 .noneother=None, or other:
 
@@ -139,6 +140,7 @@
 
 .update.success2=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
 
+.update.success3|staleness=1
 .update.success3=Update successful. You can view your scheduled entries <a [[aopts]]>here</a>.
 
 .updating=&nbsp;

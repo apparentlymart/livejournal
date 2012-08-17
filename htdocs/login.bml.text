@@ -20,8 +20,7 @@
 .connect.twitter|staleness=1
 .connect.twitter=Login with Twitter
 
-.connect.vkontakte|staleness=1
-.connect.vkontakte=Login with Vkontakte
+.connect.vkontakte=Login with VKontakte
 
 .createaccount.button|staleness=1
 .createaccount.button=Create an Account

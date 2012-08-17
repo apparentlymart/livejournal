@@ -8,18 +8,18 @@
 .notags|staleness=1
 .notags=No tags are defined in this category
 
+.rename.everywhere|staleness=1
+.rename.everywhere=Rename everywhere
+
+.rename.link|staleness=1
+.rename.link=Rename
+
+.rename.merge|staleness=1
+.rename.merge=Merge tags
+
 .requests|staleness=1
 .requests=requests
 
 .title|staleness=1
 .title=Manage Support Tags
-
-.rename.link|staleness=1
-.rename.link=Rename
-
-.rename.everywhere|staleness=1
-.rename.everywhere=Rename everywhere
-
-.rename.merge|staleness=1
-.rename.merge=Merge tags
 

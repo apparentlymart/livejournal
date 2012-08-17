@@ -20,6 +20,9 @@
 .ban_everywhere.title|staleness=1
 .ban_everywhere.title=Ban user everywhere
 
+.ban_in_my|staleness=1
+.ban_in_my=in my journal
+
 .buy_same_userhead|staleness=1
 .buy_same_userhead=Buy the same user head
 
@@ -47,11 +50,20 @@
 .lists_as_friend|staleness=1
 .lists_as_friend=lists you as a friend
 
+.ljtalk|staleness=1
+.ljtalk=LJ Talk
+
 .loading|staleness=1
 .loading=Loading...
 
 .mutual_friend|staleness=1
 .mutual_friend=is your mutual friend
+
+.offline|staleness=1
+.offline=Offline
+
+.online|staleness=1
+.online=Online
 
 .profile|staleness=1
 .profile=Profile
@@ -68,8 +80,7 @@
 .send_message|staleness=1
 .send_message=Send message
 
-.social_capital_less_that|staleness=1
-.social_capital_less_that=less that 10
+.social_capital_less_that=less than 10
 
 .stop_community|staleness=1
 .stop_community=Stop watching
@@ -113,7 +124,3 @@
 .you_watching|staleness=1
 .you_watching=You are watching [[username]]
 
-.ban_in_my=in my journal
-.ljtalk=LJ Talk
-.online=Online
-.offline=Offline

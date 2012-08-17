@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 .btn.create=Create Community
 
-.btn.proceed=Proceed...
+.btn.proceed=Proceed
 
 .create.text=Creating a new community is easy, just follow the instructions below.
 

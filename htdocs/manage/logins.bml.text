@@ -7,6 +7,7 @@
 
 .loggedin.table.bound=Bound to IP
 
+.loggedin.table.country|staleness=1
 .loggedin.table.country=Country
 
 .loggedin.table.create=Creation Time
@@ -19,6 +20,7 @@
 
 .loggedin.table.ip=IP Address
 
+.loggedin.table.isp|staleness=1
 .loggedin.table.isp=ISP
 
 .loggedin.table.logout=Log Out

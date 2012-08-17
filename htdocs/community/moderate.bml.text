@@ -68,6 +68,7 @@
 
 .posted.proterror=The entry has not been posted due to this protocol error: [[err]]
 
+.posted.tags.skipped|staleness=1
 .posted.tags.skipped<<
 However the following tags were not added: [[tags]]<br />
 This either happened because:<br />

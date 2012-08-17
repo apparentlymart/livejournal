@@ -2,7 +2,7 @@
 .btn.del_photo|staleness=1
 .btn.del_photo=Delete photo
 
-.btn.proceed=Proceed
+.btn.proceed=Upload
 
 .btn.save=Save Settings
 
@@ -134,7 +134,7 @@
 
 .uploadheader=Upload a New Picture
 
-.uploadheader.fb=Upload a New Picture From ScrapBook
+.uploadheader.fb=Upload a New Picture From Scrapbook
 
 .uploadheader.photo|staleness=1
 .uploadheader.photo=Upload a New Photo
