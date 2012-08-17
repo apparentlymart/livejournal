@@ -6392,6 +6392,16 @@ talk.post.music=Music
 
 talk.post.nosubject=no subject
 
+talk.post.paidrepost=Paid repost
+
+talk.post.paidrepost.budget=Repost budget:
+
+talk.post.paidrepost.budget.add=Add to budget
+
+talk.post.paidrepost.current=Current budget is [[current]] tokens
+
+talk.post.paidrepost.pay=Pay for reposts of this entry
+
 talk.post.repost.facebook=Facebook
 
 talk.post.repost.settings=setup
