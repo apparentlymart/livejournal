@@ -1552,17 +1552,17 @@ sub can_delete_journal_item {
 }
 
 sub convert_to_repost {
-    my ($class, $mark) = @_;
-    $class->set_prop( 'repost_link' =>  $mark);
+    my ($self, $mark) = @_;
+    $self->set_prop( 'repost_link' =>  $mark);
 } 
 
 sub original_post {
-    my ($class) = @_;
+    my ($self) = @_;
     
-    my $loaded_prop = $class->{'original_post_obj'};
+    my $loaded_prop = $self->{'original_post_obj'};
     
     unless ($loaded_prop) {
-        my $link = $class->prop('repost_link');
+        my $link = $self->prop('repost_link');
         if ($link) {
             my ($journalid, $jitemid) = split(/:/, $link);
             my $user = int($journalid) ? LJ::want_user(int($journalid)) : undef;
@@ -1570,7 +1570,7 @@ sub original_post {
             {     
                 my $reposted_entry = LJ::Entry->new(int($journalid), jitemid => int($jitemid));
                 $loaded_prop =  $reposted_entry if $reposted_entry->valid;
-                $class->{'original_post_obj'} = $loaded_prop;
+                $self->{'original_post_obj'} = $loaded_prop;
             }
         }
     }
