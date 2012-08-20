@@ -9,6 +9,17 @@ sub need_res {
     return qw( stc/widgets/recentcomments.css );
 }
 
+my @_ml_strings = (
+    'widget.recentcomments.title',
+    'widget.recentcomments.viewall',
+    'widget.recentcomments.anon',
+    'widget.recentcomments.nocomments',
+    'widget.recentcomments.nosubject',
+    'widget.recentcomments.commentheading',
+    'widget.recentcomments.link',
+    'widget.recentcomments.reply',
+);
+
 # args
 #   user: optional $u whose recent received comments we should get (remote is default)
 #   limit: number of recent comments to show, or 3
@@ -19,6 +30,9 @@ sub render_body {
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
     return "" unless $u;
     return "" if $u->is_identity;
+
+    my $lncode = LJ::Lang::get_effective_lang();
+    LJ::Lang::get_text_multi($lncode, undef, \@_ml_strings);
 
     my $limit = defined $opts{limit} ? $opts{limit} : 3;
 
