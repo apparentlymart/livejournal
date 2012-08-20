@@ -3473,8 +3473,7 @@ sub editevent {
             $req->{props}->{repost_offer} = $offer_id if $offer_id;
             
         } elsif($repost_offer_action eq 'edit') {
-            
-            $repost_offer->add_budget(\$error, int $req->{add_repost_budget}) or 
+            $repost_offer->add_budget(\$error, $repost_offer->{add_budget}) or 
                 fail(\$warning,160,$error);
        
         } elsif($repost_offer_action eq 'revoke') {
