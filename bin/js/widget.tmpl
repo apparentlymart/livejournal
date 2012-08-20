@@ -2,10 +2,12 @@
  * @name $.lj.<TMPL_VAR name>
  * @requires $.ui.core, $.ui.widget, $.lj.basicWidget<TMPL_IF extends>, $.lj.<TMPL_VAR extends></TMPL_IF>
  * @class TODO: Write description here
+ * @fileoverview <TMPL_VAR name>
+ * @extends <TMPL_IF extends>$.lj.<TMPL_VAR extends><TMPL_ELSE>$.lj.basicWidget</TMPL_IF>
 <TMPL_IF author> * @author <TMPL_VAR author>
 </TMPL_IF> */
 
-(function($, window) {
+(function ($, window) {
 	'use strict';
 
 	/** @lends $.lj.<TMPL_VAR name>.prototype */
