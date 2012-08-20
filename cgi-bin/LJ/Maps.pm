@@ -1,6 +1,7 @@
 package LJ::Maps;
 use strict;
 use URI;
+use LWP;
 
 ##
 ## input: attribute hash for <lj-map /> tag (url, width, height)
@@ -23,7 +24,23 @@ sub expand_ljmap_tag {
                 $iframe_url = $uri->clone;
                 $url_params{'output'} = 'embed';
                 $iframe_url->query_form(%url_params);
-            } elsif ($host eq 'maps.yandex.ru') {
+            } elsif ($host eq 'goo.gl') {
+                my $browser = LWP::UserAgent->new;
+                my $response = $browser->get( $url );
+                if ($response->is_success) {
+                    $iframe_url = URI->new($response->{'_request'}->{'_uri'});
+                    $url_params{'output'} = 'embed';
+                    $iframe_url->query_form(%url_params);
+                }
+            } elsif ($host eq 'www.openstreetmap.org') {
+                if ($url_params{'lon'} && $url_params{'lat'} && $url_params{'zoom'}) {
+                    $width  += 25;
+                    $height += 25;
+                    $iframe_url = "http://$LJ::EMBED_MODULE_DOMAIN_CDN?mode=lj-map&url=" . LJ::eurl($url);
+                } elsif($url_params{'bbox'}) {
+                    $iframe_url = $url;
+                }
+           } elsif ($host eq 'maps.yandex.ru') {
                 $iframe_url = 
                     "http://$LJ::EMBED_MODULE_DOMAIN_CDN?mode=lj-map&url=" . LJ::eurl($url) 
                     . "&width=" . LJ::eurl($width) . "&height=" . LJ::eurl($height);
@@ -40,7 +57,7 @@ sub expand_ljmap_tag {
 
 ##
 ## input: hash of options (url, width, height)
-## output: html code for <iframe> with Yandex Map
+## output: html code for <iframe> with Yandex Map or OpenStreetMap
 ## method is called from htdocs/tools/embedcontent.bml
 ## 
 sub get_iframe_source {
@@ -55,7 +72,6 @@ sub get_iframe_source {
             my @domains = split /\./, LJ::Request->header_in("Host");
             if (@domains>=2) {
                 my $subdomain = "$domains[-2].$domains[-1]";
-                # warn $subdomain;
                 $key = $LJ::YANDEX_MAPS_API_KEYS{$subdomain};
             }
         }
@@ -69,9 +85,7 @@ sub get_iframe_source {
         $zoom =~ s/[^\d\.\-\+]//g;
         my $width   = LJ::ehtml($opts{'width'});
         my $height  = LJ::ehtml($opts{'height'});
-        #my $width   = LJ::ehtml($opts{'width'} - 20);
-        #my $height  = LJ::ehtml($opts{'height'} - 20);
-        
+       
         return <<"HTML";
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -95,8 +109,65 @@ sub get_iframe_source {
 </body>
 </html>
 HTML
-     }
-    return "[error: invalid Yandex Map url]";
+   
+    } elsif ($uri->can('host') && $uri->host eq 'www.openstreetmap.org') {
+        my %url_params = $uri->query_form;
+        my $lon  = $url_params{'lon'};
+        my $lat  = $url_params{'lat'};
+        my $zoom = $url_params{'zoom'};
+            return <<"HTML";
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+<script type="text/javascript">  
+  function initialize() {
+        var options = {
+          scrollwheel: false,
+          scaleControl: true,
+          mapTypeControlOptions: {style: google.maps.MapTypeControlStyle.DROPDOWN_MENU}
+        }
+        var map = new google.maps.Map(document.getElementById("map"), options);
+        map.setCenter(new google.maps.LatLng($lat, $lon));
+        map.setZoom($zoom);
+        var openStreet = new google.maps.ImageMapType({
+          getTileUrl: function(ll, z) {
+            var X = ll.x % (1 << z);  // wrap
+            return "http://tile.openstreetmap.org/" + z + "/" + X + "/" + ll.y + ".png";
+          },
+          tileSize: new google.maps.Size(256, 256),
+          isPng: true,
+          maxZoom: 18,
+          name: "OSM",
+          alt: "Слой с Open Streetmap"
+        }); 
+        map.mapTypes.set('osm', openStreet);
+        map.setMapTypeId('osm');
+        map.setOptions({
+          mapTypeControlOptions: {
+            mapTypeIds: [
+              'osm',
+              google.maps.MapTypeId.ROADMAP,
+              google.maps.MapTypeId.TERRAIN,
+              google.maps.MapTypeId.SATELLITE,
+              google.maps.MapTypeId.HYBRID
+            ],
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+          }
+        });
+}
+ 
+</script>
+</head> 
+<body onload="initialize()"> 
+    <div id="map" style="width:800px;height:600px;"></div>  
+</body> 
+</html>
+HTML
+    }
+
+    return "[error: invalid Map url]";
 }
 
 1;
