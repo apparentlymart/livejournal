@@ -334,7 +334,7 @@ sub get_status {
         if ($paid && !$reposted) {
             $cost = __get_cost($entry_obj, $u);
 
-            $paid = 0 if ($cost == 0 && !$is_owner)
+            $paid = 0 if ($cost == 0 && !$is_owner) || !$entry_obj->repost_budget;
         }
     }
 
