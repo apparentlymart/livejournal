@@ -384,7 +384,10 @@ sub unixtime {
 
 # returns LJ::User object for the poster of this entry, or undef for anonymous
 sub poster {
-    LJ::load_userid($_[0]->posterid);
+    return $_[0]->{'poster_obj'} if exists $_[0]->{'poster_obj'};
+    my $poster = LJ::load_userid($_[0]->posterid);
+    $_[0]->{'poster_obj'} = $poster;
+    return $poster;
 }
 
 sub posterid {
