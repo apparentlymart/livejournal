@@ -2588,7 +2588,7 @@ sub postevent {
          $uowner->user eq $LJ::WIDGET_FEATURED_COMMUNITY_NAME ) {
 
         #reset widget featured_communities
-        my $featured_communities_key  = 'featured_communities:widget:' .  $uowner->userid;
+        my $featured_communities_key  = 'featured_communities:widget:data:' .  $LJ::WIDGET_FEATURED_COMMUNITY_NAME;
         LJ::MemCache::delete($featured_communities_key);
     }
 
