@@ -327,7 +327,7 @@ sub get_status {
                                            $entry_obj->jitemid, 
                                            $u->userid );
         $reposted = (!!$reposted) || 0;
-        $paid = $reposted ? 
+        $paid = $reposted && !$is_owner ? 
             (!!$cost || 0) :
             (!!$entry_obj->repost_offer || 0);
                
