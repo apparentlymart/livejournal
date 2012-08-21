@@ -10,6 +10,7 @@ body<=
     return LJ::server_down_html() if ($LJ::SERVER_DOWN);
     use Class::Autouse qw (LJ::Poll);
     use LJ::Setting::Music;
+    use LJ::User::UserlogRecord;
 
     LJ::need_res(qw(
                     stc/widgets/selecttags.css
@@ -132,8 +133,15 @@ body<=
 
             LJ::run_hooks('rejected_entry', $c, $modid, $poster);
 
-            if ($POST{'mark_as_spam'} && !LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
+            if ($POST{'mark_as_spam'}) {
+                if  (LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
+                    $c->ban_user($poster);
+                    LJ::set_rel($c->{'userid'}, $poster->{'userid'}, 'D');
+                    LJ::User::UserlogRecord::SpamSet->create( $c, 'spammerid' => $poster->{'userid'}, 'remote' => $remote );
+                    LJ::run_hook('auto_suspender_for_spam', $poster->{'userid'});
+                } else {
                     $success = 0;
+                }
             }
         }
 
