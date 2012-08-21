@@ -16,6 +16,13 @@ use DBI;
 
 use LJ::ModuleCheck;
 
+use Data::Dumper;
+
+use Class::Autouse qw (
+                       LJ::OAuth::AccessToken
+                       LJ::Comment
+                       );
+
 # TODO: use EXPORT_OK instead, do not clutter the caller's namespace
 # unless asked to specifically
 our @EXPORT = qw(
@@ -260,7 +267,6 @@ sub create_application {
     my $res = LJ::UserApps->add_application(%opts);
 
     if($res->{errors} && @{$res->{errors}}){
-        use Data::Dumper;
         die 'Application errors:'.Dumper($res->{errors});
     }
 
@@ -275,9 +281,25 @@ sub create_application {
     return $app;
 }
 
-sub get_access_token {
-    use LJ::OAuth::AccessToken;
+sub create_post {
+    my ( $class, %opts ) = @_;
 
+    my $userid = delete $opts{userid} or die "Can't create post without userid";
+
+    my $u = LJ::load_userid($userid) or die "Can't load user $userid";
+
+    return $u->t_post_fake_entry(%opts);
+}
+
+sub create_comment {
+    my ( $class, %opts ) = @_;
+
+    my $entry = delete $opts{entry};
+
+    return $entry->t_enter_comment(%opts);
+}
+
+sub get_access_token {
     my $class = shift;
     my %opts = @_;
     $opts{access} ||= [];
