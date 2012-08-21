@@ -5823,7 +5823,7 @@ sub getusersrating {
             identity_value   => $sp->{identity_value},
             userpic_url      => $sp->{userpic} ? $sp->{userpic}->url : '',
             journal_url      => $sp->{journal_base},
-            userhead_url     => $sp->{headicon},
+            userhead_url     => $sp->{userhead_url},
             title            => $sp->{name_raw},
         };
     }
