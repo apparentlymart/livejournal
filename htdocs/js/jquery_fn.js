@@ -234,6 +234,8 @@ jQuery.fn.disableEnterSubmit = function() {
 		containers.removeClass('current')
 			.eq(index)
 			.addClass('current');
+
+		LiveJournal.run_hook('change_tab', index);
 	}
 
 	function onClick(evt) {
