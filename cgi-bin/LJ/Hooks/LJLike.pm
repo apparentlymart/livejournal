@@ -2,7 +2,7 @@ package LJ::Hooks::LJLike;
 use strict;
 use warnings;
 
-LJ::register_hook( 'insert_html_after_body_open' => sub {
+LJ::register_hook( 'insert_html_before_body_close' => sub {
     my ($after_body_open_ref) = @_;
 
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_google'}++;
@@ -15,7 +15,7 @@ LJ::register_hook( 'insert_html_after_body_open' => sub {
     $$after_body_open_ref .=  qq{<script type="text/javascript">LiveJournal.injectScript('http://apis.google.com/js/plusone.js',{text:"{lang: '$locale'}"});</script>};
 } );
 
-LJ::register_hook( 'insert_html_after_body_open' => sub {
+LJ::register_hook( 'insert_html_before_body_close' => sub {
     my ($after_body_open_ref) = @_;
 
     my $language = LJ::Lang::get_remote_lang();
@@ -32,7 +32,7 @@ LJ::register_hook( 'insert_html_after_body_open' => sub {
     };
 } );
 
-LJ::register_hook( 'insert_html_after_body_open' => sub {
+LJ::register_hook( 'insert_html_before_body_close' => sub {
     my ($after_body_open_ref) = @_;
 
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_twitter'}++;
