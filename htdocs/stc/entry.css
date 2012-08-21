@@ -946,13 +946,17 @@ td.tabs {
 .b-updatepage-paidrepost {
 	}
 	.b-updatepage-paidrepost-agreement {
-		display: block;
+		display: none;
 		font-size: 11px;
 		}
 	.b-updatepage-paidrepost-fields {
-		display: block;
+		display: none;
 		padding: 5px 0;
 		font-size: 11px;
+		}
+	.b-updatepage-paidrepost-enabled .b-updatepage-paidrepost-agreement,
+	.b-updatepage-paidrepost-enabled .b-updatepage-paidrepost-fields {
+		display: block;
 		}
 		.b-updatepage-paidrepost-label {
 			}
