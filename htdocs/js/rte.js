@@ -7,6 +7,12 @@
 		processDraft,
 		lastValue;
 
+	$(function () {
+		$('#draft').on('change keyup paste', function () {
+			LiveJournal.run_hook('editor_data_changed', $(this).val());
+		});
+	});
+
 	window.initEditor = function(data) {
 		data = data || {};
 		processDraft = !!('isInitDraft' in window);
