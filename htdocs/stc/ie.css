@@ -742,3 +742,10 @@ __________________________________________*/
 .b-pics-promo-wrapper {
 	display: none;
 	}
+
+/* Profile Group Gradient
+ ------------------------------------------- */	
+.b-profile-group {
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#EDF7FF', EndColorStr = '#FFFFFF');
+	}
+
