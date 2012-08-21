@@ -275,6 +275,9 @@
 	dtd['lj-repost'] = {};
 	dtd['lj-raw'] = dtd.div;
 
+	// set allowed tags for poll, for reference check
+	// http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.dtd.html
+	
 	dtd['lj-poll'] = {
 		'lj-pq': 1
 	};
@@ -287,6 +290,11 @@
 	dtd['lj-pi'] = {
 		'#': 1
 	};
+
+	['a', 'b', 'em', 'i', 'img', 'strong', 'u', 'lj-user'].forEach(function(tag) {
+		dtd['lj-pq'][tag] = 1;
+		dtd['lj-pi'][tag] = 1;
+	});
 
 	dtd.$block.iframe = dtd.$inline.iframe;
 	delete dtd.$inline.iframe;
@@ -1825,7 +1833,8 @@
 								newElement.attributes.frameBorder = 0;
 								break;
 							case 'lj-poll':
-								newElement = new CKEDITOR.htmlParser.fragment.fromHtml(decodeURIComponent(element.attributes['lj-data'])).children[0];
+								var data = decodeURIComponent(element.attributes['lj-data']);
+								newElement = new CKEDITOR.htmlParser.fragment.fromHtml(data).children[0];
 								break;
 							case 'lj-repost':
 								newElement = new CKEDITOR.htmlParser.element('lj-repost');

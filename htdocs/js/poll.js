@@ -57,8 +57,10 @@ var Poll = (function(){
 			this.questions = [];
 
 			selectPoll.find(tagPrefix + 'pq').each(function(i, pq) {
+				jQuery(pq).find('br').detach();
+
 				var question = {
-					name: pq.firstChild.nodeValue || '',
+					name: jQuery(pq).clone().find('lj-pi, lj\\:pi').detach().end().html() || '',
 					type: pq.getAttribute('type'),
 					answers: []
 				};
