@@ -369,9 +369,10 @@ Related ML variables are: C<esn.month.day_*>.
 =cut
 
 sub fancy_time_format {
-    my ( $class, $timestamp, $precision, $timezone ) = @_;
+    my ( $class, $timestamp, $precision, $timezone, $opts ) = @_;
     $precision ||= 'sec';
     $timezone ||= 'UTC';
+    $opts ||= {};
 
     # DateTime heavily uses Params::Validate to validate incoming parameters,
     # but it gives significant overhead
@@ -382,9 +383,16 @@ sub fancy_time_format {
         'time_zone' => $timezone,
     );
 
-    my $month_code = lc LJ::Lang::month_short( $dt->month );
-    my $day_month  = LJ::Lang::ml( 'esn.month.day_' . $month_code,
-        { 'day' => $dt->day } );
+    my $day_month;
+
+    if ($opts->{mount_short}) {
+        my $month_code = LJ::Lang::month_short_langcode($dt->month);
+        $day_month  = $dt->day . " " . LJ::Lang::ml($month_code);
+    } else { 
+        my $month_code = lc LJ::Lang::month_short( $dt->month );
+        $day_month  = LJ::Lang::ml( 'esn.month.day_' . $month_code,
+                         { 'day' => $dt->day } );
+    }
 
     my $ret = $day_month . ' ' . $dt->year;
     return $ret if $precision eq 'day';
