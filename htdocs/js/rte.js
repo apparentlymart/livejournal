@@ -11,6 +11,10 @@
 		$('#draft').on('change keyup paste', function () {
 			LiveJournal.run_hook('editor_data_changed', $(this).val());
 		});
+
+		setTimeout(function () {
+			$('#draft').trigger('change');
+		}, 0);
 	});
 
 	window.initEditor = function(data) {
