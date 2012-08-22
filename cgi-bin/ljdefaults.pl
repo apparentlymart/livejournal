@@ -105,7 +105,7 @@ use strict;
                       'can_post' => 1,
                       'get_comments' => 1,
                       'leave_comments' => 1,
-                      'mod_queue' => 50,
+                      'mod_queue' => 250,
                       'mod_queue_per_poster' => 1,
                       'weblogscom' => 0,
                       'hide_email_after' => 0,
