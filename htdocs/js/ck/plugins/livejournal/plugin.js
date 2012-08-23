@@ -369,7 +369,7 @@
 			function onLoadFrame() {
 				var win = this.$.contentWindow, doc = win.document, iframeBody = new CKEDITOR.dom.element.get(doc.body);
 
-				if (iframeBody.on) {
+				if (iframeBody.on && !Site.page.disabled_input) {
 					iframeBody.on('dblclick', onDoubleClick);
 					iframeBody.on('click', onClickFrame);
 					iframeBody.on('keyup', onKeyUp);
@@ -576,11 +576,13 @@
 					});
 				}
 
-				editor.document.on('click', findLJTags);
-				editor.document.on('mouseout', CKEDITOR.note.hide);
-				editor.document.on('mouseover', findLJTags);
-				editor.document.getBody().on('keyup', onKeyUp);
-				updateFrames();
+				if (!Site.page.disabled_input) {
+					editor.document.on('click', findLJTags);
+					editor.document.on('mouseout', CKEDITOR.note.hide);
+					editor.document.on('mouseover', findLJTags);
+					editor.document.getBody().on('keyup', onKeyUp);
+					updateFrames();
+				}
 			});
 
 			// LJ Buttons
