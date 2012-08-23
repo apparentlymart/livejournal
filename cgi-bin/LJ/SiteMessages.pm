@@ -10,7 +10,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
                                             
-                                            return $u->in_class('perm');
+                                            return $u && $u->in_class('perm');
                                        },
                     },
     
@@ -20,7 +20,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
                                             
-                                            return $u->in_class('sponsored');
+                                            return $u && $u->in_class('sponsored');
                                        },
                     },
                     
@@ -30,7 +30,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
                                             
-                                            return $u->get_cap('paid');
+                                            return $u && $u->get_cap('paid');
                                        },
                     },
     
@@ -40,7 +40,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
                                             
-                                            return $u->in_class('plus') && !$u->get_cap('paid');
+                                            return $u && $u->in_class('plus') && !$u->get_cap('paid');
                                        },
                     },
     
@@ -51,7 +51,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
 
-                                            return !($u->in_class('plus') || $u->get_cap('paid'));
+                                            return $u && !($u->in_class('plus') || $u->get_cap('paid'));
                                        }
                     },
     
@@ -98,7 +98,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
 
-                                            return $u->get_cap('trynbuy');      
+                                            return $u && $u->get_cap('trynbuy');      
                                        }
                     },
     
@@ -108,7 +108,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
 
-                                            return LJ::TryNBuy->already_used($u);
+                                            return $u && LJ::TryNBuy->already_used($u);
                                        }
                     },
     
@@ -118,7 +118,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
 
-                                            return !(LJ::TryNBuy->already_used($u) || $u->get_cap('trynbuy'));
+                                            return $u && !(LJ::TryNBuy->already_used($u) || $u->get_cap('trynbuy'));
                                        }
                     },
     
@@ -128,7 +128,7 @@ use constant AccountMask => {
                         validate    => sub {
                                             my ($u) = @_;
                                             
-                                            return $u->prop('email_faulty');
+                                            return $u && $u->prop('email_faulty');
                                        }
                     },
    NewPhotohosting => {
@@ -136,8 +136,14 @@ use constant AccountMask => {
                         group       => 5,
                         validate    => sub {
                                             my ($u) = @_;
-                                            return !(LJ::Pics::Migration->user_enabled_new_photohosting($u));
+                                            return $u && !(LJ::Pics::Migration->user_enabled_new_photohosting($u));
                                        }
+                    },
+
+    Anonymous   => {
+                        value       => 8192,
+                        group       => 0,
+                        validate    => sub { LJ::get_remote() ? 0 : 1 },
                     },
 };
 
@@ -296,8 +302,6 @@ sub get_messages {
     # direct the questions at the given $u, or remote if no $u given
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
-    return unless $u; # there are no messages for logged out users
-
     my @messages = $class->load_messages;
     @messages = $class->filter_messages($u, @messages);
     @messages = $class->filter_by_country($u, @messages);
@@ -311,7 +315,7 @@ sub get_messages {
 sub filter_messages {
     my $class = shift;
     my $u = shift;
-   
+  
     my @messages;
     MESSAGE:
     foreach my $m (@_) {
@@ -466,15 +470,14 @@ sub get_open_message {
     my $class = shift;
 
     my $remote = LJ::get_remote();
-    return unless $remote; # this feature only for logged in users
 
     ## tiny optimization
-    $remote->preload_props(qw/country closed_sm/);
+    $remote->preload_props(qw/country closed_sm/) if $remote;
 
     ##
     my @messages = $class->get_messages(user => $remote);
 
-    my $closed = $remote->prop('closed_sm');
+    my $closed = $remote ? $remote->prop('closed_sm') : undef;
     if ($closed) {
         my %closed = map { $_ => 1 } split(',', $closed);
         @messages = grep { not $closed{$_->{mid}} } @messages;
