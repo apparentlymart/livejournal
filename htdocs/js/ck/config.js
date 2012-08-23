@@ -31,7 +31,7 @@ CKEDITOR.editorConfig = function(config) {
 			'toolbar',
 			'undo',
 			'wysiwygarea',
-			'onchange',
+			'onchange'
 		];
 
 	if (Site.page.ljpost) {
@@ -69,9 +69,9 @@ CKEDITOR.editorConfig = function(config) {
 
 	config.plugins = plugins.join(',');
 
-	if (jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
-		config.plugins += ',contextmenu';
-	}
+	// if (jQuery.browser.msie || jQuery.browser.opera) { //show context menu only in internet explorer as it was in previous version of editor
+	// 	config.plugins += ',contextmenu';
+	// }
 
 	config.contentsLangDirection = 'ltr';
 	config.fillEmptyBlocks = false;
