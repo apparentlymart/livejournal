@@ -13,6 +13,8 @@ LiveJournal.register_hook = function (hook, func) {
 
 // args: hook, params to pass to hook
 LiveJournal.run_hook = function () {
+	//console.log('run_hook', arguments);
+
 	var hookfuncs = LiveJournal.hooks[arguments[0]];
 	if (!hookfuncs || !hookfuncs.length) {
 		return;
@@ -683,4 +685,69 @@ LiveJournal.isMobile = function() {
 	}
 }();
 
+LiveJournal.getEmbed = function(url) {
+	var text = url,
+		videoid;
 
+	if (text.match(/^(http:\/\/(www\.)?)?youtu\.be/)) {
+		videoid = (text.split('?')[0]).replace(/\/+$/,'').split('/').pop();
+		text = 'http://www.youtube.com/embed/' + videoid;
+		text = '<iframe width="560" height="315" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
+	} else if (text.match(/^(http:\/\/(www\.)?)?youtube\.com/)) {
+		text = 'http://www.youtube.com/embed/' + LiveJournal.parseGetArgs(text).v;
+		text = '<iframe width="560" height="315" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
+	} else if (text.match(/^(http:\/\/(www\.)?)?rutube\.ru/)) {
+		text = 'http://video.rutube.ru/' + LiveJournal.parseGetArgs(text).v;
+		text = ('<lj-embed> <OBJECT width="470" height="353">' +
+				'<PARAM name="movie" value="{text}"></PARAM>' +
+				'<PARAM name="wmode" value="window"></PARAM><PARAM name="allowFullScreen" value="true"></PARAM>' +
+				'<EMBED src="{text}" type="application/x-shockwave-flash"' +
+				' wmode="window" width="470" height="353" allowFullScreen="true" ></EMBED></OBJECT></lj-embed>').supplant({ text: text });
+	} else if (text.match(/^(http:\/\/(www\.)?)?vimeo\.com/)) {
+		videoid = (text.split('?')[0]).replace(/\/+$/,'').split('/').pop();
+		text = 'http://player.vimeo.com/video/' + videoid;
+		text = ('<iframe src="{text}" width="400" height="225" frameborder="0"' +
+			'webkitAllowFullScreen mozallowfullscreen allowFullScreen data-link="{url}"></iframe>').supplant({ text: text, url: url });
+	}
+	return text;
+};
+
+LiveJournal.showWidgets = function() {
+	
+	function random() {
+		return 	'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ','
+		+ (Math.floor((256-199)*Math.random()) + 200) + ','
+		+ (Math.floor((256-199)*Math.random()) + 200) + ')';
+	}
+
+	function _click(widget) {
+		widget.element
+			.click(function() {
+				console.log(widget.__proto__.widgetName, widget);
+			});
+	}
+
+	function _color(widget) {
+		widget.element
+			.css('background-color', random())
+			.css('border', '3px dashed ' + random());
+	}
+
+	for (var widget in jQuery.lj) {
+		var instances = jQuery.lj[widget].prototype.instances;
+		if (instances) {
+			instances.forEach(_click);
+		}
+	}
+	setInterval(function() {
+		for (var widget in jQuery.lj) {
+			var instances = jQuery.lj[widget].prototype.instances;
+			if (instances) {
+				instances.forEach(_color);
+			}
+		}
+	}, 500);
+
+};
+
+LiveJournal.widgetEvents = {};
