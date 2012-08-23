@@ -310,6 +310,8 @@
 
 	delete dtd['lj-cut']['lj-cut'];
 
+	// CKEDITOR.dtd.$empty['lj-embed'] = 1;
+
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
 			editor.rteButton = rteButton;
@@ -1857,7 +1859,14 @@
 								var data = decodeURIComponent(element.attributes['lj-data']);
 
 									newElement = new CKEDITOR.htmlParser.element('lj-embed');
+
 									newElement.attributes.id = element.attributes.id;
+
+									// necessary for isOptionalClose=true
+									if (element.attributes.id) {
+										newElement.isEmpty = true;
+									}
+
 									if (element.attributes.hasOwnProperty('source_user')) {
 										newElement.attributes.source_user = element.attributes.source_user;
 									}
