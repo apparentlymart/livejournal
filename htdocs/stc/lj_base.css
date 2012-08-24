@@ -4549,8 +4549,10 @@ BODY div .b-helplink:active {
 	_height: 1.2em;
 	zoom: 1;
 	}
-	.b-ljbutton INPUT {
+	.b-ljbutton BUTTON {
 		*overflow: visible;
+		*padding-right: 7px;
+		*padding-left: 7px;
 		}
 .b-ljbutton-submit {
 	margin: -0.4em 0;
@@ -5161,7 +5163,6 @@ HTML BODY .i-ljuser {
 	background: #DCFBFF -o-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
 	background: #DCFBFF -ms-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
 	background: #DCFBFF linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#DCFBFF', endColorstr='#CDE7FE',GradientType=0 );
 	*zoom: 1;
 	}
 .b-panel:before {
@@ -5178,6 +5179,13 @@ HTML BODY .i-ljuser {
 	-moz-border-radius: 100px / 50px;
 	border-radius: 100px / 50px;
 	}
+/* remove shadow on mobile */
+.mobile-msg .b-panel:before,
+.g-sensor .b-panel:before {
+	content: "";
+	display: none;
+	}
+/* remove shadow on tiny screen */
 @media screen and (max-width: 1000px) {
 	.b-panel:before {
 		content: "";
@@ -5220,14 +5228,13 @@ HTML BODY .i-ljuser {
 		-moz-box-shadow: inset 0 0 6px #2B4C7B;
 		-webkit-box-shadow: inset 0 0 6px #2B4C7B;
 		box-shadow: inset 0 0 6px #2B4C7B;
-		background: #3863A0;
-		background: #3863A0 -moz-linear-gradient(top,  #3863A0 0%, #369AFF 100%);
-		background: #3863A0 -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3863A0), color-stop(100%,#369AFF));
-		background: #3863A0 -webkit-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #3863A0 -o-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #3863A0 -ms-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #3863A0 linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3863A0', endColorstr='#369AFF',GradientType=0 );
+		background: #369AFF;
+		background: #369AFF -moz-linear-gradient(top,  #3863A0 0%, #369AFF 100%);
+		background: #369AFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3863A0), color-stop(100%,#369AFF));
+		background: #369AFF -webkit-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF -o-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF -ms-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF linear-gradient(top,  #3863A0 0%,#369AFF 100%);
 		color: #FFF;
 		}
 
@@ -5247,7 +5254,6 @@ HTML BODY .i-ljuser {
 	background: #F4FBFF -o-linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
 	background: #F4FBFF -ms-linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
 	background: #F4FBFF linear-gradient(top, #F4FBFF 0%,#E4F3FF 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F4FBFF', endColorstr='#E4F3FF',GradientType=0 );
 	}
 	.b-contentplus-head {
 		margin: 0;
@@ -5281,11 +5287,12 @@ HTML BODY .i-ljuser {
 		margin: 0;
 		padding: 0;
 		}
-
+/* switch to one column on tiny screen */
 @media screen and (max-width: 1000px) {
 	.b-contentplus-section {
 		float: none;
 		width: auto;
+		margin-bottom: 30px;
 		}
 	.b-contentplus-aside {
 		float: none;
@@ -5302,6 +5309,7 @@ HTML BODY .i-ljuser {
 	margin: 0;
 	padding: 30px;
 	line-height: 1.4;
+	*padding-left: 0;
 	}
 	.b-extracontent-head {
 		margin: 0 0 1em;
@@ -5339,6 +5347,7 @@ HTML BODY .i-ljuser {
 			-moz-border-radius: 30px / 100px;
 			border-radius: 30px / 100px;
 			}
+/* remove shadow on tiny screen */
 @media screen and (max-width: 1000px) {
 	.b-extracontent {
 		padding-right: 0;
@@ -5348,7 +5357,6 @@ HTML BODY .i-ljuser {
 			display: none;
 			}
 }
-
 
 
 
