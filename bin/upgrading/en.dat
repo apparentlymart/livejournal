@@ -689,17 +689,19 @@ create.login.twitter=Twitter
 
 create.login.vkontakte=VKontakte
 
-create.nextsteps.communities|staleness=1
-create.nextsteps.communities=join communities
+create.nextsteps.communities=join <a href="[[communities]]">communities</a>
 
-create.nextsteps.friends|staleness=1
-create.nextsteps.friends=find friends
+create.nextsteps.customize=<a href="[[customize]]">customize</a> your journal
 
-create.nextsteps.pics|staleness=1
-create.nextsteps.pics=upload pictures
+create.nextsteps.friends=find <a href="[[friends]]">friends</a>
 
-create.nextsteps.profile|staleness=1
-create.nextsteps.profile=fill your profile
+create.nextsteps.friendspage=check out your <a href="[[friendspage]]">friends page</a>
+
+create.nextsteps.pics=upload pictures in <a href="[[photoalbum]]">photo album</a>
+
+create.nextsteps.profile=fill your <a href="[[profie]]">profile</a>
+
+create.nextsteps.popular=check out the most <a href="[[popular]]">popular entries</a>
 
 create.post|staleness=1
 create.post=Create First Post
