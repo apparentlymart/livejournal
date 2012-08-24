@@ -6750,7 +6750,7 @@ talk.post.paidrepost.budget.add|staleness=1
 talk.post.paidrepost.budget.add=Add to budget
 
 talk.post.paidrepost.current|staleness=1
-talk.post.paidrepost.current=Current budget is [[current]] tokens
+talk.post.paidrepost.current=Current budget is [[current]] tokens.
 
 talk.post.paidrepost.pay|staleness=1
 talk.post.paidrepost.pay=Pay for reposts of this entry
