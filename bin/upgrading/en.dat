@@ -3796,6 +3796,12 @@ inbox.messages=Messages
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
 
+index.lj_is|staleness=1
+index.lj_is=LiveJournal is your possiblity to express yourself, share your life events and connect with friends.
+
+index.you_can|staleness=1
+index.you_can=You can use LiveJournal in diffirent ways: as personal diary, discussion forum, social network, etc.
+
 i_like_this_title|staleness=1
 i_like_this_title=Please click Track this if you want to receive all comments to this entry
 
