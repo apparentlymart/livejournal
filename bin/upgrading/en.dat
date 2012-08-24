@@ -3804,6 +3804,12 @@ index.lj_is=LiveJournal is your possiblity to express yourself, share your life 
 index.you_can|staleness=1
 index.you_can=You can use LiveJournal in diffirent ways: as personal diary, discussion forum, social network, etc.
 
+/index.bml.lj_is|staleness=1
+/index.bml.lj_is=LiveJournal is your possiblity to express yourself, share your life events and connect with friends.
+
+/index.bml.you_can|staleness=1
+/index.bml.you_can=You can use LiveJournal in diffirent ways: as personal diary, discussion forum, social network, etc.
+
 i_like_this_title|staleness=1
 i_like_this_title=Please click Track this if you want to receive all comments to this entry
 
