@@ -7,6 +7,7 @@ CKEDITOR.editorConfig = function(config) {
 	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljlink',  'plugins/lj/ljlink/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljfont',  'plugins/lj/ljfont/plugin.js' );
+	CKEDITOR.plugins.addExternal( 'ljcut2',  'plugins/lj/ljcut/plugin.js' );
 
 	var ljplugins = [/*'ljspell', */ (Site.page.ljpost) ? 'livejournal' : 'livejournal_old', 'ljcolor', 'ljlink'],
 		plugins = [
@@ -38,7 +39,7 @@ CKEDITOR.editorConfig = function(config) {
 		plugins.push('autogrow');
 		config.autoGrow_minHeight = 400;
 
-		ljplugins.push('ljspell', 'ljfont');
+		ljplugins.push('ljspell', 'ljfont', 'ljcut2');
 	} else {
 		plugins.push('dialog', 'image', 'link', 'font');
 	}
@@ -101,6 +102,7 @@ CKEDITOR.editorConfig = function(config) {
 			ifEnabled(Site.media_embed_enabled, 'LJEmbedLink'),
 
 			'LJCut',
+			'LJCut2',
 			'LJSpoiler',
 			
 			'LJMap',
