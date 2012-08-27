@@ -1183,6 +1183,7 @@ function plural_form_is(count) {
 			}
 		} else {
 			str = def || '[' + key + ']';
+			LJ.console.log("Text variable ["+ key +"] hasn't been defined.");
 		}
 
 		return str;
