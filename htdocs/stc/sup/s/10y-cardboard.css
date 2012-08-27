@@ -161,7 +161,13 @@ A:visited {
 .content .entry-wrap {
 	clear:both;
 	padding-left:28px;
-	overflow:hidden;
+	*zoom: 1;
+	}
+.content .entry-wrap:after {
+	content: "";
+	display: table;
+	border-collapse: collapse;
+	clear: both;
 	}
 
 /* Entry */
