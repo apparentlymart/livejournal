@@ -10218,6 +10218,9 @@ xmlrpc.error.221=Unknown language
 xmlrpc.error.222|staleness=1
 xmlrpc.error.222=Cannot create or update paid repost button via API
 
+xmlrpc.error.223|staleness=1
+xmlrpc.error.223=Repost budget is empty
+
 xmlrpc.error.300|staleness=1
 xmlrpc.error.300=Don't have access to requested journal
 

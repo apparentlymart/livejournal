@@ -101,6 +101,7 @@ my %e = (
      "220" => E_PERM,
      "221" => E_PERM,
      "222" => E_PERM,    
+     "223" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -2439,10 +2440,12 @@ sub postevent {
              userid        => $posterid}, 
             \$error
         );
-        
+
         return fail($err,222) if $repost_offer && ! $flags->{noauth};
        
         return fail($err,160,$error) if $error;
+
+        return fail($err,223) if $req->{'paid_repost_on'} && ! $repost_offer->{'budget'};
     }
 
     # convert RTE lj-embeds to normal lj-embeds
