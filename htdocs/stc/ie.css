@@ -749,3 +749,11 @@ __________________________________________*/
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#EDF7FF', EndColorStr = '#FFFFFF');
 	}
 
+/* Clear fix
+----------------------------------------------*/
+* html .clearfix-lj {
+	zoom: 1;
+	} /* IE6 */
+*:first-child+html .clearfix-lj {
+	zoom: 1;
+	} /* IE7 */

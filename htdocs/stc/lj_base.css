@@ -5446,5 +5446,13 @@ HTML BODY .i-ljuser {
     border: 1px solid #CCC;
 	font-size: 1em;
 	}
-	
-	
+
+/* Clear fix
+----------------------------------------------*/
+.clearfix-lj:after {
+	visibility: hidden;
+	display: block;
+	content: "";
+	clear: both;
+	height: 0;
+	}	
