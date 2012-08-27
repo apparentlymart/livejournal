@@ -693,7 +693,7 @@ create.nextsteps.communities=join <a href="[[communities]]">communities</a>
 
 create.nextsteps.customize=<a href="[[customize]]">customize</a> your journal
 
-create.nextsteps.email=an email has been sent to [[email]] containing further instructions (<a href="[[changeemail]]">change email</a>)
+create.nextsteps.email=an email has been sent to <strong>[[email]]</strong> containing further instructions (<a href="[[changeemail]]">change email</a>)
 
 create.nextsteps.friends=find <a href="[[friends]]">friends</a>
 
