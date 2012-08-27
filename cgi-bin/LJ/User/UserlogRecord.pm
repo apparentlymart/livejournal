@@ -31,8 +31,12 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     PasswordChange
     PasswordReset
     PasswordResetRequest
+    PicsAlbumBackupDelete
     PicsAlbumDelete
+    PicsAlbumRestore
+    PicsPhotoBackupDelete
     PicsPhotoDelete
+    PicsPhotoRestore
     PicsTagDelete
     RevokeEmailValidation
     S2StyleChange
