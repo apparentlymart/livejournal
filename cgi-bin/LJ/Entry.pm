@@ -1586,7 +1586,7 @@ sub repost_offer {
 sub repost_budget {
     my $self = shift;
 
-    return unless $self->repost_offer;
+    return undef unless $self->repost_offer;
 
     return LJ::Pay::Repost::Offer->get_budget(
                                               $self->posterid,
