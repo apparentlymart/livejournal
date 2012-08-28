@@ -890,7 +890,7 @@ sub render_options_block {
             return '' unless LJ::is_enabled("paid_repost");
             
             my ($offer, $budget) = ($opts->{repost_offer}, $opts->{repost_budget});
-            
+
             my $out = '';
 
             my $checkbox = LJ::html_check({
@@ -900,7 +900,6 @@ sub render_options_block {
                 'name'     => 'paid_repost_on',
                 'id'       => 'paid_repost_on',
                 'selected' => ($budget > 0 ? 1 : 0),
-                $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label'    => "",
             });
             my $checkbox_text = LJ::Lang::ml('entryform.paid_repost.checkbox');
@@ -979,7 +978,6 @@ sub render_options_block {
                 'name'     => 'sticky_type',
                 'id'       => 'sticky_type',
                 'selected' => $selected,
-                $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label'    => "",
             });
 
@@ -1005,7 +1003,6 @@ sub render_options_block {
                 'name'     => 'prop_opt_backdated',
                 'id'       => 'do_not_add_type',
                 'selected' => $selected,
-                $opts->{'prop_opt_preformatted'} || $opts->{'event_format'},
                 'label'    => "",
             });
             my $help = LJ::help_icon_html('backdate');
