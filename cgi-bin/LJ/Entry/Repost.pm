@@ -345,9 +345,7 @@ sub get_status {
                  };
 
     if ($is_owner && $paid) {
-        my $budget = $entry_obj->repost_budget;
-        $budget =~ s/(\d{1,3})(?=(\d{3})+$)/$1 /g;
-        $result->{budget} = $budget;
+        $result->{budget} = $entry_obj->repost_budget;
     }
 
     return $result;    
