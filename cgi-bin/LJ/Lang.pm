@@ -814,8 +814,16 @@ sub get_lang_names {
     my @langs = @_;
     push @langs, @LJ::LANGS unless @langs;
 
+    ## check in-memory cache first
+    if ($LJ::_CACHE_LANG_NAMES and (time - $LJ::_CACHE_LANG_NAMES->{cached_at} < 3660)){
+        return $LJ::_CACHE_LANG_NAMES->{data};
+    }
+
     my $list = LJ::MemCache::get("langnames");
-    return $list if $list;
+    if ($list){
+        $LJ::_CACHE_LANG_NAMES = { cached_at => time, data => $list }; ## add to process memory cache
+        return $list;
+    }
 
     $list = [];
     foreach my $code (@langs) {
@@ -832,6 +840,9 @@ sub get_lang_names {
 
     ## cache name on 5 min
     LJ::MemCache::set( 'langnames' => $list, 3660 );
+
+    ## cache in process memory for the same time as in memcache
+    $LJ::_CACHE_LANG_NAMES = { cached_at => time, data => $list };
 
     return $list;
 }
