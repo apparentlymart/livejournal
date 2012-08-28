@@ -1029,5 +1029,14 @@ sub html_get_link_urls {
     return \@link_urls;
 }
 
+sub delimited_number {
+    my ($number, $delimiter) = @_;
+    $delimiter ||= ' ';
+    
+    $number =~ s/(\d{1,3})(?=(\d{3})+$)/$1$delimiter/g;
+
+    return $number;
+}
+
 1;
 
