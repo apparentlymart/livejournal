@@ -306,11 +306,14 @@ sub FriendsPage
 
             if (!$logprops{$datakey}) {
                 $logprops{$datakey} = $entry_obj->props;
- 
+
+                my $subject = $entry_obj->subject_html || 
+                              $ctx->[S2::PROPS]->{'text_nosubject'};
+
                 # mark as repost
                 $logprops{$datakey}->{'repost'}         = 'e';
                 $logprops{$datakey}->{'repost_author'}  = $entry_obj->poster->user; 
-                $logprops{$datakey}->{'repost_subject'} = $entry_obj->subject_html;
+                $logprops{$datakey}->{'repost_subject'} = $subject;
                 $logprops{$datakey}->{'repost_url'}     = $entry_obj->url;
             }
         }
