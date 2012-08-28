@@ -2863,6 +2863,10 @@ sub share_contactinfo {
 sub get_social_capital {
     my ($u) = @_;
 
+    if ( $LJ::IS_DEV_SERVER && ( my $getter = $LJ::FAKE_SOCIAL_CAPITAL ) ) {
+        return $getter->($u);
+    }
+
     my $soc_capital = LJ::MemCache::get( $u->user."_soc_cap" );
     if (defined $soc_capital) {
         return $soc_capital;
