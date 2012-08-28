@@ -7202,7 +7202,13 @@ sub load_user
 
     # check memcache
     {
-        my $uid = LJ::MemCache::get("uidof:$user");
+        my $uid;
+        if ($LJ::PRELOADED_USER_IDS{$user} && !$LJ::IS_DEV_SERVER) {
+            $uid = $LJ::PRELOADED_USER_IDS{$user};
+        } else {
+            $uid = LJ::MemCache::get("uidof:$user");
+        }
+
         $u = LJ::memcache_get_u([$uid, "userid:$uid"]) if $uid;
         return _set_u_req_cache($u) if $u;
     }
@@ -10379,6 +10385,7 @@ sub get_userid
 
     $user = LJ::canonical_username($user);
 
+    if ($LJ::PRELOADED_USER_IDS{$user} && !$LJ::IS_DEV_SERVER) { return $LJ::PRELOADED_USER_IDS{user}; }
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
     my $userid = LJ::MemCache::get("uidof:$user");
