@@ -2343,6 +2343,7 @@ sub start_request
     %LJ::_ML_USED_STRINGS = ();       # strings looked up in this web request
     %LJ::REQ_CACHE_USERTAGS = ();     # uid -> { ... }; populated by get_usertags, so we don't load it twice
     %LJ::LOCK_OUT = ();
+    %LJ::SECRET = ();                 # secret key -> secret value
 
     $LJ::VERTICALS_FORCE_USE_MASTER = 0;    # It need to load a new created category from master insteed slave server.
 
@@ -3197,7 +3198,12 @@ sub get_secret
     }
 
     my $memkey = "secret:$time";
-    my $secret = LJ::MemCache::get($memkey);
+    my $secret = $LJ::SECRET{$memkey};
+    if (!$secret) {
+        $secret = LJ::MemCache::get($memkey);
+        $LJ::SECRET{$memkey} = $secret;
+    }
+
     return $want_new ? ($time, $secret) : $secret if $secret;
 
     my $dbh = LJ::get_db_writer();
@@ -3205,6 +3211,7 @@ sub get_secret
     $secret = $dbh->selectrow_array("SELECT secret FROM secrets ".
                                     "WHERE stime=?", undef, $time);
     if ($secret) {
+        $LJ::SECRET{$memkey} = $secret;
         LJ::MemCache::set($memkey, $secret) if $secret;
         return $want_new ? ($time, $secret) : $secret;
     }
