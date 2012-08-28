@@ -338,12 +338,19 @@ sub get_status {
         }
     }
 
-    return  { 'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
-              'reposted' => $reposted,
-              'paid'     => $paid,
-              'cost'     => $cost,
-              $is_owner ? ('budget' => $entry_obj->repost_budget) : (),
-            };
+    my $result = { 'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
+                   'reposted' => $reposted,
+                   'paid'     => $paid,
+                   'cost'     => $cost,
+                 };
+
+    if ($is_owner && $paid) {
+        my $budget = $entry_obj->repost_budget;
+        $budget =~ s/(\d{1,3})(?=(\d{3})+$)/$1 /g;
+        $result->{budget} = $budget;
+    }
+
+    return $result;    
 }
 
 sub get_budget {

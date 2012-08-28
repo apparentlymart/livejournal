@@ -904,8 +904,11 @@ sub render_options_block {
             });
             my $checkbox_text = LJ::Lang::ml('entryform.paid_repost.checkbox');
             
+            my $qty = $budget;
+            $qty =~ s/(\d{1,3})(?=(\d{3})+$)/$1 /g;
+
             my $current_budget = $offer && $budget ? 
-                LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $budget}) : 
+                LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $qty}) : 
                 '' ;
 
             my $help = LJ::help_icon_html('paid_repost');
