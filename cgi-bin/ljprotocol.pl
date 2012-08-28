@@ -102,6 +102,7 @@ my %e = (
      "221" => E_PERM,
      "222" => E_PERM,    
      "223" => E_TEMP,
+     "224" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -2433,6 +2434,10 @@ sub postevent {
     if (LJ::is_enabled("paid_repost")) {
         my $error;
 
+        if ($req->{'repost_budget'} && $req->{'repost_budget'} =~ /\D/) {
+            return fail($err,224);
+        }
+
         $repost_offer = LJ::Pay::Repost::Offer->from_create_entry(
             \$event, 
             {repost_budget => $req->{'repost_budget'},
@@ -3286,6 +3291,20 @@ sub editevent {
 
     if (LJ::is_enabled("paid_repost") && $req->{'event'} =~ /\S/) {
         my $error;
+
+        if(!$curprops{$itemid}->{repost_offer} &&
+           $req->{paid_repost_on} &&
+           !$req->{repost_budget}) {
+            return fail($err,223);
+        }
+
+        if ($req->{repost_budget} && $req->{repost_budget} =~ /\D/){
+            return fail($err,224);
+        }
+
+        if ($req->{add_repost_budget} && $req->{add_repost_budget} =~ /\D/){
+            return fail($err,224);
+        }
 
         ($repost_offer, $repost_offer_action) = LJ::Pay::Repost::Offer->from_edit_entry(
             \$req->{event},
