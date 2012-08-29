@@ -4598,6 +4598,15 @@ BODY div .b-helplink:active {
     vertical-align: middle;
     font-size: 2em;
     }
+.ljcut-link .ljcut-link-collapse {
+	display: none;
+	}
+.ljcut-expanded .ljcut-link-collapse {
+	display: inline;
+	}
+.ljcut-expanded .ljcut-link-expand {
+	display: none;
+	}
 
 /* Trava object  
 --------------------------------------*/

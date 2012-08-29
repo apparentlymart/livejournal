@@ -750,7 +750,17 @@ sub clean {
                     my $etext = $link_text->();
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<div>" if $tag eq "div";
-                    $newdata .= "<b class=\"ljcut-link\">(&nbsp;<a href=\"$url#cutid$cutcount\">$etext</a>&nbsp;)</b>";
+                    my $data_ids = "";
+                    if ($opts->{entry_url}) {
+                        my $entry = LJ::Entry->new_from_url($opts->{entry_url});
+                        my $ditemid = 0;
+                        my $journalid = $entry->journalid;
+                        if ($entry && $entry->valid) {
+                            $ditemid = $entry->ditemid;
+                        }
+                        $data_ids = qq(data-widget='ljcut' data-widget-options='{ "journalid": "$journalid", "ditemid": "$ditemid", "cutid": "$cutcount" }');
+                    }
+                    $newdata .= "<b $data_ids class=\"ljcut-link lj-widget\">(&nbsp;<a href=\"$url#cutid$cutcount\" class=\"ljcut-link-expand\">$etext</a><a href=\"javascript:void(0)\" class=\"ljcut-link-collapse\">".Encode::decode_utf8(LJ::Lang::ml("ljcut.collapse"))."</a>&nbsp;)</b>";
                     $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
