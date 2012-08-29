@@ -320,7 +320,7 @@ sub get_status {
     my $paid     = 0;
     my $cost     = 0;
     
-    my $is_owner = ($entry_obj->posterid == $u->userid) ? 1 : 0;
+    my $is_owner = ($u && $entry_obj->posterid == $u->userid) ? 1 : 0;
 
     if ($u) {
         ($reposted, $cost) = __get_repost( $entry_obj->journal, 
