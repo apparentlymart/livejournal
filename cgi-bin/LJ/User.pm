@@ -25,6 +25,7 @@ use LJ::Constants;
 use LJ::JSON;
 use LJ::FileStore;
 use LJ::MemCache;
+use LJ::MemCacheProxy;
 use LJ::RateLimit           qw();
 use LJ::RelationService;
 use LJ::Request;
