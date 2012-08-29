@@ -5456,3 +5456,92 @@ HTML BODY .i-ljuser {
 	clear: both;
 	height: 0;
 	}	
+	
+	
+/* Pseudo link
+--------------------------------------*/
+.b-pseudo {
+	border-bottom: 1px dotted !important;
+	cursor: pointer;
+	text-decoration: none !important;
+	}
+
+/* Pseudo link to hidden content
+--------------------------------------*/
+.b-toggle {
+	position: relative;
+	display: inline;
+	line-height: 1.2em;
+	}
+.b-toggle:before,
+.b-toggle:after {
+	position: absolute;
+	display: inline-block;
+	border-width: 0.5em;
+	border-style: solid;
+	width: 0;
+	height: 0;
+	}
+.b-toggle-before {
+	margin: 0 0 0 1.5em;
+	}
+.b-toggle-before:before {
+	left: -1.5em;
+	content: '';
+	}
+.b-toggle-after {
+	margin: 0 1.5em 0 0;
+	}
+.b-toggle-after:after {
+	right: -1.5em;
+	content: '';
+	}
+.b-toggle-left:after,
+.b-toggle-left:before {
+	top: 0.2em;
+	border-color: transparent;
+	border-right-color: inherit;
+	}
+	.b-toggle-left:before {
+		left: -1.5em;
+		}
+	.b-toggle-left:after {
+		right: -1em;
+		}
+.b-toggle-right:after,
+.b-toggle-right:before {
+	top: 0.2em;
+	right: -1.5em;
+	border-color: transparent;
+	border-left-color: inherit;
+	}
+	.b-toggle-right:before {
+		left: -1em;
+		}
+	.b-toggle-right:after {
+		right: -1.5em;
+		}
+.b-toggle-top:after,
+.b-toggle-top:before {
+	top: -0.1em;
+	border-color: transparent;
+	border-bottom-color: inherit;
+	}
+	.b-toggle-top:before {
+		left: -1.3em;
+		}
+	.b-toggle-top:after {
+		right: -1.3em;
+		}
+.b-toggle-bottom:after,
+.b-toggle-bottom:before {
+	top: 0.4em;
+	border-color: transparent;
+	border-top-color: inherit;
+	}
+	.b-toggle-bottom:before {
+		left: -1.3em;
+		}
+	.b-toggle-bottom:after {
+		right: -1.3em;
+		}
