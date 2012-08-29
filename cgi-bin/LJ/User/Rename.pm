@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use LJ::Request;
+use LJ::MemCacheProxy;
 use LJ::Event::SecurityAttributeChanged;
 
 ## namespace for user-renaming actions
@@ -239,7 +240,7 @@ sub basic_rename {
                 $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
                 foreach my $fofid ( @$users ) {
                     LJ::memcache_kill( $fofid, "friends" );
-                    LJ::MemCache::delete( [ $fofid, "frgmask:$fofid:$u->{'userid'}" ] );
+                    LJ::MemCacheProxy::delete( [ $fofid, "frgmask:$fofid:$u->{'userid'}" ] );
                 }
             }
         }

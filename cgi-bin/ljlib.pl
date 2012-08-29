@@ -57,6 +57,7 @@ use Class::Autouse qw(
                       LJ::Vertical
                       LJ::Browse
                       LJ::FriendsTags
+                      LJ::MemCacheProxy
                       );
 
 use LJ::TimeUtil;
@@ -2345,6 +2346,7 @@ sub start_request
     %LJ::LOCK_OUT = ();
     %LJ::SECRET = ();                 # secret key -> secret value
 
+
     $LJ::VERTICALS_FORCE_USE_MASTER = 0;    # It need to load a new created category from master insteed slave server.
 
     $LJ::COUNT_LOAD_PROPS_MULTI    = 0;     # Counter for number of requests function LJ::User::load_user_props_multi()
@@ -2357,6 +2359,7 @@ sub start_request
     LJ::Message->reset_singletons;
     LJ::Vertical->reset_singletons;
     LJ::Browse->reset_singletons;
+    LJ::MemCacheProxy->reset_singletons;
 
     LJ::UniqCookie->clear_request_cache;
 

@@ -24,6 +24,7 @@ use Class::Autouse qw(
                       LJ::PersonalStats::Ratings::Journals
                       LJ::API::RateLimiter
                       LJ::Pay::Repost::Offer
+                      LJ::MemCacheProxy
                       );
 
 use LJ::TimeUtil;
@@ -4536,7 +4537,7 @@ sub editfriends
             }
 
             my $memkey = [$userid,"frgmask:$userid:$friendid"];
-            LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
+            LJ::MemCacheProxy::set($memkey, $gmask+0, time()+60*15);
             LJ::memcache_kill($friendid, 'friendofs');
             LJ::memcache_kill($friendid, 'friendofs2');
 
@@ -4752,7 +4753,7 @@ sub editfriendgroups
         $dbh->do("UPDATE friends SET groupmask=$mask ".
                  "WHERE userid=$userid AND friendid=?",
                  undef, $friendid);
-        LJ::MemCache::set([$userid, "frgmask:$userid:$friendid"], $mask);
+        LJ::MemCacheProxy::set([$userid, "frgmask:$userid:$friendid"], $mask);
     }
 
     # invalidate memcache of friends/groups

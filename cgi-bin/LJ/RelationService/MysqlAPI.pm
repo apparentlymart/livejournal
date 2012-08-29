@@ -1,6 +1,7 @@
 package LJ::RelationService::MysqlAPI;
 use strict;
 
+use LJ::MemCacheProxy;
 
 ## friends
 sub find_relation_destinations {
@@ -200,7 +201,7 @@ sub _create_relation_to_type_f {
     die "create_relation_to error: " . DBI->errstr if DBI->errstr;
 
     my $memkey = [$u->userid, "frgmask:" . $u->userid . ":" . $friend->userid];
-    LJ::MemCache::set($memkey, $opts{groupmask}, time()+60*15);
+    LJ::MemCacheProxy::set($memkey, $opts{groupmask}, time()+60*15);
     LJ::memcache_kill($friend->userid, 'friendofs');
     LJ::memcache_kill($friend->userid, 'friendofs2');
 
@@ -279,7 +280,7 @@ sub _remove_relation_to_type_f {
         LJ::User->decrease_friendsof_counter($friend->userid);
 
         # delete friend-of memcache keys for anyone who was removed
-        LJ::MemCache::delete([ $u->userid, "frgmask:" . $u->userid . ":" . $friend->userid ]);
+        LJ::MemCacheProxy::delete([ $u->userid, "frgmask:" . $u->userid . ":" . $friend->userid ]);
         LJ::memcache_kill($friend->userid, 'friendofs');
         LJ::memcache_kill($friend->userid, 'friendofs2');
 
@@ -780,7 +781,7 @@ sub get_groupmask {
     return 0 unless $jid && $fid;
 
     my $memkey = [$jid,"frgmask:$jid:$fid"];
-    my $mask = LJ::MemCache::get($memkey);
+    my $mask = LJ::MemCacheProxy::get($memkey);
     unless (defined $mask) {
         my $dbw = LJ::get_db_writer();
         die "No database reader available" unless $dbw;
