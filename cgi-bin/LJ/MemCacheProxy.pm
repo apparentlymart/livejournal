@@ -32,8 +32,11 @@ sub get_multi {
     my $local_ret;
     my @keys_request = ();
     foreach my $key (@keys) {
-        if (exists $singletons{$key}) {
-            $local_ret->{$key} = $singletons{$key};
+        my $key_normal = ref $key eq 'ARRAY' ? $key->[1]
+                                             : $key;
+
+        if (exists $singletons{$key_normal}) {
+            $local_ret->{$key_normal} = $singletons{$key_normal};
         } else {
             push @keys_request, $key;
         }
