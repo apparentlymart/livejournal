@@ -79,6 +79,8 @@
 
 .modemail.yes=Email me every time someone submits a post to the queue
 
+.modreject=Email me when submission has been rejected from the moderation queue
+
 .title=Community Management
 
 .title2|staleness=1

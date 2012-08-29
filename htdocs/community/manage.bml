@@ -166,9 +166,13 @@ body<=
 
      my $mod_emails = $POST{modemail} ? 1 : 0;
      $remote->set_prop( 'opt_nomodemail' => $mod_emails ? undef : 1 );
+     
+     my $mod_reject = $POST{modreject} ? 1 : 0;
+     $remote->set_prop( 'opt_modrejectemail' => $mod_reject );
  }
 
  my $mod_emails = $remote->prop("opt_nomodemail") ? 0 : 1;
+ my $mod_reject = $remote->prop("opt_modrejectemail") ? 1 : 0;
 
  $ret .= "<div class='columns-2 pkg' style='margin-bottom: 15px;'>\n";
  $ret .= "<div class='columns-2-left'>\n";
@@ -188,6 +192,11 @@ body<=
  $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_no', 
                           value => '0', selected => !$mod_emails });
  $ret .= "<label for='modemail_no'>$ML{'.modemail.no'}</label><br />";
+ $ret .= "</fieldset> ";
+ $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
+ $ret .= LJ::html_check({ type => 'checkbox', name => 'modreject', id => 'modreject', 
+                          value => '1', selected => $mod_reject });
+ $ret .= "<label for='modreject'>$ML{'.modreject'}</label><br />";
  $ret .= "</fieldset> ";
  $ret .= "<?standout " . LJ::html_submit($ML{'.joinmail.save'}) . " standout?>";
  $ret .= "</form>";
