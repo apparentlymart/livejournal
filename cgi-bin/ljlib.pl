@@ -2510,7 +2510,7 @@ sub get_keyword_id
     # setup the keyword for use
     unless ($kw =~ /\S/) { return 0; }
     $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
-    $kw = LJ::Text->normalize_tag_name ($kw);
+    #$kw = LJ::Text->normalize_tag_name ($kw);
 
     # get the keyword and insert it if necessary
     my $kwid;
