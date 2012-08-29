@@ -6118,6 +6118,8 @@ talk.editpic.left=&larr; Left
 talk.editpic.none|staleness=1
 talk.editpic.none=None
 
+talk.editpic.imagesize=Image Size
+
 talk.editpic.right|staleness=1
 talk.editpic.right=Right &rarr;
 
