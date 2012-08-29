@@ -80,7 +80,7 @@ sub delete_prop_memcache {
 
     my $userid = int $u->userid;
 
-    LJ::MemCache::delete ([ $userid, $memkey ]);
+    LJ::MemCacheProxy::delete ([ $userid, $memkey ]);
 }
 
 sub fetch_props_memcache {
@@ -98,7 +98,7 @@ sub fetch_props_memcache {
         push @memkeys, [ $userid, $memkey ];
     }
 
-    my $from_memcache = LJ::MemCache::get_multi(@memkeys);
+    my $from_memcache = LJ::MemCacheProxy::get_multi(@memkeys);
 
     my %ret;
     foreach my $k (@$props) {
@@ -121,7 +121,7 @@ sub store_props_memcache {
     foreach my $k (keys %$propmap) {
         my $memkey = $class->memcache_key($u, $k);
 
-        LJ::MemCache::set( [ $userid, $memkey ],
+        LJ::MemCacheProxy::set( [ $userid, $memkey ],
                            $propmap->{$k} || '',
                            $expire );
     }
