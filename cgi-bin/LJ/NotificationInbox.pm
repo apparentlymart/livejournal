@@ -207,7 +207,7 @@ sub unread_count {
     my $self = shift;
 
     # cached unread count
-    my $unread = LJ::MemCache::get($self->_unread_memkey);
+    my $unread = LJ::MemCacheProxy::get($self->_unread_memkey);
 
     return $unread if defined $unread;
 
@@ -220,7 +220,7 @@ sub unread_count {
     ($unread) = $sth->fetchrow_array;
 
     # cache it
-    LJ::MemCache::set($self->_unread_memkey, $unread, 30 * 60);
+    LJ::MemCacheProxy::set($self->_unread_memkey, $unread, 30 * 60);
 
     return $unread;
 }
