@@ -2008,14 +2008,14 @@ sub set_prop {
             # table and uses only one memcache key to cache that
 
             my $memkey = $handler->memcache_key($u);
-            LJ::MemCache::delete([ $u->userid, $memkey ]);
+            LJ::MemCacheProxy::delete([ $u->userid, $memkey ]);
         } elsif ( $memcache_policy eq 'blob' ) {
             # the handler uses one memcache key for each prop,
             # so let's delete them all
 
             foreach my $propname (@$propnames_handled) {
                 my $memkey = $handler->memcache_key( $u, $propname );
-                LJ::MemCache::delete([ $u->userid, $memkey ]);
+                LJ::MemCacheProxy::delete([ $u->userid, $memkey ]);
             }
         }
     }
@@ -6771,7 +6771,7 @@ sub load_user_props {
             # table and uses only one memcache key to cache that
 
             my $memkey = $handler->memcache_key($u);
-            if ( my $packed = LJ::MemCache::get([ $u->userid, $memkey ]) ) {
+            if ( my $packed = LJ::MemCacheProxy::get([ $u->userid, $memkey ]) ) {
                 my $propmap
                     = LJ::User::PropStorage->unpack_from_memcache($packed);
 
@@ -6789,8 +6789,8 @@ sub load_user_props {
                                        { 'use_master' => $use_master } );
 
             my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
-            LJ::MemCache::set( [$u->userid, $memkey],
-                               $packed, $memc_expire );
+            LJ::MemCacheProxy::set( [$u->userid, $memkey],
+                                    $packed, $memc_expire );
 
             $extend_user_object->($propmap);
         } elsif ( $memcache_policy eq 'blob' ) {
@@ -6895,7 +6895,7 @@ sub load_user_props_multi {
 
         if ( $memcache_policy eq 'lite' ) {
             my %memkeys;
-            my $propmaps = LJ::MemCache::get_multi(map {
+            my $propmaps = LJ::MemCacheProxy::get_multi(map {
                 [
                     ($_ => ($memkeys{$_} = $handler->memcache_key($users->{$_})))
                 ]
