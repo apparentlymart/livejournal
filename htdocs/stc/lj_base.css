@@ -4594,10 +4594,10 @@ BODY div .b-helplink:active {
 /* LJ-CUT link  
 --------------------------------------*/
 .ljcut-link-scissors {
-    padding: 0 2px 0 0;
-    vertical-align: middle;
-    font-size: 2em;
-    }
+	padding: 0 2px 0 0;
+	vertical-align: middle;
+	font-size: 2em;
+	}
 .ljcut-link .ljcut-link-collapse {
 	display: none;
 	}
@@ -5441,7 +5441,9 @@ HTML BODY .i-ljuser {
 	padding: 0 20px 0 0;
 	background: url(/img/preloader-s.gif?v=1) no-repeat 100% 60%;
 	}
-	
+
+
+
 /* Update button */
 .b-updater {
 	width: 100%;
@@ -5449,31 +5451,35 @@ HTML BODY .i-ljuser {
 	border: 0;
 	cursor: pointer;
 	background: #DDDDDD;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    border: 1px solid #CCC;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: 1px solid #CCC;
 	font-size: 1em;
 	}
+
+
 
 /* Clear fix
 ----------------------------------------------*/
 .clearfix-lj:after {
-	visibility: hidden;
-	display: block;
 	content: "";
+	display: table;
+	border-collapse: collapse;
 	clear: both;
-	height: 0;
-	}	
-	
-	
+	}
+
+
+
 /* Pseudo link
 --------------------------------------*/
 .b-pseudo {
-	border-bottom: 1px dotted !important;
+	border-bottom: 1px dotted;
 	cursor: pointer;
-	text-decoration: none !important;
+	text-decoration: none;
 	}
+
+
 
 /* Pseudo link to hidden content
 --------------------------------------*/
@@ -5505,18 +5511,20 @@ HTML BODY .i-ljuser {
 	right: -1.5em;
 	content: '';
 	}
-.b-toggle-left:after,
-.b-toggle-left:before {
-	top: 0.2em;
+/* top */
+.b-toggle-top:after,
+.b-toggle-top:before {
+	top: -0.1em;
 	border-color: transparent;
-	border-right-color: inherit;
+	border-bottom-color: inherit;
 	}
-	.b-toggle-left:before {
-		left: -1.5em;
+	.b-toggle-top:before {
+		left: -1.3em;
 		}
-	.b-toggle-left:after {
-		right: -1em;
+	.b-toggle-top:after {
+		right: -1.3em;
 		}
+/* right */
 .b-toggle-right:after,
 .b-toggle-right:before {
 	top: 0.2em;
@@ -5530,18 +5538,7 @@ HTML BODY .i-ljuser {
 	.b-toggle-right:after {
 		right: -1.5em;
 		}
-.b-toggle-top:after,
-.b-toggle-top:before {
-	top: -0.1em;
-	border-color: transparent;
-	border-bottom-color: inherit;
-	}
-	.b-toggle-top:before {
-		left: -1.3em;
-		}
-	.b-toggle-top:after {
-		right: -1.3em;
-		}
+/* bottom */
 .b-toggle-bottom:after,
 .b-toggle-bottom:before {
 	top: 0.4em;
@@ -5553,4 +5550,17 @@ HTML BODY .i-ljuser {
 		}
 	.b-toggle-bottom:after {
 		right: -1.3em;
+		}
+/* left */
+.b-toggle-left:after,
+.b-toggle-left:before {
+	top: 0.2em;
+	border-color: transparent;
+	border-right-color: inherit;
+	}
+	.b-toggle-left:before {
+		left: -1.5em;
+		}
+	.b-toggle-left:after {
+		right: -1em;
 		}
