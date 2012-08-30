@@ -760,7 +760,7 @@ sub clean {
                         }
                         $data_ids = qq(data-widget='ljcut' data-widget-options='{ "journalid": "$journalid", "ditemid": "$ditemid", "cutid": "$cutcount" }');
                     }
-                    $newdata .= "<b $data_ids class=\"ljcut-link lj-widget\">(&nbsp;<a href=\"$url#cutid$cutcount\" class=\"ljcut-link-expand\">$etext</a><a href=\"javascript:void(0)\" class=\"ljcut-link-collapse\">".Encode::decode_utf8(LJ::Lang::ml("ljcut.collapse"))."</a>&nbsp;)</b>";
+                    $newdata .= "<b $data_ids class=\"ljcut-link lj-widget\">(&nbsp;<a href=\"$url#cutid$cutcount\" class=\"ljcut-link-expand\">$etext</a><a href=\"$url#cutid$cutcount\" class=\"ljcut-link-collapse\">".Encode::decode_utf8(LJ::Lang::ml("ljcut.collapse"))."</a>&nbsp;)</b>";
                     $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
