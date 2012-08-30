@@ -8789,6 +8789,8 @@ sub modify_caps {
     # get a u object directly from the db
     my $u = LJ::load_userid($userid, "force");
 
+    delete $u->{sup_enabled} if $u;
+
     # add new caps
     my $newcaps = int($u->{'caps'});
     foreach (@$cap_add) {
