@@ -2187,6 +2187,7 @@ sub journal_js_inject
                     js/s2.js
                     js/jquery/jquery.lj.confirmbubble.js
                     templates/Widgets/popupcontent.tmpl
+                    js/jquery/jquery.lj.ljcut.js
                    });
 
     LJ::run_hooks('extra_journal_js');
