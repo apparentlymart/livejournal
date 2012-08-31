@@ -230,6 +230,9 @@
 .friends.mutual|staleness=1
 .friends.mutual=Mutual Friends
 
+.friends.mutual.with.you|staleness=1
+.friends.mutual.with.you=Mutual with you
+
 .friends.user=Friends
 
 .friends.viewall.comm|staleness=1
@@ -237,6 +240,9 @@
 
 .friends.viewall.comm2|staleness=1
 .friends.viewall.comm2=<a [[aopts]]>View all</a>
+
+.friends.viewall.list|staleness=1
+.friends.viewall.list=View full list
 
 .friends.viewall.other|staleness=1
 .friends.viewall.other=This user is watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
