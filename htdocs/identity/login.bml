@@ -11,6 +11,8 @@ body<=
     if (LJ::get_remote()) {
         return LJ::Request->redirect("$LJ::SITEROOT/login.bml");
     }
+	
+	LJ::need_res('stc/identity/identity.css');
 
     $title = LJ::Lang::ml('.title');
 
