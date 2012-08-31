@@ -889,7 +889,7 @@ sub render_options_block {
         'paid_repost' => sub {
             return '' unless LJ::is_enabled("paid_repost");
             
-            my ($offer, $budget) = ($opts->{repost_offer}, $opts->{repost_budget});
+            my ($paid_repost_on, $budget) = ($opts->{paid_repost_on}, $opts->{current_repost_budget});
 
             my $out = '';
 
@@ -900,19 +900,18 @@ sub render_options_block {
                 'name'     => 'paid_repost_on',
                 'id'       => 'paid_repost_on',
                 'tabindex' => '220',
-                'selected' => ($budget > 0 ? 1 : 0),
+                'selected' => ($paid_repost_on ? 1 : 0),
                 'label'    => "",
                 'raw'      => "autocomplete='off'",
             });
             my $checkbox_text = LJ::Lang::ml('entryform.paid_repost.checkbox');
             
-            my $qty = $budget;
-            $qty =~ s/(\d{1,3})(?=(\d{3})+$)/$1 /g;
-
-            my $current_budget = $offer && $budget ? 
-                LJ::Lang::ml('entryform.paid_repost.current_budget', {qty => $qty}) : 
+            my $current_budget = defined $budget ? 
+                LJ::Lang::ml('entryform.paid_repost.current_budget', {
+                    qty => LJ::delimited_number($budget),
+                }) :
                 '' ;
-
+            
             my $help = LJ::help_icon_html('paid_repost');
 
             $out .= qq{<span class="b-updatepage-paidrepost-agreement">};
@@ -921,38 +920,25 @@ sub render_options_block {
             $out .= qq{$help};
             $out .= qq{<strong class="b-updatepage-paidrepost-current">$current_budget</strong>};
             $out .= qq{</span>};
-
-            my ($label, $opts);
-            unless ($offer) {
-                $opts = {
-                    'name'  => 'repost_budget',
-                    'value' => $budget,
-                };
-                $label = LJ::Lang::ml('entryform.paid_repost.budget');
-            } else {
-                $opts = {
-                    'name'  => 'add_repost_budget',
-                    'value' => $opts->{add_repost_budget},
-                };
-
-                $label =  $budget > 0 ? 
-                    LJ::Lang::ml('entryform.paid_repost.add_budget') :
-                    LJ::Lang::ml('entryform.paid_repost.budget');
-            }
+                                
+            my $label = defined $budget ? 
+                LJ::Lang::ml('entryform.paid_repost.add_budget') :
+                LJ::Lang::ml('entryform.paid_repost.budget');
 
             my $field = LJ::html_text({
+                'name'     => 'repost_budget',
+                'value'    => $opts->{repost_budget},
                 'id'       => 'repost_budget',
                 'tabindex' => '220',
                 'size'     => '10',
                 'raw'      => "autocomplete='off'",
-                %$opts,
             });
-
+            
             $out .= qq{<span class="b-updatepage-paidrepost-fields">};
             $out .= qq{<label for="repost_budget" class="b-updatepage-paidrepost-label">$label</label>};
             $out .= qq{<span class="b-updatepage-paidrepost-budget">$field</span>};
             $out .= qq{</span>};
-
+            
             return $out;
         },         
         'sticky' => sub {

@@ -584,15 +584,18 @@ body<=
                 'sticky' => $entry_obj->is_sticky,
                 'opt_backdated' => $entry_obj->prop('opt_backdated'),
             };
-
-            if($entry->{'repost_offer'} = $entry_obj->prop('repost_offer')) {
+            
+            if(my $repost_offer_id = $entry_obj->prop('repost_offer')) {
                 my $offer = LJ::Pay::Repost::Offer->get_repost_offer(
                                                         $entry_obj->posterid,
-                                                        $entry_obj->prop('repost_offer'),
+                                                        $repost_offer_id,
                                                         );
-                $entry->{'repost_budget'} = $offer->budget if $offer && $offer->is_active;
+                if($offer && $offer->is_active) {
+                    $entry->{'current_repost_budget'} = $offer->budget;
+                    $entry->{'paid_repost_on'} = 1 unless defined $entry->{'paid_repost_on'};
+                }
             }
-
+            
             for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }

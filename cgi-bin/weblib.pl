@@ -1158,7 +1158,7 @@ sub entry_form_decode
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid prop_give_features 
-                repost_budget add_repost_budget paid_repost_on)) {
+                repost_budget paid_repost_on)) {
         $req->{$_} = $POST->{$_};
     }
 
