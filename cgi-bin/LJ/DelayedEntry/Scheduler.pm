@@ -151,6 +151,8 @@ sub on_pulse {
 
                     __notify_user(  $entry->poster,
                                     $entry->journal);
+                    
+                    $entry->mark_posted();
                     next;
                 }
 

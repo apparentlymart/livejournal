@@ -228,6 +228,19 @@ sub convert {
              'res' => $res };
 }
 
+sub mark_posted {
+    my ($self) = @_;
+    
+    $self->journal->do( "UPDATE delayedlog2 SET ".
+                        "finaltime=NOW(), url=? " .
+                        "WHERE delayedid = ? AND " .
+                        "journalid = ?", 
+                        undef,
+                        "not posted",
+                        $self->delayedid,
+                        $self->journalid ); 
+}
+
 sub convert_from_data {
     my ($self, $req) = @_;
     my $flags = { 'noauth' => 1,
