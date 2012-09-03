@@ -607,7 +607,9 @@ sub delete {
                                 $entry_obj->jitemid, 
                                 $u->userid);
     
-        return  { 'delete' => 'OK' };
+        my $status = $class->get_status($entry_obj, $u);
+        $status->{'delete'} = 'OK';  
+        return $status;
     }
 
     return LJ::API::Error->get_error('entry_not_found');
