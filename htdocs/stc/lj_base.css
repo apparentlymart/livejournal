@@ -246,9 +246,6 @@ DL.current-version {
 		font-weight: normal;
 		}
 
-/* transparency for ie */
-.lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }
-
 .lj_ippu_titlebar {
 	text-align:left;
 	}

@@ -757,3 +757,7 @@ __________________________________________*/
 *:first-child+html .clearfix-lj {
 	zoom: 1;
 	} /* IE7 */
+	
+/* transparency for ie */
+.lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }
+
