@@ -28,7 +28,7 @@ sub try_lock {
     }
 
     my ($result) = 
-        $dbh->selectrow_array("SELECT GET_LOCK('$DELAYED_ENTRIES_LOCK_NAME', 10)");
+        $dbh->selectrow_array("SELECT GET_LOCK('$DELAYED_ENTRIES_LOCK_NAME', 120)");
     return $result;
 }
 
