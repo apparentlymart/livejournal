@@ -1110,3 +1110,20 @@
 .music-settings-system-error .music-settings-system-error-msg {
 	display: block;
 	}
+
+/* Journapromo settings */
+
+.b-settings-journalpromo TD,
+.lj_adsense td.help {
+	vertical-align: top;
+	}
+.b-settings-journalpromo P {
+	margin: 0;
+	}
+.b-settings-journalpromo .b-settings-journalpromo-rules {
+	color: #AAA;
+	font-size: 11px;
+	}
+.b-settings-journalpromo-header {
+	font-weight: bold;
+	}
