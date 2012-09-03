@@ -199,3 +199,94 @@ DIV.lc_detect INPUT {
 	display: none;
 	}
 
+/* SMS Notifications
+--------------------------- */
+.b-manage-smsn {
+	float: left;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+.b-manage-smsn-hide {
+	}
+	.b-manage-smsn LI {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		}
+	.b-manage-smsn .b-manage-smsn-sms {
+		float: left;
+		margin: 0 0.3em 0.3em 0;
+		padding: 0.3em 0 0;
+		line-height: 1.5;
+		}
+		.b-manage-smsn .b-manage-smsn-sms INPUT.b-manage-smsn-code {
+			width: 2.5em;
+			}
+		.b-manage-smsn .b-manage-smsn-sms INPUT.b-manage-smsn-phone {
+			width: 10em;
+			}
+	.b-manage-smsn-hide .b-manage-smsn-sms {
+		padding: 0;
+		}
+	.b-manage-smsn .b-manage-smsn-status {
+		position: relative;
+		float: left;
+		padding: 0 0 0 20px;
+		margin: 0 0 0 .5em;
+		max-width: 80%;
+		}
+	.b-manage-smsn-hide .b-manage-smsn-status {
+		display: none !important;
+		}
+		.b-manage-smsn .b-manage-smsn-status .i-bubble {
+			margin: 0 30px 0 10px !important;
+			}
+		.b-manage-smsn .b-manage-smsn-status .help-icon {
+			position: absolute;
+			top: 8px;
+			right: 0;
+			}
+			.b-manage-smsn .b-manage-smsn-status .help-icon A {
+				border: none;
+				}
+		.i-manage-smsn-icon {
+			position: absolute;
+			top: 16px;
+			left: 0;
+			width: 16px;
+			height: 16px;
+			margin: -9px 0 0 0;
+			background-image: url(/img/icons/smsn.gif?v=9361);
+			background-repeat: no-repeat;
+			background-position: 0 -800px;
+			}
+		.i-manage-smsn-unsupporteddef,
+		.i-manage-smsn-already_use,
+		.i-manage-smsn-initial {
+			background-position: 0 0;
+			}
+		.i-manage-smsn-correctnum {
+			background-position: 0 0;
+			}
+		.i-manage-smsn-badnum {
+			background-position: 0 -1000px;
+			}
+		.i-manage-smsn-wrongcode {
+			background-position: 0 -800px;
+			}
+		.i-manage-smsn-reqsent {
+			background-position: 0 -200px;
+			}
+		.i-manage-smsn-smssent {
+			background-position: 0 -400px;
+			}
+		.i-manage-smsn-verified {
+			background-position: 0 -600px;
+			}
+	.b-manage-smsn .b-manage-smsn-btn {
+		clear: both;
+		}
+	.b-manage-smsn-hide .b-manage-smsn-btn {
+		display: none;
+		}
