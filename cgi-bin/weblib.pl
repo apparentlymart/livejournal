@@ -1373,33 +1373,29 @@ sub include_raw  {
 sub res_template_includes {
     my $ret = shift;
     my %loaded;
-    foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
-        if (LJ::is_enabled('templates_from_stat')) {
-            # Create template id
-            my $key = $template;
-            $key =~ s{(?<!\\)/} {-}g;
-            $key =~ s{\.(?:jq)?tmpl$} {}g;
+    if (LJ::is_enabled('templates_from_stat')) {
+        my $time = time;
+        my $lang = LJ::Lang::current_language();
+        my $src  = $LJ::IS_SSL? $LJ::SSLROOT : $LJ::STATPREFIX;
+           $src .= '/tmpl/??';
 
-            my $stat_prefix = 'l-stat';
-            my $debug_data  = '';
-
-            if ($LJ::IS_DEV_SERVER || $LJ::CURRENT_VERSION eq 'trunk') {
-                $stat_prefix =  'stat';
-
-                $debug_data = sprintf q{
-                    data-template="%s"
-                    data-translation="%s"},
-                    $template, $LJ::TEMPLATE_TRANSLATION;
-            }
-
-            my $address = "http://$stat_prefix.$LJ::DOMAIN/__tmpl/$template?v=" . $LJ::CURRENT_VERSION;
-            $ret .= sprintf q{<script type="text/plain" id="%s" src="%s" %s>}, 
-                        $key, $address, $debug_data;
-            $ret .= '</script>';
-
-            $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, 
-                    $key, $key, $LJ::TEMPLATE_TRANSLATION;
-        } else {
+        foreach my $extension ('.tmpl', '.jqtmpl') {
+            my $mtime = 0;
+            $ret .= join join(',',
+                map {
+                    local $_ = $_;
+                    s{^} {../};
+                    my $lmtime = _file_modtime($_, $time);
+                    $mtime = $lmtime if $lmtime > $mtime;
+                    s{^.*?templates/} {};
+                    $_
+                } grep {
+                    -1 != index $_, $extension
+                } @LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE
+            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime;uselang=$lang"></script>\n}; 
+        }
+    } else {
+        foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
             my $path = [split m{(?<!\\)/}, $template];
             my $file = pop @$path;
             my ($type, $filter);

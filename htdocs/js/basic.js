@@ -821,31 +821,33 @@ LJ.UI._templates = {};
  * @param {string} id Id of the script tag containing the templates or the template text.
  * @param {string=JQuery} type Type of the template. Default is jquery templates.
  */
-LJ.UI.registerTemplate = function(name, id, type) {
-	var node = jQuery('#' + id),
-		template;
+LJ.UI.registerTemplate = function (name, data, type) {
+	var node, template;
 
 	type = type || 'JQuery';
 
-	if (node.length > 0) {
-		//jQuery.text() method returns empty string in IE8
-		template = node.html();
-	} else {
-		template = id;
+	switch (type) {
+		case 'JQuery':
+			node = jQuery('#' + data);
+
+			if (node.length) {
+				jQuery.template(name, node.html());
+			} else {
+				LJ.console.warn('Template node #' + data + ' was not found');
+				return;
+			}
+
+			break;
+
+		case 'JQuery.stat':
+			jQuery.template(name, data);
+			type = 'JQuery';
+			break;
 	}
 
 	LJ.UI._templates[name] = {
 		type: type
 	};
-
-	var tmplObject = LJ.UI._templates[name];
-
-	switch (type) {
-		case 'JQuery':
-			jQuery.template(name, template);
-			break;
-	}
-
 };
 
 /**
