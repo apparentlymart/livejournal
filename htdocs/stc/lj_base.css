@@ -2762,6 +2762,49 @@ HTML BODY .i-ljuser {
 	font-size: 1em;
 	}
 
+/* Steps
+--------------------------------------*/
+.b-steps {
+	position: relative;
+	margin: 0 0 10px -9px;
+	padding: 0;
+	list-style: none;
+	color: #7C7D7F;
+	*zoom: 1;
+	}
+.b-steps:before,
+.b-steps:after {
+	display: table;
+	border-collapse: collapse;
+	content: "";
+	}
+.b-steps:after {
+	clear: both;
+	}
+	.b-steps-step {
+		position: relative;
+		display: inline-block;
+		margin: 0 7px 0 0;
+		padding: 5px 9px;
+		*display: inline;
+		*zoom: 1;
+		}
+	.b-steps-step.active {
+		-moz-border-radius: 0.5em;
+		border-radius: 0.5em;
+		-moz-box-shadow: inset 0 0 6px #2B4C7B;
+		-webkit-box-shadow: inset 0 0 6px #2B4C7B;
+		box-shadow: inset 0 0 6px #2B4C7B;
+		background: #369AFF;
+		background: #369AFF -moz-linear-gradient(top,  #3863A0 0%, #369AFF 100%);
+		background: #369AFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3863A0), color-stop(100%,#369AFF));
+		background: #369AFF -webkit-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF -o-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF -ms-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		background: #369AFF linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		color: #FFF;
+		}
+
 /* Clear fix
 ----------------------------------------------*/
 .clearfix-lj:after {
