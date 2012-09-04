@@ -1121,9 +1121,11 @@
 	margin: 0;
 	}
 .b-settings-journalpromo .b-settings-journalpromo-rules {
-	color: #AAA;
-	font-size: 11px;
+	margin: 5px 0 0;
+	color: #838383;
+	font-size: 12px;
 	}
 .b-settings-journalpromo-header {
 	font-weight: bold;
 	}
+
