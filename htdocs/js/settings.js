@@ -128,7 +128,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 			}
 		})
 		.bind('travauserinfo', function (evt, data) {
-			if (data) {
+			if (data && data.user) {
 				userName.html(data.user.name || data.user.nickname);
 			}
 	});
