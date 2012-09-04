@@ -199,32 +199,41 @@ sub update {
 }
 
 sub convert {
-    my ($self) = @_;
+    my ($self, $verbose) = @_;
     my $req = $self->{data};
 
     my $flags = { 'noauth' => 1,
                   'use_custom_time' => 0,
                   'u' => $self->poster };
 
-    my $err = 0;
+    warn "postevent user " . $self->poster->userid if $verbose;
+
+    my $err = '';
     my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
-    my $fail = !defined $res->{itemid} && $res->{message};
+    my ($error_code, $text) = split(/:/, $err);
+    $error_code ||= 0;
 
-
-    if ( $err || !$fail ) {
+    if ( !$err ) {
         my $url = $res->{'url'} || '';
+        warn "no error : ";
+        warn "delayed id : " . $self->delayedid;
+        warn "journal id : " . $self->journalid;
+        warn "url : $url";
+
         $self->journal->do( "UPDATE delayedlog2 SET ".
                             "finaltime=NOW(), url=? " .
                             "WHERE delayedid = ? AND " .
-                                  "journalid = ?", 
+                            "journalid = ?", 
                             undef,
                             $url,
                             $self->delayedid,
                             $self->journalid ); 
+    } elsif ($verbose) {
+        warn "error $err";
     }
 
-    return { 'delete_entry'  => (!$fail || $err < 500),
-             'error_message' => $res->{message},
+    return { 'delete_entry'  => !($error_code < 500),
+             'error_message' => $text || '',
              'res' => $res };
 }
 
@@ -249,13 +258,15 @@ sub convert_from_data {
 
     my $err = 0;
     my $res = LJ::Protocol::do_request("postevent", $req, \$err, $flags);
-    my $fail = !defined $res->{itemid} && $res->{message};
-    if ($fail) {
+    if ($err) {
         $self->update($req);
     }
 
+    my ($error_code, $text) = split(/:/, $err);
+    $error_code ||= 0;
+    $text       ||= '';
     
-    if ( $err || !$fail ) {
+    if ( !$err ) {
         my $url = $res->{'url'} || '';
         $self->journal->do( "UPDATE delayedlog2 SET ".
                             "finaltime=NOW(), url=? " .
@@ -267,7 +278,8 @@ sub convert_from_data {
                             $self->journalid );
     }
 
-    return { 'delete_entry' => (!$fail || $err < 500),
+    return { 'delete_entry' => !($error_code < 500),
+             'error_message' => $text || '',
              'res' => $res };
 }
 

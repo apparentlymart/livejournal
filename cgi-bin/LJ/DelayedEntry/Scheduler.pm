@@ -56,12 +56,14 @@ sub pulse_time {
 }
 
 sub __load_delayed_entries {
-    my ($dbh) = @_;
+    my ($dbh, $verbose) = @_;
     my @entries;
 
     my $list = $dbh->selectall_arrayref( "SELECT journalid, delayedid, posterid " .
                                          "FROM delayedlog2 ".
                                          "WHERE posttime <= NOW() AND finaltime IS NULL LIMIT 1000" );
+
+    print "loaded list to post: " . LJ::D($list) if $verbose; 
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
                                                    { journalid  => $tuple->[0],
@@ -138,7 +140,7 @@ sub on_pulse {
     }
 
     eval {
-        while ( my $entries = __load_delayed_entries($dbh) ) {
+        while ( my $entries = __load_delayed_entries($dbh, $verbose) ) {
             foreach my $entry (@$entries) {
                 if (!LJ::DelayedEntry::can_post_to($entry->journal,
                                                    $entry->poster)) {
@@ -156,7 +158,7 @@ sub on_pulse {
                     next;
                 }
 
-                my $post_status = $entry->convert();
+                my $post_status = $entry->convert($verbose);
 
                 # do we need to send error
                 if ( $post_status->{'error_message'} ) {
