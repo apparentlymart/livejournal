@@ -73,21 +73,21 @@
 /* Shared Content */
 .account table, .display table, .mobile table, 
 .privacy table, .history table, .advertising table, .extension table, .extensions table,
-.lj_adsense table {
+.lj_adsense table, .myad table {
     width: 100%;
 }
 .account td, .display td, .mobile td, .privacy td, .history td, .advertising td, .integration td, 
-.extensions td, .lj_adsense td {
+.extensions td, .lj_adsense td, .myad td {
     border-bottom: 1px #ccc solid;
     padding: 10px 10px 10px 5px;
 }
 .account td.last, .display td.last, .mobile td.last, .privacy td.last, 
 .history td.last, .advertising td.last, .extension td.last, 
-.extensions td.last, .lj_adsense td {
+.extensions td.last, .lj_adsense td, .myad td.last {
     border-bottom: none;
 }
 .account td.help, .display td.help, .mobile td.help, .privacy td.help, 
-.history td.help, .advertising td.help .extensions td.help, .lj_adsense td.help {
+.history td.help, .advertising td.help .extensions td.help, .lj_adsense td.help, .myad td.help {
     width: 14px;
     text-align: right;
 }
@@ -1112,9 +1112,20 @@
 	}
 
 /* Journapromo settings */
-
+.myad UL {
+	margin: 0 0 0 4px;
+	padding: 0;
+	list-style: none;
+	}
+	.myad .b-settings-journalpromo UL LI {
+		margin: 0 0 12px 0;
+		}
+.myad .b-settings-journalpromo TD {
+	padding: 0;
+	border-bottom: none;
+	}
 .b-settings-journalpromo TD,
-.lj_adsense td.help {
+.myad td.help {
 	vertical-align: top;
 	}
 .b-settings-journalpromo P {
@@ -1128,4 +1139,11 @@
 .b-settings-journalpromo-header {
 	font-weight: bold;
 	}
-
+.journalpromo-options {
+	visibility: hidden;
+	height: 0;
+	}
+	.journalpromo-options.journalpromo-options-on {
+		visibility: visible;
+		height: auto;
+		}
