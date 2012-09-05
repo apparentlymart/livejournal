@@ -88,8 +88,10 @@ sub __load_delayed_entries {
                                          "FROM delayedlog2 ".
                                          "WHERE posttime <= NOW() AND " . 
                                          "finaltime IS NULL AND " . 
-                                         "(lastposttry <= $time OR lastposttry IS NULL) " . 
-                                         "LIMIT 1000" );
+                                         "(lastposttry <= ? OR lastposttry IS NULL) " . 
+                                         "LIMIT 1000",
+                                         undef,
+                                         $time );
 
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
