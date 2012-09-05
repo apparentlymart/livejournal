@@ -215,10 +215,10 @@ sub convert {
 
     if ( !$err ) {
         my $url = $res->{'url'} || '';
-        warn "no error : ";
-        warn "delayed id : " . $self->delayedid;
-        warn "journal id : " . $self->journalid;
-        warn "url : $url";
+        warn "no error:\n" .
+             "\tdelayed id : " . $self->delayedid . "\n" .
+             "\tjournal id : " . $self->journalid . "\n" .
+             "\turl : $url\n" if $verbose;
 
         $self->journal->do( "UPDATE delayedlog2 SET ".
                             "finaltime=NOW(), url=? " .

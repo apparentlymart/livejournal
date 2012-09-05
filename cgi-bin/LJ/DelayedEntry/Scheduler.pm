@@ -5,38 +5,62 @@ use warnings;
 my $DELAYED_ENTRIES_LOCK_NAME = 'delayed_entries_lock';
 
 sub new {
-    my ($class, $dbh) = @_;
+    my ($class, $dbh, $verbose) = @_;
 
-    if (!try_lock($dbh)) {
+    if (!try_lock($dbh, $verbose)) {
         return undef;
     }
 
     my $self = bless {}, $class;
     $self->{dbh} = $dbh;
+    $self->{locked}  = 1;
+    $self->{verbose} = $verbose;
 
     return $self;
 }
 
 sub try_lock {
-    my ($dbh) = @_;
+    my ($dbh, $verbose) = @_;
 
     my ($free) = 
         $dbh->selectrow_array("SELECT IS_FREE_LOCK('$DELAYED_ENTRIES_LOCK_NAME')");
 
     if (!$free) {
+        print "cluster is locked\n" if $verbose;
         return 0;
     }
 
     my ($result) = 
-        $dbh->selectrow_array("SELECT GET_LOCK('$DELAYED_ENTRIES_LOCK_NAME', 120)");
+        $dbh->selectrow_array("SELECT GET_LOCK('$DELAYED_ENTRIES_LOCK_NAME', 1)");
+    
+    if (!$result && $verbose) {
+        print "locked failed\n";
+    } elsif ($verbose) {
+        print "locked\n";
+    }
+
     return $result;
+}
+
+sub unlock {
+    my ($self) = @_;
+    my $dbh = $self->{dbh};
+
+    if ($self->{locked}) {
+        $dbh->selectrow_array("SELECT RELEASE_LOCK('$DELAYED_ENTRIES_LOCK_NAME')");
+        $self->{locked} = 0; 
+        print "unlocked\n" if $self->{verbose};
+    }
 }
 
 sub DESTROY {
     my ($self) = @_;
     my $dbh = $self->{dbh};
 
-    $dbh->selectrow_array("SELECT RELEASE_LOCK('$DELAYED_ENTRIES_LOCK_NAME')");
+    if ($self->{locked}) {
+        $dbh->selectrow_array("SELECT RELEASE_LOCK('$DELAYED_ENTRIES_LOCK_NAME')");
+        print "unlocked in destroy\n" if $self->{verbose};
+    }
 }
 
 
@@ -49,7 +73,7 @@ use LJ::PersistentQueue;
 use strict;
 use warnings;
 
-my $PULSE_TIME = 1 * 60;
+my $PULSE_TIME = 1;# * 60;
 
 sub pulse_time {
     return $PULSE_TIME;
@@ -63,13 +87,13 @@ sub __load_delayed_entries {
                                          "FROM delayedlog2 ".
                                          "WHERE posttime <= NOW() AND finaltime IS NULL LIMIT 1000" );
 
-    print "loaded list to post: " . LJ::D($list) if $verbose; 
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
                                                    { journalid  => $tuple->[0],
                                                      delayed_id => $tuple->[1],
                                                      posterid   => $tuple->[2]} );
     }
+
     return undef if !scalar @entries;
     return \@entries;
 }
@@ -133,28 +157,38 @@ sub on_pulse {
     my ($clusterid, $dbh, $verbose) = @_;
     __assert($dbh);
 
-    my $lock = new LJ::DelayedEntry::Scheduler::TableLock($dbh);
-
-    if (!$lock) {
-        return;
-    }
 
     eval {
-        while ( my $entries = __load_delayed_entries($dbh, $verbose) ) {
+        while ( my $lock = new LJ::DelayedEntry::Scheduler::TableLock($dbh, $verbose) ) {
+            my $entries = __load_delayed_entries($dbh, $verbose);
+            if (!$entries) {
+                 print "no entries, cluster = $clusterid\n" if $verbose;
+                 return;
+            }
+
+            foreach my $entry (@$entries) {
+                print "mark entry as posted:\n" .
+                      "\tdelayed id = " . $entry->delayedid .
+                      "\tpost date " . $entry->posterid . "\n" if $verbose;
+
+                $entry->mark_posted();
+            }
+
+            $lock->unlock;
+ 
             foreach my $entry (@$entries) {
                 if (!LJ::DelayedEntry::can_post_to($entry->journal,
                                                    $entry->poster)) {
                     
                     if ($verbose) {
-                        print "The entry with subject " . $entry->subject;
-                        print "\ndelayed id = " . $entry->delayedid . 
-                        print " and post date " . $entry->posttime;
+                        print "The entry with subject " . $entry->subject . 
+                              "\ndelayed id = " . $entry->delayedid . 
+                              " and post date " . $entry->posttime . "\n";
                     }
 
                     __notify_user(  $entry->poster,
                                     $entry->journal);
                     
-                    $entry->mark_posted();
                     next;
                 }
 
@@ -162,7 +196,7 @@ sub on_pulse {
 
                 # do we need to send error
                 if ( $post_status->{'error_message'} ) {
-                    warn "(posting failed) The entry with subject " . $entry->subject .
+                    print "(posting failed) The entry with subject " . $entry->subject .
                           "\ndelayed id = " . $entry->delayedid . 
                           " and post date " . $entry->posttime . 
                           " error : " . $post_status->{'error_message'};
@@ -188,3 +222,4 @@ sub __assert() {
 }
 
 1;
+
