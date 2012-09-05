@@ -45,11 +45,11 @@
 					</TMPL_IF>
 
 					<TMPL_IF expr="entry_security eq 'private'">
-						<img src="<?imgprefix?>/icon_private.gif?v=7017" width=16 height=16 align=absmiddle class="i-posticon">
+						<img src="<TMPL_VAR lj_imgprefix>/icon_private.gif?v=7017" width=16 height=16 align=absmiddle class="i-posticon">
 					<TMPL_ELSIF expr="entry_security eq 'groups'">
-						<img src="<?imgprefix?>/icon_groups.gif?v=13546" width=19 height=16 align=absmiddle class="i-posticon">
+						<img src="<TMPL_VAR lj_imgprefix>/icon_groups.gif?v=13546" width=19 height=16 align=absmiddle class="i-posticon">
 					<TMPL_ELSIF expr="entry_security eq 'friends'">
-						<img src="<?imgprefix?>/icon_protected.gif?v=7017" width=14 height=15 align=absmiddle class="i-posticon">
+						<img src="<TMPL_VAR lj_imgprefix>/icon_protected.gif?v=7017" width=14 height=15 align=absmiddle class="i-posticon">
 					</TMPL_IF>
 					<a href='<TMPL_VAR entry_url>'>
 						<TMPL_IF entry_subject>
