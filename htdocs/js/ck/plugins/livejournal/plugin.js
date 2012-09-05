@@ -985,7 +985,7 @@
 						iframe.setAttribute('data-link', content);
 						iframe.setAttribute('lj-class', 'lj-iframe');
 						iframe.setAttribute('class', 'lj-iframe-wrap lj-rtebox');
-						iframe.setAttribute('style', "width: 560px; height:315px;");
+						iframe.setAttribute('style', "width: 570px; height:325px;");
 						iframe.setAttribute('lj-style', "width: 560px; height:315px;");
 						iframe.setAttribute('allowfullscreen', 'true');
 						iframe.setAttribute('lj-content', encodeURIComponent("<div class='lj-embed-inner lj-rtebox-inner'>iframe</div>"));
