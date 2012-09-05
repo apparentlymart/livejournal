@@ -4514,4 +4514,19 @@ register_alter(sub {
 
 });
 
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("delayedlog2", "lastposttry")) {
+        do_alter( "delayedlog2",
+                  "ALTER TABLE delayedlog2 " .
+                  "ADD lastposttry int(10) unsigned DEFAULT NULL" );
+    }
+
+});
+
+
+
 1; # return true
