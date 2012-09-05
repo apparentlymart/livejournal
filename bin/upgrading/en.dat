@@ -741,6 +741,10 @@ create.reg.gender.unspecified=Unspecified
 create.reg.password|staleness=1
 create.reg.password=Password
 
+create.reg.password.hidden=Password is hidden
+
+create.reg.password.shown=Password is shown
+
 create.reg.passwordconfirm|staleness=1
 create.reg.passwordconfirm=Password confirm
 
