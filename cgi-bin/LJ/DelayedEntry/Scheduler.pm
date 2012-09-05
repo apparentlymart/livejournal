@@ -73,7 +73,7 @@ use LJ::PersistentQueue;
 use strict;
 use warnings;
 
-my $PULSE_TIME = 1;# * 60;
+my $PULSE_TIME = 1 * 60;
 
 sub pulse_time {
     return $PULSE_TIME;
