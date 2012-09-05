@@ -250,6 +250,21 @@ sub mark_posted {
                         $self->journalid ); 
 }
 
+sub work_in_progress {
+    my ($self) = @_;
+
+    my $time = time();
+    $self->journal->do( "UPDATE delayedlog2 SET ".
+                        "lastposttry=? " .
+                        "WHERE delayedid = ? AND " .
+                        "journalid = ?",
+                        undef,
+                        $time,
+                        $self->delayedid,
+                        $self->journalid );
+
+}
+
 sub convert_from_data {
     my ($self, $req) = @_;
     my $flags = { 'noauth' => 1,

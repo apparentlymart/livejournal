@@ -83,9 +83,13 @@ sub __load_delayed_entries {
     my ($dbh, $verbose) = @_;
     my @entries;
 
+    my $time = time() - 60*5;
     my $list = $dbh->selectall_arrayref( "SELECT journalid, delayedid, posterid " .
                                          "FROM delayedlog2 ".
-                                         "WHERE posttime <= NOW() AND finaltime IS NULL LIMIT 1000" );
+                                         "WHERE posttime <= NOW() AND " . 
+                                         "finaltime IS NULL AND " . 
+                                         "(lastposttry <= $time OR lastposttry IS NULL) " . 
+                                         "LIMIT 1000" );
 
     foreach my $tuple (@$list) {
         push @entries, LJ::DelayedEntry->load_data($dbh,
@@ -171,7 +175,7 @@ sub on_pulse {
                       "\tdelayed id = " . $entry->delayedid .
                       "\tpost date " . $entry->posterid . "\n" if $verbose;
 
-                $entry->mark_posted();
+                $entry->work_in_progress();
             }
 
             $lock->unlock;
@@ -188,7 +192,8 @@ sub on_pulse {
 
                     __notify_user(  $entry->poster,
                                     $entry->journal);
-                    
+            
+                    $entry->mark_posted();        
                     next;
                 }
 
