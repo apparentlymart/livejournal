@@ -84,7 +84,7 @@ sub __load_delayed_entries {
     my @entries;
 
     my $time = time() - 60*5;
-    my $list = $dbh->selectall_arrayref( "SELECT journalid, delayedid, posterid " .
+    my $list = $dbh->selectall_arrayref( "SELECT journalid, delayedid, posterid, lastposttry " .
                                          "FROM delayedlog2 ".
                                          "WHERE posttime <= NOW() AND " . 
                                          "finaltime IS NULL AND " . 
@@ -97,7 +97,8 @@ sub __load_delayed_entries {
         push @entries, LJ::DelayedEntry->load_data($dbh,
                                                    { journalid  => $tuple->[0],
                                                      delayed_id => $tuple->[1],
-                                                     posterid   => $tuple->[2]} );
+                                                     posterid   => $tuple->[2],
+                                                     lastpostry => $tuple->[3],} );
     }
 
     return undef if !scalar @entries;
@@ -172,13 +173,7 @@ sub on_pulse {
                  return;
             }
 
-            foreach my $entry (@$entries) {
-                print "mark entry as posted:\n" .
-                      "\tdelayed id = " . $entry->delayedid .
-                      "\tpost date " . $entry->posterid . "\n" if $verbose;
-
-                $entry->work_in_progress();
-            }
+            @$entries = grep { $_->work_in_progress() } @$entries;
 
             $lock->unlock;
  

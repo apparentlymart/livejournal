@@ -254,15 +254,16 @@ sub work_in_progress {
     my ($self) = @_;
 
     my $time = time();
-    $self->journal->do( "UPDATE delayedlog2 SET ".
-                        "lastposttry=? " .
-                        "WHERE delayedid = ? AND " .
-                        "journalid = ?",
-                        undef,
-                        $time,
-                        $self->delayedid,
-                        $self->journalid );
-
+    return $self->journal->do( "UPDATE delayedlog2 SET ".
+                               "lastposttry=? " .
+                               "WHERE delayedid = ? AND " .
+                               "journalid = ? AND " .
+                               "lastposttry = ?" ,
+                               undef,
+                               $time,
+                               $self->delayedid,
+                               $self->journalid,
+                               $self->{lastposttry}, );
 }
 
 sub convert_from_data {
@@ -718,6 +719,7 @@ sub load_data {
     $self->{poster}     = LJ::want_user($opts->{posterid});
     $self->{data}       = __deserialize($data_ser);
     $self->{posttime}   = __get_datetime($self->{data});
+    $self->{lastposttry} = $opts->{lastposttry};
 
     return $self;
 }
