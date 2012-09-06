@@ -145,6 +145,9 @@
 .details.lastupdated2|staleness=1
 .details.lastupdated2=last updated [[timestamp]]
 
+.details.lastupdated3|staleness=1
+.details.lastupdated3=Last updated
+
 .details.membersince|staleness=1
 .details.membersince=Member Since: [[createdate]]
 
@@ -168,6 +171,9 @@
 
 .details.supportpoints2|staleness=1
 .details.supportpoints2=[[num]] <a [[aopts]]>Support [[?num_raw|Point|Points]]</a>
+
+.details.supportpoints3|staleness=1
+.details.supportpoints3=[[num_raw]] <a [[aopts]]>Support [[?num_raw|Point|Points]]</a>
 
 .details.tags|staleness=1
 .details.tags=[[num]] <a [[aopts]]>[[?num|Tag|Tags]]</a>
