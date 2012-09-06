@@ -547,9 +547,11 @@ sub trans {
                     my $custom_userhead = $remote->custom_usericon;
                     require URI;
                     my $uri = URI->new ($custom_userhead);
-                    my $res = send_files ($uri->path);
-                    LJ::Request->content_type ('image/gif');
-                    return ($res == LJ::Request::OK) ? LJ::Request::DONE : $res;
+                    if ($uri) {
+                        my $res = send_files ($uri->path);
+                        LJ::Request->content_type ('image/gif');
+                        return ($res == LJ::Request::OK) ? LJ::Request::DONE : $res;
+                    }
                 }
             }
 
