@@ -126,7 +126,7 @@ sub load_userpics
 
     if (@LJ::MEMCACHE_SERVERS) {
         my @mem_keys = map { [$_->[1],"userpic.$_->[1]"] } @load_list;
-        my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+        my $mem = LJ::MemCacheProxy::get_multi(@mem_keys) || {};
         while (my ($k, $v) = each %$mem) {
             next unless $v && $k =~ /(\d+)/;
             my $id = $1;
@@ -179,7 +179,7 @@ sub load_userpics
             $ur->{location} = uc(substr($ur->{location}, 0, 1));
 
             $LJ::CACHE_USERPIC{$id} = $ur;
-            LJ::MemCache::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
+            LJ::MemCacheProxy::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
         }
     }
 
@@ -210,7 +210,7 @@ sub load_userpics
         }->{delete $ur->{contenttype}};
 
         $LJ::CACHE_USERPIC{$id} = $ur;
-        LJ::MemCache::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
+        LJ::MemCacheProxy::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
     }
 }
 
@@ -266,7 +266,7 @@ sub expunge_userpic {
 
     # now clear the user's memcache picture info
     LJ::Userpic->delete_cache($u);
-    LJ::MemCache::delete([$picid, "userpic.$picid"]);
+    LJ::MemCacheProxy::delete([$picid, "userpic.$picid"]);
 
     ## if this was the default userpic, "undefault" it
     if ($u->{'defaultpicid'} && $u->{'defaultpicid'}==$picid) {
