@@ -1379,6 +1379,7 @@ sub res_template_includes {
         my $src  = $LJ::IS_SSL? $LJ::SSLROOT : $LJ::STATPREFIX;
            $src .= '/tmpl/??';
 
+        my $timestamp = int(time() / $LJ::TEMPLATES_UPDATE_TIME);
         foreach my $extension ('.tmpl', '.jqtmpl') {
             my $mtime = 0;
             $ret .= join join(',',
@@ -1392,7 +1393,7 @@ sub res_template_includes {
                 } grep {
                     -1 != index $_, $extension
                 } @LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE
-            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime;uselang=$lang"></script>\n}; 
+            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime&tm=$timestamp;uselang=$lang"></script>\n}; 
         }
     } else {
         foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
