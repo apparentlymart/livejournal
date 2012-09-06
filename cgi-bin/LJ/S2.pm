@@ -47,9 +47,6 @@ sub make_journal
     my ($entry, $page);
     my $con_opts = {};
 
-    LJ::Widget::Calendar->render()
-        unless LJ::run_hook('show_control_strip', { user => $u->{user} });
-
     if ($view eq "res") {
         # the s1shortcomings virtual styleid doesn't have a styleid
         # so we're making the rule that it can't have resource URLs.
@@ -87,6 +84,9 @@ sub make_journal
     # work in this context since BML::cur_req won't be loaded if no BML requests
     # have been served from this Apache process yet
     BML::set_language($lang, \&LJ::Lang::get_text);
+
+    LJ::Widget::Calendar->render()
+        unless LJ::run_hook('show_control_strip', { user => $u->{user} });
 
     # let layouts disable EntryPage / ReplyPage, using the BML version
     # instead.
