@@ -245,10 +245,14 @@ sub reply_url {
 sub comments_url {
     my ( $self, %opts ) = @_;
 
-    my $overridden_url;
-    LJ::run_hooks( 'override_comments_url', $self->journal, $self,
-        \$overridden_url );
-    return $overridden_url if $overridden_url;
+    my $no_override = delete $opts{no_override}; # For stream comments
+
+    unless ($no_override) {
+        my $overridden_url;
+        LJ::run_hooks( 'override_comments_url', $self->journal, $self,
+            \$overridden_url );
+        return $overridden_url if $overridden_url;
+    }
 
     my $remote     = LJ::get_remote();
     my $replycount = $self->reply_count;
@@ -274,19 +278,24 @@ sub url {
     my $style  = delete $opts{style};
     my $nc     = delete $opts{nc};
 
+    my $no_overrides = delete $opts{no_overrides}; # For stream comments
+
     croak "Unknown args passed to url: " . join(",", keys %opts)
         if %opts;
 
-    my $override = LJ::run_hook("entry_permalink_override", $self, %opts);
-    return $override if $override;
+    unless ($no_overrides) {
+        my $override = LJ::run_hook("entry_permalink_override", $self, %opts);
+        return $override if $override;
 
-    LJ::run_hook('override_entry_url', $u, $self, \$override);
-    return $override if $override;
+        LJ::run_hook('override_entry_url', $u, $self, \$override);
+        return $override if $override;
+    } 
 
     $self->{'url'} ||= $u->journal_base . "/" . $self->ditemid . ".html";
     my $url = $self->{'url'};
 
     delete $args{anchor};
+    delete $args{no_overrides};
     if (%args) {
         $url .= "?";
         $url .= LJ::encode_url_string(\%args);
