@@ -6384,7 +6384,7 @@ sub reset_cache {
 
     foreach my $key (@keys) {
         $key =~ s/\*/$u->{userid}/g;
-        LJ::MemCache::delete([ $u->{userid}, $key ]);
+        LJ::MemCacheProxy::delete([ $u->{userid}, $key ]);
     }
 
     my $bio = $dbcm->selectrow_array('SELECT bio FROM userbio WHERE userid = ?', undef, $u->{userid});
@@ -8213,7 +8213,7 @@ sub get_timezone {
 
     # next, check memcache
     my $memkey = [$u->userid, 'timezone_guess:' . $u->userid];
-    my $memcache_data = LJ::MemCache::get($memkey);
+    my $memcache_data = LJ::MemCacheProxy::get($memkey);
     if ($memcache_data) {
         # fill the request cache since it was empty
         $u->{_timezone_guess} = $memcache_data;
@@ -8250,7 +8250,7 @@ sub get_timezone {
         # set the caches
         $u->{_timezone_guess} = $$offsetref;
         my $expire = 60*60*24; # 24 hours
-        LJ::MemCache::set($memkey, $$offsetref, $expire);
+        LJ::MemCacheProxy::set($memkey, $$offsetref, $expire);
     }
 
     return 1;
