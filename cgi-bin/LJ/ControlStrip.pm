@@ -2,6 +2,7 @@ package LJ::ControlStrip;
 
 use strict;
 use LJ::Widget::Calendar;
+use LJ::Widget::JournalPromoStrip;
 
 sub render
 {
@@ -312,6 +313,10 @@ sub render
     $data_control_strip->{site_messages} = LJ::Widget::SiteMessages->should_render
                                            ? LJ::Widget::SiteMessages->render
                                            : '';
+
+    $data_control_strip->{promo_strip} = LJ::Widget::JournalPromoStrip->should_render(remote => $remote, journal => $journal)
+                                            ? LJ::Widget::JournalPromoStrip->render(remote => $remote, journal => $journal)
+                                            : '';
 
     {
         my $extra_cells;
