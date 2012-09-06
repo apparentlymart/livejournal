@@ -195,7 +195,6 @@ sub make_html
     my @valid_sizes = qw/ 100x100 320x240 640x480 /;
     $opts->{imgsize} = '320x240' unless grep { $opts->{imgsize} eq $_; } @valid_sizes;
     my ($width, $height) = split 'x', $opts->{imgsize};
-    my $size = '/s' . $opts->{imgsize};
 
     # force lj-cut on images larger than 320 in either direction
     $opts->{imgcut} = 'count'
@@ -212,14 +211,39 @@ sub make_html
     foreach my $i (@$images) {
         my $title = LJ::ehtml($i->{'title'});
 
+        my ( $image_url, $page_url, $scaled_url );
+        $image_url = $i->{'url'};
+
+        my $image_uri      = URI->new($image_url);
+        my $image_hostname = $image_uri ? $image_uri->host : '';
+
+        if ( $image_hostname =~ /^ic?[.]pics/ ) {
+            my $extension = ( $image_url =~ /(\w+)$/ );
+
+            $page_url = $image_url;
+            $page_url =~ s/\w*original[.]\w+$//;
+
+            $scaled_url = $page_url . $width . '.' . $extension;
+        } else {
+            $page_url   = $image_url . '/';
+
+            if ( $i->{'width'} > $width || $i->{'height'} > $height ) {
+                $scaled_url = $page_url . '/s' . $opts->{'imgsize'};
+            } else {
+                $scaled_url = $image_url;
+            }
+        }
+
         # don't set a size on images smaller than the requested width/height
         # (we never scale larger, just smaller)
+        my $size = '/s' . $opts->{imgsize};
         undef $size if $i->{width} <= $width || $i->{height} <= $height;
 
         $html .= "<td>" if $horiz;
         $html .= "<lj-cut text=\"$title\">" if $opts->{imgcut} eq 'titles';
-        $html .= "<a href=\"$i->{url}/\">";
-        $html .= "<img src=\"$i->{url}$size\" alt=\"$title\" border=\"0\"></a><br />";
+        $html .= "<a href=\"$page_url\">";
+        $html .= "<img src=\"$scaled_url\" alt=\"$title\" border=\"0\">";
+        $html .= "</a><br />";
         $html .= "$i->{caption}<br />" if $i->{caption};
         $html .= $horiz ? '</td>' : '<br />';
         $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';
