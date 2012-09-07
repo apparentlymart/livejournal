@@ -1740,10 +1740,10 @@ sub bday_string {
 
     if ($opts{'format'}) {
         if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
-            $mon = LJ::Lang::ml(LJ::Lang::month_long_langcode($mon)); 
+            $mon = LJ::Lang::ml(LJ::Lang::month_long_genitive_langcode($mon)); 
             $bday_string = sprintf("%02d %s %04d", $day, $mon, $year);
         } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
-            $mon = LJ::Lang::ml(LJ::Lang::month_long_langcode($mon)); 
+            $mon = LJ::Lang::ml(LJ::Lang::month_long_genitive_langcode($mon)); 
             $bday_string = sprintf("%02d %s", $day, $mon);
         } elsif ($u->can_show_bday_year && $year > 0) {
             $bday_string = $year;
