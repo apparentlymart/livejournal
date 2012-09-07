@@ -30,8 +30,14 @@
 .cat.adsense|staleness=1
 .cat.adsense=adSense
 
+.cat.myad|staleness=1
+.cat.myad=.cat.myad
+
 .cat.adsense.desc|staleness=1
 .cat.adsense.desc=adSense settings
+
+.cat.myad.desc|staleness=1
+.cat.myad.desc=.cat.myad.desc
 
 .cat.display|staleness=1
 .cat.display=Display
