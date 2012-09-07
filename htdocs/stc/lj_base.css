@@ -2876,7 +2876,8 @@ HTML BODY .i-ljuser {
 .b-toggle:before,
 .b-toggle:after {
 	position: absolute;
-	display: inline-block;
+	overflow: hidden;
+	display: block;
 	border-width: 0.5em;
 	border-style: solid;
 	width: 0;
@@ -2887,14 +2888,14 @@ HTML BODY .i-ljuser {
 	}
 .b-toggle-before:before {
 	left: -1.5em;
-	content: '';
+	content: ' ';
 	}
 .b-toggle-after {
 	margin: 0 1.5em 0 0;
 	}
 .b-toggle-after:after {
 	right: -1.5em;
-	content: '';
+	content: ' ';
 	}
 /* top */
 .b-toggle-top:after,
