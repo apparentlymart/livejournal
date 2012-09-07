@@ -757,6 +757,8 @@ create.reg.username=Username
 create.reg.username.desc|staleness=1
 create.reg.username.desc=Your name on LiveJournal
 
+create.reg.captcha.desc=Prove you're human
+
 create.steps.finish|staleness=1
 create.steps.finish=2. Finish
 
