@@ -78,10 +78,10 @@
 		},
 		LJLike: {
 			html: encodeURIComponent(CKLang.LJLike_WizardNotice + '<br /><a href="#" lj-cmd="LJLike">' + CKLang.LJLike_WizardNoticeLink + '</a>')
-		},
+		},/*
 		LJUserLink: {
 			html: encodeURIComponent(CKLang.LJUser_WizardNotice + '<br /><a href="#" lj-cmd="LJUserLink">' + CKLang.LJUser_WizardNoticeLink + '</a>')
-		},
+		},*/
 		LJLink2: {
 			html: encodeURIComponent(CKLang.LJLink_WizardNotice + '<br /><a href="#" lj-cmd="LJLink2">' + CKLang.LJLink_WizardNoticeLink + '</a>')
 		},
@@ -391,6 +391,11 @@
 
 				while (length--) {
 					frame = frames.getItem(length), cmd = frame.getAttribute('lj-cmd'), frameWin = frame.$.contentWindow, doc = frameWin.document, ljStyle = frame.getAttribute('lj-style') || '';
+					
+					if (frame.getAttribute('data-update') === 'false') {
+						continue;
+					}
+
 					frame.removeListener('load', onLoadFrame);
 					frame.on('load', onLoadFrame);
 					doc.open();
@@ -690,93 +695,93 @@
 			}());
 
 			// LJ User
-			(function () {
-				var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
-					button = 'LJUserLink';
+			// (function () {
+			// 	var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
+			// 		button = 'LJUserLink';
 
-				function onData(data, userName, LJUser) {
-					if (data.error) {
-						LiveJournal.run_hook('incorrect_user');
-						return;
-					}
+			// 	function onData(data, userName, LJUser) {
+			// 		if (data.error) {
+			// 			LiveJournal.run_hook('incorrect_user');
+			// 			return;
+			// 		}
 
-					if (data.success) {
-						data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
+			// 		if (data.success) {
+			// 			data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
 
-						ljUsers[userName] = data.ljuser;
+			// 			ljUsers[userName] = data.ljuser;
 
-						var tmpNode = new CKEDITOR.dom.element.createFromHtml(data.ljuser);
-						tmpNode.setAttribute('lj-cmd', 'LJUserLink');
+			// 			var tmpNode = new CKEDITOR.dom.element.createFromHtml(data.ljuser);
+			// 			tmpNode.setAttribute('lj-cmd', 'LJUserLink');
 
-						if (LJUser) {
-							LJUser.$.parentNode.replaceChild(tmpNode.$, LJUser.$);
-						} else {
-							editor.insertElement(tmpNode);
-						}
-					}
+			// 			if (LJUser) {
+			// 				LJUser.$.parentNode.replaceChild(tmpNode.$, LJUser.$);
+			// 			} else {
+			// 				editor.insertElement(tmpNode);
+			// 			}
+			// 		}
 
-				}
+			// 	}
 
-				var hooked = false;
-				editor.addCommand('LJUserLink', {
-					exec: function(editor) {
-						var userName = '',
-							selection = new CKEDITOR.dom.selection(editor.document),
-							LJUser = ljTagsData.LJUserLink.node,
-							currentUserName;
+			// 	var hooked = false;
+			// 	editor.addCommand('LJUserLink', {
+			// 		exec: function(editor) {
+			// 			var userName = '',
+			// 				selection = new CKEDITOR.dom.selection(editor.document),
+			// 				LJUser = ljTagsData.LJUserLink.node,
+			// 				currentUserName;
 
-						function checkInsert(username) {
-							parent.HTTPReq.getJSON({
-								data: parent.HTTPReq.formEncoded({
-									username: username
-								}),
-								method: 'POST',
-								url: url,
-								onData: function (data) {
-									onData(data, username, ljTagsData.LJUserLink.node);
-								}
-							});
-						}
+			// 			function checkInsert(username) {
+			// 				parent.HTTPReq.getJSON({
+			// 					data: parent.HTTPReq.formEncoded({
+			// 						username: username
+			// 					}),
+			// 					method: 'POST',
+			// 					url: url,
+			// 					onData: function (data) {
+			// 						onData(data, username, ljTagsData.LJUserLink.node);
+			// 					}
+			// 				});
+			// 			}
 
-						if (!hooked) {
-							var lj = LJUser;
-							LiveJournal.register_hook('user_response', function(user) {
-								checkInsert(user);
-							});
-							hooked = true;
-						}
+			// 			if (!hooked) {
+			// 				var lj = LJUser;
+			// 				LiveJournal.register_hook('user_response', function(user) {
+			// 					checkInsert(user);
+			// 				});
+			// 				hooked = true;
+			// 			}
 
-						if (LJUser) {
-							// CKEDITOR.note && CKEDITOR.note.hide(true);
-							currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
+			// 			if (LJUser) {
+			// 				// CKEDITOR.note && CKEDITOR.note.hide(true);
+			// 				currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
 
-							rteButton(button, 'user', {
-								user: currentUserName
-							});
+			// 				rteButton(button, 'user', {
+			// 					user: currentUserName
+			// 				});
 
-							return;
-						} else if (selection.getType() == 2) {
-							userName = selection.getSelectedText();
-						}
+			// 				return;
+			// 			} else if (selection.getType() == 2) {
+			// 				userName = selection.getSelectedText();
+			// 			}
 
-						if (userName == '') {
-							rteButton(button, 'user');
-							return;
-						}
+			// 			if (userName == '') {
+			// 				rteButton(button, 'user');
+			// 				return;
+			// 			}
 
-						if (!userName || currentUserName == userName) {
-							return;
-						}
+			// 			if (!userName || currentUserName == userName) {
+			// 				return;
+			// 			}
 
-						checkInsert(userName, LJUser);
-					}
-				});
+			// 			checkInsert(userName, LJUser);
+			// 		}
+			// 	});
 
-				editor.ui.addButton('LJUserLink', {
-					label: CKLang.LJUser,
-					command: 'LJUserLink'
-				});
-			})();
+			// 	editor.ui.addButton('LJUserLink', {
+			// 		label: CKLang.LJUser,
+			// 		command: 'LJUserLink'
+			// 	});
+			// })();
 
 			// LJ Image
 			(function() {
@@ -1630,7 +1635,7 @@
 						fakeElement.attributes.buttons = attr.join(',');
 
 						return fakeElement;
-					},
+					},/*
 					'lj': (function() {
 						function updateUser(name) {
 							var ljTags = editor.document.getElementsByTag('lj');
@@ -1654,6 +1659,7 @@
 						}
 
 						return function(element) {
+							return;
 							var ljUserName = element.attributes.user;
 							if (!ljUserName || !ljUserName.length) {
 								return;
@@ -1707,7 +1713,7 @@
 								});
 							}
 						};
-					})(),
+					})(),*/
 					'lj-map': function(element) {
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
 						var frameStyle = '';
@@ -1762,6 +1768,11 @@
 						createDoubleFrame(element, 'lj-spoiler', 'LJSpoiler', 'title');
 					},
 					'iframe': function(element) {
+						if (element.attributes['data-update'] === 'false') {
+							return element;
+						}
+
+
 						var src = element.attributes.src;
 
 						if (element.attributes['lj-class'] && element.attributes['lj-class'].indexOf('lj-') + 1 == 1) {
