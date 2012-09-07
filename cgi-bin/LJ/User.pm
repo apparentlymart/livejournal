@@ -1730,7 +1730,7 @@ sub can_show_full_bday {
 
 # This will format the birthdate based on the user prop
 sub bday_string {
-    my $u = shift;
+    my ($u, %opts) = @_;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
 
@@ -1738,12 +1738,24 @@ sub bday_string {
     my ($year,$mon,$day) = split(/-/, $bdate);
     my $bday_string = '';
 
-    if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
-        $bday_string = $bdate;
-    } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
-        $bday_string = "$mon-$day";
-    } elsif ($u->can_show_bday_year && $year > 0) {
-        $bday_string = $year;
+    if ($opts{'format'}) {
+        if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
+            $mon = LJ::Lang::ml(LJ::Lang::month_long_langcode($mon)); 
+            $bday_string = sprintf("%02d %s %04d", $day, $mon, $year);
+        } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
+            $mon = LJ::Lang::ml(LJ::Lang::month_long_langcode($mon)); 
+            $bday_string = sprintf("%02d %s", $day, $mon);
+        } elsif ($u->can_show_bday_year && $year > 0) {
+            $bday_string = $year;
+        }
+    } else {
+        if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
+            $bday_string = $bdate; #sprintf("%02d %s %04d", $day, $mon, $year);
+        } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
+            $bday_string = "$mon-$day"; #sprintf("%02d %s, $day, $mon");
+        } elsif ($u->can_show_bday_year && $year > 0) {
+            $bday_string = $year;
+        }
     }
     $bday_string =~ s/^0000-//;
     return $bday_string;
