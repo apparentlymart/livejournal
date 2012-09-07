@@ -5302,6 +5302,12 @@ sub ban_user {
 
     LJ::run_hooks('ban_set', $u, $ban_u);
 
+    my @friendof_uids  = $u->friendof_uids;
+    if (grep {$ban_u->userid} @friendof_uids) {
+         LJ::MemCache::decr($u->user.'_count_friendof') if $ban_u->{journaltype} eq 'P' || $ban_u->{journaltype} eq 'I';
+         LJ::MemCache::decr($u->user.'_count_member')   if $ban_u->{journaltype} eq 'C' || $ban_u->{journaltype} eq 'S';
+    }
+ 
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }
 
@@ -5312,11 +5318,20 @@ sub ban_user_multi {
 
     my $us = LJ::load_userids(@banlist);
     my $remote = LJ::get_remote();
+
+    my @friendof_uids  = $u->friendof_uids;
+    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+
     foreach my $banuid (@banlist) {
         LJ::User::UserlogRecord::BanSet->create( $u,
             'bannedid' => $banuid, 'remote' => $remote );
 
         LJ::run_hooks('ban_set', $u, $us->{$banuid}) if $us->{$banuid};
+
+        if ($friendof_uids_hash{$banuid}) {
+            LJ::MemCache::decr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
+            LJ::MemCache::decr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
+        }
     }
 
     return 1;
@@ -5329,11 +5344,20 @@ sub unban_user_multi {
 
     my $us = LJ::load_userids(@unbanlist);
     my $remote = LJ::get_remote();
+
+    my @friendof_uids  = $u->friendof_uids;
+    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+
     foreach my $banuid (@unbanlist) {
         LJ::User::UserlogRecord::BanUnset->create( $u,
             'bannedid' => $banuid, 'remote' => $remote );
 
         LJ::run_hooks('ban_unset', $u, $us->{$banuid}) if $us->{$banuid};
+
+        if ($friendof_uids_hash{$banuid}) {
+            LJ::MemCache::incr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
+            LJ::MemCache::incr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
+        }
     }
 
     return 1;
