@@ -7132,6 +7132,10 @@ talk.user.hint=tema
 talk.user.insert|staleness=1
 talk.user.insert=Insert user
 
+talk.user.save=Save user
+
+talk.user.title=User title
+
 talk.userhint.default|staleness=1
 talk.userhint.default=igrick
 
