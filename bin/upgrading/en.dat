@@ -4880,6 +4880,59 @@ poll.error.whovote=whovote must be 'all' or 'friends'.
 poll.isclosed|staleness=1
 poll.isclosed=This poll is closed.
 
+poll.navalny.code=Code
+
+poll.navalny.error.internal.error=Internal error of service. Please try again later.
+poll.navalny.error.ticket.used=Ticket already used. The voter has already voted on this ticket, or the ticket was invalid.
+poll.navalny.error.ticket.limit=Ticket request limit exceeded. Query limit is exceeded by ticket. Please try again later.
+poll.navalny.error.validation.fail=Ticket validation failed. Ticket no exist or invalid password.
+
+poll.navalny.insert=Code to insert in the journal
+poll.navalny.insert.lj=Livejournal
+poll.navalny.insert.other=Other site
+
+poll.navalny.notification.code.incorrect<<
+Dear user!
+
+We checked you data and let you know that it is incorrect.
+
+Please, try to vote one more time: http://www.livejournal.com/poll.bml?id =[[xxxxxx]]
+
+Best regards,
+
+Livejournal team
+.
+
+poll.navalny.notification.everything.right<<
+Dear user!
+
+We checked you data and let you know that your vote was counted
+
+Best regards,
+
+ 
+Livejournal team
+.
+
+poll.navalny.notification.vote.twice<<
+Dear user!
+
+We checked you data and let you know that you had already voted the poll and it is forbidden to vote twice.
+
+Best regards,
+
+ 
+Livejournal team
+.
+
+poll.navalny.password=Password
+
+poll.navalny.submit=Submit a poll
+
+poll.navalny.submit.confirm.email=We will check you data, but we couldn't send you results because of your e-mail wasn't confirmed. Please confirm it.
+
+poll.navalny.submit.send.email=We received your vote. After we will check an information results would be sent on your e-mail address soon.
+
 poll.participants|staleness=1
 poll.participants=, participants: [[total]]
 
