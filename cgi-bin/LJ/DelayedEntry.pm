@@ -254,16 +254,27 @@ sub work_in_progress {
     my ($self) = @_;
 
     my $time = time();
-    return $self->journal->do( "UPDATE delayedlog2 SET ".
-                               "lastposttry=? " .
-                               "WHERE delayedid = ? AND " .
-                               "journalid = ? AND " .
-                               "lastposttry = ?" ,
-                               undef,
-                               $time,
-                               $self->delayedid,
-                               $self->journalid,
-                               $self->{lastposttry}, );
+    if (!$self->{lastposttry}) {
+         return $self->journal->do( "UPDATE delayedlog2 SET ".
+                                    "lastposttry=? " .
+                                    "WHERE delayedid = ? AND " .
+                                    "journalid = ?" .
+                                    undef,
+                                    $time,
+                                    $self->delayedid,
+                                    $self->journalid, );
+    } else {
+        return $self->journal->do( "UPDATE delayedlog2 SET ".
+                                   "lastposttry=? " .
+                                   "WHERE delayedid = ? AND " .
+                                   "journalid = ? AND " .
+                                   "lastposttry = ?" ,
+                                   undef,
+                                   $time,
+                                   $self->delayedid,
+                                   $self->journalid,
+                                   $self->{lastposttry}, );
+    }
 }
 
 sub convert_from_data {
