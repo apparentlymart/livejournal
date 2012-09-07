@@ -839,6 +839,15 @@ sub clean {
                     $newdata .= "<b>[Unknown LJ tag]</b>";
                 }
             }
+            elsif ($tag eq "lj-random")
+            {
+                my $max = abs($attr->{'max'}) || 10_000_000;
+                my $min = abs($attr->{'min'}) || 0;
+                if ($max < $min) {
+                    ($max, $min) = ($min, $max);
+                }
+                $newdata .= int(rand($max-$min)) + $min;
+            }
             elsif ($tag eq "lj-raw")
             {
                 # Strip it out, but still register it as being open
