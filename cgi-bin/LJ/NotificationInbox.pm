@@ -375,6 +375,7 @@ sub enqueue {
     # if over the max, delete the oldest notification
     my $max = $u->get_cap('inbox_max');
     my $skip = $max - 1; # number to skip to get to max
+
     if ($max && $self->count >= $max) {
 
         # Get list of bookmarks and ignore them when checking inbox limits
@@ -426,11 +427,15 @@ sub enqueue {
             or die $u->errstr;
     }
 
-    # send notification
-    $self->__send_notify( { 'u'         => $u,
-                            'journal_u' => LJ::want_user($evt->arg2),
-                            'msgid'     => $evt->arg1,
-                            'etypeid'   => $evt->etypeid, });
+    if ( LJ::Event::UserMessageRecvd->etypeid == $evt->etypeid ) {
+        # send notification
+        $self->__send_notify({
+            'u'         => $u,
+            'journal_u' => LJ::want_user($evt->arg2),
+            'msgid'     => $evt->arg1,
+            'etypeid'   => $evt->etypeid,
+        });
+    }
 
     # invalidate memcache
     $self->expire_cache;
@@ -440,15 +445,11 @@ sub enqueue {
 
 sub __send_notify {
     my ($self, $data) = @_;
-    my $etypeid = $data->{'etypeid'};
+    my $msgid       = $data->{'msgid'};
+    my $u           = $data->{'u'};
+    my $journal_u   = $data->{'journal_u'};
 
-    if (LJ::Event::UserMessageRecvd->etypeid == $etypeid) {
-        my $msgid       = $data->{'msgid'};
-        my $u           = $data->{'u'};
-        my $journal_u   = $data->{'journal_u'};
-
-        LJ::Event::InboxUserMessageRecvd->new($u, $msgid, $journal_u)->fire;
-    }
+    LJ::Event::InboxUserMessageRecvd->new($u, $msgid, $journal_u)->fire;
 }
 
 # return true if item is bookmarked

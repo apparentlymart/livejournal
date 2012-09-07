@@ -87,11 +87,11 @@ sub new {
 # my $event =
 #     LJ::Event->new_from_raw_params($example_etypeid, $u->id, $arg1, $arg2, $arg3, $arg4);
 sub new_from_raw_params {
-    my (undef, $etypeid, $journalid, $arg1, $arg2, $arg3, $arg4) = @_;
+    my (undef, $etypeid, $journalid, @args ) = @_;
 
     my $class   = LJ::Event->class($etypeid) or confess "Classname cannot be undefined/false";
     my $journal = LJ::load_userid($journalid);
-    my $evt     = LJ::Event->new($journal, $arg1, $arg2, $arg3, $arg4);
+    my $evt     = LJ::Event->new($journal, @args);
 
     # bless into correct class
     bless $evt, $class;
@@ -107,9 +107,10 @@ sub new_from_raw_params {
 # my ($etypeid, $journalid, $arg1, $arg2) = @$params;
 sub raw_params {
     my $self = shift;
-    use Data::Dumper;
+
     my $ju = $self->event_journal or
         Carp::confess("Event $self has no journal: " . Dumper($self));
+
     my @params = map { $_ || 0 } (
         $self->etypeid,
         $ju->id,
@@ -579,10 +580,12 @@ sub subscriptions {
     my $zeromeans = $self->zero_journalid_subs_means;
 
     my @wildcards_from;
+
     if ($zeromeans eq 'friends') {
         # find friendofs, add to @wildcards_from
         @wildcards_from = LJ::get_friendofs($self->u);
-    } elsif ($zeromeans eq 'all') {
+    }
+    elsif ($zeromeans eq 'all') {
         $allmatch = 1;
     }
 
@@ -603,12 +606,14 @@ sub subscriptions {
         ## TODO: check that LJ::get_cluster_master($cid) in other parts of code
         ## will return handle to 'active' db, not cached 'inactive' db handle
         my $udbh = '';
+
         if (not $LJ::DISABLED{'try_to_load_subscriptions_from_slave'}){
-            $udbh = eval { 
-                        require 'LJ/DBUtil.pm';
-                        LJ::DBUtil->get_inactive_db($cid); # connect to slave 
-                    };
+            $udbh = eval {
+                require 'LJ/DBUtil.pm';
+                LJ::DBUtil->get_inactive_db($cid); # connect to slave
+             };
         }
+
         $udbh ||= LJ::get_cluster_master($cid); # default (master) connect
 
         die "Can't connect to db" unless $udbh;
@@ -627,7 +632,9 @@ sub subscriptions {
         my @args = ($self->etypeid);
         push @args, $self->u->id unless $allmatch;
         push @args, @extra_args;
+
         $sth->execute(@args);
+
         if ($sth->err) {
             warn "SQL: [$sql], args=[@args]\n";
             die $sth->errstr;
