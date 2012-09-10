@@ -399,3 +399,17 @@ jQuery.delayedCallback = function(callback, minDelay) {
 		checkFinish();
 	};
 };
+
+/**
+ * Fix behavior of select box: trigger change event on keyup
+ */
+jQuery.fn.selectFix = function () {
+	'use strict';
+
+	return this.filter('select').on('keyup', function (e) {
+		var code = e.which;
+		if (code >= 37 && code <= 40) {
+			jQuery(this).trigger('change');
+		}
+	});
+};
