@@ -258,7 +258,7 @@ sub work_in_progress {
          return $self->journal->do( "UPDATE delayedlog2 SET ".
                                     "lastposttry=? " .
                                     "WHERE delayedid = ? AND " .
-                                    "journalid = ?" .
+                                    "journalid = ?",
                                     undef,
                                     $time,
                                     $self->delayedid,
