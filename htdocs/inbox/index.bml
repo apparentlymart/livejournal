@@ -30,6 +30,7 @@ body<=
                   js/esn_inbox.js
                   stc/esn.css
                   stc/lj_base.css
+                  stc/lj_base-journal.css
                   ));
                   
     LJ::need_string(qw(
