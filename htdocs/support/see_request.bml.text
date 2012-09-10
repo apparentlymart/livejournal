@@ -110,6 +110,8 @@ and correct, it will be sent to the user. p?>
 .ip_address|staleness=1
 .ip_address=IP Address
 
+.is_beta=Request sent from Beta
+
 .language|staleness=1
 .language=language
 

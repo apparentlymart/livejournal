@@ -612,7 +612,7 @@ sub file_request
         return unless $q && $q ne 'NULL';
         push @data, "($spid, '$_[0]', $q)";
     };
-    my @props = qw(uniq useragent ip has_js);
+    my @props = qw(uniq useragent ip has_js is_beta);
     push @props, "language" if LJ::is_enabled("support_request_language");
     foreach my $p (@props) {
         $add_data->($p, $o->{$p});

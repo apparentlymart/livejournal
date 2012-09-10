@@ -513,6 +513,10 @@ body<=
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.has_js'}:</b></td>";
     $ret .= "<td>$has_js</td></tr>";
     
+    # Is problem occurred on Prod or Beta?
+    my $is_beta = $props->{'is_beta'};
+    $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.is_beta'}:</b></td>";
+    $ret .= "<td>$is_beta</td></tr>";
 
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.supportcategory'}:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {

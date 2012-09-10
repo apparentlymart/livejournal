@@ -204,6 +204,8 @@ sub handle_post {
     $req{'ip'}      = LJ::get_remote_ip();
     $req{'has_js'}  = $post->{'has_js'};
 
+    $req{'is_beta'} = LJ::Request->cookie('ljbetatest') ? 1 : 0;
+
     # don't autoreply if they aren't gonna get a link
     $req{'no_autoreply'} = $class->send_email ? 0 : 1;
 
