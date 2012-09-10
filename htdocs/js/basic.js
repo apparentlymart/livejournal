@@ -1441,7 +1441,7 @@ Object.extend(String.prototype, {
 	 * Encode a string to allow a secure insertion in html code.
 	 */
 	encodeHTML: function() {
-		return this.replace( /([<>&"])/g, function( m, c ) { return String.encodeEntity( c ) } ); /* fix syntax highlight: " */
+		return this.replace( /([<>&\"\'])/g, function( m, c ) { return String.encodeEntity( c ) } ); /* fix syntax highlight: " */
 	},
 
 	decodeHTML: function() {
