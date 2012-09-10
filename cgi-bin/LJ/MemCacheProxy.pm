@@ -12,16 +12,16 @@ sub reset_singletons {
 }
 
 sub get {
-    my ($key) = @_;
+    my ($key_origin) = @_;
 
-    $key = $key->[1]
-        if ref $key eq 'ARRAY';
+    my $key = $key_origin->[1]
+        if ref $key_origin eq 'ARRAY';
     
     if (exists $singletons{$key}) {
         return $singletons{$key};
     }
 
-    my $value = LJ::MemCache::get($key);
+    my $value = LJ::MemCache::get($key_origin);
     $singletons{$key} = $value;
     return $value;
 }
@@ -54,33 +54,33 @@ sub get_multi {
 }
 
 sub delete {
-    my ($key) = @_;
+    my ($key_origin) = @_;
 
-    $key = $key->[1]
-        if ref $key eq 'ARRAY';
+    my $key = $key_origin->[1]
+        if ref $key_origin eq 'ARRAY';
 
     delete $singletons{$key};
-    LJ::MemCache::delete($key);
+    LJ::MemCache::delete($key_origin);
 }
 
 sub set {
-    my ($key, $value, $expire) = @_;
+    my ($key_origin, $value, $expire) = @_;
 
-    $key = $key->[1]
-        if ref $key eq 'ARRAY';
+    my $key = $key_origin->[1]
+        if ref $key_origin eq 'ARRAY';
 
     $singletons{$key} = $value;
-    return LJ::MemCache::set($key, $value, $expire);
+    return LJ::MemCache::set($key_origin, $value, $expire);
 }
 
 sub replace {
-    my ( $key, $value, $expire ) = @_;
+    my ( $key_origin, $value, $expire ) = @_;
 
-    $key = $key->[1]
-        if ref $key eq 'ARRAY';
+    my $key = $key_origin->[1]
+        if ref $key_origin eq 'ARRAY';
 
     $singletons{$key} = $value;
-    return LJ::MemCache::replace($key, $value, $expire);
+    return LJ::MemCache::replace($key_origin, $value, $expire);
 }
 
 1;
