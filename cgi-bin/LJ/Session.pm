@@ -670,7 +670,12 @@ sub session_from_domain_cookie {
         my $rr = $opts->{redirect_ref};
 
         if ($rr) {
-            $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . LJ::eurl(_current_url());
+            my $current_url = _current_url();
+
+            my $time     = time;
+            my $sign     = LJ::run_hook('sign_set_domain_session_redirect' => $current_url, $time);
+            my $returnto = LJ::eurl($current_url);
+            $$rr = "$LJ::SITEROOT/misc/get_domain_session.bml?return=" . $returnto . '&sign=' . $sign . '&t=' . $time;
         }
 
         return undef;

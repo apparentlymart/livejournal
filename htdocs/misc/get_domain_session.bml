@@ -2,7 +2,22 @@
 {
     use strict;
     use vars qw(%GET);
-    return BML::redirect(LJ::Session->helper_url($GET{'return'}, $GET{'ljpta'}) || "$LJ::SITEROOT/login.bml");
+
+    my $return = $GET{'return'};
+    my $ljpta  = $GET{'ljpta'};
+    my $sign_time = $GET{'t'};
+    my $sign   = $GET{'sign'};
+
+    my $is_sign_valid = 0;
+    LJ::run_hook('check_get_domain_session_sign' => \$is_sign_valid, $return, $sign_time, $sign);
+
+    if (!$is_sign_valid){
+        BML::set_status( LJ::Request::NOT_FOUND() );
+        BML::finish();
+        return '';
+    }
+
+    return BML::redirect(LJ::Session->helper_url($return, $ljpta) || "$LJ::SITEROOT/login.bml");
 }
 _code?>
 
