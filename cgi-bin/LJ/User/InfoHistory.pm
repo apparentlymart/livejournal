@@ -27,10 +27,10 @@ sub get {
 
     $LJ::REQ_GLOBAL{'infohistory_cache'} ||= {};
     unless ( exists $LJ::REQ_GLOBAL{'infohistory_cache'}->{ $u->userid } ) {
-        my $dbr = LJ::get_db_reader();
-        local $dbr->{'RaiseError'} = 1;
+        my $dbh = LJ::get_db_writer();
+        local $dbh->{'RaiseError'} = 1;
 
-        my $rows = $dbr->selectall_arrayref(
+        my $rows = $dbh->selectall_arrayref(
             'SELECT * FROM infohistory WHERE userid=? ORDER BY timechange',
             { 'Slice' => {} },
             $u->userid,
