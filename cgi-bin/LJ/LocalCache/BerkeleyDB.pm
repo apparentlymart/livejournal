@@ -9,10 +9,23 @@ use BerkeleyDB;
 my $connection;
 my $lifetime;
 
+sub __reset_connection {
+    if ($connection) {
+        $connection->db_close();
+        $connection = undef;
+    }
+}
+
+sub DESTROY {
+    __reset_connection();
+}
+
 sub __get_instance {
     my ($class) = @_;
 
     if ($connection) {
+        die "CDS is not enabled " 
+            unless $connection->cds_enabled();
         return $connection;
     }
 
@@ -23,8 +36,11 @@ sub __get_instance {
     my $env = new BerkeleyDB::Env
                   -Home   => $LJ::LJ_LOCAL_BDB_HOME,
                   -Flags  => DB_CREATE| DB_INIT_CDB | DB_INIT_MPOOL,
+                  -LockDetect => DB_LOCK_OLDEST,
+                  -ErrFile => *STDERR
         or die "cannot open environment: $BerkeleyDB::Error\n";
 
+    return unless $env;
     die "CDS is not enabled " unless $env->cds_enabled();
 
     $connection = new BerkeleyDB::Hash
@@ -42,6 +58,7 @@ sub get {
     my ($class, $key) = @_;
 
     my $db = $class->__get_instance();
+    return unless $db;
 
     my $data = '';
     my $status = $db->db_get($key, $data);
@@ -56,6 +73,11 @@ sub get {
         }
 
         my $lock = $db->cds_lock();
+        unless ($lock) {
+            __reset_connection();
+            return;
+        }
+
         eval { $db->db_del($key); };
         $lock->cds_unlock();
     }
@@ -86,7 +108,14 @@ sub set {
     my $cache_data = "$expire_time:$data";
 
     my $db = $class->__get_instance();
+    return unless $db;
+
     my $lock = $db->cds_lock();
+    unless ($lock) {
+        __reset_connection();
+        return 0;
+    }   
+
     eval { $db->db_put($key, $cache_data); };
     $lock->cds_unlock();
 
@@ -95,13 +124,20 @@ sub set {
 
 sub replace {
     my ($class, $key, $value, $expire) = @_;
-    return undef;
+    return 0;
 }
 
 sub delete {
     my ($class, $key) = @_;
     my $db = $class->__get_instance();
+    return unless $db;
+
     my $lock = $db->cds_lock();
+    unless ($lock) {
+        __reset_connection();
+        return  0;
+    }
+
     eval { $db->db_del($key); };
     $lock->cds_unlock();
     return 1;
