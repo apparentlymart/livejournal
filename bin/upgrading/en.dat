@@ -5114,6 +5114,16 @@ rating.timeswitcher.all=All time
 
 rating.timeswitcher.day=Views in 24 hours
 
+relations.change.error.suspended=Suspended journals cannot add friends.
+
+relations.change.error.email_not_validated=Sorry, you aren't allowed to add to friends until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="http://www.livejournal.com/register.bml">have it re-sent.</a>
+
+relations.change.error.reached_max_friends=You have reached your limit of [[count]] friends.
+
+relations.change.error.reached_limit_ban=Exceeded limit maximum of banned users
+
+relations.change.error.rate_limit=You are trying to add too many friends in too short a period of time.
+
 repost.button.counter=Already reposted by...
 
 repost.button.label|staleness=1
