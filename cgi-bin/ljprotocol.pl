@@ -1295,7 +1295,7 @@ sub getfriendspage
     });
 
     my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
-
+   
     my @uids;
 
     my @res = ();
@@ -1331,10 +1331,25 @@ sub getfriendspage
         # event result data structure
         my %h = ();
 
+        my $repost_props = { use_repost_signature => 1 };
+        my ($original_entry, $repost_entry, $event_raw);
+        my $opts = {original_post_obj => \$original_entry, repost_obj => \$repost_entry, event => \$event_raw};
+        if (LJ::Entry::Repost->substitute_content( $entry, $opts, $repost_props )) {
+            $h{repost} = 1;
+            $entry = $original_entry;
+        }
+
         # Add more data for public posts
         foreach my $method (@attrs) {
             $h{$method} = $entry->$method;
         }
+
+        if($h{repost}){
+            $h{event_raw} = $event_raw;
+            $h{original_entry_url} = $original_entry->url;
+            $h{repostername} = $repost_entry->journal->username;
+        }
+        
 
         $h{event_raw} = LJ::trim_widgets(
             length    => $req->{trim_widgets},
@@ -4085,7 +4100,9 @@ sub getevents {
         #
         # prepare list of variables to substiture values
         #
+        my $repost_entry;
         my $content =  { 'original_post_obj' => \$entry,
+                         'repost_obj'        => \$repost_entry,
                          'journalid'         => \$final_ownerid,
                          'itemid'            => \$final_itemid,
                          'allowmask'         => \$mask,
@@ -4108,7 +4125,9 @@ sub getevents {
              $evt->{'repost_ownerid'} = $final_ownerid;
              $evt->{'repost_itemid'}  = $final_itemid;
              $evt->{'repost_anum'}    = $final_anum;
-             $evt->{'repoost_props'}  = $entry->props;
+             $evt->{'repost_props'}  = $entry->props;
+             $evt->{'original_entry_url'} = $entry->url,
+             $evt->{'repostername'} = $repost_entry->journal->username;
         }
 
         # now my own post, so need to check for suspended prop
@@ -4229,7 +4248,9 @@ sub getevents {
             
             $evt->{'props'}    = delete $evt->{'repost_props'}
                 unless $req->{'noprops'};
-
+            
+            delete $evt->{'props'}{'repost_offer'} if $evt->{'props'};
+            
             $evt->{'itemid'}   = delete $evt->{'repost_itemid'};
             $evt->{'anum'}     = delete $evt->{'repost_anum'};
             $evt->{'ownerid'}  = delete $evt->{'repost_ownerid'};
