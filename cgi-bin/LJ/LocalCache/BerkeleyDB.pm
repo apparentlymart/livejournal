@@ -16,7 +16,6 @@ sub __get_instance {
         return $connection;
     }
 
-    warn "create connection";
     unless(-d $LJ::LJ_LOCAL_BDB_HOME) {    
         mkdir $LJ::LJ_LOCAL_BDB_HOME;
     }
