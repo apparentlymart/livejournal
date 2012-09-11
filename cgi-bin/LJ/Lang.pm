@@ -739,19 +739,25 @@ sub get_text_multi {
 
     return \%strings unless %memkeys;
 
-    my @keys_memcache = ();
-    my @keys = keys %memkeys;
+    my $mem = {};
+    if (0 && LJ::is_enabled('local_cache')) {
+        my @keys_memcache = ();
+        my @keys = keys %memkeys;
 
-    my $mem_local = LJ::LocalCache::get_cache()->get_multi( \@keys, \@keys_memcache );
-    my $mem = LJ::MemCache::get_multi( @keys_memcache ) || {};
+        my $mem_local = LJ::LocalCache::get_cache()->get_multi( \@keys, \@keys_memcache );
+           $mem = LJ::MemCache::get_multi( @keys_memcache ) || {};
 
-    foreach my $key (keys %$mem) {
-        LJ::LocalCache::get_cache()->set($key, $mem->{$key});
+        foreach my $key (keys %$mem) {
+            LJ::LocalCache::get_cache()->set($key, $mem->{$key});
+        }
+
+        foreach my $key (keys %$mem_local) {
+            $mem->{$key} = $mem_local->{$key};
+        }
+    } else {
+        $mem = LJ::MemCache::get_multi( keys %memkeys ) || {};
     }
-
-    foreach my $key (keys %$mem_local) {
-        $mem->{$key} = $mem_local->{$key};
-    }
+       
 
     ## %dbload: lower-case key --> text; text may be empty (but defined) string
     my %dbload;
