@@ -29,7 +29,7 @@ sub __get_instance {
         return $connection;
     }
 
-    unless(-d $LJ::LJ_LOCAL_BDB_HOME) {    
+    unless(-d $LJ::LJ_LOCAL_BDB_HOME) {
         mkdir $LJ::LJ_LOCAL_BDB_HOME;
     }
 

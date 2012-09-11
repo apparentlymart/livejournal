@@ -38,7 +38,7 @@ sub get {
 
 sub get_multi {
     my ($class, $keys, $not_fetched_keys) = @_;
-    $not_fetched_keys = $keys;
+    @$not_fetched_keys = @$keys;
     return undef;
 }
 
