@@ -58,13 +58,11 @@ sub execute {
         while (my @ids_batch = splice(@$banids, 0 => 500)){
             ## load users
             my $us = LJ::load_userids(@ids_batch);
-            while (my (undef, $banuser) = each %$us){
-                ## We are interested in suspended or expunged users only.
-                if ($banuser->is_suspended or $banuser->is_expunged){
-                    ## remove suspended user from ban list
-                    ban_unset($remote, $journal, $banuser);
-                    $self->print("User " . $banuser->user . " unbanned from " . $journal->user);
-                }
+            ## unban users multi
+            @ids_batch = grep { $us->{$_}->is_suspended || $us->{$_}->is_expunged } @ids_batch;
+            $journal->unban_user_multi(@ids_batch);
+            for (@ids_batch) {
+                $self->print("User " . $us->{$_}->user . " unbanned from " . $journal->user);
             }
         }
     } else {
@@ -73,29 +71,12 @@ sub execute {
         return $self->error("Unknown account: $user")
             unless $banuser;
 
-        ban_unset($remote, $journal, $banuser);
+        $journal->unban_user_multi($banuser->userid);
 
         return $self->print("User " . $banuser->user . " unbanned from " . $journal->user);
     }
 
     return 1;
 }
-
-sub ban_unset {
-    my ($remote, $journal, $banuser) = @_;
-
-    LJ::clear_rel($journal, $banuser, 'B');
-
-    LJ::User::UserlogRecord::BanUnset->create( $journal,
-        'bannedid' => $banuser->userid, 'remote' => $remote );
-
-    LJ::run_hooks('ban_unset', $journal, $banuser);
-
-
-}
-
-
-
-
 
 1;

@@ -5303,7 +5303,12 @@ sub ban_user {
     LJ::run_hooks('ban_set', $u, $ban_u);
 
     my @friendof_uids  = $u->friendof_uids;
-    if (grep {$ban_u->userid} @friendof_uids) {
+    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+
+    my $ban_uids = LJ::load_rel_user($u, 'B');
+    my %ban_user_hash = map {$_ => 1} @$ban_uids;
+
+    if ($friendof_uids_hash{$ban_u->id} && !$ban_user_hash{$ban_u->id}) {
          LJ::MemCache::decr($u->user.'_count_friendof') if $ban_u->{journaltype} eq 'P' || $ban_u->{journaltype} eq 'I';
          LJ::MemCache::decr($u->user.'_count_member')   if $ban_u->{journaltype} eq 'C' || $ban_u->{journaltype} eq 'S';
     }
@@ -5314,13 +5319,14 @@ sub ban_user {
 sub ban_user_multi {
     my ($u, @banlist) = @_;
 
-    LJ::set_rel_multi(map { [$u->id, $_, 'B'] } @banlist);
-
     my $us = LJ::load_userids(@banlist);
     my $remote = LJ::get_remote();
 
     my @friendof_uids  = $u->friendof_uids;
     my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+
+    my $ban_uids = LJ::load_rel_user($u, 'B');
+    my %ban_user_hash = map {$_ => 1} @$ban_uids;
 
     foreach my $banuid (@banlist) {
         LJ::User::UserlogRecord::BanSet->create( $u,
@@ -5328,11 +5334,13 @@ sub ban_user_multi {
 
         LJ::run_hooks('ban_set', $u, $us->{$banuid}) if $us->{$banuid};
 
-        if ($friendof_uids_hash{$banuid}) {
+        if ($friendof_uids_hash{$banuid} && !$ban_user_hash{$banuid}) {
             LJ::MemCache::decr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
             LJ::MemCache::decr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
         }
     }
+
+    LJ::set_rel_multi(map { [$u->id, $_, 'B'] } @banlist);
 
     return 1;
 }
@@ -5340,13 +5348,14 @@ sub ban_user_multi {
 sub unban_user_multi {
     my ($u, @unbanlist) = @_;
 
-    LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
-
     my $us = LJ::load_userids(@unbanlist);
     my $remote = LJ::get_remote();
 
     my @friendof_uids  = $u->friendof_uids;
     my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+
+    my $ban_uids = LJ::load_rel_user($u, 'B');
+    my %ban_user_hash = map {$_ => 1} @$ban_uids;
 
     foreach my $banuid (@unbanlist) {
         LJ::User::UserlogRecord::BanUnset->create( $u,
@@ -5354,11 +5363,13 @@ sub unban_user_multi {
 
         LJ::run_hooks('ban_unset', $u, $us->{$banuid}) if $us->{$banuid};
 
-        if ($friendof_uids_hash{$banuid}) {
+        if ($friendof_uids_hash{$banuid} && $ban_user_hash{$banuid}) {
             LJ::MemCache::incr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
             LJ::MemCache::incr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
         }
     }
+
+    LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
 
     return 1;
 }

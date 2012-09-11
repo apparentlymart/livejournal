@@ -52,12 +52,7 @@ sub execute {
     return $self->error("You have reached the maximum number of bans.  Unban someone and try again.")
         if scalar(@$banlist) >= ($LJ::MAX_BANS || 5000);
 
-    LJ::set_rel($journal, $banuser, 'B');
-
-    LJ::User::UserlogRecord::BanSet->create( $journal,
-        'bannedid' => $banuser->userid, 'remote' => $remote );
-
-    LJ::run_hooks('ban_set', $journal, $banuser);
+    $journal->ban_user($banuser);
 
     return $self->print("User " . $banuser->user . " banned from " . $journal->user);
 }
