@@ -855,7 +855,9 @@ sub clean {
             }
             elsif ($tag eq "lj-cvk-poll") 
             {
-                $newdata .= Encode::decode_utf8(LJ::Controller::CVK->widget->raw_output);
+                if (my $widget = LJ::Controller::CVK->widget) {
+                    $newdata .= Encode::decode_utf8($widget->raw_output);
+                }
             }
             elsif ( $tag eq 'lj-like' ) {
                 next TOKEN if $opts->{'textonly'};
