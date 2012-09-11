@@ -853,7 +853,10 @@ sub clean {
                 # Strip it out, but still register it as being open
                 $opencount{$tag}++;
             }
-
+            elsif ($tag eq "lj-cvk-poll") 
+            {
+                $newdata .= Encode::decode_utf8(LJ::Controller::CVK->widget->raw_output);
+            }
             elsif ( $tag eq 'lj-like' ) {
                 next TOKEN if $opts->{'textonly'};
 
