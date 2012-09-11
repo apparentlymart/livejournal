@@ -44,7 +44,7 @@ sub render_body {
         $ret .= "<table cellspacing='0' class='prop-list first' id='proplist__presentation__basic'>";
         $ret .= $class->language_chooser($u) if $opts{show_lang_chooser};
         foreach my $prop_name (@basic_props) {
-            next if $class->skip_prop($props->{$prop_name}, $prop_name, theme => $theme);
+            next if $class->skip_prop($props->{$prop_name}, $prop_name, theme => $theme, style => $style);
 
             if ($opts{show_lang_chooser}) {
                 # start on gray, since the language chooser will be white
@@ -60,7 +60,7 @@ sub render_body {
         $count = 1; # reset counter
         my $header_printed = 0;
         foreach my $prop_name (@$groupprops) {
-            next if $class->skip_prop($props->{$prop_name}, $prop_name, props_to_skip => \%is_basic_prop, theme => $theme);
+            next if $class->skip_prop($props->{$prop_name}, $prop_name, props_to_skip => \%is_basic_prop, theme => $theme, style => $style);
 
             # need to print the header inside the foreach because we don't want it printed if
             # there's no props in this group that are also in this subheader
@@ -366,8 +366,9 @@ sub group_exists_with_props {
     my $groupprops = $opts{groupprops};
 
     my $theme = LJ::Customize->get_current_theme($u);
+    my $style = LJ::S2::load_style($u->prop('s2_style'));
     foreach my $prop_name (@$groupprops) {
-        return 1 unless $class->skip_prop($props->{$prop_name}, $prop_name, theme => $theme);
+        return 1 unless $class->skip_prop($props->{$prop_name}, $prop_name, theme => $theme, style => $style);
     }
 
     return 0;

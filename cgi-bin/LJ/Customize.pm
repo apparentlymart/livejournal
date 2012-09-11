@@ -463,7 +463,7 @@ sub save_s2_props {
         $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
             unless ref $prop;
         next unless ref $prop;
-        next if $prop->{'noui'};
+        next if $prop->{'noui'} && !S2::is_property_use ([$style->{'layer'}{'theme'}], $prop->{'name'});
         my $name = $prop->{'name'};
         next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
 
