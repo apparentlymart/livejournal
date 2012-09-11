@@ -740,7 +740,7 @@ sub get_text_multi {
     return \%strings unless %memkeys;
 
     my $mem = {};
-    if (0 && LJ::is_enabled('local_cache')) {
+    if (LJ::is_enabled('local_cache')) {
         my @keys_memcache = ();
         my @keys = keys %memkeys;
 
