@@ -354,7 +354,7 @@
 
     my $url = LJ::Request->uri();
     # Page version switcher
-    if ($remote && !$remote->prop('profile_ver_noswitch')) {
+    if (LJ::is_enabled('profile_controller') && $remote && !$remote->prop('profile_ver_noswitch')) {
         $body .= "<form class='b-profile-switchver' method='POST'><button class='b-profile-switchver-button' type='submit' name='new_version' value='1' ><span class='b-profile-switchver-inner'>".LJ::Lang::ml('profile.switch.to.new.version')."</span></button> " .LJ::Lang::ml('profile.switch.to.version.post'). "</form>";
         if (LJ::did_post() && LJ::Request->post_param('new_version')) {
             $remote->set_prop('profile_ver', 2);
