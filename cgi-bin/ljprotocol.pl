@@ -268,18 +268,15 @@ sub do_request
         $req->{'ver'} = 0 unless defined $req->{'ver'};
 
         # check specified language
-        if (defined $req->{'lang'} && $req->{'lang'}) {
-            if ($req->{'lang'} eq 'en') {
-                $req->{'lang'} = "en_LJ";
-            } elsif (not grep /^$req->{'lang'}$/, @LJ::LANGS) {
-                return fail($err, 221, $req->{'lang'} );
-            }
+        if ($req->{'lang'} && not grep /^$req->{'lang'}$/, @LJ::LANGS) {
+            return fail($err, 221, $req->{'lang'} );
         }
     }
     
     # set specified or default language
     my $current_lang = LJ::Lang::current_language();
     my $lang = $req->{'lang'} || $current_lang || $LJ::DEFAULT_LANG;
+    $lang = 'en_LJ' if $lang eq 'en';
     LJ::Lang::current_language($lang) unless $lang eq $current_lang;
 
     $flags ||= {};
@@ -329,6 +326,7 @@ sub do_request
     }
 
     LJ::Request->notes("codepath" => "") if LJ::Request->is_inited;
+
     return fail($err, 201);
 }
 
