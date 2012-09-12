@@ -219,6 +219,10 @@ body<=
 
         $save_rv = LJ::Setting->save_all($u, \%POST, \@settings);
 
+        if (defined $FORM{'redirect_to'}) {
+            return BML::redirect($FORM{'redirect_to'});
+        }
+
         if (LJ::Setting->save_had_errors($save_rv)) {
             $submit_msg .= "<?errorbar $ML{'.errors'} errorbar?><br />";
         } else {
@@ -279,6 +283,10 @@ body<=
 
             $u->set_prop('opt_getselfemail' => exists($POST{'opt_getselfemail'}))
                 if LJ::get_cap($u, 'getselfemail');
+
+            if (defined $FORM{'redirect_to'}) {
+                return BML::redirect($FORM{'redirect_to'});
+            }
 
             if ($error) {
                 if ($error->isa('LJ::Subscription::QuotaError')) {
