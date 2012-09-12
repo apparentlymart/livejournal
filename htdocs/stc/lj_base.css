@@ -2881,20 +2881,18 @@ HTML BODY .i-ljuser {
 	margin: 0 0 0 1.5em;
 	}
 .b-toggle-before:before {
-	left: -1.5em;
 	content: ' ';
 	}
 .b-toggle-after {
 	margin: 0 1.5em 0 0;
 	}
 .b-toggle-after:after {
-	right: -1.5em;
 	content: ' ';
 	}
 /* top */
 .b-toggle-top:after,
 .b-toggle-top:before {
-	top: -0.1em;
+	top: 0;
 	border-color: transparent;
 	border-bottom-color: inherit;
 	}
@@ -2907,13 +2905,13 @@ HTML BODY .i-ljuser {
 /* right */
 .b-toggle-right:after,
 .b-toggle-right:before {
-	top: 0.2em;
+	top: 0;
 	right: -1.5em;
 	border-color: transparent;
 	border-left-color: inherit;
 	}
 	.b-toggle-right:before {
-		left: -1em;
+		left: -1.3em;
 		}
 	.b-toggle-right:after {
 		right: -1.5em;
@@ -2921,7 +2919,8 @@ HTML BODY .i-ljuser {
 /* bottom */
 .b-toggle-bottom:after,
 .b-toggle-bottom:before {
-	top: 0.4em;
+	margin: 0.5em 0 0 0;
+	top: 0;
 	border-color: transparent;
 	border-top-color: inherit;
 	}
@@ -2934,7 +2933,7 @@ HTML BODY .i-ljuser {
 /* left */
 .b-toggle-left:after,
 .b-toggle-left:before {
-	top: 0.2em;
+	top: 0;
 	border-color: transparent;
 	border-right-color: inherit;
 	}
