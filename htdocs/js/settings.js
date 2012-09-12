@@ -9,12 +9,19 @@ LiveJournal.register_hook('init_settings', function ($) {
 		confirm_msg: LiveJournal.getLocalizedStr('.form.confirm', null, 'Save your changes?'),
 		form_changed: false,
 		navclickSave: function(e) {
-			if (!Settings.form_changed || e.isDefaultPrevented() || this.target === '_blank') {
-				return;
+			
+			if ( Settings.form_changed  && confirm(Settings.confirm_msg) ) {
+				
+				e.preventDefault();
+				
+				var redirectVal = $(e.target).attr('href');
+				
+				if ( redirectVal ) {
+					Settings.$form.append('<input type="hidden" name="redirect_to" value="' + redirectVal + '">');
+				}
+				
+				Settings.$form.submit();
 			}
-
-			var confirmed = confirm(Settings.confirm_msg);
-			confirmed && Settings.$form.submit();
 		}
 	};
 
