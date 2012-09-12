@@ -177,7 +177,9 @@ sub __create_post {
     #
     # Needs to create new entry
     #
-    my %req = ( 'username'    => $u->user,
+    my %req = ( 
+                'ver'         => 4,
+                'username'    => $u->user,
                 'event'       => $event_text_stub,
                 'subject'     => '',
                 'tz'          => $timezone,
