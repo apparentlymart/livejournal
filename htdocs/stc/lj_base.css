@@ -581,13 +581,7 @@ SUP.i-new {
 /* Styles for messagers,
 Must be removed after implementation of Framework! */
 .appwidget-sitemessages {
-	position: absolute;
-	top: 50px;
-	left: 0;
-	z-index: 10;
-	width: 100%;
 	padding: 0;
-	margin: 0;
 	}
 .mobile-msg .appwidget-sitemessages {
 	top: 130px;
