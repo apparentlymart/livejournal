@@ -268,7 +268,7 @@ sub do_request
         $req->{'ver'} = 0 unless defined $req->{'ver'};
 
         # check specified language
-        if ($req->{'lang'} && not grep /^$req->{'lang'}$/, @LJ::LANGS) {
+        if ($req->{'lang'} && not grep /^$req->{'lang'}$/, (@LJ::LANGS, 'en')) {
             return fail($err, 221, $req->{'lang'} );
         }
     }
