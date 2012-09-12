@@ -703,3 +703,38 @@ span.expandcollapse {
 			font-size: 10px;
 			color: #999;
 			}
+
+/* switcher new version */
+.b-profile-switchver {
+	position: relative;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 5px 0 5px 0;
+	font: 14px/1.3 Arial,sans-serif;
+	}
+	.b-profile-switchver-button {
+		overflow: visible;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		font: 14px/1.3 Arial,sans-serif;
+		color: #000;
+		cursor: pointer;
+		}
+		.b-profile-switchver-inner {
+			margin: 0;
+			padding: 0;
+			}
+		.s-horizon .b-profile-switchver-inner {
+			color: #00C;
+			text-decoration: underline;
+			}
+		.s-lanzelot .b-profile-switchver-inner {
+			color: #3F5F9E;
+			border-bottom: 1px solid #CCC;
+			}
+		.s-lanzelot .b-profile-switchver-button:hover .b-profile-switchver-inner {
+			border-bottom: 1px solid #3F5F9E;
+			}
