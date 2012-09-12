@@ -352,6 +352,16 @@
 
     $body .= "<div id='profile_page'>";
 
+    my $url = LJ::Request->uri();
+    # Page version switcher
+    if ($remote && !$remote->prop('profile_ver_noswitch')) {
+        $body .= "<form method='POST'><input type='submit' name='new_version' value='".LJ::Lang::ml('profile.switch.to.new.version')."' ></form>";
+        if (LJ::did_post() && LJ::Request->post_param('new_version')) {
+            $remote->set_prop('profile_ver', 2);
+            return LJ::Request->redirect($url, LJ::Request::HTTP_MOVED_TEMPORARILY);
+        }
+    }
+
     if ($com) {
         my $pt;
         my $userinfo_join_community;

@@ -902,6 +902,22 @@ userproplist.profile_collapsed_headers:
   multihomed: 0
   prettyname: Profile Page Collapsed Headers
 
+userproplist.profile_ver:
+  cldversion: 0
+  datatype: num
+  des: Version of profile page
+  indexed: 0
+  multihomed: 0
+  prettyname: Profile page version
+
+userproplist.profile_ver_noswitch:
+  cldversion: 0
+  datatype: bool
+  des: True if user can't switch profile page to old version
+  indexed: 0
+  multihomed: 0
+  prettyname: New profile version
+
 userproplist.public_key:
   cldversion: 4
   datatype: blobchar

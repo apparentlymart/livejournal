@@ -629,6 +629,9 @@ sub handle_post {
 
         $nu->make_login_session;
 
+        $nu->set_prop("profile_ver", 2);
+        $nu->set_prop("noswitch_profile_ver", 1);
+
         # Default new accounts to Plus level
         $nu->add_to_class('plus');
         $nu->set_prop("create_accttype", "plus");
