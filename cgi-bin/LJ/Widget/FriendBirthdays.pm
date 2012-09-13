@@ -19,7 +19,7 @@ sub render_body {
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
     return "" unless $u;
 
-    my $cache_key  = "friend_birthdays:" . $u->userid;
+    my $cache_key  = "friend_birthdays_2:" . $u->userid;
     my $cache_data = LJ::MemCache::get($cache_key);
     if ($cache_data) {
         return $cache_data;
