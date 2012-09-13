@@ -62,7 +62,6 @@ sub render_body {
         $ret .= "<td>" . $class->ml('widget.friendbirthdays.userbirthday', {'month' => LJ::Lang::ml(LJ::Lang::month_short_langcode($month)), 'day' => $day}) . "</td>";
         $ret .= "<td><a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=" . $u->user . "' title='" .  $class->ml('widget.friendbirthdays.gift') . "' class='gift-link'><span>";
         $ret .= $class->ml('widget.friendbirthdays.gift') . "</span></a></td>";
-        $ret .= "<td>" . (scalar @$wishes ? "<a href='$wish_url' class='wish-link' title='" . $class->ml('widget.friendbirthdays.wishlist') . "'><span>" . $class->ml('widget.friendbirthdays.wishlist') . "</span></a>" : "&nbsp;") . "</td>";
         $ret .= "</tr>";
     }
 
