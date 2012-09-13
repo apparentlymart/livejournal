@@ -6,7 +6,7 @@ use Carp qw(croak);
 use LJ::Text;
 use String::CRC32;
 
-use constant { WIDGET_EXPIRE_TIME => 60*60};
+use constant { WIDGET_EXPIRE_TIME => 15*60};
 
 sub need_res {
     return qw( stc/widgets/recentcomments.css );
