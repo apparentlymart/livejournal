@@ -4,6 +4,9 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::Text;
+use String::CRC32;
+
+use constant { WIDGET_EXPIRE_TIME => 60*60};
 
 sub need_res {
     return qw( stc/widgets/recentcomments.css );
@@ -37,6 +40,16 @@ sub render_body {
     my $limit = defined $opts{limit} ? $opts{limit} : 3;
 
     my @comments = $u->get_recent_talkitems($limit, memcache => 1);
+
+    my $key_part = crc32(join(':', map { $_->{jtalkid} } @comments));
+    my $key = "recent_comments_widget:$key_part:" . 
+              ":" . $lncode .
+              ":" . $u->userid;
+
+    my $data = LJ::MemCache::get($key);
+    if ($data) {
+        return $data;
+    }
 
     my $ret;
 
@@ -95,6 +108,7 @@ sub render_body {
     $ret .= "</ul>";
     $ret .= "</div>";
 
+    LJ::MemCache::set($key, $ret, WIDGET_EXPIRE_TIME);
     return $ret;
 }
 
