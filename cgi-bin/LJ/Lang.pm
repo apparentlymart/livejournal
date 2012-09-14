@@ -446,7 +446,6 @@ sub set_text {
 
     if ($text) {
         LJ::MemCache::set( "ml.${lncode}.${dmid}.${itcode}", $text );
-        LJ::LocalCache::get_cache()->set( "ml.${lncode}.${dmid}.${itcode}", $text );
     }
 
     my @langids;
@@ -740,7 +739,7 @@ sub get_text_multi {
     return \%strings unless %memkeys;
 
     my $mem = {};
-    if (LJ::is_enabled('local_cache')) {
+    if (LJ::is_enabled('local_cache') &&  LJ::is_web_context()) {
         my @keys_memcache = ();
         my @keys = keys %memkeys;
 
@@ -748,7 +747,7 @@ sub get_text_multi {
            $mem = LJ::MemCache::get_multi( @keys_memcache ) || {};
 
         foreach my $key (keys %$mem) {
-            LJ::LocalCache::get_cache()->set($key, $mem->{$key});
+            LJ::LocalCache::get_cache()->set($key, $mem->{$key}, 30*60);
         }
 
         foreach my $key (keys %$mem_local) {
@@ -822,13 +821,11 @@ sub get_text_multi {
 
         if ($text) {
             LJ::MemCache::set( $cache_key, $text );
-            LJ::LocalCache::get_cache()->set($cache_key, $text);
         } else {
             ## Do not cache empty values forever - they may be inserted later.
             ## This is a hack, what we actually need is a mechanism to delete
             ## the entire language tree for a given $code if it's updated.
             LJ::MemCache::set( $cache_key, $text, 24 * 3600 );
-            LJ::LocalCache::get_cache()->set( $cache_key, $text, 24 * 3600 );
         }
     }
 
