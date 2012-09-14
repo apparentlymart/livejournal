@@ -33,8 +33,8 @@ sub __get_instance {
 
     my $db_file_name = "$LJ::LJ_LOCAL_BDB_HOME/$LJ::LJ_LOCAL_BDB_NAME";
     if (-e $db_file_name) {
-        my $status = BerkeleyDB::db_verify( -Filename => $db_file_name, 
-                                            -Outfile => $db_file_name);
+        my $status = BerkeleyDB::db_verify( -Filename => $db_file_name, );
+#                                            -Outfile => $db_file_name);
 
         if ($status) {
             rmtree($LJ::LJ_LOCAL_BDB_HOME);
