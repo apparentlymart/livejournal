@@ -3152,6 +3152,110 @@ sub editevent {
         return $res if $res->{type};
     }
 
+    # don't moderate admins, moderators & pre-approved users
+    unless ( LJ::RelationService->is_relation_type_to( $ownerid, $posterid, [ 'A','M','N' ] ) ) {
+
+        my $need_moderated = 0;
+        if ( $uowner->check_non_whitelist_enabled() ) {
+            LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
+        }
+
+        if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
+
+            $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
+
+            # create tag <lj-embed> from HTML-tag <embed>
+            LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
+
+            my $fr = $dbcm->quote(Storable::nfreeze($req));
+            return fail($err, 409) if length($fr) > 200_000;
+
+            # store
+            my $modid = LJ::alloc_user_counter($uowner, "M");
+            return fail($err, 501) unless $modid;
+
+            $uowner->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
+                        "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
+                        LJ::text_trim($req->{'subject'}, 30, 0));
+            return fail($err, 501) if $uowner->err;
+
+            $uowner->do("INSERT INTO modblob (journalid, modid, request_stor) ".
+                        "VALUES ($ownerid, $modid, $fr)");
+            if ($uowner->err) {
+                $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
+                return fail($err, 501);
+            }
+
+            # alert moderator(s)
+            my $mods = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
+            if (@$mods) {
+                # load up all these mods and figure out if they want email or not
+                my $modlist = LJ::load_userids(@$mods);
+
+                my @emails;
+                my $ct;
+                foreach my $mod (values %$modlist) {
+                    last if $ct > 20;  # don't send more than 20 emails.
+
+                    next unless $mod->is_visible;
+
+                    LJ::load_user_props($mod, 'opt_nomodemail');
+                    next if $mod->{opt_nomodemail};
+                    next if $mod->{status} ne "A";
+
+                    push @emails,
+                        {
+                            to          => $mod->email_raw,
+                            browselang  => $mod->prop('browselang'),
+                            charset     => $mod->mailencoding || 'utf-8',
+                        };
+
+                    ++$ct;
+                }
+
+                foreach my $to (@emails) {
+                    # TODO: html/plain text.
+                    my $body = LJ::Lang::get_text(
+                        $to->{'browselang'},
+                        'esn.moderated_submission.body', undef,
+                        {
+                            user        => $u->{'user'},
+                            subject     => $req->{'subject'},
+                            community   => $uowner->{'user'},
+                            modid       => $modid,
+                            siteroot    => $LJ::SITEROOT,
+                            sitename    => $LJ::SITENAME,
+                            moderateurl => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid",
+                            viewurl     => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}",
+                        });
+
+                    my $subject = LJ::Lang::get_text($to->{'browselang'},'esn.moderated_submission.subject');
+
+                    LJ::send_mail({
+                        'to'        => $to->{to},
+                        'from'      => $LJ::DONOTREPLY_EMAIL,
+                        'charset'   => $to->{charset},
+                        'subject'   => $subject,
+                        'body'      => $body,
+                    });
+                }
+            }
+
+            my $msg = translate($u, "modpost", undef);
+            return {
+                'message' => $msg,
+                xc3 => {
+                    u => $u,
+                    post => {
+                        coords      => $req->{props}->{current_coords},
+                        has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
+                        from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
+                    }
+                }
+            };
+        }
+    }
+
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,

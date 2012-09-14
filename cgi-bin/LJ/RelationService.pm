@@ -185,6 +185,30 @@ sub is_relation_to {
     return $interface->is_relation_to($u, $friend, $type, %opts);    
 }
 
+sub is_relation_type_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $types  = shift;
+    my %opts   = @_;
+    
+    $u = LJ::want_user($u);
+    $friend = LJ::want_user($friend);
+    
+    return undef unless $u && $friend && $types;
+    $types = [ $types ] unless ref $types eq 'ARRAY';
+
+    if ($class->_load_alt_api('read', $types)) {
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $alt->is_relation_type_to($u, $friend, $types, %opts);
+        }
+    }
+
+    my $interface = $class->relation_api($u);
+    return $interface->is_relation_type_to($u, $friend, $types, %opts);    
+}
+
 sub get_groupmask {
     my $class  = shift;
     my $u      = shift;

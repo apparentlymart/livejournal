@@ -6515,6 +6515,14 @@ sub is_spamprotection_enabled {
     return 0;
 }
 
+sub check_non_whitelist_enabled {
+    my $u = shift;
+    return 0 if $LJ::DISABLED{'spam_button'};
+    my $check_non_whitelist = $u->prop('check_non_whitelist');
+    return 1 if (!defined($check_non_whitelist) || $check_non_whitelist eq 'Y');
+    return 0;
+}
+
 # return sticky entries existing
 sub has_sticky_entry {
     my ($self) = @_;

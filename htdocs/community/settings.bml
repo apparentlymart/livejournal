@@ -263,9 +263,12 @@ body<=
                 $cu->set_prop('adult_content', $adult_content);
             }
 
-            if ($moderated =~ /^[AF]$/ && ! LJ::load_rel_user($cu->{'userid'}, 'M')->[0]) {
-                LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
-              }
+            if ($moderated =~ /^[AF]$/) {
+                unless ( LJ::load_rel_user($cu->{'userid'}, 'M')->[0] ) {
+                    LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
+                }
+                $cu->set_prop('check_non_whitelist', $POST{check_non_whitelist} ? 'Y' : 'N');
+            }
 
             # since journaltype changed
             $cu->invalidate_directory_record;
@@ -302,10 +305,11 @@ body<=
     $cname = $POST{'cuser'}; # if we're falling through with errors when creating
     
     my %info = (
-                'membership'=>$POST{'membership'} || 'open',
-                'postlevel'=>$POST{'postlevel'} || 'members',
-                'nonmember_posting'=>$POST{'nonmember_posting'} || 0,
-                'moderated'=>($POST{'moderated'} =~ /^[NAF]$/) ? $POST{'moderated'} : 'F',
+                'membership'          => $POST{'membership'} || 'open',
+                'postlevel'           => $POST{'postlevel'} || 'members',
+                'nonmember_posting'   => $POST{'nonmember_posting'} || 0,
+                'moderated'           => ($POST{'moderated'} =~ /^[NAF]$/) ? $POST{'moderated'} : 'F',
+                'check_non_whitelist' => $POST{'check_non_whitelist'} || 'N',
                 );
 
     if ($mode eq 'modify') {
@@ -330,6 +334,7 @@ body<=
         LJ::load_user_props($c, "nonmember_posting", "moderated");
         $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
         $info{'moderated'} = ($c->{'moderated'} =~ /^[01NAF]$/) ? $c->{'moderated'} : 'N';
+        $info{'check_non_whitelist'} = $c->check_non_whitelist_enabled ? 'Y' : 'N';
     }
 
     $ret .= "<form method='post' action='settings.bml?mode=$mode'>";
@@ -448,6 +453,10 @@ body<=
     $ret .= " <label for='moderate_filter'>$ML{'.label.moderationyes_filter'}</label><br />";
     $ret .= "<a href='/community/whitelist.bml?authas=$GET{authas}' id='moderate_filter_link' style='display:none'>$ML{'.label.whitelist'}</a>";
     $ret .= "<noscript><a href='/community/whitelist.bml?authas=$GET{authas}'>$ML{'.label.whitelist'}</a></noscript>";
+    $ret .= "</p>";
+    $ret .= "<p class='input-wrapper'>";
+    $ret .= LJ::html_check({ type => 'checkbox', id => 'check_non_whitelist', name => 'check_non_whitelist', value => 'Y', selected => ($info{'check_non_whitelist'} eq 'Y') ? 1 : 0 });
+    $ret .= " <label for='check_non_whitelist'>$ML{'.label.check_non_whitelist'}</label></p>";
     $ret .= "</p>";
     $ret .= "</div></fieldset>";
 

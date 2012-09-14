@@ -768,6 +768,25 @@ sub is_relation_to {
     return $LJ::REQ_CACHE_REL{$key} = $dbval;
 }
 
+sub is_relation_type_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $types  = shift;
+    my %opts   = @_;
+    
+    return undef unless $types && $u && $friend;
+
+    my $userid = LJ::want_userid($u);
+    my $friendid = LJ::want_userid($friend);
+
+    my $dbh = LJ::get_db_writer();
+    my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                         "WHERE userid=$userid AND targetid=$friendid ".
+                                         "AND type IN (?)", undef, $types);
+    return $relcount;
+}
+
 sub get_groupmask {
     my $class  = shift;
     my $u      = shift;
