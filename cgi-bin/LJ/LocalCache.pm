@@ -43,7 +43,7 @@ sub get_multi {
 }
 
 sub set {
-    my ($class, @keys) = @_;
+    my ($class, $key, $value, $expire) = @_;
     return undef;
 }
 
