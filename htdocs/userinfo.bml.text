@@ -222,6 +222,9 @@
 .friends.alsofriendof|staleness=1
 .friends.alsofriendof=Also Friend of
 
+.friends.alsofriendof2|staleness=1
+.friends.alsofriendof2=Friend of
+
 .friends.comm=Members
 
 .friends.friendof|staleness=1
