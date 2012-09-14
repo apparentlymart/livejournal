@@ -269,6 +269,7 @@
 	dtd.$block['lj-pq'] = 1;
 	dtd.$block['lj-pi'] = 1;
 	dtd.$nonEditable['lj-template'] = 1;
+	dtd.$empty['lj-random'] = 1;
 
 	dtd['lj-template'] = {};
 	dtd['lj-map'] = {};
