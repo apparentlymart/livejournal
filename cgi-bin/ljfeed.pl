@@ -5,6 +5,7 @@ use strict;
 no warnings 'uninitialized';
 
 use LJ::Entry;
+use LJ::Entry::Repost;
 use LJ::Request;
 use LJ::TimeUtil;
 use XML::Atom::Person;
@@ -114,6 +115,15 @@ sub make_feed {
             return undef;
         }
 
+        if (LJ::Entry::Repost->substitute_content($entry, 
+                                              { 'original_post_obj' => \$entry,} )) {
+            
+            if ( ! $entry || ! $entry->valid || ! $entry->visible_to($remote) ) {
+                $opts->{'handler_return'} = 404;
+                return undef;
+            }
+        }
+
         push @objs, $entry;
     }
     elsif ( $viewfunc->{'paid_only'} ) {
@@ -200,11 +210,18 @@ sub make_feed {
 
   ENTRY:
     foreach my $entry_obj (@objs) {
-        my $ditemid = $entry_obj->{ditemid};
-
         next ENTRY if $entry_obj->poster->{'statusvis'} eq 'S';
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
+    
+        my $reposted = LJ::Entry::Repost->substitute_content($entry_obj,
+                                                           { 'original_post_obj' => \$entry_obj,} );
 
+        if ($reposted) {
+            next ENTRY if $entry_obj->poster->{'statusvis'} eq 'S';
+            next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
+        }
+    
+        my $ditemid = $entry_obj->{ditemid};
         if ( $LJ::UNICODE && $entry_obj->prop('unknown8bit') ) {
             LJ::item_toutf8(
                 $u,
