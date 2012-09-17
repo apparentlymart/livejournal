@@ -669,6 +669,8 @@ create.login.google=Google
 create.login.head|staleness=1
 create.login.head=Login to LiveJournal
 
+create.login.login=LiveJournal Login
+
 create.login.mailru|staleness=1
 create.login.mailru=Mail.Ru
 
@@ -680,9 +682,6 @@ create.login.openid.button=Login
 
 create.login.openid.placeholder|staleness=1
 create.login.openid.placeholder=OpenID url
-
-create.login.secure|staleness=1
-create.login.secure=LiveJournal Secure Site
 
 create.login.twitter|staleness=1
 create.login.twitter=Twitter
@@ -741,9 +740,9 @@ create.reg.gender.unspecified=Unspecified
 create.reg.password|staleness=1
 create.reg.password=Password
 
-create.reg.password.hidden=Password is hidden
+create.reg.password.hidden=Show Password
 
-create.reg.password.shown=Password is shown
+create.reg.password.shown=Hide Password
 
 create.reg.passwordconfirm|staleness=1
 create.reg.passwordconfirm=Password confirm
