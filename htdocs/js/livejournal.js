@@ -692,10 +692,10 @@ LiveJournal.getEmbed = function(url) {
 	if (text.match(/^(http:\/\/(www\.)?)?youtu\.be/)) {
 		videoid = (text.split('?')[0]).replace(/\/+$/,'').split('/').pop();
 		text = 'http://www.youtube.com/embed/' + videoid;
-		text = '<iframe width="560" height="315" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
+		text = '<iframe width="490" height="370" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
 	} else if (text.match(/^(http:\/\/(www\.)?)?youtube\.com/)) {
 		text = 'http://www.youtube.com/embed/' + LiveJournal.parseGetArgs(text).v;
-		text = '<iframe width="560" height="315" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
+		text = '<iframe width="490" height="370" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
 	} else if (text.match(/^(http:\/\/(www\.)?)?rutube\.ru/)) {
 		text = 'http://video.rutube.ru/' + LiveJournal.parseGetArgs(text).v;
 		text = ('<lj-embed> <OBJECT width="470" height="353">' +
@@ -710,6 +710,23 @@ LiveJournal.getEmbed = function(url) {
 			'webkitAllowFullScreen mozallowfullscreen allowFullScreen data-link="{url}"></iframe>').supplant({ text: text, url: url });
 	}
 	return text;
+};
+
+LiveJournal.parseMediaLink = function(input) {
+	'use strict';
+
+	var regexp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+	var match = input.match(regexp);
+
+	if (match && match[7]) {
+		var id = match[7];
+		return {
+			id: id,
+			site: 'youtube',
+			preview: 'http://img.youtube.com/vi/' + id + '/0.jpg'
+		};
+	}
+	return null;
 };
 
 LiveJournal.showWidgets = function() {

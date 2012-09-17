@@ -987,18 +987,24 @@
 					if (content !== LiveJournal.getEmbed(content)) {
 						var node = CKEDITOR.dom.element.createFromHtml(LiveJournal.getEmbed(content));
 
+						var background = "";
+						var media = LiveJournal.parseMediaLink(content);
+						if (media.preview) {
+							background = 'style="background-image: url(' + media.preview + ');"';
+						}
+
 						iframe.setAttribute('lj-url', node.getAttribute('src'));
 						iframe.setAttribute('data-link', content);
 						iframe.setAttribute('lj-class', 'lj-iframe');
 						iframe.setAttribute('class', 'lj-iframe-wrap lj-rtebox');
-						iframe.setAttribute('style', "width: 570px; height:325px;");
-						iframe.setAttribute('lj-style', "width: 560px; height:315px;");
+						iframe.setAttribute('style', "width: 490px; height:370px;");
+						iframe.setAttribute('lj-style', "width: 480px; height:360px;");
 						iframe.setAttribute('allowfullscreen', 'true');
-						iframe.setAttribute('lj-content', encodeURIComponent("<div class='lj-embed-inner lj-rtebox-inner'>iframe</div>"));
+						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>iframe</div>"));
 					} else {
 						iframe.setAttribute('lj-class', 'lj-embed');
 						iframe.setAttribute('class', 'lj-embed-wrap lj-rtebox');
-						iframe.setAttribute('lj-content', encodeURIComponent("<div class='lj-embed-inner lj-rtebox-inner'>Embed</div>"));
+						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>Embed</div>"));
 					}
 					iframe.setAttribute('lj-data', encodeURIComponent(LiveJournal.getEmbed(content)));
 
@@ -1773,6 +1779,13 @@
 							return element;
 						}
 
+						var background = "";
+						if (element.attributes['data-link']) {
+							var media = LiveJournal.parseMediaLink(element.attributes['data-link']);
+							if (media.preview) {
+								background = 'style="background-image: url(' + media.preview + ');"';
+							}
+						}
 
 						var src = element.attributes.src;
 
@@ -1787,12 +1800,12 @@
 
 						if (!isNaN(width)) {
 							frameStyle += 'width:' + width + 'px;';
-							bodyStyle += 'width:' + (width - 2) + 'px;';
+							bodyStyle += 'width:' + (width - 10) + 'px;';
 						}
 
 						if (!isNaN(height)) {
 							frameStyle += 'height:' + height + 'px;';
-							bodyStyle += 'height:' + (height - 2) + 'px;';
+							bodyStyle += 'height:' + (height - 10) + 'px;';
 						}
 
 						if (frameStyle.length) {
@@ -1803,7 +1816,7 @@
 						fakeElement.attributes['lj-url'] = element.attributes.src ? encodeURIComponent(element.attributes.src) : '';
 						fakeElement.attributes['lj-class'] = 'lj-iframe';
 						fakeElement.attributes['class'] = 'lj-iframe-wrap lj-rtebox';
-						fakeElement.attributes['lj-content'] = '<div class="lj-rtebox-inner"><p class="lj-iframe">iframe</p></div>';
+						fakeElement.attributes['lj-content'] = '<div ' + background + ' class="lj-rtebox-inner">' + (background ? '' : 'iframe') + '</div>';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 

@@ -7,7 +7,7 @@ CKEDITOR.editorConfig = function(config) {
 	CKEDITOR.plugins.addExternal( 'ljcolor', 'plugins/lj/ljcolor/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljlink',  'plugins/lj/ljlink/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljfont',  'plugins/lj/ljfont/plugin.js' );
-	// CKEDITOR.plugins.addExternal( 'ljcut2',  'plugins/lj/ljcut/plugin.js' );
+	CKEDITOR.plugins.addExternal( 'ljcut2',  'plugins/lj/ljcut/plugin.js' );
 	CKEDITOR.plugins.addExternal( 'ljuser2',  'plugins/lj/ljuser/plugin.js' );
 
 	var ljplugins = [/*'ljspell', */ (Site.page.ljpost) ? 'livejournal' : 'livejournal_old', 'ljcolor', 'ljlink'],
@@ -40,7 +40,7 @@ CKEDITOR.editorConfig = function(config) {
 		plugins.push('autogrow');
 		config.autoGrow_minHeight = 400;
 
-		ljplugins.push('ljspell', 'ljfont', /*'ljcut2',*/ 'ljuser2');
+		ljplugins.push('ljspell', 'ljfont', 'ljcut2', 'ljuser2');
 	} else {
 		plugins.push('dialog', 'image', 'link', 'font');
 	}
@@ -81,8 +81,9 @@ CKEDITOR.editorConfig = function(config) {
 	config.tabSpaces = 2;
 	config.startupShowBorders = false;
 	config.toolbarCanCollapse = false;
-	config.disableNativeSpellChecker = true;
-	
+
+	config.disableNativeSpellChecker = Site.page.ljpost ? true : false;
+
 	var toolbar = [];
 
 	function ifEnabled(condition, what) {
@@ -103,7 +104,7 @@ CKEDITOR.editorConfig = function(config) {
 			ifEnabled(Site.media_embed_enabled, 'LJEmbedLink'),
 
 			'LJCut',
-			/*'LJCut2',*/
+			// 'LJCut2',
 			'LJSpoiler',
 			
 			'LJMap',
