@@ -4,6 +4,7 @@ use base(LJ::LocalCache);
 use strict;
 use warnings;
 
+use utf8;
 use Redis;
 
 my $local_connection;
@@ -59,9 +60,10 @@ sub get {
         return;
     }
 
-    my $recv_data = $connection->get($key);
+    my $value = $connection->get($key);
 
-    return utf8::decode($recv_data);
+    return unless $value;
+    return utf8::encode($value);
 }
 
 sub get_multi {
@@ -109,7 +111,107 @@ sub replace {
 
 sub delete {
     my ($class, $key) = @_;
-    return undef;
+    my $connection = __get_write_conneciton();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    return $connection->del($key);
+}
+
+sub incr {
+    my ($class, $key, $value) = @_;
+    my $connection = __get_write_connection();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    if ($value) {
+        $value = int($value);
+        return 0 unless $value;
+        return $connection->incrby($key, $value);
+    }
+    return $connection->incr($key);
+}
+
+sub decr {
+    my ($class, $key, $value) = @_;
+    my $connection = __get_write_connection();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    if ($value) {
+        $value = int($value);
+        return 0 unless $value;
+        return $connection->decrby($key, $value);
+    }
+
+    return $connection->decr($key);
+}
+
+sub exists {
+    my ($class, $key) = @_;
+    my $connection = __get_read_connection();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    return $connection->exists($key);
+}
+
+sub rpush {
+    my ($class, $key, $value) = @_;
+    my $connection = __get_write_connection();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    $value = utf8::decode($value);
+    return $connection->rpush($key, $value);    
+}
+
+sub lpush {
+    my ($class, $key, $value) = @_;
+    my $connection = __get_write_connection();
+
+    if (!$connection) {
+        return 0;
+    }
+
+    $value = utf8::decode($value);
+    return $connection->lpush($key, $value);
+}
+
+sub lpop {
+    my ($class, $key) = @_;
+    my $connection = __get_read_connection();
+
+    if (!$connection) {
+        return undef;
+    }
+
+    my $value = $connection->lpop($key);
+    return unless $value;
+    return unf8::encode($value);
+}
+
+sub rpop {
+    my ($class, $key) = @_;
+    my $connection = __get_read_connection();
+
+    if (!$connection) {
+        return undef;
+    }
+
+    my $value = $connection->rpop($key);
+    return unless $value;
+    return unf8::encode($value);
 }
 
 1;
