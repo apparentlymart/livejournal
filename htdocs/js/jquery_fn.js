@@ -413,3 +413,36 @@ jQuery.fn.selectFix = function () {
 		}
 	});
 };
+
+/**
+ * Provide ability to check if element is on the screen
+ * @author Valeriy Vasin (valeriy.vasin@sup.com)
+ */
+;(function ($) {
+	'use strict';
+	// cache window object
+	var $win = $(window);
+	$.expr[':'].screenable = function (element) {
+		var win = {},
+			el = {},
+			$el = $(element);
+
+			// window coordinates
+			win.width = $win.width(),
+			win.height = $win.height(),
+			win.top = $win.scrollTop(),
+			win.bottom = win.top + win.height,
+			win.left = $win.scrollLeft(),
+			win.right = win.left + win.width,
+
+			// element coordinates
+			el.width = $el.width();
+			el.height = $el.height();
+			el.top = $el.offset().top;
+			el.bottom = el.top + el.height;
+			el.left = $el.offset().left;
+			el.right = el.left + el.width;
+
+		return (el.bottom > win.top && el.top < win.bottom) && (el.right > win.left && el.left < win.right);
+	};
+}(jQuery));
