@@ -4,6 +4,12 @@ use warnings;
 
 use LJ::ModuleLoader;
 
+# Usage example: 
+#   
+#   LJ::LocalCache::get_cache()->set("ml.${lncode}.${dmid}.${itcode}", $text, 30*60);
+#
+
+
 my @SUBCLASSES = LJ::ModuleLoader->module_subclasses(__PACKAGE__);
 
 my $loaded = 0;
@@ -31,8 +37,13 @@ sub get_cache {
     return "LJ::LocalCache::$handler";
 }
 
+sub expire {
+    my ($class, $key, $expire) = @_;
+    return 0;
+}
+
 sub get {
-    my ($class,$key) = @_;
+    my ($class, $key) = @_;
     return undef;
 }
 
@@ -49,10 +60,45 @@ sub set {
 
 sub replace {
     my ($class, $key, $value, $expire) = @_;
-    return undef;
+    return 0;
 }
 
 sub delete {
+    my ($class, $key) = @_;
+    return 0;
+}
+
+sub incr {
+    my ($class, $key, $value) = @_;
+    return 0;
+}
+
+sub decr {
+    my ($class, $key, $value) = @_;
+    return 0;
+}
+
+sub exists {
+    my ($class, $key) = @_;
+    return 0;
+}
+
+sub rpush {
+    my ($class, $key, $value) = @_;
+    return 0;
+}
+
+sub lpush {
+    my ($class, $key, $value) = @_;
+    return 0;
+}
+
+sub lpop {
+    my ($class, $key) = @_;
+    return undef;
+}
+
+sub rpop {
     my ($class, $key) = @_;
     return undef;
 }

@@ -100,8 +100,22 @@ sub set {
 
     my $result = $connection->set( $key, 
                                    utf8::decode($value) );
-    $connection->expire($key, $expire);
+
+    if ($expire) {
+        $connection->expire($key, $expire);
+    }
+
     return $result;
+}
+
+sub expire {
+    my ($class, $key, $expire) = @_;
+    my $connection = __get_write_conneciton();
+    if (!$connection) {
+        return 0;
+    }
+
+    return $connection->expire($key, $expire);
 }
 
 sub replace {
