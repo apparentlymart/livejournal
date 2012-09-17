@@ -4,15 +4,28 @@ use base(LJ::LocalCache);
 use strict;
 use warnings;
 
+use Redis;
+
 my $local_connection;
 my $master_connection;
 
 sub __get_read_connection {
     if ($local_connection) {
+        if ($local_connection->ping) {
+            return $local_connection;
+        } else {
+            $local_connection = undef;
+        }
+    }    
+
+    if ($local_connection) {
+        $local_connection = undef
+            unless $local_connection->ping;
         return $local_connection;
     }
      
-    $local_connection = eval { Redis->new(encoding => undef) };
+    $local_connection = eval { Redis->new(encoding => undef, 
+                                          debug => 0) };
     if ($@ && $LJ::IS_DEV_SERVER) {
         warn "get read connection error: $@";
     }
@@ -46,7 +59,9 @@ sub get {
         return;
     }
 
-    return $connection->get($key);
+    my $recv_data = $connection->get($key);
+
+    return utf8::decode($recv_data);
 }
 
 sub get_multi {
@@ -65,7 +80,7 @@ sub get_multi {
         my $value = shift @data;
 
         if ($value) {
-            $result->{$key} = $value; 
+            $result->{$key} = utf8::encode($value); 
         } else {
             push @{$not_fetched_keys}, $key;
         }
@@ -82,7 +97,7 @@ sub set {
     }
 
     my $result = $connection->set( $key, 
-                                   $value );
+                                   utf8::decode($value) );
     $connection->expire($key, $expire);
     return $result;
 }
