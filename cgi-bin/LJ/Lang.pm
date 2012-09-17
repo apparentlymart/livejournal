@@ -724,7 +724,10 @@ sub get_text_multi {
     ## %memkeys: lower-case code --> memcache key
     my %memkeys;
     foreach my $code ( keys %lc_codes ) {
-        my $cache_key = "ml.${lang}.${dmid}.${code}";
+        my @code_array = split //, $code;
+        my $cache_key = $code_array[1] eq '.' ? "ml.${lang}.${dmid}.${code}"
+                                              : "ml.${lang}.${dmid}${code}";
+
         my $text      = undef;
         $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
 
