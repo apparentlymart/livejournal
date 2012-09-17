@@ -197,7 +197,7 @@ sub enter_comment {
 
     # update the "replycount" summary field of the log table
     if ($comment->{state} eq 'A') {
-        LJ::replycount_do($journalu, $itemid, "incr");
+        LJ::replycount_do($journalu, $itemid, "incr", 1, $posterid);
     }
 
     # update the "hasscreened" property of the log item if needed

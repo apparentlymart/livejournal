@@ -2740,7 +2740,7 @@ sub reject_entry_as_spam {
 # $value is amount to incr/decr, 1 by default
 
 sub replycount_do {
-    my ($u, $jitemid, $action, $value) = @_;
+    my ($u, $jitemid, $action, $value, $posterid) = @_;
 
     # check action name
     die "unknown action: $action" 
@@ -2764,7 +2764,7 @@ sub replycount_do {
             : sub { LJ::MemCache::incr($memkey, $value) };
     
     my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
-    LJ::run_hooks( 'replycount_change', $entry );
+    LJ::run_hooks( 'replycount_change', $entry, $posterid );
 
     ##
     my $sql_sign = $action eq 'decr' ? '-' : '+';

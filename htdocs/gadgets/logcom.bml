@@ -15,6 +15,7 @@
     my $api_key = LJ::Request->get_param('rsk');
     my $domain  = LJ::Request->get_param('domain');
     my $type    = LJ::Request->get_param('type');
+    my $ditemid = LJ::Request->get_param('ditemid');
 
     ## convert remote-site key to lj.com's community
     my $partner = LJ::PartnerSite->find_by_api_key($api_key);
@@ -38,7 +39,7 @@
         }
     );
 
-    my $entry = $partner->find_entry_by_docid($docid);
+    my $entry = $partner->find_entry_by_docid($docid, {ditemid => $ditemid});
     my $jitemid = $entry->jitemid;
 
     my $replyto = LJ::Request->get_param('replyto');
