@@ -725,7 +725,7 @@ sub get_text_multi {
     my %memkeys;
     foreach my $code ( keys %lc_codes ) {
         my @code_array = split //, $code;
-        my $cache_key = $code_array[1] eq '.' ? "ml.${lang}.${dmid}.${code}"
+        my $cache_key = $code_array[1] ne '.' ? "ml.${lang}.${dmid}.${code}"
                                               : "ml.${lang}.${dmid}${code}";
 
         my $text      = undef;
