@@ -350,6 +350,14 @@ userproplist.icq:
   multihomed: 1
   prettyname: ICQ
 
+userproplist.message_draft:
+  cldversion: 4
+  datatype: blobchar
+  des: Backup of a user's most recent unsended message
+  indexed: 0
+  multihomed: 0
+  prettyname: New Message Draft
+
 userproplist.init_bdate:
   cldversion: 4
   datatype: char

@@ -21,15 +21,14 @@
     }
 
     my $ret = {};
-    my $prop_name = delete $POST{'prop_name'} || 'entry_draft';
     my $draft = delete $POST{'saveDraft'};
 
     if ( defined $draft ) {
-        $u->set_draft_text(encode($draft), $prop_name);
+        $u->set_draft_text(encode($draft));
     } elsif ( $POST{'clearDraft'} ) {
-        $u->set_draft_text('', $prop_name);
+        $u->set_draft_text('');
     } else {
-        my $decoded = decode($u->draft_text($prop_name));
+        my $decoded = decode($u->draft_text);
         if ( ref $decoded ) {
             %$ret = (%$ret, %$decoded);
         } else {
