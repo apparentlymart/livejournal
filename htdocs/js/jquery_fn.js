@@ -446,3 +446,25 @@ jQuery.fn.selectFix = function () {
 		return (el.bottom > win.top && el.top < win.bottom) && (el.right > win.left && el.left < win.right);
 	};
 }(jQuery));
+
+/**
+ * Parse lj-likes plugin
+ * It parse all elements with class 'lj-like', uncomment their content
+ * and parse with LiveJournal.parseLikeButtons()
+ */
+;(function ($) {
+	'use strict';
+
+	$.fn.ljLikes = function () {
+
+		return $(this).each(function () {
+			$(this).find('.lj-like').each(function () {
+				$(this).html(function (html) {
+					// remove comments node
+					return $.trim( $(this).html().replace(/<!--([\s\S]*?)-->/mig, '$1') );
+				});
+				LiveJournal.parseLikeButtons($(this));
+			});
+		});
+	};
+}(jQuery));
