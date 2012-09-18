@@ -3115,8 +3115,11 @@ sub uncache_prop {
 }
 
 sub set_draft_text {
-    my ($u, $draft) = @_;
-    my $old = $u->draft_text;
+    my ($u, $draft, $prop_name) = @_;
+
+    $prop_name ||= 'entry_draft';
+
+    my $old = $u->draft_text($prop_name);
 
     $LJ::_T_DRAFT_RACE->() if $LJ::_T_DRAFT_RACE;
 
@@ -3126,7 +3129,7 @@ sub set_draft_text {
     # one method is just setting it all at once.  which incurs about
     # 75 bytes of SQL overhead on top of the length of the draft,
     # not counting the escaping
-    push @methods, [ "set", sub { $u->set_prop('entry_draft', $draft); 1 },
+    push @methods, [ "set", sub { $u->set_prop($prop_name, $draft); 1 },
                      75 + length $draft ];
 
     # stupid case, setting the same thing:
@@ -3136,11 +3139,11 @@ sub set_draft_text {
     if (length $old && $draft =~ /^\Q$old\E(.+)/s) {
         my $new = $1;
         my $appending = sub {
-            my $prop = LJ::get_prop("user", "entry_draft") or die; # FIXME: use exceptions
+            my $prop = LJ::get_prop("user", $prop_name) or die; # FIXME: use exceptions
             my $rv = $u->do("UPDATE userpropblob SET value = CONCAT(value, ?) WHERE userid=? AND upropid=? AND LENGTH(value)=?",
                             undef, $new, $u->{userid}, $prop->{id}, length $old);
             return 0 unless $rv > 0;
-            $u->uncache_prop("entry_draft");
+            $u->uncache_prop($prop_name);
             return 1;
         };
         push @methods, [ "append", $appending, 40 + length $new ];
@@ -3161,8 +3164,9 @@ sub set_draft_text {
 }
 
 sub draft_text {
-    my ($u) = @_;
-    return $u->prop('entry_draft');
+    my ($u, $prop_name) = @_;
+    $prop_name ||= 'entry_draft';
+    return $u->prop($prop_name);
 }
 
 sub notable_interests {
