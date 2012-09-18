@@ -3802,6 +3802,14 @@ inbox.message=Message
 inbox.messages|staleness=1
 inbox.messages=Messages
 
+inbox.nav.conversations=Conversations
+
+inbox.nav.compose=Compose message
+
+inbox.nav.marked=Marked
+
+inbox.nav.notifications=Notifications
+
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
 
