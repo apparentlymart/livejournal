@@ -2424,6 +2424,9 @@ sub set_logprop {
 
         $kill_mem = 1 unless $prop eq "commentalter";
 
+        my $memkey_ind = [ $uid, "log2indprop:$uid:$jitemid:$prop->{'id'}" ];
+        LJ::MemCache::delete($memkey_ind);
+
         if ($v) {
             $ins_values .= "," if $ins_values;
             $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $u->quote($v) . ")";
@@ -2592,6 +2595,85 @@ sub load_log_props2multi
     &nodb;
     my ($ids, $props) = @_;
     _get_posts_raw_wrapper($ids, "prop", $props);
+}
+
+sub load_individual_props_multi {
+    my ( $u, $jitemids, $propnames ) = @_;
+
+    my $userid = $u->userid;
+
+    my ( @propids, %propname_map );
+    foreach my $propname (@$propnames) {
+        my $prop = LJ::get_prop( 'log', $propname );
+        die "Unknown prop $propname" unless $prop;
+
+        my $propid = $prop->{'propid'};
+
+        push @propids, $propid;
+        $propname_map{$propid} = $propname;
+    }
+
+    my @memkeys;
+    foreach my $jitemid (@$jitemids) {
+        foreach my $propid (@propids) {
+            push @memkeys, [ $userid, "log2indprop:$userid:$jitemid:$propid" ];
+        }
+    }
+
+    my $memcache_result = LJ::MemCache::get_multi(@memkeys);
+
+    my ( %remaining_jitemids, %ret );
+    foreach my $key_and_hash (@memkeys) {
+        my $key = $key_and_hash->[1];
+        my ( undef, undef, $jitemid, $propid ) = split /:/, $key;
+        my $propname = $propname_map{$propid};
+
+        if ( defined $memcache_result->{$key} ) {
+            $ret{$jitemid} ||= {};
+            $ret{$jitemid}->{$propname} = $memcache_result->{$key};
+        } else {
+            $remaining_jitemids{$jitemid} = 1;
+        }
+    }
+
+    return \%ret unless %remaining_jitemids;
+
+    my $jitemids_in = join( ',', keys %remaining_jitemids );
+    my $propids_in  = join( ',', @propids );
+
+    my $udbh = LJ::get_cluster_master($u);
+    my $rows = $udbh->selectall_arrayref(
+        "SELECT jitemid, propid, value FROM logprop2 " .
+        "WHERE journalid=? AND " .
+        "jitemid IN ($jitemids_in) AND propid IN ($propids_in)",
+        { 'Slice' => {} }, $userid,
+    );
+
+    my %props_from_db;
+    foreach my $row (@$rows) {
+        my $jitemid = $row->{'jitemid'};
+        my $propid  = $row->{'propid'};
+
+        $props_from_db{$jitemid} ||= {};
+        $props_from_db{$jitemid}->{$propid} = $row->{'value'};
+    }
+
+    foreach my $propid (@propids) {
+        my $propname = $propname_map{$propid};
+
+        foreach my $jitemid ( keys %remaining_jitemids ) {
+            $props_from_db{$jitemid} ||= {};
+            $props_from_db{$jitemid}->{$propid} ||= '';
+
+            my $propval = $props_from_db{$jitemid}->{$propid};
+            my $memkey  = [ $userid, "log2indprop:$userid:$jitemid:$propid" ];
+
+            LJ::MemCache::set( $memkey, $propval );
+            $ret{$jitemid}->{$propname} = $propval;
+        }
+    }
+
+    return \%ret;
 }
 
 # <LJFUNC>
