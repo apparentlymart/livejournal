@@ -6606,6 +6606,10 @@ sub push_subscription {
     return $u->{push_subscriptions}{$key} || {};
 }
 
+sub promo_announce_disabled {
+    my $u = shift;
+    return $u->prop('promo_announce_disabled') || 0;
+}
 
 package LJ;
 
