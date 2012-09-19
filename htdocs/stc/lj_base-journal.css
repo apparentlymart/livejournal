@@ -1885,3 +1885,12 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 			display: none;
 			}
 
+/* System Message for Journal
+----------------------------------- */
+.appwidget-sitemessages {
+    position: absolute;
+    top: 50px;
+    z-index: 4000;
+    width: 100%;
+    }
+
