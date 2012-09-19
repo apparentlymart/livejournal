@@ -3757,6 +3757,14 @@ img.track_thread_active=Track This
 
 img.xml=XML Source
 
+inbox.compose.message=Message
+
+inbox.compose.send=Send
+
+inbox.compose.to=To
+
+inbox.compose.userpic=Userpic
+
 inbox.error.couldnt_retrieve_inbox|staleness=1
 inbox.error.couldnt_retrieve_inbox=Could not retrieve inbox for user [[user]]
 
@@ -3806,9 +3814,13 @@ inbox.nav.conversations=Conversations
 
 inbox.nav.compose=Compose message
 
+inbox.nav.find=Find
+
 inbox.nav.marked=Marked
 
 inbox.nav.notifications=Notifications
+
+inbox.nav.search=Start typing a username or a word
 
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
