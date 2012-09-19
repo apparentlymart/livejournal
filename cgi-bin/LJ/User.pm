@@ -6606,6 +6606,11 @@ sub push_subscription {
     return $u->{push_subscriptions}{$key} || {};
 }
 
+sub disable_promo_announce {
+    my $u = shift;
+    $u->set_prop('promo_announce_disabled', 1);
+}
+
 sub promo_announce_disabled {
     my $u = shift;
     return $u->prop('promo_announce_disabled') || 0;
