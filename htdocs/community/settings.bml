@@ -446,7 +446,7 @@ body<=
     $ret .= "<a href='/community/whitelist.bml?authas=$GET{authas}' id='moderate_filter_link' style='display:none'>$ML{'.label.whitelist'}</a>";
     $ret .= "<noscript><a href='/community/whitelist.bml?authas=$GET{authas}'>$ML{'.label.whitelist'}</a></noscript>";
     $ret .= "</p>";
-    $ret .= "<p class='input-wrapper'>";
+    $ret .= "<p class='input-wrapper input-wrapper-whitelist'>";
     $ret .= LJ::html_check({ type => 'checkbox', id => 'check_non_whitelist', name => 'check_non_whitelist', value => 'Y', selected => ($info{'check_non_whitelist'} eq 'Y') ? 1 : 0 });
     $ret .= " <label for='check_non_whitelist'>$ML{'.label.check_non_whitelist'}</label></p>";
     $ret .= "</p>";
