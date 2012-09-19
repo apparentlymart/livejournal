@@ -10,19 +10,11 @@ title<=
 _code?>
 <=title
 head<=
-<style type='text/css'>
-    fieldset { display: block; width: 320px; border: 1px solid #ccc; margin: 0 15px 15px 0; padding: 8px; }
-    fieldset div { min-height: 170px; }
-    * html fieldset div { height: 190px; }
-    *:first-child+html fieldset div { min-height: 190px; }
-    #left-column, #right-column { float: left; }
-    legend { color: #036; font-size: 1.2em; font-weight: bold; }
-    p.input-wrapper { margin-left: 27px; text-indent: -27px; }
-    label { color: #444; }
-    label b { color: #000; }
-    .standout { clear: left; max-width: 695px; }
-    .standout table { margin: 0 auto; }
-</style>
+<?_code
+{
+    LJ::need_res( qw( stc/community/settings.css js/community/settings.js ) );
+}
+_code?>
 <=head
 body<=
 <?_code
