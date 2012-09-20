@@ -1,4 +1,9 @@
 (function() {
+	CKEDITOR.editor.prototype.lightSetData = function(data) {
+		this.document.getBody().setHtml(this.dataProcessor.toHtml(data));
+		this.fire('contentDom');
+	};
+
 	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
 	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
 
