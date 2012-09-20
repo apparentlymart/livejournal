@@ -483,11 +483,15 @@
 					}
 				} while (node = node.getParent());
 
+				var editorCommand;
 				if (isSelection) {
 					for (command in ljTagsData) {
 						if (ljTagsData.hasOwnProperty(command) && (!noteData || !noteData.hasOwnProperty(command))) {
 							delete ljTagsData[command].node;
-							editor.getCommand(command).setState(CKEDITOR.TRISTATE_OFF);
+							editorCommand = editor.getCommand(command);
+							if (editorCommand) {
+								editorCommand.setState(CKEDITOR.TRISTATE_OFF);
+							}
 						}
 					}
 				}
