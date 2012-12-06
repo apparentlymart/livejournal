@@ -53,6 +53,7 @@ body<=
         $mode = 'help';
     }
 
+    my $faqlink = LJ::Faq->page_url( 'faqid' => 75 );
 #--------------------------------------------------------------------------
 
     # Help text
@@ -239,7 +240,7 @@ body<=
                 text  => qq{
                     <?h1 $ML{'.help.images.header'} h1?><br />
 
-                    <?p } . BML::ml('.help.images.text', {'aopts1' => "href='$LJ::FB_SITEROOT'", 'scrapbook' => 'ScrapBook', 'dimensions' => "320x240", 'aopts2' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'", 'aopts3' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help&amp;type=headers'"}) . qq{ p?><br />
+                    <?p } . BML::ml('.help.images.text', {'aopts1' => "href='$LJ::FB_SITEROOT'", 'scrapbook' => 'ScrapBook', 'dimensions' => "320x240", 'aopts2' => "href='$faqlink'", 'aopts3' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help&amp;type=headers'"}) . qq{ p?><br />
 
                     <fieldset><legend>$ML{'.help.images.gallery.header'}</legend>
                     <?p } . BML::ml('.help.images.gallery.text', {'header' => "<b>lj-gallery</b>", 'name' => "LJ_emailpost"}) . qq{ p?>
@@ -265,7 +266,7 @@ body<=
                     emailex?></fieldset>
 
                     <fieldset><legend>$ML{'.help.images.size.header'}</legend>
-                    <?p } . BML::ml('.help.images.size.text1', {'maxsize' => "640x480", 'defaultsize' => "320x240" , 'header' => "<b>lj-imgsize</b>", 'ljcutsize' => "320x240", 'aopts' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'"}) . qq{ p?>
+                    <?p } . BML::ml('.help.images.size.text1', {'maxsize' => "640x480", 'defaultsize' => "320x240" , 'header' => "<b>lj-imgsize</b>", 'ljcutsize' => "320x240", 'aopts' => "href='$faqlink'"}) . qq{ p?>
                     <?p } . BML::ml('.help.images.size.text2', {'size1' => "100x100", 'size2' => "320x240", 'size3' => "640x480"}) . qq{ p?>
                     <?emailex
                     $to_pin
@@ -301,7 +302,7 @@ body<=
                     emailex?></fieldset>
 
                     <fieldset><legend>$ML{'.help.images.ljcut.header'}</legend>
-                    <?p } . BML::ml('.help.images.ljcut.text', {'ljcutsize' => "320x240", 'aopts' => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=75'", 'header' => "<b>lj-imgcut</b>", 'count' => "count", 'titles' => "titles"}) . qq{ p?>
+                    <?p } . BML::ml('.help.images.ljcut.text', {'ljcutsize' => "320x240", 'aopts' => "href='$faqlink'", 'header' => "<b>lj-imgcut</b>", 'count' => "count", 'titles' => "titles"}) . qq{ p?>
                     <?emailex
                     $to_pin
                     $from

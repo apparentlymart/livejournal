@@ -2,34 +2,34 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>1. Core Layer 1</title>
+<title>1. Core Layer 1</title>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="S2 Manual">
-<link rel="up" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
-<link rel="prev" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
+<link rel="up" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
+<link rel="prev" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
 <link rel="next" href="core1.class.Color.html" title="Color Class">
 <meta name="date" content="2008-Jun-03">
 </head>
 <body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
-<tr><th colspan="3" align="center">1. Core Layer 1</th></tr>
+<tr><th colspan="3" align="center">1. Core Layer 1</th></tr>
 <tr>
 <td width="20%" align="left">
-<a accesskey="p" href="siteapi.html">Prev</a> </td>
-<th width="60%" align="center">Appendix A. LiveJournal's S2 API</th>
-<td width="20%" align="right"> <a accesskey="n" href="core1.class.Color.html">Next</a>
+<a accesskey="p" href="siteapi.html">Prev</a> </td>
+<th width="60%" align="center">Appendix A. LiveJournal's S2 API</th>
+<td width="20%" align="right"> <a accesskey="n" href="core1.class.Color.html">Next</a>
 </td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="siteapi.core1">1. Core Layer 1</h2></div></div></div>
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="siteapi.core1">1. Core Layer 1</h2></div></div></div>
 <p>LiveJournal's only core layer, at present.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="core1.props">1.1. Properties</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="core1.props">1.1. Properties</h3></div></div></div>
 <div class="variablelist"><dl>
 <dt>
 <a name="core1.prop.IMGDIR"></a><span class="term"><code class="varname">$*IMGDIR</code> : <code class="classname">string</code></span>
@@ -875,7 +875,7 @@
 </dl></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="core1.funcs">1.2. Functions</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="core1.funcs">1.2. Functions</h3></div></div></div>
 <div class="variablelist"><dl>
 <dt>
 <a name="core1.func.PalItem(int,Color)"></a><span class="term"><code class="function">PalItem(<a class="link" href="core1.class.int.html" title="int Class">int</a> index, <a class="link" href="core1.class.Color.html" title="Color Class">Color</a> c)</code> : <a class="link" href="core1.class.PalItem.html" title="PalItem Class">PalItem</a></span>
@@ -1123,7 +1123,7 @@ login page if the user isn't logged in.</p></dd>
 </dl></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="core1.classes">1.3. Classes</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="core1.classes">1.3. Classes</h3></div></div></div>
 <div class="toc">
 <p><b>Table of Contents</b></p>
 <dl>
@@ -1247,10 +1247,10 @@ sensitive information which can't be made available to S2.</span>
 </div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="siteapi.core1.dateformats">1.4. Date Formats</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="siteapi.core1.dateformats">1.4. Date Formats</h3></div></div></div>
 <p>The <code class="function">Date</code> class has a method <code class="function">date_format()</code> and its subclass <code class="function">DateTime</code> adds the method <code class="function">time_format()</code>.  There's also a <code class="function">month_format()</code> on objects dealing with only a month.  All these methods take an optional format string which can be either a named format or a custom format string.  If no format is provided, a default sensible version is used.  The default is indicated in the table below.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="siteapi.core1.dateformat.named">1.4.1. Named Date Formats</h4></div></div></div>
+<div class="titlepage"><div><div><h4 class="title" id="siteapi.core1.dateformat.named">1.4.1. Named Date Formats</h4></div></div></div>
 <p>The following named date formats are supported and localized for internationalization.  The English representation is shown only as an example.</p>
 <div class="informaltable"><table border="1">
 <colgroup>
@@ -1275,28 +1275,28 @@ sensitive information which can't be made available to S2.</span>
 <tr>
 <td align="left">date_format</td>
 <td align="left">med</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%mon%%. %%dayord%%, %%yyyy%%</td>
 <td align="left">Feb. 5th, 1980</td>
 </tr>
 <tr>
 <td align="left">date_format</td>
 <td align="left">med_day</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%da%%, %%mon%%. %%dayord%%, %%yyyy%%</td>
 <td align="left">Tue, Feb. 5th, 1980</td>
 </tr>
 <tr>
 <td align="left">date_format</td>
 <td align="left">long</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%month%% %%dayord%%, %%yyyy%%</td>
 <td align="left">February 5th, 1980</td>
 </tr>
 <tr>
 <td align="left">date_format</td>
 <td align="left">long_day</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%day%%, %%month%% %%dayord%%, %%yyyy%%</td>
 <td align="left">Tuesday, February 5th, 1980</td>
 </tr>
@@ -1310,14 +1310,14 @@ sensitive information which can't be made available to S2.</span>
 <tr>
 <td align="left">month_format</td>
 <td align="left">short</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%m%%/%%yy%%</td>
 <td align="left">04/03</td>
 </tr>
 <tr>
 <td align="left">month_format</td>
 <td align="left">med</td>
-<td align="left"> </td>
+<td align="left"> </td>
 <td align="left">%%mon%% %%yyyy%%</td>
 <td align="left">Apr 2003</td>
 </tr>
@@ -1332,7 +1332,7 @@ sensitive information which can't be made available to S2.</span>
 </table></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="siteapi.core1.dateformat.custom">1.4.2. Custom Date Formats</h4></div></div></div>
+<div class="titlepage"><div><div><h4 class="title" id="siteapi.core1.dateformat.custom">1.4.2. Custom Date Formats</h4></div></div></div>
 <p>If you're making a style for yourself and don't care about keeping the date formats generic for internationalization, you can construct your own date format string with interpolated variables which you surround in double percent signs.</p>
 <div class="informaltable"><table border="1">
 <colgroup>
@@ -1430,15 +1430,15 @@ sensitive information which can't be made available to S2.</span>
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="siteapi.html">Prev</a> </td>
+<a accesskey="p" href="siteapi.html">Prev</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="siteapi.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="core1.class.Color.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="core1.class.Color.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">Appendix A. LiveJournal's S2 API </td>
+<td width="40%" align="left" valign="top">Appendix A. LiveJournal's S2 API </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> Color Class</td>
+<td width="40%" align="right" valign="top"> Color Class</td>
 </tr>
 </table>
 </div>

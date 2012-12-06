@@ -1,7 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<TMPL_IF ie8_ie7_compatible>
 <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />
+<TMPL_ELSE>
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+</TMPL_IF>
 <link rel="home" title="<TMPL_VAR expr="ml('lynx.nav.home')">" href="<TMPL_VAR lj_siteroot>/" />
 <link rel="contents" title="<TMPL_VAR expr="ml('lynx.nav.sitemap')">" href="<TMPL_VAR lj_siteroot>/site/" />
 <link rel="help" title="<TMPL_VAR expr="ml('lynx.nav.help')">" href="<TMPL_VAR lj_siteroot>/support/" />

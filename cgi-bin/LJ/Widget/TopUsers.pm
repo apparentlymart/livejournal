@@ -48,17 +48,16 @@ sub _fetch_data {
             my $count = $_->{count};
             my $user  = LJ::load_userid($_->{userid});
 
-            my $userpic = undef;
-            $userpic = $user->userpic() if $user;
+            next unless $user;
 
-            warn "Cannot load user with id=$_->{userid}\n" unless $user;
-            warn "Cannot load userpic with id=$_->{userid}\n" unless $userpic;
+            my $userpic = $user->userpic();
 
-            if ($count && $user && $userpic) {
+
+            if ($count && $userpic) {
                 push @{$keys{$key}->{'data'}},
                     {
                         count   => $count,
-                        userpic => $userpic ? $userpic->url : '',
+                        userpic => $userpic->url,
                         display => $user->ljuser_display,
                         user    => $user->user,
                         url     => $user->journal_base,

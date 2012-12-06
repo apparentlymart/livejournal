@@ -1,3 +1,5 @@
-  jquery/jquery.lj.lazyLoadable.js
-  jquery/jquery.lj.s2editSearchBox.js
+  jquery/jquery.lj.carousel.js
   jquery/jquery.lj.entryDatePicker.js
+  jquery/jquery.lj.lazyLoadable.js
+  jquery/jquery.lj.modalWindow.js
+  jquery/jquery.lj.s2editSearchBox.js

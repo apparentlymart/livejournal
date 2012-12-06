@@ -945,12 +945,22 @@ td.tabs {
 /* paid repost */
 .b-updatepage-paidrepost {
 	}
+	#entryform-paid_repost-wrapper {
+		display: none;
+		padding: 5px 10px;
+		background: #DDD;
+		}
+		#entryform-paid_repost-wrapper.b-updatepage-paidrepost-enabled {
+			display: inline-block;
+			}
 	.b-updatepage-paidrepost-agreement {
 		display: none;
+		padding: 0 0 5px 0;
 		font-size: 11px;
 		}
 	.b-updatepage-paidrepost-fields {
 		display: none;
+		overflow: hidden;
 		padding: 5px 0;
 		font-size: 11px;
 		}
@@ -958,7 +968,9 @@ td.tabs {
 	.b-updatepage-paidrepost-enabled .b-updatepage-paidrepost-fields {
 		display: block;
 		}
-		.b-updatepage-paidrepost-label {
+		.b-updatepage-paidrepost-fields .b-updatepage-paidrepost-label {
+			float: left;
+			width: 8em;
 			}
 		.b-updatepage-paidrepost-check {
 			margin: 0 0.5em 0 0;
@@ -970,6 +982,9 @@ td.tabs {
 			margin: 0 0 0 0.5em;
 			padding: 0 20px 0 0;
 			background: url(/img/icons/paidrepost.png?v=1) no-repeat 100% 50%;
+			}
+		.b-updatepage-paidrepost-cs {
+			margin: 0 0 0 0.5em;
 			}
 	.b-updatepage-paidrepost-unchecked .b-updatepage-paidrepost-fields {
 		opacity: 0.3;

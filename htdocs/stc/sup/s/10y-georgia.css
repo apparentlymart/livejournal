@@ -395,3 +395,10 @@ A:visited:hover {
 	.footer A {
 		background:#FFF;
 		}
+
+
+
+/* LJSUP-13769 */
+.appwidget-journalpromo {
+	margin: 20px auto 20px 16px;
+	}

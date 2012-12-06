@@ -63,7 +63,7 @@ head<=
         else
         {
             faqUrl.style.display = 'inline';
-            faqUrl.href = 'faqbrowse.bml?faqid=' + faqDropdown.value;
+            faqUrl.href = 'faq/' + faqDropdown.value + '.html';
         }
         return false;
     }
@@ -176,6 +176,7 @@ body<=
 
 <?_code
 {
+#line 180
     use strict;
     use vars qw(%FORM);
     use LJ::Support::Request::Tag;
@@ -378,11 +379,14 @@ body<=
     }
 
     # account type
-    $ret .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=38'><span style='white-space: nowrap'>$ML{'.accounttype'}</span></a>:</b></td><td>";
+    my $acct_type_faq_link = LJ::Faq->page_url( 'faqid' => 38 );
+    $ret .= "<tr><td align='right' valign='top'><b><a href='$acct_type_faq_link'><span style='white-space: nowrap'>$ML{'.accounttype'}</span></a>:</b></td><td>";
     $ret .= LJ::name_caps($u->{'caps'}) || "<i>$ML{'.unknown'}</i>";
     $ret .= "</td></tr>\n";
 
-    if ($u->{'userid'}) {
+    if ($u->{'userid'}) {   
+        my $username = $u->username;
+
         $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
 
         if ($u->is_expunged) {
@@ -477,25 +481,49 @@ body<=
             }
         }
 
-        my $view_history = LJ::check_priv($remote, 'historyview');
-        my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || 
-                           LJ::check_priv($remote, 'canview', 'userloglight') ||
-                           LJ::check_priv($remote, 'canview', '*');
-        my $view_money = LJ::check_priv($remote, 'moneysearch') || LJ::check_priv($remote, 'moneyview');
-        my $view_props = LJ::check_priv($remote, 'siteadmin', 'propview') || 
-                         LJ::check_priv($remote, 'siteadmin', 'propedit') ||
-                         LJ::check_priv($remote, 'siteadmin', '*');
+        my @view_pages = qw( history userlog money props files logins );
 
-        if ($view_history || $view_userlog || $view_money || $view_props) {
-            $ret .= "<br />$ML{'.view'}: ";
-            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a>&nbsp;&nbsp;&nbsp;"
-                if $view_history;
-            $ret .= "<a href='$LJ::SITEROOT/admin/userlog/$u->{user}'>userlog</a>&nbsp;&nbsp;&nbsp;"
-                if $view_userlog;
-            $ret .= "<a href='$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$u->{user}'>payments</a>&nbsp;&nbsp;&nbsp;"
-                if $view_money;
-            $ret .= "<a href='$LJ::SITEROOT/admin/propedit.bml?user=$u->{user}'>props</a>"
-                if $view_props;				
+        my %view_privs_map = (
+            'history' => [ [ 'historyview' ] ],
+            'userlog' => [ [ 'canview', 'userlog' ], [ 'canview', 'userloglight' ] ],
+            'money'   => [ [ 'moneyview' ], [ 'moneysearch' ] ],
+            'props'   => [ [ 'siteadmin', 'propview' ], [ 'siteadmin', 'propedit' ] ],
+            'files'   => [ [ 'canview', 'userfiles' ] ],
+            'logins'  => [ [ 'canview', 'sessions' ], [ 'canview', 'sessions-sup' ] ],
+        );
+
+        my %links_map = (
+            'history' => [ LJ::Lang::ml('/support/see_request.bml.statushistory'), "$LJ::SITEROOT/admin/statushistory.bml?user=$username" ],
+            'userlog' => [ 'userlog',  "$LJ::SITEROOT/admin/userlog/$username" ],
+            'money'   => [ 'payments', "$LJ::SITEROOT/admin/accounts/paidsearch.bml?method=user&value=$username" ],
+            'props'   => [ 'props',    "$LJ::SITEROOT/admin/propedit.bml?user=$username" ],
+            'files'   => [ 'files',    "$LJ::SITEROOT/manage/files.bml?user=$username" ],
+            'logins'  => [ 'sessions', "$LJ::SITEROOT/manage/logins.bml?user=$username" ],
+        );
+
+        my ( %can_view, $can_view_anything );
+        foreach my $page (@view_pages) {
+            # warn $page;
+            $can_view{$page} = 0;
+
+            foreach my $priv ( @{ $view_privs_map{$page} } ) {
+                $can_view{$page}   ||= LJ::check_priv( $remote, @$priv );
+                $can_view_anything ||= $can_view{$page};
+            }
+        }
+
+        if ($can_view_anything) {
+            my $username = $u->username;
+
+            $ret .= '<br />' .
+                LJ::Lang::ml('/support/see_request.bml.view') . ': ';
+
+            foreach my $page (@view_pages) {
+                next unless $can_view{$page};
+
+                my ( $name, $url ) = @{ $links_map{$page} };
+                $ret .= qq{<a href="$url">$name</a>} . ( "&nbsp;" x 3 );
+            }
         }
 
         $ret .= "</td></tr>\n";
@@ -517,6 +545,20 @@ body<=
     my $is_beta = $props->{'is_beta'};
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.is_beta'}:</b></td>";
     $ret .= "<td>$is_beta</td></tr>";
+
+    if ($u) {
+        my %migration_status_map = (
+            0 => 'not started',
+            1 => 'starting',
+            2 => 'in progress',
+            3 => 'done',
+        );
+
+        my $propval = eval { $u->prop('fotki_migration_status') } || 0;
+        my $status  = $migration_status_map{$propval};
+
+        $ret .= qq{<tr><td align="right" nowrap="nowrap"><b>Photo hosting migration:</b></td><td>$status</td></tr>};
+    }
 
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.supportcategory'}:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
@@ -733,12 +775,13 @@ body<=
             my $faq = LJ::Faq->load($le->{'faqid'}, lang => BML::get_language());
             $faq->render_in_place;
             my $faqname = $faq->question_raw;
+            my $faqlink = $faq->page_url;
 
             $ret .= "<div style='display: table; padding: 3px; background: <?emcolor?>; border: 1px solid #000000; margin-left: auto; margin-right: auto;'>\n";
             # whitespace between these two DIVs is necessary for proper
             # rendering in IE 5 for Mac OS < X
             $ret .= "<div style='text-align:center;'>";
-            $ret .= "<b>$ML{'.faq.reference'}:</b><br /><a href='faqbrowse.bml?faqid=$le->{'faqid'}'>$faqname</a></div></div>\n";
+            $ret .= "<b>$ML{'.faq.reference'}:</b><br /><a href='$faqlink'>$faqname</a></div></div>\n";
         }
         $ret .= "<p align='left' style='margin-top: 0px; margin-bottom: 0px;'>$message</p>\n";
         $ret .= "</td></tr></table>\n";
@@ -801,7 +844,7 @@ body<=
     {
         my $dbr = LJ::get_db_reader();
         # FAQ reference
-        $ret .= "<tr valign='middle'><td align='right'>$ML{'.reference'} <a href='faq.bml'>$ML{'.faq'}</a>:</td><td colspan='2'>\n";
+        $ret .= "<tr valign='middle'><td align='right'>$ML{'.reference'} <a href='$LJ::SITEROOT/support/faq/'>$ML{'.faq'}</a>:</td><td colspan='2'>\n";
 
         my %faqcat;
         my %faqq;
@@ -836,7 +879,7 @@ body<=
         $ret .= LJ::html_select({ 'name' => 'faqid', 'onchange' => 'updateFaqLink()' }, @faqlist) . "\n";
         $ret .= qq(<script language="JavaScript"><!--
             if (document.getElementById)
-                document.write("<a href='faq.bml' id='faqlink'>View FAQ</a>");
+                document.write("<a href='$LJ::SITEROOT/support/faq/' id='faqlink'>View FAQ</a>");
         //--></script>);
         $ret .= "</td></tr>\n";
     }
@@ -1079,11 +1122,4 @@ _code?>
 _code?>
 
 <=body
-page?><?_c <LJDEP>
-link: htdocs/support/faqbrowse.bml, htdocs/styles/browse/styleinfo.bml
-link: htdocs/support/help.bml, htdocs/support/act.bml, htdocs/login.bml
-link: htdocs/guide/support.bml, htdocs/support/faq.bml, htdocs/support/index.bml
-link: htdocs/allpics.bml
-img: htdocs/userpic
-post: htdocs/support/append_request.bml
-</LJDEP> _c?>
+page?>

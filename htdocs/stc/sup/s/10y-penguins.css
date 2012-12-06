@@ -391,4 +391,10 @@ A:visited:hover {
 .view-month .entry-text .comments-count {
 	color:#AAA;
 	}
-	
+
+
+
+/* LJSUP-13769 */
+.appwidget-journalpromo {
+	margin: 20px 20px 20px auto;
+	}

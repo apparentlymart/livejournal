@@ -270,7 +270,10 @@ sub comments_url {
 sub url {
     my $self = shift;
     my %opts = @_;
-    my %args = %opts; # used later
+    my $no_opts = !%opts;
+    return $self->{'__simple_url'} if $self->{'__simple_url'} && $no_opts;
+
+    my %args  = %opts;
     my $u    = $self->{u};
     my $view   = delete $opts{view};
     my $anchor = delete $opts{anchor};
@@ -301,6 +304,7 @@ sub url {
         $url .= LJ::encode_url_string(\%args);
     }
     $url .= "#$anchor" if $anchor;
+    $self->{'__simple_url'} = $url if $no_opts;
     return $url;
 }
 
@@ -552,6 +556,28 @@ sub set_prop {
     return 1;
 }
 
+sub normalize_props {
+    my $self = shift;
+
+    return unless $self->{_loaded_props};
+
+    foreach my $pname ( keys %{$self->{props}} ) {
+        my $pval  = $self->{props}{$pname};
+        
+        next unless defined $pval;
+
+        my $prop  = LJ::get_prop("log", $pname);
+        my $ptype = $prop->{'datatype'};
+        
+        if ($ptype eq "bool" && $pval !~ /^[01]$/) {
+            $self->{props}{$pname} = $pval ? 1 : 0;
+        } 
+
+        if ($ptype eq "num" && $pval =~ /[^\d]/) {
+            $self->{props}{$pname} = int $pval;
+        }
+    }
+}
 
 # called automatically on $event->comments
 # returns the same data as LJ::get_talk_data, with the addition
@@ -887,6 +913,18 @@ sub subject_html
     return $subject;
 }
 
+sub subject_drop_html {
+    my $self = shift;
+    $self->_load_text unless $self->{_loaded_text};
+    return $self->{droped_subject} if $self->{droped_subject};
+
+    my $subject = $self->{subject};
+    my $subject_droped_html = LJ::Text->drop_html($subject);
+    $self->{droped_subject}= $subject_droped_html;
+    return $subject_droped_html;
+}
+
+
 sub subject_text
 {
     my $self = shift;
@@ -930,13 +968,13 @@ sub event_html
     }
     $opts->{journalid} = $self->journalid;
     $opts->{posterid}  = $self->posterid;
-    $opts->{entry_url} = $self->prop('reposted_from') || $self->url;
+    $opts->{entry_url} = $self->url;
 
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
 
-    LJ::expand_embedded($self->{u}, $self->ditemid, $remote, \$event, video_placeholders => $opts->{'video_placeholders'} );
+    LJ::expand_embedded($self->{u}, $self->ditemid, $remote, \$event, video_placeholders => $opts->{'not_expand_placeholders'} ? 1 : $opts->{'video_placeholders'} );
     return $event;
 }
 
@@ -1512,7 +1550,7 @@ sub extract_metadata {
 
     my %meta;
 
-    $meta{'title'} = LJ::Text->drop_html( $self->subject_raw );
+    $meta{'title'} = $self->subject_drop_html;
 
     $meta{'description'} = eval {
         my $text = $self->event_raw;

@@ -161,6 +161,7 @@ sub clean {
     my %remove_attribs = ($opts->{'remove_attribs'}) ?
         (map {$_ => 1} @{ $opts->{'remove_attribs'} }) : ();
     my $remove_positioning = $opts->{'remove_positioning'} || 0;
+    my $placeholders = $opts->{'placeholders'} || 0;
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
     my $cut_retrieve     =  $opts->{cut_retrieve} || 0;
@@ -173,7 +174,7 @@ sub clean {
 
     my $ljspoiler_allowed = $enable_dynamic_elements;
 
-    my $poster = LJ::load_userid($opts->{posterid});
+    my $poster = $opts->{poster} || LJ::load_userid($opts->{posterid});
     my $put_nofollow = not ($poster and $poster->get_cap('paid') and not $poster->get_cap('trynbuy'));
 
     my $viewer_lang = $opts->{'viewer_lang'};
@@ -518,10 +519,9 @@ sub clean {
             if ( $tag eq 'lj-spoiler' ) {
                 next TOKEN unless $ljspoiler_allowed;
 
-                my $title = $attr->{'title'} ||
-                    $attr->{'text'} ||
-                    Encode::decode_utf8(
-                        LJ::Lang::ml('fcklang.ljspoiler.prompt.text') );
+                my $title = exists $attr->{'title'} && length $attr->{'title'}
+                    ? $attr->{'title'}
+                    : $attr->{'text'} || Encode::decode_utf8( LJ::Lang::ml('fcklang.ljspoiler.prompt.text') );
 
                 $title = LJ::ehtml($title);
 
@@ -661,7 +661,7 @@ sub clean {
             my $clean_res = eval {
                 my $cleantag = $tag;
                 $cleantag =~ s/^.*://s;
-                $cleantag =~ s/[^\w]//g;
+                $cleantag =~ s/[^\w]//go;
                 no strict 'subs';
                 my $meth = "CLEAN_$cleantag";
                 my $seq   = $token->[3];  # attribute names, listref
@@ -751,16 +751,18 @@ sub clean {
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<div>" if $tag eq "div";
                     my $data_ids = "";
-                    if ($opts->{entry_url}) {
+                    if ($opts->{entry_url} && $opts->{entry_url} ne '#') {
                         my $entry = LJ::Entry->new_from_url($opts->{entry_url});
                         my $ditemid = 0;
                         my $journalid = $entry->journalid;
                         if ($entry && $entry->valid) {
                             $ditemid = $entry->ditemid;
                         }
-                        $data_ids = qq(data-widget='ljcut' data-widget-options='{ "journalid": "$journalid", "ditemid": "$ditemid", "cutid": "$cutcount" }');
+                        $data_ids = qq(data-widget='ljcut' data-widget-options='{ "journalid": "$journalid", "ditemid": "$ditemid", "cutid": "$cutcount", "placeholders" : $placeholders }');
                     }
-                    $newdata .= "<b $data_ids class=\"ljcut-link lj-widget\">(&nbsp;<a href=\"$url#cutid$cutcount\" class=\"ljcut-link-expand\">$etext</a><a href=\"$url#cutid$cutcount\" class=\"ljcut-link-collapse\">".Encode::decode_utf8(LJ::Lang::ml("ljcut.collapse"))."</a>&nbsp;)</b>";
+                    $newdata .= "<b $data_ids class=\"ljcut-link lj-widget\"><span class='ljcut-brace'>(&nbsp;</span><span class=\"ljcut-decor\"><a href=\"$url#cutid$cutcount\" class=\"ljcut-link-expand\">$etext</a>";
+                    $newdata .= "<a href=\"$url#cutid$cutcount\" class=\"ljcut-link-collapse\">".Encode::decode_utf8(LJ::Lang::ml("ljcut.collapse"))."</a>" unless $opts->{no_ljcut_collapse};
+                    $newdata .= "</span><span class='ljcut-brace'>&nbsp;)</span></b>";
                     $newdata .= "</div>" if $tag eq "div";
                     unless ($opts->{'cutpreview'}) {
                         push @eatuntil, $tag;
@@ -960,7 +962,7 @@ sub clean {
 
                     # IE sucks:
                     my $nowhite = $hash->{$attr};
-                    $nowhite =~ s/[\s\x0b]+//g;
+                    $nowhite =~ s/[\s\x0b]+//go;
                     if ($nowhite =~ /(?:jscript|livescript|javascript|vbscript|about):/ix) {
                         delete $hash->{$attr};
                         next;
@@ -1130,8 +1132,22 @@ sub clean {
                             $img_bad = 1;
                         }
 
-                    }
-                    else {
+                    } elsif ( my $maxwidth = $opts->{'maximgwidth'} ) {
+                        $img_bad = 0;
+
+                        my $width = $hash->{'width'};
+                        if ( $width && $width !~ /\%$/ ) {
+                            $width =~ s/\D//g;
+=head
+                            if ( int $width > $maxwidth ) {
+                                delete $hash->{'width'};
+                                delete $hash->{'height'};
+                            }
+=cut
+                        }
+
+                        #$img_bad = 1 if ( $opts->{'img_placeholders'} );
+                    } else {
                         $img_bad = 0;
                     }
 
@@ -1192,7 +1208,7 @@ sub clean {
                 }
 
                 if ($tag eq "a" and $hash->{href} and $put_nofollow) {
-                    if ($hash->{href} =~ m!^https?://([^/]+?)(/.*)?$!) {
+                    if ($hash->{href} =~ m!^(https?://)?([^/]+?)(/.*)?$!) {
                         my $host = $1;
                         unless ($host =~ /\Q$LJ::DOMAIN\E$/i) {
                             $hash->{rel} = "nofollow";
@@ -1418,8 +1434,8 @@ sub clean {
                 } else {
                     $newdata .= "<a name='cutid$cutcount-end'></a>"
                 }
-            }
-            elsif ($tag eq "lj-repost" and $ljrepost_allowed and ref $opencount{$tag}){
+            } #'"
+            elsif ($tag eq "lj-repost" and $ljrepost_allowed and ref $opencount{$tag}) {
                 ## Add repost button
                 ## If there is opening <lj-repost> tag than $opencount{$tag} exists.
                 ##
@@ -1455,20 +1471,26 @@ sub clean {
                     $captured = Encode::decode_utf8($captured);
                     $subject  = Encode::decode_utf8($subject) if $subject;
                 }
+
                 $captured = LJ::ehtml($captured);
 
                 # add <form> with invisible fields and visible submit button
-                if ($captured){
-                    $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
+                if ( $captured ) {
+                    $newdata .= qq[
+                      <form action="http://www.$LJ::DOMAIN/update.bml" method="POST">
                         <div style="display:none;visible:false">
                         <input type="text" name="subject" value="$subject" />
                         <textarea name="event">$captured</textarea>
+                        <input type="hidden" name="repost" value="$opts->{cuturl}" />
+                        <input type="hidden" name="repost_type" value="a" />
                         </div>
-                        <input type="submit" value="$button" /></form>];
+                        <input type="submit" value="$button" />
+                      </form>];
                 } else {
                     ## treat <lj-repost></lj-repost> as <lj-repost />
                     $newdata .= qq[<form action="http://www.$LJ::DOMAIN/update.bml" method="GET">]
-                             .  qq[<input type=hidden name="repost" value="$opts->{cuturl}" />]
+                             .  qq[<input type="hidden" name="repost" value="$opts->{cuturl}" />]
+                             .  qq[<input type="hidden" name="repost_type" value="a" />]
                              .  qq(<input type="submit" value="$button" /> )
                              .  qq[</form>];
                 }
@@ -1684,7 +1706,7 @@ sub clean {
     # after the <table> was closed) causing unnecessary problems
     if (ref $opts->{'autoclose'} eq "ARRAY") {
         foreach my $tag (@{$opts->{'autoclose'}}) {
-            next if $tag =~ /^(?:tr|td|th|tbody|thead|tfoot|li)$/;
+            next if $tag =~ /^(?:tr|td|th|tbody|thead|tfoot|li)$/o;
             if ($opencount{$tag}) {
                 $newdata .= "</$tag>" x $opencount{$tag};
             }
@@ -1823,9 +1845,9 @@ sub ExpandLJURL
          'faq' => sub {
              my $id = shift()+0;
              if ($id) {
-                 return "support/faqbrowse.bml?faqid=$id";
+                 return "support/faq/$id.html";
              } else {
-                 return "support/faq.bml";
+                 return "support/faq/";
              }
          },
          'memories' => sub {
@@ -2171,10 +2193,11 @@ sub clean_message
 }
 
 sub clean_userbio {
-    my $ref = shift;
+    my ($ref, %opts) = @_;
+    
     return undef unless ref $ref;
 
-    clean($ref, {
+    my %final_opts = (
         'wordlength' => 100,
         'addbreaks' => 1,
         'attrstrip' => [qw[style]],
@@ -2185,7 +2208,10 @@ sub clean_userbio {
         'remove' => $userbio_remove,
         'autoclose' => \@userbio_close,
         'cleancss' => 1,
-    });
+        %opts,
+    );
+
+    clean($ref, \%final_opts);
 }
 
 sub clean_s1_style

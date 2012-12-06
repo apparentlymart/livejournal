@@ -1,5 +1,6 @@
 <?_code # -*-bml-*-
 {
+#line 4
     use strict;
     use vars qw(%GET %POST $title $body);
 
@@ -26,6 +27,9 @@
 
     my $dbr = LJ::get_db_reader();
     my $remote = LJ::get_remote();
+
+    my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$id});
+    $id = undef if defined $is_buyable && $is_buyable;
 
     # show the public layers
     unless ($id) {
@@ -59,7 +63,10 @@
                 my $num_children = 0;
                 foreach my $child (@{$lay->{'children'}}) {
                     my $is_active = LJ::run_hook("layer_is_active", $pub->{$child}->{uniq});
-                    $num_children++ if !defined $is_active || $is_active;
+                    next unless !defined $is_active || $is_active;
+                    my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$child});
+                    next if defined $is_buyable && $is_buyable;
+                    $num_children++;
                 }
                 $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$lid'>";
                 $body .= BML::ml('.layerchildren', {'numchildren' => $num_children}) . "</a>]</li></ul>";
@@ -75,8 +82,10 @@
             # expand children
             $body .= "<ul>";
             foreach (@children) {
-                my $is_active = LJ::run_hook("layer_is_active", $pub->{$_}->{uniq});
+                my $is_active = LJ::run_hook("layer_is_active", $pub->{$_}->{'uniq'});
                 next unless !defined $is_active || $is_active;
+                my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$_});
+                next if defined $is_buyable && $is_buyable;
                 $self->($self, $_);
             }
             $body .= "</ul>";

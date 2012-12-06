@@ -915,7 +915,7 @@ function print_sidebar_linklist()
             if ($l.is_heading) {
                 $list = $list + """<strong>$l.title</strong><br />""";
             } else {
-                $list = $list + """<a href="$l.url">$l.title</a><br />""";
+                $list = $list + """<a href="$l.url" $l.attributes>$l.title</a><br />""";
             }
         } else {
             $list = $list + "<br /><br />";

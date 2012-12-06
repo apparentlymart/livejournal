@@ -239,6 +239,18 @@
 .friends.mutual|staleness=1
 .friends.mutual=Mutual Friends
 
+.friends.mutual.friendof|staleness=1
+.friends.mutual.friendof=Mutual Friends of
+
+.friends.mutual.friends|staleness=1
+.friends.mutual.friends=Mutual Friends
+
+.friends.mutual.cfriends|staleness=1
+.friends.mutual.cfriends=Mutual Cfriends
+
+.friends.mutual.member|staleness=1
+.friends.mutual.member=Mutual Member
+
 .friends.mutual.with.you|staleness=1
 .friends.mutual.with.you=Mutual with you
 

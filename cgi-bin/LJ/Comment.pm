@@ -1319,7 +1319,7 @@ sub _format_mail_both {
             my $language_old = LJ::Lang::current_language;
             LJ::Lang::current_language($lang);
 
-            $text = $entry->event_html({ cuturl => $entry->url });
+            $text = $entry->event_html({ cuturl => $entry->url, no_ljcut_collapse => 1 });
 
             LJ::Lang::current_language($language_old);
         }
@@ -1515,7 +1515,7 @@ sub format_template_html_mail {
 
     # add specific for HTML params
     $t->param(parent_text        => LJ::Talk::Post::blockquote($parent ? $parent->body_html
-                                                                       : $entry->event_html ));
+                                                                       : $entry->event_html({ no_ljcut_collapse => 1 }) ));
     $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_html));
 
     my $email_subject = $self->subject_html;

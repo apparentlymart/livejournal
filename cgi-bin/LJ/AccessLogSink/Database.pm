@@ -44,6 +44,8 @@ sub extra_values {
 sub log {
     my ($self, $rec) = @_;
 
+    return 0 unless LJ::is_enabled('db_access_logs');
+
     return 0 unless $self->should_log($rec);
 
     my $dbl = LJ::get_dbh($self->database_role)

@@ -443,7 +443,7 @@ function Page::print_linklist() {
                 println """<span style="font-weight: bold;">$l.title</span> """;
                 $section_open = true;
             } else {
-                println """[<a href="$l.url">$l.title</a>]""";
+                println """[<a href="$l.url" $l.attributes>$l.title</a>]""";
             }
         } else {
             println "<br />";

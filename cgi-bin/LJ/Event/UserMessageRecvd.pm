@@ -16,6 +16,32 @@ sub new {
 
 sub is_common { 1 }
 
+sub as_web_notification {
+    my ($self, $u) = @_;
+
+    my $msg     = $self->load_message;
+    my $other_u = $msg->other_u;
+    my $msgid   = $msg->msgid;
+    my $qid     = $msg->qid;
+
+    my $pic;
+    if ($msg->userpic) {
+        $pic = LJ::Userpic->new_from_keyword($other_u, $msg->userpic);
+    } else {
+        $pic = $other_u->userpic;
+    }
+
+    my $inbox = "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid";
+    my $pic_url = $pic ? $pic->url : 
+                         "$LJ::STATPREFIX/horizon/nouserpic.png?v=2621";
+
+    return {  title   => $msg->subject,
+              content => $msg->body,
+              tag     => $other_u->user,
+              icon    => $pic_url,
+              url     => $inbox };
+}
+
 sub as_email_subject {
     my ($self, $u) = @_;
 

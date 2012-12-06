@@ -12,8 +12,14 @@ use base 'LJ::NewWorker::Gearman';
 use Storable;
 use LJ::NewWorker::Gearman;
 use LJ::Directory::Search;
+use LJ::Directory::Constraint;
 use LJ::UserSearch;
 use LJ::UserSearch::MetaUpdater;
+
+BEGIN {
+    use Class::Autouse;
+    Class::Autouse->load("LJ::Directory::Constraint");
+};
 
 my $mtime;
 

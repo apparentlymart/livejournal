@@ -1,5 +1,12 @@
 <html>
-<head><title>Status History</title></head>
+<head>
+    <title>Status History</title>
+    <style type="text/css">
+        .i-ljuser-deleted {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
 <body>
 <?_code
 {
@@ -60,20 +67,30 @@
     }
     my $flow = $FORM{'flow'} eq 'asc' ? 'ASC' : 'DESC';
 
-    my $sth = $dbr->prepare("SELECT u.user, ua.user AS admin, s.shtype, s.shdate, s.notes " .
-                            "FROM statushistory s " .
-                            "LEFT JOIN useridmap ua ON s.adminid=ua.userid " .
-                            "LEFT JOIN useridmap u ON s.userid=u.userid " .
-                            $where .
-                            "ORDER BY $orderby $flow LIMIT 1000");
+        my $sql = qq~
+        SELECT u.user,
+               ua.user AS admin,
+               s.shtype,
+               s.shdate,
+               s.notes
+          FROM statushistory s
+     LEFT JOIN useridmap ua ON s.adminid=ua.userid
+     LEFT JOIN useridmap u ON s.userid=u.userid
+        $where
+      ORDER BY $orderby $flow
+         LIMIT 1000~;
+
+    my $sth = $dbr->prepare($sql);
     $sth->execute;
     return $dbr->errstr if $dbr->err;
 
     # column headings w/ sort links
     $ret .= "<p><b>Query:";
+
     foreach (qw(user admin type)) {
         $ret .= "&nbsp;&nbsp;$_=" . LJ::eall($FORM{$_}) if $FORM{$_}
     }
+
     $ret .= "</b></p>\n";
     $ret .= "<table border='1' cellpadding='5' width='100%'>\n<tr>";
     foreach (qw(user admin shtype shdate notes)) {
@@ -85,6 +102,7 @@
 
     # query built above
     my $ct = 0;
+
     while (my $hist = $sth->fetchrow_hashref) {
         # see if they can see this item: either they have unarged historyview or
         # they have historyview:shtype

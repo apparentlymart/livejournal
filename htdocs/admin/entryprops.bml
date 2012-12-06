@@ -91,6 +91,15 @@ body<=
             if ($time_props{$prop}) {
                 $props{$prop} = LJ::TimeUtil->mysql_time($props{$prop});
             }
+            
+            $props{$prop} = "-" if $prop eq 'poster_ip' && ! LJ::check_priv($remote, "canview", "userlog");
+            if ($prop eq 'uniq') {
+                if (LJ::check_priv($remote, "canview", "userlog") || LJ::check_priv($remote, "canview", "uniq")) {
+                    $props{$prop} = "<a href='$LJ::SITEROOT/admin/uniq.bml?what=".$props{$prop}."'>".$props{$prop}."</a>" if $prop eq 'uniq'; 
+                } else {
+                    $props{$prop} = "-";
+                }
+            }
         }
         if ($prop eq 'moderator_id') {
             my $moderator = LJ::load_userid($props{$prop});
@@ -103,7 +112,11 @@ body<=
         $ret .= "<li><strong>$prop</strong>: $props{$prop}$extra</li><br />";
     }
     if ($entry->is_sticky) {
-        $ret .= "<li><strong>Post is sticky</strong>: Y";
+        $ret .= "<li><strong>Post is sticky</strong>: Y</li><br />";
+    }
+    my $modid = $entry->prop("mod_queue_id");
+    if ($modid) {
+        $ret .= "<li><strong>New content in moderation queue</strong>: Yes, ID = $modid</li><br />";
     }
     $ret .= "</ul>";
 

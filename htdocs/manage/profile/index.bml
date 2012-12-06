@@ -640,16 +640,12 @@ body<=
             $ret .= "var supportedDEF = [" . join(',', keys %{$LJ::SMSRU{provider_by_code_def}}) . "];";
             $ret .= "var smsCountry = '$country';";
 
-            my $prefix = '';
-            $prefix = '.kz' if $country eq 'KZ';
-            $prefix = '.tj' if $country eq 'TJ';
-
             my $dict_out = LJ::JSON->to_json({
                 'sendsmsbut'        => $ML{'.section.textmsg.button'},
                 'resendsmsbut'      => $ML{'.section.textmsg.button.resend'},
-                'initial'           => $ML{'.section.textmsg.info' . $prefix},
-                'badNum'            => $ML{'.section.textmsg.info.badnum' . $prefix},
-                'unsupporteddef'    => $ML{'.section.textmsg.info.unsupporteddef' . $prefix},
+                'initial'           => $ML{'.section.textmsg.info'},
+                'badNum'            => $ML{'.section.textmsg.info.badnum'},
+                'unsupporteddef'    => $ML{'.section.textmsg.info.unsupporteddef'},
 
                 map { $_ => $ML{".section.textmsg.info.$_"} }
                     qw( already_use correctNum requestsent smssent
@@ -866,7 +862,7 @@ body<=
             LJ::User::UserlogRecord::EmailChange->create( $u,
                 'new' => $POST{'email'}, 'remote' => $remote );
 
-            LJ::run_hook('post_email_change',
+            LJ::run_hooks('post_email_change',
                          {
                              user     => $u,
                              newemail => $POST{'email'},

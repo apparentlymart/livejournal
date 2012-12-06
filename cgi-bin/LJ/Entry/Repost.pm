@@ -14,6 +14,9 @@ use constant { REPOST_KEYS_EXPIRING    => 60*60*2,
                REPOST_USERS_LIST_LIMIT => 25,
              };
 
+# memcache namespace: reposters chunks are stored with these keys in memcache
+my $memcache_ns = 'reposters_list_chunk2';
+
 sub __get_count {
     my ($u, $jitemid) = @_;
 
@@ -113,14 +116,14 @@ sub __create_repost_record {
     # remove last users list block from cache
     # 
     my $last_block_id = int( $current_count / REPOST_USERS_LIST_LIMIT );    
-    LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id");
+    LJ::MemCache::delete("$memcache_ns:$journalid:$jitemid:$last_block_id");
     
     #
     # remove prev block too
     #
     if ($last_block_id > 0) {
         $last_block_id--;
-        LJ::MemCache::delete("reposters_list_chunk:$journalid:$jitemid:$last_block_id")
+        LJ::MemCache::delete("$memcache_ns:$journalid:$jitemid:$last_block_id")
     }
     
     #
@@ -292,7 +295,7 @@ sub __create_repost {
                                                   qty              => $cost,
                                                   );
         unless($blid){
-            return $fail->($err || LJ::API::Error->get_error('repost_blocking_error'));
+            return $fail->(LJ::API::Error->get_error('repost_blocking_error'));
         }
     }
 
@@ -343,11 +346,11 @@ sub get_status {
     my $result = { 'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
                    'reposted' => $reposted,
                    'paid'     => $paid,
-                   'cost'     => $cost,
+                   'cost'     => LJ::delimited_number( $cost ),
                  };
 
     if ($is_owner && $paid) {
-        $result->{budget} = $entry_obj->repost_budget;
+        $result->{budget} = LJ::delimited_number( $entry_obj->repost_budget );
     }
 
     return $result;    
@@ -394,7 +397,7 @@ sub __clean_reposters_list {
  
     # construct memcache keys base
     my $journalid = $u->userid;
-    my $key_base = "reposters_list_chunk:$journalid:$jitemid";
+    my $key_base = "$memcache_ns:$journalid:$jitemid";
 
     # clean all blocks
     for (my $i = 0; $i < $blocks_count; $i++) {
@@ -406,7 +409,7 @@ sub __put_reposters_list {
     my ($journalid, $jitemid, $data, $lastrequest) = @_;
 
     my $subkey       = "$journalid:$jitemid";
-    my $memcache_key = "reposters_list_chunk:$subkey:$lastrequest";
+    my $memcache_key = "$memcache_ns:$subkey:$lastrequest";
     
     my $serialized = LJ::JSON->to_json( $data );
     LJ::MemCache::set( $memcache_key, $serialized, REPOST_KEYS_EXPIRING );
@@ -415,7 +418,7 @@ sub __put_reposters_list {
 sub __get_reposters_list {
     my ($journalid, $jitemid, $lastrequest) = @_;
 
-    my $memcache_key = "reposters_list_chunk:$journalid:$jitemid:$lastrequest";
+    my $memcache_key = "$memcache_ns:$journalid:$jitemid:$lastrequest";
 
     my $data;
     my $reposters = LJ::MemCache::get($memcache_key);
@@ -514,7 +517,11 @@ sub get_list {
 
     foreach my $reposter (@$repostersids) {
         my $u = LJ::want_user($reposter);
-        push @$users, { user => $u->user,  'url' => $u->journal_base, };
+        push @$users, {
+            'userid' => $u->userid,
+            'user'   => $u->user,
+            'url'    => $u->journal_base,
+        };
     }  
  
     $reposters_info->{'last'}   = $lastrequest + 1;

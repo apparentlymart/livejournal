@@ -70,8 +70,19 @@ sub run_hook
     my ($hookname, @args) = @_;
     load_hooks_dir() unless $hooks_dir_scanned;
 
-    return undef unless @{$LJ::HOOKS{$hookname} || []};
-    return $LJ::HOOKS{$hookname}->[0]->[1]->(@args);
+    my $registered_hooks = $LJ::HOOKS{$hookname} || [];
+    return undef unless @$registered_hooks;
+
+    if ( @$registered_hooks > 1 ) {
+        my $list_out = join( q{, },
+            map { $_->[0] . ' line ' . $_->[2] } @$registered_hooks );
+
+        Carp::carp "more than one hook has been registered " .
+            "for $hookname ($list_out), but " .
+            "only one is being used in run_hook";
+    }
+
+    return $registered_hooks->[0]->[1]->(@args);
 }
 
 # <LJFUNC>
@@ -210,6 +221,16 @@ register_setter("disable_nudge", sub {
         return 0;
     }
     $u->set_prop("opt_no_nudge", $value);
+    return 1;
+});
+
+register_setter("check_suspicious", sub {
+    my ($u, $key, $value, $err) = @_;
+    unless ($value =~ /^(?:yes|no)$/) {
+        $$err = "Illegal value. Must be 'yes' or 'no'";
+        return 0;
+    }
+    $u->set_prop("check_suspicious", $value);
     return 1;
 });
 

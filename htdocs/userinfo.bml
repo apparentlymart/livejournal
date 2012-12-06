@@ -1025,7 +1025,7 @@
             $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
             $u->{'bio'} =~ s!\n!<br />!g;
         } else {
-            LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+            LJ::CleanHTML::clean_userbio(\$u->{'bio'}, poster => $u);
         }
 
         LJ::EmbedModule->expand_entry($u, \$u->{'bio'});

@@ -313,6 +313,12 @@ sub render
     $data_control_strip->{site_messages} = LJ::Widget::SiteMessages->should_render
                                            ? LJ::Widget::SiteMessages->render
                                            : '';
+
+    if ( $data_journal->{'view_friends'} ) {
+        $data_control_strip->{'switch_friendsfeed'} =
+            LJ::Widget::FriendsFeedBeta->render( 'placement' => 'legacy' );
+    }
+
     if (LJ::is_enabled('journalpromo')) {
         $data_control_strip->{promo_strip} = LJ::Widget::JournalPromoStrip->should_render(remote => $remote, journal => $journal)
                                             ? LJ::Widget::JournalPromoStrip->render(remote => $remote, journal => $journal)
@@ -373,8 +379,8 @@ sub render
             $last_date[1] -= 1;
         }
 
-        if (@early_date[1] != 0) {
-            @early_date[1] -= 1;
+        if ($early_date[1] != 0) {
+            $early_date[1] -= 1;
         }
 
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =

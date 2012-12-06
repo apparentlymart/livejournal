@@ -280,7 +280,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 							'<a href="'+Site.siteroot+'/manage/account">'+
 								'<img src="'+Site.statprefix+'/horizon/upgrade-paid-icon.gif?v=2621" width="13" height="16" alt=""/>'+
 							'</a> '+
-							'<a href="'+Site.siteroot+'/support/faqbrowse.bml?faqid=295">'+data.alias_title+'</a>'+
+							'<a href="'+Site.siteroot+'/support/faq/295.html">'+data.alias_title+'</a>'+
 						'</span>');
 				}
 			}

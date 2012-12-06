@@ -202,7 +202,14 @@ sub on_pulse {
                           "\ndelayed id = " . $entry->delayedid . 
                           " and post date " . $entry->posttime . 
                           " error : " . $post_status->{'error_message'};
-                    
+
+                    if ( $post_status->{'delete_entry'} ) {
+                        __send_error($entry->poster, 
+                                     $entry->subject,  
+                                     $post_status->{'error_message'});
+                        $entry->mark_posted();
+                    }
+
                 } elsif ($verbose) {
                         print "(posting) The entry with delayed id = " . 
                               $entry->delayedid . 

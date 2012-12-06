@@ -11,5 +11,6 @@ LJ::NewWorker::TheSchwartz::ProcessSub->start();
 package LJ::NewWorker::TheSchwartz::ProcessSub;
 use base 'LJ::NewWorker::TheSchwartz';
 sub capabilities { "LJ::Worker::ProcessSub" }
+sub find_job_limit { 200 }
 
 1;

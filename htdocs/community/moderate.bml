@@ -97,7 +97,8 @@ body<=
                 $req->{props}->{taglist} = $POST{'prop_taglist'};
         }
         if ($mode eq 'approve_do') {
-            my $res = LJ::Protocol::do_request('postevent', $req, \$prot_err, { 'nomod'=>1, 
+            my $method = $req->{itemid} ? 'editevent' : 'postevent';
+            my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'=>1, 
                                                                                 'noauth'=>1, 
                                                                                 'use_custom_time'=> 0, });
             if ($res) { # succeeded
@@ -266,6 +267,11 @@ body<=
             $c->do("DELETE FROM modblob WHERE journalid=? AND modid=?",
                    undef, $c->{'userid'}, $modid);
 
+            if ( $req->{itemid} ) {
+                my $entry = LJ::Entry->new($c->{'userid'}, jitemid => $req->{itemid});
+                $entry->set_prop("mod_queue_id", undef) if $entry;
+            }
+
         # FALL THROUGH to showing the list of entries in this community
         } else {
             $ret .= "<p>";
@@ -388,6 +394,7 @@ body<=
             LJ::load_userids_multiple([ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @entries ]);
             foreach (sort { $a->{'logtime'} lt $b->{'logtime'} } @entries) {
                 my $is_adult = 0;
+                my $is_edited = 0;
                 my $frozen = $dbcr->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=? AND modid=?",
                                                     undef, $c->{'userid'}, $_->{'modid'});
                 if ($frozen) {
@@ -397,6 +404,7 @@ body<=
                                     ? 1 
                                     : 0;
                     $is_adult = 0 if $req->{prop_adult_content} eq 'none';
+                    $is_edited = 1 if $req->{itemid};
                 }
                 my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
@@ -408,7 +416,9 @@ body<=
                     "<td>\n" .
                     BML::ml('Actionlink', {
                         'link'=>"<a href='$link'>$ML{'.brlist.view'}</a>"
-                        }) . "</td></tr>\n";
+                        }) . "</td>" .
+                    "<td>" . ($is_edited ? BML::ml('.is_edited_entry') : '&nbsp;') . "</td>" .
+                    "</tr>\n";
             }
             $ret .= "</table>";
         }

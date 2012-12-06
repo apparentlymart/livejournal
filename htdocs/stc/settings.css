@@ -1113,15 +1113,15 @@
 
 /* Journapromo settings */
 .myad UL {
-	margin: 0 0 0 4px;
+	margin: 0;
 	padding: 0;
 	list-style: none;
 	}
-	.myad .b-settings-journalpromo UL LI {
+	.myad .journalpromo-options-wrapper UL LI {
 		margin: 0 0 12px 0;
 		}
 .myad .b-settings-journalpromo TD {
-	padding: 0;
+	padding: 8px 0;
 	border-bottom: none;
 	}
 .b-settings-journalpromo TD,
@@ -1147,3 +1147,141 @@
 		visibility: visible;
 		height: auto;
 		}
+.b-journalpromo-controls-add:after,
+.b-journalpromo-manage-controls:after,
+.b-journalpromo-manage:after {
+	display: block;
+	height: 0;
+	clear: both;
+    content: " ";
+	line-height: 0;
+    visibility: hidden;
+    font-size: 0;
+	}
+.b-journalpromo-manage-controls {
+	margin-top: 10px;
+	}
+	.b-journalpromo-manage-controls .b-journalpromo-manage-btns-clear {
+		float: right;
+		}
+.b-journalpromo-add-user {
+	width: 318px;
+	}
+.b-journalpromo-manage-settings {
+	width: 320px;
+	padding: 0 20px 0 0;
+	}
+.b-journalpromo-manage-desc {
+	overflow: hidden;
+	}
+.b-journalpromo-manage .b-bubble {
+	width: 298px;
+	margin: 10px 0 !important;
+	}
+.b-journalpromo-manage .b-bubble-warning {
+	display: none;
+	}
+.b-journalpromo-manage .b-bubble-alert {
+	margin: 0 0 10px !important;
+	}
+.b-journalpromo-manage-example {
+	float: left;
+	width: 65%;
+	text-align: left;
+	}
+.b-journalpromo-manage-confirm {
+	float: right;
+	width: 35%;
+	text-align: right;
+	}
+.b-settings-journalpromo-blacklist {
+	display: none;
+	}
+.b-settings-journalpromo-blacklist.b-settings-show {
+	display: block;
+	display: table-row-group;
+	}
+.b-splatest-more {
+	display: inline-block;
+	width: 18px;
+	height: 16px;
+	vertical-align: top;
+	background: url("/img/preloader/preloader-blue-blue.gif") no-repeat scroll -5px 50% transparent;    
+	}
+.b-journalpromo-manage .b-splatest-more-count,
+.b-journalpromo-manage-loading .b-journalpromo-manage-count {
+	display: none;
+	}
+.b-journalpromo-manage-loading .b-splatest-more-count {
+	display: inline-block;
+	}
+.b-settings-journalpromo .b-journalpromo-manage-numbering {
+	line-height: 19px;
+	margin-bottom: 10px;
+	padding: 4px 0 4px 2px;
+	}
+.b-journalpromo-manage-userlist {
+	overflow: hidden;
+    padding: 14px 20px 16px 20px !important;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid #EBEBEB;
+	}
+	.b-journalpromo-manage-userlist LI {
+		position: relative;
+		float: left;
+		padding: 0 7px 0 0;
+		white-space: nowrap;
+		z-index: 0;
+		}
+		.b-journalpromo-manage-userlist LI SPAN {
+			position: relative;
+			float: left;
+			margin: 0;
+			}
+		.b-journalpromo-manage-userlist LI B {
+			position: relative;
+			}
+		.b-journalpromo-manage-userlist A {
+			border-bottom: 0 !important;
+			text-decoration: none !important;
+			}
+		.b-journalpromo-manage-userlist LI:hover,
+		.b-journalpromo-manage-userlist LI.hover {
+			z-index: 2 !important;
+			}
+		.b-journalpromo-manage-userlist LI:hover SPAN,
+		.b-journalpromo-manage-userlist LI.hover SPAN {
+			margin: -3px -14px -4px -8px;
+			padding: 2px 13px 3px 7px;
+			-moz-border-radius: 5px;
+			-webkit-border-radius: 5px;
+			border-radius: 5px;
+			border: 1px solid #CCC;
+			background: #f5f5f5;
+			}
+		.b-journalpromo-manage-userlist LI:hover B, 
+		.b-journalpromo-manage-userlist LI.hover B {
+			z-index: -2;
+			visibility: hidden;
+			}
+			.b-journalpromo-manage-userlist LI:hover SPAN .b-journalpromo-pending-close,
+			.b-journalpromo-manage-userlist LI.hover SPAN .b-journalpromo-pending-close {
+				display: block;
+				position: absolute;
+				top: 50%;
+				right: 6px;
+				width: 6px;
+				height: 7px;
+				margin: -3px 0 0;
+				padding: 0;
+				background: url(/img/buttons/pending-close.gif?v=1) no-repeat 0 0;
+				cursor: pointer;
+				}
+			.b-journalpromo-manage-userlist .b-journalpromo-comma-hide .b-journalpromo-users-comma {
+				visibility: hidden;
+				}
+.b-journalpromo-manage-btns {
+	text-align: right;
+	}

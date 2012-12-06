@@ -16,10 +16,6 @@ use strict;
         'i18n' => 'generator/en',
     };
 
-    # cluster 0 is no longer supported
-    $LJ::DEFAULT_CLUSTER ||= 1;
-    @LJ::CLUSTERS = (1) unless @LJ::CLUSTERS;
-
     $LJ::HOME = $ENV{'LJHOME'};
     $LJ::HTDOCS = "$LJ::HOME/htdocs";
     $LJ::SSLDOCS ||= "$LJ::HOME/ssldocs";
@@ -513,6 +509,10 @@ use strict;
         @LJ::GEARMAN_SERVERS = qw( 127.0.0.1:8000 )
             unless @LJ::GEARMAN_SERVERS;
     }
+
+    # cluster 0 is no longer supported
+    $LJ::DEFAULT_CLUSTER ||= 1;
+    @LJ::CLUSTERS = (1) unless @LJ::CLUSTERS;
 }
 
 # no dependencies.

@@ -14,7 +14,11 @@
 
 	var listeners = {
 		onStartEdit: function(evt) {
-			evt.data._setState('edit');
+			var self = evt.data;
+
+			self._setState('edit');
+			self._setEditDate(self.currentDate);
+
 			evt.preventDefault();
 		},
 
@@ -220,8 +224,8 @@
 				self._isEvent = false; //we're not a blur event
 
 				if (currentDate.getMonth() !== date.getMonth() || currentDate.getDate() !== date.getDate() || currentDate.getFullYear() !== date.getFullYear()) {
-					date.setHours(currentDate.getHours());
-					date.setMinutes(currentDate.getMinutes());
+					date.setHours(self.currentDate.getHours());
+					date.setMinutes(self.currentDate.getMinutes());
 					self._setEditDate(date);
 				}
 			});
@@ -262,6 +266,10 @@
 			}
 		},
 
+		/**
+		 * Stop timer
+		 * @param {Boolean} completely Also change options.updateDate to prevent timer start in future
+		 */
 		_stopTimer: function(completely) {
 			clearInterval(this._updateTimer);
 			delete this._updateTimer;
@@ -301,14 +309,16 @@
 
 			var current = new Date(),
 				toSet = new Date(date);
+
+			/* Compare dates with one minute precision */
 			current.setMilliseconds(0);
 			current.setSeconds(0);
-			current.setMinutes(0);
-			current.setHours(0);
+			//current.setMinutes(0);
+			//current.setHours(0);
 			toSet.setMilliseconds(0);
 			toSet.setSeconds(0);
-			toSet.setMinutes(0);
-			toSet.setHours(0);
+			//toSet.setMinutes(0);
+			//toSet.setHours(0);
 
 			var delta = +toSet - (+new Date());
 			this._setTime(date);
@@ -321,6 +331,11 @@
 			}
 		},
 
+		/**
+		 * Set widget state
+		 *
+		 * @param {String} state State name
+		 */
 		_setState: function(state) {
 			this.options.state = state = state || 'default';
 
@@ -336,6 +351,7 @@
 						this._startTimer();
 						this._dateInputs.custom_time.val(1);
 					}
+
 					break;
 				case 'infutureedit':
 				case 'inedit':

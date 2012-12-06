@@ -1,19 +1,3 @@
-userproplist.ad_categories:
-  cldversion: 4
-  datatype: char
-  des: User selectable Ad categories
-  indexed: 0
-  multihomed: 0
-  prettyname: Ad Content Categories
-
-userproplist.ad_visibility:
-  cldversion: 4
-  datatype: char
-  des: User-selected ad visibility option
-  indexed: 0
-  multihomed: 0
-  prettyname: Ad Visibility
-
 userproplist.admin_content_flag:
   cldversion: 4
   datatype: char
@@ -29,6 +13,22 @@ userproplist.adult_content:
   indexed: 0
   multihomed: 0
   prettyname: Adult Content Flag
+
+userproplist.ad_categories:
+  cldversion: 4
+  datatype: char
+  des: User selectable Ad categories
+  indexed: 0
+  multihomed: 0
+  prettyname: Ad Content Categories
+
+userproplist.ad_visibility:
+  cldversion: 4
+  datatype: char
+  des: User-selected ad visibility option
+  indexed: 0
+  multihomed: 0
+  prettyname: Ad Visibility
 
 userproplist.aliases:
   cldversion: 5
@@ -86,6 +86,30 @@ userproplist.city:
   multihomed: 0
   prettyname: City
 
+userproplist.closed_sm:
+  cldversion: 8
+  datatype: char
+  des: List of closed site messages
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
+userproplist.closed_feed_line:
+  cldversion: 8
+  datatype: char
+  des: Is friends feed line closed?
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
+userproplist.comment_alter_time:
+  cldversion: 8
+  datatype: num
+  des: Unix time of last modification of comment's data in journal. Comment added/deleted/updated/screened/etc...
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
 userproplist.comm_promo_blurb:
   cldversion: 4
   datatype: char
@@ -109,6 +133,30 @@ userproplist.country:
   indexed: 1
   multihomed: 0
   prettyname: Country
+
+userproplist.custom_usericon:
+  cldversion: 0
+  datatype: char
+  des: Custom user icon, to be used instead of /img/userinfo.gif in ljuser
+  indexed: 1
+  multihomed: 0
+  prettyname: Custom user icon
+
+userproplist.custom_usericon_individual:
+  cldversion: 0
+  datatype: char
+  des: Individual user icon. It contains uh_id & exp_date.
+  indexed: 1
+  multihomed: 0
+  prettyname: Individual user icon
+
+userproplist.default_copyright:
+  cldversion: 4
+  datatype: char
+  des: Default value to entry prop 'copyright'
+  indexed: 0
+  multihomed: 0
+  prettyname: Default value to entry prop 'copyright'
 
 userproplist.disable_comm_promo:
   cldversion: 4
@@ -134,6 +182,14 @@ userproplist.dogeartime:
   multihomed: 0
   prettyname: dog ear time
 
+userproplist.dont_expunge_journal:
+  cldversion: 8
+  datatype: num
+  des: explicitly prevent the system from purging this user
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
 userproplist.dont_load_members:
   cldversion: 4
   datatype: bool
@@ -149,6 +205,14 @@ userproplist.dupsig_post:
   indexed: 0
   multihomed: 0
   prettyname: Duplicate signature for last post
+
+userproplist.election_poll_id:
+  cldversion: 8
+  datatype: num
+  des: Supermaintainer election poll id
+  indexed: 1
+  multihomed: 0
+  prettyname: Supermaintainer election poll id
 
 userproplist.emailpost_allowfrom:
   cldversion: 4
@@ -230,6 +294,14 @@ userproplist.emailpost_userpic:
   multihomed: 
   prettyname: Userpic for email posting
 
+userproplist.email_faulty:
+  cldversion: 8
+  datatype: bool
+  des: True if user email was set as unconfirmed due to delivery related problems
+  indexed: 1
+  multihomed: 0
+  prettyname: Email is faulty
+
 userproplist.entry_draft:
   cldversion: 4
   datatype: blobchar
@@ -294,6 +366,14 @@ userproplist.friendspagetitle:
   multihomed: 0
   prettyname: Friends Page Title
 
+userproplist.friends_tags:
+  cldversion: 0
+  datatype: blobchar
+  des: Set of tags, which filter friendspage
+  indexed: 0
+  multihomed: 0
+  prettyname: Friendspage filtrating tags 
+
 userproplist.gender:
   cldversion: 4
   datatype: char
@@ -317,6 +397,14 @@ userproplist.google_talk:
   indexed: 1
   multihomed: 1
   prettyname: Google Talk Address
+
+userproplist.hidefriendsreposts:
+  cldversion: 8
+  datatype: bool
+  des: hide reposts in friends page
+  indexed: 0
+  multihomed: 0
+  prettyname: hide friends reposts
 
 userproplist.hide_adult_content:
   cldversion: 4
@@ -350,13 +438,13 @@ userproplist.icq:
   multihomed: 1
   prettyname: ICQ
 
-userproplist.message_draft:
-  cldversion: 4
-  datatype: blobchar
-  des: Backup of a user's most recent unsended message
-  indexed: 0
+userproplist.ilikeit_enable:
+  cldversion: 0
+  datatype: bool
+  des: Enable 'I like it' button in community.
+  indexed: 1
   multihomed: 0
-  prettyname: New Message Draft
+  prettyname: Enable 'I like it' button.
 
 userproplist.init_bdate:
   cldversion: 4
@@ -365,14 +453,6 @@ userproplist.init_bdate:
   indexed: 0
   multihomed: 0
   prettyname: Birthdate
-
-userproplist.user_comment_no_index:
-  cldversion: 4
-  datatype: bool
-  des: Exclude comments search from feed
-  indexed: 0
-  multihomed: 0
-  prettyname: No Index
 
 userproplist.interest_ids_blob:
   cldversion: 4
@@ -389,6 +469,14 @@ userproplist.jabber:
   indexed: 1
   multihomed: 1
   prettyname: Jabber Address
+
+userproplist.javascript:
+  cldversion: 8
+  datatype: bool
+  des: JS is enabled in S2
+  indexed: 0
+  multihomed: 1
+  prettyname: JS is enabled in S2
 
 userproplist.journaldomain:
   cldversion: 4
@@ -430,6 +518,14 @@ userproplist.journal_box_placement:
   multihomed: 0
   prettyname: Journal Box Placement
 
+userproplist.lastloginid:
+  cldversion: 8
+  datatype: num
+  des: Previous login id
+  indexed: 0
+  multihomed: 0
+  prettyname: Previous login id
+
 userproplist.last_fm_user:
   cldversion: 4
   datatype: char
@@ -469,6 +565,14 @@ userproplist.maintainers_freeze:
   indexed: 0
   multihomed: 0
   prettyname: Freeze list of community's maintainers
+
+userproplist.message_draft:
+  cldversion: 4
+  datatype: blobchar
+  des: Backup of a user's most recent unsended message
+  indexed: 0
+  multihomed: 0
+  prettyname: New Message Draft
 
 userproplist.moderated:
   cldversion: 4
@@ -541,6 +645,22 @@ userproplist.opt_blockrobots:
   indexed: 1
   multihomed: 0
   prettyname: Block Robots & Spiders
+
+userproplist.opt_commentsstylemine:
+  cldversion: 8
+  datatype: char
+  des: 1: always use user style when viewing comments in any journal
+  indexed: 0
+  multihomed: 0
+  prettyname: Comments always in my Style
+
+userproplist.opt_comment_fold_disabled:
+  cldversion: 8
+  datatype: bool
+  des: 0: disable comment fold for user
+  indexed: 0
+  multihomed: 0
+  prettyname: Comments always in my Style
 
 userproplist.opt_comminvitemail:
   cldversion: 4
@@ -694,6 +814,14 @@ userproplist.opt_maxwordlength:
   multihomed: 0
   prettyname: Max Word Length
 
+userproplist.opt_modrejectemail:
+  cldversion: 8
+  datatype: bool
+  des: 0: default, do not send emails about rejection from moderation, 1: send them
+  indexed: 0
+  multihomed: 0
+  prettyname: Send emails about rejection from moderation
+
 userproplist.opt_nctalklinks:
   cldversion: 4
   datatype: bool
@@ -798,6 +926,14 @@ userproplist.opt_showtopicstuff:
   multihomed: 0
   prettyname: Topic Directory Integration
 
+userproplist.opt_show_captcha_to:
+  cldversion: 4
+  datatype: char
+  des: Show CAPTCHA before posting a comment to: A=All, N=No one, F=non-Friends, R=anonymous users
+  indexed: 0
+  multihomed: 0
+  prettyname: Show CAPTHCHA on commenting
+
 userproplist.opt_stylealwaysmine:
   cldversion: 4
   datatype: char
@@ -805,22 +941,6 @@ userproplist.opt_stylealwaysmine:
   indexed: 0
   multihomed: 0
   prettyname: Always my Style
-
-userproplist.opt_commentsstylemine:
-  cldversion: 8
-  datatype: char
-  des: 1: always use user style when viewing comments in any journal
-  indexed: 0
-  multihomed: 0
-  prettyname: Comments always in my Style
-
-userproplist.opt_comment_fold_disabled:
-  cldversion: 8
-  datatype: bool 
-  des: 0: disable comment fold for user
-  indexed: 0
-  multihomed: 0
-  prettyname: Comments always in my Style
 
 userproplist.opt_stylemine:
   cldversion: 4
@@ -886,13 +1006,13 @@ userproplist.opt_whoscreened:
   multihomed: 0
   prettyname: Screening comments
 
-userproplist.opt_show_captcha_to:
-  cldversion: 4
+userproplist.pingback:
+  cldversion: 0
   datatype: char
-  des: Show CAPTCHA before posting a comment to: A=All, N=No one, F=non-Friends, R=anonymous users
+  des: (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
   indexed: 0
   multihomed: 0
-  prettyname: Show CAPTHCHA on commenting
+  prettyname: PingBack options
 
 userproplist.portalinit:
   cldversion: 4
@@ -926,6 +1046,14 @@ userproplist.profile_ver_noswitch:
   multihomed: 0
   prettyname: New profile version
 
+userproplist.provide_entries:
+  cldversion: 8
+  datatype: bool
+  des: Can give post to others
+  indexed: 0
+  multihomed: 0
+  prettyname: Can give post to others
+
 userproplist.public_key:
   cldversion: 4
   datatype: blobchar
@@ -933,6 +1061,30 @@ userproplist.public_key:
   indexed: 0
   multihomed: 0
   prettyname: PGP or GPG public key
+
+userproplist.purge_external_content:
+  cldversion: 8
+  datatype: char
+  des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
+userproplist.push_notification_devices:
+  cldversion: 8
+  datatype: blobchar
+  des: ID devices with notification channels and othwer data for push notification
+  indexed: 0
+  multihomed: 0
+  prettyname: Storage for ID devices for push notification
+
+userproplist.recent_logtags:
+  cldversion: 8
+  datatype: blobchar
+  des: Recently used tags, a compressed JSON structure with its format similar to the output of LJ::Tags::get_usertags
+  indexed: 0
+  multihomed: 0
+  prettyname: Recently used tags
 
 userproplist.renamedto:
   cldversion: 4
@@ -1006,6 +1158,14 @@ userproplist.s2_style:
   multihomed: 0
   prettyname: S2 Style
 
+userproplist.safe_search:
+  cldversion: 4
+  datatype: char
+  des: Safe search filtering settings -- "none" means no filtering, otherwise it's a number, and the greater the number the more filtering occurs
+  indexed: 0
+  multihomed: 0
+  prettyname: Safe Search Filtering
+
 userproplist.schemepref:
   cldversion: 4
   datatype: char
@@ -1021,14 +1181,6 @@ userproplist.scheme_manually_set:
   indexed: 0
   multihomed: 0
   prettyname: Explicit Scheme
-
-userproplist.safe_search:
-  cldversion: 4
-  datatype: char
-  des: Safe search filtering settings -- "none" means no filtering, otherwise it's a number, and the greater the number the more filtering occurs
-  indexed: 0
-  multihomed: 0
-  prettyname: Safe Search Filtering
 
 userproplist.show_control_strip:
   cldversion: 4
@@ -1070,6 +1222,22 @@ userproplist.sidx_loc:
   multihomed: 1
   prettyname: SearchIndex: Location
 
+userproplist.singapore_invitations:
+  cldversion: 8
+  datatype: num
+  des: Singapore invitations status/time
+  indexed: 0
+  multihomed: 0
+  prettyname: Singapore invitations status/time
+
+userproplist.singapore_invitations_posted:
+  cldversion: 8
+  datatype: bool
+  des: Singapore invitations posted
+  indexed: 0
+  multihomed: 0
+  prettyname: Singapore invitations posted
+
 userproplist.skype:
   cldversion: 0
   datatype: char
@@ -1077,6 +1245,14 @@ userproplist.skype:
   indexed: 1
   multihomed: 1
   prettyname: Skype ID
+
+userproplist.smsru_interval:
+  cldversion: 4
+  datatype: char
+  des: Interval for SMSru notifications. fortmat start_hour-end_hour
+  indexed: 0
+  multihomed: 0
+  prettyname: Interval for SMSru notifications
 
 userproplist.sms_carrier:
   cldversion: 4
@@ -1134,13 +1310,13 @@ userproplist.sms_yes_means:
   multihomed: 0
   prettyname: What "yes" SMS message means
 
-userproplist.smsru_interval:
-  cldversion: 4
-  datatype: char
-  des: Interval for SMSru notifications. fortmat start_hour-end_hour
+userproplist.social_influence_info:
+  cldversion: 8
+  datatype: blobchar
+  des: Data stucture that countains 'social influence' information
   indexed: 0
   multihomed: 0
-  prettyname: Interval for SMSru notifications
+  prettyname: Social Influence information
 
 userproplist.state:
   cldversion: 4
@@ -1150,6 +1326,30 @@ userproplist.state:
   multihomed: 0
   prettyname: State
 
+userproplist.sticky_entries:
+  cldversion: 0
+  datatype: char
+  des: (depricated stickies)
+  indexed: 0
+  multihomed: 0
+  prettyname: Sticky entry ids
+
+userproplist.sticky_entry:
+  cldversion: 0
+  datatype: char
+  des: (depricated sticky)
+  indexed: 0
+  multihomed: 0
+  prettyname: Sticky entry id
+
+userproplist.sticky_entry_id:
+  cldversion: 0
+  datatype: char
+  des: Sticky entry id
+  indexed: 0
+  multihomed: 0
+  prettyname: Sticky entry id
+
 userproplist.stylesys:
   cldversion: 4
   datatype: num
@@ -1157,6 +1357,54 @@ userproplist.stylesys:
   indexed: 0
   multihomed: 0
   prettyname: Style System to use
+
+userproplist.sys_base_friending_notif_delay:
+  cldversion: 8
+  datatype: num
+  des: Base delay of sending notification to friended/defrended user (for first action in queue).
+  indexed: 1
+  multihomed: 0
+  prettyname: Base system friending notification delay
+
+userproplist.sys_friending_notif_delay:
+  cldversion: 8
+  datatype: num
+  des: Delay (per action per action in queue) of sending notification to friended/defrended user.
+  indexed: 1
+  multihomed: 0
+  prettyname: System friending notification delay
+
+userproplist.sys_limit_friending_notif_delay:
+  cldversion: 8
+  datatype: num
+  des: Maximum delay of sending notifications. Flush all users action from queue when delay is exceed the limit.
+  indexed: 1
+  multihomed: 0
+  prettyname: System limit of friending notification delay
+
+userproplist.take_entries:
+  cldversion: 8
+  datatype: bool
+  des: Can get other journals post
+  indexed: 0
+  multihomed: 0
+  prettyname: Can get other journals post
+
+userproplist.talkleftct:
+  cldversion: 8
+  datatype: char
+  des: Count of comments left by the user
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
+userproplist.talkleftct2:
+  cldversion: 8
+  datatype: char
+  des: Count of comments left by the user
+  indexed: 1
+  multihomed: 0
+  prettyname: 
 
 userproplist.theme_preview_styleid:
   cldversion: 4
@@ -1182,6 +1430,14 @@ userproplist.timezone:
   multihomed: 0
   prettyname: Timezone
 
+userproplist.trava_uid:
+  cldversion: 0
+  datatype: char
+  des: user id in trava.ru
+  indexed: 0
+  multihomed: 0
+  prettyname: user id in trava.ru
+
 userproplist.trusted_s1:
   cldversion: 0
   datatype: char
@@ -1189,6 +1445,14 @@ userproplist.trusted_s1:
   indexed: 0
   multihomed: 0
   prettyname: Trusted S1 Styles
+
+userproplist.trynbuy_enabled_at:
+  cldversion: 8
+  datatype: num
+  des: The moment when user enabled trynbuy feature
+  indexed: 1
+  multihomed: 0
+  prettyname: The moment when user enabled trynbuy feature
 
 userproplist.underage_status:
   cldversion: 4
@@ -1213,15 +1477,39 @@ userproplist.urlname:
   indexed: 0
   multihomed: 0
   prettyname: Website Name
- 
+
+userproplist.user_comment_no_index:
+  cldversion: 4
+  datatype: bool
+  des: Exclude comments search from feed
+  indexed: 0
+  multihomed: 0
+  prettyname: No Index
+
 userproplist.view_control_strip:
-   cldversion: 4
-   datatype: char
-   des: View control strip on all journals
-   indexed: 0
-   multihomed: 0
-   prettyname: View Control Strip
- 
+  cldversion: 4
+  datatype: char
+  des: View control strip on all journals
+  indexed: 0
+  multihomed: 0
+  prettyname: View Control Strip
+
+userproplist.webmastertools_google:
+  cldversion: 8
+  datatype: char
+  des: Meta tag content value provided by Google
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
+userproplist.webmastertools_yandex:
+  cldversion: 8
+  datatype: char
+  des: Meta tag content value provided by Yandex
+  indexed: 1
+  multihomed: 0
+  prettyname: 
+
 userproplist.who_invited:
   cldversion: 4
   datatype: char
@@ -1229,6 +1517,14 @@ userproplist.who_invited:
   indexed: 0
   multihomed: 0
   prettyname: Who Invited User
+
+userproplist.widget_top_entries:
+  cldversion: 7
+  datatype: char
+  des: Current setings and status of Top n entries
+  indexed: 1
+  multihomed: 0
+  prettyname: Current setings and status of Top n entries
 
 userproplist.yahoo:
   cldversion: 0
@@ -1246,23 +1542,23 @@ userproplist.zip:
   multihomed: 0
   prettyname: ZIP code
 
-userproplist.push_notification_devices:
-  cldversion: 8
-  datatype: blobchar
-  des: ID devices with notification channels and othwer data for push notification
-  multihomed: 0
-  prettyname: Storage for ID devices for push notification
+userproplist.adv_adfox_ru_quality:
+  cldversion: 7
+  datatype: char
+  des: Adfox content quality marker
   indexed: 0
-
-talkproplist.edit_time:
-  datatype: num
-  des: Unix time of the last edit.  undef if never edited.
-  prettyname: Edit Time
+  multihomed: 0
+  prettyname: Adfox content quality marker
 
 talkproplist.deleted_poster:
   datatype: char
   des: If the comment poster's account is deleted, this field gets added to all of their posts, so the UI can show something besides 'anonymous' when posterid gets set to 0
   prettyname: Username of deleted poster
+
+talkproplist.edit_time:
+  datatype: num
+  des: Unix time of the last edit.  undef if never edited.
+  prettyname: Edit Time
 
 talkproplist.guest_auth:
   datatype: bool
@@ -1304,10 +1600,20 @@ talkproplist.poster_ip:
   des: The poster's IP address, optionally logged.
   prettyname: Poster's IP address
 
+talkproplist.poster_ip_force:
+  datatype: char
+  des: The poster's IP address, optionally logged. Logged all, no check user's settings.
+  prettyname: Poster's IP address
+
 talkproplist.subjecticon:
   datatype: char
   des: partial filename for subject icon to use
   prettyname: Subject Icon
+
+talkproplist.uniq:
+  datatype: char
+  des: Uniq
+  prettyname: Uniq
 
 talkproplist.unknown8bit:
   datatype: bool
@@ -1331,6 +1637,30 @@ logproplist.commentalter:
   des: Unix time of the last change to number of comments to this post.
   prettyname: Comments altered
   sortorder: 99
+
+logproplist.copyright:
+  datatype: char
+  des: Copyrighted status: 'C' - copyrighted, 'P' - public, full cite allowed.
+  prettyname: Copyrighted status
+  sortorder: 
+
+logproplist.crosspost_fb:
+  datatype: char
+  des: crosspost to facebook information
+  prettyname: Crosspost to Facebook 
+  sortorder: 111
+
+logproplist.crosspost_tw:
+  datatype: char
+  des: crosspost to twitter information
+  prettyname: Crosspost to Twitter
+  sortorder: 112
+
+logproplist.crosspost_vk:
+  datatype: char
+  des: crosspost to vkontakte information
+  prettyname: Crosspost to vkontakte
+  sortorder: 114
 
 logproplist.current_coords:
   datatype: char
@@ -1362,11 +1692,41 @@ logproplist.current_music:
   prettyname: Current Music
   sortorder: 10
 
+logproplist.external_url:
+  datatype: char
+  des: URL of this entry on an external site
+  prettyname: External URL
+  sortorder: 107
+
+logproplist.give_count:
+  datatype: num
+  des: Given tokens counter
+  prettyname: Given counter
+  sortorder: 110
+
+logproplist.give_features:
+  datatype: char
+  des: Enable "Give" features in this entry
+  prettyname: "Give" features 
+  sortorder: 109
+
 logproplist.hasscreened:
   datatype: bool
   des: True if comments to this item include screened comments
   prettyname: Has screened replies
   sortorder: 99
+
+logproplist.interface:
+  datatype: char
+  des: Name of interface used to post(web/xml-rpc/im etc.).
+  prettyname: Interface
+  sortorder: 106
+
+logproplist.moderator_id:
+  datatype: num
+  des: userid of moderator, who approved this entry
+  prettyname: Moderator's userid
+  sortorder: 10
 
 logproplist.opt_backdated:
   datatype: bool
@@ -1374,16 +1734,16 @@ logproplist.opt_backdated:
   prettyname: Back-dated
   sortorder: 35
 
-logproplist.opt_nocomments:
-  datatype: bool
-  des: Turn on if readers can't post comments on this entry.
-  prettyname: Don't Allow Comments and hide comments already posted to the entry
-  sortorder: 25
-
 logproplist.opt_lockcomments:
   datatype: bool
   des: Turn on if readers can't post comments on this entry.
   prettyname: Don't Allow Comments
+  sortorder: 25
+
+logproplist.opt_nocomments:
+  datatype: bool
+  des: Turn on if readers can't post comments on this entry.
+  prettyname: Don't Allow Comments and hide comments already posted to the
   sortorder: 25
 
 logproplist.opt_noemail:
@@ -1410,11 +1770,41 @@ logproplist.picture_keyword:
   prettyname: Picture Keyword
   sortorder: 30
 
+logproplist.pingback:
+  datatype: char
+  des: (J)ournal default, (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
+  prettyname: PingBack options
+  sortorder: 105
+
+logproplist.poster_ip:
+  datatype: char
+  des: The poster's IP address, optionally logged.
+  prettyname: Poster's IP address
+  sortorder: 99
+
 logproplist.qotdid:
   datatype: 
   des: Writer's block ID
   prettyname: Writer's block ID
   sortorder: 104
+
+logproplist.ratingbot_comment:
+  datatype: char
+  des: highest interval in ratings [SUP|UA|NONCYR]
+  prettyname: highest interval in ratings
+  sortorder: 
+
+logproplist.reposted_from:
+  datatype: char
+  des: In case this entry is a repost, the URL of the original entry that was reposted
+  prettyname: Reposted from
+  sortorder: 
+
+logproplist.repost_link:
+  datatype: char
+  des: repost link information
+  prettyname: Repost link informaton
+  sortorder: 114
 
 logproplist.revnum:
   datatype: num
@@ -1428,11 +1818,29 @@ logproplist.revtime:
   prettyname: Revision time
   sortorder: 99
 
+logproplist.revtime_sch:
+  datatype: num
+  des: scheduled post last edit time
+  prettyname: Scheduled post last edit time
+  sortorder: 113
+
+logproplist.set_to_schedule:
+  datatype: num
+  des: time when post set to schedule list
+  prettyname: Schedule time
+  sortorder: 112
+
 logproplist.sms_msgid:
   datatype: num
   des: SMS Message ID of the message which led to this journal entry
   prettyname: SMS Message ID
   sortorder: 99
+
+logproplist.spam_counter:
+  datatype: num
+  des: Counter of spam comments in this entry
+  prettyname: Spam counter
+  sortorder: 108
 
 logproplist.statusvis:
   datatype: char
@@ -1457,6 +1865,12 @@ logproplist.taglist:
   des: Comma separated list of tags on the entry
   prettyname: Tag List
   sortorder: 101
+
+logproplist.uniq:
+  datatype: char
+  des: Uniq
+  prettyname: Uniq
+  sortorder: 99
 
 logproplist.unknown8bit:
   datatype: bool
@@ -1488,14 +1902,11 @@ logproplist.verticals_list:
   prettyname: Verticals List
   sortorder: 103
 
-usermsgproplist.userpic:
-  des: Userpic chosen by the user who created the message
-
 usermsgproplist.preformatted:
   des: message contains HTML
 
-pollproplist2.unique:
-  des: If set to 1, then a person with a given email address can only vote once in the poll
+usermsgproplist.userpic:
+  des: Userpic chosen by the user who created the message
 
 pollproplist2.createdate:
   des: The voter must have created their account by the date specified (Pacific time) in order to vote.  Must be in format YYYY-MM-DD, otherwise there will be no restriction.
@@ -1503,366 +1914,6 @@ pollproplist2.createdate:
 pollproplist2.supermaintainer:
   des: If set to !0, only maintainers can see, vote and view results for this poll. Has value as UserID - SuperMaintainer.
 
-logproplist.copyright:
-  datatype: char
-  des: Copyrighted status: 'C' - copyrighted, 'P' - public, full cite allowed.
-  prettyname: Copyrighted status
-
-userproplist.default_copyright:
-  cldversion: 4
-  datatype: char
-  des: Default value to entry prop 'copyright'
-  indexed: 0
-  multihomed: 0
-  prettyname: Default value to entry prop 'copyright'
-
-userproplist.pingback:
-  cldversion: 0
-  datatype: char
-  des: (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
-  indexed: 0
-  multihomed: 0
-  prettyname: PingBack options
-
-logproplist.pingback:
-  datatype: char
-  des: (J)ournal default, (O)pen - all links from post should be processed with PingBack. (L)iveJournal - only leading to/from livejournal.com. (D)isabled - pingbacks disabled.
-  prettyname: PingBack options
-  sortorder: 105
-
-categoryproplist.children:
-  des: The subcategories(propval=catid) for a given category.
-
-categoryproplist.top_children:
-  des: The categories(propval=catid) to display even when the category is summmarized or reduced to just a few of the total.
-
-categoryproplist.in_nav:
-  des: The top_level categories to display in the main navigation, sorted by the prop value
-
-categoryproplist.featured:
-  des: The communites(propval=journalid) to display at the top of a category.
-
-logproplist.interface:
-  datatype: char
-  des: Name of interface used to post(web/xml-rpc/im etc.).
-  prettyname: Interface
-  sortorder: 106
-
-userproplist.custom_usericon:
-  datatype: char
-  des: Custom user icon, to be used instead of /img/userinfo.gif in ljuser
-  prettyname: Custom user icon
-
-userproplist.custom_usericon_individual:
-  datatype: char
-  des: Individual user icon. It contains uh_id & exp_date.
-  prettyname: Individual user icon
-
-userproplist.talkleftct:
-  datatype: char
-  des: Count of comments left by the user
-  cldversion: 8
-
-userproplist.talkleftct2:
-  datatype: char
-  des: Count of comments left by the user
-  cldversion: 8
-
-userproplist.ilikeit_enable:
-  datatype: bool
-  des: Enable 'I like it' button in community.
-  prettyname: Enable 'I like it' button.
-
-userproplist.closed_sm:
-  datatype: char
-  des: List of closed site messages
-  cldversion: 8
-
-userproplist.widget_top_entries:
-  cldversion: 7
-  datatype: char
-  des: Current setings and status of Top n entries
-  indexed: 1
-  multihomed: 0
-  prettyname: Current setings and status of Top n entries
-
-userproplist.webmastertools_yandex:
-  datatype: char
-  des: Meta tag content value provided by Yandex
-  cldversion: 8
-
-userproplist.webmastertools_google:
-  datatype: char
-  des: Meta tag content value provided by Google
-  cldversion: 8
-
-userproplist.comment_alter_time:
-  datatype: num
-  des: Unix time of last modification of comment's data in journal. Comment added/deleted/updated/screened/etc...
-  cldversion: 8
-
-userproplist.dont_expunge_journal:
-  datatype: num
-  des: explicitly prevent the system from purging this user
-  cldversion: 8
-
-userproplist.purge_external_content:
-  datatype: char
-  cldversion: 8
-  des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
-
-ratelist.addfriend:
-  des: Logged when a user adds someone to their Friends list
-
-ratelist.comm_in_vertical:
-  des: Logged when a community's entry gets added to a vertical
-
-ratelist.ctflag:
-  des: Logged when user flags content
-
-ratelist.failed_login:
-  des: Logged when wrong username/password is used
-
-ratelist.in_vertical:
-  des: Logged when a journal's entry gets added to a vertical
-
-ratelist.lostinfo:
-  des: Logged when a forgotten password or username e-mail is requested
-
-ratelist.post:
-  des: Logged whenever user posts (to any journal)
-
-ratelist.sms_register:
-  des: Logged when a user registers a number for SMS
-
-ratelist.syn_in_vertical:
-  des: Logged when a syndicated account's entry gets added to a vertical
-
-ratelist.tellafriend:
-  des: Logged when a users sends a message via Tell A Friend
-
-ratelist.usermessage:
-  des: Logged when a users sends a message to another user
-
-userproplist.sys_base_friending_notif_delay:
-  datatype: num
-  des: Base delay of sending notification to friended/defrended user (for first action in queue).
-  cldversion: 8
-  prettyname: Base system friending notification delay
-
-userproplist.sys_friending_notif_delay:
-  datatype: num
-  des: Delay (per action per action in queue) of sending notification to friended/defrended user.
-  cldversion: 8
-  prettyname: System friending notification delay
-
-userproplist.sys_limit_friending_notif_delay:
-  datatype: num
-  des: Maximum delay of sending notifications. Flush all users action from queue when delay is exceed the limit.
-  cldversion: 8
-  prettyname: System limit of friending notification delay
-
-userproplist.election_poll_id:
-  datatype: num
-  des: Supermaintainer election poll id
-  cldversion: 8
-  prettyname: Supermaintainer election poll id
-
-logproplist.external_url:
-  datatype: char
-  des: URL of this entry on an external site
-  prettyname: External URL
-  sortorder: 107
-
-userproplist.trynbuy_enabled_at:
-  datatype: num
-  des: The moment when user enabled trynbuy feature
-  cldversion: 8
-  prettyname: The moment when user enabled trynbuy feature
-
-logproplist.spam_counter:
-  datatype: num
-  des: Counter of spam comments in this entry
-  prettyname: Spam counter
-  sortorder: 108
-  
-userproplist.email_faulty:
-  datatype: bool
-  des: True if user email was set as unconfirmed due to delivery related problems
-  cldversion: 8
-  prettyname: Email is faulty
-
-logproplist.give_features:
-  datatype: char
-  des: Enable "Give" features in this entry
-  prettyname: "Give" features 
-  sortorder: 109
-
-logproplist.give_count:
-  datatype: num
-  des: Given tokens counter
-  prettyname: Given counter
-  sortorder: 110
-
-userproplist.friends_tags:
-  datatype: blobchar
-  des: Set of tags, which filter friendspage
-  indexed: 0
-  multihomed: 0
-  prettyname: Friendspage filtrating tags 
-
-logproplist.reposted_from:
-  datatype: char
-  prettyname: Reposted from
-  des: In case this entry is a repost, the URL of the original entry that was reposted
-
-userproplist.recent_logtags:
-  datatype: blobchar
-  prettyname: Recently used tags
-  des: Recently used tags, a compressed JSON structure with its format similar to the output of LJ::Tags::get_usertags
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.take_entries:
-  datatype: bool
-  prettyname: Can get other journals post
-  des: Can get other journals post
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.provide_entries:
-  datatype: bool
-  prettyname: Can give post to others
-  des: Can give post to others
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.javascript:
-  datatype: bool
-  prettyname: JS is enabled in S2
-  des: JS is enabled in S2
-  indexed: 0
-  multihomed: 1
-  cldversion: 8
-
-userproplist.singapore_invitations:
-  datatype: num
-  prettyname: Singapore invitations status/time
-  des: Singapore invitations status/time
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.singapore_invitations_posted:
-  datatype: bool
-  prettyname: Singapore invitations posted
-  des: Singapore invitations posted
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.lastloginid:
-  datatype: num
-  prettyname: Previous login id
-  des: Previous login id
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.hidefriendsreposts:
-  datatype: bool
-  prettyname: hide friends reposts
-  des: hide reposts in friends page
-  indexed: 0
-  multihomed: 0
-  cldversion: 8
-
-userproplist.sticky_entries:
-  datatype: char
-  des: (depricated stickies)
-  indexed: 0
-  prettyname: Sticky entry ids
-
-userproplist.sticky_entry:
-  datatype: char
-  des: (depricated sticky)
-  indexed: 0
-  prettyname: Sticky entry id
-
-userproplist.sticky_entry_id:
-  datatype: char
-  des: Sticky entry id
-  indexed: 0
-  prettyname: Sticky entry id
-
-userproplist.social_influence_info:
-  datatype: blobchar
-  des: Data stucture that countains 'social influence' information
-  indexed: 0
-  multihomed: 0
-  prettyname: Social Influence information
-  cldversion: 8
-
-logproplist.crosspost_fb:
-  datatype: char
-  des: crosspost to facebook information
-  prettyname: Crosspost to Facebook 
-  sortorder: 111
-
-logproplist.crosspost_tw:
-  datatype: char
-  des: crosspost to twitter information
-  prettyname: Crosspost to Twitter
-  sortorder: 112
-
-logproplist.ratingbot_comment:
-  datatype: char
-  des: highest interval in ratings [SUP|UA|NONCYR]
-  prettyname: highest interval in ratings
-
-userproplist.opt_modrejectemail:
-  cldversion: 8
-  datatype: bool
-  des: 0: default, do not send emails about rejection from moderation, 1: send them
-  indexed: 0
-  prettyname: Send emails about rejection from moderation
-
-userproplist.trava_uid:
-  datatype: char
-  des: user id in trava.ru
-  prettyname: user id in trava.ru
-  indexed: 0
-
-logproplist.moderator_id:
-  datatype: num
-  des: userid of moderator, who approved this entry
-  prettyname: Moderator's userid
-  sortorder: 10
-
-logproplist.set_to_schedule:
-  datatype: num 
-  des: time when post set to schedule list
-  prettyname: Schedule time
-  sortorder: 112
-
-logproplist.revtime_sch:
-  datatype: num 
-  des: scheduled post last edit time
-  prettyname: Scheduled post last edit time
-  sortorder: 113
-
-logproplist.crosspost_vk:
-  datatype: char
-  des: crosspost to vkontakte information
-  prettyname: Crosspost to vkontakte
-  sortorder: 114
-
-logproplist.repost_link:
-  datatype: char
-  des: repost link information
-  prettyname: Repost link informaton
-  sortorder: 114
+pollproplist2.unique:
+  des: If set to 1, then a person with a given email address can only vote once in the poll
 

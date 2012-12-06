@@ -745,7 +745,7 @@ sub get_text_multi {
         my @keys = keys %memkeys;
 
         my $mem_local = LJ::LocalCache::get_cache()->get_multi( \@keys, \@keys_memcache );
-           $mem = LJ::MemCache::get_multi( @keys_memcache ) || {};
+           $mem = LJ::MemCache::get_multi( @keys_memcache ) if @keys_memcache;
 
         foreach my $key (keys %$mem) {
             LJ::LocalCache::get_cache()->set($key, $mem->{$key}, 30*60);

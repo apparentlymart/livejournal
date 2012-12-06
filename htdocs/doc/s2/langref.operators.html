@@ -2,31 +2,31 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>4. Operators</title>
+<title>4. Operators</title>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="S2 Manual">
-<link rel="up" href="langref.html" title="Chapter 4. Language Reference">
-<link rel="prev" href="langref.variables.html" title="3. Variables">
-<link rel="next" href="langref.statements.html" title="5. Statements">
+<link rel="up" href="langref.html" title="Chapter 4. Language Reference">
+<link rel="prev" href="langref.variables.html" title="3. Variables">
+<link rel="next" href="langref.statements.html" title="5. Statements">
 <meta name="date" content="2008-Jun-03">
 </head>
 <body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
-<tr><th colspan="3" align="center">4. Operators</th></tr>
+<tr><th colspan="3" align="center">4. Operators</th></tr>
 <tr>
 <td width="20%" align="left">
-<a accesskey="p" href="langref.variables.html">Prev</a> </td>
-<th width="60%" align="center">Chapter 4. Language Reference</th>
-<td width="20%" align="right"> <a accesskey="n" href="langref.statements.html">Next</a>
+<a accesskey="p" href="langref.variables.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 4. Language Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="langref.statements.html">Next</a>
 </td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="langref.operators">4. Operators</h2></div></div></div>
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="langref.operators">4. Operators</h2></div></div></div>
 <p>S2 operators have the following associativity and precedence, listed
   from highest precedence to lowest.</p>
 <div class="informaltable"><table border="0">
@@ -92,7 +92,7 @@
 </tbody>
 </table></div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.arithmetic">4.1. Arithmetic Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.arithmetic">4.1. Arithmetic Operators</h3></div></div></div>
 <p>The S2 language has the usual set of arithmetic operators you'd
     expect to find in a programming language. These are the same as the
     arithmetic operators in perl.</p>
@@ -149,7 +149,7 @@
 </table></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.comparison">4.2. Comparison Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.comparison">4.2. Comparison Operators</h3></div></div></div>
 <p>These operators allow you to compare one value to another. Both operands
     must be of the same type, and all but simple equality/inequality can only be applied to
     integers. Only primitive types may be compared with these operators.
@@ -195,7 +195,7 @@
 </table></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.logical">4.3. Logical Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.logical">4.3. Logical Operators</h3></div></div></div>
 <p>These operators perform logical operations on boolean values. All operands
 must be boolean, and a boolean value results.</p>
 <div class="informaltable"><table border="0">
@@ -229,7 +229,7 @@ true if its operand is false, and false otherwise.</p>
 <code class="literal">if</code> statement to include two or more comparisons.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.type">4.4. Type Conversion/Testing Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.type">4.4. Type Conversion/Testing Operators</h3></div></div></div>
 <p>These functions operate on object values only. Their left operand is
 the subject, while the right operand is a class name.</p>
 <div class="informaltable"><table border="0">
@@ -243,20 +243,20 @@ the subject, while the right operand is a class name.</p>
 <td><code class="literal">isa</code></td>
 <td>Returns true if the object
     can be typecasted to the given class</td>
-<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
 </tr>
 <tr>
 <td><code class="literal">instanceof</code></td>
 <td>Returns true if
     the type of the object is exactly the classname given.</td>
-<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
 </tr>
 <tr>
 <td><code class="literal">as</code></td>
 <td>Cast the given value to
     the classname given, but only if the object's runtime type is compatible.
     If not, returns a null object.</td>
-<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
 </tr>
 </tbody>
 </table></div>
@@ -270,11 +270,11 @@ determines which function will be called, not the type of the variable on
 which the arrow operator is applied.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.other">4.5. Other Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.other">4.5. Other Operators</h3></div></div></div>
 <p>These operators don't really fit into a category of their own, and
 have perhaps non-obvious functions.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="id2802456">4.5.1. The assignment operator: <code class="literal">=</code>
+<div class="titlepage"><div><div><h4 class="title" id="id2802456">4.5.1. The assignment operator: <code class="literal">=</code>
 </h4></div></div></div>
 <p>The assignment operator (which should not be confused with the
     equality test operator, <code class="literal">==</code>), is used to assign a value
@@ -306,7 +306,7 @@ have perhaps non-obvious functions.</p>
     above.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="id2802538">4.5.2. String Concatenation with <code class="literal">+</code>
+<div class="titlepage"><div><div><h4 class="title" id="id2802538">4.5.2. String Concatenation with <code class="literal">+</code>
 </h4></div></div></div>
 <p>The <code class="literal">+</code> symbol actually has two purposes in the S2
     language. When one of its operands is a string, it becomes
@@ -327,7 +327,7 @@ have perhaps non-obvious functions.</p>
     integers and certain objects directly into string literals.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="id2802588">4.5.3. The ternary conditional operator <code class="literal">? :</code>
+<div class="titlepage"><div><div><h4 class="title" id="id2802588">4.5.3. The ternary conditional operator <code class="literal">? :</code>
 </h4></div></div></div>
 <p>This is the only operator in the S2 language with three operands.
     Its function can be thought of as being like an
@@ -353,7 +353,7 @@ have perhaps non-obvious functions.</p>
     in some cases.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="id2802651">4.5.4. The range operator <code class="literal">..</code>
+<div class="titlepage"><div><div><h4 class="title" id="id2802651">4.5.4. The range operator <code class="literal">..</code>
 </h4></div></div></div>
 <p>This rather quirky operator is borrowed from Perl. It takes two
     integer operands and returns an array of integers containing all integers
@@ -384,7 +384,7 @@ have perhaps non-obvious functions.</p>
 </div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.operators.unary">4.6. Named Unary Operators</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.operators.unary">4.6. Named Unary Operators</h3></div></div></div>
 <p>The following are the built-in named operators. You do not have to
     wrap the following term in parentheses.</p>
 <div class="variablelist"><dl>
@@ -432,15 +432,15 @@ have perhaps non-obvious functions.</p>
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="langref.variables.html">Prev</a> </td>
+<a accesskey="p" href="langref.variables.html">Prev</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="langref.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="langref.statements.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="langref.statements.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">3. Variables </td>
+<td width="40%" align="left" valign="top">3. Variables </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 5. Statements</td>
+<td width="40%" align="right" valign="top"> 5. Statements</td>
 </tr>
 </table>
 </div>

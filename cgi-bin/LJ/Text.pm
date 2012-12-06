@@ -169,8 +169,10 @@ sub truncate {
     cluck "unknown options: " . Dumper(\%opts)
         if %opts;
 
-    cluck "not actually truncating"
-        unless $bytes || $chars;
+    unless ( $bytes || $chars ) {
+        cluck "not actually truncating: no 'bytes' or 'chars' " .
+            "parameter passed to LJ::Text::truncate";
+    }
 
     $str = $class->truncate_to_bytes($str, $bytes) if $bytes;
     $str = $class->truncate_to_chars($str, $chars) if $chars;
@@ -290,7 +292,6 @@ sub truncate_to_word_with_ellipsis {
         $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
 
-        $str .= $ellipsis;
     }
 
     if ($chars && $class->char_len($str) > $chars) {
@@ -326,12 +327,21 @@ sub truncate_to_word_with_ellipsis {
         $remainder = substr($original_string, $class->byte_len($str));
         
         $str .= ' ' if($add_space && $str =~ /\S$/);
-        $str .= $ellipsis;
+
     } elsif($force_ellipsis) {
         $str .= ' ' if($str =~ /\S$/);
-        $str .= $ellipsis;
     }
-    
+
+    if($noparse_tags) {
+        while ( $_ = shift @$noparse_tags ) {
+            my $cnt = scalar($str =~ m/<$_>/g) || 0;
+            $cnt -= scalar($str =~ m/<$_\/>/g);
+            $str .= "<\/$_>" if ($cnt > 0);
+        }
+    }
+
+    $str .= $ellipsis;
+
     $str ||= $ellipsis if($fill_empty);
 
     $remainder =~ s/^\s+//;

@@ -1,0 +1,66 @@
+<h2 class="widget-header">
+    <TMPL_IF no_theme_chooser>
+        <TMPL_VAR expr="ml('widget.journaltitles.title_nonum')">
+    <TMPL_ELSE>
+        <TMPL_VAR expr="ml('widget.journaltitles.title')">
+    </TMPL_IF>
+</h2>
+
+<div class='theme-titles-content'>
+
+    <p class="detail">
+        <TMPL_VAR expr="ml('widget.journaltitles.desc')">
+        <TMPL_VAR helpicon>
+    </p>
+
+    <TMPL_LOOP titles>
+        <form method="POST" id="<TMPL_VAR id>_form" data-which="<TMPL_VAR id>" class='lj-widget' data-widget='journalTitles'>
+            <TMPL_VAR form_auth>
+
+            <dl class="theme-titles-item">
+                <dt class="theme-titles-item-head">
+                    <label for="<TMPL_VAR id>">
+                        <TMPL_VAR name>
+                    </label>
+                </dt>
+                <dd class="theme-titles-item-body theme-titles-item-body-title" id="<TMPL_VAR id>_view">
+                    <strong class="theme-titles-item-title"><!--
+                        --><TMPL_VAR value ESCAPE=HTML><!--
+                    --></strong>
+                    <a
+                        href="javascript:void(0);"
+                        class="theme-title-control"
+                        id="<TMPL_VAR id>_edit"><!--
+                        --><TMPL_VAR expr="ml('widget.journaltitles.edit')"><!--
+                    --></a>
+                </dd>
+                <dd class="theme-titles-item-body theme-titles-item-body-input" id="<TMPL_VAR id>_modify">
+                    <input
+                        type="text"
+                        name="Widget[JournalTitles]_title_value"
+                        id="<TMPL_VAR id>"
+                        value="<TMPL_VAR value ESCAPE=HTML>"
+                        maxlength="100"
+                        size="30" />
+                    <input
+                        type="hidden"
+                        name="Widget[JournalTitles]_which_title"
+                        value="<TMPL_VAR id>" /><!--
+                    --><input
+                        type="submit"
+                        name="Widget[JournalTitles]_save"
+                        value="<TMPL_VAR expr="ml('widget.journaltitles.btn')">"
+                        id="save_btn_<TMPL_VAR id>" />
+                    <a
+                        href="javascript:void(0);"
+                        class="theme-title-control"
+                        id="<TMPL_VAR id>_cancel"><!--
+                        --><TMPL_VAR expr="ml('widget.journaltitles.cancel')"><!--
+                    --></a>
+                </dd>
+            </dl>
+
+        </form>
+    </TMPL_LOOP>
+
+</div>

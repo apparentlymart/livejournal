@@ -517,3 +517,11 @@ A:visited:hover {
 	.comment-wrap .comment-head A:visited {
 		color:#4F3B1B;
 		}
+
+
+
+/* LJSUP-13769 */
+.appwidget-journalpromo {
+	margin: 0 auto;
+	}
+

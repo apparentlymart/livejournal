@@ -143,7 +143,10 @@ use constant AccountMask => {
     Anonymous   => {
                         value       => 8192,
                         group       => 0,
-                        validate    => sub { LJ::get_remote() ? 0 : 1 },
+                        validate    => sub {
+                                            my ($u) = @_;
+                                            !$u && (LJ::Request->header_in('Host') eq 'api.'.$LJ::DOMAIN)
+                                       },
                     },
 };
 

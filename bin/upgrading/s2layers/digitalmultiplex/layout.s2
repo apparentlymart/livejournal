@@ -755,7 +755,7 @@ function Page::print_linklist() {
             if ($l.is_heading) {
                 $list = $list + """<tr><td><strong>$l.title</strong></td></tr>""";
             } else {
-                $list = $list + """<tr><td>$*text_sidebar_link_separator<a href="$l.url">$l.title</a></td></tr>""";
+                $list = $list + """<tr><td>$*text_sidebar_link_separator<a href="$l.url" $l.attributes>$l.title</a></td></tr>""";
             }
         } else {
             $list = $list + "<tr><td>&nbsp;</td></tr>";

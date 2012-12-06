@@ -19,6 +19,7 @@ $maint{'clean_caches'} = sub
 
     print "-I- Cleaning commenturl.\n";
     $dbh->do("DELETE FROM commenturls WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 50000");
+    $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 50000");
 
     print "-I- Cleaning syslog table.\n";
     $dbh->do("DELETE FROM syslog WHERE log_time < UNIX_TIMESTAMP() - 86400 * 30 * 2");  ## 2 months
@@ -183,6 +184,13 @@ $maint{'clean_caches'} = sub
             if $in_to_delete;
     }
     print "    deleted $cnt_delete\n";
+
+    print "-I- Remove outdated sessions.\n";
+    LJ::disconnect_dbs();
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbh = LJ::get_cluster_master($c);
+        $dbh->do("DELETE FROM sessions WHERE timeexpire < UNIX_TIMESTAMP() LIMIT 100000");
+    }
 
     LJ::run_hooks('extra_cache_clean');
     LJ::disconnect_dbs();

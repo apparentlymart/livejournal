@@ -508,7 +508,7 @@ function Page::print_linklist() {
                 println """<li><span style="font-weight: bold;">$l.title</span>\n<ul>""";
                 $section_open = true;
             } else {
-                println """<li><a href="$l.url">$l.title</a></li>""";
+                println """<li><a href="$l.url" $l.attributes>$l.title</a></li>""";
             }
         }
     }

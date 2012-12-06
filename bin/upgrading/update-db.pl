@@ -21,6 +21,8 @@ BEGIN {
 use LJ::S2;
 use MogileFS::Admin;
 
+use LJ::Pay::Theme;
+
 my $opt_sql     = 0;
 my $opt_drop    = 0;
 my $opt_pop     = 0;
@@ -404,6 +406,7 @@ sub populate_s2 {
                     $dbh->do("INSERT INTO s2info (s2lid, infokey, value) VALUES (?,'redist_uniq',?)",
                              undef, $id, $base);
                 }
+
             }
 
             die "Can't generate ID for '$base'" unless $id;
@@ -468,6 +471,24 @@ sub populate_s2 {
                 if ($@) {
                     print "S2 compilation failed: $@\n";
                     exit 1;
+                }
+
+                my %th_hash = ();
+                LJ::S2::load_layer_info(\%th_hash, [ $id ]);
+                if ($th_hash{$id}{'is_buyable'}) {
+                    my $s2_theme = LJ::S2Theme->new (themeid => $id);
+                    my @s2_theme_cats = $s2_theme->cats;
+                    my $theme_shop = LJ::Pay::Theme->load_by_s2lid ($id);
+                    print "Create/modify $base($id) in shop table\n";
+                    unless ($theme_shop) {
+                        $theme_shop = LJ::Pay::Theme->new ();
+                        $theme_shop->name ($th_hash{$id}{'name'});
+                        $theme_shop->s2tid ($id);
+                        $theme_shop->save_to_db;
+                        $theme_shop->add_cat ($_) foreach @s2_theme_cats;
+                    }
+                    ## Clear the memcache key after adding shop theme
+                    $existing = LJ::S2::get_public_layers({ force => 1 }, $sysid);
                 }
 
                 if ($opt_compiletodisk) {

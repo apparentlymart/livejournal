@@ -9,6 +9,7 @@ body<=
     use vars qw(%GET %POST $title);
     BML::decl_params(_default => qr/./);
 
+    use Storable;
     use LJ::DelayedEntry;
     use LJ::Widget::Fotki::Upload;
     use LJ::Widget::Calendar;
@@ -58,8 +59,8 @@ body<=
                         stc/editjournal.css
                         stc/widgets/selecttags.css
                         js/inputcomplete.js
-                        js/jquery/jquery.ui.position.min.js
-                        js/jquery/jquery.ui.autocomplete.min.js
+                        js/lib/jquery-ui/jquery.ui.position.min.js
+                        js/lib/jquery-ui/jquery.ui.autocomplete.min.js
                         js/jquery/jquery.bgiframe.js
                         js/gears_init.js
                         js/scanner.js
@@ -112,6 +113,7 @@ body<=
     # extra get arguments
     my $getextra;
     $getextra .= "usejournal=$usejournal&" if $usejournal; 
+    $getextra .= "journal=$usejournal&" if $usejournal; 
     $getextra .= "year=$year&month=$month&day=$day&" if $year && $month && $day;
     $getextra .= "only_me=$only_me_checked&" if $only_me_checked;
     chop $getextra;
@@ -380,6 +382,10 @@ body<=
                 # Delete
                 $req{'event'} = '' if $POST{'action:delete'} || $POST{'action:deletespam'};
 
+                unless ($req{'event'} || $POST{'action:delete'} || $POST{'action:deletespam'}) {
+                    return "<?h1 $ML{'Error'} h1?><?p $ML{'/update.bml.error.noentry'} p?>";
+                }
+
                 # mark as spam, if need be
                 if ( $POST{'action:deletespam'} && $entry_obj->is_delayed ) {
                       LJ::mark_entry_as_spam($usejournal_u, $itemid);
@@ -446,6 +452,10 @@ body<=
                 } else {
                     $result .= "<?p $ML{'.success.edited'} p?>";
                     
+                    if (my $message = $res->{message}){
+                        $result .= "<?p $res->{message} p?>";
+                    } 
+
                     if (!$delayedid) {
         
                         # open a request about the unsuspension if one doesn't already exist
@@ -559,6 +569,42 @@ body<=
             LJ::EmbedModule->parse_module_embed($journalu, \$event, edit => 1);
             $event = LJ::eurl($event);
 
+            # LJSUP-13431: Antispam for edited entries in the communities
+            my $modid = $entry_obj->prop("mod_queue_id");
+            if ( $modid && LJ::isu($journalu) ) {
+                my $dbcm = LJ::get_cluster_master($journalu);
+                my $edit_url = "$LJ::SITEROOT/editjournal.bml?journal=$journalu->{user}&itemid=$ditemid";
+
+                if ($GET{restore} eq 'yes') {
+                    $entry_obj->set_prop("mod_queue_id", undef);
+        
+                    $dbcm->do("
+                        DELETE 
+                        FROM modlog
+                        WHERE journalid=? AND modid=?
+                    ", undef, $journalu->{'userid'}, $modid);
+
+                    $dbcm->do("
+                        DELETE 
+                        FROM modblob 
+                        WHERE journalid=? AND modid=?
+                    ", undef, $journalu->{'userid'}, $modid);
+            
+                    return BML::redirect($edit_url);
+                } else {
+                    my $frozen = $dbcm->selectrow_array("
+                        SELECT request_stor 
+                        FROM modblob 
+                        WHERE journalid=? AND modid=?
+                    ", undef, $journalu->{'userid'}, $modid);
+
+                    my $req = $frozen ? Storable::thaw($frozen) : {};
+                    ($subject, $event) = ($req->{subject}, $req->{event});
+        
+                    LJ::need_var( entry_restore => "$edit_url&restore=yes" ) if $entry_obj->poster->equals($remote);  
+                }
+            }
+
             my $suspend_msg = $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
             my $entry = {
                 'mode' => "edit",
@@ -593,6 +639,7 @@ body<=
                 if($offer && $offer->is_active) {
                     $entry->{'current_repost_budget'} = $offer->budget;
                     $entry->{'paid_repost_on'} = 1 unless defined $entry->{'paid_repost_on'};
+                    $entry->{'repost_limit_sc'} = $offer->limit_sc;
                 }
             }
             
@@ -605,7 +652,6 @@ body<=
             $entry->{prop_trava_user}   = $remote->prop('trava_uid') if $remote;
             $entry->{prop_copyright}    = $entry_obj->prop('copyright') || $remote->prop('default_copyright') || 'P';
 
-            foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
             $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 
             my $js = undef;
@@ -632,7 +678,21 @@ body<=
             #    be placed in the correct BML head portion later
             # -- this is a hack, should be done by weblib and pushed into \$$head above
             #    in a way which is compatible with both this page and update.bml
-            LJ::need_string('entryform.close.confirm');
+            LJ::need_string(qw(
+                entryform.close.confirm
+
+                dialog.confirm.antispam.text
+                dialog.confirm.antispam.yes
+                dialog.confirm.antispam.no
+                dialogs.yes
+                dialogs.no
+            ));
+
+            LJ::need_res(qw(
+                js/jquery/jquery.center.js
+                js/jquery/dialogs.js
+                templates/Widgets/dialogs.tmpl
+            ));
 
             $$head .= qq|
     <script type="text/javascript">

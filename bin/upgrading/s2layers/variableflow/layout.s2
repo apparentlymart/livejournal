@@ -703,12 +703,12 @@ function Page::print_linklist() {
                     if ($l.is_heading) {
                         $link = """<ul class="navbar"><li class="active">$l.title</li>""";
                     } else {
-                        $link = """<ul class="navbar"><li class="active">$links_title</li><li><a href="$l.url">$l.title</a></li>""";
+                        $link = """<ul class="navbar"><li class="active">$links_title</li><li><a href="$l.url" $l.attributes>$l.title</a></li>""";
                     }
                     $section_open = true;
                     $first = false;
                 } else {
-                    $link = """<li><a href="$l.url">$l.title</a></li>""";
+                    $link = """<li><a href="$l.url" $l.attributes>$l.title</a></li>""";
                 }
             } else {
                 $link = """<ul class="navbar">&nbsp;</ul>""";

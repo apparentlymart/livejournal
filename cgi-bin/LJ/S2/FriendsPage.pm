@@ -359,6 +359,7 @@ sub FriendsPage
                  'posterid'            => $entry_obj->posterid,
                  'img_placeholders'    => $replace_images_in_friendspage,
                  'video_placeholders'  => $replace_video,
+                 'placeholders'        => 1,
         });
 
         LJ::expand_embedded(

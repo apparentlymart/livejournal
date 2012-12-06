@@ -466,7 +466,7 @@ function Page::print_linklist() {
                 println """$l.title: """;
                 $section_open = true;
             } else {
-                println """(<a href="$l.url">$l.title</a>)""";
+                println """(<a href="$l.url" $l.attributes>$l.title</a>)""";
                 $section_open = true;
             }
         }

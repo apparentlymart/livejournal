@@ -2,31 +2,31 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>2. Layer Guidelines</title>
+<title>2. Layer Guidelines</title>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="S2 Manual">
-<link rel="up" href="s2onlj.html" title="Chapter 7. Using S2 on LiveJournal">
-<link rel="prev" href="s2onlj.resources.html" title="1. Resources">
-<link rel="next" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
+<link rel="up" href="s2onlj.html" title="Chapter 7. Using S2 on LiveJournal">
+<link rel="prev" href="s2onlj.resources.html" title="1. Resources">
+<link rel="next" href="siteapi.html" title="Appendix A. LiveJournal's S2 API">
 <meta name="date" content="2008-Jun-03">
 </head>
 <body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
-<tr><th colspan="3" align="center">2. Layer Guidelines</th></tr>
+<tr><th colspan="3" align="center">2. Layer Guidelines</th></tr>
 <tr>
 <td width="20%" align="left">
-<a accesskey="p" href="s2onlj.resources.html">Prev</a> </td>
-<th width="60%" align="center">Chapter 7. Using S2 on LiveJournal</th>
-<td width="20%" align="right"> <a accesskey="n" href="siteapi.html">Next</a>
+<a accesskey="p" href="s2onlj.resources.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 7. Using S2 on LiveJournal</th>
+<td width="20%" align="right"> <a accesskey="n" href="siteapi.html">Next</a>
 </td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="s2onlj.layerguide">2. Layer Guidelines</h2></div></div></div>
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="s2onlj.layerguide">2. Layer Guidelines</h2></div></div></div>
 <p>This section is a list of suggestions for making good layers for LiveJournal, and also forms
       the requirements for creating layers to be offered as standard by LiveJournal. You should read
       this if you're designing a LiveJournal layout, or if you're writing the code to implement
@@ -36,10 +36,10 @@
       the first for those creating a design, and the second for those who are implementing a design
       in S2 code. You might, of course, be both!</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="s2onlj.layerguide.design">2.1. Guidelines For Layout Designers</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="s2onlj.layerguide.design">2.1. Guidelines For Layout Designers</h3></div></div></div>
 <p>When starting to design a layout, you should keep in mind the following points.</p>
 <div class="itemizedlist"><ul type="disc">
-<li><p><b>Beware Copyright. </b>Practically everything creative is copyrighted, from images to site designs
+<li><p><b>Beware Copyright. </b>Practically everything creative is copyrighted, from images to site designs
               to program code. If you copy or clone someone else's design or HTML, or use an
               image created by someone else, you may find yourself in a copyright lawsuit.
               Also, any style which is to be part of the LiveJournal system must be distributable
@@ -47,7 +47,7 @@
               distribution is licenced. The easiest way to keep to this is to only use your
               own work in creating a layer.</p></li>
 <li>
-<p><b>Design Flexibly. </b>S2 is designed to be extensible, and if you think about extensibility
+<p><b>Design Flexibly. </b>S2 is designed to be extensible, and if you think about extensibility
               early on your will make it much easier to adapt to suit additions to LiveJournal
               later on.</p>
 <p>Some particular things to bear in mind are:
@@ -66,7 +66,7 @@
           </p>
 </li>
 <li>
-<p><b>Design for standard page elements. </b>There are certain things which users expect to find in LiveJournal
+<p><b>Design for standard page elements. </b>There are certain things which users expect to find in LiveJournal
               styles. These include:
               </p>
 <div class="itemizedlist"><ul type="circle">
@@ -89,7 +89,7 @@
             </p>
 </li>
 <li>
-<p><b>Design for Customization. </b>As you are creating your design, try to think of things that users
+<p><b>Design for Customization. </b>As you are creating your design, try to think of things that users
               might want to customize. Colors are the easiest to think of, but
               you could also provide options for margin sizes, the position of
               navigation bars and chosing classes of fonts.</p>
@@ -100,7 +100,7 @@
             you can.</p>
 </li>
 <li>
-<p><b>Design for Internationalization. </b>If you are designing a layout you should try to allow for
+<p><b>Design for Internationalization. </b>If you are designing a layout you should try to allow for
               the text in your layout to be translated. A lot of commonly-used text
               is already provided by the system translated, and it will be a lot
               easier to make your style multi-lingual if you make use of the
@@ -116,12 +116,12 @@
 </ul></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="s2onlj.layerguide.implementation">2.2. Guidelines For Implementors</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="s2onlj.layerguide.implementation">2.2. Guidelines For Implementors</h3></div></div></div>
 <p>If you are a programmer writing the S2 code for an S2 layout (or, to a lesser extent,
         some other layer) then this section is for you.</p>
 <div class="itemizedlist"><ul type="disc">
 <li>
-<p><b>Use Properties. </b>If you expose properties from your layout, the end-user will be able
+<p><b>Use Properties. </b>If you expose properties from your layout, the end-user will be able
               to customize these properties from a web-based GUI interface. In general,
               the more of these you have the better, but don't go overboard.</p>
 <div class="itemizedlist"><ul type="circle">
@@ -142,7 +142,7 @@
 </ul></div>
 </li>
 <li>
-<p><b>Let the System Help You. </b>The core layer has lots of useful default implementations of various
+<p><b>Let the System Help You. </b>The core layer has lots of useful default implementations of various
               page features. For example, it can generate
               links to users and form page titles and subtitles from the relevant
               user settings and translation properties. Using these defaults can save
@@ -167,7 +167,7 @@
           </p>
 </li>
 <li>
-<p><b>Text Abstraction. </b>All text in a layout should be easily overridable either by properties
+<p><b>Text Abstraction. </b>All text in a layout should be easily overridable either by properties
               or by functions. Functions are required when text includes a number which
               affects the grammar of a sentence, such &#8220;<span class="quote">You are viewing the 10 most recent
               entries</span>&#8221;.
@@ -188,15 +188,15 @@
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="s2onlj.resources.html">Prev</a> </td>
+<a accesskey="p" href="s2onlj.resources.html">Prev</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="s2onlj.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="siteapi.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="siteapi.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">1. Resources </td>
+<td width="40%" align="left" valign="top">1. Resources </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> Appendix A. LiveJournal's S2 API</td>
+<td width="40%" align="right" valign="top"> Appendix A. LiveJournal's S2 API</td>
 </tr>
 </table>
 </div>

@@ -19,7 +19,13 @@ sub args_desc { [
 
 sub usage { '<command> <user> [ <group> ] [ <fgcolor> ] [ <bgcolor> ]' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, 'siteadmin') || 
+           LJ::check_priv($remote, 'supporthelp') ||
+           LJ::check_priv($remote, 'betatest', 'omega') ||
+           $LJ::IS_DEV_SERVER;
+}
 
 sub execute {
     my ($self, $command, $user, @args) = @_;

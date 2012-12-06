@@ -5,10 +5,81 @@ use base qw(LJ::Identity);
 
 use LJ::OpenID;
 use Net::OpenID::VerifiedIdentity;
+use Encode qw(encode_utf8 decode_utf8);
+
+use integer;
+
+use constant BASE => 36;
+use constant TMIN => 1;
+use constant TMAX => 26;
+use constant SKEW => 38;
+use constant DAMP => 700;
+use constant INITIAL_BIAS => 72;
+use constant INITIAL_N => 128;
+
+my $Delimiter = chr 0x2D;
+my $BasicRE   = qr/[\x00-\x7f]/;
 
 sub typeid { 'O' }
 sub pretty_type { 'OpenID' }
 sub short_code { 'openid' }
+
+sub digit_value {
+    my $code = shift;
+    return ord($code) - ord("A") if $code =~ /[A-Z]/;
+    return ord($code) - ord("a") if $code =~ /[a-z]/;
+    return ord($code) - ord("0") + 26 if $code =~ /[0-9]/;
+    return;
+}
+
+sub adapt {
+    my($delta, $numpoints, $firsttime) = @_;
+    $delta = $firsttime ? $delta / DAMP : $delta / 2;
+    $delta += $delta / $numpoints;
+    my $k = 0;
+    while ($delta > ((BASE - TMIN) * TMAX) / 2) {
+    $delta /= BASE - TMIN;
+    $k += BASE;
+    }
+    return $k + (((BASE - TMIN + 1) * $delta) / ($delta + SKEW));
+}
+
+sub decode_punycode {
+    my $code = shift;
+
+    my $n      = INITIAL_N;
+    my $i      = 0;
+    my $bias   = INITIAL_BIAS;
+    my @output;
+
+    if ($code =~ s/(.*)$Delimiter//o) {
+    push @output, map ord, split //, $1;
+    return 0 unless $1 =~ /^$BasicRE*$/o;
+    }
+
+    while ($code) {
+    my $oldi = $i;
+    my $w    = 1;
+    LOOP:
+    for (my $k = BASE; 1; $k += BASE) {
+        my $cp = substr($code, 0, 1, '');
+        my $digit = digit_value($cp);
+        defined $digit or return 0;
+        $i += $digit * $w;
+        my $t = ($k <= $bias) ? TMIN
+        : ($k >= $bias + TMAX) ? TMAX : $k - $bias;
+        last LOOP if $digit < $t;
+        $w *= (BASE - $t);
+    }
+    $bias = adapt($i - $oldi, @output + 1, $oldi == 0);
+    $n += $i / (@output + 1);
+    $i = $i % (@output + 1);
+    splice(@output, $i, 0, $n);
+    $i++;
+    }
+
+    return join '', map chr, @output;
+}
 
 sub enabled {
     return LJ::OpenID->consumer_enabled;
@@ -159,6 +230,10 @@ sub display_name {
     ## Decode URL's like below to human-readable names
     ## http://blog.k.python.ru/accounts/5/%D0%94%D0%BC%D0%B8
     $name =~ s/%([\dA-Fa-f]{2})/chr(hex($1))/ge;
+
+    if ($name =~ /^xn--(.*?)(\..*?)$/) {
+        $name = Encode::encode_utf8(decode_punycode($1)).$2;
+    }
 
     return $name;
 }

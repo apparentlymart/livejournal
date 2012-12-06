@@ -8,13 +8,17 @@ require "ljlib.pl";
 
 my $interval        = 10;
 my $verbose         = 0;
+my $prioritize      = 0;
 my $schwartz_role   = $LJ::THESCHWARTZ_ROLE_WORKER;
+my $priority_limit;
 
 sub options {
     my $self = shift;
     return (
         'interval|i=i'          => \$interval,
         'schwartz-role|r=s'     => \$schwartz_role,
+        'priority-level|l=i'    => \$priority_limit,
+        'prioritize|p'          => \$prioritize,
         $self->SUPER::options(),
     );
 }
@@ -24,9 +28,12 @@ sub help {
     return
         $self->SUPER::help() .
         "-i | --interval=n          set sleep interval to n secounds\n" .
+        "-l | --priority-level=n    work only with this priority level\n" .
+        "-p | --prioritize          use prioritization\n".
         "-r | --schwartz-role=role  connect to db with specified role (defualt is '$schwartz_role')\n";
 }
 
+sub find_job_limit  { }
 sub capabilities    { }
 sub on_idle         { }
 sub on_afterwork    { }
@@ -46,7 +53,11 @@ sub _init {
     warn "The Schwartz _init(): init with role '$schwartz_role'.\n" if $verbose;
 
     $sclient = LJ::theschwartz({ role => $schwartz_role }) or die "Could not get schwartz client";
+    $sclient->set_prioritize($prioritize);
+    $sclient->set_priority_limit($priority_limit) if defined $priority_limit;
+
     $sclient->set_verbose( $class->schwartz_verbose_handler || $class->verbose );
+    $sclient->set_find_job_limit( $class->find_job_limit );
     foreach my $classname ($class->capabilities) {
         warn "The Schwartz run(): can_do('$classname').\n" if $verbose;
         $sclient->can_do($classname);

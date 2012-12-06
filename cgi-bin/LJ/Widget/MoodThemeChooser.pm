@@ -36,12 +36,15 @@ sub render_body {
           selected => $preview_moodthemeid },
         map { {value => $_->{moodthemeid}, text => $_->{name}, disabled => $_->{disabled}} } @themes,
     ) . "<br />";
-    $ret .= $class->html_check(
-        name => 'opt_forcemoodtheme',
-        id => 'opt_forcemoodtheme',
-        selected => $forcemoodtheme,
-    );
-    $ret .= "<label for='opt_forcemoodtheme'>" . $class->ml('widget.moodthemechooser.forcetheme') . "</label>";
+
+    if ( LJ::is_enabled('friendsfeed_optout') ) {
+        $ret .= $class->html_check(
+            name => 'opt_forcemoodtheme',
+            id => 'opt_forcemoodtheme',
+            selected => $forcemoodtheme,
+        );
+        $ret .= "<label for='opt_forcemoodtheme'>" . $class->ml('widget.moodthemechooser.forcetheme') . "</label>";
+    }
 
     my $journalarg = $getextra ? "?journal=" . $u->user : "";
     $ret .= "<ul class='moodtheme-links nostyle'>";
@@ -134,8 +137,10 @@ sub js {
             DOM.addEventListener($('moodtheme_dropdown'), "change", function (evt) { self.previewMoodTheme(evt) });
         },
         previewMoodTheme: function (evt) {
-            var opt_forcemoodtheme = 0;
-            if ($('opt_forcemoodtheme').checked) opt_forcemoodtheme = 1;
+            var opt_forcemoodtheme = 0,
+                checkbox = $('opt_forcemoodtheme');
+
+            if (checkbox && checkbox.checked) opt_forcemoodtheme = 1;
 
             this.updateContent({
                 preview_moodthemeid: $('moodtheme_dropdown').value,

@@ -328,6 +328,11 @@ sub get_search_keywords_for_js {
             next unless LJ::run_hook("layer_is_active", $theme->uniq) && LJ::run_hook("layer_is_active", $theme->layout_uniq);
         }
 
+        if ($theme->is_buyable) {
+            my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($theme->s2lid);
+            next if $shop_theme && ($shop_theme->is_bought_out || $shop_theme->is_disabled);
+        }
+
         my $theme_name = LJ::ejs($theme->name);
         my $layout_name = LJ::ejs($theme->layout_name);
         my $designer_name = LJ::ejs($theme->designer);
@@ -545,7 +550,10 @@ sub get_propgroups {
             next unless ref $prop;
         }
 
-        next if (S2::is_property_hidden([$style->{'layer'}{'theme'}], $prop->{'name'}));
+        my $prop_hidden = S2::is_property_hidden(
+            [ values %{ $style->{'layer'} } ], $prop->{'name'} );
+
+        next if $prop_hidden;
 
         if (LJ::is_enabled("delayed_entries")) { 
             if ($prop->{'name'} eq 'sticky_subject' ||
@@ -648,12 +656,20 @@ sub get_moodtheme_select_list {
 sub get_cats {
     my $class = shift;
     my $u = shift;
-        
+ 
+    my %purchased = $LJ::DISABLED{'lj_shop_styles'} ? () : (
+        purchased => {
+            text => LJ::Lang::ml('customize.cats.purchased'),
+            main => 1,
+            order => 3,
+        },
+    );
+
     my @categories = (
         all => {
             text => LJ::Lang::ml('customize.cats.all'),
             main => 1,
-            order => 3,
+            order => 4,
         },
         featured => {
             text => LJ::Lang::ml('customize.cats.featured'),
@@ -665,15 +681,16 @@ sub get_cats {
             main => 1,
             order => 2,
         },
+        %purchased,
         special => {
             text => LJ::Lang::ml('customize.cats.special'),
             main => 1,
-            order => 4,
+            order => 5,
         },
         custom => {
             text => LJ::Lang::ml('customize.cats.custom'),
             main => 1,
-            order => 5,
+            order => 6,
         },
         sup => {
             text => LJ::Lang::ml('customize.cats.sup'),

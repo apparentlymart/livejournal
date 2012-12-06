@@ -29,6 +29,7 @@ sub do_parse {
     my $is_removed_video = 0;
     my $images_crop_cnt = $args{'crop_image'};
     my @images = ();
+    my @links = ();
     my $remove_tags = $args{'remove_tags'};
     my $is_text_trimmed = 0;
 
@@ -36,9 +37,20 @@ sub do_parse {
         my $type = $token->[0];
         my $tag  = $token->[1];
         my $attr = $token->[2];  # hashref
+        my $text = $token->[3];
 
         if ($type eq "S") {
             my $selfclose = 0;
+
+            ## remove all 'a' and return array with links
+            if ($tag eq 'a') {
+                if (grep { $tag eq $_ } @$remove_tags) {
+                    push @links, $attr->{'href'};
+                    $p->get_text('/a');
+                    $ret .= " ";
+                    next;
+                }
+            }
 
             ## resize and crop first image from post if exist
             if ($tag eq 'img') {
@@ -57,10 +69,12 @@ sub do_parse {
                 ## Are we need to update db?
                 my $is_new_img = 0;
 
-                my $jitemid = $entry->jitemid;
-                my $journalid = $entry->journalid;
+                my $jitemid = 0;
+                my $journalid = 0;
                 my $dbw = LJ::get_db_writer();
                 if ($images_crop_cnt) {
+                    $jitemid = $entry->jitemid;
+                    $journalid = $entry->journalid;
                     my $post = $dbw->selectrow_arrayref ("
                         SELECT pic_orig_url, pic_fb_url 
                             FROM category_recent_posts 
@@ -89,6 +103,8 @@ sub do_parse {
                     }
                 }
                 if ($images_crop_cnt && $r && ($r->{'status'} ne 'small') && $r->{'url'}) {
+                    $jitemid = $entry->jitemid;
+                    $journalid = $entry->journalid;
                     $images_crop_cnt--;
                     push @images, $r->{url};
                     $dbw->do ("
@@ -185,6 +201,7 @@ sub do_parse {
     return {
         text             => $ret,
         images           => \@images,
+        links            => \@links,
         is_removed_video => $is_removed_video,
         is_text_trimmed  => $is_text_trimmed,
     }

@@ -3,8 +3,12 @@
     <input type="hidden" name="<TMPL_VAR prefix>_action" value="compile" />
     <input type="hidden" name="<TMPL_VAR prefix>_id" value="<TMPL_VAR id>"/>
     <div class="header">
+        <TMPL_VAR ljuser>
         <h1><TMPL_VAR title></h1>
         <div class="tools">
+            <a href="/customize/options.bml?authas=<TMPL_VAR username>">Options</a>
+            <a href="/customize/advanced/layers.bml?authas=<TMPL_VAR username>">Your Layers</a>
+            <a href="/customize/advanced/layerbrowse.bml?authas=<TMPL_VAR username>">Public Layers</a>
             <a href="<TMPL_VAR s2doc>" target="_blank">Documentation</a>
         </div>
         <input type="submit" value="Save & Compile" class="compilelink" />

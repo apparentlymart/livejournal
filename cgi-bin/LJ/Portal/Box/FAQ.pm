@@ -68,8 +68,8 @@ sub generate_content {
             my $q = $f->question_html;
             $q =~ s/^\s+//; $q =~ s/\s+$//;
             $q =~ s/\n/<BR>/g;
-            $content .= "<li><a href='/support/faqbrowse.bml?faqid="
-                . $f->{'faqid'} . "'>$q</a> <i>($s->{statval})</i></li>\n";
+            my $link = $f->page_url;
+            $content .= "<li><a href='$link'>$q</a> <i>($s->{statval})</i></li>\n";
         }
         $content .= "</ul>\n";
     }
@@ -88,12 +88,13 @@ sub generate_content {
         my $randfaq = $faqs->[$randfaqindex];
         my $faqid = $randfaq->[0];
         my $question = $randfaq->[1];
+        my $faqlink = LJ::Faq->page_url( 'faqid' => $faqid );
 
         $content .= qq {
             <b>FAQ of the Day:</b>
             <ul>
                 <li>
-                <a href="/support/faqbrowse.bml?faqid=$faqid">$question</a>
+                <a href="$faqlink">$question</a>
                 </li>
             </ul>
         };
@@ -103,7 +104,7 @@ sub generate_content {
 
     $content .= qq {
             <b>FAQ Search:</b>
-            <form action="$LJ::SITEROOT/support/faqsearch.bml" method="GET">
+            <form action="$LJ::SITEROOT/support/faq/search.html" method="GET">
             <input type="hidden" name="lang" value="$currlang" />
             <div style="padding: 5px;">
               } . LJ::html_text({ name => 'q' }) . qq {

@@ -64,6 +64,10 @@ use LJ::Subscription;
 use LJ::Typemap;
 use LJ::Text;
 
+use constant {
+    BASE_PRIORITY => 0,
+};
+
 ### COMMON FUNCTIONS ###
 
 # create a new event structure based on its type, journal and arguments
@@ -249,6 +253,10 @@ sub all_classes {
     return $tm->all_classes;
 }
 
+sub priority {
+    return BASE_PRIORITY;
+}
+
 # return string containing nicely-represented list of links to go with
 # the notification (the "now that you're receiving this notification, you
 # can" one)
@@ -411,6 +419,24 @@ sub as_alert {
     return $self->as_string($u);
 }
 
+# return a string representing an "Web Notification" body (or another popup
+# notification type)
+# notification sent to the passed user notifying them that this event has
+# happened.
+#
+# this is a virtual function; base class function returns whatever default
+# structure method returns.
+#
+# $wlm->send($u, $event->as_web_body($u));
+sub as_web_notification {
+    my ($self, $u) = @_;
+    return { title   => $self->as_email_subject($u),
+             content => $self->as_string($u),
+             tag     => '',
+             icon    => '',
+             url     => '' };             
+}
+
 # return a string representing an email subject of an email notification sent
 # to the passed user notifying them that this event has happened.
 #
@@ -529,6 +555,8 @@ sub fire {
     my $job = $self->fire_job or
         return 0;
 
+    $job->priority($self->priority);
+ 
     my $h = $sclient->insert($job);
     return $h ? 1 : 0;
 }
@@ -544,7 +572,7 @@ sub fire_job {
         if (ref $val eq "CODE") {
             $val->($self);
         } else {
-            warn $self->as_string . "\n";
+            warn $self->as_string( $self->event_journal ) . "\n";
         }
     }
 

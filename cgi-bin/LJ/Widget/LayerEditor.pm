@@ -148,6 +148,9 @@ sub prepare_template_params {
     $params->{errors} = [ $class->error_list ];
     $params->{form_auth} = LJ::form_auth();
 
+    $params->{ljuser} = $u->ljuser_display();
+    $params->{username} = $u->user();
+
     return 1;
 }
 =head2 handle_post

@@ -340,14 +340,14 @@ sub get_userpic_info
     my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
     my ($info, $minfo);
 
-    if ($minfo = LJ::MemCache::get($memkey)) {
+    if ($minfo = LJ::MemCacheProxy::get($memkey)) {
         # the pre-versioned memcache data was a two-element hash.
         # since then, we use an array and include a version number.
 
         if (ref $minfo eq 'HASH' ||
             $minfo->[0] != $VERSION_PICINFO) {
             # old data in the cache.  delete.
-            LJ::MemCache::delete($memkey);
+            LJ::MemCacheProxy::delete($memkey);
         } else {
             my (undef, $picstr, $kwstr) = @$minfo;
             $info = {
@@ -377,7 +377,7 @@ sub get_userpic_info
             # Load picture comments
             if ($opts->{'load_comments'}) {
                 my $commemkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
-                my $comminfo = LJ::MemCache::get($commemkey);
+                my $comminfo = LJ::MemCacheProxy::get($commemkey);
 
                 if (defined $comminfo) {
                     my ($pos, $nulpos);

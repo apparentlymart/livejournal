@@ -69,7 +69,7 @@
     # do first expand_embedded pass with the preview flag to extract
     # embedded content before cleaning and replace with tags
     # the cleaner won't eat
-    LJ::EmbedModule->parse_module_embed($u, \$event, preview => 1,);
+    LJ::EmbedModule->parse_module_embed($u, \$event, edit => 1);
     # clean content normally
     LJ::CleanHTML::clean_event(\$event, {
         preformatted => $req{'prop_opt_preformatted'},

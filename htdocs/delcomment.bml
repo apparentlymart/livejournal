@@ -311,12 +311,9 @@ _info?><?_code
                 push @messages, LJ::Lang::ml('/delcomment.bml.success.spam');
             }
 
-            my $ml_header = LJ::Lang::ml('/delcomment.bml.success.head');
-
             my $messages = join( '', map { "<p>$_</p>" } @messages );
 
             my $body = qq{
-                <h1>$ml_header</h1>
                 $messages
             };
 

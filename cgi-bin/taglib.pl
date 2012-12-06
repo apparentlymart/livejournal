@@ -667,8 +667,14 @@ sub can_add_entry_tags {
     }
  
     ## generic case: if $remote can add tags to the entire journal of the entry
-    return 1 if LJ::Tags::can_add_tags($journal, $remote);
-    
+    my $can_add_entry_tags_key = '__can_add_entry_tags_' . $journal->userid;
+    return 1 if $remote->{$can_add_entry_tags_key};
+    unless (exists $remote->{$can_add_entry_tags_key}) {
+        my $result = LJ::Tags::can_add_tags($journal, $remote);
+        $remote->{$can_add_entry_tags_key} = $result;
+        return 1 if $result;
+    }
+
     ## not allowed.
     return;
 }

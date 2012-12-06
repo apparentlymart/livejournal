@@ -61,6 +61,7 @@ sub jobs_of_unique_matching_subs {
         next if $has_done{$s->unique}++;
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
+            priority => $evt->priority,
             arg      => {
                 'userid'    => $s->userid + 0,
                 'subdump'   => $s->dump,

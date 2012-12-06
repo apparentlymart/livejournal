@@ -149,6 +149,13 @@ sub common_template_params {
         }
     }
 
+    my $ie8_ie7_compatible = 1;
+    if ( defined $args->{'ie8_ie7_compatible'} &&
+        ! $args->{'ie8_ie7_compatible'} )
+    {
+        $ie8_ie7_compatible = 0;
+    }
+
     my $additional_head_content = '';
     LJ::run_hooks( 'head_content', \$additional_head_content );
 
@@ -436,6 +443,7 @@ sub common_template_params {
         'remote_wallet_link'     => $remote_wallet_link,
         'remote_ljphoto_url'     => $remote_ljphoto_url,
         'remote_can_use_ljphoto' => $remote_can_use_ljphoto,
+        'remote_is_sup'          => $remote_is_sup,
 
         'need_loginform'              => $need_loginform,
         'loginform_returnto'          => $loginform_returnto,
@@ -444,6 +452,7 @@ sub common_template_params {
         'loginform_need_extra_fields' => $loginform_need_extra_fields,
         'loginform_onclick'           => $loginform_onclick,
 
+        'ie8_ie7_compatible'       => $ie8_ie7_compatible,
         'additional_head_content'  => $additional_head_content,
         'expresslane_html_comment' => $expresslane_html_comment,
         'server_signature_title'   => $LJ::SERVER_SIGNATURE_TITLE || '',

@@ -1,35 +1,77 @@
 // This file contains general-purpose LJ code
-LiveJournal = {
-	hooks: {} // The hook mappings
-};
+var LiveJournal = {};
 
-LiveJournal.register_hook = function (hook, func) {
-	if (! LiveJournal.hooks[hook]) {
-		LiveJournal.hooks[hook] = [];
-	}
+// Hooks
+;(function ($) {
+	'use strict';
 
-	LiveJournal.hooks[hook].push(func);
-};
+	LiveJournal.hooks = {}; // The hook mappings
 
-// args: hook, params to pass to hook
-LiveJournal.run_hook = function () {
-	//console.log('run_hook', arguments);
+	/**
+	 * Register handler for hook
+	 * @param  {String} hook Hook name
+	 * @param  {Function} func Hook handler
+	 */
+	LiveJournal.register_hook = function (hook, func) {
+		if (typeof hook !== 'string' || typeof func !== 'function') {
+			throw new Error('Provide correct hook name or handler.');
+		}
 
-	var hookfuncs = LiveJournal.hooks[arguments[0]];
-	if (!hookfuncs || !hookfuncs.length) {
-		return;
-	}
+		if ( !LiveJournal.hooks[hook] ) {
+			LiveJournal.hooks[hook] = [];
+		}
 
-	var hookargs = [].slice.call(arguments, 1);
+		LiveJournal.hooks[hook].push(func);
+	};
 
-	var rv = null;
+	/**
+	 * Run registered hooks
+	 * @param  {String} hook Hook name
+	 */
+	LiveJournal.run_hook = function (hook /**, args*/) {
+		var hookFuncs = LiveJournal.hooks[hook],
+			args = null,
+			result = null;
 
-	hookfuncs.forEach(function (hookfunc) {
-		rv = hookfunc.apply(null, hookargs);
-	});
+		// nothing has been registered for this hook
+		if ( $.type(hookFuncs) !== 'array' || hookFuncs.length === 0 ) {
+			return;
+		}
 
-	return rv;
-};
+		// arguments to pass for the hook
+		args = Array.prototype.slice.call(arguments, 1);
+
+		hookFuncs.forEach(function (hookFunc) {
+			result = hookFunc.apply(null, args);
+		});
+
+		return result;
+	};
+
+	/**
+	 * Remove hook functionality
+	 * @param  {String} hook Hook name
+	 * @param  {Function} [func] Hook function to remove
+	 */
+	LiveJournal.remove_hook = function (hook, func) {
+		if (typeof hook !== 'string') {
+			throw new Error('Hook name should be provided.');
+		}
+
+		// if no hooks has been registered yet
+		if (!LiveJournal.hooks[hook]) {
+			return;
+		}
+
+		if (typeof func === 'function') {
+			LiveJournal.hooks[hook] = LiveJournal.hooks[hook].filter(function (hookFunc) {
+				return hookFunc !== func;
+			});
+		} else {
+			LiveJournal.hooks[hook] = [];
+		}
+	};
+}(jQuery));
 
 LiveJournal.initPage = function () {
 	//LJRU-3137: The code relies on the Site global variable
@@ -42,6 +84,8 @@ LiveJournal.initPage = function () {
 	if (LJ.Api) {
 		LJ.Api.init({ auth_token: Site.auth_token });
 	}
+
+	LJ.UI.track();
 
 	LJ.UI.bootstrap();
 
@@ -56,7 +100,8 @@ LiveJournal.initPage = function () {
 	LiveJournal.initSpoilers();
 	LiveJournal.initResizeHelper();
 
-	//ljuniq cookie is checked in PageStats/Omniture.pm now
+	//ljuniq cookie is checked here now instead of PageStats/Omniture.pm
+	LiveJournal.checkLjUniq();
 
 	// run other hooks
 	LiveJournal.run_hook('page_load');
@@ -354,7 +399,7 @@ LiveJournal.constructUrl = function(base, args, escapeArgs) {
 	base = base.replace(/(\&|\?)+$/g, '');
 	var queryStr = base,
 		queryArr = [];
-	
+
 	if (args) {
 		queryStr += ( base.indexOf('?') === -1 ? '?' : '&' );
 
@@ -407,63 +452,207 @@ LiveJournal.closeSiteMessage = function(node, e, id) {
 	}, 'json');
 };
 
-LiveJournal.parseLikeButtons = function(ctx) {
-	try {
-		FB.XFBML.parse();
-	} catch(e) {}
+LiveJournal.parseLikeButtons = (function ($) {
+	'use strict';
 
-	try {
-		if (jQuery.browser.msie) {
-			var replaceNode, attrs, j, node;
-			var nodes = document.body.getElementsByTagName('plusone');
+	var selectors = {
+		facebook: '.lj-like-item-facebook',
+		google: '.lj-like-item-google',
+		twitter: '.lj-like-item-twitter',
+		tumblr: '.lj-like-item-tumblr',
+		surfingbird: '.lj-like-item-surfinbird',
+		repost: '.lj-like-item-repost'
+	};
 
-			for (var i = 0, l = nodes.length; i < l; ++i) {
-				replaceNode = document.createElement('g:plusone');
-				node = nodes[i];
-				attrs = node.attributes;
+	/**
+	 * Parse lj-like buttons
+	 * @param  {Object} $node jQuery .lj-like node
+	 */
+	function parse($node) {
+		parseFacebook($node);
+		parseGoogle($node);
+		parseTwitter($node);
+		parseTumblr($node);
+		parseSurfingbird($node);
+		parseRepost($node);
+	}
 
-				for (j = 0; j < attrs.length; ++j) {
-					if (attrs[j].specified) {
-						replaceNode.setAttribute(attrs[j].nodeName, attrs[j].nodeValue);
-					}
+	/**
+	 * Create iframe node with default params and ability to redefine them (iframe factory)
+	 * @param  {Object} params Params to substitute for iframe {src, width, height...}
+	 * @return {Element}       Created iframe node
+	 */
+	function createIframe(params) {
+		var iframe = document.createElement('iframe'),
+			param;
+
+		// defaults
+		iframe.frameBorder = 0;
+		iframe.scrolling = 'no';
+		iframe.allowTransparency = 'true';
+		iframe.width = 110;
+		iframe.height = 20;
+
+		// reassign params
+		if (params) {
+			for (param in params) {
+				if (params.hasOwnProperty(param)) {
+					iframe[param] = params[param];
 				}
-
-				node.parentNode.replaceChild(replaceNode, node);
 			}
 		}
 
-		gapi.plusone.go();
-	} catch(e) {}
+		return iframe;
+	}
 
-	jQuery('a.twitter-share-button', ctx || document).each(function() {
-		if (this.href != 'http://twitter.com/share') {
+	/**
+	 * Parse facebook likes
+	 * Documentation: http://developers.facebook.com/docs/reference/javascript/FB.XFBML.parse/
+	 * @param  {jQuery} $node jQuery collection
+	 */
+	function parseFacebook($node) {
+		var item = $node.find( selectors.facebook );
+
+		if (item.length === 0) {
 			return;
 		}
 
-		var link = jQuery(this), params = {
-			url: link.attr('data-url'),
-			text: link.attr('data-text'),
-			count: link.attr('data-count'),
-			lang: link.attr('data-lang')
+		try {
+			window.FB.XFBML.parse( item.get(0) );
+		} catch (e) {
+			console.warn(e.message);
+		}
+	}
+
+	/**
+	 * Parse google +1 button
+	 * Documentation: https://developers.google.com/+/plugins/+1button/#jsapi
+	 * @param  {jQuery} $node jQuery node with likes in which we will search for google +1 button for parsing
+	 */
+	function parseGoogle($node) {
+		var $button = $node.find( selectors.google ).children().first(),	// jquery node <g:plusone />
+			button = null;	// raw DOM node <g:plusone>
+
+		if ($button.length === 0) {
+			return;
+		}
+
+		button = $button.get(0);
+
+		// gapi could throw errors
+		try {
+			window.gapi.plusone.render( button, { size: $button.attr('size'), href: $button.attr('href') } );
+		} catch (e) {
+			console.warn(e.message);
+		}
+	}
+
+	/**
+	 * Parse and replace twitter button
+	 * @param  {jQuery} $node jQuery node with .lj-like class
+	 */
+	function parseTwitter($node) {
+		var params = null,
+			iframe = null,
+			// link to replace with iframe
+			link = null,
+			item = $node.find( selectors.twitter );
+
+		if (item.length === 0) {
+			return;
+		}
+
+		link = item.children().eq(0);
+
+		params = {
+			url: link.data('url'),
+			text: link.data('text'),
+			count: link.data('count'),
+			lang: link.data('lang')
 		};
 
-		link.replaceWith(jQuery('<iframe frameborder="0" scrolling="no" allowtransparency="true" />').css({
-			width: '110px',
-			height: '20px'
-		})
-		.attr('src', LiveJournal.constructUrl('http://platform.twitter.com/widgets/tweet_button.html', params))
-		.insertBefore(link));
-	});
+		iframe = createIframe({
+			src: LiveJournal.constructUrl('http://platform.twitter.com/widgets/tweet_button.html', params)
+		});
 
-	jQuery('div.lj-like-item-repost > a', ctx || document).each(function() {
-		var link = jQuery(this),
-			url = link.data('url');
+		link.replaceWith(iframe);
+	}
+
+	/**
+	 * Parse surfingbird share button
+	 * @param  {jQuery} $node jQuery .lj-like node
+	 */
+	function parseSurfingbird($node) {
+		var item = $node.find( selectors.surfingbird ),
+			link = null,
+			iframe = null,
+			params = null;
+
+		if (item.length === 0) {
+			return;
+		}
+
+		link = item.find('.surfinbird__like_button');
+		params = {
+			url: link.data('url'),
+			caption: link.data('text'),
+			layout: 'common'
+		};
+
+		iframe = createIframe({
+			src: LiveJournal.constructUrl('http://surfingbird.ru/button', params)
+		});
+
+		link.replaceWith(iframe);
+	}
+
+	/**
+	 * Parse tumblr share button
+	 * @param  {jQuery} $node jQuery .lj-like node
+	 */
+	function parseTumblr($node) {
+		var item = $node.find( selectors.tumblr ),
+			link = null,
+			params = null,
+			href;
+
+		if (item.length === 0) {
+			return;
+		}
+
+		link = item.find('.tumblr-share-button'),
+		href = link.attr('href'),
+		params = {
+			url: link.data('url'),
+			name: link.data('title')
+		};
+
+		link.attr('href', LiveJournal.constructUrl(href, params));
+	}
+
+	/**
+	 * Parse repost button
+	 * @param  {jQuery} $node jQuery .lj-like node
+	 */
+	function parseRepost($node) {
+		var item = $node.find( selectors.repost ),
+			link = null,
+			url;
+
+		if (item.length === 0) {
+			return;
+		}
+
+		link = $node.find('.lj-like-item-repost').find('a'),
+		url = link.data('url');
 
 		LJ.Api.call('repost.get_status', { url: url }, function (data) {
 			link.replaceWith(LiveJournal.renderRepostButton(url, data));
 		});
-	});
-};
+	}
+
+	return parse;
+}(jQuery));
 
 LiveJournal.renderRepostButton = function (url, data) {
 	data = data || {};
@@ -471,8 +660,8 @@ LiveJournal.renderRepostButton = function (url, data) {
 	var meta = {
 			paid: !!data.paid,
 			url: url,
-			cost: Number(data.cost || 0),
-			budget: Number(data.budget || 0),
+			cost: data.cost,
+			budget: data.budget,
 			count: Number(data.count || 0),
 			reposted: !!data.reposted
 		},
@@ -482,7 +671,7 @@ LiveJournal.renderRepostButton = function (url, data) {
 
 	if (meta.paid) {
 		template = 'templates-CleanHtml-PaidRepost';
-		meta.owner = !meta.cost;
+		meta.owner = meta.cost === '0';
 		options.classNames = {
 			active: 'paidrepost-button-active',
 			inactive: 'paidrepost-button-inactive'
@@ -728,43 +917,3 @@ LiveJournal.parseMediaLink = function(input) {
 	}
 	return null;
 };
-
-LiveJournal.showWidgets = function() {
-	
-	function random() {
-		return 	'rgb(' + (Math.floor((256-199)*Math.random()) + 200) + ','
-		+ (Math.floor((256-199)*Math.random()) + 200) + ','
-		+ (Math.floor((256-199)*Math.random()) + 200) + ')';
-	}
-
-	function _click(widget) {
-		widget.element
-			.click(function() {
-				console.log(widget.__proto__.widgetName, widget);
-			});
-	}
-
-	function _color(widget) {
-		widget.element
-			.css('background-color', random())
-			.css('border', '3px dashed ' + random());
-	}
-
-	for (var widget in jQuery.lj) {
-		var instances = jQuery.lj[widget].prototype.instances;
-		if (instances) {
-			instances.forEach(_click);
-		}
-	}
-	setInterval(function() {
-		for (var widget in jQuery.lj) {
-			var instances = jQuery.lj[widget].prototype.instances;
-			if (instances) {
-				instances.forEach(_color);
-			}
-		}
-	}, 500);
-
-};
-
-LiveJournal.widgetEvents = {};

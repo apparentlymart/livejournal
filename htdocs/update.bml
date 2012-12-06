@@ -109,13 +109,16 @@
                     stc/entry.css
                     stc/trava.css
                     stc/widgets/selecttags.css
-                    js/jquery/jquery.ui.position.min.js
-                    js/jquery/jquery.ui.autocomplete.min.js
+                    js/lib/jquery-ui/jquery.ui.position.min.js
+                    js/lib/jquery-ui/jquery.ui.autocomplete.min.js
                     js/jquery/jquery.bgiframe.js
                     js/gears_init.js
                     js/scanner.js
                     js/photobucket_jw.js
                     ));
+
+    LJ::need_var(last_fm_user => $remote && $remote->{'last_fm_user'});
+    LJ::need_var(last_fm_api_key => $LJ::LAST_FM_API_KEY);
 
     ## figure out times
     my $now = DateTime->now;
@@ -182,8 +185,8 @@
         ## in future support for other quick embeds will be added.
         ## TODO: use oEmbed for YouTube (http://apiblog.youtube.com/2009/10/oembed-support.html)
         if ($url =~ m!http://www.youtube.com/watch\?v=([\w\-]+)! || $url =~ m!http://www.youtube.com/v/([\w\-]+)!) {
-            $event .= <<"EMBED";
-<object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/$1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/$1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+            $event = <<"EMBED";
+<iframe width="490" height="370" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen="allowfullscreen" data-link="http://www.youtube.com/watch?v=$1"></iframe>
 EMBED
         }
     }
@@ -201,7 +204,7 @@ EMBED
             return;
         }
 
-        if ($entry->visible_to($remote)){
+        if ($entry->visible_to($remote)) {
             $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
 
             unless ($event) {
@@ -216,9 +219,10 @@ EMBED
                         subject  => $subject,
                         text     => $event,
                 });
-                $reposted_from = $entry->url;
-                $repost_hidden = LJ::repost_auth($POST{'repost_type'} || $GET{'repost_type'} || 'd', $entry->poster->username, $entry->url, $subject);
             }
+
+            $reposted_from = $entry->url;
+            $repost_hidden = LJ::repost_auth($POST{'repost_type'} || $GET{'repost_type'} || 'd', $entry->poster->username, $entry->url, $subject);
         }
     }
 
@@ -347,6 +351,7 @@ EMBED
             'albums_id'             => $POST{'albums_id'} || $GET{'albums_id'},
             'photos_id'             => $POST{'photos_id'} || $GET{'photos_id'},
             'repost_budget'         => $POST{'repost_budget'},
+            'repost_limit_sc'       => $POST{'repost_limit_sc'},
         };
 
         if ($remote) {
@@ -532,7 +537,8 @@ EMBED
                     'custom_time' => $custom_time,
                     'tz'          => $timezone,
                     'posttype'    => $type,
-                    'repost_budget' => $POST{'repost_budget'},
+                    'repost_budget'   => $POST{'repost_budget'},
+                    'repost_limit_sc' => $POST{'repost_limit_sc'},
                     );
 
         $flags->{'use_custom_time'} = 1; 
@@ -795,8 +801,10 @@ head<=
     # The draft might contain BML like syntax and cause problems
     BML::noparse();
 
-    LJ::need_string('entryform.close.confirm'); 
-    
+    LJ::need_string(qw(
+        entryform.close.confirm
+    )); 
+
     # append months names tranlation to Site.ml_text['month.names.long']  
     my @ml_months = map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
     my @ml_months_texts = map { LJ::Lang::ml($_) } @ml_months;
@@ -839,11 +847,4 @@ _code?>
 </script>
 
 <=head
-page?><?_c <LJDEP>
-lib: LJ::SpellCheck
-link: htdocs/users, htdocs/download/index.bml, htdocs/moodlist.bml
-link: htdocs/update.bml, htdocs/lostinfo.bml, htdocs/support/faqbrowse.bml
-link: htdocs/allpics.bml
-post: htdocs/update.bml
-</LJDEP> _c?>
-
+page?>

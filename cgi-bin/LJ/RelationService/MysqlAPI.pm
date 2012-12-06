@@ -456,7 +456,7 @@ sub _load_friend_friendof_uids_from_memcache {
 
     my $memkey = $class->_friend_friendof_uids_memkey($u, $mode);
 
-    if (my $pack = LJ::MemCache::get($memkey)) {
+    if (my $pack = LJ::MemCacheProxy::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
         # value in memcache is good if stored limit (from last time)
         # is >= the limit currently being requested.  we just may
@@ -775,15 +775,18 @@ sub is_relation_type_to {
     my $types  = shift;
     my %opts   = @_;
     
-    return undef unless $types && $u && $friend;
+    return undef unless $u && $friend;
+    return undef unless ref $types eq 'ARRAY';
 
     my $userid = LJ::want_userid($u);
     my $friendid = LJ::want_userid($friend);
 
+    $types = join ",", map {"'$_'"} @$types;
+
     my $dbh = LJ::get_db_writer();
     my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
                                          "WHERE userid=$userid AND targetid=$friendid ".
-                                         "AND type IN (?)", undef, $types);
+                                         "AND type IN ($types)");
     return $relcount;
 }
 
@@ -808,7 +811,7 @@ sub get_groupmask {
         $mask = $dbw->selectrow_array("SELECT groupmask FROM friends ".
                                       "WHERE userid=? AND friendid=?",
                                       undef, $jid, $fid);
-        LJ::MemCache::set($memkey, $mask+0, time()+60*15);
+        LJ::MemCacheProxy::set($memkey, $mask+0, time()+60*15);
     }
 
     return $mask+0;  # force it to a numeric scalar
@@ -962,6 +965,33 @@ sub _mod_rel_multi
     }
 
     return $ret;
+}
+
+sub find_relation_attributes {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    return undef unless $type eq 'F';
+
+    return undef unless $u && $friend;
+ 
+    my $jid = LJ::want_userid($u);
+    my $fid = LJ::want_userid($friend);
+    return undef unless $jid && $fid;
+
+    my $dbr = LJ::get_db_reader();
+    die "No database reader available" unless $dbr;
+
+    my $fr = $dbr->selectrow_hashref("
+        SELECT groupmask, fgcolor, bgcolor 
+        FROM friends 
+        WHERE userid=? 
+          AND friendid=?
+    ", { Slice => {} }, $u->userid, $friend->userid);
+    return $fr;
 }
 
 1;

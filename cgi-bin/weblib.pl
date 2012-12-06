@@ -185,6 +185,7 @@ sub make_authas_select {
     my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
+    shift @list if @list > 1 && $opts->{'remove_self'};
     if (@list > 1 || $list[0] ne $u->{'user'}) {
         my $ret;
         my $label = $BML::ML{'web.authas.label'};
@@ -194,7 +195,8 @@ sub make_authas_select {
                                  'selected' => $opts->{'authas'} || $u->{'user'},
                                  'class' => 'hideable',
                                  },
-                                 map { $_, $_ } @list) . " ";
+                                 ## We loaded all users in LJ::get_authas_list(). Here we use their singletons.
+                                 map { my $u = LJ::load_user ($_); ($_, $u->display_name) } @list) . " ";
         $ret .= $opts->{'button_tag'} . LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'}) . $opts->{'button_close_tag'};
         return $ret;
     }
@@ -1158,7 +1160,7 @@ sub entry_form_decode
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid prop_give_features 
-                repost_budget paid_repost_on)) {
+                repost_budget paid_repost_on repost_limit_sc)) {
         $req->{$_} = $POST->{$_};
     }
 
@@ -1188,6 +1190,10 @@ sub entry_form_decode
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
+    $req->{'prop_poster_ip'} = LJ::get_remote_ip(); 
+
+    my $uniq = LJ::UniqCookie->current_uniq();
+    $req->{'prop_uniq'} = $uniq; 
 
     if ( my $reposted_from = $POST->{'reposted_from'} ) {
         my $reposted_entry = LJ::Entry->new_from_url($reposted_from);
@@ -1309,6 +1315,46 @@ sub stat_src_to_url {
     return $LJ::STATPREFIX . $url . "?v=" . $mtime;
 }
 
+sub need_res_group {
+    my (@groupnames) = @_;
+    foreach my $name (@groupnames){
+        my $group = $LJ::RES_GROUP_DEPS{$name};
+        next unless $group;
+        next if $LJ::REQ_GLOBAL{__need_res_group}->{$group}++;
+
+        ## js, css, templates
+        foreach my $resource_class (qw/js css templates/){
+            next unless exists $group->{$resource_class};
+            foreach my $files ($group->{$resource_class}){
+                foreach my $resource (@$files){
+                    if (ref $resource eq 'ARRAY'){
+                        ## need_res expects $cond as a first argument,
+                        ## but for config files other order is preferable:
+                        ##    source file name at first place then condition at second
+                        ##
+                        ## support both
+                        my ($file, $cond) = ref($resource->[0]) 
+                                                ? ($resource->[1], $resource->[0])
+                                                : ($resource->[0], $resource->[1]);
+                        LJ::need_res($cond, $file);
+                    } else {
+                        LJ::need_res($resource);
+                    }
+                }
+            }
+        }
+
+        ## ml
+        if (my $mls = $group->{ml}){
+            LJ::need_string(@$mls);
+        }
+        
+        ## groups
+        if (my $groups = $group->{groups}){
+            LJ::need_res_group($_) for @$groups;
+        }
+    }
+}
 
 ## Support for conditional file inclusion:
 ## e.g. LJ::need_res( {condition => 'IE'}, 'ie.css', 'myie.css') will result in
@@ -1551,11 +1597,18 @@ sub res_includes {
         my $locale = LJ::Lang::current_language();
         $locale = $locale eq 'debug'? $locale : LJ::lang_to_locale($locale);
 
+        my %comm_access = ();
+        if ($ju && $ju->is_community) {
+            my @c_acc = LJ::get_comm_settings ($ju);
+            $comm_access{'membership'} = $c_acc[0] if scalar @c_acc;
+        }
+
         my $ljentry = LJ::Request->notes('ljentry') || ''; # url
         my %site = (
                 imgprefix                => "$imgprefix",
                 siteroot                 => "$siteroot",
                 statprefix               => "$statprefix",
+                jsonrpcprefix            => "$LJ::JSON_RPC_PREFIX",
                 picsUploadDomain         => $LJ::PICS_UPLOAD_DOMAIN,
                 currentJournalBase       => "$journal_base",
                 currentJournal           => "$journal",
@@ -1577,6 +1630,7 @@ sub res_includes {
                 locale                   => $locale,
                 pics_production          => LJ::is_enabled('pics_production'),
                 v                        => stc_0_modtime($now),
+                %comm_access,
         );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
@@ -1596,7 +1650,7 @@ sub res_includes {
         # LJSUP-12854: Fix escape for Site object
         $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
         $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
-
+        
         $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
@@ -2489,7 +2543,11 @@ sub get_body_class_for_service_pages {
         }
     } elsif ($uri =~ m!^/browse(/.*)?$!) {
         push @classes, "catalogue-page";
-    } elsif ($uri =~ m!^/games(/.*)?$! || $host eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN") {
+    } elsif (
+        $uri =~ m!^/games(/.*)?$!
+        || $host eq "$LJ::USERAPPS_SUBDOMAIN.$LJ::DOMAIN"
+        || $uri =~ m!^/adv(/.*)?$!
+    ) {
         push @classes, 'framework-page';
     } elsif ($uri =~ m|^/friendstimes|
              or ($host =~ m!^(\w+)\.\Q$LJ::USER_DOMAIN\E$!

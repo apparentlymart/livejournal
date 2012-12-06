@@ -260,6 +260,8 @@ body<=
                     LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
                 }
                 $cu->set_prop('check_non_whitelist', $POST{check_non_whitelist} ? 'Y' : 'N');
+            } elsif ($moderated eq 'N') {
+                $cu->set_prop('check_non_whitelist', 'N');
             }
 
             # since journaltype changed

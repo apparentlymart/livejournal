@@ -4,52 +4,64 @@ body {
 	padding: 0px;
 	font-family: Tahoma, sans-serif;
 	font-size: 8pt;
-	overflow: auto;
+	overflow: visible;
 }
 
 div.header {
-	top: 0px;
-	height: 19px;
-	width: 100%;
+	top: 0;
+	height: 21px;
 	background-color: #ffffff;
 	font-size: 13px;
+	line-height: 1.6em;
 	border-bottom: solid #808080 1px;
-	padding: 2px 0px 0px 0px;
+	padding: 0 0 0 17px;
 }
 
 h1 {
-	float: left;
-	margin: 0px;
-	padding: 0px 6px 0px 12px;
+	display: inline;
+	margin: 0;
+	padding: 0 7px 0 7px;
 	font-weight: bold;
 	font-size: 13px;
 }
 
-div.header a, div.tools a {
+div.header a {
 	text-decoration: none;
 	color: #000000;
 	padding: 0px 6px 0px 6px;
-}
-
+	}
+div.header .i-ljuser-username {
+	color: #0000ff;
+	}
+HTML BODY .i-ljuser-userhead {
+    vertical-align: text-top !important;
+	}
+div.tools a {
+	text-decoration: underline;
+	}
 div.header .compilelink {
 	color: #0000ff;
 	height: 16px;
 	font-size: 7pt;
 	font-weight: bold;
-}
-
-div.header a:hover, div.tools a:hover {
+	}
+div.header a:hover {
 	text-decoration: underline;
-}
+	}
+div.tools a:hover {
+	text-decoration: none;
+	}
 
 div.tools {
-	float: right;
+	position: absolute;
+	top: 0;
+	right: 0;
 	padding-right: 6px;
-}
+	}
 
 div.reference {
 	position: absolute;
-	top: 27px;
+	top: 32px;
 	left: 12px;
 	bottom: 43px;
 	height: auto;
@@ -112,7 +124,7 @@ div.tabs a {
 
 div.main {
 	position: absolute;
-	top: 26px;
+	top: 32px;
 	left: 204px;
 	right: 12px;
 	bottom: 151px;

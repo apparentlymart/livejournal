@@ -468,3 +468,14 @@ A:visited {
 	.content .page-nav A:visited:hover {
 		color:#FFF;
 		}
+
+
+
+/* LJSUP-13769 */
+.appwidget-journalpromo {
+	margin: 0 auto 2em 28px;
+	}
+.view-entry .appwidget-journalpromo,
+.view-reply .appwidget-journalpromo {
+	margin: 22px auto 33px 28px;
+	}

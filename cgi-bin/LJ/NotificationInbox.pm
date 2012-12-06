@@ -195,9 +195,16 @@ sub count {
     }
 
     my $u = $self->owner;
-    return $self->{count} = $u->selectrow_array
-        ("SELECT COUNT(*) FROM notifyqueue WHERE userid=?",
-         undef, $u->id);
+    
+    my $count = LJ::MemCache::get($self->_count_memkey) ;
+    unless (defined $count) {
+        $count = $u->selectrow_array
+                    ("SELECT COUNT(*) FROM notifyqueue WHERE userid=?",
+                     undef, $u->id);
+        LJ::MemCache::set($self->_count_memkey, $count, 3600);
+    }
+
+    return $self->{count} = $count;
 }
 
 # returns number of unread items in inbox
@@ -301,6 +308,12 @@ sub _memkey {
     return [$userid, "inbox:$userid"];
 }
 
+sub _count_memkey {
+    my $self = shift;
+    my $userid = $self->u->id;
+    return [$userid, "inbox:cnt:$userid"];
+}
+
 sub _unread_memkey {
     my $self = shift;
     my $userid = $self->u->id;
@@ -344,6 +357,7 @@ sub expire_cache {
     $self->{items} = undef;
 
     LJ::MemCache::delete($self->_memkey);
+    LJ::MemCache::delete($self->_count_memkey);
     LJ::MemCache::delete($self->_unread_memkey);
 }
 
@@ -381,6 +395,7 @@ sub enqueue {
         # Get list of bookmarks and ignore them when checking inbox limits
         my $bmarks = join ',', $self->get_bookmarks_ids;
         my $bookmark_sql = ($bmarks) ? "AND qid NOT IN ($bmarks) " : '';
+
         my $too_old_qid = $u->selectrow_array
             ("SELECT qid FROM notifyqueue ".
              "WHERE userid=? $bookmark_sql".

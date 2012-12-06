@@ -46,6 +46,9 @@ sub render_body {
     } elsif ($cat eq "custom") {
         push @getargs, "cat=custom";
         @themes = LJ::S2Theme->load_by_user($u);
+    } elsif ($cat eq "purchased") {
+        push @getargs, "cat=purchased";
+        @themes = LJ::S2Theme->load_purchased($u);
     } elsif ($cat) {
         push @getargs, "cat=$cat";
         @themes = LJ::S2Theme->load_by_cat($cat);
@@ -126,8 +129,17 @@ sub render_body {
     );
 
     $ret .= "<div class='themes-area'>";
+    my @purchased = LJ::S2Theme->load_purchased ($u);
     foreach my $theme (@themes_this_page) {
         next unless defined $theme;
+
+        my $is_bought = 0;
+        my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($theme->s2lid);
+        if ($theme->is_buyable) {
+            $is_bought = 1 if grep { $shop_theme && $_->s2lid == $shop_theme->s2tid } @purchased;
+            next if $shop_theme && $shop_theme->is_bought_out && !$is_bought;
+            next if $shop_theme && $shop_theme->is_disabled && !$is_bought;
+        }
 
         # figure out the type(s) of theme this is so we can modify the output accordingly
         my %theme_types;
@@ -136,8 +148,9 @@ sub render_body {
         } elsif (!$theme->themeid && !$current_theme->themeid) {
             $theme_types{current} = 1 if $theme->layoutid == $current_theme->layoutid;
         }
-        $theme_types{upgrade} = 1 if !$filter_available && !$theme->available_to($u);
+        $theme_types{upgrade} = 1 if !$is_bought && !$filter_available && !$theme->available_to($u);
         $theme_types{special} = 1 if LJ::run_hook("layer_is_special", $theme->uniq);
+        $theme_types{shop_item} = 1 if !$is_bought && !$theme_types{current} && $theme->is_buyable;
 
         
         my ($theme_class, $theme_options, $theme_icons) = ("", "", "");
@@ -167,6 +180,10 @@ sub render_body {
             $theme_class .= " special" if $viewing_featured && LJ::run_hook("should_see_special_content", $u);
             $theme_icons .= LJ::run_hook("customize_available_until", $theme);
         }
+        if ($theme_types{shop_item}) {
+            $theme_class .= " shop-item";
+            $theme_options .= LJ::run_hook("customize_shop_item_options", $u, $theme);
+        }
         $theme_icons .= "</div><!-- end .theme-icons -->" if $theme_icons;
 
         my $theme_layout_name = $theme->layout_name;
@@ -174,7 +191,7 @@ sub render_body {
 
         $ret .= "<div class='theme-item$theme_class'><div class='theme-item-in'>";
         $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-preview' alt='' />";
-        $ret .= "<h4>" . $theme->name . "</h4>";
+        $ret .= "<h4>" . ( $theme->is_buyable ? $shop_theme->name : $theme->name ) . "</h4>";
 
         my $preview_redirect_url;
         if ($theme->themeid) {

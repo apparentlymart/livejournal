@@ -11,6 +11,7 @@ use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::DebugLog
                        LJ::NotificationMethod::Alerts
                        LJ::NotificationMethod::Push
+                       LJ::NotificationMethod::Web
                        );
 
 # this mofo is basically just an interface

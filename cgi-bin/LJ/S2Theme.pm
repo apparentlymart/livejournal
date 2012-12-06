@@ -186,7 +186,12 @@ sub load_by_cat {
         my $theme = $class->new( themeid => $layer );
 
         # we have a theme, now see if it's in the given category
-        foreach my $possible_cat ($theme->cats) {
+        my @theme_cats = $theme->cats;
+        if ($theme->is_buyable) {
+            my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($theme->s2lid);
+            @theme_cats = $shop_theme ? @{$shop_theme->get_cats} : @theme_cats;
+        }
+        foreach my $possible_cat (@theme_cats) {
             next unless $possible_cat eq $cat;
             push @themes, $theme;
             last;
@@ -239,6 +244,17 @@ sub load_by_user {
     }
 
     return @themes;
+}
+
+sub load_purchased {
+    my $class = shift;
+    my $u     = shift;
+
+    die "Invalid user object." unless LJ::isu($u);
+
+    my @shop_themes = LJ::Pay::Theme->get_purchased ($u);
+
+    return @shop_themes;
 }
 
 sub load_by_search {
@@ -366,6 +382,7 @@ sub new {
     my $layers = LJ::S2::get_public_layers();
     my $is_custom = 0;
     my %outhash = ();
+
     unless ($layers->{$themeid} && $layers->{$themeid}->{uniq}) {
         if ($opts{user}) {
             my $u = $opts{user};
@@ -431,6 +448,8 @@ sub new {
     $layout_class = "LJ::S2Theme::$layout_class";
 
     # make this theme an object of the lowest level class that's defined
+#    if ($layers->{$themeid}->{'is_buyable'} || $outhash{$themeid}{'is_buyable'}) {
+#        bless $self, "LJ::S2Theme::LJShopStyle";
     if (eval { $theme_class->init }) {
         bless $self, $theme_class;
     } elsif (eval { $layout_class->init }) {
@@ -725,5 +744,6 @@ sub component_props { () }
 sub setup_props { () }
 sub ordering_props { () }
 sub custom_props { () }
+sub is_buyable { 0 }
 
 1;

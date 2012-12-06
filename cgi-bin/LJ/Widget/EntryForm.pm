@@ -167,7 +167,7 @@ sub lastfm_geolocation_width {
 
     my $ret_width = 0;
     $ret_width = 32 if $self->should_show_geolocation;
-    $ret_width = 45 if $self->should_show_lastfm || $self->should_show_trava;
+    $ret_width = 40 if $self->should_show_lastfm || $self->should_show_trava;
 
     return ('style' => "width: $ret_width\%;");
 }
@@ -178,11 +178,7 @@ sub need_res {
 
     my @ret;
 
-    if ( $LJ::IS_DEV_SERVER ) {
-        push @ret, 'js/ck/ckeditor-dev.js';
-    } else {
-        push @ret, 'js/ck/ckeditor.js';
-    }
+    push @ret, 'js/ck/ckeditor.js';
 
     push @ret, qw(
         js/ippu.js
@@ -890,6 +886,7 @@ sub render_options_block {
             return '' unless LJ::is_enabled("paid_repost");
             
             my ($paid_repost_on, $budget) = ($opts->{paid_repost_on}, $opts->{current_repost_budget});
+            my $limit_sc = $opts->{repost_limit_sc} || $LJ::PAYREPOST_MIN_SOCIAL_CAPITAL;
 
             my $out = '';
 
@@ -937,6 +934,21 @@ sub render_options_block {
             $out .= qq{<span class="b-updatepage-paidrepost-fields">};
             $out .= qq{<label for="repost_budget" class="b-updatepage-paidrepost-label">$label</label>};
             $out .= qq{<span class="b-updatepage-paidrepost-budget">$field</span>};
+            $out .= qq{</span>};
+
+            my $limit_sc_label = LJ::Lang::ml('talk.post.paidrepost.limit_sc');    
+            my $limit_sc_field = LJ::html_text({
+                'name'     => 'repost_limit_sc',
+                'value'    => $limit_sc,
+                'id'       => 'repost_limit_sc',
+                'tabindex' => '225',
+                'size'     => '10',
+                'raw'      => "autocomplete='off'",
+            });
+
+            $out .= qq{<span class="b-updatepage-paidrepost-fields">};
+            $out .= qq{<label class="b-updatepage-paidrepost-label">$limit_sc_label</label>};
+            $out .= qq{<span class="b-updatepage-paidrepost-cs">$limit_sc_field</span>};
             $out .= qq{</span>};
             
             return $out;
@@ -1726,7 +1738,7 @@ sub render_ljphoto_block {
 
                 my $res = $photo ? {
                     photo_desc  => $photo->prop('description'),
-                    photo_title => $photo->prop('title'),
+                    photo_title => LJ::ehtml($photo->prop('title')),
                     photo_url   => $photo->image_url( 'size' => @photos > 1 ? 100 : 600 ),
                     photo_id    => $photo->photo_id_displayed,
                 } : undef;

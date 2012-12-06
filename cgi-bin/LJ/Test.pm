@@ -261,8 +261,14 @@ sub create_application {
     $opts{name}            ||= $opts{application_key};
     $opts{type}            ||= 'E'; 
     $opts{status}          ||= 'A';
-    $opts{primary}         ||= [@{$LJ::USERAPPS_ACCESS_LISTS}[0..2]];
-    $opts{secondary}       ||= [@{$LJ::USERAPPS_ACCESS_LISTS}[3..5]];
+
+    unless ($opts{primary} || $opts{secondary} ) {
+        $opts{primary}         = [@{$LJ::USERAPPS_ACCESS_LISTS}];
+        $opts{secondary}       = [];
+    } else {
+        $opts{primary}         ||= [];
+        $opts{secondary}       ||= [];
+    }
 
     my $res = LJ::UserApps->add_application(%opts);
 
@@ -276,8 +282,6 @@ sub create_application {
     $app->set_primary($opts{primary}) if $opts{primary};
     $app->set_secondary($opts{secondary}) if $opts{secondary};
     
-    $app->{non} = $opts{non} || [@{$LJ::USERAPPS_ACCESS_LISTS}[6..$#$LJ::USERAPPS_ACCESS_LISTS]];
-
     return $app;
 }
 
@@ -303,7 +307,10 @@ sub get_access_token {
     my $class = shift;
     my %opts = @_;
     $opts{access} ||= [];
-    my $app = $opts{app} or die "Application is not specified";
+    my $app = $opts{app} ? 
+        $opts{app} : 
+        LJ::UserApps::Application->new( id => $opts{application_id} );
+    die "Application is not specified" unless $app;
     $app->authorize( userid => $opts{userid}, access => $opts{access} );
     my $token =  LJ::OAuth::AccessToken->generate(
                                                   consumer_key => $opts{consumer_key},
@@ -458,6 +465,7 @@ sub t_post_fake_entry {
 
     my $subject = delete $opts{subject} || "test suite post.";
     my $body    = delete $opts{body}    || "This is a test post from $$ at " . time() . "\n";
+    my $props   = delete $opts{props} || {};
 
     my %req = (
                mode => 'postevent',
@@ -468,6 +476,7 @@ sub t_post_fake_entry {
                subject => $subject,
                tz => 'guess',
                security => $proto_sec,
+               props  => $props,
                );
 
     $req{allowmask} = 1 if $security eq 'friends';
@@ -477,6 +486,7 @@ sub t_post_fake_entry {
 
     # pass-thru opts
     $req{usejournal} = $opts{usejournal} if $opts{usejournal};
+
     $flags->{usejournal_okay} = $opts{usejournal_okay} if $opts{usejournal_okay};
 
     LJ::do_request(\%req, \%res, $flags);
@@ -484,7 +494,9 @@ sub t_post_fake_entry {
     die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";
     my $jitemid = $res{itemid} or die "No itemid";
 
-    return LJ::Entry->new($u, jitemid => $jitemid);
+    my $uowner = $opts{usejournal} ? LJ::load_user($opts{usejournal}) : $u;
+
+    return LJ::Entry->new($uowner, jitemid => $jitemid);
 }
 
 package LJ::Entry;

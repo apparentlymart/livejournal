@@ -511,6 +511,13 @@ __________________________________________*/
 
 /* New controlstrip
 -----------------------------------------------*/
+.w-cs .w-cs-group .ljuser, 
+.w-cs .w-cs-group .submit-wrap {
+	float: left;
+	}
+.w-cs .w-cs-search {
+	width: auto !important;
+	}
 .w-cs INPUT.submit {
 	overflow: visible;
 	}
@@ -521,6 +528,20 @@ __________________________________________*/
     width: 50px;
     height: 50px;    
     }
+#NoUserpic A {
+	display: block;
+	position: relative;
+	height: 100px;
+	}
+#NoUserpic IMG {
+	position: static;
+	}
+#NoUserpic A SPAN {
+	position: absolute;
+	left: 0;
+	top: 30px;
+	height: auto;
+	}
 
 /* this needs for correct floating at external login tabs */
 .b-auth-desc {
@@ -760,4 +781,74 @@ __________________________________________*/
 	
 /* transparency for ie */
 .lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }
+
+/* Fix Box-sizing IE7-IE8
+----------------------------------------------*/
+*+html .b-dialog-prompt-wrap {
+	margin: 0 10px 0 0;
+	}
+	
+*+html .b-dialog-btn {
+	overflow: hidden;
+	padding: 2px 5px;
+	}
+
+/* CVK */
+
+.b-cvk-rc,
+.b-cvk-auth {
+	zoom: 1;
+	}
+.b-cvk-code {
+	margin-left: 0;
+	padding-left: 30px;
+	}
+
+/* journalpromo */
+.journalpromo-popup-info-list,
+.journalpromo-popup-content,
+.journalpromo-popup-info-list,
+.journalpromo-popup-info-list LI,
+.b-journalpromo-header {
+	position: relative;
+	zoom: 1;
+	}
+.journalpromo-popup-content {
+	width: 320px;
+	}
+.journalpromo-sc-icon {
+	margin-top: 1px;
+	}
+.journalpromo-sort-index {
+	margin-top: 2px;
+	vertical-align: middle;
+	}
+.b-journalpromo-order-journal .i-ljuser-userhead {
+	vertical-align: middle !important;
+	}
+.journalpromo-popup-info-list .journalpromo-popup-info-option,
+.b-journalpromo-header-title {
+	float: left;
+	}
+.journalpromo-statistics-journals-loading .b-splatest-more-journals,
+.journalpromo-statistics-active-loading .b-splatest-more-active,
+.journalpromo-statistics-history-loading .b-splatest-more-history {
+	display: block;
+	}
+.journalpromo-buttons,
+.your-price .b-journalpromo-notice {
+	display: inline;
+	}
+
+/* Dengi Online */
+
+.b-payment-list .b-payment-item {
+	display: inline;
+	}
+.confirm-form-subsection {
+	width: 350px;
+	}
+.confirm-form-section DL {
+	zoom: 1;
+	}
 

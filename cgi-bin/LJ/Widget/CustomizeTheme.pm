@@ -121,8 +121,8 @@ sub render_body {
     $ret .= "<div class='customize-content'>";
 
     $ret .= "<div class='customize-buttons'>";
+    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_top'" } );
     $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
-    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button' id='reset_btn_top'" } );
     $ret .= "</div>";
 
     # Display Group
@@ -214,8 +214,8 @@ sub render_body {
     }
 
     $ret .= "<div class='customize-buttons'>";
+    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_bottom'" } );
     $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
-    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button' id='reset_btn_bottom'" } );
     $ret .= "</div>";
 
     $ret .= "</div><!-- end .customize-content -->";

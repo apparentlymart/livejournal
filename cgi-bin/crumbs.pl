@@ -41,7 +41,7 @@ use POSIX qw/ENOENT/;
                'emailmanage' => ['Email Management', '/tools/emailmanage.bml', 'manage'],
                'encodings' => ['About Encodings', '/support/encodings.bml', 'support'],
                'export' => ['Export Journal', '/export.bml', 'home'],
-               'faq' => ['Frequently Asked Questions', '/support/faq.bml', 'support'],
+               'faq' => ['Frequently Asked Questions', '/support/faq/', 'support'],
                'feedstersearch' => ['Search a Journal', '/tools/search.bml', 'home'],
                'filterfriends' => ['Filter Friends Page', '/friends/filter.bml', 'friends'],
                'friends' => ['Friends Tools', '/friends/', 'manage'],

@@ -15,7 +15,9 @@
     if ($type eq "nav_and_user" || $type eq "nav") {
         # Some special shortcuts used for easy navigation
         if ($q =~ /^faq (\d+)$/) {
-            return BML::redirect("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$1&view=full");
+            my $faqid   = $1;
+            my $faqlink = LJ::Faq->page_url( 'faqid' => $faqid );
+            return LJ::Request->redirect($faqlink);
         }
         if ($q =~ /^req(uest)? (\d+)$/) {
             return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$2");
@@ -233,7 +235,7 @@
     if ($type eq "faq") {
         my $term = lc($q);
         if ($term) {
-            return BML::redirect("$LJ::SITEROOT/support/faqsearch.bml?q=" . LJ::eurl($term));
+            return BML::redirect("$LJ::SITEROOT/support/faq/search.html?q=" . LJ::eurl($term));
         } else {
             $title = $ML{'.nofaqsearch.title'};
             $body = $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'.nofaqsearch.text'} p?>";

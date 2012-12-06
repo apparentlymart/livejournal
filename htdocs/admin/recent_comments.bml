@@ -43,10 +43,17 @@
         my $lrow = LJ::get_log2_row($ju, $r->{'nodeid'});
         my $hr_ago = sprintf("%.1f", ($now - $r->{'posttime'}) / 3600);
 
+        my $journal = LJ::load_userid($r->{'journalid'});
+
+        my $comment = LJ::Comment->new($journal, jtalkid => $r->{'jtalkid'});
+
         if ($lrow) {
             my $talkid = ($r->{'jtalkid'} * 256) + $lrow->{'anum'};
             my $url = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
-            $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": <a href='$url'>$url</a><br />\n";
+            $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": <a href='$url'>$url</a> ";
+            $ret .= "from IP: ".$comment->prop('poster_ip_force') if LJ::check_priv($remote, "siteadmin", "userlog");
+            $ret .= " / uniq: <a href='$LJ::SITEROOT/admin/uniq.bml?what=".$comment->prop('uniq')."'>".$comment->prop('uniq')."</a>" if LJ::check_priv($remote, "siteadmin", "userlog") || LJ::check_priv($remote, "siteadmin", "uniq");
+            $ret .= "<br />\n";
         } else {
             $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": link unavailable<br />";
         }

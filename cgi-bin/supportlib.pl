@@ -957,8 +957,7 @@ sub mail_response_to_user
                     undef,
                     {
                         faqname =>  $faqname,
-                        faqurl  =>  "$LJ::SITEROOT/support/faqbrowse.bml?" .
-                                    "faqid=$faqid&view=full",
+                        faqurl  =>  LJ::Faq->page_url( 'faqid' => $faqid ),
                     }
                   );
     }

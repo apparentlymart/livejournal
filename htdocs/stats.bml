@@ -224,7 +224,4 @@ EOSTAT
 _code?>
 
 <=body
-page?><?_c <LJDEP>
-link: htdocs/stats/, htdocs/support/faqbrowse.bml
-img: htdocs/img/bluedot.gif, htdocs/stats/postsbyday.png, htdocs/stats/postsbyweek.png, htdocs/stats/newbyday.png
-</LJDEP> _c?>
+page?>

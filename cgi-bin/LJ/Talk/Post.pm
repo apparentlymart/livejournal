@@ -1,6 +1,7 @@
 package LJ::Talk::Post;
 use strict;
 
+use LJ::Admin::Spam::Urls;
 use LJ::EventLogRecord::NewComment;
 
 sub indent {
@@ -136,16 +137,23 @@ sub enter_comment {
     $talkprop{'picture_keyword'} = $comment->{picture_keyword};
 
     $talkprop{'opt_preformatted'} = $comment->{preformat} ? 1 : 0;
+
     my $opt_logcommentips = $journalu->{'opt_logcommentips'};
-    if ($opt_logcommentips eq "A" ||
-        ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/))
-    {
-        if (LJ::is_web_context()) {
-            my $ip = LJ::Request->remote_ip;
-            my $forwarded = LJ::Request->header_in('X-Forwarded-For');
-            $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
-            $talkprop{'poster_ip'} = $ip;
+
+    if (LJ::is_web_context()) {
+        my $ip = LJ::Request->remote_ip;
+        my $forwarded = LJ::Request->header_in('X-Forwarded-For');
+        $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
+
+        if ($opt_logcommentips eq "A" ||
+            ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/))
+        {
+                $talkprop{'poster_ip'} = $ip;
         }
+
+        my $uniq = LJ::UniqCookie->current_uniq();
+        $talkprop{'uniq'} = $uniq; 
+        $talkprop{'poster_ip_force'} = $ip; 
     }
 
     # remove blank/0 values (defaults)
@@ -173,26 +181,36 @@ sub enter_comment {
         LJ::MemCache::set([$journalu->{'userid'}, "talkprop:$journalu->{'userid'}:$jtalkid"], $hash);
     }
 
-    # record up to 25 (or $LJ::TALK_MAX_URLS) urls from a comment
-    my (%urls, $dbh);
-    if ($LJ::TALK_MAX_URLS &&
-        ( %urls = map { $_ => 1 } LJ::get_urls($comment->{body}) ) &&
-        ( $dbh = LJ::get_db_writer() )) # don't log if no db available
-    {
-        my (@bind, @vals);
-        my $ip = LJ::get_remote_ip();
-        while (my ($url, undef) = each %urls) {
-            push @bind, '(?,?,?,?,UNIX_TIMESTAMP(),?)';
-            push @vals, $posterid, $journalu->{userid}, $ip, $jtalkid, $url;
-            last if @bind >= $LJ::TALK_MAX_URLS;
+    my %urls = map { $_ => 1 } LJ::get_urls($comment->{body});
+    my @urls = keys %urls;
+
+    # record up to $LJ::TALK_MAX_URLS urls from a comment
+    if ($LJ::TALK_MAX_URLS && @urls) {
+        LJ::Admin::Spam::Urls::insert(
+            $posterid,
+            $journalu->{userid},
+            $jtalkid,
+            $comment->{state} eq 'B' ? 'S' : '',
+            @urls
+        );
+    }
+
+    # update the "spam_counter" if URL is in TOP of spam URLs for the last 24 hour
+    # and comment mark as spam
+    if ($comment->{state} eq 'B') {
+        my $change = 0;
+
+        foreach my $url (@urls) {
+            if (LJ::Admin::Spam::Urls::is_url_in_top_of_spam($url)) {
+                $change++;
+            }
         }
-        my $bind = join(',', @bind);
-        my $sql = qq{
-            INSERT INTO commenturls
-                (posterid, journalid, ip, jtalkid, timecreate, url)
-            VALUES $bind
-        };
-        $dbh->do($sql, undef, @vals);
+
+        if ($change) {
+            if (my $u = $comment->{u}) {
+                $u->incr_spam_counter($change);
+            }
+        }
     }
 
     # update the "replycount" summary field of the log table

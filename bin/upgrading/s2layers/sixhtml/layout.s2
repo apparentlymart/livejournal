@@ -538,7 +538,7 @@ function print_module_links(string title) {
             $box_open = true;
         }
         if (not $link.is_heading and $link.title != "") {
-            $items[size $items] = """<a href="$link.url">$link.title</a>""";
+            $items[size $items] = """<a href="$link.url"  $link.attributes>$link.title</a>""";
         }
     }
     if ($box_open) {
@@ -826,6 +826,10 @@ function RecentPage::print_body() {
             $e->print_ebox();
             "</div>";
         }
+
+        #LJSUP-13769
+        $this->render_journalpromo();
+
     }
 
     if ($.nav.backward_url != "" or $.nav.forward_url != "") {
@@ -851,6 +855,9 @@ function EntryPage::print_body() {
         $.entry->print_ebox();
         "</div>";
     }
+
+    #LJSUP-13769
+    $this->render_journalpromo();
 
 """
     <a id="$*text_comments_id"></a>
@@ -911,6 +918,12 @@ function ReplyPage::print_body
         $.entry->print_ebox();
         "</div>";
     }
+
+    #LJSUP-13769
+    if ($this->render_journalpromo()) {
+        print "\n<hr />\n";
+    }
+
     $.form->print();
 }
 
@@ -928,6 +941,10 @@ function DayPage::print_body() {
                 $e->print_ebox();
                 "</div>";
             }
+
+            #LJSUP-13769
+            $this->render_journalpromo();
+
         }
 
         "</div>";

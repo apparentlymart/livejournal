@@ -17,9 +17,11 @@ use LJ::JSON;
 use LJ::Text;
 
 sub request_resources {
+    my ( $class, %opts ) = @_;
+
     return if $LJ::REQ_GLOBAL{'sharing_resources_requested'}++;
 
-    LJ::need_res( qw( js/share.js stc/share.css ) );
+    LJ::need_res( 'stc/share.css' );
 
     my $services = {
         'livejournal' => {
@@ -71,17 +73,24 @@ sub request_resources {
 
     my $params_out = LJ::JSON->to_json($params);
 
-    LJ::include_raw( 'js' => "LJShare.init($params_out)" );
+    my $include_type = $opts{'include_type'} || 'init';
+    if ( $include_type eq 'init' ) {
+        LJ::need_res( 'js/share.js' );
+        LJ::include_raw( 'js' => "LJShare.init($params_out)" );
+    } elsif ( $include_type eq 'define' ) {
+        LJ::include_raw( 'js' => "Site.LJShareParams = $params_out;" );
+    }
 }
 
 sub render_js {
     my ( $class, $opts ) = @_;
 
+    my $cache_key;
     if ( my $entry = delete $opts->{'entry'} ) {
-        $opts->{'title'}        = LJ::ejs( LJ::Text->drop_html($entry->subject_raw) );
+        $opts->{'title'}        = LJ::ejs( $entry->subject_drop_html );
         $opts->{'url'}          = $entry->url;
 
-        if ($opts->{'title'}){
+        if ($opts->{'title'}) {
             $opts->{'title'}       = Encode::decode_utf8($opts->{'title'});
             $opts->{'title'}       =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
             $opts->{'title'}       = Encode::encode_utf8($opts->{'title'});
@@ -90,9 +99,10 @@ sub render_js {
     }
 
     my $opts_out = LJ::JSON->to_json($opts);
-
-    return
+    my $result_text = 
         qq{<script type="text/javascript">LJShare.link($opts_out);</script>};
+
+    return $result_text;
 }
 
 1;

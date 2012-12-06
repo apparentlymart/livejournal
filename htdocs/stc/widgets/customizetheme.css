@@ -1,4 +1,5 @@
-.customize-button {    
+.customize-button {
+    margin: 0 0 0 16px;    
     font-size: 11px;
     color: #fff;
     background: #559A40;
@@ -6,6 +7,12 @@
     border-bottom: 2px solid #447C33;
     border-right: 2px solid #447C33;
 }
+.customize-button-default {
+    background: #AAA;
+    border: 2px solid #999;
+    border-bottom: 2px solid #666;
+    border-right: 2px solid #666;
+    }
 .customize-buttons {
     text-align: right;
     margin-top: 10px;
@@ -50,11 +57,14 @@
     background: #ECF6FF url(/img/customize/arrow-down.gif?v=1) left center no-repeat;
 }
 .customize-content fieldset {
-    border-bottom: 0px none;
-    border-left: 0px none;
-    border-right: 0px none;
+    border: 0px none;
+    border-top: 1px solid gray;
     margin: 15px 0 5px 0;
-}
+    }
+    .prop-delimeter fieldset {
+        margin: 0;
+        padding-bottom: 0;
+        }
 
 .customize-content fieldset legend {
     font-size: 22px;
@@ -62,7 +72,15 @@
     font-style: normal;
     margin: 0;
     padding: 0 7px 0 6px;
-}
+    }
+    .prop-delimeter fieldset legend {
+        font-size: 18px;
+        }
+    .prop-delimeter HR {
+        height: 1px;
+        background: gray;
+        color: gray;
+        }
 .customize-content fieldset legend span {
     font-size: 11px;
     padding: 0 0 8px 0;

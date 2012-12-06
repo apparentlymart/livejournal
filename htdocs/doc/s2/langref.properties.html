@@ -2,31 +2,31 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>9. Properties</title>
+<title>9. Properties</title>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="S2 Manual">
-<link rel="up" href="langref.html" title="Chapter 4. Language Reference">
-<link rel="prev" href="langref.layerinfo.html" title="8. layerinfo declarations">
-<link rel="next" href="langref.docstrings.html" title="10. DocStrings">
+<link rel="up" href="langref.html" title="Chapter 4. Language Reference">
+<link rel="prev" href="langref.layerinfo.html" title="8. layerinfo declarations">
+<link rel="next" href="langref.docstrings.html" title="10. DocStrings">
 <meta name="date" content="2008-Jun-03">
 </head>
 <body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
-<tr><th colspan="3" align="center">9. Properties</th></tr>
+<tr><th colspan="3" align="center">9. Properties</th></tr>
 <tr>
 <td width="20%" align="left">
-<a accesskey="p" href="langref.layerinfo.html">Prev</a> </td>
-<th width="60%" align="center">Chapter 4. Language Reference</th>
-<td width="20%" align="right"> <a accesskey="n" href="langref.docstrings.html">Next</a>
+<a accesskey="p" href="langref.layerinfo.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 4. Language Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="langref.docstrings.html">Next</a>
 </td>
 </tr>
 </table>
 <hr>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="langref.properties">9. Properties</h2></div></div></div>
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="langref.properties">9. Properties</h2></div></div></div>
 <p>Properties are single values which are exposed by the core and layout
 layers and set in all subsequent layers to configure aspects of a style.
 Properties can be of any primitive type as well as any class which provides
@@ -38,7 +38,7 @@ object based on that string.</p>
 of a style such that they can be set from a friendly &#8220;<span class="quote">wizard</span>&#8221;-like
 interface.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.properties.declaration">9.1. Declaration</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.properties.declaration">9.1. Declaration</h3></div></div></div>
 <p>Properties are defined using the following syntax:</p>
 <pre class="programlisting">property int page_recent_items { des = "Number of journal entries to show on recent entry page";
       min = 5;
@@ -48,7 +48,7 @@ interface.</p>
     These are used by the host application for various uses, including the
     presentation of a friendly customization interface.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h4 class="title" id="langref.properties.standard">9.1.1. Standard Properties</h4></div></div></div>
+<div class="titlepage"><div><div><h4 class="title" id="langref.properties.standard">9.1.1. Standard Properties</h4></div></div></div>
 <p>The following attributes are available for all properties:</p>
 <div class="variablelist"><dl>
 <dt><span class="term"><code class="varname">des</code></span></dt>
@@ -74,7 +74,7 @@ interface.</p>
 <p>There are also attributes only available for specific types of
         property, as described in the following sections.</p>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h5 class="title" id="langref.properties.standard.integer">9.1.1.1. Attributes for integer properties</h5></div></div></div>
+<div class="titlepage"><div><div><h5 class="title" id="langref.properties.standard.integer">9.1.1.1. Attributes for integer properties</h5></div></div></div>
 <div class="variablelist"><dl>
 <dt><span class="term"><code class="varname">max</code></span></dt>
 <dd>The maximum value permitted.</dd>
@@ -83,7 +83,7 @@ interface.</p>
 </dl></div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h5 class="title" id="langref.properties.standard.string">9.1.1.2. Attributes for string properties</h5></div></div></div>
+<div class="titlepage"><div><div><h5 class="title" id="langref.properties.standard.string">9.1.1.2. Attributes for string properties</h5></div></div></div>
 <div class="variablelist"><dl>
 <dt><span class="term"><code class="varname">maxlength</code></span></dt>
 <dd>The maximum amount of characters this
@@ -96,14 +96,14 @@ interface.</p>
 </div>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.properties.set">9.2. Setting</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.properties.set">9.2. Setting</h3></div></div></div>
 <p>The <code class="function">set</code> command is used to set the values of
     properties from all layers:</p>
 <pre class="programlisting">set text_read_comment = "Read 1 comment";</pre>
 <p>The value set by the highest layer will be used.</p>
 </div>
 <div class="section" lang="en">
-<div class="titlepage"><div><div><h3 class="title" id="langref.properties.use">9.3. Use</h3></div></div></div>
+<div class="titlepage"><div><div><h3 class="title" id="langref.properties.use">9.3. Use</h3></div></div></div>
 <p>In order to use a property from the core layer in a layout, you
     should first tell the system that you are going to use it. This makes it
     appear in the customization UI if applicable.</p>
@@ -118,15 +118,15 @@ interface.</p>
 <table width="100%" summary="Navigation footer">
 <tr>
 <td width="40%" align="left">
-<a accesskey="p" href="langref.layerinfo.html">Prev</a> </td>
+<a accesskey="p" href="langref.layerinfo.html">Prev</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="langref.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="langref.docstrings.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="langref.docstrings.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">8. <code class="varname">layerinfo</code> declarations </td>
+<td width="40%" align="left" valign="top">8. <code class="varname">layerinfo</code> declarations </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> 10. DocStrings</td>
+<td width="40%" align="right" valign="top"> 10. DocStrings</td>
 </tr>
 </table>
 </div>

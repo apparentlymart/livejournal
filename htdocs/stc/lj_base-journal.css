@@ -1633,6 +1633,16 @@ A.lj-button-link:active {
 		border:1px dashed #999;
 		border-radius:6px;
 		}
+	.lj-like-item DIV,
+	.lj-like-item SPAN,
+	.lj-like-item IFRAME,
+	.lj-like-item-google *,
+	.lj-like-item-tumblr A {
+		vertical-align: middle !important;
+		}
+.lj-like + BR {
+	display: none;
+	}
 
 
 

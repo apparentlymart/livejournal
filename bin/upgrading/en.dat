@@ -3,6 +3,60 @@ Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
 
+adv_page.title=Advertising on the site
+
+adv_page.title.newsblock=News
+
+adv_page.title.supcontacts=SUP Media
+
+adv_page.title.advertfeatures=Advertising possibilities
+
+adv_page.title.specprojects=Project examples
+
+adv_page.link.allnews=All news
+
+admin.backup.recovery.label.account=Account name:
+
+admin.backup.recovery.label.from=From date/time:
+
+admin.backup.recovery.label.to=To date/time:
+
+admin.backup.recovery.hint.to=(optional -- current date/time used if not specified)
+
+admin.backup.recovery.label.action=Action
+
+admin.backup.recovery.label.restore=<b>Restore</b> entries that were deleted in the specified time period
+
+admin.backup.recovery.label.delete=<b>Delete</b> entries that were posted in the specified time period
+
+admin.backup.recovery.label.send=Send status updates to:
+
+admin.backup.recovery.hint.send=(optional)
+
+admin.backup.recovery.button.add=Add
+
+admin.backup.recovery.link.queue.restore=Restore Queue
+
+admin.backup.recovery.link.queue.delete=Delete Queue
+
+admin.backup.recovery.title.queue.restore=Restore Queue
+
+admin.backup.recovery.title.queue.delete=Delete Queue
+
+admin.backup.recovery.th.account=Account
+
+admin.backup.recovery.th.date=Date/time
+
+admin.backup.recovery.th.requested=Requested by
+
+admin.backup.recovery.th.added=Added
+
+admin.backup.recovery.th.status=Status
+
+adv_page.sup_about.text<<
+<p class="b-contact-address">127006, Россия, Москва, бизнес-центр "Школа журналистов",<br />ул. Малая Дмитровка, 20, 3 этаж</p> <dl class="b-contact-list"> <dt>Телефон:</dt> <dd>+7 (495) 980-80-68</dd> <dt>Факс:</dt> <dd>+7 (495) 662-38-57</dd> <dt>E-mail:</dt> <dd><a href="mailto:info@sup.com">info@sup.com</a></dd> <dt>Для прессы, проектов и сотрудничества:</dt> <dd>+7 (495) 980-80-68 доб. 1148,<br /><a href="mailto:pr@sup.com">pr@sup.com</a></dd> </dl> 
+.
+
 birthday.link=birthdays
 
 birthday.text=[[user]], did you know you can surprise your friends by actually remembering their birthdays?  LJ keeps a list of your friends' [[link]] for you.
@@ -767,6 +821,18 @@ create.steps.reg=1. Registration
 create.welcome|staleness=1
 create.welcome=Welcome 
 
+create.underage.links=Use the links to access more options:
+
+create.underage.links.faq=You can read about it in <a href="http://www.livejournal.com/support/faq/244.html">FAQ</a>;
+
+create.underage.links.home=Continue reading <a href="http://www.livejournal.com">Livejournal</a> anonymously.
+
+create.underage.links.verification=If your account was incorrectly flagged as underage you can complete <a href="http://www.livejournal.com/agecheck/">the verification process</a>;
+
+create.underage.message=We no longer allow users under 13 to register for LiveJournal
+
+create.underage.title=Age Verification
+
 crumb.acctstatus=Account Status
 
 crumb.addfriend=Add Friend
@@ -1041,6 +1107,8 @@ customize.cats.pattern=Pattern/Texture
 customize.cats.premium|staleness=1
 customize.cats.premium=Premium
 
+customize.cats.purchased=Purchased
+
 customize.cats.special|staleness=1
 customize.cats.special=Special
 
@@ -1201,6 +1269,34 @@ date.day.wednesday.long=Wednesday
 
 date.day.wednesday.short=Wed
 
+date.format.inbox.left.full=%B %D, %Y at %h:%m
+
+date.format.inbox.left.long=%B %D, %Y
+
+date.format.inbox.left.short=%B %D
+
+date.format.inbox.left.today=%h:%m, today
+
+date.format.inbox.left.week=%u
+
+date.format.inbox.left.year=%B %D
+
+date.format.inbox.left.yesterday=yesterday
+
+date.format.inbox.right.full=%B %D, %Y at %h:%m
+
+date.format.inbox.right.long=%B %D, %Y, %h:%m
+
+date.format.inbox.right.short=%B %D, %h:%m
+
+date.format.inbox.right.today=%h:%m, today
+
+date.format.inbox.right.week=%h:%m, %u
+
+date.format.inbox.right.year=%h:%m, %B %D
+
+date.format.inbox.right.yesterday=%h:%m, yesterday
+
 date.format.long|staleness=1
 date.format.long=%B %D, %Y
 
@@ -1299,6 +1395,13 @@ date.next=Next month
 
 date.prev|staleness=1
 date.prev=Prev month
+
+dialogs.yes=OK
+dialogs.no=Cancel
+
+dialog.confirm.antispam.text=You see on moderation entry version. You can reset to old version or continue editing
+dialog.confirm.antispam.yes=Back to old version
+dialog.confirm.antispam.no=Edit new version
 
 Email=Email
 
@@ -2463,6 +2566,28 @@ Options:
 esn.moderated_submission.subject|staleness=1
 esn.moderated_submission.subject=Moderated submission notification
 
+esn.moderated_edited_submission.body<<
+There has been a new submission into the community '[[community]]'
+which you moderate.
+
+Entry author [[user]] have updated [[subject]] and added the following new links/images:
+
+[[susp_list]]
+
+Options:
+
+  - Accept or reject this submission
+    [[moderateurl]]
+  - View the entire moderation queue
+    [[viewurl]]
+
+--
+[[sitename]] Team
+[[siteroot]]
+.
+
+esn.moderated_edited_submission.subject=Moderated submission notification
+
 esn.month.day_apr|staleness=1
 esn.month.day_apr=April [[day]]
 
@@ -2909,8 +3034,6 @@ eventrates.users_who_like_it=Users who like it
 eventrates.view_all|staleness=1
 eventrates.view_all=View all
 
-fckland.ljimage=Insert/Edit Image
-
 fcklang.cutcontents=Type your cut contents here.
 
 fcklang.cutprompt=Cut link text?
@@ -2949,6 +3072,9 @@ fcklang.ljimage.wizardnotice=Image must be edited inside the Link Wizard
 fcklang.ljimage.wizardnoticelink|staleness=1
 fcklang.ljimage.wizardnoticelink=Go to Image wizard
 
+fcklang.ljlike|staleness=1
+fcklang.ljlike=Like buttons
+
 fcklang.ljlike.button.facebook|staleness=1
 fcklang.ljlike.button.facebook=Facebook
 
@@ -2972,6 +3098,12 @@ fcklang.ljlike.button.paidrepost.title=Total budget
 
 fcklang.ljlike.button.repost|staleness=1
 fcklang.ljlike.button.repost=Repost
+
+fcklang.ljlike.button.surfingbird|staleness=1
+fcklang.ljlike.button.surfingbird=Surfingbird
+
+fcklang.ljlike.button.tumblr|staleness=1
+fcklang.ljlike.button.tumblr=Tumblr
 
 fcklang.ljlike.button.twitter|staleness=1
 fcklang.ljlike.button.twitter=Twitter
@@ -2997,6 +3129,15 @@ fcklang.ljlink.wizardnotice=Link must be edited inside the Link Wizard
 
 fcklang.ljlink.wizardnoticelink|staleness=1
 fcklang.ljlink.wizardnoticelink=Go to link wizard
+
+fcklang.ljmap|staleness=1
+fcklang.ljmap=Insert map
+
+fcklang.ljpoll|staleness=1
+fcklang.ljpoll=Insert poll
+
+fcklang.ljspell|staleness=1
+fcklang.ljspell=Spellcheck
 
 fcklang.ljrepost|staleness=1
 fcklang.ljrepost=Repost
@@ -3684,6 +3825,30 @@ fotki.storage.used.numbers=from [[max]]
 fotki.storage.used.title|staleness=1
 fotki.storage.used.title=Used [[used]]
 
+friendsfeed.ads.control.edit=Edit
+
+friendsfeed.ads.control.disable=Disable
+
+friendsfeed.ads.control.delete=Delete
+
+friendsfeed.ads.new=New ad
+
+friendsfeed.ads.timestamps=All timestamps are shown in
+
+friendsfeed.ads.timestamps.change=change this
+
+friendsfeed.ads.title.disabled=Disabled
+
+friendsfeed.ads.title.entry=Entry
+
+friendsfeed.ads.title.edit=Edit
+
+friendsfeed.ads.title.id=ID
+
+friendsfeed.ads.title.targeting=Targeting
+
+friendsfeed.ads.title.time=Time
+
 gender.female|staleness=1
 gender.female=Female
 
@@ -3757,13 +3922,61 @@ img.track_thread_active=Track This
 
 img.xml=XML Source
 
+inbox.action.collapse=Collapse
+
+inbox.action.delete=Delete
+
+inbox.action.delete.conversation=Delete conversation
+
+inbox.action.mark=Mark
+
+inbox.action.mark.conversation=Mark all messages in conversation
+
+inbox.action.read=Read
+
+inbox.action.spam=Mark as spam
+
+inbox.action.unmark=Unmark
+
+inbox.action.unmark.conversation=Unmark all messages in conversation
+
+inbox.action.unread=Unread
+
+inbox.button.delete=Delete message
+
+inbox.button.delete.conversation=Delete all messages in conversation
+
+inbox.button.mark=Mark
+
+inbox.button.markasread=Mark as read
+
+inbox.button.markasunread=Mark as unread
+
+inbox.button.unmark=Unmark
+
+inbox.checkall=check all conversations
+
 inbox.compose.message=Message
 
 inbox.compose.send=Send
 
+inbox.compose.shortcut.mac=Cmd+Enter
+
+inbox.compose.shortcut.win=Ctrl+Enter
+
 inbox.compose.to=To
 
 inbox.compose.userpic=Userpic
+
+inbox.counter.amount=10000
+
+inbox.counter.title=Characters left:
+
+inbox.draft.autosave=Draft autosaved
+
+inbox.draft.restore=Restore draft?
+
+inbox.draft.restored=Draft restored
 
 inbox.error.couldnt_retrieve_inbox|staleness=1
 inbox.error.couldnt_retrieve_inbox=Could not retrieve inbox for user [[user]]
@@ -3810,6 +4023,8 @@ inbox.message=Message
 inbox.messages|staleness=1
 inbox.messages=Messages
 
+inbox.messages.loading=Load Earlier Messages
+
 inbox.nav.conversations=Conversations
 
 inbox.nav.compose=Compose message
@@ -3822,8 +4037,20 @@ inbox.nav.notifications=Notifications
 
 inbox.nav.search=Start typing a username or a word
 
+inbox.nav.switch=Menu
+
+inbox.nav.suspicious=Suspicious
+
+inbox.noconversations.compose=New Message
+
+inbox.noconversations.title=No Conversation Selected
+
+inbox.noconversations.unread=Show Unread
+
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
+
+inbox.spellcheck=Spellcheck
 
 index.lj_is|staleness=1
 index.lj_is=LiveJournal is your possiblity to express yourself, share your life events and connect with friends.
@@ -4899,12 +5126,21 @@ poll.error.whovote=whovote must be 'all' or 'friends'.
 poll.isclosed|staleness=1
 poll.isclosed=This poll is closed.
 
+poll.navalny.body=Navalny Intro
+
+poll.navalny.button.check.pass=Check password
+
+poll.navalny.button.get.pass=Get password
+
 poll.navalny.code=Code
 
 poll.navalny.error.internal.error=Internal error of service. Please try again later.
 poll.navalny.error.ticket.used=Ticket already used. The voter has already voted on this ticket, or the ticket was invalid.
 poll.navalny.error.ticket.limit=Ticket request limit exceeded. Query limit is exceeded by ticket. Please try again later.
 poll.navalny.error.validation.fail=Ticket validation failed. Ticket no exist or invalid password.
+
+poll.navalny.input.password=Input code and password
+poll.navalny.get.password=Get password by code on your phone, when you have no password
 
 poll.navalny.insert=Code to insert in the journal
 poll.navalny.insert.lj=Livejournal
@@ -4922,6 +5158,17 @@ Best regards,
 Livejournal team
 .
 
+poll.navalny.notification.count.exceed<<
+Dear user!
+
+Limit of count of candidates is exceeded. Please, try later again. 
+
+Best regards,
+
+ 
+Livejournal team
+.
+
 poll.navalny.notification.everything.right<<
 Dear user!
 
@@ -4932,6 +5179,42 @@ Best regards,
  
 Livejournal team
 .
+
+poll.navalny.notification.limit.exceed<<
+Dear user!
+
+Limit of your ticket request is exceeded. Please, try later again. 
+
+Best regards,
+
+ 
+Livejournal team
+.
+
+poll.navalny.notification.not.verefied<<
+Dear user!
+
+Your ticket is not verefied. You can vote only online.
+
+Best regards,
+
+ 
+Livejournal team
+.
+
+
+
+poll.navalny.notification.system.error<<
+Dear user!
+
+Occurred internal error of service. Please, try again later.
+
+Best regards,
+
+Livejournal team
+.
+
+poll.navalny.notification.subject=Central Election Commission
 
 poll.navalny.notification.vote.twice<<
 Dear user!
@@ -4946,11 +5229,23 @@ Livejournal team
 
 poll.navalny.password=Password
 
+poll.navalny.password.sent=Password has been sent on your phone
+
+poll.navalny.password.warning=Password has not been sent on your phone because putin
+
+poll.navalny.phone=Phone
+
+poll.navalny.phone.hint=+79991112233
+
 poll.navalny.submit=Submit a poll
 
 poll.navalny.submit.confirm.email=We will check you data, but we couldn't send you results because of your e-mail wasn't confirmed. Please confirm it.
 
+poll.navalny.submit.confirm.vote=After submit, we will check an information results would be sent on your e-mail address soon.
+
 poll.navalny.submit.send.email=We received your vote. After we will check an information results would be sent on your e-mail address soon.
+
+poll.navalny.title=Navalny Title
 
 poll.participants|staleness=1
 poll.participants=, participants: [[total]]
@@ -5172,6 +5467,8 @@ s2theme.themename.default=(Unnamed - [[themeid]])
 
 s2theme.themename.notheme|staleness=1
 s2theme.themename.notheme=(Layout Default)
+
+send.a.gift=Send a Gift
 
 setting.adultcontent.error.invalid|staleness=1
 setting.adultcontent.error.invalid=Invalid adult content setting.
@@ -6718,6 +7015,9 @@ talk.post.collapse.options=Collapse adult, comments, screen, backdated
 talk.post.comments|staleness=1
 talk.post.comments=Comments
 
+talk.post.comments.lockcomments|staleness=1
+talk.post.comments.lockcomments=locked
+
 talk.post.comments.nocomments|staleness=1
 talk.post.comments.nocomments=disabled
 
@@ -6860,6 +7160,8 @@ talk.post.paidrepost.budget.add=Add to budget
 talk.post.paidrepost.current|staleness=1
 talk.post.paidrepost.current=Current budget is [[current]] tokens.
 
+talk.post.paidrepost.desc=description
+
 talk.post.paidrepost.pay|staleness=1
 talk.post.paidrepost.pay=Pay for reposts of this entry
 
@@ -6934,6 +7236,8 @@ talk.post.submit.delete=Delete Entry
 
 talk.post.submit.post|staleness=1
 talk.post.submit.post=Post Entry
+
+talk.post.submit.post.queued=Post one more entry
 
 talk.post.submit.postto|staleness=1
 talk.post.submit.postto=Post to
@@ -7056,6 +7360,8 @@ talk.result.success.queue.extra=Tags added to entry. Moderator can remove some
 talk.result.success.queue.short|staleness=1
 talk.result.success.queue.short=Entry added
 
+talk.result.success.queue.title=Post an Entry
+
 talk.result.success.tags|staleness=1
 talk.result.success.tags=This tags were not added:
 
@@ -7117,6 +7423,8 @@ talk.spoiler.main=Spoiler
 
 talk.suspendedpost|staleness=1
 talk.suspendedpost=Suspended post
+
+talk.switchview=Switch to Basic HTML view
 
 talk.threadlink=Thread
 

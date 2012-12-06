@@ -4,6 +4,22 @@
 package LJ::ModPerl;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+
+# this code prevents the XS version of Params::Classify from loading
+# we do this because the combination of Params::Classify, IpMap, and
+# mod_perl seems to segfault after apache forks
+BEGIN {
+    require XSLoader;
+    my $old_load = \&XSLoader::load;
+    local *XSLoader::load = sub {
+        my @args = @_;
+        my ($pkgname) = @args;
+        die if $pkgname eq 'Params::Classify';
+        $old_load->(@args);
+    };
+    eval { require Params::Classify };
+}
+
 use LJ::Request;
 
 $LJ::UPTIME = time();

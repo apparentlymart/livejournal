@@ -296,4 +296,22 @@
 		}
 	}
 
+	// community antispam check
+	$(function (){
+		// restore entry (if it's on moderation)
+		if (LJ.pageVar('entry_restore')) {
+			LJ.dialogs.confirm( LJ.ml('dialog.confirm.antispam.text'), {
+				yes: {
+					text: LJ.ml('dialog.confirm.antispam.yes'),
+					action: function () {
+						window.location.href = LJ.pageVar('entry_restore');
+					}
+				},
+				no: {
+					text: LJ.ml('dialog.confirm.antispam.no')
+				}
+			});
+		}
+	});
+
 })(jQuery, this);

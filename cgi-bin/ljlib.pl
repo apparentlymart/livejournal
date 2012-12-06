@@ -24,6 +24,7 @@ use Digest::SHA1 ();
 use HTTP::Date ();
 use LJ::MemCache;
 use LJ::Error;
+use LJ::Faq;
 use LJ::User;      # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Entry;     # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Constants;
@@ -79,7 +80,7 @@ sub END { LJ::end_request(); }
 # so other tools (in particular, the inter-cluster user mover) can verify
 # that it knows how to move all types of data before it will proceed.
 @LJ::USER_TABLES = ("userbio", "birthdays", "cmdbuffer", "dudata",
-                    "log2", "logtext2", "logprop2", "logsec2",
+                    "log2", "logleft", "logtext2", "logprop2", "logsec2",
                     "talk2", "talkprop2", "talktext2", "talkleft",
                     "userpicblob2", "subs", "subsprop", "has_subs",
                     "ratelog", "loginstall", "sessions", "sessions_data",
@@ -1729,14 +1730,30 @@ sub load_props
         next unless defined $keyname{$t};
         next if defined $LJ::CACHE_PROP{$t};
         my $tablename = $t eq "rate" ? "ratelist" : "${t}proplist";
-        $dbr ||= LJ::get_db_reader();
+
+        my $cache_key = "props:table:data:$tablename"; 
+        my $cache_data  = LJ::MemCache::get($cache_key);
+        if ($cache_data) {
+            foreach my $p (@$cache_data) {
+                $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
+                $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
+            }
+            next;
+        } 
+
+        $dbr ||= LJ::get_db_writer();
         my $sth = $dbr->prepare("SELECT * FROM $tablename");
         $sth->execute;
+
+        my @data = ();
         while (my $p = $sth->fetchrow_hashref) {
             $p->{'id'} = $p->{$keyname{$t}};
             $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
             $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
+            push @data, $p;
         }
+
+        LJ::MemCache::set($cache_key, \@data, 180);
     }
 }
 
@@ -1757,6 +1774,7 @@ sub get_prop
 {
     my $table = shift;
     my $name = shift;
+
     unless (defined $LJ::CACHE_PROP{$table} && $LJ::CACHE_PROP{$table}->{$name}) {
         $LJ::CACHE_PROP{$table} = undef;
         LJ::load_props($table);
@@ -2361,6 +2379,7 @@ sub start_request
     LJ::Browse->reset_singletons;
     LJ::MemCacheProxy->reset_singletons;
 
+    LJ::RelationService->reset_singletons;
     LJ::UniqCookie->clear_request_cache;
 
     # we use this to fake out get_remote's perception of what
@@ -2377,9 +2396,6 @@ sub start_request
     # to validate master db connection, instead of selecting
     # the connection ID... just as fast, but with a point!)
     $LJ::DBIRole->trigger_weight_reload();
-
-    # reset BML's cookies
-    eval { LJ::Request->start_request };
 
     # reload config if necessary
     LJ::Config->start_request_reload;

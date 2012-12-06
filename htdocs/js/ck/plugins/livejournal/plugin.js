@@ -1,17 +1,146 @@
 (function() {
+	'use strict';
+
+	/*
+	 * CKEDITOR.prototype.setData light version
+	 * doesnt recreate whole iframe each time
+	 * @param {String} data Editor content
+	 */
 	CKEDITOR.editor.prototype.lightSetData = function(data) {
 		this.document.getBody().setHtml(this.dataProcessor.toHtml(data));
 		this.fire('contentDom');
 	};
 
+
+	/*
+	 * Update 'editor.editdataWithFocus' with
+	 * data + focus (as span element with id '__rte_focus')
+	 *
+	 * Used for focus transtition between rte and html modes
+	 * (only when range is collapsed)
+	 */
+	CKEDITOR.editor.prototype.insertCaret = function() {
+		this.focus();
+
+		var selection = this.getSelection(),
+			range = selection && selection.getRanges()[0];
+
+		if (!range || !range.collapsed) {
+			return false;
+		}
+
+		var span = new CKEDITOR.dom.element('span');
+		span.setAttribute('id', '__rte_focus');
+		span.setText('|');
+
+		range.insertNode(span);
+
+		this.dataWithFocus = this.getData();
+
+		span.remove();
+	};
+
+
+	/*
+	 * Move focus to either start or end of editor content
+	 * @param {String} where Could be 'start' or 'end'
+	 */
+	CKEDITOR.editor.prototype.moveFocus = function(where) {
+		var self = this;
+		this.focus();
+
+		setTimeout(function() {
+			var s = self.getSelection(),
+				selected_ranges = s && s.getRanges(),
+				node = selected_ranges && selected_ranges[0].startContainer,
+				parents = node && node.getParents(true);
+
+			if (!node) {
+				return;
+			}
+
+			if (where === 'end') {
+		        node = parents[parents.length - 2].getFirst();
+		        if (!node) {
+					return;
+		        }
+
+		        while (true) {
+		            var x = node.getNext();
+		            if (x == null) {
+		                break;
+		            }
+		            node = x;
+		        }
+
+		        s.selectElement(node);
+		        selected_ranges = s.getRanges();
+		        selected_ranges[0].collapse(false);
+		        s.selectRanges(selected_ranges);
+			}
+
+			if (where === 'start') {
+
+					var range = new CKEDITOR.dom.range( self.document );
+					range.selectNodeContents( self.document.getBody() );
+					range.collapse(true);
+					s.selectRanges([ range ]);
+
+			}
+		}, 100); // need some time for selection
+	};
+
+
+	/*
+	 * Check if editor's focus at the specified position
+	 * @param {String} where Could be 'start' or 'end'
+	 */
+	CKEDITOR.editor.prototype.isFocusAt = function(where) {
+		var selection = this.getSelection(),
+			range = selection.getRanges()[0],
+			body = this.document.getBody();
+
+		if (where === 'end' && range.checkEndOfBlock()) {
+			if (body.equals(range.endContainer) || body.getLast().equals(range.endContainer)) {
+				return true;
+			}
+		}
+
+		if (where === 'start') {
+			throw new Error('Not implemented');
+		}
+
+		return false;
+	};
+
+
+	/*
+	 * Check if selection is collapsed
+	 * @return {Boolean}
+	 */
+	CKEDITOR.editor.prototype.isSelectionCollapsed = function() {
+		var selection = this.getSelection(),
+			range = selection && selection.getRanges()[0];
+
+		if (range) {
+			return !!range.collapsed;
+		}
+
+		return false;
+	};
+
 	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
 	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
+	window.CKLang = CKEDITOR.CKLang = CKLang;
 
 	if (Site.page.ljpost) {
 		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents_new.css?t=' + Site.version;
 	} else {
 		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
 	}
+
+	var focusToken = '@focus@',
+		focusTransformed = '<input type="hidden" id="__focus"/>';
 
 	function rteButton(button, widget, options) {
 		options = options || {};
@@ -24,7 +153,7 @@
 
 		this.execFromEditor = false;
 	}
-	
+
 
 	var likeButtons = [
 		{
@@ -68,6 +197,22 @@
 			htmlOpt: Site.remote_is_sup? '<li class="like-vk"><input type="checkbox" id="like-vk" /><label for="like-vk">' + CKLang.LJLike_button_vkontakte + '</label></li>' : ''
 		},
 		{
+			label: CKLang.LJLike_button_surfingbird,
+			id: 'surfingbird',
+			abbr: 'sb',
+			checked: Site.remote_is_sup ? true : false,
+			html: '<span class="lj-like-item sb">' + CKLang.LJLike_button_surfingbird + '</span>',
+			htmlOpt: Site.remote_is_sup? '<li class="like-sb"><input type="checkbox" id="like-sb" /><label for="like-sb">' + CKLang.LJLike_button_surfingbird + '</label></li>' : ''
+		},
+		{
+			label: CKLang.LJLike_button_tumblr,
+			id: 'tumblr',
+			abbr: 'tb',
+			checked: true,
+			html: '<span class="lj-like-item tb">' + CKLang.LJLike_button_tumblr + '</span>',
+			htmlOpt: '<li class="like-tb"><input type="checkbox" id="like-tb" /><label for="like-tb">' + CKLang.LJLike_button_tumblr + '</label></li>'
+		},
+		{
 			label: CKLang.LJLike_button_give,
 			id: 'livejournal',
 			abbr: 'lj',
@@ -107,162 +252,6 @@
 		}
 	};
 
-	var ljUsers = {};
-
-	function createNote(editor) {
-		var timer,
-			state,
-			currentData,
-			tempData,
-			noteNode = document.createElement('lj-note'),
-			isIE = typeof(document.body.style.opacity) != 'string';
-
-		var animate = (function() {
-			var fps = 60, totalTime = 100, steps = totalTime * fps / 1000, timeOuts = [], type, parentContainer = document.getElementById('draft-container') || document.body;
-
-			function apply() {
-				var data = timeOuts.shift();
-				var currentStep = (type ? data.time / totalTime : -(data.time / totalTime - 1)).toFixed(1);
-
-				if (!timeOuts.length) {
-					currentStep = type ? 1 : 0;
-				}
-
-				if (isIE) {
-					noteNode.style.filter = (currentStep >= 1) ? null : 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + (currentStep * 100) + ')';
-				} else {
-					noteNode.style.opacity = currentStep;
-				}
-
-				if (currentStep == 0 && noteNode && noteNode.parentNode) {
-					noteNode.parentNode.removeChild(noteNode);
-				}
-			}
-
-			return function(animateType) {
-				type = animateType;
-
-				if (type && noteNode.parentNode) {
-					if (isIE) {
-						noteNode.style.filter = null;
-					} else {
-						noteNode.style.opacity = 1;
-					}
-				} else {
-					for (var i = 1; i <= steps; i++) {
-						var time = Math.floor(1000 / fps) * i;
-						timeOuts.push({
-							time: time,
-							timer: setTimeout(apply, time)
-						});
-					}
-				}
-
-				parentContainer.appendChild(noteNode);
-				noteNode.style.marginTop = -noteNode.offsetHeight / 2 + 'px';
-				noteNode.style.marginLeft = -noteNode.offsetWidth / 2 + 'px';
-			}
-		})();
-
-		noteNode.className = 'note-popup';
-
-		noteNode.onmouseout = function() {
-			if (!currentData || !currentData.cmd) {
-				// CKEDITOR.note.hide();
-			}
-		};
-
-		noteNode.onmouseover = function() {
-			if (timer && !state) {
-				state = 1;
-				timer = clearTimeout(timer);
-			}
-		};
-
-		if (isIE) {
-			noteNode.style.filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)';
-		} else {
-			noteNode.style.opacity = 0;
-		}
-
-		function callCmd() {
-			var cmd = this.getAttribute('lj-cmd');
-			if (currentData.hasOwnProperty(cmd)) {
-				ljTagsData[cmd].node = currentData[cmd].node;
-				var selection = new CKEDITOR.dom.selection(editor.document);
-				selection.selectElement(ljTagsData[cmd].node);
-				editor.execFromEditor = true;
-				editor.execCommand(cmd);
-				// CKEDITOR.note.hide(true);
-			}
-
-			return false;
-		}
-
-		function applyNote() {
-			if (!window.switchedRteOn) {
-				// CKEDITOR.note.hide(true);
-			}
-
-			if (state) {
-				currentData = tempData;
-				tempData = null;
-
-				var html = '';
-				for (var cmd in currentData) {
-					if (currentData.hasOwnProperty(cmd)) {
-						html += '<div class="noteItem">' + currentData[cmd].content + '</div>';
-					}
-				}
-
-				noteNode.innerHTML = decodeURIComponent(html);
-
-				var links = noteNode.getElementsByTagName('a');
-				for (var i = 0, l = links.length; i < l; i++) {
-					var link = links[i];
-					if (ljTagsData.hasOwnProperty(link.getAttribute('lj-cmd'))) {
-						link.onclick = callCmd;
-					}
-				}
-			} else {
-				currentData = null;
-			}
-
-			animate(state);
-
-			timer = null;
-		}
-
-		CKEDITOR.note = {
-			show: function(data, isNow) {
-				if ((!isNow && data == tempData) || !window.switchedRteOn) {
-					return;
-				}
-
-				if (timer) {
-					timer = clearTimeout(timer);
-				}
-
-				state = 1;
-				tempData = data;
-				isNow === true ? applyNote() : timer = setTimeout(applyNote, 1000);
-			},
-			hide: function(isNow) {
-				if (state) {
-					state = 0;
-
-					if (timer) {
-						timer = clearTimeout(timer);
-					}
-
-					if (noteNode.parentNode) {
-						isNow === true ? applyNote() : timer = setTimeout(applyNote, 500);
-					}
-				}
-			}
-		};
-	}
-
 	var dtd = CKEDITOR.dtd;
 
 	dtd.$block['lj-template'] = 1;
@@ -283,7 +272,7 @@
 
 	// set allowed tags for poll, for reference check
 	// http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.dtd.html
-	
+
 	dtd['lj-poll'] = {
 		'lj-pq': 1
 	};
@@ -317,6 +306,13 @@
 	delete dtd['lj-cut']['lj-cut'];
 
 	// CKEDITOR.dtd.$empty['lj-embed'] = 1;
+
+	// <lj user...> transforms to iframe https://jira.sup.com/browse/LJSUP-13877
+	CKEDITOR.dtd.p.iframe = 1;
+
+	// https://jira.sup.com/browse/LJSV-2404
+	CKEDITOR.dtd['lj-cut']['iframe'] = 1;
+	CKEDITOR.dtd['lj-spoiler']['iframe'] = 1;
 
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
@@ -358,6 +354,7 @@
 					if (this.getAttribute('lj-cmd') == 'LJPollLink') {
 						this.frame.setStyle('height', this.getDocument().$.body.scrollHeight + 'px');
 					}
+					editor.focus();
 					new CKEDITOR.dom.selection(editor.document).selectElement(this.frame);
 				}
 
@@ -392,13 +389,24 @@
 			}
 
 			function updateFrames() {
-				var frames = editor.document.getElementsByTag('iframe'), length = frames.count(), frame, cmd, frameWin, doc, ljStyle;
+				var frames = editor.document.getElementsByTag('iframe'),
+					length = frames.count(), frame,
+					cmd, frameWin, doc, ljStyle;
+
 				editor.execFromEditor = false;
 
 				while (length--) {
-					frame = frames.getItem(length), cmd = frame.getAttribute('lj-cmd'), frameWin = frame.$.contentWindow, doc = frameWin.document, ljStyle = frame.getAttribute('lj-style') || '';
-					
+					frame = frames.getItem(length),
+					cmd = frame.getAttribute('lj-cmd'),
+					frameWin = frame.$.contentWindow,
+					doc = frameWin.document,
+					ljStyle = frame.getAttribute('lj-style') || '';
+
 					if (frame.getAttribute('data-update') === 'false') {
+						continue;
+					}
+
+					if (doc && doc.body && doc.body.getAttribute('data-loaded')) {
 						continue;
 					}
 
@@ -408,15 +416,25 @@
 					doc.write('<!DOCTYPE html>' +
 						'<html style="' + ljStyle + '">' +
 							'<head><link rel="stylesheet" href="' + CKEDITOR.styleText + '" /></head>' +
-							'<body scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>'
+							'<body data-loaded="true" scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>'
 								+ decodeURIComponent(frame.getAttribute('lj-content') || '') +
 							'</body>' +
 						'</html>');
 					doc.close();
 				}
 			}
+			editor.updateFrames = updateFrames;
+
+			/*
+			 * only Firefox needs this (frames are not updated when
+			 * switching from HTML to visual editor) for the first time
+			 */
+			editor.on('dataReady', function() {
+				setTimeout(updateFrames, 100);
+			});
 
 			function findLJTags(evt) {
+				editor.fire('updateSnapshot');
 				if (editor.onSwitch === true) {
 					delete editor.onSwitch;
 					return;
@@ -424,7 +442,7 @@
 
 				var noteData, isClick = evt.name == 'click', isSelection = evt.name == 'selectionChange' || isClick, target = evt.data.element || evt.data.getTarget(), node, command;
 
-				if (isClick && (evt.data.getKey() == 1 || evt.data.$.button == 0)) {
+				if (isClick && (evt.data.getKey() === 1 || evt.data.$.button === 0)) {
 					evt.data.preventDefault();
 				}
 
@@ -462,10 +480,10 @@
 
 					if (!attr && node.type == 1) {
 						var parent = node.getParent();
-						if (node.is('img') && parent.getParent() && !parent.getParent().hasAttribute('lj:user')) {
+						if (node.is('img') && !node.hasAttribute('data-user') && parent.getParent() && !parent.getParent().hasAttribute('data-user')) {
 							attr = 'LJImage';
 							node.setAttribute('lj-cmd', attr);
-						} else if (node.is('a') && !parent.hasAttribute('lj:user')) {
+						} else if (node.is('a') && !node.hasAttribute('data-user') && !parent.hasAttribute('lj:user')) {
 							attr = 'LJLink2';
 							node.setAttribute('lj-cmd', attr);
 						}
@@ -495,8 +513,7 @@
 						}
 					}
 				}
-
-				// noteData ? CKEDITOR.note.show(noteData) : CKEDITOR.note.hide();
+				editor.fire('updateSnapshot');
 			}
 
 			// Configure editor
@@ -534,7 +551,70 @@
 					return '<iframe class="lj-repost-wrap" lj-class="lj-repost" frameborder="0" allowTransparency="true" lj-text="' + text + '" lj-button="' + buttonTitle + '" lj-content="' + content + '"></iframe>';
 				}
 
+				/*
+				 * Find and move token out from markup
+				 */
+				function moveToken(s, token) {
+				    return s.replace(/<(.|\n)*?>/g, function(match) {
+				        var z = match;
+
+				        if (z.indexOf(token) !== -1) {
+				            z = z.replace(token, '');
+				            return z + token;
+				        } else {
+				            return match;
+				        }
+				    });
+				}
+
+				/*
+				 * Insert token at position in string
+				 */
+				function insertAt(s, position, token) {
+					return [s.slice(0, position), token, s.slice(position)].join('');
+				}
+
+				/*
+				 * Transform html focus to rte focus
+				 */
+				editor.on('contentDom', function(event) {
+					var htmlFocus = event.editor.document.getById('__focus');
+
+					if (htmlFocus) {
+						this._domBuilt = true;
+
+						setTimeout(function() {
+							event.editor.focus();
+
+							var selection = event.editor.getSelection();
+							if (selection) {
+								var range = new CKEDITOR.dom.range(event.editor.document);
+								range.setEndAfter(htmlFocus);
+								selection.selectRanges([range]);
+							}
+							htmlFocus.remove();
+
+							editor.fire('updateSnapshot');
+						}, this._domBuilt ? 0 : 100);
+					}
+				});
+
 				editor.dataProcessor.toHtml = function(html, fixForBody) {
+
+					// focus transformations
+					var position = Site.page.__htmlLast;
+					if (typeof position === 'number') {
+						if (html.length > 0) {
+							html = moveToken(
+								insertAt(html, position, focusToken),
+								focusToken
+							).replace(focusToken, focusTransformed);
+						} else {
+							html = focusTransformed;
+						}
+						delete Site.page.__htmlLast;
+					}
+
 					html = html.replace(/<lj [^>]*?>/gi, closeTag)
 						.replace(/<lj-map [^>]*?>/gi, closeTag)
 						.replace(/<lj-template[^>]*?>/gi, closeTag)
@@ -543,15 +623,22 @@
 						.replace(/<lj-poll.*?>[\s\S]*?<\/lj-poll>/gi, createPoll)
 						.replace(/<lj-poll-([0-9]+)>/gi, createUneditablePoll)
 						.replace(/<lj-repost\s*(?:button\s*=\s*(?:"([^"]*?)")|(?:"([^']*?)"))?.*?>([\s\S]*?)<\/lj-repost>/gi, createRepost)
-						.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, createEmbed);
+						.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, createEmbed)
+						.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, createLJRaw)
+						.replace(/\n/g, '<br/>');
 
-					if (!$('event_format').checked) {
-						html = html.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, createLJRaw);
+					// Fix tables: LJSUP-14409, LJSUP-13714
+					html = html
+						.replace(/>\s+<tr/ig, '><tr')
+						.replace(/>\s+<\/tr/ig, '></tr')
+						.replace(/>\s+<td/ig, '><td')
+						.replace(/>\s+<\/td/ig, '></td')
+						.replace(/<\/tr>\s+<\/table>/ig, '</tr></table>')
+						.replace(/<tr>\n/ig, '<tr>')
+						.replace(/\n<\/tr>/ig, '</tr>')
+						.replace(/<td>\n/ig, '<td>')
+						.replace(/\n<\/td>/ig, '</td>');
 
-						if (!window.switchedRteOn) {
-							html = html.replace(/\n/g, '<br />');
-						}
-					}
 
 					html = CKEDITOR.htmlDataProcessor.prototype.toHtml.call(this, html, fixForBody);
 
@@ -565,11 +652,7 @@
 
 			editor.dataProcessor.toDataFormat = function(html, fixForBody) {
 				html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
-
-				if (!$('event_format').checked) {
-					html = html.replace(/<br\s*\/>/gi, '\n');
-				}
-
+				html = html.replace(/<br\s*\/>/gi, '\n');
 				return html.replace(/\t/g, ' ');
 			};
 
@@ -581,11 +664,19 @@
 			editor.on('afterCommandExec', updateFrames);
 			editor.on('dialogHide', updateFrames);
 
-			editor.on('dataReady', function() {
-				// if (!CKEDITOR.note) {
-				// 	createNote(editor);
-				// }
+			/*
+			 * Fix paste by removing last line break,
+			 * which occurs every time (LJSUP-14448).
+			 */
+			(function() {
+				var lastBr = /<br\s*\/?>$/i;
+				editor.on('paste', function(e) {
+					e.data.html = e.data.html.replace(lastBr, '');
+				});
+			})();
 
+
+			editor.on('dataReady', function() {
 				if (CKEDITOR.env.ie) {
 					editor.document.getBody().on('dragend', updateFrames);
 					editor.document.getBody().on('paste', function () {
@@ -595,7 +686,6 @@
 
 				if (!Site.page.disabled_input) {
 					editor.document.on('click', findLJTags);
-					// editor.document.on('mouseout', CKEDITOR.note.hide);
 					editor.document.on('mouseover', findLJTags);
 					editor.document.getBody().on('keyup', onKeyUp);
 					updateFrames();
@@ -603,195 +693,6 @@
 			});
 
 			// LJ Buttons
-
-			// LJ Font
-			(function () {
-				var button = 'LJFont',
-					config = editor.config,
-					hooked = false,
-					styles = {},
-					defaultFont = 'normal',  // This value probably should not be hardcoded
-					currentFont = config.LJFontDefault,
-					sizes = config.LJFontSize,
-					style = config.LJFontStyle,
-					selectedItem = 'b-fontsize-select-item-active',
-					i, part, vars, name, $items = jQuery();
-
-				for (name in sizes) {
-					styles[name] = new CKEDITOR.style(style, { size: sizes[name] });
-					styles[name]._.definition.name = name;
-				}
-
-				function setValue(value) {
-					currentFont = value;
-
-					$items
-						.removeClass(selectedItem)
-						.filter('.b-fontsize-select-item-' + currentFont)
-						.addClass(selectedItem);
-				}
-
-				editor.addCommand(button, {
-					exec: function(editor) {
-						editor.rteButton(button, 'font');
-
-						if (!hooked) {
-							$items = jQuery('.b-fontsize-select-item');
-							LiveJournal.register_hook('font_response', function (font) {
-								editor.focus();
-								editor.fire('saveSnapshot');
-
-								var style = styles[font],
-									s, selection, selected;
-
-								if (currentFont === font) {
-									style.remove(editor.document);
-								} else {
-									selection = editor.getSelection();
-									selected = parseFloat(style._.definition.styles['font-size']);
-
-									for (s in styles) {
-										styles[s].remove(editor.document);
-									}
-
-									style.apply(editor.document);
-								}
-
-								editor.fire('saveSnapshot');
-							});
-							hooked = true;
-
-							var command = editor.getCommand(button);
-							command.setState(CKEDITOR.TRISTATE_ON);
-
-							setValue(currentFont);
-						}
-					}
-				});
-
-				editor.ui.addButton(button, {
-					label: CKLang[button],
-					command: button
-				});
-
-				editor.on('selectionChange', function (ev) {
-					var elementPath = ev.data.path,
-						elements = elementPath.elements,
-						command = editor.getCommand(button),
-						i, element, value;
-
-					// For each element into the elements path.
-					for (i = 0; i < elements.length; i++) {
-						element = elements[i];
-
-						// Check if the element is removable by any of
-						// the styles.
-						for (value in styles) {
-							if (styles[value].checkElementRemovable(element, true)) {
-								if (value !== currentFont) {
-									setValue(value);
-									command.setState(CKEDITOR.TRISTATE_ON);
-								}
-
-								return;
-							}
-						}
-					}
-
-					setValue(defaultFont);
-					command.setState(CKEDITOR.TRISTATE_OFF);
-					return;
-				});
-			}());
-
-			// LJ User
-			// (function () {
-			// 	var url = top.Site.siteroot + '/tools/endpoints/ljuser.bml',
-			// 		button = 'LJUserLink';
-
-			// 	function onData(data, userName, LJUser) {
-			// 		if (data.error) {
-			// 			LiveJournal.run_hook('incorrect_user');
-			// 			return;
-			// 		}
-
-			// 		if (data.success) {
-			// 			data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
-
-			// 			ljUsers[userName] = data.ljuser;
-
-			// 			var tmpNode = new CKEDITOR.dom.element.createFromHtml(data.ljuser);
-			// 			tmpNode.setAttribute('lj-cmd', 'LJUserLink');
-
-			// 			if (LJUser) {
-			// 				LJUser.$.parentNode.replaceChild(tmpNode.$, LJUser.$);
-			// 			} else {
-			// 				editor.insertElement(tmpNode);
-			// 			}
-			// 		}
-
-			// 	}
-
-			// 	var hooked = false;
-			// 	editor.addCommand('LJUserLink', {
-			// 		exec: function(editor) {
-			// 			var userName = '',
-			// 				selection = new CKEDITOR.dom.selection(editor.document),
-			// 				LJUser = ljTagsData.LJUserLink.node,
-			// 				currentUserName;
-
-			// 			function checkInsert(username) {
-			// 				parent.HTTPReq.getJSON({
-			// 					data: parent.HTTPReq.formEncoded({
-			// 						username: username
-			// 					}),
-			// 					method: 'POST',
-			// 					url: url,
-			// 					onData: function (data) {
-			// 						onData(data, username, ljTagsData.LJUserLink.node);
-			// 					}
-			// 				});
-			// 			}
-
-			// 			if (!hooked) {
-			// 				var lj = LJUser;
-			// 				LiveJournal.register_hook('user_response', function(user) {
-			// 					checkInsert(user);
-			// 				});
-			// 				hooked = true;
-			// 			}
-
-			// 			if (LJUser) {
-			// 				// CKEDITOR.note && CKEDITOR.note.hide(true);
-			// 				currentUserName = ljTagsData.LJUserLink.node.getElementsByTag('b').getItem(0).getText();
-
-			// 				rteButton(button, 'user', {
-			// 					user: currentUserName
-			// 				});
-
-			// 				return;
-			// 			} else if (selection.getType() == 2) {
-			// 				userName = selection.getSelectedText();
-			// 			}
-
-			// 			if (userName == '') {
-			// 				rteButton(button, 'user');
-			// 				return;
-			// 			}
-
-			// 			if (!userName || currentUserName == userName) {
-			// 				return;
-			// 			}
-
-			// 			checkInsert(userName, LJUser);
-			// 		}
-			// 	});
-
-			// 	editor.ui.addButton('LJUserLink', {
-			// 		label: CKLang.LJUser,
-			// 		command: 'LJUserLink'
-			// 	});
-			// })();
 
 			// LJ Image
 			(function() {
@@ -802,7 +703,9 @@
 					var selected = selectedImage,
 						parent = selected && selected.getParent();
 
-					if (!selected) return;
+					if (!selected) {
+						return;
+					}
 
 					if (data.url) {
 						selected.setAttribute('src', data.url);
@@ -874,7 +777,7 @@
 						if (parent && parent.getName() === 'a') {
 							parent.setAttribute('href', data.link);
 							parent.setAttribute('data-cke-saved-href', data.link);
-							
+
 							if (data.blank) {
 								parent.setAttribute('target', '_blank');
 							} else {
@@ -918,7 +821,7 @@
 						selected = selected? selected.getSelectedElement() : null;
 						selectedImage = selected;
 
-						if (selected) {
+						if (selected && selected.is('img')) {
 							var parent = selected && selected.getParent(),
 								hasParentLink = parent.getName() === 'a',
 								parentLink = hasParentLink && parent,
@@ -1009,7 +912,7 @@
 						iframe.setAttribute('style', "width: 490px; height:370px;");
 						iframe.setAttribute('lj-style', "width: 480px; height:360px;");
 						iframe.setAttribute('allowfullscreen', 'true');
-						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>iframe</div>"));
+						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>" + (background ? "" : "iframe") + "</div>"));
 					} else {
 						iframe.setAttribute('lj-class', 'lj-embed');
 						iframe.setAttribute('class', 'lj-embed-wrap lj-rtebox');
@@ -1017,7 +920,7 @@
 					}
 					iframe.setAttribute('lj-data', encodeURIComponent(LiveJournal.getEmbed(content)));
 
-					
+
 					iframe.setAttribute('frameBorder', 0);
 					iframe.setAttribute('allowTransparency', 'true');
 					iframe.setAttribute('lj-cmd', button);
@@ -1035,12 +938,12 @@
 						var node = ljTagsData[button].node || lastSelectedIframe;
 
 						if (node) {
-							rteButton(button, widget, {
+							editor.rteButton(button, widget, {
 								defaultText: node && decodeURIComponent(node.getAttribute('data-link') || node.getAttribute('lj-url') || node.getAttribute('lj-data')),
 								editMode: true
 							});
 						} else {
-							rteButton(button, widget);
+							editor.rteButton(button, widget);
 						}
 
 					}
@@ -1051,85 +954,6 @@
 					command: button
 				});
 			})();
-
-			function doubleFrameCommand (tagName, cmdName, promptData) {
-				var text,
-					ljNode = ljTagsData[cmdName].node;
-
-				if (ljNode) {
-					if (text = promptData.skip || prompt(promptData.title, ljNode.getAttribute('text') || promptData.text)) {
-						if (text == promptData.text) {
-							ljNode.removeAttribute('text');
-						} else {
-							ljNode.setAttribute('text', text);
-						}
-					}
-				} else {
-					if (text = promptData.skip || prompt(promptData.title, promptData.text)) {
-						editor.focus();
-
-						var selection = new CKEDITOR.dom.selection(editor.document),
-							ranges = selection.getRanges(),
-							iframeOpen = new CKEDITOR.dom.element('iframe', editor.document),
-							iframeClose = iframeOpen.clone();
-
-						iframeOpen.setAttribute('lj-cmd', cmdName);
-						iframeOpen.setAttribute('lj-class', tagName + ' ' + tagName + '-open');
-						iframeOpen.setAttribute('class', tagName + '-wrap');
-						iframeOpen.setAttribute('frameBorder', 0);
-						iframeOpen.setAttribute('allowTransparency', 'true');
-						if (text != promptData.text) {
-							iframeOpen.setAttribute('text', text);
-						}
-
-						iframeClose.setAttribute('lj-class', tagName + ' ' + tagName + '-close');
-						iframeClose.setAttribute('class', tagName + '-wrap');
-						iframeClose.setAttribute('frameBorder', 0);
-						iframeClose.setAttribute('allowTransparency', 'true');
-
-						var range = ranges[0];
-						selection.lock();
-
-						var br = new CKEDITOR.dom.element('br', editor.document),
-							firstBR = br.clone(),
-							lastBR = br.clone();
-
-						var fragment = new CKEDITOR.dom.documentFragment(editor.document);
-						fragment.append(br.clone());
-						fragment.append(iframeOpen);
-						fragment.append(firstBR);
-
-						if (range.collapsed === false) {
-							for (var i = 0, l = ranges.length; i < l; i++) {
-								// https://jira.sup.com/browse/LJSV-2328
-								// https://jira.sup.com/browse/LJSUP-13130
-								if (selection.getSelectedElement()) {
-									ranges[i].enlarge( CKEDITOR.ENLARGE_ELEMENT );
-								}
-
-								fragment.append(ranges[i].extractContents());
-							}
-						}
-
-						fragment.append(lastBR);
-						editor.insertElement(iframeClose);
-						br.clone().insertAfter(iframeClose);
-						iframeClose.insertBeforeMe(fragment);
-
-						range.setStart(firstBR, 0);
-						range.setEnd(lastBR, 0);
-						selection.unlock();
-
-						selection.selectRanges(ranges);
-
-						editor.fire('updateSnapshot');
-						updateFrames();
-					}
-
-					// CKEDITOR.note && CKEDITOR.note.hide(true);
-				}
-
-			}
 
 			// LJ Map
 			(function() {
@@ -1182,7 +1006,7 @@
 					exec: function() {
 						var node = ljTagsData[button].node;
 
-						rteButton(button, widget, {
+						editor.rteButton(button, widget, {
 							defaultText: node ? node.getAttribute('lj-url') : '',
 							editMode: node? true : false
 						});
@@ -1192,70 +1016,6 @@
 
 				editor.ui.addButton(button, {
 					label: CKLang.LJMap_Title,
-					command: button
-				});
-			})();
-
-			// LJ Cut
-			(function() {
-				var button = "LJCut",
-					widget = "cut";
-
-				LiveJournal.register_hook('cut_response', function(text) {
-					doubleFrameCommand('lj-cut', button, {
-						title: CKLang.LJCut_PromptTitle,
-						text: CKLang.LJCut_PromptText,
-
-						skip: text
-					});
-				});
-
-				editor.addCommand('LJCut', {
-					exec: function() {
-						var node = ljTagsData[button].node;
-
-						rteButton(button, widget, {
-							defaultText: node ? node.getAttribute('text') : '',
-							editMode: node? true : false
-						});
-					},
-					editorFocus: false
-				});
-
-				editor.ui.addButton(button, {
-					label: CKLang.LJCut_Title,
-					command: button
-				});
-			})();
-
-			// LJ Spoiler
-			(function() {
-				var button = "LJSpoiler",
-					widget = "spoiler";
-
-				LiveJournal.register_hook('spoiler_response', function(text) {
-					doubleFrameCommand('lj-spoiler', button, {
-						title: CKLang.LJCut_PromptTitle,
-						text: CKLang.LJCut_PromptText,
-
-						skip: text
-					});
-				});
-
-				editor.addCommand(button, {
-					exec: function() {
-						var node = ljTagsData[button].node;
-
-						rteButton(button, widget, {
-							defaultText: node ? node.getAttribute('text') : '',
-							editMode: node? true : false
-						});
-					},
-					editorFocus: false
-				});
-
-				editor.ui.addButton(button, {
-					label: CKLang.LJSpoiler_Title,
 					command: button
 				});
 			})();
@@ -1392,7 +1152,7 @@
 							for (var i = ranges.length - 1; i >= 0; i--) {
 								var range = ranges[i];
 								var encloseNode = range.getEnclosedNode();
-								if (encloseNode && encloseNode.is('iframe')) {
+								if (encloseNode && encloseNode.type === CKEDITOR.NODE_ELEMENT && encloseNode.is('iframe')) {
 									return;
 								}
 
@@ -1489,13 +1249,13 @@
 						var node = ljTagsData.LJPollLink.node;
 
 						if (node) {
-							rteButton(button, 'poll', {
+							editor.rteButton(button, 'poll', {
 								ljData: decodeURIComponent(node.getAttribute('lj-data')),
 								editMode: true,
 								disabled: node && (node.getAttribute('data-disabledPoll') ? true : false)
 							});
 						} else {
-							rteButton(button, 'poll');
+							editor.rteButton(button, 'poll');
 						}
 					},
 					editorFocus: false
@@ -1511,6 +1271,8 @@
 			(function() {
 				var button = 'LJLike',
 					widget = "like";
+
+				var btn;
 
 				likeButtons.defaultButtons = [];
 				for (var i = 0; i < likeButtons.length; i++) {
@@ -1564,12 +1326,12 @@
 						var node = ljTagsData[button].node;
 
 						if (node) {
-							rteButton(button, widget, {
+							editor.rteButton(button, widget, {
 								buttons: node.getAttribute('buttons'),
 								editMode: true
 							});
 						} else {
-							rteButton(button, widget);
+							editor.rteButton(button, widget);
 						}
 					},
 					editorFocus: false
@@ -1583,32 +1345,6 @@
 		},
 		afterInit: function(editor) {
 			var dataProcessor = editor.dataProcessor;
-
-			function createDoubleFrame(element, tagName, cmdName, attrName) {
-				attrName = attrName || 'text';
-
-				var openFrame = new CKEDITOR.htmlParser.element('iframe');
-				openFrame.attributes['lj-class'] = tagName + ' ' + tagName + '-open';
-				openFrame.attributes['class'] = tagName + '-wrap';
-				openFrame.attributes['lj-cmd'] = cmdName;
-				openFrame.attributes['frameBorder'] = 0;
-				openFrame.attributes['allowTransparency'] = 'true';
-
-				if (element.attributes.hasOwnProperty(attrName)) {
-					openFrame.attributes.text = element.attributes[attrName];
-				}
-
-				element.children.unshift(openFrame);
-
-				var closeFrame = new CKEDITOR.htmlParser.element('iframe');
-				closeFrame.attributes['lj-class'] = tagName + ' ' + tagName + '-close';
-				closeFrame.attributes['class'] = tagName + '-wrap';
-				closeFrame.attributes['frameBorder'] = 0;
-				closeFrame.attributes['allowTransparency'] = 'true';
-				element.children.push(closeFrame);
-
-				delete element.name;
-			}
 
 			// http://docs.cksource.com/CKEditor_3.x/Developers_Guide/Data_Processor
 
@@ -1651,85 +1387,7 @@
 						fakeElement.attributes.buttons = attr.join(',');
 
 						return fakeElement;
-					},/*
-					'lj': (function() {
-						function updateUser(name) {
-							var ljTags = editor.document.getElementsByTag('lj');
-
-							for (var i = 0, l = ljTags.count(); i < l; i++) {
-								var ljTag = ljTags.getItem(i);
-
-								if (ljTag) {
-									var userName = ljTag.getAttribute('user');
-									var userTitle = ljTag.getAttribute('title');
-									if (name == (userTitle ? userName + ':' + userTitle : userName)) {
-										var newLjTag = new CKEDITOR.dom.element.createFromHtml(ljUsers[name], editor.document);
-										newLjTag.setAttribute('lj-cmd', 'LJUserLink');
-										ljTag.insertBeforeMe(newLjTag);
-										ljTag.remove();
-									}
-								}
-							}
-
-							editor.removeListener('dataReady', updateUser);
-						}
-
-						return function(element) {
-							return;
-							var ljUserName = element.attributes.user;
-							if (!ljUserName || !ljUserName.length) {
-								return;
-							}
-
-							var ljUserTitle = element.attributes.title;
-							var cacheName = ljUserTitle ? ljUserName + ':' + ljUserTitle : ljUserName;
-
-							if (ljUsers.hasOwnProperty(cacheName)) {
-								var ljTag = (new CKEDITOR.htmlParser.fragment.fromHtml(ljUsers[cacheName])).children[0];
-
-								ljTag.attributes['lj-cmd'] = 'LJUserLink';
-								return ljTag;
-							} else {
-								var postData = {
-									username: ljUserName
-								};
-
-								if (ljUserTitle) {
-									postData.usertitle = ljUserTitle;
-								}
-
-								HTTPReq.getJSON({
-									data: HTTPReq.formEncoded(postData),
-									method: 'POST',
-									url: Site.siteroot + '/tools/endpoints/ljuser.bml',
-									onError: function(err) {
-										alert(err + ' "' + ljUserName + '"');
-									},
-									onData: function(data) {
-										if (data.error) {
-											return alert(data.error + ' "' + ljUserName + '"');
-										}
-
-										if (!data.success) {
-											return;
-										}
-
-										ljUsers[cacheName] = data.ljuser;
-
-										data.ljuser = data.ljuser.replace('<span class="useralias-value">*</span>', '');
-
-										if (editor.document) {
-											updateUser(cacheName);
-										} else {
-											editor.on('dataReady', function() {
-												updateUser(cacheName);
-											});
-										}
-									}
-								});
-							}
-						};
-					})(),*/
+					},
 					'lj-map': function(element) {
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe');
 						var frameStyle = '';
@@ -1777,12 +1435,6 @@
 
 						return fakeElement;
 					},
-					'lj-cut': function (element) {
-						createDoubleFrame(element, 'lj-cut', 'LJCut');
-					},
-					'lj-spoiler': function (element) {
-						createDoubleFrame(element, 'lj-spoiler', 'LJSpoiler', 'title');
-					},
 					'iframe': function(element) {
 						if (element.attributes['data-update'] === 'false') {
 							return element;
@@ -1801,11 +1453,23 @@
 						if (element.attributes['lj-class'] && element.attributes['lj-class'].indexOf('lj-') + 1 == 1) {
 							return element;
 						}
+
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe'),
 							frameStyle = '',
 							bodyStyle = '',
 							width = Number(element.attributes.width),
 							height = Number(element.attributes.height);
+
+						// partner iframe, fix width/height from style attribute
+						if (element.attributes.src.indexOf('kroogi.com') !== -1 && element.attributes.style) {
+							var matchWidth = element.attributes.style.match(/width:\s([0-9]+)px;/i),
+								matchHeight = element.attributes.style.match(/height:\s([0-9]+)px;/i);
+
+							if (matchHeight.length === 2 && matchWidth.length === 2) {
+								width = Number(matchWidth.pop());
+								height = Number(matchHeight.pop());
+							}
+						}
 
 						if (!isNaN(width)) {
 							frameStyle += 'width:' + width + 'px;';
@@ -1838,19 +1502,21 @@
 						return fakeElement;
 					},
 					a: function(element) {
-						if (element.parent.attributes && !element.parent.attributes['lj:user']) {
+						if (element.attributes['data-user']) {
+							return;
+						}
+
+						if (element.parent && element.parent.attributes && !element.parent.attributes['lj:user']) {
 							element.attributes['lj-cmd'] = 'LJLink2';
 						}
 					},
 					img: function(element) {
-						var parent = element.parent && element.parent.parent;
-						if (!parent || !parent.attributes || !parent.attributes['lj:user']) {
-							element.attributes['lj-cmd'] = 'LJImage';
+						if (element.attributes['data-user']) {
+							return;
 						}
-					},
-					div: function(element) {
-						if (element.attributes['class'] == 'lj-cut') {
-							createDoubleFrame(element, 'lj-cut', 'LJCut');
+						var parent = element.parent && element.parent.parent;
+						if (!parent || !element.attributes['data-user'] || !parent.attributes || !parent.attributes['data-user']) {
+							element.attributes['lj-cmd'] = 'LJImage';
 						}
 					}
 				}
@@ -1860,6 +1526,17 @@
 
 			// editor.dataProcessor.htmlFilter: filter applied to the HTML available in the
 			// editor when transforming it on the XHTML outputted by the editor ("on output").
+
+			dataProcessor.htmlFilter.addRules({
+				elements: {
+					'input': function(element) {
+						if (element.attributes && element.attributes.id === '__focus') {
+							return false;
+						}
+						return element;
+					}
+				}
+			});
 
 			dataProcessor.htmlFilter.addRules({
 				elements: {
@@ -1874,7 +1551,7 @@
 						} else {
 							return element;
 						}
-						
+
 						switch (className) {
 							case 'lj-like':
 								newElement = new CKEDITOR.htmlParser.element('lj-like');
@@ -1882,7 +1559,7 @@
 								if (element.attributes.defaults != 'true') {
 									newElement.attributes.buttons = element.attributes.buttons;
 								}
-								
+
 								if (element.attributes.hasOwnProperty('lj-style')) {
 									newElement.attributes.style = element.attributes['lj-style'];
 								}
@@ -1961,14 +1638,14 @@
 									while (node) {
 										if (node.name == 'iframe') {
 											var DFclassName = node.attributes['lj-class'];
-											if (DFclassName.indexOf(className + '-close') + 1) {
+											if (DFclassName && DFclassName.indexOf(className + '-close') + 1) {
 												if (isCanBeNested && index) {
 													index--;
 												} else {
 													newElement.next = node;
 													break;
 												}
-											} else if (DFclassName.indexOf(className + '-open') + 1) {
+											} else if (DFclassName && DFclassName.indexOf(className + '-open') + 1) {
 												if (isCanBeNested) {
 													index++;
 												} else {
@@ -1995,28 +1672,6 @@
 						}
 
 						return newElement;
-					},
-					span: function(element) {
-						var userName = element.attributes['lj:user'];
-						if (userName) {
-							var ljUserNode = new CKEDITOR.htmlParser.element('lj');
-							ljUserNode.attributes.user = userName;
-
-							try {
-								var userTitle = element.children[1].children[0].children[0].value;
-							} catch(e) {
-								return false;
-							}
-
-							if (userTitle && userTitle != userName) {
-								ljUserNode.attributes.title = userTitle;
-							}
-
-							ljUserNode.isOptionalClose = ljUserNode.isEmpty = true;
-							return ljUserNode;
-						} else if (element.attributes.style == 'display: none;' || !element.children.length) {
-							return false;
-						}
 					},
 					div: function(element) {
 						if (!element.children.length) {

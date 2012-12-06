@@ -233,6 +233,9 @@ sub output_prop {
     $existing_display = LJ::eall($existing_display);
 
     my $ret;
+    if ($type eq "OptionsDelimeter") {
+        $row_class =~ s/graybg//;
+        }
     $ret .= "<tr class='prop-row$row_class' width='100%'>";
 
     if ($linklist_tab) {
@@ -242,7 +245,7 @@ sub output_prop {
     }
 
     $ret .= "<td class='prop-header'>" . LJ::eall($prop->{des}) . " " . LJ::help_icon("s2opt_$name") . "</td>"
-        unless $type eq "Color";
+        unless $type eq "Color" or $type eq "OptionsDelimeter";
 
     if ($prop->{values}) {
         $ret .= "<td class='prop-input'>";
@@ -311,8 +314,18 @@ sub output_prop {
         );
         $ret .= "</td>";
         $ret .= "<td>" . LJ::eall($prop->{des}) . " " . LJ::help_icon("s2opt_$name") . "</td>";
+    } 
+    elsif ($type eq "OptionsDelimeter") {
+        $ret .= "<td class='prop-delimeter' colspan='2'>";
+        if($prop->{des}){
+            $ret .= "<fieldset><legend>" . $prop->{des} . "</legend></fieldset>";
+            }
+        else {
+            $ret .= "<hr/>";   
+            }
+        $ret .= "</td>";
     }
-
+    
     my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
     $ret .= " $offhelp";
 

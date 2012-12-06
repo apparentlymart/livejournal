@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
  <loc>http://www.livejournal.com/abuse/index.bml</loc>
@@ -5641,1217 +5641,1217 @@
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faq.bml</loc>
+ <loc>http://www.livejournal.com/support/faq/</loc>
  <changefreq>monthly</changefreq>
  <priority>1</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=about</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/about.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=abuse</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/abuse.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=accounts</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/accounts.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=basic</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/basic.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=clients</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/clients.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=comments</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/comments.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=comm-manage</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/comm-manage.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=community</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/community.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=cust-adv</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/cust-adv.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=customize</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/customize.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=entries</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/entries.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=ext_sites</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/ext_sites.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=levels</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/levels.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=mobile</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/mobile.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=payments</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/payments.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=s1</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/s.html1</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=scrapbook</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/scrapbook.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=security</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/security.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=site_nav</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/site_nav.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=sup</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/sup.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=syn</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/syn.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=troubleshooting</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/troubleshooting.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqcat=userpics</loc>
+ <loc>http://www.livejournal.com/support/faq/cat/userpics.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=1</loc>
+ <loc>http://www.livejournal.com/support/faq/1.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=100</loc>
+ <loc>http://www.livejournal.com/support/faq/100.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=101</loc>
+ <loc>http://www.livejournal.com/support/faq/101.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=102</loc>
+ <loc>http://www.livejournal.com/support/faq/102.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=104</loc>
+ <loc>http://www.livejournal.com/support/faq/104.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=105</loc>
+ <loc>http://www.livejournal.com/support/faq/105.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=106</loc>
+ <loc>http://www.livejournal.com/support/faq/106.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=107</loc>
+ <loc>http://www.livejournal.com/support/faq/107.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=108</loc>
+ <loc>http://www.livejournal.com/support/faq/108.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=109</loc>
+ <loc>http://www.livejournal.com/support/faq/109.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=11</loc>
+ <loc>http://www.livejournal.com/support/faq/11.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=110</loc>
+ <loc>http://www.livejournal.com/support/faq/110.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=111</loc>
+ <loc>http://www.livejournal.com/support/faq/111.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=113</loc>
+ <loc>http://www.livejournal.com/support/faq/113.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=114</loc>
+ <loc>http://www.livejournal.com/support/faq/114.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=115</loc>
+ <loc>http://www.livejournal.com/support/faq/115.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=116</loc>
+ <loc>http://www.livejournal.com/support/faq/116.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=117</loc>
+ <loc>http://www.livejournal.com/support/faq/117.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=119</loc>
+ <loc>http://www.livejournal.com/support/faq/119.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=12</loc>
+ <loc>http://www.livejournal.com/support/faq/12.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=120</loc>
+ <loc>http://www.livejournal.com/support/faq/120.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=121</loc>
+ <loc>http://www.livejournal.com/support/faq/121.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=122</loc>
+ <loc>http://www.livejournal.com/support/faq/122.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=123</loc>
+ <loc>http://www.livejournal.com/support/faq/123.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=124</loc>
+ <loc>http://www.livejournal.com/support/faq/124.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=125</loc>
+ <loc>http://www.livejournal.com/support/faq/125.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=126</loc>
+ <loc>http://www.livejournal.com/support/faq/126.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=127</loc>
+ <loc>http://www.livejournal.com/support/faq/127.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=128</loc>
+ <loc>http://www.livejournal.com/support/faq/128.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=129</loc>
+ <loc>http://www.livejournal.com/support/faq/129.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=13</loc>
+ <loc>http://www.livejournal.com/support/faq/13.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=130</loc>
+ <loc>http://www.livejournal.com/support/faq/130.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=131</loc>
+ <loc>http://www.livejournal.com/support/faq/131.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=132</loc>
+ <loc>http://www.livejournal.com/support/faq/132.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=134</loc>
+ <loc>http://www.livejournal.com/support/faq/134.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=135</loc>
+ <loc>http://www.livejournal.com/support/faq/135.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=136</loc>
+ <loc>http://www.livejournal.com/support/faq/136.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=137</loc>
+ <loc>http://www.livejournal.com/support/faq/137.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=138</loc>
+ <loc>http://www.livejournal.com/support/faq/138.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=139</loc>
+ <loc>http://www.livejournal.com/support/faq/139.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=14</loc>
+ <loc>http://www.livejournal.com/support/faq/14.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=140</loc>
+ <loc>http://www.livejournal.com/support/faq/140.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=141</loc>
+ <loc>http://www.livejournal.com/support/faq/141.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=143</loc>
+ <loc>http://www.livejournal.com/support/faq/143.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=145</loc>
+ <loc>http://www.livejournal.com/support/faq/145.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=149</loc>
+ <loc>http://www.livejournal.com/support/faq/149.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=15</loc>
+ <loc>http://www.livejournal.com/support/faq/15.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=150</loc>
+ <loc>http://www.livejournal.com/support/faq/150.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=151</loc>
+ <loc>http://www.livejournal.com/support/faq/151.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=155</loc>
+ <loc>http://www.livejournal.com/support/faq/155.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=156</loc>
+ <loc>http://www.livejournal.com/support/faq/156.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=157</loc>
+ <loc>http://www.livejournal.com/support/faq/157.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=158</loc>
+ <loc>http://www.livejournal.com/support/faq/158.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=159</loc>
+ <loc>http://www.livejournal.com/support/faq/159.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=16</loc>
+ <loc>http://www.livejournal.com/support/faq/16.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=160</loc>
+ <loc>http://www.livejournal.com/support/faq/160.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=162</loc>
+ <loc>http://www.livejournal.com/support/faq/162.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=164</loc>
+ <loc>http://www.livejournal.com/support/faq/164.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=165</loc>
+ <loc>http://www.livejournal.com/support/faq/165.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=166</loc>
+ <loc>http://www.livejournal.com/support/faq/166.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=168</loc>
+ <loc>http://www.livejournal.com/support/faq/168.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=169</loc>
+ <loc>http://www.livejournal.com/support/faq/169.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=17</loc>
+ <loc>http://www.livejournal.com/support/faq/17.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=171</loc>
+ <loc>http://www.livejournal.com/support/faq/171.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=172</loc>
+ <loc>http://www.livejournal.com/support/faq/172.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=175</loc>
+ <loc>http://www.livejournal.com/support/faq/175.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=176</loc>
+ <loc>http://www.livejournal.com/support/faq/176.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=177</loc>
+ <loc>http://www.livejournal.com/support/faq/177.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=179</loc>
+ <loc>http://www.livejournal.com/support/faq/179.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=18</loc>
+ <loc>http://www.livejournal.com/support/faq/18.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=181</loc>
+ <loc>http://www.livejournal.com/support/faq/181.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=182</loc>
+ <loc>http://www.livejournal.com/support/faq/182.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=183</loc>
+ <loc>http://www.livejournal.com/support/faq/183.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=184</loc>
+ <loc>http://www.livejournal.com/support/faq/184.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=185</loc>
+ <loc>http://www.livejournal.com/support/faq/185.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=186</loc>
+ <loc>http://www.livejournal.com/support/faq/186.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=187</loc>
+ <loc>http://www.livejournal.com/support/faq/187.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=188</loc>
+ <loc>http://www.livejournal.com/support/faq/188.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=189</loc>
+ <loc>http://www.livejournal.com/support/faq/189.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=19</loc>
+ <loc>http://www.livejournal.com/support/faq/19.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=190</loc>
+ <loc>http://www.livejournal.com/support/faq/190.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=191</loc>
+ <loc>http://www.livejournal.com/support/faq/191.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=192</loc>
+ <loc>http://www.livejournal.com/support/faq/192.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=193</loc>
+ <loc>http://www.livejournal.com/support/faq/193.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=194</loc>
+ <loc>http://www.livejournal.com/support/faq/194.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=195</loc>
+ <loc>http://www.livejournal.com/support/faq/195.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=196</loc>
+ <loc>http://www.livejournal.com/support/faq/196.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=197</loc>
+ <loc>http://www.livejournal.com/support/faq/197.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=198</loc>
+ <loc>http://www.livejournal.com/support/faq/198.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=199</loc>
+ <loc>http://www.livejournal.com/support/faq/199.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=2</loc>
+ <loc>http://www.livejournal.com/support/faq/2.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=20</loc>
+ <loc>http://www.livejournal.com/support/faq/20.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=200</loc>
+ <loc>http://www.livejournal.com/support/faq/200.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=201</loc>
+ <loc>http://www.livejournal.com/support/faq/201.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=202</loc>
+ <loc>http://www.livejournal.com/support/faq/202.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=203</loc>
+ <loc>http://www.livejournal.com/support/faq/203.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=206</loc>
+ <loc>http://www.livejournal.com/support/faq/206.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=207</loc>
+ <loc>http://www.livejournal.com/support/faq/207.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=208</loc>
+ <loc>http://www.livejournal.com/support/faq/208.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=209</loc>
+ <loc>http://www.livejournal.com/support/faq/209.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=21</loc>
+ <loc>http://www.livejournal.com/support/faq/21.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=210</loc>
+ <loc>http://www.livejournal.com/support/faq/210.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=211</loc>
+ <loc>http://www.livejournal.com/support/faq/211.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=212</loc>
+ <loc>http://www.livejournal.com/support/faq/212.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=213</loc>
+ <loc>http://www.livejournal.com/support/faq/213.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=214</loc>
+ <loc>http://www.livejournal.com/support/faq/214.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=215</loc>
+ <loc>http://www.livejournal.com/support/faq/215.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=216</loc>
+ <loc>http://www.livejournal.com/support/faq/216.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=218</loc>
+ <loc>http://www.livejournal.com/support/faq/218.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=219</loc>
+ <loc>http://www.livejournal.com/support/faq/219.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=220</loc>
+ <loc>http://www.livejournal.com/support/faq/220.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=221</loc>
+ <loc>http://www.livejournal.com/support/faq/221.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=222</loc>
+ <loc>http://www.livejournal.com/support/faq/222.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=224</loc>
+ <loc>http://www.livejournal.com/support/faq/224.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=225</loc>
+ <loc>http://www.livejournal.com/support/faq/225.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=226</loc>
+ <loc>http://www.livejournal.com/support/faq/226.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=23</loc>
+ <loc>http://www.livejournal.com/support/faq/23.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=231</loc>
+ <loc>http://www.livejournal.com/support/faq/231.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=232</loc>
+ <loc>http://www.livejournal.com/support/faq/232.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=233</loc>
+ <loc>http://www.livejournal.com/support/faq/233.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=234</loc>
+ <loc>http://www.livejournal.com/support/faq/234.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=235</loc>
+ <loc>http://www.livejournal.com/support/faq/235.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=237</loc>
+ <loc>http://www.livejournal.com/support/faq/237.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=24</loc>
+ <loc>http://www.livejournal.com/support/faq/24.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=243</loc>
+ <loc>http://www.livejournal.com/support/faq/243.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=244</loc>
+ <loc>http://www.livejournal.com/support/faq/244.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=245</loc>
+ <loc>http://www.livejournal.com/support/faq/245.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=246</loc>
+ <loc>http://www.livejournal.com/support/faq/246.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=247</loc>
+ <loc>http://www.livejournal.com/support/faq/247.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=248</loc>
+ <loc>http://www.livejournal.com/support/faq/248.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=249</loc>
+ <loc>http://www.livejournal.com/support/faq/249.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=25</loc>
+ <loc>http://www.livejournal.com/support/faq/25.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=250</loc>
+ <loc>http://www.livejournal.com/support/faq/250.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=252</loc>
+ <loc>http://www.livejournal.com/support/faq/252.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=253</loc>
+ <loc>http://www.livejournal.com/support/faq/253.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=254</loc>
+ <loc>http://www.livejournal.com/support/faq/254.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=255</loc>
+ <loc>http://www.livejournal.com/support/faq/255.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=256</loc>
+ <loc>http://www.livejournal.com/support/faq/256.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=257</loc>
+ <loc>http://www.livejournal.com/support/faq/257.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=258</loc>
+ <loc>http://www.livejournal.com/support/faq/258.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=259</loc>
+ <loc>http://www.livejournal.com/support/faq/259.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=26</loc>
+ <loc>http://www.livejournal.com/support/faq/26.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=260</loc>
+ <loc>http://www.livejournal.com/support/faq/260.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=262</loc>
+ <loc>http://www.livejournal.com/support/faq/262.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=263</loc>
+ <loc>http://www.livejournal.com/support/faq/263.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=264</loc>
+ <loc>http://www.livejournal.com/support/faq/264.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=265</loc>
+ <loc>http://www.livejournal.com/support/faq/265.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=266</loc>
+ <loc>http://www.livejournal.com/support/faq/266.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=267</loc>
+ <loc>http://www.livejournal.com/support/faq/267.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=268</loc>
+ <loc>http://www.livejournal.com/support/faq/268.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=27</loc>
+ <loc>http://www.livejournal.com/support/faq/27.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=270</loc>
+ <loc>http://www.livejournal.com/support/faq/270.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=271</loc>
+ <loc>http://www.livejournal.com/support/faq/271.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=272</loc>
+ <loc>http://www.livejournal.com/support/faq/272.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=273</loc>
+ <loc>http://www.livejournal.com/support/faq/273.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=274</loc>
+ <loc>http://www.livejournal.com/support/faq/274.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=275</loc>
+ <loc>http://www.livejournal.com/support/faq/275.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=276</loc>
+ <loc>http://www.livejournal.com/support/faq/276.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=277</loc>
+ <loc>http://www.livejournal.com/support/faq/277.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=279</loc>
+ <loc>http://www.livejournal.com/support/faq/279.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=280</loc>
+ <loc>http://www.livejournal.com/support/faq/280.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=281</loc>
+ <loc>http://www.livejournal.com/support/faq/281.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=282</loc>
+ <loc>http://www.livejournal.com/support/faq/282.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=283</loc>
+ <loc>http://www.livejournal.com/support/faq/283.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=285</loc>
+ <loc>http://www.livejournal.com/support/faq/285.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=286</loc>
+ <loc>http://www.livejournal.com/support/faq/286.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=287</loc>
+ <loc>http://www.livejournal.com/support/faq/287.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=288</loc>
+ <loc>http://www.livejournal.com/support/faq/288.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=289</loc>
+ <loc>http://www.livejournal.com/support/faq/289.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=290</loc>
+ <loc>http://www.livejournal.com/support/faq/290.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=291</loc>
+ <loc>http://www.livejournal.com/support/faq/291.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=292</loc>
+ <loc>http://www.livejournal.com/support/faq/292.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=30</loc>
+ <loc>http://www.livejournal.com/support/faq/30.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=32</loc>
+ <loc>http://www.livejournal.com/support/faq/32.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=33</loc>
+ <loc>http://www.livejournal.com/support/faq/33.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=38</loc>
+ <loc>http://www.livejournal.com/support/faq/38.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=4</loc>
+ <loc>http://www.livejournal.com/support/faq/4.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=40</loc>
+ <loc>http://www.livejournal.com/support/faq/40.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=44</loc>
+ <loc>http://www.livejournal.com/support/faq/44.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=46</loc>
+ <loc>http://www.livejournal.com/support/faq/46.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=47</loc>
+ <loc>http://www.livejournal.com/support/faq/47.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=50</loc>
+ <loc>http://www.livejournal.com/support/faq/50.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=51</loc>
+ <loc>http://www.livejournal.com/support/faq/51.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=56</loc>
+ <loc>http://www.livejournal.com/support/faq/56.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=57</loc>
+ <loc>http://www.livejournal.com/support/faq/57.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.9</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=6</loc>
+ <loc>http://www.livejournal.com/support/faq/6.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=60</loc>
+ <loc>http://www.livejournal.com/support/faq/60.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=61</loc>
+ <loc>http://www.livejournal.com/support/faq/61.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.8</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=62</loc>
+ <loc>http://www.livejournal.com/support/faq/62.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=64</loc>
+ <loc>http://www.livejournal.com/support/faq/64.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=66</loc>
+ <loc>http://www.livejournal.com/support/faq/66.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=67</loc>
+ <loc>http://www.livejournal.com/support/faq/67.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=68</loc>
+ <loc>http://www.livejournal.com/support/faq/68.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=69</loc>
+ <loc>http://www.livejournal.com/support/faq/69.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=7</loc>
+ <loc>http://www.livejournal.com/support/faq/7.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=70</loc>
+ <loc>http://www.livejournal.com/support/faq/70.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=71</loc>
+ <loc>http://www.livejournal.com/support/faq/71.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=72</loc>
+ <loc>http://www.livejournal.com/support/faq/72.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=73</loc>
+ <loc>http://www.livejournal.com/support/faq/73.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=74</loc>
+ <loc>http://www.livejournal.com/support/faq/74.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=75</loc>
+ <loc>http://www.livejournal.com/support/faq/75.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=76</loc>
+ <loc>http://www.livejournal.com/support/faq/76.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=77</loc>
+ <loc>http://www.livejournal.com/support/faq/77.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=78</loc>
+ <loc>http://www.livejournal.com/support/faq/78.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=79</loc>
+ <loc>http://www.livejournal.com/support/faq/79.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=8</loc>
+ <loc>http://www.livejournal.com/support/faq/8.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=80</loc>
+ <loc>http://www.livejournal.com/support/faq/80.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=82</loc>
+ <loc>http://www.livejournal.com/support/faq/82.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=84</loc>
+ <loc>http://www.livejournal.com/support/faq/84.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=85</loc>
+ <loc>http://www.livejournal.com/support/faq/85.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.7</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=86</loc>
+ <loc>http://www.livejournal.com/support/faq/86.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=9</loc>
+ <loc>http://www.livejournal.com/support/faq/9.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=91</loc>
+ <loc>http://www.livejournal.com/support/faq/91.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=92</loc>
+ <loc>http://www.livejournal.com/support/faq/92.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=93</loc>
+ <loc>http://www.livejournal.com/support/faq/93.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=95</loc>
+ <loc>http://www.livejournal.com/support/faq/95.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=96</loc>
+ <loc>http://www.livejournal.com/support/faq/96.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=97</loc>
+ <loc>http://www.livejournal.com/support/faq/97.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqbrowse.bml?faqid=98</loc>
+ <loc>http://www.livejournal.com/support/faq/98.html</loc>
  <changefreq>monthly</changefreq>
  <priority>0.6</priority>
 </url>
@@ -6861,7 +6861,7 @@
  <priority>1</priority>
 </url>
 <url>
- <loc>http://www.livejournal.com/support/faqsearch.bml</loc>
+ <loc>http://www.livejournal.com/support/faq/search.html</loc>
  <changefreq>monthly</changefreq>
  <priority>1</priority>
 </url>

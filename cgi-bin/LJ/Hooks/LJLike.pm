@@ -35,6 +35,12 @@ LJ::register_hook( 'insert_html_before_body_close' => sub {
 LJ::register_hook( 'insert_html_before_body_close' => sub {
     my ($after_body_open_ref) = @_;
 
+    $$after_body_open_ref .= qq{<script type="text/javascript">LiveJournal.injectScript('http://surfingbird.ru/share/share.min.js');</script> };
+} );
+
+LJ::register_hook( 'insert_html_before_body_close' => sub {
+    my ($after_body_open_ref) = @_;
+
     return if $LJ::REQ_GLOBAL{'sitewide_resources_ljlike_twitter'}++;
 
     $$after_body_open_ref .=  qq{<script type="text/javascript">LiveJournal.injectScript('http://platform.twitter.com/widgets.js');</script>};

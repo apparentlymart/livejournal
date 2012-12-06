@@ -100,6 +100,7 @@ sub handler
 
     LJ::Request->free();
     LJ::Request->init($r);
+    LJ::Request->start_request();
 
     if ($LJ::SHOW_SLOW_QUERIES) {
         my $method = LJ::Request->method;
@@ -388,6 +389,7 @@ sub trans {
             and LJ::Request->uri !~ m|/palimg/|     ## PaletteModify actions are processed by other handler
             and LJ::Request->uri !~ m|^/__api/?|
             and LJ::Request->uri !~ m|^/__tmpl/|
+            and LJ::Request->uri !~ m|^$LJ::CDN_SITE_MESSAGE_URL/?|
             ) or
         ($LJ::IS_SSL and LJ::Request->unparsed_uri =~ /\?\?/)
     ){
@@ -1128,10 +1130,6 @@ sub trans {
         elsif ( $func eq "cssproxy" ) {
             return $bml_handler->("$LJ::HOME/htdocs/extcss/index.bml");
         }
-        elsif ( $func eq 'portal' ) {
-            # if this is a "portal" subdomain then prepend the portal URL
-            return redir("$LJ::SITEROOT/portal/");
-        }
         elsif ( $func eq 'support' ) {
             return redir("$LJ::SITEROOT/support/");
         }
@@ -1582,7 +1580,11 @@ sub userpic_content
 
     # Load the user object and pic and make sure the picture is viewable
     my $u = LJ::load_userid($userid);
-    return LJ::Request::NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/;
+    if ($u && $u->{'statusvis'} =~ /[XS]/) {
+        LJ::Request->pnotes ('error' => 'e404');
+        LJ::Request->pnotes ('remote' => LJ::get_remote());
+        return LJ::Request::NOT_FOUND;
+    }
 
     my %upics;
     LJ::load_userpics(\%upics, [ $u, $picid ]);
@@ -1671,8 +1673,8 @@ sub userpic_content
         my $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
 
         LJ::Request->header_out( 'X-REPROXY-FILE', $path );
-        $send_headers->();
 
+        $send_headers->();
         return LJ::Request::OK
     }
 

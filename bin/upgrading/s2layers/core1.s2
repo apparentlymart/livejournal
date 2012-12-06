@@ -76,6 +76,10 @@ class string
     "If the string contains a valid HTTP or HTTPS URL it is returned. Otherwise, an empty string is returned.";
 }
 
+class OptionsDelimeter 
+"Delimeters for options page."
+{}
+
 class Color
 "Represents a color."
 {
@@ -258,6 +262,7 @@ class UserLink
     var readonly bool is_heading "Is this link a heading or category name?  If so, it has no url and a list of children.";
     var readonly string title "The title or label for the link";
     var readonly string url "The url to which the link points";
+    var readonly string attributes "The link attributes for 'a' tag";
     var readonly UserLink[] children "Not Implemented: An array of child UserLink objects.";
 }
 
@@ -635,6 +640,18 @@ class Page
 
     function builtin get_alien_post( string url ) : Entry
     "Returns any public entry from any journal having give_posts_to_alien prop. Recipient must have get_alien_posts prop";
+
+    function builtin viewer_sees_journalpromo() : bool
+    "Return true if journal promo is not empty.";
+        
+    function builtin is_journalpromo() : bool
+    "Return true if journal promo is not empty and was not shown.";
+
+    function builtin journalpromo() : string
+    "Returns rendered journal promo.";
+
+    function builtin render_journalpromo() : bool
+    "Print rendered journal promo and return true if journal promo is not empty.";
 }
 
 class TagsPage extends Page
@@ -2604,7 +2621,7 @@ function Page::print_linklist() {
             if ($l.is_heading) {
                 "<b>$l.title</b>";
             } else {
-                "<a href='$l.url'>$l.title</a>";
+                "<a href='$l.url' $l.attributes>$l.title</a>";
             }
         }
         "<br />";

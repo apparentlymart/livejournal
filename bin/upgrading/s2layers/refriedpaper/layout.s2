@@ -1015,7 +1015,7 @@ function Page::print_linklist() {
         $return = $return + """<span style="font-weight: bold;">$l.title</span><br />""";
         $section_open = true;
       } else {
-        $return = $return + """<a href="$l.url">$l.title</a><br />""";
+        $return = $return + """<a href="$l.url" $l.attributes>$l.title</a><br />""";
       }
     }
   }

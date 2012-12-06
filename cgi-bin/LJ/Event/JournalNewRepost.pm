@@ -193,7 +193,7 @@ sub as_sms {
     undef $tinyurl if $tinyurl =~ /^500/;
             
     return LJ::Lang::get_text($lang, $ml_string, undef, {
-        reposter   => $self->poster->display_username,
+        reposter   => $self->reposter->display_username,
         community  => $entry->journal->display_username,
         poster     => $entry->poster->display_username,
         mobile_url => $tinyurl,

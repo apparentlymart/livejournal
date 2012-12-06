@@ -113,6 +113,7 @@ sub response {
     return LJ::Response::JSON->new( 
                 'data'          => $resp_data,
                 'callback'      => $self->{'callback'},
+                'javascript'    => ! !$self->{'callback'},
                 'http_headers'  => $headers, );
 
 }
@@ -120,7 +121,7 @@ sub response {
 sub __get_headers {
     my ($self, $result) = @_;
 
-    if (LJ::Request->hostname eq 'stat.' . $LJ::DOMAIN) {
+    if (LJ::API::RpcAuth::is_stat_domain( LJ::Request->hostname ) ) {
         if ($result->{'properties'}) {
             my $properties = $result->{'properties'};
             if ($properties->{'cache-time'}) {

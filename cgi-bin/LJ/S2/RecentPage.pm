@@ -1,7 +1,6 @@
 use strict;
 package LJ::S2;
 
-use LJ::DelayedEntry;
 use LJ::Entry::Repost;
 use LJ::UserApps;
 
@@ -41,9 +40,9 @@ sub RecentPage
 
         $p->{'tagfilter_active'} = 1;
         $p->{'tagfilter_mode'}   = $opts->{'tagmode'};
-        while ( my ( $tagname, $tagid ) = each %{ $opts->{'tagmap'} } ) {
+        while ( my ( $tagname, $tagids ) = each %{ $opts->{'tagmap'} } ) {
             push @{ $p->{'tagfilter_tags'} },
-                LJ::S2::Tag( $u, $tagid, $tagname );
+                LJ::S2::Tag( $u, $tagids->[0], $tagname );
         }
     }
 
@@ -113,7 +112,7 @@ sub RecentPage
         'poster'  => $get->{'poster'} || '',
         'show_sticky_on_top' => 1,
     }) if ($itemshow >= 0) ;
-    
+
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
     if ($is_prev_exist) {
         if ( scalar(@items) > $itemshow ) {        
@@ -122,6 +121,8 @@ sub RecentPage
     }
 
     die $err if $err;
+
+    my @prefetch_keys = ();
 
     ### load the log properties
     my %logprops = ();
@@ -138,9 +139,22 @@ sub RecentPage
         next unless $_->{'posterid'} != $u->{'userid'};
         $apu{$_->{'posterid'}} = undef;
     }
+
+    #
+    # prefetch userpic infomation and userids
+    #
     if (%apu) {
+        push @prefetch_keys, map { [$_, "upicinf:$_"] } keys %apu;
+        push @prefetch_keys, map { [$_, "upiccom:$_"] } keys %apu;
+
         LJ::load_userids_multiple([map { $_, \$apu{$_} } keys %apu], [$u]);
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
+    }
+
+    
+    LJ::MemCacheProxy::get_multi( @prefetch_keys );
+    if ($remote) {
+        $remote->prefetch_subscriptions();
     }
 
     # load tags
@@ -153,6 +167,10 @@ sub RecentPage
     my $sticky_appended  = !$u->has_sticky_entry() || $skip;
     my $ljcut_disable    = $remote ? $remote->prop("opt_ljcut_disable_lastn") : undef;
     my $replace_video    = $remote ? $remote->opt_embedplaceholders : 0;
+    
+    my %all_users;
+    
+    $all_users{$u->userid} = $u;
 
   ENTRY:
     foreach my $item ( @items ) {
@@ -164,6 +182,7 @@ sub RecentPage
 
         my $ditemid   = $itemid * 256 + $item->{'anum'};
         my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $entry_obj->handle_prefetched_props($logprops{$itemid});
        
         my $repost_entry_obj;
         my $removed; 
@@ -171,7 +190,7 @@ sub RecentPage
         next ENTRY unless $entry_obj->visible_to($remote, { 'viewall'  => $viewall, 
                                                             'viewsome' => $viewsome});
 
-        $entry_obj->handle_prefetched_props($logprops{$itemid});
+        
         my $replycount = $logprops{$itemid}->{'replycount'};
 
         my $subject    = $logtext->{$itemid}->[0];
@@ -334,10 +353,15 @@ sub RecentPage
             'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
         
+        $all_users{$entry_obj->posterid} = $entry_obj->poster;
+        
         push @{$p->{'entries'}}, $entry;
         LJ::run_hook('notify_event_displayed', $entry_obj);
 
     } # end huge while loop
+    
+    my $prefetch_props = ['custom_usericon', 'custom_usericon_individual'];
+    LJ::load_user_props_multi([keys %all_users], $prefetch_props);
 
     # mark last entry as closing.
     $p->{'entries'}->[-1]->{'end_day'} = 1 if @{$p->{'entries'} || []};

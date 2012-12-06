@@ -288,12 +288,12 @@ function Page::print_linklist() {
                 if ($l.is_heading) {
                     $link = "<tr><td>$l.title:</td><td>";
                 } else {
-                    $link = "<tr><td>View:</td><td><a href='$l.url'>$l.title</a>. ";
+                    $link = "<tr><td>View:</td><td><a href='$l.url' $l.attributes>$l.title</a>. ";
                 }
                 $section_open = true;
                 $first = false;
             } else {
-                $link = "<a href='$l.url'>$l.title</a>. ";
+                $link = "<a href='$l.url' $l.attributes>$l.title</a>. ";
             }
         } else {
             $link = """<tr><td>&nbsp;</td></tr>""";

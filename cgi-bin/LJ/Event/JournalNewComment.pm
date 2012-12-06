@@ -16,6 +16,7 @@ sub new {
     return $class->SUPER::new($comment->journal, $comment->jtalkid);
 }
 
+sub priority { 5 } 
 sub is_common { 1 }
 
 my @_ml_strings_en = (

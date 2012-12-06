@@ -119,6 +119,7 @@ sub get_multi {
 sub set {
     my ($class, $key, $data, $expire) = @_;
 
+    $data ||= '';
     $expire ||= 10 * 60;
     my $expire_time = time() + $expire; 
     my $cache_data = "$expire_time:$data";

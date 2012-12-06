@@ -1,6 +1,8 @@
 package LJ::Widget::SiteMessages;
 
 use strict;
+use warnings;
+
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::SiteMessages );
@@ -78,3 +80,4 @@ sub should_render {
 }
 
 1;
+

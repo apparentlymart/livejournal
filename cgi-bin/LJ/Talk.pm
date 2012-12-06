@@ -1,6 +1,15 @@
 package LJ::Talk;
 use strict;
 
+#########################
+# Types of state:
+# A - active
+# S - screened
+# D - deleted
+# B - spam
+# F - frozen
+#########################
+
 use Captcha::reCAPTCHA;
 use Carp qw(croak);
 use MIME::Words;
@@ -1744,7 +1753,10 @@ sub load_comments
 my $SC = '/talkpost_do.bml';
 
 sub resources_for_talkform {
-    LJ::need_res('stc/display_none.css');
+    LJ::need_res(qw(
+        stc/display_none.css
+        stc/lj_base-journal.css
+    ));
     LJ::need_res(qw(
         js/jquery/jquery.lj.subjecticons.js
         js/jquery/jquery.lj.commentator.js

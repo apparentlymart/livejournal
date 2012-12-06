@@ -4,10 +4,18 @@ use strict;
 use LJ::ExtBlock;
 use LJ::JSON;
 
+use LJ::Request;
 use LJ::RelationService::RSAPI;
 use LJ::RelationService::MysqlAPI;
 
 use Data::Dumper;
+
+my %singletons = ();
+
+sub reset_singletons {
+    %singletons = ();
+}
+
 
 sub _load_alt_api {
     my $class  = shift;
@@ -16,8 +24,12 @@ sub _load_alt_api {
 
     return 0 unless LJ::is_enabled('send_test_load_to_rs2');
 
-    my $ext_block = LJ::ExtBlock->load_by_id('lj11_params');
-    my $values = $ext_block ? LJ::JSON->from_json($ext_block->blocktext) : {};
+    my $values = LJ::Request->is_inited ? $singletons{'__lj11_params_value'} : 0;
+    unless ($values) {
+        my $ext_block = LJ::ExtBlock->load_by_id('lj11_params');
+        $values = $ext_block ? LJ::JSON->from_json($ext_block->blocktext) : {};
+        $singletons{'__lj11_params_value'} = $values;
+    }
     
     if ($type eq 'F') {
         return 0 unless $values->{rs_enable_type_f};
@@ -68,8 +80,7 @@ sub find_relation_destinations {
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->find_relation_destinations($u, $type, %opts);
-   
+    return $interface->find_relation_destinations($u, $type, %opts);   
 }
 
 ## findRelationSources
@@ -113,6 +124,7 @@ sub load_relation_destinations {
     }
 
     my $interface = $class->relation_api($u);
+    delete $singletons{$u->userid};
     return $interface->load_relation_destinations($u, $type, %opts);
 }
 
@@ -136,7 +148,9 @@ sub create_relation_to {
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->create_relation_to($u, $friend, $type, %opts);
+    my $result = $interface->create_relation_to($u, $friend, $type, %opts);
+    delete $singletons{$u->userid}->{$friend->userid};
+    return $result;
 }
 
 
@@ -159,6 +173,9 @@ sub remove_relation_to {
         }
     }
     my $interface = $class->relation_api($u);
+    if ($u ne '*' && UNIVERSAL::isa($u, 'LJ::User')) {
+        delete $singletons{$u->userid}->{$friend->userid};
+    }
     return $interface->remove_relation_to($u, $friend, $type);
 }
 
@@ -168,11 +185,19 @@ sub is_relation_to {
     my $friend = shift;
     my $type   = shift;
     my %opts   = @_;
-    
-    $u = LJ::want_user($u);
-    $friend = LJ::want_user($friend);
-    
+
     return undef unless $u && $friend && $type;
+
+    unless (UNIVERSAL::isa($u, 'LJ::User') && UNIVERSAL::isa($friend, 'LJ::User')) {
+        $u = LJ::want_user($u);
+        $friend = LJ::want_user($friend);
+
+        return undef unless $u && $friend && $type;
+    }
+
+    return $singletons{$u->{userid}}->{$friend->{userid}}->{$type}
+        if exists $singletons{$u->{userid}}->{$friend->{userid}}->{$type} && 
+                    !%opts && LJ::Request->is_inited;
 
     if ($class->_load_alt_api('read', $type)) {
         my $alt = $class->alt_api($u);
@@ -182,7 +207,9 @@ sub is_relation_to {
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->is_relation_to($u, $friend, $type, %opts);    
+    my $relation = $interface->is_relation_to($u, $friend, $type, %opts);   
+    $singletons{$u->{userid}}->{$friend->{userid}}->{$type} = $relation;
+    return $relation;
 }
 
 sub is_relation_type_to {
@@ -222,6 +249,10 @@ sub get_groupmask {
     
     return 0 unless $u && $friend && $type;
 
+    return $singletons{$u->userid}->{$friend->userid}->{gmask}
+        if exists $singletons{$u->userid}->{$friend->userid}->{gmask} && 
+                    !%opts && LJ::Request->is_inited;
+
     if ($class->_load_alt_api('read', $type)) {
         my $alt = $class->alt_api($u);
         if ($alt) {
@@ -230,7 +261,9 @@ sub get_groupmask {
     }
 
     my $interface = $class->relation_api($u);
-    return $interface->get_groupmask($u, $friend, %opts);    
+    my $result = $interface->get_groupmask($u, $friend, %opts);
+    $singletons{$u->userid}->{$friend->userid}->{gmask} = $result;
+    return $result;
 }
 
 sub delete_and_purge_completely {
@@ -250,6 +283,7 @@ sub delete_and_purge_completely {
     }
 
     my $interface = $class->relation_api($u);
+    delete $singletons{$u->userid};
     return $interface->delete_and_purge_completely($u, %opts);    
 }
 
@@ -285,6 +319,29 @@ sub set_rel_multi {
 
     my $interface = $class->relation_api();
     return $interface->set_rel_multi($edges);
+}
+
+sub find_relation_attributes {
+    my $class  = shift;
+    my $u      = shift;
+    my $friend = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
+    $u = LJ::want_user($u);
+    $friend = LJ::want_user($friend);
+    
+    return undef unless $u && $friend && $type;
+
+    if ($class->_load_alt_api('read', $type)) {
+        my $alt = $class->alt_api($u);
+        if ($alt) {
+            $alt->find_relation_attributes($u, $friend, $type, %opts);
+        }
+    }
+
+    my $interface = $class->relation_api($u);
+    return $interface->find_relation_attributes($u, $friend, $type, %opts);    
 }
 
 1;

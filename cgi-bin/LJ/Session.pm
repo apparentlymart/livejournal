@@ -43,7 +43,7 @@ sub instance {
 
     # try memory
     my $memkey = _memkey($u, $sessid);
-    my $sess = LJ::MemCache::get($memkey);
+    my $sess = LJ::MemCacheProxy::get($memkey);
     return $sess if $sess;
 
     # try master
@@ -53,7 +53,7 @@ sub instance {
         or return undef;
 
     bless $sess;
-    LJ::MemCache::set($memkey, $sess);
+    LJ::MemCacheProxy::set($memkey, $sess);
     return $sess;
 }
 
@@ -104,11 +104,6 @@ sub create {
 
     my $udbh = LJ::get_cluster_master($u);
     return undef unless $udbh;
-
-    # clean up any old, expired sessions they might have (lazy clean)
-    $u->do("DELETE FROM sessions WHERE userid=? AND timeexpire < UNIX_TIMESTAMP()",
-           undef, $u->{userid});
-    # FIXME: but this doesn't remove their memcached keys
 
     my $expsec     = LJ::Session->session_length($exptype);
     my $timeexpire = time() + $expsec;
@@ -216,7 +211,7 @@ sub _dbupdate {
         $sess->{$k} = $changes{$k};
     }
 
-    LJ::MemCache::delete($sess->_memkey);
+    LJ::MemCacheProxy::delete($sess->_memkey);
     return 1;
 
 }
@@ -863,7 +858,7 @@ sub destroy_sessions {
     }
     foreach my $id (@sessids) {
         $id += 0;
-        LJ::MemCache::delete(_memkey($u, $id));
+        LJ::MemCacheProxy::delete(_memkey($u, $id));
     }
 
     return 1;

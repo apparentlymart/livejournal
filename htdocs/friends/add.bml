@@ -24,8 +24,8 @@ use vars qw($body $title $windowtitle %GET %POST);
                  stc/entry.css
                  js/core.js
                  js/colorpicker.js
-                 js/jquery/jquery.ui.position.min.js
-                 js/jquery/jquery.ui.autocomplete.min.js
+                 js/lib/jquery-ui/jquery.ui.position.min.js
+                 js/lib/jquery-ui/jquery.ui.autocomplete.min.js
                  js/jquery/jquery.bgiframe.js
                  js/addfriend.js));
 
@@ -245,8 +245,9 @@ use vars qw($body $title $windowtitle %GET %POST);
 if ($u->is_visible) {
 
     ## Add user alias while user's friending
+        my $notes_faq_link = LJ::Faq->page_url( 'faqid' => 295 );
         $body .= '<div class="b-addfriend-option b-addfriend-note">';
-        $body .= '<h3 class="b-addfriend-subhead">' . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'" }) . '</h3>';
+        $body .= '<h3 class="b-addfriend-subhead">' . BML::ml('.note.text', {'username' => LJ::ljuser($user), aopts => "href='$notes_faq_link'" }) . '</h3>';
         if ($remote->get_cap ('aliases')) {
             $body .= '<p>' . LJ::html_text ( { name => 'user_note', class => 'type-text', value => LJ::ljuser_alias($u->{user}) } ) . '</p>';
         } else {

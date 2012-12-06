@@ -48,13 +48,15 @@ sub new {
 # returns: The newly populated LJ::Faq object.
 # </LJFUNC>
 sub load {
-    my $class = shift;
-    my $faqid = int(shift);
+    my ( $class, $faqid, %opts ) = @_;
+
+    $faqid = int $faqid;
     croak ("invalid faqid: $faqid")
         unless $faqid > 0;
 
-    my %opts = @_;
-    my $lang = delete $opts{lang} || $LJ::DEFAULT_LANG;
+    my $check = delete $opts{'check'};
+    my $lang  = delete $opts{'lang'} || $LJ::DEFAULT_LANG;
+
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
@@ -70,6 +72,9 @@ sub load {
              "FROM faq WHERE faqid=?",
              undef, $faqid);
         die $dbr->errstr if $dbr->err;
+
+        return undef if $check && !$f;
+
         $faq = $class->new(%$f, lang => $lang);
 
     } else { # Don't load fields that lang_update_in_place will overwrite.
@@ -79,6 +84,9 @@ sub load {
              "FROM faq WHERE faqid=?",
              undef, $faqid);
         die $dbr->errstr if $dbr->err;
+
+        return undef if $check && !$f;
+
         $faq = $class->new(%$f, lang => $lang);
         $faq->lang_update_in_place;
     }
@@ -203,6 +211,13 @@ sub unixmodtime {
 sub sortorder {
     my $self = shift;
     return $self->{sortorder};
+}
+
+sub page_url {
+    my ( $self, %opts ) = @_;
+
+    my $faqid = $opts{'faqid'} || $self->faqid;
+    return "$LJ::SITEROOT/support/faq/$faqid.html";
 }
 
 # <LJFUNC>
@@ -455,37 +470,48 @@ sub load_matching {
         or die "initial FAQ rendering failed";
 
     foreach my $f (@faqs) {
-	my $score = 0;
+        my $score = 0;
 
-	if ($f->question_raw =~ /\Q$term\E/i) {
-	    $score += 3;
-	}
-	if ($f->question_raw =~ /\b\Q$term\E\b/i) {
-	    $score += 5;
-	}
+        if ($f->question_raw =~ /\Q$term\E/i) {
+            $score += 3;
+        }
+        if ($f->question_raw =~ /\b\Q$term\E\b/i) {
+            $score += 5;
+        }
 
-	if ($f->summary_raw =~ /\Q$term\E/i) {
-	    $score += 2;
-	}
-	if ($f->summary_raw =~ /\b\Q$term\E\b/i) {
-	    $score += 4;
-	}
+        if ($f->summary_raw =~ /\Q$term\E/i) {
+            $score += 2;
+        }
+        if ($f->summary_raw =~ /\b\Q$term\E\b/i) {
+            $score += 4;
+        }
 
-	if ($f->answer_raw =~ /\Q$term\E/i) {
-	    $score += 1;
-	}
-	if ($f->answer_raw =~ /\b\Q$term\E\b/i) {
-	    $score += 3;
-	}
+        if ($f->answer_raw =~ /\Q$term\E/i) {
+            $score += 1;
+        }
+        if ($f->answer_raw =~ /\b\Q$term\E\b/i) {
+            $score += 3;
+        }
 
-	next unless $score;
+        next unless $score;
 
-	$scores{$f->{faqid}} = $score;
+        $scores{$f->{faqid}} = $score;
 
-	push @results, $f;
+        push @results, $f;
     }
 
     return sort { $scores{$b->{faqid}} <=> $scores{$a->{faqid}} } @results;
+}
+
+sub note_usage {
+    my ( $self, $remote ) = @_;
+
+    return unless $remote && LJ::is_enabled('faquses');
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do(
+        'REPLACE INTO faquses SET faqid=?, userid=?, dateview=NOW()',
+        undef, $self->faqid, $remote->userid );
 }
 
 1;

@@ -80,11 +80,6 @@
                 BML::redirect($POST{ret});
                 return 1;
             }
-    
-            if (my $u = LJ::User->new_from_external_domain($redir_host)) {
-                BML::redirect($POST{ret});
-                return 1;
-            }
         }
 
         return 0;
@@ -320,15 +315,15 @@
             $cursess->update_master_cookie;
         }
 
-        if ($do_login)
-        {
+        if ( $do_login ) {
             my $u = LJ::load_user($user);
 
             if (! $u) {
                 my $euser = LJ::eurl($user);
                 push @errors, [ unknown_user => BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })]
                     unless $u;
-            } else {
+            }
+            else {
                 push @errors, [ purged_user => "$ML{'error.purged.text'}" ] if $u->is_expunged;
                 push @errors, [ community_disabled_login => "$ML{'error.nocommlogin'}" ]
                     if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
@@ -347,7 +342,8 @@
 
             if ($POST{response}) {
                 $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response}, \$banned, $chal_opts);
-            } else {  # js disabled, fallback to plaintext
+            }
+            else {  # js disabled, fallback to plaintext
                 $ok = LJ::auth_okay($u, $password, undef, undef, \$banned);
             }
 
@@ -395,8 +391,8 @@
             my $exptype = ($POST{'expire'} eq "never" || $POST{'remember_me'}) ? "long" : "short";
             my $bindip  = ($POST{'bindip'} eq "yes") ? BML::get_remote_ip() : "";
 
-            $u->make_login_session($exptype, $bindip);
             LJ::run_hooks('user_login', $u);
+            $u->make_login_session($exptype, $bindip);
             $cursess = $u->session;
 
             return if $want_success_redirect->();
@@ -406,16 +402,12 @@
                 $POST{'ref'} !~ /[\n\r]/)
             {
                 return BML::redirect("$POST{'ref'}");
-            } elsif ($GET{'ret'} == 1 && $referer) {
-                if (    $referer =~ /\Q$LJ::DOMAIN\E/ || 
-                        ($referer =~ m!http://([\w\.\-]+)! && LJ::User->new_from_external_domain($1))) 
-                { 
-                    my $uniq = LJ::Request->notes('uniq');
-                    if ($uniq) {
-                        LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
-                    }
-                    return BML::redirect("$referer");
+            } elsif ($GET{'ret'} == 1 && $referer && $referer =~ /\Q$LJ::DOMAIN\E/) {
+                my $uniq = LJ::Request->notes('uniq');
+                if ($uniq) {
+                    LJ::MemCache::set("loginout:$uniq", 1, time() + 15);
                 }
+                return BML::redirect("$referer");
             }
 
             LJ::set_remote($u);

@@ -62,7 +62,7 @@ body<=
 
             return BML::redirect("$LJ::SITEROOT/customize/options.bml$getextra");
         }
-        my @errors = LJ::Widget->handle_post(\%POST, qw(JournalTitles ThemeChooser ThemeNav LayoutChooser AdLayout));
+        my @errors = LJ::Widget->handle_post(\%POST, qw(JournalTitles ThemeChooser ThemeNav LayoutChooser AdLayout CustomizeFriendsFeed));
         $ret .= LJ::bad_input(@errors) if @errors;
     }
 
@@ -109,6 +109,9 @@ body<=
     $ret .= "<div class='layout-selector-wrapper pkg'>";
     $ret .= $layout_chooser->render( headextra => \$headextra );
     $ret .= "</div><!-- end .layout-selector-wrapper' -->";
+
+    my $customize_friendsfeed = LJ::Widget::CustomizeFriendsFeed->new;
+    $ret .= $customize_friendsfeed->render;
 
     $ret .= "<form method='POST'><div class='theme-customize'>";
     $ret .= LJ::form_auth();

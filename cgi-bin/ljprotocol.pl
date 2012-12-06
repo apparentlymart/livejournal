@@ -43,7 +43,7 @@ require "taglib.pl";
 require "talklib.pl" if $LJ::NEW_ENTRY_CLEANUP_HACK;
 
 # when posting or editing ping hubbub
-require "ljfeed.pl" unless $LJ::DISABLED{'hubbub'};
+require "ljfeed.pl";
 
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
@@ -104,6 +104,7 @@ my %e = (
      "222" => E_PERM,    
      "223" => E_TEMP,
      "224" => E_TEMP,
+     "225" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -834,7 +835,7 @@ sub deletecomments {
     my @comments;
     foreach my $id (@ids) {
         my $comm = LJ::Comment->new($journal, dtalkid => $id);
-        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
+        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm && ($comm->dtalkid == $id);
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $comm->user_can_delete($u);
 
@@ -969,7 +970,7 @@ sub updatecomments {
     my @comments;
     foreach my $id (@ids) {
         my $comm = LJ::Comment->new($journal, dtalkid => $id);
-        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm->dtalkid == $id;
+        return fail($err, 203, 'xmlrpc.des.no_comment_by_param',{'param'=>'dtalkid'}) unless $comm && ($comm->dtalkid == $id);
         return fail($err, 327, 'dtalkid:'.$comm->dtalkid) if $comm->is_deleted;
         return fail($err, 326, 'dtalkid:'.$comm->dtalkid) unless $can_method->($u, $journal, $comm->entry->poster, $comm->poster);
         push @comments, $comm;
@@ -1336,6 +1337,8 @@ sub getfriendspage
             $h{repost} = 1;
             $entry = $original_entry;
         }
+
+        $entry->normalize_props() unless $flags->{'noauth'};
 
         # Add more data for public posts
         foreach my $method (@attrs) {
@@ -2448,13 +2451,10 @@ sub postevent {
     if (LJ::is_enabled("paid_repost")) {
         my $error;
 
-        if ($req->{'repost_budget'} && $req->{'repost_budget'} =~ /\D/) {
-            return fail($err,224);
-        }
-
         $repost_offer = LJ::Pay::Repost::Offer->from_create_entry(
             \$event, 
             {repost_budget => $req->{'repost_budget'},
+             limit_sc      => $req->{'repost_limit_sc'},
              journalid     => $ownerid,
              userid        => $posterid}, 
             \$error
@@ -2463,8 +2463,6 @@ sub postevent {
         return fail($err,222) if $repost_offer && ! $flags->{noauth};
        
         return fail($err,160,$error) if $error;
-
-        return fail($err,223) if $req->{'paid_repost_on'} && ! $repost_offer->{'budget'};
     }
 
     # convert RTE lj-embeds to normal lj-embeds
@@ -2646,11 +2644,15 @@ sub postevent {
                 return fail($err, 501);
             }
 
-            # alert moderator(s)
-            my $mods = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
-            if (@$mods) {
+            # alert moderator(s), maintainers, owner
+            my $mods        = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
+            my $mains       = LJ::load_rel_user($dbh, $ownerid, 'A') || [];
+            my $super       = LJ::load_rel_user($dbh, $ownerid, 'S') || [];
+            my %mail_list   = (map { $_ => 1 } (@$super, @$mods, @$mains));
+
+            if (%mail_list) {
                 # load up all these mods and figure out if they want email or not
-                my $modlist = LJ::load_userids(@$mods);
+                my $modlist = LJ::load_userids(keys %mail_list);
 
                 my @emails;
                 my $ct;
@@ -2839,24 +2841,6 @@ sub postevent {
         }
     }    
     
-    if ($repost_offer) {
-        my $error = '';
-        
-        $repost_offer->{jitemid} = $jitemid;
-
-        my $offer_id = LJ::Pay::Repost::Offer->create(
-            \$error,
-            %$repost_offer,
-        );
-
-        unless ( $offer_id ) {
-            LJ::delete_entry($uowner, $jitemid, undef, $anum); # roll-back
-            return fail($err,160,$error);
-        } else {
-            $req->{props}->{repost_offer} = $offer_id;
-        }
-    }
-
     # Entry tags
     if ($req->{props} && defined $req->{props}->{taglist}) {
         # slightly misnamed, the taglist is/was normally a string, but now can also be an arrayref.
@@ -2930,6 +2914,23 @@ sub postevent {
                           \%logprops) if %logprops;
     }
 
+    # Paid Repost Offer
+    if ($repost_offer) {
+        my $error = '';
+        
+        $repost_offer->{jitemid} = $jitemid;
+
+        my $offer_id = LJ::Pay::Repost::Offer->create(
+            \$error,
+            %$repost_offer,
+        );
+
+        unless ( $offer_id ) {
+            LJ::delete_entry($uowner, $jitemid, undef, $anum); # roll-back
+            return fail($err,160,$error);
+        }
+    }
+
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$jitemid ".
              "WHERE userid=$ownerid") unless $flags->{'notimeupdate'};
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
@@ -2963,6 +2964,18 @@ sub postevent {
       }
 
     my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
+
+    my $ip = LJ::get_remote_ip();
+    my $uniq = LJ::UniqCookie->current_uniq();
+
+    $u->do('INSERT INTO logleft VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef, 
+        $posterid, 
+        $ownerid, 
+        $ditemid, 
+        $ip, 
+        $uniq, 
+        $security eq 'public'
+    ) if $uowner->{'journaltype'} eq 'C';
 
     ## Counter "new_post" for monitoring
     LJ::run_hook ("update_counter", {
@@ -3110,7 +3123,7 @@ sub editevent {
             return fail( $err, 217 ) if $req->{itemid} || $req->{anum};
             return fail( $err, 215 ) unless $req->{tz};
 
-            if ( $req->{repost_budget} || LJ::CleanHtml::Like->extract_repost_budget(\$req->{event}) ) {
+            if ( $req->{repost_budget} || LJ::CleanHtml::Like->extract_repost_params(\$req->{event}) ) {
                 return fail($err, 159);
             }
 
@@ -3152,107 +3165,150 @@ sub editevent {
         return $res if $res->{type};
     }
 
-    # don't moderate admins, moderators & pre-approved users
-    unless ( LJ::RelationService->is_relation_type_to( $ownerid, $posterid, [ 'A','M','N' ] ) ) {
+    # don't moderate admins, moderators, pre-approved users & unsuspicious users
+    my $is_unsuspicious_user = 0;
+    LJ::run_hook('is_unsuspicious_user_in_comm', $posterid, \$is_unsuspicious_user);
+    my $is_approved_user = LJ::RelationService->is_relation_type_to( $ownerid, $posterid, [ 'A','M','N' ] );
+    unless ( $is_unsuspicious_user || $is_approved_user || !$uowner->check_non_whitelist_enabled() ) {
+
+        my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
+        my $modid_old = $entry->prop("mod_queue_id");
+
+        my $need_moderated_old = 0;
+
+        my $suspicious_list_old = {};
+        LJ::run_hook('spam_community_detector', $uowner, { event => $entry->event_html }, \$need_moderated_old, $suspicious_list_old);
 
         my $need_moderated = 0;
-        if ( $uowner->check_non_whitelist_enabled() ) {
-            LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
+
+        my $suspicious_list = {};
+        LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated, $suspicious_list);
+        
+        foreach ( keys %$suspicious_list_old ) {
+            delete $suspicious_list->{$_};
         }
+        $need_moderated = scalar keys %$suspicious_list;
 
-        if ($uowner->{'journaltype'} eq 'C' && $need_moderated && !$flags->{'nomod'}) {
+        if ($uowner->{'journaltype'} eq 'C' && !$flags->{'nomod'}) {
 
-            $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
+            
+            if ($need_moderated) {
 
-            # create tag <lj-embed> from HTML-tag <embed>
-            LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
+                $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
 
-            my $fr = $dbcm->quote(Storable::nfreeze($req));
-            return fail($err, 409) if length($fr) > 200_000;
+                # create tag <lj-embed> from HTML-tag <embed>
+                LJ::EmbedModule->parse_module_embed($uowner, \$req->{event});
 
-            # store
-            my $modid = LJ::alloc_user_counter($uowner, "M");
-            return fail($err, 501) unless $modid;
+                my $fr = $dbcm->quote(Storable::nfreeze($req));
+                return fail($err, 409) if length($fr) > 200_000;
 
-            $uowner->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
-                        "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
-                        LJ::text_trim($req->{'subject'}, 30, 0));
-            return fail($err, 501) if $uowner->err;
+                # store
+                my $modid = LJ::alloc_user_counter($uowner, "M");
+                return fail($err, 501) unless $modid;
 
-            $uowner->do("INSERT INTO modblob (journalid, modid, request_stor) ".
-                        "VALUES ($ownerid, $modid, $fr)");
-            if ($uowner->err) {
-                $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
-                return fail($err, 501);
-            }
+                $uowner->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
+                            "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
+                            LJ::text_trim($req->{'subject'}, 30, 0));
+                return fail($err, 501) if $uowner->err;
 
-            # alert moderator(s)
-            my $mods = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
-            if (@$mods) {
-                # load up all these mods and figure out if they want email or not
-                my $modlist = LJ::load_userids(@$mods);
-
-                my @emails;
-                my $ct;
-                foreach my $mod (values %$modlist) {
-                    last if $ct > 20;  # don't send more than 20 emails.
-
-                    next unless $mod->is_visible;
-
-                    LJ::load_user_props($mod, 'opt_nomodemail');
-                    next if $mod->{opt_nomodemail};
-                    next if $mod->{status} ne "A";
-
-                    push @emails,
-                        {
-                            to          => $mod->email_raw,
-                            browselang  => $mod->prop('browselang'),
-                            charset     => $mod->mailencoding || 'utf-8',
-                        };
-
-                    ++$ct;
+                $uowner->do("INSERT INTO modblob (journalid, modid, request_stor) ".
+                            "VALUES ($ownerid, $modid, $fr)");
+                if ($uowner->err) {
+                    $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
+                    return fail($err, 501);
+                }
+                
+                if ($modid_old) {
+                    $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid_old");
+                    return fail($err, 501) if $uowner->err;
+                    $uowner->do("DELETE FROM modblob WHERE journalid=$ownerid AND modid=$modid_old");
+                    return fail($err, 501) if $uowner->err;
                 }
 
-                foreach my $to (@emails) {
-                    # TODO: html/plain text.
-                    my $body = LJ::Lang::get_text(
-                        $to->{'browselang'},
-                        'esn.moderated_submission.body', undef,
-                        {
-                            user        => $u->{'user'},
-                            subject     => $req->{'subject'},
-                            community   => $uowner->{'user'},
-                            modid       => $modid,
-                            siteroot    => $LJ::SITEROOT,
-                            sitename    => $LJ::SITENAME,
-                            moderateurl => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid",
-                            viewurl     => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}",
+                $entry->set_prop("mod_queue_id", $modid);
+            
+                my $suspicious_text = "";
+                foreach ( sort keys %$suspicious_list ) {
+                    $suspicious_text .= "   - $suspicious_list->{$_}->{type} - $suspicious_list->{$_}->{url}\n";
+                }
+
+                # alert moderator(s), maintainers, owner
+                my $mods        = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
+                my $mains       = LJ::load_rel_user($dbh, $ownerid, 'A') || [];
+                my $super       = LJ::load_rel_user($dbh, $ownerid, 'S') || [];
+                my %mail_list   = (map { $_ => 1 } (@$super, @$mods, @$mains));
+
+                if (%mail_list) {
+                    # load up all these mods and figure out if they want email or not
+                    my $modlist = LJ::load_userids(keys %mail_list);
+
+                    my @emails;
+                    my $ct;
+                    foreach my $mod (values %$modlist) {
+                        last if $ct > 20;  # don't send more than 20 emails.
+
+                        next unless $mod->is_visible;
+
+                        LJ::load_user_props($mod, 'opt_nomodemail');
+                        next if $mod->{opt_nomodemail};
+                        next if $mod->{status} ne "A";
+
+                        push @emails,
+                            {
+                                to          => $mod->email_raw,
+                                browselang  => $mod->prop('browselang'),
+                                charset     => $mod->mailencoding || 'utf-8',
+                            };
+
+                        ++$ct;
+                    }
+
+                    foreach my $to (@emails) {
+                        # TODO: html/plain text.
+                        my $body = LJ::Lang::get_text(
+                            $to->{'browselang'},
+                            'esn.moderated_edited_submission.body', undef,
+                            {
+                                user        => $u->{'user'},
+                                subject     => $req->{'subject'},
+                                community   => $uowner->{'user'},
+                                modid       => $modid,
+                                siteroot    => $LJ::SITEROOT,
+                                sitename    => $LJ::SITENAME,
+                                moderateurl => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid",
+                                viewurl     => "$LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}",
+                                susp_list   => $suspicious_text,
+                            });
+
+                        my $subject = LJ::Lang::get_text($to->{'browselang'},'esn.moderated_edited_submission.subject');
+
+                        LJ::send_mail({
+                            'to'        => $to->{to},
+                            'from'      => $LJ::DONOTREPLY_EMAIL,
+                            'charset'   => $to->{charset},
+                            'subject'   => $subject,
+                            'body'      => $body,
                         });
-
-                    my $subject = LJ::Lang::get_text($to->{'browselang'},'esn.moderated_submission.subject');
-
-                    LJ::send_mail({
-                        'to'        => $to->{to},
-                        'from'      => $LJ::DONOTREPLY_EMAIL,
-                        'charset'   => $to->{charset},
-                        'subject'   => $subject,
-                        'body'      => $body,
-                    });
-                }
-            }
-
-            my $msg = translate($u, "modpost", undef);
-            return {
-                'message' => $msg,
-                xc3 => {
-                    u => $u,
-                    post => {
-                        coords      => $req->{props}->{current_coords},
-                        has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
-                        from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
                     }
                 }
-            };
+
+                my $msg = translate($u, "modpost", undef);
+                return {
+                    'message' => $msg,
+                    xc3 => {
+                        u => $u,
+                        post => {
+                            coords      => $req->{props}->{current_coords},
+                            has_images  => ($req->{event} =~ /pics\.livejournal\.com/ ? 1 : 0),
+                            from_mobile => ($req->{event} =~ /m\.livejournal\.com/ ? 1 : 0)
+                        }
+                    }
+                };
+            } elsif ($modid_old) {
+                $uowner->do("DELETE FROM modlog  WHERE journalid=? and  modid=?", undef, $ownerid, $modid_old);
+                $uowner->do("DELETE FROM modblob WHERE journalid=? and  modid=?", undef, $ownerid, $modid_old);
+                $entry->set_prop("mod_queue_id", undef);
+            }
         }
     }
 
@@ -3410,20 +3466,6 @@ sub editevent {
     if (LJ::is_enabled("paid_repost") && $req->{'event'} =~ /\S/) {
         my $error;
 
-        if(!$curprops{$itemid}->{repost_offer} &&
-           $req->{paid_repost_on} &&
-           !$req->{repost_budget}) {
-            return fail($err,223);
-        }
-
-        if ($req->{repost_budget} && $req->{repost_budget} =~ /\D/){
-            return fail($err,224);
-        }
-
-        if ($req->{add_repost_budget} && $req->{add_repost_budget} =~ /\D/){
-            return fail($err,224);
-        }
-
         ($repost_offer, $repost_offer_action) = LJ::Pay::Repost::Offer->from_edit_entry(
             \$req->{event},
             {
@@ -3432,14 +3474,21 @@ sub editevent {
                 journalid   => $ownerid,
                 jitemid     => $itemid,
                 budget      => $req->{repost_budget},
+                limit_sc    => $req->{repost_limit_sc},
                 revoke      => !$req->{paid_repost_on},
             },
             \$error,
         );
         
-        # cannot create or edit repost offer via api
-        return fail($err,222) if $repost_offer && $repost_offer_action =~ /create|edit/ && ! $flags->{noauth};;
+        
+        unless ($flags->{noauth}) {
+            # cannot create or edit repost offer via api
+            return fail($err,222) if $repost_offer && $repost_offer_action =~ /create|edit/;
 
+            # do not revoke repost offer via api
+            undef $repost_offer if $repost_offer && $repost_offer_action =~ /revoke/;
+        }
+  
         return fail($err,160,$error) if $error;
     }
     
@@ -3599,12 +3648,12 @@ sub editevent {
 
             my $offer_id = LJ::Pay::Repost::Offer->create(\$error, %$repost_offer) or 
                 fail(\$warning,160,$error);
-            
-            $req->{props}->{repost_offer} = $offer_id if $offer_id;
-            
+                        
         } elsif($repost_offer_action eq 'edit') {
-            $repost_offer->add_budget(\$error, $repost_offer->{add_budget}) or 
-                fail(\$warning,160,$error);
+            $repost_offer->edit(\$error, 
+                                add_budget => $repost_offer->{add_budget},
+                                limit_sc   => $repost_offer->{limit_sc},
+                                ) or fail(\$warning,160,$error);
        
         } elsif($repost_offer_action eq 'revoke') {
             
@@ -4017,18 +4066,21 @@ sub getevents {
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err, 203, 'xmlrpc.des.bad_value',{'param'=>'syncitems'})
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-        return fail($err, 301, 'xmlrpc.des.syncitems_unavailable') unless($u);
+
+        return fail($err, 301, 'xmlrpc.des.syncitems_unavailable') unless($uowner || $u);
 
         my $now = time();
 
         # broken client loop prevention
+        # TODO: Just add rate limits here instead of that old stuff
+        my $u_req = ($u ? $u : $uowner);
         if ($req->{'lastsync'}) {
             my $pname = "rl_syncitems_getevents_loop";
-            LJ::load_user_props($u, $pname);
+            LJ::load_user_props($u_req, $pname);
 
             # format is:  time/date/time/date/time/date/... so split
             # it into a hash, then delete pairs that are older than an hour
-            my %reqs = split(m!/!, $u->{$pname});
+            my %reqs = split(m!/!, $u_req->{$pname});
 
             foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
             my $count = grep { $_ eq $date } values %reqs;
@@ -4040,7 +4092,7 @@ sub getevents {
                 return fail($err,406);
             }
 
-            $u->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
+            $u_req->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
                                                sort { $b <=> $a }
                                                keys %reqs ) );
         }
@@ -4131,6 +4183,81 @@ sub getevents {
 
         my $in = join(',', @ids) || "0";
         $where = "AND jitemid IN ($in)";
+    }
+    elsif ($req->{'selecttype'} eq 'tag') {
+        
+        my $empty_res = {
+            skip => $skip,
+            xc3  => { u => $u },
+            events => [],
+        };
+
+        my $howmany = $req->{'howmany'} || 20;
+        if ($howmany > 50) { $howmany = 50; }
+        $howmany = $howmany + 0;
+
+        $limit = "LIMIT $howmany";
+        $offset = "OFFSET $skip";
+
+        my $jitemids;
+
+        my ($tagids, $tagnames, $tags, $known_tags) = ([], [], {}, {});
+
+        return fail($err,225)
+            unless LJ::Tags::is_valid_tagstring($req->{'tags'}, $tagnames, { omit_underscore_check => 1 });
+
+        $tags = LJ::Tags::get_usertags($uowner, { remote => $u });
+        
+        return $empty_res unless $tags && %$tags;
+
+        while ( my ($tid, $tag) = each %$tags ) {
+            $known_tags->{LJ::Text->normalize_tag_name($tag->{name})} = $tid;
+        }
+
+        my $tagmode = lc $req->{'tagmode'};
+
+        $tagids = [ map {
+            my $tid = $known_tags->{LJ::Text->normalize_tag_name($_)};
+            $tid ? 
+                $tid : 
+                ( $tagmode eq 'and' ? return $empty_res : () ); 
+        } @$tagnames ];
+
+        return $empty_res unless $tagids && @$tagids;
+        
+        if ($tagmode eq 'and') {
+
+            my $limit = $LJ::TAG_INTERSECTION;
+            $#{$tagids} = $limit - 1 if @{$tagids} > $limit;
+            my $in = join(',', map { $_+0 } @{$tagids});
+            my $sth = $dbcr->prepare("SELECT jitemid, kwid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)");
+            $sth->execute($ownerid);
+
+            my %mix;
+            while (my $row = $sth->fetchrow_arrayref) {
+                my ($jitemid, $kwid) = @$row;
+                $mix{$jitemid}++;
+            }
+
+            my $need = @{$tagids};
+            foreach my $jitemid (keys %mix) {
+                delete $mix{$jitemid} if $mix{$jitemid} < $need;
+            }
+            
+            $jitemids = [keys %mix];
+        } else { # mode: 'or'
+            # select jitemids uniquely
+            my $in = join(',', map { $_+0 } @{$tagids});
+            $jitemids = $dbcr->selectcol_arrayref(qq{
+                SELECT DISTINCT jitemid FROM logtagsrecent WHERE journalid = ? AND kwid IN ($in)
+                }, undef, $ownerid);
+        }
+
+        return $empty_res unless @$jitemids;
+   
+        $where = " AND jitemid IN (" .
+            join(',', map { $_ + 0 } @$jitemids) .
+            ")";
     }
     else {
         return fail($err,200,'xmlrpc.des.bad_value',{'param'=>'selecttype'});
@@ -4271,7 +4398,7 @@ sub getevents {
         #
         # There is using final_ variabled to get correct link
         #
-        $evt->{'url'}         = LJ::item_link($final_ownerid, 
+        $evt->{'url'}         = LJ::item_link(LJ::load_userid($final_ownerid), 
                                               $final_itemid, 
                                               $final_anum);
 
@@ -4322,8 +4449,23 @@ sub getevents {
             $evt->{'props'} = {};
 
             foreach my $name (keys %{$props{$itemid}}) {
+
                 my $value = $props{$itemid}->{$name};
                 $value =~ s/\n/ /g;
+
+                # normalize props
+                unless ($flags->{'noauth'}) {
+                    my $prop  = LJ::get_prop("log", $name);
+                    my $ptype = $prop->{'datatype'};
+                
+                    if ($ptype eq "bool" && $value !~ /^[01]$/) {
+                        $value = $value ? 1 : 0;
+                    }
+                    if ($ptype eq "num" && $value =~ /[^\d]/) {
+                        $value = int $value;
+                    }
+                }
+
                 $evt->{'props'}->{$name} = $value;
             }
 
@@ -5216,9 +5358,6 @@ sub login_message
     return $msg->("readonly")          if LJ::get_cap($u, "readonly");
     return $msg->("not_validated")     if ($u->{'status'} eq "N" and not $LJ::EVERYONE_VALID);
     return $msg->("must_revalidate")   if ($u->{'status'} eq "T" and not $LJ::EVERYONE_VALID);
-
-    my $checkpass = LJ::run_hook("bad_password", { 'u' => $u });
-    return $msg->("bad_password", { 'pre' => "$checkpass " }) if $checkpass;
 
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/;
     return $msg->("old_win32_client")  if $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/;

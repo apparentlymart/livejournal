@@ -1,6 +1,8 @@
 package LJ::FaqCat;
 use strict;
 
+my $faq_dmid;
+
 sub new {
     my $class = ref $_[0] ? ref shift : shift;
     my $opts  = ref $_[0] ? shift : {@_};
@@ -40,7 +42,43 @@ sub load_by_ids {
     return @res;
 }
 
+sub load {
+    my ( $class, $id ) = @_;
+    my ($faqcat) = $class->load_by_ids($id);
+    return $faqcat;
+}
 
+sub load_all {
+    my ($class) = @_;
+
+    my $dbh = LJ::get_db_reader();
+    my $rows = $dbh->selectall_arrayref(
+        'SELECT * FROM faqcat ORDER BY catorder', { 'Slice' => {} } );
+
+    return map { $class->new($_) } @$rows;
+}
+
+sub catname_display {
+    my ( $self, $lang ) = @_;
+
+    if ( $lang eq $LJ::DEFAULT_LANGUAGE ) {
+        return $self->faqcatname;
+    }
+
+    unless ( defined $faq_dmid ) {
+        my $dom = LJ::Lang::get_dom('faq');
+        $faq_dmid = $dom->{'dmid'};
+    }
+
+    my $varname = 'cat.' . $self->faqcat;
+    return LJ::Lang::get_text( $lang, $varname, $faq_dmid );
+}
+
+sub page_url {
+    my ($self) = @_;
+
+    my $faqcat = $self->faqcat;
+    return "$LJ::SITEROOT/support/faq/cat/$faqcat.html";
+}
 
 1;
-

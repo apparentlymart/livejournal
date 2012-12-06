@@ -421,4 +421,57 @@ sub next_afternoon {
     return ($epoch > $after ? $epoch : $epoch + 86400);
 }
 
+my $format_map = {
+    qw{
+        day        %D
+        week_day   %u
+        month      %M
+        month_name %B
+        year       %Y
+        hour       %h
+        minute     %m
+    }
+};
+
+my $format_rmap = { reverse %$format_map };
+
+sub format_time {
+    my ($class, $format, $data) = @_;
+    my $i;
+
+    foreach my $key (map { $format_map->{$_} } keys %$data) {
+        if (($i = index($format, $key)) >= 0) {
+            substr($format, $i, length($key)) = $data->{ $format_rmap->{$key} };
+        }
+    }
+
+    return $format;
+} # format_time
+
+sub format_rtime {
+    my ($class, $format, $input) = @_;
+    my @order = grep { $_ } map { $format_rmap->{$_} } split m{((?<!\\)%\w)}i, $format;
+    my @format = grep { $_ } split m{(?<!\\)%\w}i, $format;
+    my (@match, $i, $key);
+
+    while (@format) {
+        $key = shift @format;
+        $i = index($input, $key);
+
+        push @match, substr $input, 0, $i
+            if $i > 0;
+
+        substr($input, 0, $i + length $key) = ''
+            unless $i < 0;
+    }
+
+    push @match, $input if $input;
+   
+    return {
+        map {
+            ($_ => shift @match)
+        } @order
+    };
+} # format_rtime
+
 1;

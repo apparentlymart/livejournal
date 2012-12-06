@@ -253,6 +253,39 @@ DL.current-version {
 	cursor:pointer;
 	}
 
+/* Social links */
+
+.social-links DT,
+.social-links DD {
+	display: inline;
+	padding: 0 !important;
+	}
+	.social-links DT {
+		font-size: 11px !important;
+		vertical-align: top;
+		}
+	.social-links DD {
+		margin: 0 2px 0;
+		}
+	.social-links DD A {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		border: 0 !important;
+		vertical-align: top;
+		outline: none;
+		background: url(/img/icons/sc.png?ver=1) no-repeat;
+		}
+	.social-links .social-fb {
+		background-position: 0 0;
+		}
+	.social-links .social-vk {
+		background-position: -17px 0;
+		}
+	.social-links .social-tw {
+		background-position: -34px 0;
+		}
+
 /* Adding/Editing a note for a user
 ------------------------------------------*/
 .user_alias_act {
@@ -1070,6 +1103,41 @@ DIV.lj_ippu_app {
 		-webkit-border-radius: 7px;
 		-moz-border-radius: 7px;
 		border-radius: 7px;
+		}
+	.b-popup-options-centered .b-popup-submit-options {
+		margin: 0.5em 0 0;
+		text-align: center;
+		}
+	/* Custom dialog elements */
+	.b-dialog {
+		position: relative;
+		width: 100%;
+		}
+	.b-dialog-header {
+		padding: 0 15px 0 0;
+		margin: 0 0 10px;
+		line-height: 16px;
+		font-size: 14px;
+		font-weight: bold;
+		color: #000;
+		}
+	.b-dialog-body {
+		max-width: 500px;
+		min-width: 300px;
+		margin: 10px 0;
+		}
+	.b-dialog-footer {
+		margin: 10px 0 0;
+		text-align: center;
+		}
+	.b-dialog-prompt {
+		display: block;
+		width: 100%;
+		margin: 10px 0 0;
+		padding: 2px 5px;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
 		}
 	/* Put here styles for popups that need to reset */
 	.b-popup,
@@ -1963,6 +2031,9 @@ BODY div .b-helplink:active {
 	.b-msgsystem-error {
 		display: none;
 		}
+	.b-msgsystem-errorbox-show .b-msgsystem-error-ajax {
+		display: block;
+		}
 .b-msgsystem-errorbox-errors {
 	display: block;
 	}
@@ -1997,6 +2068,9 @@ BODY div .b-helplink:active {
 	}
 	.b-msgsystem-message {
 		display: none;
+		}
+	.b-msgsystem-messagebox-show .b-msgsystem-message-ajax {
+		display: block;
 		}
 .b-msgsystem-messagebox-messages {
 	display: block;
@@ -2615,62 +2689,6 @@ HTML BODY .i-ljuser {
 	.i-ljuser-username {
 		}
 
-/* Content plus Aside
---------------------------------------*/
-.b-extracontent {
-	position: relative;
-	margin: 0;
-	padding: 30px;
-	line-height: 1.4;
-	*padding-left: 0;
-	}
-	.b-extracontent-head {
-		margin: 0 0 1em;
-		font-size: 1em;
-		font-style: normal;
-		font-weight: bold;
-		color: #000;
-		}
-	.b-extracontent P {
-		margin: 0 0 1em;
-		}
-	.b-extracontent-more {
-		padding-top: 1em;
-		border-top: 2px solid #C8CFD5;
-		}
-	.b-extracontent-shadow {
-		overflow: hidden;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		width: 27px;
-		margin: 0;
-		padding: 0;
-		}
-		.b-extracontent-shadow-inner {
-			position: absolute;
-			top: 20px;
-			bottom: 20px;
-			right: 27px;
-			width: 300%;
-			-webkit-box-shadow: 0 0 10px 0 #99A7BC;
-			-moz-box-shadow: 0 0 10px 0 #99A7BC;
-			box-shadow: 0 0 10px 0 #324F7A;
-			-moz-border-radius: 30px / 100px;
-			border-radius: 30px / 100px;
-			}
-/* remove shadow on tiny screen */
-@media screen and (max-width: 1000px) {
-	.b-extracontent {
-		padding-right: 0;
-		padding-left: 0;
-		}
-		.b-extracontent-shadow-inner {
-			display: none;
-			}
-}
-
 /* Popup content
 --------------------------------------*/
 .b-popup-content {
@@ -2801,18 +2819,18 @@ HTML BODY .i-ljuser {
 --------------------------------------*/
 .b-panel {
 	position: relative;
-	margin: 0;
+	margin: 0 0 120px;
 	padding: 20px 20px 60px;
 	border: 0;
 	-moz-border-radius: 9px;
 	border-radius: 9px;
-	background: #DCFBFF;
-	background: #DCFBFF -moz-linear-gradient(top,  #DCFBFF 0%, #CDE7FE 100%);
-	background: #DCFBFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#DCFBFF), color-stop(100%,#CDE7FE));
-	background: #DCFBFF -webkit-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
-	background: #DCFBFF -o-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
-	background: #DCFBFF -ms-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
-	background: #DCFBFF linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
+	background: #CDE7FE;
+	background: #CDE7FE -moz-linear-gradient(top,  #DCFBFF 0%, #CDE7FE 100%);
+	background: #CDE7FE -webkit-gradient(linear, left top, left bottom, color-stop(0%,#DCFBFF), color-stop(100%,#CDE7FE));
+	background: #CDE7FE -webkit-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
+	background: #CDE7FE -o-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
+	background: #CDE7FE -ms-linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
+	background: #CDE7FE linear-gradient(top,  #DCFBFF 0%,#CDE7FE 100%);
 	*zoom: 1;
 	}
 .b-panel:before {
@@ -2820,14 +2838,14 @@ HTML BODY .i-ljuser {
 	position: absolute;
 	top: 50%;
 	bottom: 0;
-	left: 10px;
-	right: 10px;
+	left: 20px;
+	right: 20px;
 	z-index: -2;
-	-webkit-box-shadow: 0 10px 15px rgba(0,0,0,0.6);
-	-moz-box-shadow: 0 10px 15px rgba(0,0,0,0.6);
-	box-shadow: 0 10px 15px rgba(127,136,159,1);
-	-moz-border-radius: 100px / 50px;
-	border-radius: 100px / 50px;
+	-webkit-box-shadow: 0 8px 25px rgb(128,145,171);
+	-moz-box-shadow: 0 8px 25px rgb(128,145,171);
+	box-shadow: 0 8px 25px rgb(128,145,171);
+	-moz-border-radius: 50px;
+	border-radius: 50px;
 	}
 /* remove shadow on mobile */
 .mobile-msg .b-panel:before,

@@ -1,12 +1,12 @@
 ILikeThis = {
 	dialog: jQuery(),
-	
+
 	dialogRemove: function()
 	{
 		this.dialog.remove();
 		jQuery(document).unbind('click', this.document_click);
 	},
-	
+
 	// inline click
 	rate: function(e, node, itemid, username)
 	{
@@ -15,7 +15,7 @@ ILikeThis = {
 		// has undorate node
 		var action = jQuery('.i_like_this_'+itemid+' .i_like_this_already').remove().length ? 'undorate' : 'rate';
 		jQuery(node).parent().removeClass('i_dont_like_this');
-		
+
 		jQuery.ajax({
 			url: LiveJournal.getAjaxUrl('eventrate'),
 			data: {
@@ -44,18 +44,18 @@ ILikeThis = {
 							append_node = jQuery(context);
 						}
 						append_node.append('<i class="i_like_this_already">/</i>');
-					} 
+					}
 				}
 			}
 		});
 		return false;
 	},
-	
+
 	// inline click
 	showList: function(e, node, itemid, username)
 	{
 		this.ajax && this.ajax.abort();
-		
+
 		this.ajax = jQuery.ajax({
 			url: LiveJournal.getAjaxUrl('eventrate'),
 			data: {
@@ -88,39 +88,39 @@ ILikeThis = {
 									+'</a></p>' : ''
 								+'</div>')
 					}).ljAddContextualPopup();
-					
+
 					ILikeThis.dialog.appendTo(document.body);
-					
+
 					//calc with viewport
 					var ele_offset = $node.offset(),
 						left = ele_offset.left,
 						top = ele_offset.top + $node.height() + 0, // TODO: 4 is fix markup height
 						$window = jQuery(window);
-					
+
 					left = Math.min(left,  $window.width() + $window.scrollLeft() - ILikeThis.dialog.outerWidth(true));
 					top = Math.min(top, $window.height() + $window.scrollTop() - ILikeThis.dialog.outerHeight(true));
-					
+
 					jQuery(document).click(ILikeThis.document_click);
-						
+
 					ILikeThis.dialog.css({
 						left: left,
 						top: top,
 						visibility: 'visible'
 					});
-					
+
 					var append_node = jQuery('.we_like_this_'+itemid+' span>span>span');
 					if (!append_node.length) { // s1
 						append_node = jQuery('.we_like_this_'+itemid);
 					}
-					
+
 					append_node.text(data.total);
 				}
 			}
 		});
-		
+
 		return false;
 	},
-	
+
 	document_click: function(e)
 	{
 		if (!jQuery(e.target).parents('.b-popup-ilikethis').length) {
@@ -158,7 +158,7 @@ DonateButton = {
 
 			if( ev.data && ev.data.message === "updateWallet" ) {
 				LiveJournal.run_hook( 'update_wallet_balance' );
-				jQuery.getJSON( LiveJournal.getAjaxUrl( 'give_tokens' ) + "?" + url_data + "&mode=js", 
+				jQuery.getJSON( LiveJournal.getAjaxUrl( 'give_tokens' ) + "?" + url_data + "&mode=js",
 					function( result ) {
 						if( result.html ) {
 							$node = jQuery( link ).closest( '.lj-button' );
@@ -184,9 +184,18 @@ DonateButton = {
 // Share at some S2 styles
 jQuery(document).click(function(e)
 {
-	var a = e.target,
-		href = a.href,
-		args;
+	'use strict';
+
+	var a, href, args;
+
+	// exit if sharing widget is on the page
+	if (jQuery.fn.share) {
+		return;
+	}
+
+	a = e.target;
+	href = a.href;
+
 	if (href && !a.shareClickIgnore) {
 		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
 			LJShare.entry({url: decodeURIComponent(LiveJournal.parseGetArgs(href).u)})
@@ -291,7 +300,7 @@ jQuery(document).click(function(e)
 			loading: 'b-mediaplaceholder-processing',
 			init: function() {
 				var self = this;
-				doc.on('click', this.selector, function(ev) { 
+				doc.on('click', this.selector, function(ev) {
 					self.handler(this, ev);
 				});
 			},
@@ -399,53 +408,10 @@ jQuery(document).click(function(e)
 
 
 /**
-* delayed like buttons loader
-*/
+ * Delayed like buttons loader
+ */
+LiveJournal.register_hook('page_load', function () {
+	'use strict';
 
-(function() {
-	var likePos = [];
-
-	LiveJournal.register_hook('page_load', function() {
-		
-		likePos = jQuery('.lj-like').map(function() {
-			return {
-				el: this,
-				top: jQuery(this).offset().top,
-				init: false
-			};
-		}).toArray();
-
-		fullInit();
-
-		if (likePos.length > 0) jQuery(window).scroll(fullInit);
-	});
-
-	function fullInit() {
-		if (likePos.length > 0) {
-			
-			var scrollTop = jQuery(window).scrollTop(),
-				windowHeight = jQuery(window).height(),
-
-				toInit = likePos.filter(function(like) {
-					return (!like.init &&
-							 like.top > scrollTop - 100 &&
-							 like.top < scrollTop + windowHeight + 200);
-				});
-
-			toInit.forEach(function(like) {
-				var jEl = jQuery(like.el),
-					internal = (jEl.get(0) || {}).childNodes;
-
-				if (!internal || !internal[0]) {
-					return;
-				}
-				
-				jEl.html(internal[0].nodeValue); // strip '<!--' and '-->'
-				LiveJournal.parseLikeButtons(jEl);
-
-				like.init = true;
-			});
-		}
-	}
-	
-})();
+	jQuery(document.body).ljLikes();
+});

@@ -25,7 +25,9 @@ sub render_body {
     my $authtoken = LJ::Auth->ajax_auth_token(LJ::get_remote(), "/_widget");
 
 	$body .= "<div class='user_alias_act'>";
-    $body .= "<div class='user-alias-label'><label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display."</label> (". BML::ml('widget.alias.faq', {aopts => "href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=295'"}) ."):</div>";
+
+    my $faqlink = LJ::Faq->page_url( 'faqid' => 295 );
+    $body .= "<div class='user-alias-label'><label for='Widget[IPPU_AddAlias]_alias'>". BML::ml('widget.alias.setalias') ." ".$for_user->ljuser_display."</label> (". BML::ml('widget.alias.faq', {aopts => "href='$faqlink'"}) ."):</div>";
 
     $body .= $class->html_text(
                 name  => 'alias',
