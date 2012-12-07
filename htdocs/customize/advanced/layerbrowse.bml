@@ -29,7 +29,7 @@
     my $remote = LJ::get_remote();
 
     my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$id});
-    $id = undef if defined $is_buyable && $is_buyable;
+    $id = undef if defined $is_buyable && $is_buyable && !(LJ::Support::has_any_support_priv($remote) || $LJ::IS_DEV_SERVER);
 
     # show the public layers
     unless ($id) {
@@ -65,7 +65,7 @@
                     my $is_active = LJ::run_hook("layer_is_active", $pub->{$child}->{uniq});
                     next unless !defined $is_active || $is_active;
                     my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$child});
-                    next if defined $is_buyable && $is_buyable;
+                    next if defined $is_buyable && $is_buyable && !(LJ::Support::has_any_support_priv($remote) || $LJ::IS_DEV_SERVER);
                     $num_children++;
                 }
                 $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$lid'>";
@@ -85,7 +85,7 @@
                 my $is_active = LJ::run_hook("layer_is_active", $pub->{$_}->{'uniq'});
                 next unless !defined $is_active || $is_active;
                 my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$_});
-                next if defined $is_buyable && $is_buyable;
+                next if defined $is_buyable && $is_buyable && !(LJ::Support::has_any_support_priv($remote) || $LJ::IS_DEV_SERVER);
                 $self->($self, $_);
             }
             $body .= "</ul>";

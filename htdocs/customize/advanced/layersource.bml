@@ -14,6 +14,10 @@
     my $remote = LJ::get_remote();
 
     my $id = $GET{'id'};
+
+    my $is_buyable = LJ::run_hook("layer_is_buyable", $pub->{$id});
+    $id = undef if defined $is_buyable && $is_buyable && !(LJ::Support::has_any_support_priv($remote) || $LJ::IS_DEV_SERVER);
+    
     return BML::redirect('layerbrowse.bml') unless $id =~ /^\d+$/;
 
     my $lay = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
