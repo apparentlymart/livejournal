@@ -196,7 +196,7 @@ sub make_authas_select {
                                  'class' => 'hideable',
                                  },
                                  ## We loaded all users in LJ::get_authas_list(). Here we use their singletons.
-                                 map { my $u = LJ::load_user ($_); ($_, $u->display_name) } @list) . " ";
+                                 (map { my $u = LJ::load_user ($_); ($_, $u->display_name) } @list), @{$opts->{'add_fields'}} ) . " ";
         $ret .= $opts->{'button_tag'} . LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'}) . $opts->{'button_close_tag'};
         return $ret;
     }
