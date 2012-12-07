@@ -191,9 +191,11 @@ sub make_authas_select {
         my $label = $BML::ML{'web.authas.label'};
         $label = $BML::ML{'web.authas.label.comm'} if ($opts->{'type'} eq "C");
         $ret = ($opts->{'label'} || $label) . " ";
+        my %select_id = $opts->{'id'} ? ( id => $opts->{'id'} ) : ();
         $ret .= LJ::html_select({ 'name' => 'authas',
                                  'selected' => $opts->{'authas'} || $u->{'user'},
                                  'class' => 'hideable',
+                                 %select_id,
                                  },
                                  ## We loaded all users in LJ::get_authas_list(). Here we use their singletons.
                                  (map { my $u = LJ::load_user ($_); ($_, $u->display_name) } @list), @{$opts->{'add_fields'}} ) . " ";
