@@ -1138,12 +1138,10 @@ sub clean {
                         my $width = $hash->{'width'};
                         if ( $width && $width !~ /\%$/ ) {
                             $width =~ s/\D//g;
-=head
                             if ( int $width > $maxwidth ) {
                                 delete $hash->{'width'};
                                 delete $hash->{'height'};
                             }
-=cut
                         }
 
                         #$img_bad = 1 if ( $opts->{'img_placeholders'} );
