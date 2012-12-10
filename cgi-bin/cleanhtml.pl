@@ -1118,7 +1118,7 @@ sub clean {
                             }
                         }
 
-                        if ( exists $hash->{width} && $hash->{width} =~ /^\d+$/ && exists $hash->{height} && $hash->{height} =~ /^\d+$/ ) {
+                        if ( exists $hash->{width} && $hash->{width} =~ /^[\d.]+$/ && exists $hash->{height} && $hash->{height} =~ /^[\d.]+$/ ) {
                             if ( $hash->{'width'} > 140 && $hash->{'height'} > 37 ) {
                                 $img_bad = 1;
                             }
