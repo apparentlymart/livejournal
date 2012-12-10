@@ -443,8 +443,31 @@ sub trans {
 
             LJ::Lang::current_language(undef);
 
-            my $response =
-                $controller->process(\@args) || $controller->default_response;
+            my $response;
+            my $controller_result = eval {
+                local $SIG{'__DIE__'} = \&Carp::confess;
+                $response = $controller->process(\@args) ||
+                    $controller->default_response;
+                1;
+            };
+
+            unless ($controller_result) {
+                my $error  = "$@";
+                my $remote = LJ::get_remote();
+
+                if ( $LJ::IS_DEV_SERVER ||
+                    ( $remote && $remote->show_raw_errors ) )
+                {
+                    $response = LJ::Response::Template->new(
+                        'file'            => 'templates/CodeError.tmpl',
+                        'params'          => { 'error' => $error },
+                        'use_site_scheme' => 1,
+                        'title'           => 'Code Error',
+                    );
+                } else {
+                    die $error;
+                }
+            }
 
             # processing result of controller
             my $result = eval { $response->output };
