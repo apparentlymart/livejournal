@@ -1513,6 +1513,7 @@ sub res_template_includes {
 sub res_includes {
     my $opts = shift || {};
     my $only_needed = $opts->{only_needed}; # do not include defaults
+    my $site_anyway = $opts->{site_anyway}; # Site anyway
 
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
@@ -1550,7 +1551,7 @@ sub res_includes {
     }
 
     # include standard JS info
-    unless ( $only_needed ) {
+    unless ( $only_needed && !$site_anyway) {
         # find current journal
         my $journal_base = '';
         my $journal      = '';
@@ -1638,7 +1639,7 @@ sub res_includes {
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
         $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
 
-        LJ::run_hooks('add_to_site_js', \%site);
+        LJ::run_hooks('add_to_site_js', \%site) unless ($only_needed);
 
         LJ::need_var(D => \%LJ::JS_D) unless exists $LJ::JSVAR{'D'};
 
