@@ -1106,6 +1106,17 @@ sub clean {
 
                     if ($opts->{'extractimages'}) { $img_bad = 1; }
 
+                    if ( my $maxwidth = $opts->{'maximgwidth'} ) {
+                        my $width = $hash->{'width'};
+                        if ( $width && $width !~ /\%$/ ) {
+                            $width =~ s/\D//g;
+                            if ( int $width > $maxwidth ) {
+                                delete $hash->{'width'};
+                                delete $hash->{'height'};
+                            }
+                        }
+                    }
+
                     # don't use placeholders for small images
                     if ( $opts->{'img_placeholders'} ) {
                         if ( exists $hash->{style} ) {
@@ -1131,20 +1142,6 @@ sub clean {
                             delete $hash->{height} if exists $hash->{height};
                             $img_bad = 1;
                         }
-
-                    } elsif ( my $maxwidth = $opts->{'maximgwidth'} ) {
-                        $img_bad = 0;
-
-                        my $width = $hash->{'width'};
-                        if ( $width && $width !~ /\%$/ ) {
-                            $width =~ s/\D//g;
-                            if ( int $width > $maxwidth ) {
-                                delete $hash->{'width'};
-                                delete $hash->{'height'};
-                            }
-                        }
-
-                        #$img_bad = 1 if ( $opts->{'img_placeholders'} );
                     } else {
                         $img_bad = 0;
                     }
