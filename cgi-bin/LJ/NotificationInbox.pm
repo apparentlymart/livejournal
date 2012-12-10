@@ -5,8 +5,13 @@
 package LJ::NotificationInbox;
 
 use strict;
-use Carp qw(croak);
-use Class::Autouse qw (LJ::NotificationItem LJ::Event LJ::NotificationArchive LJ::Event::InboxUserMessageRecvd);
+use Carp 'croak';
+use Class::Autouse qw{
+    LJ::NotificationItem LJ::Event LJ::NotificationArchive
+    LJ::Event::InboxUserMessageRecvd LJ::Event::JournalNewComment
+};
+
+my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
 
 # constructor takes a $u
 sub new {
@@ -24,6 +29,10 @@ sub new {
         items => undef, # defined to arrayref once items loaded
         bookmarks => undef, # defined to arrayref
     };
+
+    $comment_typeid  ||= LJ::Event::JournalNewComment->etypeid;
+    $rmessage_typeid ||= LJ::Event::UserMessageRecvd->etypeid;
+    $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
 
     return $u->{_notification_inbox} = bless $self, $class;
 }
@@ -58,9 +67,7 @@ sub items {
     #   objects we'll instantiate those ahead of time
     #   so that if one has its data loaded they will
     #   all benefit from a coalesced load
-    $self->instantiate_comment_singletons;
-
-    $self->instantiate_message_singletons;
+    $self->instantiate_singletons;
 
     return @items;
 }
@@ -274,30 +281,31 @@ sub _load {
     return @item_ids;
 }
 
-sub instantiate_comment_singletons {
-    my $self = shift;
+sub instantiate_singletons {
+    my $self = $_[0];
+    return 1 unless $LJ::DISABLED{'inbox_controller'};
 
-    # instantiate all the comment singletons so that they will all be
-    # loaded efficiently later as soon as preload_rows is called on
-    # the first comment object
-    my @comment_items = grep { $_->event->class eq 'LJ::Event::JournalNewComment' } grep {$_->event} $self->items;
-    my @comment_events = map { $_->event } @comment_items;
-    # instantiate singletons
-    LJ::Comment->new($_->event_journal, jtalkid => $_->jtalkid) foreach @comment_events;
+    foreach ($self->items()) {
+        my $event = $_->event() or next;
+        my $etypeid = $event->etypeid();
 
-    return 1;
-}
+        # instantiate all the comment singletons so that they will all be
+        # loaded efficiently later as soon as preload_rows is called on
+        # the first comment object
+        LJ::Comment->new(
+            $event->event_journal,
+            jtalkid => $event->{'args'}[0],
+        ) if $etypeid == $comment_typeid;
 
-sub instantiate_message_singletons {
-    my $self = shift;
-
-    # instantiate all the message singletons so that they will all be
-    # loaded efficiently later as soon as preload_rows is called on
-    # the first message object
-    my @message_items = grep { $_->event->class eq 'LJ::Event::UserMessageRecvd' } grep {$_->event} $self->items;
-    my @message_events = map { $_->event } @message_items;
-    # instantiate singletons
-    LJ::Message->load({msgid => $_->arg1, journalid => $_->u->{userid}}) foreach @message_events;
+        # instantiate all the message singletons so that they will all be
+        # loaded efficiently later as soon as preload_rows is called on
+        # the first message object
+        LJ::Message->new({
+            msgid     => $event->{'args'}[0],
+            otherid   => $event->{'args'}[1],
+            journalid => $event->{'userid'},
+        }) if $etypeid == $rmessage_typeid or $etypeid == $smessage_typeid;
+    }
 
     return 1;
 }

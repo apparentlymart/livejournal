@@ -1,9 +1,3 @@
-# This is a class representing a notification that came out of an
-# LJ::NotificationInbox. You can tell it to mark itself as
-# read/unread, delete it, and get the event that it contains out of
-# it.
-# Mischa Spiegelmock, 05/2006
-
 package LJ::NotificationItem;
 use strict;
 use warnings;
@@ -88,16 +82,14 @@ sub as_html {
 
 # returns the event that this item refers to
 sub event {
-    my $self = shift;
+    &_load unless $_[0]->{'_loaded'};
 
-    $self->_load unless $self->{_loaded};
-
-    return $self->{event};
+    return $_[0]->{'event'};
 }
 
 # loads this item
 sub _load {
-    my $self = shift;
+    my $self = $_[0];
 
     my $qid = $self->qid;
     my $u = $self->owner;
@@ -157,20 +149,16 @@ sub absorb_row {
 
 # returns when this event happened (or got put in the inbox)
 sub when_unixtime {
-    my $self = shift;
+    &_load unless $_[0]->{'_loaded'};
 
-    $self->_load unless $self->{_loaded};
-
-    return $self->{when};
+    return $_[0]->{'when'};
 }
 
 # returns the state of this item
 sub _state {
-    my $self = shift;
+    &_load unless $_[0]->{'_loaded'};
 
-    $self->_load unless $self->{_loaded};
-
-    return $self->{state};
+    return $_[0]->{'state'};
 }
 
 # returns if this event is marked as read
@@ -234,3 +222,4 @@ sub _set_state {
     LJ::MemCache::delete($memkey);
 }
 
+1;

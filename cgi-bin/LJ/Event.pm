@@ -97,6 +97,9 @@ sub new_from_raw_params {
     my $journal = LJ::load_userid($journalid);
     my $evt     = LJ::Event->new($journal, @args);
 
+    # Store etypeid in instance to check it faster
+    $evt->{'etypeid'} = $etypeid; 
+
     # bless into correct class
     bless $evt, $class;
 
@@ -128,14 +131,11 @@ sub raw_params {
 # my $journal = $event->event_journal;
 # my $journal = $event->u;
 # my $arg1    = $event->arg1;
-sub event_journal { &u; }
 sub userid        { $_[0]->{userid}; }
 
-sub u {
-    my ($self) = @_;
-    $self->{'u'} ||= LJ::load_userid($self->{userid});
-    return $self->{'u'};
-}
+sub u { return $_[0]->{'u'} ||= LJ::load_userid($_[0]->{'userid'}); }
+
+*event_journal = \&u;
 
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }
@@ -190,11 +190,11 @@ my (%classes, %etypeids);
 sub class {
     my ($class, $typeid) = @_;
 
+    $typeid ||= $class->etypeid;
+
     unless ($classes{$typeid}) {
         my $tm = $class->typemap
             or return undef;
-
-        $typeid ||= $class->etypeid;
 
         $classes{$typeid} = $tm->typeid_to_class($typeid);
     }
@@ -206,8 +206,17 @@ sub class {
 #
 # my $etypeid = LJ::Event::ExampleEvent->etypeid;
 sub etypeid {
-    my ($class_self) = @_;
-    my $class = ref $class_self ? ref $class_self : $class_self;
+    my $invocant = $_[0];
+    my $class;
+
+    if (ref $invocant) {
+        return $invocant->{'etypeid'}
+            if $invocant->{'etypeid'};
+
+        $class = ref $invocant;
+    } else {
+        $class = $invocant;
+    }
 
     unless ($etypeids{$class}) {
         my $tm = $class->typemap

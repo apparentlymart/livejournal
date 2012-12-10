@@ -1,6 +1,6 @@
 package LJ::Message;
 use strict;
-use Carp qw/ croak /;
+use Carp 'croak';
 
 use Class::Autouse qw(
                       LJ::Typemap
@@ -9,32 +9,38 @@ use Class::Autouse qw(
 
 my %singletons = (); # journalid-msgid
 
+my %fields = map { $_ => 1 } qw{
+    msgid journalid otherid subject body type parent_msgid
+    timesent userpic preformatted
+};
 
 sub new {
     my ($class, $opts) = @_;
+    my $self = $singletons{$opts->{'journalid'}}->{$opts->{'msgid'}};
 
-    my $self = bless {};
+    # Object exists
+    return $self if $self;
 
-    # fields
-    foreach my $f (qw(msgid journalid otherid subject body type parent_msgid
-                      timesent userpic preformatted)) {
-        $self->{$f} = delete $opts->{$f} if exists $opts->{$f};
-    }
+    $self = bless {
+        map {
+            $_ => delete $opts->{$_}
+        } grep {
+            $fields{$_}
+        } keys %$opts
+    };
 
     # unknown fields
     croak("Invalid fields: " . join(",", keys %$opts)) if (%$opts);
 
     # Handle renamed users
+    # TODO: try to not load user
     my $other_u = LJ::want_user($self->{otherid});
     if ($other_u && $other_u->is_renamed) {
         $other_u = $other_u->get_renamed_user;
         $self->{otherid} = $other_u->{userid};
     }
 
-    my $journalid = $self->{journalid} || undef;
-    my $msgid = $self->{msgid} || undef;
-
-    $self->set_singleton; # only gets set if msgid and journalid defined
+    $self->set_singleton(); # only gets set if msgid and journalid defined
 
     return $self;
 }
@@ -231,94 +237,82 @@ sub _save_msgprop_row_to_db {
 #  Accessors
 #############
 sub journalid {
-    my $self = shift;
-    return $self->{journalid};
+    return $_[0]->{'journalid'};
 }
 
 sub msgid {
-    my $self = shift;
-    return $self->{msgid};
+    return $_[0]->{'msgid'};
 }
 
 sub _orig_u {
-    my $self = shift;
-    return LJ::want_user($self->journalid);
+    return LJ::want_user(&journalid);
 }
 
 sub _rcpt_u {
-    my $self = shift;
-
-    return LJ::want_user($self->otherid);
+    return LJ::want_user(&otherid);
 }
 
+*other_u = \&_rcpt_u;
+
 sub type {
-    my $self = shift;
-    return $self->_row_getter("type", "msg");
+    return $_[0]->{'type'} ||= $_[0]->_row_getter(type => 'msg');
 }
 
 sub parent_msgid {
-    my $self = shift;
-    return $self->_row_getter("parent_msgid", "msg");
+    return $_[0]->_row_getter(parent_msgid => 'msg');
 }
 
 sub otherid {
-    my $self = shift;
-    return $self->_row_getter("otherid", "msg");
-}
-
-sub other_u {
-    my $self = shift;
-    return LJ::want_user($self->otherid);
+    return $_[0]->{'otherid'} ||= $_[0]->_row_getter(otherid => 'msg');
 }
 
 sub timesent {
-    my $self = shift;
-    return $self->_row_getter("timesent", "msg");
+    return $_[0]->{'timesent'} ||= $_[0]->_row_getter(timesent => 'msg');
 }
 
 sub subject_raw {
-    my $self = shift;
-    return $self->_row_getter("subject", "msgtext");
+    return $_[0]->{'subject'} ||= $_[0]->_row_getter(subject => 'msgtext');
 }
 
 sub subject {
-    my $self = shift;
-    return LJ::ehtml($self->subject_raw) || "(no subject)";
+    return LJ::ehtml($_[0]->subject_raw) || "(no subject)";
 }
 
 sub body_raw {
-    my $self = shift;
-    return $self->_row_getter("body", "msgtext");
+    return $_[0]->{'body'} ||= $_[0]->_row_getter(body => 'msgtext');
 }
 
 sub body {
-    my $self = shift;
-    my $body = $self->body_raw;
-    return LJ::ehtml($body) unless $self->preformatted;
+    my $body = &body_raw;
+    return LJ::ehtml($body) unless &preformatted;
+
     LJ::CleanHTML::clean_message(\$body);
     return $body;
 }
 
 sub userpic {
-    my $self = shift;
-    return $self->_row_getter("userpic", "msgprop");
+    return $_[0]->{'userpic'}
+        if exists $_[0]->{'userpic'};
+
+    return $_[0]->{'userpic'} = $_[0]->_row_getter(userpic => 'msgprop');
 }
 
 sub preformatted {
-    my $self = shift;
-    return $self->_row_getter("preformatted", "msgprop");
+    return $_[0]->{'preformatted'}
+        if exists $_[0]->{'preformatted'};
+
+    return $_[0]->{'preformatted'} = $_[0]->_row_getter(preformatted => 'msgprop');
 }
 
 sub valid {
-    my $self = shift;
     # just check a field that requires a db load...
-    return $self->type ? 1 : 0;
+    return &type? 1 : 0;
 }
 
 sub qid {
-    my $self = shift;
+    my $self = $_[0];
     unless ($self->{qid}) {
-        my $u = $self->_orig_u;
+        my $u = &_orig_u;
         my $sth = $u->prepare( "select qid from notifyqueue where userid=? and arg1=?" );
         $sth->execute( $self->journalid, $self->msgid );
         $self->{qid} = $sth->fetchrow_array();
@@ -327,9 +321,9 @@ sub qid {
 }
 
 sub parent_qid {
-    my $self = shift;
+    my $self = $_[0];
     unless ($self->{qid}) {
-        my $u = $self->_orig_u;
+        my $u = &_orig_u;
         my $sth = $u->prepare( "select qid from notifyqueue where userid=? and arg1=?" );
         $sth->execute( $self->journalid, $self->parent_msgid );
         $self->{qid} = $sth->fetchrow_array();
@@ -359,34 +353,31 @@ sub set_timesent {
 
 sub _row_getter {
     my ($self, $member, $table) = @_;
+    my $key = join $table, '_loaded_', '_row';
 
     return $self->{$member} if $self->{$member};
-    __PACKAGE__->preload_rows($table, $self) unless $self->{"_loaded_${table}_row"};
+    __PACKAGE__->preload_rows($table, $self) unless $self->{$key};
     return $self->{$member};
 }
 
 sub absorb_row {
     my ($self, $table, %row) = @_;
+    my $key = join $table, '_loaded_', '_row';
 
-    foreach (qw(journalid type parent_msgid otherid timesent state subject
-                body userpic preformatted)) {
+    foreach (qw{ journalid type parent_msgid otherid timesent state subject body userpic preformatted }) {
         if (exists $row{$_}) {
-            $self->{$_} = $row{$_};
-            $self->{"_loaded_${table}_row"} = 1;
+            $self->{$_}   = $row{$_};
+            $self->{$key} = 1;
         }
     }
-    $self->set_singleton;
 }
 
 sub set_singleton {
-    my ($self) = @_;
+    my $msgid = $_[0]->{'msgid'};
+    my $uid   = $_[0]->{'journalid'};
 
-    my $msgid = $self->msgid;
-    my $uid = $self->journalid;
-
-    if ($msgid && $uid) {
-        $singletons{$uid}->{$msgid} = $self;
-    }
+    $singletons{$uid}->{$msgid} ||= $_[0]
+        if $msgid and $uid;
 }
 
 # Can user reply to this message
@@ -473,42 +464,40 @@ sub reset_singletons {
     %singletons = ();
 }
 
-# returns an arrayref of unloaded comment singletons
+# returns an array of unloaded comment singletons
 sub unloaded_singletons {
-    my ($self, $table) = @_;
-    my @singletons;
-    push @singletons, values %{$singletons{$_}} foreach keys %singletons;
-    return grep { ! $_->{"_loaded_${table}_row"} } @singletons;
+    my $key = join $_[1], '_loaded_', '_row';
+
+    return map {
+        grep {
+            not $_->{$key}
+        } values %$_
+    } values %singletons;
 }
 
 sub preload_rows {
     my ($class, $table, $self) = @_;
-    my @objlist = $self->unloaded_singletons($table);
-    my @msglist = (map  { [ $_->journalid, $_->msgid ] }
-                     grep { ! $_->{"_loaded_${table}_row"} }
-                       @objlist);
-    my $getter;
-    {
-        no strict 'refs';
-        $getter = *{$class . "::_get_${table}_rows"};
-    }
-    my @rows = $self->$getter(@msglist);
+    my %messages;
+
+    local $; = ':';
+
+    my @messages = map {
+        my @slice = @{ $_ }{qw{ journalid msgid }};
+
+        $messages{$slice[0], $slice[1]} = $_;
+
+        \@slice
+    } unloaded_singletons(undef, $table);
+
+    my $getter = join '::', $class, (join $table, '_get_', '_rows');
     
-    # make a mapping of journalid-msgid=> $row
-    my %row_map = map { join("-", $_->{journalid}, $_->{msgid}) => $_ } @rows;
-
-    foreach my $msg (@objlist) {
-        my $row = $row_map{join("-", $msg->journalid, $msg->msgid)};
-        next unless $row;
-
-        # absorb row into given LJ::Message object
-        $msg->absorb_row($table, %$row);
-    }
+    ($messages{$_->{'journalid'}, $_->{'msgid'}} or next)->absorb_row($table, %$_)
+        foreach $self->$getter(\@messages);
 }
 
 # get the core message data from memcache or the DB
 sub _get_msg_rows {
-    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
+    my ($self, $items) = @_; # obj, [ journalid, msgid ], ...
 
     # what do we need to load per-journalid
     my %need    = ();
@@ -516,23 +505,26 @@ sub _get_msg_rows {
 
     # get what is in memcache
     my @keys = ();
-    foreach my $msg (@items) {
+    foreach my $msg (@$items) {
         my ($uid, $msgid) = @$msg;
 
         # we need this for now
         $need{$uid}->{$msgid} = 1;
 
-        push @keys, [$uid, "msg:$uid:$msgid"];
+        push @keys, [$uid, join ':', 'msg', $uid, $msgid];
     }
 
     # return an array of rows preserving order in which they were requested
     my $ret = sub {
-        my @ret = ();
-        foreach my $it (@items) {
-            my ($uid, $msgid) = @$it;
-            push @ret, $have{$uid}->{$msgid};
-        }
-        return @ret;
+        return map {
+            my ($uid, $msgid) = @$_;
+
+            +{
+                %{ $have{$uid}->{$msgid} },
+                journalid => $uid,
+                msgid     => $msgid,
+            }
+        } @$items;
     };
 
     my $mem = LJ::MemCache::get_multi(@keys);
@@ -542,10 +534,6 @@ sub _get_msg_rows {
             next unless $row;
 
             my (undef, $uid, $msgid) = split(":", $key);
-
-            # add in implicit keys:
-            $row->{journalid} = $uid;
-            $row->{msgid} = $msgid;
 
             # update our needs
             $have{$uid}->{$msgid} = $row;
@@ -599,7 +587,7 @@ sub _get_msg_rows {
 
 # get the text message data from memcache or the DB
 sub _get_msgtext_rows {
-    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
+    my ($self, $items) = @_; # obj, [ journalid, msgid ], ...
 
     # what do we need to load per-journalid
     my %need    = ();
@@ -607,23 +595,26 @@ sub _get_msgtext_rows {
 
     # get what is in memcache
     my @keys = ();
-    foreach my $msg (@items) {
+    foreach my $msg (@$items) {
         my ($uid, $msgid) = @$msg;
 
         # we need this for now
         $need{$uid}->{$msgid} = 1;
 
-        push @keys, [$uid, "msgtext:$uid:$msgid"];
+        push @keys, [$uid, join ':', 'msgtext', $uid, $msgid];
     }
 
     # return an array of rows preserving order in which they were requested
     my $ret = sub {
-        my @ret = ();
-        foreach my $it (@items) {
-            my ($uid, $msgid) = @$it;
-            push @ret, $have{$uid}->{$msgid};
-        }
-        return @ret;
+        return map {
+            my ($uid, $msgid) = @$_;
+
+            +{
+                %{ $have{$uid}->{$msgid} },
+                journalid => $uid,
+                msgid     => $msgid,
+            }
+        } @$items;
     };
 
     my $mem = LJ::MemCache::get_multi(@keys);
@@ -634,7 +625,7 @@ sub _get_msgtext_rows {
             my (undef, $uid, $msgid) = split(":", $key);
 
             # update our needs
-            $have{$uid}->{$msgid} = { journalid => $uid, msgid => $msgid, subject => $row->[0], body => $row->[1] };
+            $have{$uid}->{$msgid} = { subject => $row->[0], body => $row->[1] };
             delete $need{$uid}->{$msgid};
             delete $need{$uid} unless %{$need{$uid}};
         }
@@ -675,7 +666,7 @@ sub _get_msgtext_rows {
         delete $need{$uid} unless %{$need{$uid}};
 
         # update memcache
-        my $memkey = [$uid, "msgtext:$uid:$msgid"];
+        my $memkey = [$uid, join ':', 'msgtext', $uid, $msgid];
         LJ::MemCache::set($memkey, [ $row->{'subject'}, $row->{'body'} ]);
     }
 
@@ -685,34 +676,38 @@ sub _get_msgtext_rows {
 # get the userpic data from memcache or the DB
 # called by preload_rows
 sub _get_msgprop_rows {
-    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
+    my ($self, $items) = @_; # obj, [ journalid, msgid ], ...
 
     # what do we need to load per-journalid
     my %need    = ();
     my %have    = ();
 
-    # get what is in memcache
     my @keys = ();
-    foreach my $msg (@items) {
+    foreach my $msg (@$items) {
         my ($uid, $msgid) = @$msg;
 
         # we need this for now
         $need{$uid}->{$msgid} = 1;
 
-        push @keys, [$uid, "msgprop:$uid:$msgid"];
+        push @keys, [$uid, join ':', 'msgprop', $uid, $msgid];
     }
 
     # return an array of rows preserving order in which they were requested
     my $ret = sub {
-        my @ret = ();
-        foreach my $it (@items) {
-            my ($uid, $msgid) = @$it;
-            push @ret, $have{$uid}->{$msgid};
-        }
-        return @ret;
+        return map {
+            my ($uid, $msgid) = @$_;
+
+            +{
+                %{ $have{$uid}->{$msgid} },
+                journalid => $uid,
+                msgid     => $msgid,
+            }
+        } @$items;
     };
 
+    # get what is in memcache
     my $mem = LJ::MemCache::get_multi(@keys);
+
     if ($mem) {
         while (my ($key, $array) = each %$mem) {
             my $row = LJ::MemCache::array_to_hash('usermsgprop', $array);
@@ -730,13 +725,13 @@ sub _get_msgprop_rows {
         return $ret->() unless %need;
     }
 
-
     # Only preload messages on the same cluster as the current message
     my $u = LJ::want_user($self->journalid);
 
     # build up a valid where clause for this cluster's select
     my @vals = ();
     my @where = ();
+
     foreach my $jid (keys %need) {
         my @msgids = keys %{$need{$jid}};
         next unless @msgids;
@@ -745,36 +740,47 @@ sub _get_msgprop_rows {
         push @where, "(journalid=? AND msgid IN ($bind))";
         push @vals, $jid => @msgids;
     }
+
     return $ret->() unless @vals;
 
     my $tm = __PACKAGE__->typemap;
-    my %props = map {$tm->class_to_typeid($_) => $_} qw(userpic preformatted);
-    my $propid = join ',', keys(%props);
+    my %props = map { $tm->class_to_typeid($_) => $_ } qw{ userpic preformatted };
+    my $propid = join ',', keys %props;
     my $where = join(" OR ", @where);
-    my $sth = $u->prepare
-        ( "SELECT journalid, msgid, propval, propid FROM usermsgprop WHERE propid IN ($propid) AND ($where)" );
-    $sth->execute(@vals);
+    my $query = "SELECT journalid, msgid, propval, propid FROM usermsgprop WHERE propid IN ($propid) AND ($where)";
+    my $sth = $u->prepare($query);
+    my $rv = $sth->execute(@vals);
 
-    my %loaded;
     while (my $row = $sth->fetchrow_hashref) {
-        my $uid = $row->{journalid};
+        my $uid   = $row->{journalid};
         my $msgid = $row->{msgid};
 
-        # update our needs
-        $have{$uid}->{$msgid} = { journalid => $uid, msgid => $msgid }
-            unless $have{$uid}->{$msgid};
-        $have{$uid}->{$msgid}->{$props{$row->{'propid'}}} = $row->{'propval'};
-#        delete $need{$uid}->{$msgid};
-#        delete $need{$uid} unless %{$need{$uid}};
-        $loaded{$uid}->{$msgid} = 1;
-        # update memcache
+        $have{$uid}->{$msgid} ||= {};
+
+        foreach my $propid (keys %props) {
+            # Placeholder for unset props
+            if ($propid == $row->{'propid'}) {
+                $have{$uid}->{$msgid}->{$props{$row->{'propid'}}} = $row->{'propval'};
+            } else {
+                $have{$uid}->{$msgid}->{$props{$propid}} ||= '';
+            }
+        }
     }
 
+    # Update memcache keys
+    foreach my $uid (keys %need) {
+        foreach my $msgid (keys %{ $need{$uid} }) {
+            my $key = join ':', 'msgprop', $uid, $msgid;
+            my $memkey = [$uid, $key];
 
-    for my $uid (keys(%loaded)){
-        for my $msgid (keys(%loaded)){
-            my $memkey = [$uid, "msgprop:$uid:$msgid"];
-            LJ::MemCache::set($memkey, LJ::MemCache::array_to_hash("usermsgprop", $have{$uid}->{$msgid} ));
+            foreach my $propid (keys %props) {
+                # Set keys for empty props
+                $have{$uid}->{$msgid}->{$propid} ||= '';
+            }
+
+            my $key = join ':', 'msgprop', $uid, $msgid;
+            my $memkey = [$uid, $key];
+            LJ::MemCache::set($memkey, LJ::MemCache::hash_to_array(usermsgprop => $have{$uid}->{$msgid}));
         }
     }
 
@@ -782,10 +788,9 @@ sub _get_msgprop_rows {
 }
 
 # get the typemap for usermsprop
+my $typemap;
 sub typemap {
-    my $self = shift;
-
-    return LJ::Typemap->new(
+    return $typemap ||= LJ::Typemap->new(
         table       => 'usermsgproplist',
         classfield  => 'name',
         idfield     => 'propid',
