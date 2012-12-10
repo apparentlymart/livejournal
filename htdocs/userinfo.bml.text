@@ -227,6 +227,12 @@
 
 .friends.comm=Members
 
+.friends.comm.mutual.friendof|staleness=1
+.friends.comm.mutual.friendof=Mutual Friends of
+
+.friends.comm.mutual.friends|staleness=1
+.friends.comm.mutual.friends=Mutual Friends
+
 .friends.friendof|staleness=1
 .friends.friendof=Friend of
 
