@@ -185,8 +185,8 @@ sub make_authas_select {
     my @list = LJ::get_authas_list($u, $opts);
 
     # only do most of form if there are options to select from
-    shift @list if @list > 1 && $opts->{'remove_self'};
-    if (@list > 1 || $list[0] ne $u->{'user'}) {
+    shift @list if @list && $opts->{'remove_self'};
+    if (@list > 1 || $opts->{'show_me'} || $list[0] ne $u->{'user'}) {
         my $ret;
         my $label = $BML::ML{'web.authas.label'};
         $label = $BML::ML{'web.authas.label.comm'} if ($opts->{'type'} eq "C");
@@ -1161,7 +1161,7 @@ sub entry_form_decode
                 prop_opt_screening prop_opt_noemail
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
-                prop_taglist prop_qotdid prop_give_features 
+                prop_taglist prop_qotdid prop_give_features
                 repost_budget paid_repost_on repost_limit_sc)) {
         $req->{$_} = $POST->{$_};
     }
@@ -1192,10 +1192,10 @@ sub entry_form_decode
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
-    $req->{'prop_poster_ip'} = LJ::get_remote_ip(); 
+    $req->{'prop_poster_ip'} = LJ::get_remote_ip();
 
     my $uniq = LJ::UniqCookie->current_uniq();
-    $req->{'prop_uniq'} = $uniq; 
+    $req->{'prop_uniq'} = $uniq;
 
     if ( my $reposted_from = $POST->{'reposted_from'} ) {
         my $reposted_entry = LJ::Entry->new_from_url($reposted_from);
@@ -1301,7 +1301,7 @@ sub js_dumper {
 
 ## stc/0 is the empty file.
 ## its modtime is checked for all concatenated sources and it is updated
-## for every release, so in the most cases this modtime 
+## for every release, so in the most cases this modtime
 ## as timestamp is used for "?v" param value.
 sub stc_0_modtime {
     my $now = shift;
@@ -1335,7 +1335,7 @@ sub need_res_group {
                         ##    source file name at first place then condition at second
                         ##
                         ## support both
-                        my ($file, $cond) = ref($resource->[0]) 
+                        my ($file, $cond) = ref($resource->[0])
                                                 ? ($resource->[1], $resource->[0])
                                                 : ($resource->[0], $resource->[1]);
                         LJ::need_res($cond, $file);
@@ -1350,7 +1350,7 @@ sub need_res_group {
         if (my $mls = $group->{ml}){
             LJ::need_string(@$mls);
         }
-        
+
         ## groups
         if (my $groups = $group->{groups}){
             LJ::need_res_group($_) for @$groups;
@@ -1364,7 +1364,7 @@ sub need_res_group {
 ## Support 'args' option. Example: LJ::need_res( { args => 'media="screen"' }, 'stc/ljtimes/iframe.css' );
 ## Results in: <link rel="stylesheet" type="text/css" href="http://stat.lj-3-32.bulyon.local/ljtimes/iframe.css?v=1285833891" media="screen"/>
 ## LJ::need_res( {clean_list => 1} ) will suppress ALL previous resources and do NOTHING more!
-## LJ::need_res( {insert_head => 1}, 'my.css' ) insert my.css to the head of the list of sources. 
+## LJ::need_res( {insert_head => 1}, 'my.css' ) insert my.css to the head of the list of sources.
 sub need_res {
     my $opts = (ref $_[0]) ? shift : {};
     my @keys = @_;
@@ -1441,7 +1441,7 @@ sub res_template_includes {
                 } grep {
                     -1 != index $_, $extension
                 } @LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE
-            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime&tm=$timestamp;uselang=$lang"></script>\n}; 
+            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime&tm=$timestamp;uselang=$lang"></script>\n};
         }
     } else {
         foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
@@ -1453,7 +1453,7 @@ sub res_template_includes {
 
             $path     = join '/', $LJ::TEMPLATE_BASE, @$path;
             my $fpath = join '/', $path, $file;
-            
+
             -f $fpath             or warn 'Missing template '. $fpath and next;
             $loaded{lc $fpath}++ and next;
 
@@ -1502,7 +1502,7 @@ sub res_template_includes {
                 $ret .= '</script>';
             }
 
-            # Let js know about template 
+            # Let js know about template
             $ret .= sprintf q{<script>LJ.UI.registerTemplate('%s', '%s', '%s');</script>}, $key, $key, $LJ::TEMPLATE_TRANSLATION;
         }
     }
@@ -1544,10 +1544,10 @@ sub res_includes {
         $jsprefix    = $LJ::JSPREFIX;
         $wstatprefix = $LJ::WSTATPREFIX;
     }
-    
+
     # add jQuery.tmpl templates
     if ( $opts->{'only_tmpl'} ) {
-        return res_template_includes;  
+        return res_template_includes;
     }
 
     # include standard JS info
@@ -1653,7 +1653,7 @@ sub res_includes {
         # LJSUP-12854: Fix escape for Site object
         $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
         $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
-        
+
         $ret_js .= qq {
             <script type="text/javascript">
                 Site = window.Site || {};
@@ -1703,7 +1703,7 @@ sub res_includes {
 
         my $sign_time = time;
         my $curl_sign = LJ::run_hook('sign_set_domain_session_redirect' => $curl, $sign_time);
-        
+
         $curl = LJ::eurl($curl);
 
         $ret_js .= qq|
@@ -1740,14 +1740,14 @@ sub res_includes {
     ## Replace sources with appropriate libraries
     unless ($only_needed){
         my %libs = ();
-        @LJ::NEEDED_RES = 
+        @LJ::NEEDED_RES =
             grep { length }
-            map  { 
+            map  {
                 my $res = $_;
                 ## is the key part of library/package
                 if (my $library = $LJ::JS_SOURCE_MAP_REV{$_}){
                     $res = $libs{$library}++ ? '' : $library;
-                } 
+                }
                 $res;
             } @LJ::NEEDED_RES;
     }
@@ -1761,7 +1761,7 @@ sub res_includes {
         if (my $library_files = $LJ::JS_SOURCES_MAP{$key}){
             $library = $key;
             $libs{$library} = 1;
-            foreach my $file (@$library_files){ 
+            foreach my $file (@$library_files){
                 my $lmtime = _file_modtime($key, $now);
                 $mtime = $lmtime if $lmtime > $mtime;
             }
@@ -1783,7 +1783,7 @@ sub res_includes {
     my $tags = sub {
         my ($type, $template) = @_;
         return unless $list{$type};
-        return if $opts->{only_css} 
+        return if $opts->{only_css}
                 and $template =~ /^<script/;
         return if $opts->{only_js}
                 and $template =~ /^<link/;
@@ -1796,7 +1796,7 @@ sub res_includes {
 
                 if ($do_concat) {
                     my $csep = join(',', @$list);
-                    my $mtime = $oldest{$type}{$cond}{$args}; 
+                    my $mtime = $oldest{$type}{$cond}{$args};
 
                     ## stc/0 is the empty file.
                     ## touch-ing it changes ?v= param for all included res.
@@ -1830,7 +1830,7 @@ sub res_includes {
         $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
         $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
     }
-    
+
     unless ($opts->{only_css}) {
         $ret .= $ret_js;
         foreach my $library (@LJ::JS_SOURCES_ORDER){ ## add libraries in strict order
