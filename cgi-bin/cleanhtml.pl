@@ -1109,7 +1109,7 @@ sub clean {
                     if ( my $maxwidth = $opts->{'maximgwidth'} ) {
                         my $width = $hash->{'width'};
                         if ( $width && $width !~ /\%$/ ) {
-                            $width =~ s/\D//g;
+                            $width =~ s/[^\d.]//g;
                             if ( int $width > $maxwidth ) {
                                 delete $hash->{'width'};
                                 delete $hash->{'height'};
