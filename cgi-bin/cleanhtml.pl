@@ -739,7 +739,7 @@ sub clean {
                 my $link_text = sub {
                     my $text =  LJ::Lang::ml('fcklang.readmore');
                     $text = Encode::decode_utf8($text) if $text;
-                    if ($attr->{'text'}) {
+                    if (exists $attr->{'text'} && length $attr->{'text'}) {
                         $text = $attr->{'text'};
                         $text =~ s/</&lt;/g;
                         $text =~ s/>/&gt;/g;
