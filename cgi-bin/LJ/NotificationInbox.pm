@@ -531,7 +531,7 @@ sub add_bookmark {
     my $u = $self->u;
     my $uid = $self->u->id;
 
-    return 0 unless $self->can_add_bookmark;
+    return 0 unless LJ::is_enabled('inbox_controller') || $self->can_add_bookmark;
 
     my $sql = "INSERT IGNORE INTO notifybookmarks (userid, qid) VALUES (?, ?)";
     $u->do($sql, undef, $uid, $qid);
