@@ -1,6 +1,7 @@
 package LJ::Talk::Post;
 use strict;
 
+use LJ::SpamFilter;
 use LJ::Admin::Spam::Urls;
 use LJ::EventLogRecord::NewComment;
 
@@ -181,7 +182,7 @@ sub enter_comment {
         LJ::MemCache::set([$journalu->{'userid'}, "talkprop:$journalu->{'userid'}:$jtalkid"], $hash);
     }
 
-    my %urls = map { $_ => 1 } LJ::get_urls($comment->{body});
+    my %urls = map { $_ => 1 } LJ::SpamFilter::get_urls($comment->{body});
     my @urls = keys %urls;
 
     # record up to $LJ::TALK_MAX_URLS urls from a comment
