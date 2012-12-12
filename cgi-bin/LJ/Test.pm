@@ -114,6 +114,8 @@ sub create_user {
     $opts{'email'} = 'do-not-reply@livejournal.com'
         unless defined $opts{'email'};
 
+    $opts{'friends'} ||= [];
+    
     my $u;
 
     if ( $journaltype eq 'P' ) {
@@ -152,6 +154,15 @@ sub create_user {
     }
 
     return $u;
+}
+
+
+sub add_friend {
+    my ($class, $uname, $fname) = @_;
+    my $u = LJ::load_user($uname) || die "Can't load user '$uname'";
+    my $f = LJ::load_user($fname) || die "Can't load user '$fname'";
+
+    $u->add_friend($f);
 }
 
 sub temp_user {
