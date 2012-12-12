@@ -1,6 +1,7 @@
 package LJ::Console::Command::ResetPassword;
 
 use strict;
+use LJ::Sendmail::Stock;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
 
@@ -8,12 +9,15 @@ sub cmd { "reset_password" }
 
 sub desc { "Resets the password for a given account" }
 
-sub args_desc { [
-                 'user' => "The account to reset the email address for.",
-                 'reason' => "Reason for the password reset.",
-                 ] }
+sub args_desc {
+    [
+        'user'   => "The account to reset the email address for.",
+        'reason' => "Reason for the password reset.",
+        'num'    => "Number of message in stock to send to user",
+    ]
+}
 
-sub usage { '<user> <reason>' }
+sub usage { '<user> <reason> [--stock:num]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -21,9 +25,9 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, $username, $reason, @args) = @_;
+    my ($self, $username, $reason, $num, @args) = @_;
 
-    return $self->error("This command takes two arguments. Consult the reference.")
+    return $self->error("This command takes two or three arguments. Consult the reference.")
         unless $username && $reason && scalar(@args) == 0;
 
     my $u = LJ::load_user($username);
@@ -31,6 +35,35 @@ sub execute {
         unless $u->journaltype eq 'P';
     return $self->error("Invalid user $username")
         unless $u;
+
+    my $body = '';
+
+    if( $num && $num =~ /^\-\-stock\:(\d+)$/) {
+        $num = $1;
+        my $dbh = LJ::get_db_reader();
+        my $stock = LJ::Sendmail::Stock::from_id($num, $dbh);
+        $body = $stock->body;
+
+        my %subst = (
+            realname  => $u->{name},
+            username  => $u->{user},
+            email     => $u->email_raw,
+        );
+
+        $body =~ s/\[\[($_)\]\]/$subst{$1}/g for keys %subst;
+    }
+    else {
+        $body = LJ::Lang::get_text(
+            $u->prop('browselang'),
+            'console.reset_password',
+            undef,
+            {
+                'url'      => "$LJ::SITEROOT/changepassword.bml",
+                'sitename' => $LJ::SITENAME,
+                'siteroot' => $LJ::SITEROOT,
+            }
+        );
+    }
 
     my $newpass = LJ::rand_chars(8);
     my $oldpass = Digest::MD5::md5_hex($u->password . "change");
@@ -41,17 +74,11 @@ sub execute {
 
     $u->kill_all_sessions;
 
-    my $body = "The password for your $LJ::SITENAME account '$username' has been reset to:\n\n";
-    $body .= "     $newpass\n\n";
-    $body .= "Please change it immediately by going to:\n\n";
-    $body .= "     $LJ::SITEROOT/changepassword.bml\n\n";
-    $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
-
     LJ::send_mail({
-        'to' => $u->email_raw,
-        'from' => $LJ::DONOTREPLY_EMAIL,
+        'to'      => $u->email_raw,
+        'from'    => $LJ::DONOTREPLY_EMAIL,
         'subject' => "Password Reset",
-        'body' => $body,
+        'body'    => $body,
     }) or $self->info("New password notification email could not be sent.");
 
     my $remote = LJ::get_remote();
