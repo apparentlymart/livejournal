@@ -58,7 +58,7 @@ sub execute {
             'console.reset_password',
             undef,
             {
-                'url'      => "$LJ::SITEROOT/changepassword.bml",
+                'url'      => "$LJ::SITEROOT/lostinfo.bml",
                 'sitename' => $LJ::SITENAME,
                 'siteroot' => $LJ::SITEROOT,
             }
