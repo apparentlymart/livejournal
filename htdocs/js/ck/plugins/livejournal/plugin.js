@@ -1,4 +1,4 @@
-(function() {
+;(function() {
 	'use strict';
 
 	/*
@@ -138,9 +138,6 @@
 	} else {
 		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
 	}
-
-	var focusToken = '@focus@',
-		focusTransformed = '<input type="hidden" id="__focus"/>';
 
 	function rteButton(button, widget, options) {
 		options = options || {};
@@ -317,6 +314,7 @@
 	CKEDITOR.plugins.add('livejournal', {
 		init: function(editor) {
 			editor.rteButton = rteButton;
+			editor.ljTagsData = ljTagsData;
 
 			// The editor event listeners
 			function onDoubleClick(evt) {
@@ -374,6 +372,8 @@
 			function onLoadFrame() {
 				var win = this.$.contentWindow, doc = win.document, iframeBody = new CKEDITOR.dom.element.get(doc.body);
 
+				LiveJournal.run_hook('rte_frame_load', this, iframeBody);
+
 				if (iframeBody.on && !Site.page.disabled_input) {
 					iframeBody.on('dblclick', onDoubleClick);
 					iframeBody.on('click', onClickFrame);
@@ -414,11 +414,11 @@
 					frame.on('load', onLoadFrame);
 					doc.open();
 					doc.write('<!DOCTYPE html>' +
-						'<html style="' + ljStyle + '">' +
+						'<html style="width: 99%; height: 99%; overflow: hidden;">' +
 							'<head><link rel="stylesheet" href="' + CKEDITOR.styleText + '" /></head>' +
-							'<body data-loaded="true" scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>'
-								+ decodeURIComponent(frame.getAttribute('lj-content') || '') +
-							'</body>' +
+							'<body data-loaded="true" scroll="no" class="' + (frame.getAttribute('lj-class') || '') + '" style="' + ljStyle + '" ' + (cmd ? ('lj-cmd="' + cmd + '"') : '') + '>' +
+								decodeURIComponent(frame.getAttribute('lj-content') || '') +
+						'</body>' +
 						'</html>');
 					doc.close();
 				}
@@ -516,40 +516,14 @@
 				editor.fire('updateSnapshot');
 			}
 
-			// Configure editor
-			(function () {
-				function closeTag(result) {
-					return result.slice(-2) == '/>' ? result : result.slice(0, -1) + '/>';
-				}
-
-				function createPoll(ljtags) {
-					var poll = new Poll(ljtags),
-						content = "<div class='lj-poll-inner lj-rtebox-inner'>" + poll.outputHTML() + "</div>";
-					return '<iframe class="lj-poll-wrap lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + poll.outputLJtags() + '" lj-content="' + content + '"></iframe>';
-				}
-
-				function createUneditablePoll(ljtags, pollId) {
-					var content = "<div class='lj-poll-inner lj-rtebox-inner'>Poll id: " + pollId + "</div>";
-					return '<iframe class="lj-poll-wrap lj-poll-wrap-done lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + escape(ljtags) + '" lj-content="' + content + '" data-disabledPoll="true"></iframe>';
-				}
-
-				function createEmbed(result, attrs, data) {
-					var content = "<div class='lj-embed-inner lj-rtebox-inner'>Embed video</div>";
-					return '<iframe class="lj-embed-wrap lj-rtebox" lj-class="lj-embed" frameborder="0" lj-cmd="LJEmbedLink" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + 'lj-content="' + content + '"></iframe>';
-				}
-
-				function createLJRaw(result, open, content, close) {
-					return open + content.replace(/\n/g, '') + close;
-				}
-
-				function createRepost(result, firstAttr, secondAttr, content) {
-					var buttonTitle = firstAttr || secondAttr || CKLang.LJRepost_Value;
-					var text = content.replace(/"/g, '&quot;');
-
-					content = text + ('<br /><input type="button" value="' + buttonTitle + '" />').replace(/"/g, '&quot;');
-
-					return '<iframe class="lj-repost-wrap" lj-class="lj-repost" frameborder="0" allowTransparency="true" lj-text="' + text + '" lj-button="' + buttonTitle + '" lj-content="' + content + '"></iframe>';
-				}
+			/*
+			 * Focus transfomations
+			 * @param {String} Html
+			 * @return {String} Html with focus
+			 */
+			var transformFocus = (function() {
+				var focusToken = '@focus@',
+					focusTransformed = '<input type="hidden" id="__focus"/>';
 
 				/*
 				 * Find and move token out from markup
@@ -599,9 +573,7 @@
 					}
 				});
 
-				editor.dataProcessor.toHtml = function(html, fixForBody) {
-
-					// focus transformations
+				return function(html) {
 					var position = Site.page.__htmlLast;
 					if (typeof position === 'number') {
 						if (html.length > 0) {
@@ -614,6 +586,47 @@
 						}
 						delete Site.page.__htmlLast;
 					}
+					return html;
+				};
+			})();
+
+			// Configure editor
+			(function () {
+				function closeTag(result) {
+					return result.slice(-2) == '/>' ? result : result.slice(0, -1) + '/>';
+				}
+
+				function createPoll(ljtags) {
+					var poll = new Poll(ljtags),
+						content = "<div class='lj-poll-inner lj-rtebox-inner'>" + poll.outputHTML() + "</div>";
+					return '<iframe class="lj-poll-wrap lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + poll.outputLJtags() + '" lj-content="' + content + '"></iframe>';
+				}
+
+				function createUneditablePoll(ljtags, pollId) {
+					var content = "<div class='lj-poll-inner lj-rtebox-inner'>Poll id: " + pollId + "</div>";
+					return '<iframe class="lj-poll-wrap lj-poll-wrap-done lj-rtebox" lj-class="lj-poll" frameborder="0" lj-cmd="LJPollLink" allowTransparency="true" ' + 'lj-data="' + escape(ljtags) + '" lj-content="' + content + '" data-disabledPoll="true"></iframe>';
+				}
+
+				function createEmbed(result, attrs, data) {
+					var content = "<div class='lj-embed-inner lj-rtebox-inner'>Embed video</div>";
+					return '<iframe class="lj-embed-wrap lj-rtebox" lj-class="lj-embed" frameborder="0" lj-cmd="LJEmbedLink" allowTransparency="true" lj-data="' + encodeURIComponent(data) + '"' + attrs + 'lj-content="' + content + '"></iframe>';
+				}
+
+				function createLJRaw(result, open, content, close) {
+					return open + content.replace(/\n/g, '') + close;
+				}
+
+				function createRepost(result, firstAttr, secondAttr, content) {
+					var buttonTitle = firstAttr || secondAttr || CKLang.LJRepost_Value;
+					var text = content.replace(/"/g, '&quot;');
+
+					content = text + ('<br /><input type="button" value="' + buttonTitle + '" />').replace(/"/g, '&quot;');
+
+					return '<iframe class="lj-repost-wrap" lj-class="lj-repost" frameborder="0" allowTransparency="true" lj-text="' + text + '" lj-button="' + buttonTitle + '" lj-content="' + content + '"></iframe>';
+				}
+
+				editor.dataProcessor.toHtml = function(html, fixForBody) {
+					html = transformFocus(html);
 
 					html = html.replace(/<lj [^>]*?>/gi, closeTag)
 						.replace(/<lj-map [^>]*?>/gi, closeTag)
@@ -648,13 +661,19 @@
 
 					return html;
 				};
-			})();
 
-			editor.dataProcessor.toDataFormat = function(html, fixForBody) {
-				html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
-				html = html.replace(/<br\s*\/>/gi, '\n');
-				return html.replace(/\t/g, ' ');
-			};
+				editor.dataProcessor.toDataFormat = function(html, fixForBody) {
+					html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
+					html = html
+						.replace(/<br\s*\/>/gi, '\n')
+						.replace(/\>&nbsp;\n/ig, '>\n')
+						.replace(/[^ ]&nbsp\;</ig, ' <')
+						.replace(/\>&nbsp\;[^ ]/ig, '> ')
+						.replace(/\t/g, ' ');
+
+					return html;
+				};
+			})();
 
 			editor.dataProcessor.writer.indentationChars = '';
 			editor.dataProcessor.writer.lineBreakChars = '';
@@ -668,13 +687,21 @@
 			 * Fix paste by removing last line break,
 			 * which occurs every time (LJSUP-14448).
 			 */
-			(function() {
+			;(function() {
 				var lastBr = /<br\s*\/?>$/i;
 				editor.on('paste', function(e) {
 					e.data.html = e.data.html.replace(lastBr, '');
 				});
 			})();
 
+			/*
+			 * Refresh frames after the paste
+			 */
+			editor.on('paste', function() {
+				setTimeout(function() {
+					updateFrames();
+				}, 0);
+			});
 
 			editor.on('dataReady', function() {
 				if (CKEDITOR.env.ie) {
@@ -695,7 +722,7 @@
 			// LJ Buttons
 
 			// LJ Image
-			(function() {
+			;(function() {
 				var button = "LJImage", selectedImage = null;
 
 				// registered in jquery/mixins/editpic.js
@@ -872,85 +899,6 @@
 
 				editor.ui.addButton(button, {
 					label: CKLang.LJImage_Title,
-					command: button
-				});
-			})();
-
-			// LJ Embed
-			(function () {
-				var lastSelectedIframe = null;
-
-				editor.on('selectionChange', function(event) {
-					var element = event.data.element;
-
-					if (element.is('iframe')) {
-						lastSelectedIframe = element;
-					} else {
-						lastSelectedIframe = null;
-					}
-				});
-
-				var button = "LJEmbedLink",
-					widget = 'video';
-
-				function insertEmbed(content) {
-					var iframe = new CKEDITOR.dom.element('iframe', editor.document);
-
-					if (content !== LiveJournal.getEmbed(content)) {
-						var node = CKEDITOR.dom.element.createFromHtml(LiveJournal.getEmbed(content));
-
-						var background = "";
-						var media = LiveJournal.parseMediaLink(content);
-						if (media.preview) {
-							background = 'style="background-image: url(' + media.preview + ');"';
-						}
-
-						iframe.setAttribute('lj-url', node.getAttribute('src'));
-						iframe.setAttribute('data-link', content);
-						iframe.setAttribute('lj-class', 'lj-iframe');
-						iframe.setAttribute('class', 'lj-iframe-wrap lj-rtebox');
-						iframe.setAttribute('style', "width: 490px; height:370px;");
-						iframe.setAttribute('lj-style', "width: 480px; height:360px;");
-						iframe.setAttribute('allowfullscreen', 'true');
-						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>" + (background ? "" : "iframe") + "</div>"));
-					} else {
-						iframe.setAttribute('lj-class', 'lj-embed');
-						iframe.setAttribute('class', 'lj-embed-wrap lj-rtebox');
-						iframe.setAttribute('lj-content', encodeURIComponent("<div " + background + " class='lj-embed-inner lj-rtebox-inner'>Embed</div>"));
-					}
-					iframe.setAttribute('lj-data', encodeURIComponent(LiveJournal.getEmbed(content)));
-
-
-					iframe.setAttribute('frameBorder', 0);
-					iframe.setAttribute('allowTransparency', 'true');
-					iframe.setAttribute('lj-cmd', button);
-
-					editor.insertElement(iframe);
-					updateFrames();
-				}
-
-				LiveJournal.register_hook(widget + '_response', function(content) {
-					insertEmbed(content);
-				});
-
-				editor.addCommand(button, {
-					exec: function(editor) {
-						var node = ljTagsData[button].node || lastSelectedIframe;
-
-						if (node) {
-							editor.rteButton(button, widget, {
-								defaultText: node && decodeURIComponent(node.getAttribute('data-link') || node.getAttribute('lj-url') || node.getAttribute('lj-data')),
-								editMode: true
-							});
-						} else {
-							editor.rteButton(button, widget);
-						}
-
-					}
-				});
-
-				editor.ui.addButton(button, {
-					label: CKLang.LJEmbed,
 					command: button
 				});
 			})();
@@ -1440,12 +1388,17 @@
 							return element;
 						}
 
-						var background = "";
-						if (element.attributes['data-link']) {
-							var media = LiveJournal.parseMediaLink(element.attributes['data-link']);
-							if (media.preview) {
-								background = 'style="background-image: url(' + media.preview + ');"';
+						function cssValue(attributeValue) {
+							if (!attributeValue) {
+								return 'auto';
 							}
+
+							return (/px|\%/).test(attributeValue) ?
+									attributeValue :
+									attributeValue.replace(
+										attributeValue,
+										attributeValue + 'px'
+									);
 						}
 
 						var src = element.attributes.src;
@@ -1455,13 +1408,11 @@
 						}
 
 						var fakeElement = new CKEDITOR.htmlParser.element('iframe'),
-							frameStyle = '',
-							bodyStyle = '',
 							width = Number(element.attributes.width),
 							height = Number(element.attributes.height);
 
 						// partner iframe, fix width/height from style attribute
-						if (element.attributes.src.indexOf('kroogi.com') !== -1 && element.attributes.style) {
+						if (element.attributes.src && element.attributes.src.indexOf('kroogi.com') !== -1 && element.attributes.style) {
 							var matchWidth = element.attributes.style.match(/width:\s([0-9]+)px;/i),
 								matchHeight = element.attributes.style.match(/height:\s([0-9]+)px;/i);
 
@@ -1471,30 +1422,21 @@
 							}
 						}
 
-						if (!isNaN(width)) {
-							frameStyle += 'width:' + width + 'px;';
-							bodyStyle += 'width:' + (width - 10) + 'px;';
-						}
-
-						if (!isNaN(height)) {
-							frameStyle += 'height:' + height + 'px;';
-							bodyStyle += 'height:' + (height - 10) + 'px;';
-						}
-
-						if (frameStyle.length) {
-							fakeElement.attributes['style'] = frameStyle;
-							fakeElement.attributes['lj-style'] = bodyStyle;
-						}
+						fakeElement.attributes['style'] = String.prototype.supplant.call("width: {width}; height: {height};", {
+							width: cssValue(element.attributes.width),
+							height: cssValue(element.attributes.height)
+						});
+						fakeElement.attributes['lj-style'] = "width: 99%; height: 99%;";
 
 						fakeElement.attributes['lj-url'] = element.attributes.src ? encodeURIComponent(element.attributes.src) : '';
 						fakeElement.attributes['lj-class'] = 'lj-iframe';
 						fakeElement.attributes['class'] = 'lj-iframe-wrap lj-rtebox';
-						fakeElement.attributes['lj-content'] = '<div ' + background + ' class="lj-rtebox-inner">' + (background ? '' : 'iframe') + '</div>';
+						fakeElement.attributes['lj-content'] = '<div class="lj-rtebox-inner">iframe</div>';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
-						if (src != LiveJournal.getEmbed(decodeURIComponent(element.attributes.src))) {
-							// convert iframe to embed
+						var media = LiveJournal.parseMedia(decodeURIComponent(element.attributes.src));
+						if (media && media.embed) {
 							fakeElement.attributes['lj-cmd'] = 'LJEmbedLink';
 							fakeElement.attributes['data-link'] = element.attributes['data-link'];
 						}
@@ -1598,7 +1540,7 @@
 								newElement = new CKEDITOR.htmlParser.element('iframe');
 								newElement.attributes.src = decodeURIComponent(element.attributes['lj-url']);
 								element.attributes.style && (element.attributes.style + ';').replace(/([a-z-]+):(.*?);/gi, function(result, name, value) {
-									newElement.attributes[name.toLowerCase()] = parseInt(value);
+									newElement.attributes[name.toLowerCase()] = parseInt(value, 10) + ((value.slice(-1) === '%') ? '%' : '');
 								});
 								newElement.attributes.frameBorder = 0;
 

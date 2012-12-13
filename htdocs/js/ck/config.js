@@ -14,6 +14,7 @@
             'ljfont'     : 'plugins/lj/ljfont/plugin.js'    ,
             'ljcut'      : 'plugins/lj/ljcut/plugin.js'     ,
             'ljuser2'    : 'plugins/lj/ljuser/plugin.js'    ,
+            'ljembed'    : 'plugins/lj/ljembed/plugin.js'   ,
             'ljautogrow' : 'plugins/lj/ljautogrow/plugin.js'
         };
 

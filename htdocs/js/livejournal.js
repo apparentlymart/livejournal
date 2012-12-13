@@ -874,46 +874,86 @@ LiveJournal.isMobile = function() {
 	}
 }();
 
-LiveJournal.getEmbed = function(url) {
-	var text = url,
-		videoid;
-
-	if (text.match(/^(http:\/\/(www\.)?)?youtu\.be/)) {
-		videoid = (text.split('?')[0]).replace(/\/+$/,'').split('/').pop();
-		text = 'http://www.youtube.com/embed/' + videoid;
-		text = '<iframe width="490" height="370" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
-	} else if (text.match(/^(http:\/\/(www\.)?)?youtube\.com/)) {
-		text = 'http://www.youtube.com/embed/' + LiveJournal.parseGetArgs(text).v;
-		text = '<iframe width="490" height="370" src="{text}" frameborder="0" allowfullscreen data-link="{url}"></iframe>'.supplant({ text: text, url: url });
-	} else if (text.match(/^(http:\/\/(www\.)?)?rutube\.ru/)) {
-		text = 'http://video.rutube.ru/' + LiveJournal.parseGetArgs(text).v;
-		text = ('<lj-embed> <OBJECT width="470" height="353">' +
-				'<PARAM name="movie" value="{text}"></PARAM>' +
-				'<PARAM name="wmode" value="window"></PARAM><PARAM name="allowFullScreen" value="true"></PARAM>' +
-				'<EMBED src="{text}" type="application/x-shockwave-flash"' +
-				' wmode="window" width="470" height="353" allowFullScreen="true" ></EMBED></OBJECT></lj-embed>').supplant({ text: text });
-	} else if (text.match(/^(http:\/\/(www\.)?)?vimeo\.com/)) {
-		videoid = (text.split('?')[0]).replace(/\/+$/,'').split('/').pop();
-		text = 'http://player.vimeo.com/video/' + videoid;
-		text = ('<iframe src="{text}" width="400" height="225" frameborder="0"' +
-			'webkitAllowFullScreen mozallowfullscreen allowFullScreen data-link="{url}"></iframe>').supplant({ text: text, url: url });
-	}
-	return text;
-};
-
-LiveJournal.parseMediaLink = function(input) {
+/**
+ * Parse link or embed html.
+ * @param {String} input Input can contain link or html.
+ * @return {Object} Object representing the media.
+ */
+LiveJournal.parseMedia = (function() {
 	'use strict';
 
-	var regexp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
-	var match = input.match(regexp);
-
-	if (match && match[7]) {
-		var id = match[7];
-		return {
-			id: id,
-			site: 'youtube',
-			preview: 'http://img.youtube.com/vi/' + id + '/0.jpg'
+	function parseMediaLink(input) {
+		var link = {
+			'youtube': 'http://youtube.com/watch?v={id}',
+			'vimeo': 'http://vimeo.com/{id}'
 		};
+
+		var embed = {
+			'youtube': '<iframe src="http://www.youtube.com/embed/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.youtube}),
+			'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo})
+		};
+
+		var provider = {
+			'vimeo': {
+				parse: function(input) {
+					var matcher = /^(http:\/\/)?(www\.)?(player\.)?vimeo.com\/(video\/)?(\d+)*/,
+						match = input.match(matcher);
+
+					return (match && match[5]) || null;
+				}
+			},
+
+			'youtube': {
+				parse: function(input) {
+					// http://stackoverflow.com/a/8260383
+
+					var matcher = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/,
+						match = input.match(matcher);
+
+					return (match && match[7]) || null;
+				}
+			}
+		};
+
+		var id, key, result;
+		for (key in provider) {
+			id = provider[key].parse(input);
+			if (id) {
+				result = {
+					site: key,
+					id: id
+				};
+
+				if (embed[key]) {
+					result.embed = embed[key].supplant(result);
+				}
+
+				if (link[key]) {
+					result.link = link[key].supplant(result);
+				}
+
+				return result;
+			}
+		}
+
+		return null;
 	}
-	return null;
-};
+
+	return function(input) {
+
+		// jQuery can fail on input
+		try {
+			var node = jQuery(input).first(), src;
+
+			if (node && node.prop('tagName').toLowerCase() === 'iframe') {
+				src = node && node.attr('src');
+
+				if (src) {
+					return parseMediaLink(src);
+				}
+			}
+		} catch (e) {
+			return parseMediaLink(input);
+		}
+	};
+})();
