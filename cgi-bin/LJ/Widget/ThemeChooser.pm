@@ -191,7 +191,7 @@ sub render_body {
 
         $ret .= "<div class='theme-item$theme_class'><div class='theme-item-in'>";
         $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-preview' alt='' />";
-        $ret .= "<h4>" . ( $theme->is_buyable ? $shop_theme->name : $theme->name ) . "</h4>";
+        $ret .= "<h4>" . $theme->name . "</h4>";
 
         my $preview_redirect_url;
         if ($theme->themeid) {

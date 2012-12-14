@@ -448,8 +448,6 @@ sub new {
     $layout_class = "LJ::S2Theme::$layout_class";
 
     # make this theme an object of the lowest level class that's defined
-#    if ($layers->{$themeid}->{'is_buyable'} || $outhash{$themeid}{'is_buyable'}) {
-#        bless $self, "LJ::S2Theme::LJShopStyle";
     if (eval { $theme_class->init }) {
         bless $self, $theme_class;
     } elsif (eval { $layout_class->init }) {
@@ -488,6 +486,11 @@ sub coreid {
 
 sub name {
     my $self = shift;
+
+    if ($self->is_buyable) {
+        my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($self->s2lid);
+        return $shop_theme->name;
+    }
 
     return $self->{name};
 }

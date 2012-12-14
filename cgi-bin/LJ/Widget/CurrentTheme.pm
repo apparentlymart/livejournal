@@ -35,14 +35,7 @@ sub render_body {
     $ret .= "<h2 class='widget-header'><span>" . $class->ml('widget.currenttheme.title', {'user' => $u->ljuser_display}) . "</span></h2>";
     $ret .= "<div class='theme-current-content pkg'>";
     $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-current-image' />";
-    my $theme_name = '';
-    my $theme_shop = LJ::Pay::Theme->load_by_s2lid ($theme->s2lid);
-    if ($theme_shop) {
-        $theme_name = $theme_shop->name;
-    } else {
-        $theme_name = $theme->name;
-    }
-    $ret .= "<h3>" . $theme_name . "</h3>";
+    $ret .= "<h3>" . $theme->name . "</h3>";
 
     my $layout_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg$showarg' class='theme-current-layout'><em>$layout_name</em></a>";
     my $special_link_opts = "href='$LJ::SITEROOT/customize/$getextra${getsep}cat=special$filterarg$showarg' class='theme-current-cat'";
