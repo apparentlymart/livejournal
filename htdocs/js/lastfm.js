@@ -45,7 +45,7 @@ LJ.LastFM = {
 
         jQuery.ajax({
             url: 'http://ws.audioscrobbler.com/2.0/',
-            dataType: 'json',
+            dataType: 'jsonp',
             cache: false,
             data: {
                 method: 'user.getrecenttracks',
