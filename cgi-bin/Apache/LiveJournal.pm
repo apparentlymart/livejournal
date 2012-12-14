@@ -433,6 +433,19 @@ sub trans {
         }
     }
 
+    my $middleware_response;
+    LJ::run_hooks( 'middleware_handler', \$middleware_response );
+    if ($middleware_response) {
+        LJ::Request->handler('perl-script');
+        LJ::Request->set_handlers( 'PerlHandler' => sub {
+            my $result = eval { $middleware_response->output; 1 };
+            warn $@ unless $result;
+            return LJ::Request::DONE;
+        } );
+
+        return LJ::Request::OK;
+    }
+
     # process controller
     # if defined
     if ( my $controller = LJ::Request->notes('controller') ) {

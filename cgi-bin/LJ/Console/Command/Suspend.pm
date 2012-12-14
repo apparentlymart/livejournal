@@ -19,7 +19,7 @@ sub usage { '<username or email address or entry url or photo/album url> <reason
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "suspend") || $LJ::IS_DEV_SERVER;
+    return LJ::check_priv( $remote, 'suspend', '' ) || $LJ::IS_DEV_SERVER;
 }
 
 sub execute {

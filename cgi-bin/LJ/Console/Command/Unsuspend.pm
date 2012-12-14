@@ -18,7 +18,7 @@ sub usage { '[--unmark] <username, email address, entry, album or photo url> <re
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return      LJ::check_priv($remote, "suspend")
+    return      LJ::check_priv( $remote, 'suspend', '' )
             ||  LJ::check_priv($remote, "unsuspend")
             ||  $LJ::IS_DEV_SERVER;
 }
