@@ -617,7 +617,12 @@ sub file_request
     foreach my $p (@props) {
         $add_data->($p, $o->{$p});
     }
-    $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES " . join(',', @data));
+
+    if (@data) {
+        $dbh->do(
+            'INSERT INTO supportprop (spid, prop, value) VALUES ' .
+            join( q{,}, @data ) );
+    }
 
     $dbh->do("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) ".
              "VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
