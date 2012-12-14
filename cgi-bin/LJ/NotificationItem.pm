@@ -158,25 +158,27 @@ sub when_unixtime {
 sub _state {
     &_load unless $_[0]->{'_loaded'};
 
-    return $_[0]->{'state'};
+    return $_[0]->{'state'} || '';
 }
 
 # returns if this event is marked as read
 sub read {
-    return 0 unless defined $_[0]->_state;
-    return $_[0]->_state eq 'R';
+    return &_state eq 'R';
 }
 
 # returns if this event is marked as unread
 sub unread {
-    return 0 unless defined $_[0]->_state;
-    return $_[0]->_state eq 'N';
+    return uc &_state eq 'N';
+}
+
+# returns if this event was marked as unread by user
+sub user_unread {
+    return &_state eq 'n';
 }
 
 # returns if this event is marked as spam
 sub spam {
-    return 0 unless defined $_[0]->_state;
-    return $_[0]->_state eq 'S';
+    return &_state eq 'S';
 }
 
 # delete this item from its inbox
@@ -192,20 +194,24 @@ sub delete {
 
 # mark this item as read
 sub mark_read {
-    my $self = shift;
-
     # do nothing if it's already marked as read
-    return if $self->read;
-    $self->_set_state('R');
+    return if &read;
+
+    _set_state($_[0], 'R');
+}
+
+# mark this item as read if it was marked as unread by system
+sub auto_read {
+    &mark_read
+        unless &read or &user_unread;
 }
 
 # mark this item as read
 sub mark_unread {
-    my $self = shift;
-
     # do nothing if it's already marked as unread
-    return if $self->unread;
-    $self->_set_state('N');
+    return if &unread;
+
+    _set_state($_[0], 'n');
 }
 
 # sets the state of this item
