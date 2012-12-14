@@ -208,9 +208,9 @@ sub save_language {
         }
         $style{'i18nc'} = $i18nc;
         $style{'i18n'} = $i18n;
-        
+
         return \%style if($opts{return});
-        
+
         $class->implicit_style_create($u, %style);
     }
 
@@ -555,7 +555,7 @@ sub get_propgroups {
 
         next if $prop_hidden;
 
-        if (LJ::is_enabled("delayed_entries")) { 
+        if (LJ::is_enabled("delayed_entries")) {
             if ($prop->{'name'} eq 'sticky_subject' ||
                 $prop->{'name'} eq 'sticky_post' ) {
                 my $value = $class->get_s2_prop_values('sticky_post', $u, $style);
@@ -656,7 +656,7 @@ sub get_moodtheme_select_list {
 sub get_cats {
     my $class = shift;
     my $u = shift;
- 
+
     my %purchased = $LJ::DISABLED{'lj_shop_styles'} ? () : (
         purchased => {
             text => LJ::Lang::ml('customize.cats.purchased'),
@@ -753,9 +753,9 @@ sub get_cats {
             text => LJ::Lang::ml('customize.cats.sports'),
         },
     );
-    
+
     LJ::run_hooks("modify_cat_list", \@categories, user => $u,);
-    
+
     return @categories;
 }
 

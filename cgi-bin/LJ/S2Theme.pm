@@ -523,13 +523,13 @@ sub preview_imgurl {
     ## system styles
     ##
     ## Note: if you want to override url of preview image of system style,
-    ## don't use 'preview_imgurl' S2 property of theme, override method 
+    ## don't use 'preview_imgurl' S2 property of theme, override method
     ## in subclass (LJ::S2Theme::*) instead.
     ##
     if (my $uniq = $self->uniq) {
         return "$LJ::IMGPREFIX/customize/previews/$uniq.png";
     }
-    
+
     ## custom styles with defined preview image
     my %info;
     LJ::S2::load_layer_info(\%info, [ $self->{s2lid} ]);
@@ -537,12 +537,12 @@ sub preview_imgurl {
         $url = "$LJ::IMGPREFIX/$url" unless $url =~ /^http/i;
         return LJ::ehtml($url);
     }
-    
+
     ## default "custom layer" icon
     return "$LJ::IMGPREFIX/customize/previews/custom-layer.png?v=12565";
 }
 
-    
+
 sub available_to {
     my $self = shift;
     my $u = shift;
@@ -680,7 +680,8 @@ sub get_preview_styleid {
 # Methods that get overridden by child packages
 ##################################################
 
-sub cats { () } # categories that the theme is in
+## sub cats defined below in code
+#sub cats { () } # categories that the theme is in
 sub layouts { ( "1" => 1 ) } # theme layout/sidebar placement options ( layout type => property value or 1 if no property )
 sub layout_prop { "" } # property that controls the layout/sidebar placement
 sub show_sidebar_prop { "" } # property that controls whether a sidebar shows or not
@@ -744,6 +745,27 @@ sub component_props { () }
 sub setup_props { () }
 sub ordering_props { () }
 sub custom_props { () }
-sub is_buyable { 0 }
+
+sub is_buyable {
+    my $self = shift;
+
+    my $theme = LJ::Pay::Theme->load_by_s2lid ($self->s2lid);
+    return 1 if $theme;
+
+    return 0;
+}
+
+sub cats {
+    my $self = shift;
+
+    return () if UNIVERSAL::can($self, 'cats') == \&cats;
+
+    my $theme = LJ::Pay::Theme->load_by_s2lid ($self->s2lid);
+
+    return $self->cats (@_) unless $theme;
+
+    return @{$theme->get_cats};
+}
 
 1;
+

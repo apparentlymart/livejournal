@@ -4,6 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Customize );
+use LJ::Pay::Theme;
 
 sub ajax { 1 }
 sub authas { 1 }
