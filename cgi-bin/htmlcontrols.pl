@@ -132,10 +132,12 @@ sub html_select
         # items can be either pairs of $value, $text or a list of $it hashrefs (or a mix)
         my $it = {};
         my $text;
+        my $js_data;
         if (ref $value) {
             $it = $value;
             $value = $it->{value};
             $text = $it->{text};
+            $js_data = $it->{js_data};
         } else {
             $text = shift @items;
         }
@@ -148,6 +150,7 @@ sub html_select
             while (defined (my $value = shift @sub_items)) {
                 my $it = {};
                 my $text;
+
                 if (ref $value) {
                     $it = $value;
                     $value = $it->{value};
@@ -196,7 +199,7 @@ sub html_select
             # is this individual option disabled?
             my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
 
-            $ret .= "<option value=\"$value\"$id$sel$dis>" .
+            $ret .= "<option value=\"$value\"$id$sel$dis $js_data>" .
                       ($ehtml ? ehtml($text) : $text) . "</option>\n";
         }
     }

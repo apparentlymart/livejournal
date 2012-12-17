@@ -174,7 +174,8 @@ sub valid_stylesheet_url {
 #           'authas' - current user, gets selected in drop-down;
 #           'label' - label to go before form elements;
 #           'button' - button label for submit button;
-#           others - arguments to pass to [func[LJ::get_authas_list]].
+#           others - arguments to pass to [func[LJ::get_authas_list]];
+#           check_paid - for each user in list will set parameter 'data-paid:0|1', used by JS
 # </LJFUNC>
 sub make_authas_select {
     my ($u, $opts) = @_; # type, authas, label, button
@@ -198,7 +199,20 @@ sub make_authas_select {
                                  %select_id,
                                  },
                                  ## We loaded all users in LJ::get_authas_list(). Here we use their singletons.
-                                 (map { my $u = LJ::load_user ($_); ($_, $u->display_name) } @list), @{$opts->{'add_fields'}} ) . " ";
+                                 (map {
+                                    my $u = LJ::load_user ($_);
+                                    my %is_paid = $opts->{'check_paid'}
+                                        ? ($u && ($u->get_cap('perm') || $u->get_cap('paid'))
+                                            ? ( js_data => " data-paid='1' " )
+                                            : ( js_data => " data-paid='0' " )
+                                          )
+                                        : undef;
+                                    {
+                                        text    => $_,
+                                        value   => $u->display_name,
+                                        %is_paid,
+                                    }
+                                } @list), @{$opts->{'add_fields'}} ) . " ";
         $ret .= $opts->{'button_tag'} . LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'}) . $opts->{'button_close_tag'};
         return $ret;
     }
