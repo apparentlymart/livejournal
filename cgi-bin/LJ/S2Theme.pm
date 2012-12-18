@@ -550,6 +550,9 @@ sub available_to {
     my $self = shift;
     my $u = shift;
 
+    my @shop_themes = LJ::Pay::Theme->get_purchased ($u);
+    return 1 if grep { $self->s2lid == $_->s2lid } @shop_themes;
+
     # theme isn't available to $u if the layout isn't
     return LJ::S2::can_use_layer($u, $self->uniq) && LJ::S2::can_use_layer($u, $self->layout_uniq);
 }
