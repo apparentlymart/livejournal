@@ -748,6 +748,7 @@ sub component_props { () }
 sub setup_props { () }
 sub ordering_props { () }
 sub custom_props { () }
+sub preview_exts { {} }
 
 sub is_buyable {
     my $self = shift;
