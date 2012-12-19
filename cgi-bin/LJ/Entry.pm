@@ -2888,8 +2888,8 @@ sub replycount_do {
 
     ##
     my $sql_sign = $action eq 'decr' ? '-' : '+';
-    my $sql = "UPDATE log2 SET replycount=LAST_INSERT_ID(replycount $sql_sign $value) WHERE journalid=? AND jitemid=?";
-    
+    my $sql = "UPDATE log2 SET replycount=LAST_INSERT_ID( ". ($sql_sign eq '-' ? "IF(replycount < $value, 0, replycount $sql_sign $value)" : "replycount $sql_sign $value"). " ) WHERE journalid=? AND jitemid=?";
+
     unless ( LJ::MemCache::can_gets() ){
     # used Cache::Memcached driver that does not support 'gets' and 'cas' commands
         $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $memkey);
