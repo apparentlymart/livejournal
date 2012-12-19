@@ -3968,6 +3968,12 @@ inbox.compose.to=To
 
 inbox.compose.userpic=Userpic
 
+inbox.confirm.cancel=Cancel
+
+inbox.confirm.remove=Remove all messages from dialogue
+
+inbox.confirm.stays=3 marked and 5 unread messages will not be deleted
+
 inbox.counter.amount=10000
 
 inbox.counter.title=Characters left:
