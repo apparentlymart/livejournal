@@ -145,6 +145,12 @@ sub create_user {
     # some hooks override this, so let's switch it back
     LJ::update_user( $u, { 'caps' => $opts{'caps'} } );
 
+    # props
+    my $props = delete $opts{props} || {};
+    while (my($k,$v) = each %$props){
+        $u->set_prop($k, $v);
+    }
+    
     if ($VERBOSE) {
         warn "created user $opts{'user'}\n";
     }
