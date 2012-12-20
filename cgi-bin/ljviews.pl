@@ -1677,7 +1677,7 @@ sub create_view_friends {
     $friends_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        LJ::run_hook('s2_head_content_extra', \$friends_page{'head'}, $remote, $opts->{r});
+        LJ::run_hooks('s2_head_content_extra', \$friends_page{'head'}, $remote, $opts->{r});
     }
     LJ::run_hooks('head_content', \$friends_page{'head'});
 
@@ -2305,7 +2305,7 @@ sub create_view_calendar
     $calendar_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        LJ::run_hook('s2_head_content_extra', \$calendar_page{'head'}, $remote, $opts->{r});
+        LJ::run_hooks('s2_head_content_extra', \$calendar_page{'head'}, $remote, $opts->{r});
     }
     LJ::run_hooks('head_content', \$calendar_page{'head'});
 
@@ -2574,7 +2574,7 @@ sub create_view_day
     $day_page{'head'} = "";
 
     if (LJ::are_hooks('s2_head_content_extra')) {
-        LJ::run_hook('s2_head_content_extra', \$day_page{'head'}, $remote, $opts->{r});
+        LJ::run_hooks('s2_head_content_extra', \$day_page{'head'}, $remote, $opts->{r});
     }
     LJ::run_hooks('head_content', \$day_page{'head'});
 
