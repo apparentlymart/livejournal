@@ -176,6 +176,7 @@ sub make_journal
     }
 
     return if $opts->{'badfriendgroup'};
+    return if $opts->{'errors'};
     return if $opts->{'handler_return'};
     return if $opts->{'readonlyremote'};
     return if $opts->{'readonlyjournal'};
