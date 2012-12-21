@@ -415,3 +415,67 @@ LiveJournal.register_hook('page_load', function () {
 
 	jQuery(document.body).ljLikes();
 });
+
+/**
+ * Embed gists from GitHub
+ *
+ * Parses the page for:
+ * '<a href="https://gist.github.com/fcd584d3a351c3e9728b"></a>'
+ */
+(function($) {
+	'use strict';
+
+	var gistBase = 'https://gist.github.com/',
+		gistCss  = {
+			'clear'       : 'both',
+			'display'     : 'block',
+			'padding-top' : '10px'
+		};
+
+	$(function() {
+		var gist = $('a[href^="' + gistBase + '"]'),
+			head = $('head');
+
+		gist.each(function(_, element) {
+			var link  = $(element),
+				href  = link.attr('href'),
+				match = href  && href.match(/gist.github.com\/([a-zA-Z0-9]+)/),
+				id    = match && match[1];
+
+			if (!id) {
+				console.error('Bad GitHub id');
+				return;
+			}
+
+			link
+				.attr('target', '_blank')
+				.css(gistCss)
+				.html('Loading the gist...');
+
+			$.ajax({
+			    url: gistBase + id + '.json',
+			    dataType: 'jsonp',
+			    timeout: 10000
+			}).done(function(result) {
+				if (!result.div || !result.stylesheet) {
+					console.error('Data error', result);
+				}
+
+				head.append(
+					'<link rel="stylesheet" href="' + result.stylesheet + '">'
+				);
+
+				var div = $(result.div).css(gistCss);
+
+				div.find('a').attr('target', '_blank');
+
+				link.replaceWith(div);
+			})
+			.fail(function(error) {
+				link.html('Gist loading error');
+			});
+		});
+
+	});
+
+})(jQuery);
