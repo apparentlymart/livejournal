@@ -22,6 +22,7 @@
         sessionexpire    => 0,
         sessiongenerate  => 0,
         syncitems        => 0,
+        addcomment       => 1,                             
     );
 
     %LJ::XMLRPC_USER_ACCESS = (

@@ -10745,6 +10745,9 @@ xmlrpc.error.335=Unknown username
 xmlrpc.error.336|staleness=1
 xmlrpc.error.336=Account not validated
 
+xmlrpc.error.337|staleness=1
+xmlrpc.error.337=Not allowed to create comment
+
 xmlrpc.error.402|staleness=1
 xmlrpc.error.402=Your IP address is temporarily banned for exceeding the login failure rate.
 

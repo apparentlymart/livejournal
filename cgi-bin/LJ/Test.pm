@@ -481,7 +481,7 @@ sub t_post_fake_entry {
     }
 
     my $subject = delete $opts{subject} || "test suite post.";
-    my $body    = delete $opts{body}    || "This is a test post from $$ at " . time() . "\n";
+    my $body    = delete $opts{body}    || "This is a test post from $$ at " . time() . "\n" . "with params:" . Dumper(\%opts);
     my $props   = delete $opts{props} || {};
 
     my %req = (

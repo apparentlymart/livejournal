@@ -144,6 +144,7 @@ my %e = (
      "334" => E_PERM,
      "335" => E_PERM,
      "336" => E_TEMP,
+     "337" => E_TEMP,
     
      # Limit errors
      "402" => E_TEMP,
@@ -554,18 +555,23 @@ sub addcomment
     my $pk = $req->{prop_picture_keyword} || $req->{picture_keyword};
 
     # create
-    my $comment = LJ::Comment->create(
-        journal      => $journal,
-        ditemid      => $req->{ditemid},
-        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
+    my $comment;
+    eval {
+        $comment = LJ::Comment->create(
+                                       journal      => $journal,
+                                       ditemid      => $req->{ditemid},
+                                       parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
+                                       
+                                       poster       => $u,
+                                       
+                                       body         => $req->{body},
+                                       subject      => $req->{subject},
+                                       
+                                       props        => { picture_keyword => $pk }
+        );
+    };
 
-        poster       => $u,
-
-        body         => $req->{body},
-        subject      => $req->{subject},
-
-        props        => { picture_keyword => $pk }
-    );
+    return fail($err,337) unless $comment;
 
     ## Counter "new_comment" for monitoring
     LJ::run_hook ("update_counter", {
