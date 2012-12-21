@@ -665,10 +665,13 @@
 				editor.dataProcessor.toDataFormat = function(html, fixForBody) {
 					html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
 					html = html
-						.replace(/<br\s*\/>/gi, '\n')
-						.replace(/\>&nbsp;\n/ig, '>\n')
-						.replace(/[^ ]&nbsp\;</ig, ' <')
-						.replace(/\>&nbsp\;[^ ]/ig, '> ')
+						.replace(/<br\s*\/>/gi     , '\n' )
+
+						.replace(/&nbsp;</ig       , ' <' )
+						.replace(/\>&nbsp;/ig      , '> ' )
+
+						.replace(/\>&nbsp;\n/ig    , '>\n')
+
 						.replace(/\t/g, ' ');
 
 					return html;
