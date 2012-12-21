@@ -1110,6 +1110,7 @@ sub can_post_to {
     return 1 if $uowner->is_community() && !$need_moderated;
 
     # pre-approved users
+    return 1 if LJ::check_rel($uowner, $poster, 'M');
     return 1 if LJ::check_rel($uowner, $poster, 'N');
     return 0;
 }
