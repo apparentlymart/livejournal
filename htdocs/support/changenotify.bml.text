@@ -38,3 +38,6 @@
 .unknow.mode|staleness=1
 .unknow.mode=Unknown mode.
 
+.event.support_request = New support request has been submitted to the board
+
+.event.support_request.cat = New support request has been submitted to <b>[[cat]]</b> category
