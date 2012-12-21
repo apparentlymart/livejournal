@@ -34,6 +34,7 @@ use LJ::Router;
 use LJ::S2;
 use LJ::TimeUtil;
 use LJ::URI;
+use LJ::Handlers;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
@@ -44,6 +45,7 @@ BEGIN {
     if (%LJ::FOTOBILDER_IP) {
         use Apache::LiveJournal::Interface::FotoBilder;
     }
+    $SIG{__WARN__} = sub { LJ::Handlers::warn_handler(@_) };
 }
 
 my %RQ;       # per-request data
