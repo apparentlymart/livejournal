@@ -8,6 +8,8 @@ require "ljhooks.pl";
 use base qw( Exporter );
 our @EXPORT_OK = qw( ml );
 
+use Carp qw();
+
 use LJ::LangDatFile;
 use LJ::TimeUtil;
 use LJ::LocalCache;
@@ -916,6 +918,15 @@ sub plural_form {
     my $lang_short = substr( $lang, 0, 2 );
     my $handler = $PLURAL_FORMS_HANDLERS{$lang_short} || \&plural_form_en;
 
+    unless ( $count =~ /^\d+$/ ) {  
+        my $oldcount = $count;
+        $count =~ s/\D//g;
+        $count ||= 0;
+
+        Carp::carp( qq{Invalid value "$oldcount" } .
+            qq{passed to plural_form, coercing to $count} );
+    }
+
     return $handler->($count);
 }
 
@@ -941,9 +952,6 @@ sub plural_form_ru {
     my ($count) = @_;
     $count = 0 unless defined $count;
     
-    ## remove the gaps from numbers: 25 500 -> 25500
-    $count =~ s/\s+//g;
-
     return 0 if ( $count % 10 == 1 && $count % 100 != 11 );
     return 1
         if ( $count % 10 >= 2 && $count % 10 <= 4 )
