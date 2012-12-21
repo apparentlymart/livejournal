@@ -34,9 +34,11 @@
          return 1;
      }
 
-     open (FILE, ">$INC_DIR/$filename") or return 0;
-     print FILE $content;
-     close FILE;
+     unless ( LJ::is_enabled('fileedit_local') ) {
+         return 0;
+     }
+
+     File::Slurp::write_file( "$INC_DIR/$filename", $content );
      return 1;
  };
 
@@ -52,10 +54,7 @@
          return $contents if defined $contents;
      }
 
-     open (FILE, "$INC_DIR/$filename") or return undef;
-     while (<FILE>) { $contents .= $_; }
-     close FILE;
-     return $contents;
+     return File::Slurp::read_file("$INC_DIR/$filename");
  };
 
  if ($files{'*'}) 
