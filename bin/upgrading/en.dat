@@ -3972,7 +3972,11 @@ inbox.confirm.cancel=Cancel
 
 inbox.confirm.remove=Remove all messages from dialogue
 
-inbox.confirm.stays=3 marked and 5 unread messages will not be deleted
+inbox.confirm.warn.all=[[amount]] [[?amount|message|messages]] will be deleted
+
+inbox.confirm.warn.marked=[[marked]] of them are marked
+
+inbox.confirm.warn.unread=[[unread]] of them are unread
 
 inbox.counter.amount=10000
 
