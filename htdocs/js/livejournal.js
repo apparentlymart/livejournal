@@ -107,8 +107,6 @@ LiveJournal.initPage = function () {
 	LiveJournal.run_hook('page_load');
 };
 
-jQuery(LiveJournal.initPage);
-
 /**
  * Special helper class is added to the body if browser doesn't support media queries and
  * screen width is less then 1000px.
