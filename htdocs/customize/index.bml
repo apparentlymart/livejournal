@@ -113,12 +113,6 @@ body<=
     my $customize_friendsfeed = LJ::Widget::CustomizeFriendsFeed->new;
     $ret .= $customize_friendsfeed->render;
 
-    $ret .= "<form method='POST'><div class='theme-customize'>";
-    $ret .= LJ::form_auth();
-    $ret .= LJ::html_submit('nextpage', $ML{'.btn.nextpage'});
-    $ret .= "</div>";
-    $ret .= "</form>";
-
     return $ret;
 }
 _code?>
