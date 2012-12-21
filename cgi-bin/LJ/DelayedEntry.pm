@@ -1095,30 +1095,23 @@ sub can_post_to {
     my $uownerid = $uowner->userid;
     my $posterid = $poster->userid;
 
-    my $can_manage = $poster->can_manage($uowner) || 0;
+    return 1 if $poster->can_manage($uowner);
+
     my $moderated = $uowner->prop('moderated') || '';
     my $need_moderated = ( $moderated =~ /^[1A]$/ ) ? 1 : 0;
+
     if ( $req && $uowner->{'moderated'} && $uowner->{'moderated'} eq 'F' ) {
         ## Scan post for spam
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated);
     }
 
-    if ( LJ::is_banned($posterid, $uownerid) ) {
-        return 0;
-    }
+    return 0 if LJ::is_banned($posterid, $uownerid);
 
-    my $can_post = ($uowner->is_community() && !$need_moderated) || $can_manage;
+    return 1 if $uowner->is_community() && !$need_moderated;
 
-    if ($can_post) {
-        return 1;
-    }
-
-    # don't moderate admins, moderators & pre-approved users
-    my $dbh = LJ::get_db_writer();
-    my ($relcount) = $dbh->selectrow_array( "SELECT 1 FROM reluser ".
-                                            "WHERE userid=$uownerid AND targetid=$posterid ".
-                                            "AND type IN ('A','M','N') LIMIT 1" );
-    return $relcount ? 1 : 0;
+    # pre-approved users
+    return 1 if LJ::check_rel($uowner, $poster, 'N');
+    return 0;
 }
 
 sub dupsig_check {
