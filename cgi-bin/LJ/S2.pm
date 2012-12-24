@@ -176,13 +176,17 @@ sub make_journal
     }
 
     return if $opts->{'badfriendgroup'};
-    return if $opts->{'errors'};
     return if $opts->{'handler_return'};
     return if $opts->{'readonlyremote'};
     return if $opts->{'readonlyjournal'};
     return if $opts->{'redir'};
     return if $opts->{'suspendeduser'};
     return if $opts->{'suspendedentry'};
+
+    if ( my $errors = $opts->{'errors'} ) {
+        return unless ref $errors;
+        return if ref $errors eq 'ARRAY' && @$errors;
+    }
 
     # the friends mode=live returns raw HTML in $page, in which case there's
     # nothing to "run" with s2_run.  so $page isn't runnable, return it now.
