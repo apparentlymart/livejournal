@@ -15,7 +15,10 @@
             'ljcut'      : 'plugins/lj/ljcut/plugin.js'     ,
             'ljuser2'    : 'plugins/lj/ljuser/plugin.js'    ,
             'ljembed'    : 'plugins/lj/ljembed/plugin.js'   ,
-            'ljautogrow' : 'plugins/lj/ljautogrow/plugin.js'
+            'ljautogrow' : 'plugins/lj/ljautogrow/plugin.js',
+            'ljlike'     : 'plugins/lj/ljlike/plugin.js'    ,
+            'ljpoll'     : 'plugins/lj/ljpoll/plugin.js'    ,
+            'ljimage'    : 'plugins/lj/ljimage/plugin.js'
         };
 
         if (isIE) {
@@ -71,7 +74,9 @@
     }
     config.plugins = plugins.join(',');
 
-    config.language = 'ru';
+    config.language = 'en';
+    config.defaultLanguage = 'en';
+
     config.autoParagraph = false;
     config.autoUpdateElement = false;
     config.docType = '<!DOCTYPE html>';
