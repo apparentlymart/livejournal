@@ -22,6 +22,11 @@
         return "/* invalid domain */";
     }
 
+    my $url = LJ::Request->uri;
+    if ($url eq '/google8ea1c03e718faacd.html') {
+        return "google-site-verification: google8ea1c03e718faacd.html";
+    }
+
     return "/* invalid URL */" unless $GET{u} and $GET{u} !~ /[<>]/;
 
     my $url = $GET{u};
