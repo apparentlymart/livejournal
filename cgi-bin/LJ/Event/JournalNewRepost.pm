@@ -241,10 +241,9 @@ sub as_html {
     my $ml_string = $journal->is_community ? 'esn.user_new_repost_community.ashtml' :
                                              'esn.user_new_repost.ashtml';
 
-    my $journal  = LJ::ljuser($self->journal);
+    my $ljuser_journal  = LJ::ljuser($self->journal);
     my $poster   = LJ::ljuser($self->poster);
     my $reposter = LJ::ljuser($self->reposter);
-    my $entry    = $self->entry; 
 
     my $tags = '';
     # add tag info for entries that have tags
@@ -261,7 +260,7 @@ sub as_html {
         {
             reposter  => $reposter,
             poster    => $poster,
-            community => $journal,
+            community => $ljuser_journal,
             about     => $about,
             tags      => $tags,
         }); 
