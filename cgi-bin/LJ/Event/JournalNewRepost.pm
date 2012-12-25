@@ -370,13 +370,6 @@ sub _as_email {
     my $ml_head_string = $is_community ? 'esn.journal_new_repost.head_comm' :
                                          'esn.journal_new_repost.head_user';
 
-    # make hyperlinks for options
-    # tags 'poster' and 'journal' cannot contain html <a> tags
-    # when it used between [[openlink]] and [[closelink]] tags.
-    my $vars = { poster    => $poster_text, 
-                 journal   => $reposter_name,
-                 community => $journal, };
-
     $email .= LJ::Lang::get_text($lang, $ml_head_string, undef,
                 {
                     reposter    => $reposter_name,
