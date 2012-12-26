@@ -1686,6 +1686,26 @@ HTTPReq = {
 	}
 };
 
+LJ.define('LJ.Object');
+/**
+ * Return a copy of the object only containing the whitelisted properties.
+ * @param {Object} obj Object source
+ * @param {String} keys* Keys which should be picked from source object
+ * @return {Object} Copy of source object that contains only whitelisted keys
+ */
+LJ.Object.pick = function(obj) {
+    var copy = {},
+    	keys = Array.prototype.concat.apply( [], Array.prototype.slice.call(arguments, 1) );
+
+    keys.forEach(function (key) {
+    	if (key in obj) {
+    		copy[key] = obj[key];
+    	}
+    });
+
+    return copy;
+};
+
 /**
  * Object responsible for statistic integration
  * @param  {jQuery} $ jQuery
