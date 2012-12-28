@@ -3,8 +3,82 @@
  *
  * Contains helper methods, dataProcessor (input on output) configurations
  */
-;(function() {
+;(function($) {
 	'use strict';
+
+	CKEDITOR.processTextarea = true;
+
+	/*
+	 * @param {HTMLElement}	node		Parent node to traverse
+	 * @param {Function}	callback	Callback, gets a current node as an argument
+	 */
+	function traverseTextNodes(node, callback) {
+		var next;
+
+		if (node.nodeType === 1) {
+			if (node = node.firstChild) {
+				do {
+					next = node.nextSibling;
+					traverseTextNodes(node, callback);
+				} while(node = next);
+		}
+
+		} else if (node && node.nodeType === 3) {
+			if (typeof callback === 'function') {
+				callback(node);
+			}
+		}
+	}
+
+	/*
+	 * @param	{String} html	HTML to process
+	 * @return	{String}		Processed HTML
+	 */
+	var newlineToBr = (function() {
+
+		var ignore = {
+			'table': 1,
+			'tbody': 1,
+			'tr'   : 1,
+
+			'lj-poll' : 1,
+			'lj-pq'   : 1,
+
+			'textarea': 1,
+
+			'ul' : 1,
+			'ol' : 1
+		};
+
+		return function(html) {
+			var dom = jQuery('<div>' + html + '</div>');
+
+			traverseTextNodes(dom.get(0), function(node) {
+				if (node.parentNode && !ignore[node.parentNode.nodeName.toLowerCase()]) {
+					$(node).replaceWith(function() {
+						return node.nodeValue.replace(/\n/ig, '<br>');
+					});
+				}
+			});
+
+			return dom.html();
+		};
+	})();
+
+	/*
+	 * Remove unnecessary nbsp from HTML string
+	 *
+	 * @param	{String} html HTML to process
+	 * @return	{String}
+	 */
+	function nbspFix(html) {
+		html = html
+			.replace(/&nbsp;</ig       , ' <' )
+			.replace(/\>&nbsp;/ig      , '> ' )
+			.replace(/\>&nbsp;\n/ig    , '>\n');
+
+		return html;
+	}
 
 	/*
 	 * CKEDITOR.prototype.setData light version
@@ -15,7 +89,6 @@
 		this.document.getBody().setHtml(this.dataProcessor.toHtml(data));
 		this.fire('contentDom');
 	};
-
 
 	/*
 	 * Update 'editor.editdataWithFocus' with
@@ -65,23 +138,23 @@
 			}
 
 			if (where === 'end') {
-		        node = parents[parents.length - 2].getFirst();
-		        if (!node) {
+				node = parents[parents.length - 2].getFirst();
+				if (!node) {
 					return;
-		        }
+				}
 
-		        while (true) {
-		            var x = node.getNext();
-		            if (x == null) {
-		                break;
-		            }
-		            node = x;
-		        }
+				while (true) {
+					var x = node.getNext();
+					if (x == null) {
+						break;
+					}
+					node = x;
+				}
 
-		        s.selectElement(node);
-		        selected_ranges = s.getRanges();
-		        selected_ranges[0].collapse(false);
-		        s.selectRanges(selected_ranges);
+				s.selectElement(node);
+				selected_ranges = s.getRanges();
+				selected_ranges[0].collapse(false);
+				s.selectRanges(selected_ranges);
 			}
 
 			if (where === 'start') {
@@ -148,11 +221,7 @@
 	CKEDITOR.lang.en.undo = LJ.ml('talk.undo');
 	CKEDITOR.lang.en.redo = LJ.ml('talk.redo');
 
-	if (Site.page.ljpost) {
-		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents_new.css?t=' + Site.version;
-	} else {
-		CKEDITOR.styleText = Site.statprefix + '/js/ck/contents.css?t=' + Site.version;
-	}
+	CKEDITOR.styleText = Site.statprefix + '/js/ck/contents_new.css?t=' + Site.version;
 
 	function rteButton(button, widget, options) {
 		options = options || {};
@@ -248,11 +317,6 @@
 	CKEDITOR.tools.extend(dtd.$body, dtd.$block);
 
 	delete dtd['lj-cut']['lj-cut'];
-
-	// CKEDITOR.dtd.$empty['lj-embed'] = 1;
-
-	// <lj user...> transforms to iframe https://jira.sup.com/browse/LJSUP-13877
-	CKEDITOR.dtd.p.iframe = 1;
 
 	// https://jira.sup.com/browse/LJSV-2404
 	CKEDITOR.dtd['lj-cut']['iframe'] = 1;
@@ -482,16 +546,16 @@
 				 * Find and move token out from markup
 				 */
 				function moveToken(s, token) {
-				    return s.replace(/<(.|\n)*?>/g, function(match) {
-				        var z = match;
+					return s.replace(/<(.|\n)*?>/g, function(match) {
+						var z = match;
 
-				        if (z.indexOf(token) !== -1) {
-				            z = z.replace(token, '');
-				            return z + token;
-				        } else {
-				            return match;
-				        }
-				    });
+						if (z.indexOf(token) !== -1) {
+							z = z.replace(token, '');
+							return z + token;
+						} else {
+							return match;
+						}
+					});
 				}
 
 				/*
@@ -529,6 +593,11 @@
 				return function(html) {
 					var position = Site.page.__htmlLast;
 					if (typeof position === 'number') {
+
+						if (html.indexOf('textarea') !== -1) {
+							return html;
+						}
+
 						if (html.length > 0) {
 							html = moveToken(
 								insertAt(html, position, focusToken),
@@ -579,7 +648,13 @@
 				}
 
 				editor.dataProcessor.toHtml = function(html, fixForBody) {
+					// from jQuery, with minor change for tags, containing '-'
+					var rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:-]+)[^>]*)\/>/gi;
+					html = html.replace(rxhtmlTag, '<$1></$2>');
+
 					html = transformFocus(html);
+
+					html = newlineToBr(html);
 
 					html = html.replace(/<lj [^>]*?>/gi, closeTag)
 						.replace(/<lj-map [^>]*?>/gi, closeTag)
@@ -590,21 +665,7 @@
 						.replace(/<lj-poll-([0-9]+)>/gi, createUneditablePoll)
 						.replace(/<lj-repost\s*(?:button\s*=\s*(?:"([^"]*?)")|(?:"([^']*?)"))?.*?>([\s\S]*?)<\/lj-repost>/gi, createRepost)
 						.replace(/<lj-embed(.*?)>([\s\S]*?)<\/lj-embed>/gi, createEmbed)
-						.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, createLJRaw)
-						.replace(/\n/g, '<br/>');
-
-					// Fix tables: LJSUP-14409, LJSUP-13714
-					html = html
-						.replace(/>\s+<tr/ig, '><tr')
-						.replace(/>\s+<\/tr/ig, '></tr')
-						.replace(/>\s+<td/ig, '><td')
-						.replace(/>\s+<\/td/ig, '></td')
-						.replace(/<\/tr>\s+<\/table>/ig, '</tr></table>')
-						.replace(/<tr>\n/ig, '<tr>')
-						.replace(/\n<\/tr>/ig, '</tr>')
-						.replace(/<td>\n/ig, '<td>')
-						.replace(/\n<\/td>/ig, '</td>');
-
+						.replace(/(<lj-raw.*?>)([\s\S]*?)(<\/lj-raw>)/gi, createLJRaw);
 
 					html = CKEDITOR.htmlDataProcessor.prototype.toHtml.call(this, html, fixForBody);
 
@@ -617,22 +678,58 @@
 
 				editor.dataProcessor.toDataFormat = function(html, fixForBody) {
 					html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
+					
+					html = nbspFix(html);
+
 					html = html
-						.replace(/<br\s*\/>/gi     , '\n' )
-
-						.replace(/&nbsp;</ig       , ' <' )
-						.replace(/\>&nbsp;/ig      , '> ' )
-
-						.replace(/\>&nbsp;\n/ig    , '>\n')
-
+						.replace(/<br\s*\/>/gi, '')
 						.replace(/\t/g, ' ');
 
-					return html;
+					var hookObject = {
+						html: html
+					};
+
+					LiveJournal.run_hook('html_output', hookObject);
+
+					return hookObject.html;
 				};
 			})();
 
 			editor.dataProcessor.writer.indentationChars = '';
-			editor.dataProcessor.writer.lineBreakChars = '';
+			editor.dataProcessor.writer.lineBreakChars   = '\n';
+
+			['p', 'span', 'div', 'a', 'table', 'tbody', 'iframe',
+			'lj', 'lj-cut', 'lj-spoiler',
+			'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+			'lj-poll', 'lj-pq', 'lj-pi'].forEach(function(tag) {
+				editor.dataProcessor.writer.setRules(tag, {
+					indent           : false ,
+					breakBeforeOpen  : false ,
+					breakAfterOpen   : false ,
+					breakBeforeClose : false ,
+					breakAfterClose  : false
+				});
+			});
+
+			['td'].forEach(function(tag) {
+				editor.dataProcessor.writer.setRules(tag, {
+					indent           : false ,
+					breakBeforeOpen  : true  ,
+					breakAfterOpen   : false ,
+					breakBeforeClose : false ,
+					breakAfterClose  : true
+				});
+			});
+
+			['tr'].forEach(function(tag) {
+				editor.dataProcessor.writer.setRules(tag, {
+					indent           : false ,
+					breakBeforeOpen  : true  ,
+					breakAfterOpen   : true  ,
+					breakBeforeClose : true  ,
+					breakAfterClose  : true
+				});
+			});
 
 			editor.on('selectionChange', findLJTags);
 			editor.on('doubleclick', onDoubleClick);
@@ -933,13 +1030,52 @@
 				editor.on('dirChanged', onDirChanged);
 			})();
 		},
-		afterInit: function(editor) {			
+		afterInit: function(editor) {
 			var dataProcessor = editor.dataProcessor;
 
 			// http://docs.cksource.com/CKEditor_3.x/Developers_Guide/Data_Processor
 
 			// editor.dataProcessor.dataFilter: filter applied to the input data
 			// when transforming it to HTML to be loaded into the editor ("on input").
+
+
+			// process textareas
+			if (CKEDITOR.processTextarea) {
+				(function() {
+					var rxTextarea = /(<textarea[^>]*>)([\s\S.]*)<\/textarea>/;
+
+					LiveJournal.register_hook('html_output', function(hookObject) {
+						hookObject.html =
+							hookObject.html.replace(rxTextarea, function(_, tag, content) {
+								content = content
+								  .replace(/<br\/>/ig, '\n')
+								  .replace(/\&#39;/ig, "'")
+								  .replace(/\&quot;/ig, '"')
+								  .replace(/\&amp;/ig, '&')
+
+								  .replace(/\&lt;/ig, '<')
+								  .replace(/\&gt;/ig, '>');
+
+								return tag + content + "</textarea>";
+							});
+					});
+
+					dataProcessor.dataFilter.addRules({
+						elements: {
+							'textarea': function(element) {
+								element.children[0].value = unescape(
+									element.children[0].value
+										.replace('&lt;cke:encoded&gt;' , '')
+										.replace('&lt;/cke:encoded&gt;', '')
+								).replace(/<br\/>/ig, '\n');
+
+								return element;
+							}
+						}
+					});
+				})();
+			}
+
 
 			dataProcessor.dataFilter.addRules({
 				elements: {
@@ -1182,4 +1318,93 @@
 		requires: ['fakeobjects', 'domiterator']
 	});
 
-})();
+
+	/*
+	 * CKEDITOR tests
+	 */
+	window.cktest = function() {
+		var e = CKEDITOR.instances.ck;
+
+		var SAME = 1;
+
+		var obj = [
+			{
+				input  : 'abc <lj user="test" /> ddd\n<lj user="6a" />',
+				output : SAME
+			},
+
+			{
+				input  : 'before<lj-like />after',
+				output : SAME
+			},
+
+			{
+				input  : 'abc\n\n<table>\n<tr>\n<td>123</td>\n</tr>\n</table>',
+				output : 'abc\n\n<table><tbody>\n<tr>\n<td>123</td>\n</tr>\n</tbody></table>'
+			},
+
+			{
+				input  : '<lj-like buttons="facebook, twitter"></lj-like>',
+				output : '<lj-like buttons="facebook,twitter" />'
+			},
+
+			{
+				input  : 'a<lj-like/>b',
+				output : 'a<lj-like />b'
+			},
+
+			{
+				input  : '<strike>abc <lj user="test" /> <b>bold</b></strike>',
+				output : SAME
+			},
+
+			{
+				input  : 'a<textarea>"dsg"\n<br>\nb</textarea>',
+				output : SAME
+			},
+
+			{
+				input  : '<textarea><style>.myClass:before {\ncontent: "ok" }</style></textarea>',
+				output : SAME
+			},
+
+			{
+				input  : "123<>\n<textarea>('<:&>')</textarea>\nabc\n<textarea>('<:&>')</textarea>\ndef",
+				output : "123&lt;&gt;\n<textarea>('<:&>')</textarea>\nabc\n<textarea>('<:&>')</textarea>\ndef"
+			}
+		];
+
+		var results = obj.map(function(test) {
+			var data,
+				result;
+
+			e.lightSetData(test.input);
+			data = e.getData();
+
+			if (test.output !== SAME) {
+				result = data === test.output;
+			} else {
+				result = data === test.input;
+			}
+
+			if (!result) {
+				console.error('Input:    ' , test.input);
+				console.error('Data:     ' , data);
+				console.error('Expected: ' , test.output === SAME ? 'Same' : test.output);
+			}
+
+			return result;
+		});
+
+		console.info(results);
+
+		// nbspFix test
+		results.push(
+			nbspFix("<b>1</b>&nbsp;<i>2</i> &nbsp; <div>3</div>\n&nbsp;<p>4</p>") ===
+			"<b>1</b> <i>2</i> &nbsp; <div>3</div>\n<p>4</p>"
+		);
+
+		return results.every(function(element) { return element === true; });
+	};
+
+})(jQuery);
