@@ -482,6 +482,8 @@ sub _db_update_sub {
     my ($sets, @binds) = $self->_db_collect_sets_binds($sub, ['flags']);
 
     $self->_dbh->do("UPDATE subs SET $sets WHERE userid=? AND subid=?", undef, @binds, $self->user->id, $subid);
+
+    LJ::Subscription->invalidate_cache($self->user);
 }
 
 sub _db_drop_sub {
