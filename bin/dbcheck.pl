@@ -35,6 +35,10 @@ unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
 
+if ($opt_verbose != 1) {
+       	$SIG{'__WARN__'} = sub {};
+}
+
 if ($help) {
     die ("Usage: dbcheck.pl [opts] [[cmd] args...]\n" .
          "    --all           Check all hosts, even those with no weight assigned.\n" .
