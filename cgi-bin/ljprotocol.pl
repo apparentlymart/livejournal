@@ -3171,6 +3171,13 @@ sub editevent {
         return $res if $res->{type};
     }
 
+    if ( $req->{sticky} &&
+         $uowner->is_community() &&
+         !$u->can_manage($uowner) )
+    {
+        return fail($err, 158);
+    }
+
     # don't moderate admins, moderators, pre-approved users & unsuspicious users
     my $is_unsuspicious_user = 0;
     LJ::run_hook('is_unsuspicious_user_in_comm', $posterid, \$is_unsuspicious_user);
