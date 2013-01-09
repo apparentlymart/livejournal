@@ -1074,7 +1074,7 @@ sub get_itemid_near2 {
         }
     }
 
-    my $result_ref = $dbr->selectcol_arrayref(  "SELECT delayedid FROM delayedlog2 use index (rlogtime,revptime) ".
+    my $result_ref = $dbr->selectcol_arrayref(  "SELECT delayedid FROM delayedlog2 ".
                                                 "WHERE journalid=? AND $sql_item_rule AND delayedid <> ? ".
                                                 $sql_poster. " ".
                                                 "AND finaltime IS NULL " .

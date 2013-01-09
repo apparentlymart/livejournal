@@ -1311,7 +1311,7 @@ sub get_recent_items
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
-        FROM log2 USE INDEX ($sort_key)
+        FROM log2
         WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $after_sql $before_sql $suspend_where
     };
 
