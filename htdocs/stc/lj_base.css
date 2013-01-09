@@ -2566,6 +2566,33 @@ BODY div .b-helplink:active {
 		cursor: default;
 		}
 
+@media screen and (max-width: 768px) {
+	.mobile-msg .b-pager-prev,
+	.g-sensor .b-pager-prev,
+	.mobile-msg .b-pager-next,
+	.g-sensor .b-pager-next {
+		display: block;
+		min-width: 0;
+		margin: 5px 0;
+		text-align: left;
+		}
+		.mobile-msg .b-pager-prev BR,
+		.g-sensor .b-pager-prev BR,
+		.mobile-msg .b-pager-next BR,
+		.g-sensor .b-pager-next BR,
+		.mobile-msg .b-pager-shortcut,
+		.g-sensor .b-pager-shortcut {
+			display: none;
+			}
+	.mobile-msg .b-xylem .b-pager-pages-after,
+	.g-sensor .b-xylem .b-pager-pages-after,
+	.mobile-msg .b-xylem .b-pager-pages:after,
+	.g-sensor .b-xylem .b-pager-pages:after {
+		display: none;
+		}
+}
+
+
 /* jQuery UI Autocomplete
 --------------------------------------*/
 .ui-autocomplete {
