@@ -2147,7 +2147,6 @@ sub get_log2_recent_log
             jitemid, posterid, eventtime, rlogtime,
             security, allowmask, anum, replycount
          FROM log2
-         USE INDEX (rlogtime)
          WHERE
                 journalid=?
          " .
@@ -2316,7 +2315,7 @@ sub get_itemid_near2
     my $result_ref;
     foreach my $limit (2, 10, 50, 100) {
         $result_ref = $dbr->selectall_arrayref(
-            "SELECT jitemid, anum, $field FROM log2 use index (rlogtime,revttime) ".
+            "SELECT jitemid, anum, $field FROM log2 ".
                 "WHERE journalid=? AND $field $cmp1 ? AND jitemid <> ? ".
                 $secwhere. " ".
                 "ORDER BY $field $order LIMIT $limit",
@@ -2388,7 +2387,7 @@ sub get_latest_ditemid {
         }
     }
 
-    my $res = $dbr->selectcol_arrayref( "SELECT jitemid, anum FROM log2 use index (rlogtime,revttime) ".
+    my $res = $dbr->selectcol_arrayref( "SELECT jitemid, anum FROM log2 ".
                                         "WHERE journalid=? ".
                                         $secwhere. " ".
                                         "ORDER BY $field LIMIT 1", undef, $jid);
