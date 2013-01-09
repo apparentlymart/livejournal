@@ -1092,16 +1092,8 @@ body<=
         LJ::run_hook('set_profile_settings_extra', $u, \%POST);
 
         # tell the user all is well
-        my $base = $u->journal_base;
-        my $profile_url = $u->profile_url;
-        my $ad_box = LJ::get_ads({ location => 'bml.manage.profile/main', ljadwrapper => 1, below_ad => LJ::CProd->full_box_for($remote, width => 300) });
-        return $ad_box . "<?h1 $ML{'.success.header'} h1?>\n" .
-                         "<?p $ML{'.success.text'} p?>" .
-                         "<?p $ML{'.success.gonext'} p?>" .
-                         "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" .
-                         "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
-                         "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
-                         LJ::Widget::GettingStarted->render;
+        return LJ::Request->redirect($u->profile_url);
+
     }
 
     # should never happen
