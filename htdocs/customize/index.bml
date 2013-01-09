@@ -19,6 +19,8 @@ body<=
     # extra arguments for get requests
     my $getextra = $authas ne $remote->user ? "?authas=$authas" : "";
 
+    LJ::need_var( 'authas' => $u->username );
+
     # if using s1, either prompt the user to switch to s2 or redirect to the s1 customization page
     unless ($u->prop('stylesys') == 2) {
         if ($u->prop('s1_confirmed')) {
