@@ -694,7 +694,6 @@ sub subscriptions {
                     userid, subid, is_dirty, journalid, etypeid,
                     arg1, arg2, ntypeid, createtime, expiretime, flags
                 FROM subs
-                USE INDEX(PRIMARY)
                 WHERE etypeid=? AND journalid=0 $and_enabled
                     AND userid IN ($jidlist)
             });
