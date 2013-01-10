@@ -24,7 +24,7 @@ sub __get_count {
     my $memcache_key = "reposted_count:$journalid:$jitemid";
 
     my ($count) = LJ::MemCache::get($memcache_key);
-    if ($count) {
+    if (defined $count) {
         return $count;
     }
 
