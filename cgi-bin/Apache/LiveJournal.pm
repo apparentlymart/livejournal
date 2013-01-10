@@ -372,6 +372,17 @@ sub trans {
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
+    ## The following block of code with 'constants' redefinition *** MUST *** be called for any 
+    ## request.
+    if ($is_ssl) {
+        $LJ::IMGPREFIX = '/img';
+        $LJ::STATPREFIX = '/stc';
+    } else {
+        $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
+        $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
+        $LJ::USERPIC_ROOT = $LJ::USERPICROOT_BAK if $LJ::USERPICROOT_BAK;
+    }
+
     # add server mark
     my ($aws_id) = $LJ::HARDWARE_SERVER_NAME =~ /\-(.+)$/;
     LJ::Request->header_out('X-AWS-Id' => $aws_id || 'unknown');
@@ -605,8 +616,6 @@ sub trans {
             if (-d _) { $file .= '/index.bml'; }
             $file =~ s!/{2,}!/!g;
             LJ::Request->filename($file);
-            $LJ::IMGPREFIX = '/img';
-            $LJ::STATPREFIX = '/stc';
             if ( $file =~ /[.]bml$/ ) {
                 return $bml_handler->($file);
             } else {
@@ -616,14 +625,6 @@ sub trans {
         else {
             return LJ::Request::FORBIDDEN;
         }
-    }
-    elsif (LJ::run_hook('set_alternate_statimg')) {
-        # do nothing, hook did it.
-    } else {
-        $LJ::DEBUG_HOOK{'pre_restore_bak_stats'}->() if $LJ::DEBUG_HOOK{'pre_restore_bak_stats'};
-        $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
-        $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
-        $LJ::USERPIC_ROOT = $LJ::USERPICROOT_BAK if $LJ::USERPICROOT_BAK;
     }
 
     # let foo.com still work, but redirect to www.foo.com
