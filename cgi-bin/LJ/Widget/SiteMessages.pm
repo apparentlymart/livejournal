@@ -14,12 +14,17 @@ sub need_res {
 sub _format_one_message {
     my $class = shift;
     my $message = shift;
+    my $opts = shift;
 
     my $lang;
     my $remote = LJ::get_remote();
 
-    $lang = $remote->prop("browselang") if $remote; # exlude s2 context language from opportunities,
+    if ($remote) {
+        $lang = $remote->prop("browselang"); # exlude s2 context language from opportunities,
         # because S2 journal code executes BML::set_language($lang, \&LJ::Lang::get_text) with its own language
+    } else {
+        $lang = LJ::locale_to_lang ($opts->{'locale'});
+    }
 
     my $mid = $message->{'mid'};
     my $text = $class->ml( $class->ml_key("$mid.text"), undef, $lang );
@@ -49,7 +54,7 @@ sub render_body {
 
     if ($opts{all}) {
         foreach my $message (LJ::SiteMessages->get_messages) {
-            $ret .= $class->_format_one_message($message);
+            $ret .= $class->_format_one_message($message, \%opts);
         }
     } else {
         my $message = LJ::SiteMessages->get_open_message;
@@ -63,7 +68,7 @@ sub render_body {
         };
 
         if ($message) {
-            $ret .= $class->_format_one_message($message);
+            $ret .= $class->_format_one_message($message, \%opts);
         }
     }
 
