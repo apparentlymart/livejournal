@@ -355,6 +355,16 @@ register_setter('provide_entries', sub {
     }
 });
 
+register_setter("updatebml_only_old", sub {
+    my ($u, $key, $value, $err) = @_;
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+    $u->set_prop("updatebml_only_old", $value);
+    return 1;
+});
+
 register_setter('custom_usericon', sub {
     my ($u, $key, $value, $err) = @_;
 
