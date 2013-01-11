@@ -451,6 +451,7 @@ sub trans {
     if ($middleware_response) {
         LJ::Request->handler('perl-script');
         LJ::Request->set_handlers( 'PerlHandler' => sub {
+            LJ::Lang::current_language(undef);
             my $result = eval { $middleware_response->output; 1 };
             warn $@ unless $result;
             return LJ::Request::DONE;
