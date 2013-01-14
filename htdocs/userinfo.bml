@@ -235,6 +235,9 @@
     # Add metadata links to <head>
     $head .= $pm->head_meta_tags;
 
+    my $app_store_meta = "";
+    $head .= LJ::run_hooks ("s2_head_content_extra_2", \$app_store_meta, $u, LJ::Request::request());
+
     my @friends;    # ($u, $u, $u,....)  truncated to max_friends_show
     my %is_friend;  # uid -> 1  (not truncated)
 

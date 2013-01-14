@@ -403,6 +403,7 @@ sub common_template_params {
         'title'              => $args->{'title'},
         'windowtitle'        => $args->{'windowtitle'} || $args->{'title'},
         'meta'               => $args->{'meta'},
+        'appstore_meta'      => $args->{'appstore_meta'},
         'head'               => $args->{'head'},
         'bodyopts'           => $args->{'bodyopts'},
         'body'               => $args->{'body'},
