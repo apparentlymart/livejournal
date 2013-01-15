@@ -6567,6 +6567,11 @@ sub check_activity {
     return 0;
 }
 
+sub is_in_whitelist_for_spam {
+    my $u = shift;
+    return $u->prop('in_whitelist_for_spam');
+}
+
 sub is_spamprotection_enabled {
     my $u = shift;
     return 0 if $LJ::DISABLED{'spam_button'};
