@@ -73,6 +73,10 @@ sub _page_head {
         LJ::run_hooks('s2_head_content_extra', \$head_content, $remote, $opts->{r});
     }
 
+    if ( LJ::are_hooks('s2_head_content_extra_2') ) {
+        LJ::run_hooks('s2_head_content_extra_2', \$head_content, $u, $opts->{r});
+    }
+
     # Automatic Discovery of RSS/Atom
     if ( $opts->{'addfeeds'} ) {
         $head_content .= qq(<link rel="alternate" type="application/rss+xml" );
