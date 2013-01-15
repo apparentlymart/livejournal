@@ -10251,6 +10251,8 @@ widget.themechooser.header.search=Search Results For: [[term]]
 widget.themechooser.layout_filter.label|staleness=1
 widget.themechooser.layout_filter.label=Only show themes in:
 
+widget.themechooser.no_paurchased_themes=You have not purchased themes
+
 widget.themechooser.page|staleness=1
 widget.themechooser.page=Page:
 

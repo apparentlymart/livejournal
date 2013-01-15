@@ -130,6 +130,10 @@ sub render_body {
 
     $ret .= "<div class='themes-area'>";
     my @purchased = LJ::S2Theme->load_purchased ($u);
+    @themes_this_page = grep { $_ } @themes_this_page;
+    if (!@themes_this_page && $cat eq 'purchased') {
+        $ret .= LJ::Lang::ml('widget.themechooser.no_paurchased_themes');
+    }
     foreach my $theme (@themes_this_page) {
         next unless defined $theme;
 
