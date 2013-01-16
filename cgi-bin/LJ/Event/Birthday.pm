@@ -48,6 +48,10 @@ sub next_bday {
 sub matches_filter {
     my ($self, $subscr) = @_;
 
+    if (!$subscr->owner || $self->userid == $subscr->owner->userid)  {
+        return 0;
+    }
+
     return $self->bdayuser->can_show_bday(to => $subscr->owner) ? 1 : 0;
 }
 
