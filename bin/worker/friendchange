@@ -55,12 +55,6 @@ sub work {
     my $args = $job->arg;
     my ($uid, $action, $fid) = @$args;
 
-    my $u = LJ::load_userid($uid)
-        or die "no userid";
-
-    my $f = LJ::load_userid($fid)
-        or die "no friend userid";
-
     # Should we ping anywhere on friend changes?
     unless (LJ::conf_test($LJ::REL_PING{server})) {
         warn "No relation ping servers defined\n"
@@ -69,6 +63,12 @@ sub work {
         $job->completed;
         return;
     }
+
+    my $u = LJ::load_userid($uid)
+        or die "no userid";
+
+    my $f = LJ::load_userid($fid)
+        or die "no friend userid";
 
     # Helper to create Atom Links in the entry
     my $make_link = sub {
