@@ -689,14 +689,11 @@ sub subscriptions {
             # FIXME: journals are only on one cluster! split jidlist based on cluster
             my $jidlist = join(",", @wildcards_from);
 
-            ## Strictly specify USE INDEX(PRIMARY) hint.
-            ## Otherwise mysql query planner is acting out and query takes inexcusable amount of time.
             my $sth = $udbh->prepare(qq{
                 SELECT
                     userid, subid, is_dirty, journalid, etypeid,
                     arg1, arg2, ntypeid, createtime, expiretime, flags
                 FROM subs
-                USE INDEX(PRIMARY)
                 WHERE etypeid=? AND journalid=0 $and_enabled
                     AND userid IN ($jidlist)
             });
