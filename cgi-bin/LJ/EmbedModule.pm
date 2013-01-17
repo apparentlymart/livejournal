@@ -419,11 +419,11 @@ sub module_iframe_tag {
             if ($type eq "S") {
                 my ($elewidth, $eleheight);
                 if ($attr->{width}) {
-                    $elewidth = $attr->{width}+0;
+                    $elewidth = $attr->{width} =~ m/^\d+%$/ ? $attr->{width} : $attr->{width}+0;
                     $width = $elewidth if $elewidth > $width;
                 }
                 if ($attr->{height}) {
-                    $eleheight = $attr->{height}+0;
+                    $eleheight = $attr->{height} =~ m/^\d+%$/ ? $attr->{height} : $attr->{height}+0;
                     $height = $eleheight if $eleheight > $height;
                 }
                 if ($attr->{style}) {
