@@ -67,7 +67,7 @@ sub render_body {
 
     $ret .= $class->start_form;
 
-    $ret .= "<div class='b-sitemessages'><table><tr><td>Start Date:</td><td>";
+    $ret .= "<div class='b-adminpage b-adminpage-max b-adminpage-padding'><table class='b-admin-table'><tr><td>Start Date:</td><td>";
     $ret .= $class->html_select
         ( name => 'month_start',
           selected => $start_month,
