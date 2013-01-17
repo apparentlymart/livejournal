@@ -9,6 +9,7 @@ body<=
     use LJ::Widget::SiteMessages;
     use LJ::Widget::AddSiteMessages;
 	
+	LJ::need_res('stc/admin/general.css');
 	LJ::need_res('stc/admin/sitemessages.css');
 
     my $remote = LJ::get_remote();
