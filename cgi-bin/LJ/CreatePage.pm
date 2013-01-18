@@ -1,6 +1,7 @@
 package LJ::CreatePage;
 use strict;
 use Carp qw(croak);
+use Encode qw(decode_utf8);
 
 sub verify_username {
     my $class = shift;
@@ -17,7 +18,7 @@ sub verify_username {
         return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.mustenter') 
                                                 : LJ::Widget::CreateAccount->ml('createaccount.error.username.mustenter');
     }
-    if (length $given_username > 15) {
+    if (length Encode::decode_utf8($given_username) > 15) {
         return $LJ::DISABLED{create_controller} ? LJ::Lang::ml('error.usernamelong') 
                                                 : LJ::Lang::ml('createaccount.error.usernamelong');
     }
