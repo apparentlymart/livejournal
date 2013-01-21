@@ -1420,6 +1420,8 @@ sub need_res {
     } else {
         push @LJ::NEEDED_RES, @reskeys;
     }
+
+    return;
 }
 
 sub include_raw  {
