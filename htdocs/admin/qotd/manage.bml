@@ -5,7 +5,7 @@ body<=
     use strict;
     use vars qw(%POST %GET);
     use Class::Autouse qw( LJ::QotD );
-
+    LJ::need_res('stc/admin/general.css');
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -15,17 +15,21 @@ body<=
         unless LJ::check_priv($remote, 'siteadmin', 'qotd') || $LJ::IS_DEV_SERVER;
 
     my $ret = "";
-
+    
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
+    
     # activate/inactivate a question
     LJ::Widget->handle_post(\%POST, qw(ManageQotD));
 
     # spotlight preview
-    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+    $ret .= "<div style='float: right; width: 400px;'>";
     $ret .= LJ::Widget::QotD->render . "</div>";
 
     # manage QotD form
     $ret .= LJ::Widget::ManageQotD->render( get => \%GET );
-
+    
+    $ret .= "</div>";
+    
     return $ret;
 }
 _code?>

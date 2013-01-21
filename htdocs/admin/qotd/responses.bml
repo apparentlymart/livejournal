@@ -5,7 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::QotD );
-
+    LJ::need_res('stc/admin/general.css');
     my $remote = LJ::get_remote();
 
     $title = "Writer's Block Report";

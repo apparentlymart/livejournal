@@ -5,6 +5,8 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::QotD );
+    LJ::need_res('stc/admin/general.css');
+    
 
     my $remote = LJ::get_remote();
 
@@ -16,16 +18,20 @@ body<=
 
     my $ret = "";
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
+
     # add a spotlight
     LJ::Widget->handle_post(\%POST, qw(AddQotD));
 
     # QotD preview
-    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+    $ret .= "<div style='float: right; width: 400px;'>";
     $ret .= LJ::Widget::QotD->render . "</div>";
     
     # add question form
     $ret .= LJ::Widget::AddQotD->render( qid => $GET{qid} );
-
+    
+    $ret .= "</div>";
+    
     return $ret;
 }
 _code?>
