@@ -5,7 +5,8 @@ body<=
 {
     use strict;
     use vars qw(%POST);
-
+    LJ::need_res('stc/admin/general.css');
+    
     my $ret = '';
     my $err = sub { return "<?errorbar $_[0] errorbar?>"; };
 
@@ -18,6 +19,7 @@ body<=
     return $err->('You do not have access to use this tool.')
         unless LJ::check_priv($remote, 'siteadmin', 'school');
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<?p [ <a href='index.bml'>&lt;&lt; Back to Admin Index</a> ] p?>";
 
     if (LJ::did_post()) {
@@ -78,7 +80,7 @@ body<=
     # form dumper
     my $dump = sub {
         my $val;
-        $val .= "<table>";
+        $val .= "<table class='b-admin-table'>";
         $val .= "<tr><td>Country:</td><td>";
         $val .= LJ::html_select({ name => "$_[0]_ctc", selected => ($POST{"$_[0]_ctc"} || "US"), },
                                 map { $_, $countries{$_} } @ctcs);
@@ -111,6 +113,7 @@ body<=
             "automatically. p?>";
     $ret .= "<?p Country is required.  City is optional, as noted. State is optional in the from case, allowing you to mass move from an undefined state. p?>";
     $ret .= "<?p <b>There is no going back.</b> p?>";
+    $ret .= "</div>";
 
 }
 _code?>

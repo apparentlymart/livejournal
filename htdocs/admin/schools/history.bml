@@ -8,7 +8,8 @@ body<=
     use LJ::Schools::Log;
     use LJ::Widget::Schools::LogItem;
     use Data::Dumper;
-
+    LJ::need_res('stc/admin/general.css');
+    
     my $ret = '';
     my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
     my $remote = LJ::get_remote();
@@ -43,6 +44,7 @@ body<=
         }),
     );
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= qq{
         <form action="history.bml" method="get">
         <p>
@@ -56,6 +58,7 @@ body<=
         <p><button type="submit">Show</button></p>
         </form>
     };
+    
 
     my $items = LJ::Schools::Log->query(
         skipto => $skipto,
@@ -78,7 +81,7 @@ body<=
             <p><em>Nothing found.</em></p>
         };
     }
-
+    $ret .= "</div>";
     return $ret;
 }
 _code?>

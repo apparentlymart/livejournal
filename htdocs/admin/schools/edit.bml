@@ -5,6 +5,8 @@ body<=
 {
     use strict;
     use vars qw(%POST);
+    LJ::need_res('stc/admin/general.css');
+    
 
     my $ret = '';
     my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
@@ -47,7 +49,8 @@ body<=
             unless ref $school;
 
         $school = $school->{$sid};
-
+        
+        $ret .= "<div class='b-adminpage'>";
         $ret .= "<form method='post' action='edit.bml'>";
         $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden('sid', $sid, 'save', 1);
@@ -84,7 +87,7 @@ body<=
         $ret .= LJ::html_submit('delete', "Delete School", { onclick => 'return confirm("Are you sure you want to delete this school?");' });
         $ret .= "</td></tr></table>";
         $ret .= "</form>";
-
+        $ret .= "</div>";
         if (LJ::check_priv($remote, 'siteadmin', 'schools-logs')) {
             my ($edited_by, $edited_time) =
                 LJ::Schools::Log->get_last_edit($sid);
@@ -126,10 +129,12 @@ body<=
         $ret .= '<?h1 Success h1?><?p School data edited or deleted p?>';
         return $ret;
     } else {
+        $ret .= "<div class='b-adminpage b-adminpage-padding b-adminpage-list'>";
         $ret .= "<form method='GET' action='edit.bml'>";
         $ret .= "School ID to edit: " . LJ::html_text({name => 'sid', size => 10});
         $ret .= ' ' . LJ::html_submit();
         $ret .= "</form>";
+        $ret .= "</div>";
     }
 
 }
