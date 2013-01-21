@@ -147,7 +147,7 @@
     my $pm = LJ::M::ProfilePage->new($u);
 
     my $remote_isfriend = LJ::is_friend($u, $remote);
-    my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
+    my $com   = $u->{'journaltype'} eq "C" ? 1 : 0;
     my $extid = $u->{'journaltype'} eq "I" ? $u->identity : undef;
 
     my $synd;
