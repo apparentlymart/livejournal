@@ -6812,6 +6812,27 @@ talk.map.example=http://goo.gl/maps/1Zgq
 talk.map.main|staleness=1
 talk.map.main=Map
 
+talk.numberedlist|staleness=1
+talk.numberedlist=Insert/Remove Numbered List
+
+talk.bulletedlist|staleness=1
+talk.bulletedlist=Insert/Remove Bulleted List
+
+talk.justifyleft|staleness=1
+talk.justifyleft=Align left
+
+talk.justifycenter|staleness=1
+talk.justifycenter=Center
+
+talk.justifyright|staleness=1
+talk.justifyright=Align right
+
+talk.undo|staleness=1
+talk.undo=Undo
+
+talk.redo|staleness=1
+talk.redo=Redo
+
 talk.memadd|staleness=1
 talk.memadd=Memorize
 
