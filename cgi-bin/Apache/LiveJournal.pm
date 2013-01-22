@@ -773,33 +773,19 @@ sub trans {
             my $is_journal_page = !$opts->{mode} || $journal_pages{$opts->{mode}};
 
             if ($adult_content ne "none" && $is_journal_page && !$should_show_page) {
-                my $returl = LJ::eurl("http://$host" . LJ::Request->uri . "$args_wq");
-
-                LJ::Request->notes("journalid" => $u->{userid}) if $u;
-
-                LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "concepts");
-                LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "explicit");
-
-                my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
-
-                # if they've confirmed that they're over 18, then they're over 14 too
-                if ($adult_content eq "concepts" && !$cookie) {
-                    $cookie = 1 if $BML::COOKIE{LJ::ContentFlag->cookie_name("explicit")};
-                }
-
-                # logged in users with defined ages are blocked from content that's above their age level
-                # logged in users without defined ages and logged out users are given confirmation pages (unless they have already confirmed)
-                if ($remote) {
-                    if (($adult_content eq "explicit" && $remote->is_minor) || ($adult_content eq "concepts" && $remote->is_child)) {
-                        LJ::Request->args("user=" . LJ::eurl($opts->{'user'}));
-                        return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => "${adult_content}_blocked"));
-                    } elsif (!$remote->best_guess_age && !$cookie) {
-                        LJ::Request->args("ret=$returl&user=" . LJ::eurl($opts->{'user'}));
-                        return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => $adult_content));
-                    }
-                } elsif (!$remote && !$cookie) {
-                    LJ::Request->args("ret=$returl&user=" . LJ::eurl($opts->{'user'}));
-                    return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => $adult_content));
+                my $returl = "http://$host" . LJ::Request->uri . "$args_wq";
+                my $interstitial_content = LJ::ContentFlag->interstitial_page_content (
+                    u           => $u,
+                    remote      => $remote,
+                    return_url  => $returl,
+                );
+                if ($interstitial_content) {
+                    LJ::Request->handler('perl-script');
+                    LJ::Request->set_handlers(PerlHandler => sub {
+                        $interstitial_content->output;
+                        return LJ::Request::DONE;
+                    });
+                    return LJ::Request::OK;
                 }
             }
         }

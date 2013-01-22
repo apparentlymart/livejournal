@@ -597,6 +597,78 @@ sub cookie_name {
     return "adult_$type";
 }
 
+sub interstitial_page_content {
+    my $class = shift;
+    my %args  = @_;
+
+    my $u           = $args{'u'};
+    my $remote      = $args{'remote'} || LJ::get_remote ();
+    my $return_url  = $args{'return_url'};
+    my $is_mobile   = $args{'is_mobile'} || 0;
+
+    my $should_show_page = $remote && ($remote->can_manage($u));
+    my $adult_content = $u->adult_content_calculated;
+    my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
+
+    if ($adult_content ne "none" && !$should_show_page) {
+
+        LJ::Request->notes("journalid" => $u->{userid}) if $u;
+
+        my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
+
+        # if they've confirmed that they're over 18, then they're over 14 too
+        if ($adult_content eq "concepts" && !$cookie) {
+            $cookie = 1 if $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
+        }
+
+        # logged in users with defined ages are blocked from content that's above their age level
+        # logged in users without defined ages and logged out users are given confirmation pages (unless they have already confirmed)
+        my ($is_need_show_confirm_page, $is_blocked) = (0, 0);
+        if ($remote) {
+            if (($adult_content eq "explicit" && $remote->is_minor) || ($adult_content eq "concepts" && $remote->is_child)) {
+                $is_need_show_confirm_page = 1;
+                $is_blocked = 1;
+            } elsif (!$remote->best_guess_age && !$cookie) {
+                $is_need_show_confirm_page = 1;
+            }
+        } elsif (!$remote && !$cookie) {
+            $is_need_show_confirm_page = 1;
+        }
+
+        if ($is_need_show_confirm_page) {
+            my $age = $adult_content eq 'explicit' ? 18 : 14;
+            my $message_ml = "adult_content.message_$adult_content" . ($is_blocked ? "_blocked" : "");
+            my $res;
+            my %params = (
+                age             => $age,
+                title           => LJ::Lang::ml("adult_content.title"),
+                content_type    => $adult_content,
+                set_age_aopts   => LJ::Lang::ml($message_ml, {
+                    age => $age, 
+                    set_age => $remote 
+                        ? LJ::Lang::ml ('adult_content.set_age', { aopts => "href='$LJ::SITEROOT/manage/profile/'" } )
+                        : "" 
+                } ),
+                siteroot        => $LJ::SITEROOT,
+                submit_btn      => LJ::html_submit( adult_check => BML::ml('adult_content.btn.ageconfirm', { age => $age }) ),
+                not_confirmed   => LJ::Lang::ml('adult_content.not_confirmed', { siteabbrev => $LJ::SITENAMEABBREV } ),
+                hidden          => LJ::html_hidden(ret => $return_url),
+            );
+            if ($is_mobile) {
+                $res = LJ::Mob::Response::Template->new(filename => '../../../Entries/AdultContent.tmpl');
+                $res->template->param (%params);
+            } else {
+                $res = LJ::Response::Template->new(file => 'templates/Entries/AdultContent.tmpl.xhtml',
+                    params => \%params,
+                );
+            }
+            return $res;
+        }
+        return;
+    }
+    return;
+}
+
 
 ######## instance methods
 
