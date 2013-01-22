@@ -23,6 +23,18 @@ sub class {
 sub true  { $wrap->true  };
 sub false { $wrap->false };
 
+sub to_boolean {
+    my ($what) = @_;
+    return $what ? $wrap->true : $wrap->false;
+}
+
+sub to_number {
+    my ($what) = @_;
+
+    # not using int deliberately because we may be handling floats here
+    return $what + 0;
+}
+
 foreach my $class (qw(LJ::JSON::XS LJ::JSON::JSONv2 LJ::JSON::JSONv1)) {
     if ($class->can_load) {
         $wrap = $class->new;
