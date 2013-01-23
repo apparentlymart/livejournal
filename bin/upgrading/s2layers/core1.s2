@@ -899,6 +899,9 @@ function builtin truncate_to_paragraph (string s, string m) : string
 function builtin get_metadata (string s) : string{}
 "Extracts metadata from p-tags";
 
+function builtin get_lj_embeds (string s) : string[]
+"Returns an array of tags <lj-embed>";
+
 function builtin rand (int high) : int
 "Returns a random integer between 1 and \$high, inclusive.";
 

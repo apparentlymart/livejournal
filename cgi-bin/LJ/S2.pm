@@ -2630,6 +2630,12 @@ sub get_metadata {
     return \%data;
 }
 
+sub get_lj_embeds {
+    my ( $ctx, $text ) = @_;
+    my @embeds = $text =~ m/(<lj\-embed\sid="\d+"\s*?\/>)/g; 
+    return \@embeds;
+}
+
 sub ehtml
 {
     my ($ctx, $text) = @_;
