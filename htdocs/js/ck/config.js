@@ -52,7 +52,6 @@
         'pastefromword',
         'specialchar',
         'tab',
-        'table',
         'toolbar',
         'undo',
         'wysiwygarea',

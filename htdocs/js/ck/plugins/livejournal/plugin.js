@@ -73,9 +73,9 @@
 	 */
 	function nbspFix(html) {
 		html = html
+			.replace(/\>&nbsp;\n/ig    , '>\n')
 			.replace(/&nbsp;</ig       , ' <' )
-			.replace(/\>&nbsp;/ig      , '> ' )
-			.replace(/\>&nbsp;\n/ig    , '>\n');
+			.replace(/\>&nbsp;/ig      , '> ' );
 
 		return html;
 	}
@@ -1320,9 +1320,7 @@
 					}
 				}
 			});
-		},
-
-		requires: ['fakeobjects', 'domiterator']
+		}
 	});
 
 
@@ -1330,7 +1328,7 @@
 	 * CKEDITOR tests
 	 */
 	window.cktest = function() {
-		var e = CKEDITOR.instances.ck;
+		var editor = CKEDITOR.instances.ck;
 
 		var SAME = 1;
 
@@ -1385,8 +1383,8 @@
 			var data,
 				result;
 
-			e.lightSetData(test.input);
-			data = e.getData();
+			editor.lightSetData(test.input);
+			data = editor.getData();
 
 			if (test.output !== SAME) {
 				result = data === test.output;
@@ -1403,13 +1401,15 @@
 			return result;
 		});
 
-		console.info(results);
-
 		// nbspFix test
 		results.push(
 			nbspFix("<b>1</b>&nbsp;<i>2</i> &nbsp; <div>3</div>\n&nbsp;<p>4</p>") ===
-			"<b>1</b> <i>2</i> &nbsp; <div>3</div>\n<p>4</p>"
+			"<b>1</b> <i>2</i> &nbsp; <div>3</div>\n <p>4</p>"
 		);
+
+		console.log(results);
+
+		editor.lightSetData('');
 
 		return results.every(function(element) { return element === true; });
 	};
