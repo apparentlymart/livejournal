@@ -701,7 +701,7 @@
 			['p', 'span', 'div', 'a', 'table', 'tbody', 'iframe',
 			'lj', 'lj-cut', 'lj-spoiler',
 			'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-			'lj-poll', 'lj-pq', 'lj-pi'].forEach(function(tag) {
+			'lj-poll', 'lj-pq', 'lj-pi', 'ul', 'ol'].forEach(function(tag) {
 				editor.dataProcessor.writer.setRules(tag, {
 					indent           : false ,
 					breakBeforeOpen  : false ,
@@ -711,7 +711,7 @@
 				});
 			});
 
-			['td'].forEach(function(tag) {
+			['td', 'li'].forEach(function(tag) {
 				editor.dataProcessor.writer.setRules(tag, {
 					indent           : false ,
 					breakBeforeOpen  : true  ,
@@ -1293,8 +1293,15 @@
 						return newElement;
 					},
 					div: function(element) {
-						if (!element.children.length) {
-							return false;
+						if (editor.config.enterMode === CKEDITOR.ENTER_BR) {
+							if (!element.children.length) {
+								return false;
+							}
+						}
+
+						if (editor.config.enterMode === CKEDITOR.ENTER_DIV) {
+							delete element.name;
+							element.add(new CKEDITOR.htmlParser.element('br'));
 						}
 					},
 					'lj:raw': function(element) {
