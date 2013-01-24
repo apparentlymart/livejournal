@@ -660,6 +660,7 @@ sub interstitial_page_content {
             } else {
                 $res = LJ::Response::Template->new(file => 'templates/Entries/AdultContent.tmpl.xhtml',
                     params => \%params,
+                    use_site_scheme => 1,
                 );
             }
             return $res;
