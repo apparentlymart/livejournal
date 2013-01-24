@@ -95,6 +95,14 @@ cleanhtml.suspend_msg=This is a suspended entry.
 cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
+colorpicker.title.new=New
+
+colorpicker.title.current=Current
+
+colorpicker.title.code=Code
+
+colorpicker.title.choose=Сhoose
+
 comment.ban.user|staleness=1
 comment.ban.user=Ban %username% from commenting
 
