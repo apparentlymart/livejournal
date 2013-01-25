@@ -403,6 +403,7 @@ sub trans {
             and LJ::Request->uri !~ m|^/__api/?|
             and LJ::Request->uri !~ m|^/__tmpl/|
             and LJ::Request->uri !~ m|^$LJ::CDN_SITE_MESSAGE_URL/?|
+            and LJ::Request->uri !~ m|userinfo.ico$|
             ) or
         ($LJ::IS_SSL and LJ::Request->unparsed_uri =~ /\?\?/)
     ){
