@@ -2630,12 +2630,6 @@ sub get_metadata {
     return \%data;
 }
 
-sub get_lj_embeds {
-    my ( $ctx, $text ) = @_;
-    my @embeds = $text =~ m/(<lj\-embed\sid="\d+"\s*?\/>)/g; 
-    return \@embeds;
-}
-
 sub ehtml
 {
     my ($ctx, $text) = @_;
@@ -4410,6 +4404,19 @@ sub Entry__get_eventrates
                 limits      => "$skip, $limit",
             )
     ];
+}
+
+sub Entry__get_lj_embeds
+{
+    my ($ctx, $this) = @_;
+
+    my $entry = LJ::Entry->new_from_url($this->{'permalink_url'});
+
+    return [] unless $entry;
+
+    my @embeds = $entry->event_text() =~ m/(<lj\-embed\sid="\d+"\s*?\/>)/g; 
+
+    return \@embeds;
 }
 
 sub Entry__is_myvoice
