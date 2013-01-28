@@ -653,6 +653,7 @@ sub interstitial_page_content {
                 submit_btn      => LJ::html_submit( adult_check => BML::ml('adult_content.btn.ageconfirm', { age => $age }) ),
                 not_confirmed   => LJ::Lang::ml('adult_content.not_confirmed', { siteabbrev => $LJ::SITENAMEABBREV } ),
                 hidden          => LJ::html_hidden(ret => $return_url),
+                is_mobile       => $is_mobile ? 1 : 0,
             );
             if ($is_mobile) {
                 $res = LJ::Mob::Response::Template->new(filename => '../../../Entries/AdultContent.tmpl');
