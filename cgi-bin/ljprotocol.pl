@@ -105,6 +105,7 @@ my %e = (
      "223" => E_TEMP,
      "224" => E_TEMP,
      "225" => E_TEMP,
+     "226" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -529,21 +530,24 @@ sub checksession {
 sub addcomment
 {
     my ($req, $err, $flags) = @_;
+    
+    $flags->{allow_anonymous} = 1;
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'addcomment');
     my $u = $flags->{'u'};
 
     return fail($err,200,"body") unless($req->{body});
     return fail($err,200,"ditemid") unless($req->{ditemid});
+    return fail($err,200,"journal/journalid") unless($req->{journal} || $req->{journalid});
 
     my $journal;
     if ($req->{journal}) {
         return fail($err,100) unless LJ::canonical_username($req->{journal});
         $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
-        return fail($err,214)
+        return fail($err,226)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
     } elsif ( $req->{journalid} ) {
         $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
-        return fail($err,214)
+        return fail($err,226)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
     } else {
         $journal = $u;
@@ -562,7 +566,7 @@ sub addcomment
                                        ditemid      => $req->{ditemid},
                                        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
                                        
-                                       poster       => $u,
+                                       poster       => $u,   # TODO: to allow poster to be undef
                                        
                                        body         => $req->{body},
                                        subject      => $req->{subject},
@@ -570,7 +574,9 @@ sub addcomment
                                        props        => { picture_keyword => $pk }
         );
     };
-
+    if($@) {
+        warn "Error occured: $@";
+    }
     return fail($err,337) unless $comment;
 
     ## Counter "new_comment" for monitoring
@@ -754,6 +760,7 @@ sub getcomments {
             }
             $item_data->{privileges}->{spam} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
             $item_data->{privileges}->{unspam} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
+            # $item_data->{privileges}->{'reply'} = 1;
         }
 
         if ( $req->{calculate_count} ){

@@ -153,8 +153,8 @@ sub create {
         unless LJ::isu($journalu);
 
     my $posteru = delete $opts{poster};
-    croak "invalid poster for new comment: $posteru"
-        unless LJ::isu($posteru);
+    #croak "invalid poster for new comment: $posteru"
+    #    unless LJ::isu($posteru);
 
     # LJ::Talk::init uses 'itemid', not 'ditemid'.
     $talk_opts{itemid} = delete $opts{ditemid};
@@ -180,13 +180,13 @@ sub create {
     #
     # FIXME: this almost certainly should be 'usertype=user' rather than
     #        'cookieuser' with $remote passed below.  Gross.
-    $talk_opts{cookieuser} ||= $posteru->user;
-    $talk_opts{usertype}   ||= 'cookieuser';
+    $talk_opts{cookieuser} ||= $posteru ? $posteru->user : undef;
+    $talk_opts{usertype}   ||= $posteru ? 'cookieuser' : 'anonymous';
     $talk_opts{nodetype}   ||= 'L';
 
     ## init.  this handles all the error-checking, as well.
     my @errors       = ();
-    my $init = LJ::Talk::Post::init(\%talk_opts, $posteru, \$need_captcha, \@errors); 
+    my $init = LJ::Talk::Post::init(\%talk_opts, $posteru, \$need_captcha, \@errors);
     croak( join "\n" => @errors )
         unless defined $init;
 
