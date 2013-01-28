@@ -11041,11 +11041,11 @@ sub get_journal_short_info_multi {
     }
 
     my %final_result = ();
-    my $result = LJ::MemCacheProxy::get_multi(@keys);
+    my $result = LJ::MemCache::get_multi(@keys);
 
     my @users_to_load = ();
     foreach my $userid (@_) {
-        my $data = $result->{"u:s:$userid"};
+        my $data = delete $result->{"u:s:$userid"};
         unless ($data) {
             push @users_to_load, $userid;
         } else {
@@ -11079,7 +11079,7 @@ sub get_journal_short_info_multi {
             $final_result{$userid} = \%user_result;
 
             my $cache = join(':', $status, $cid, $type);
-            LJ::MemCacheProxy::set("u:s:$userid", $cache, 60*60*24);
+            LJ::MemCache::set("u:s:$userid", $cache, 60*60*24*30);
         }
     }  
 
