@@ -1788,29 +1788,11 @@ sub send_files {
 
     my $size = $result->{content_length};
 
-    if ( !$LJ::REPROXY_DISABLE{files} &&
-        LJ::Request->header_in('X-Proxy-Capabilities') &&
-        LJ::Request->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
-    {
-        my $paths = $result->{paths};
-
-        my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
-        # reproxy url
-        if ($paths->[0] =~ m/^http:/) {
-            LJ::Request->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
-            LJ::Request->header_out('X-REPROXY-URL', join(' ', @$paths));
-        }
-
-        # reproxy file
-        else {
-            LJ::Request->header_out('X-REPROXY-FILE', $paths->[0]);
-        }
-
+    my $send_headers = sub {
         my $mime_type = $result->{mime_type};
         $mime_type ||= 'image/gif' if $uri =~ m|^/userhead/\d+|; ## default for userheads
 
         LJ::Request->content_type ($mime_type);
-        LJ::Request->header_out("Content-length", 0); # it's true. Response body and content-length is added by proxy.
         LJ::Request->header_out("Last-Modified", LJ::TimeUtil->time_to_http ($result->{change_time}));
         ## Add Expires and Cache-Control headers
         if ($uri =~ m|^/userhead/\d+|o){
@@ -1832,8 +1814,44 @@ sub send_files {
         }
 
         LJ::Request->send_http_header();
+    };
+
+    if ( !$LJ::REPROXY_DISABLE{files} &&
+        LJ::Request->header_in('X-Proxy-Capabilities') &&
+        LJ::Request->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
+    {
+        my $paths = $result->{paths};
+
+        my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
+        # reproxy url
+        if ($paths->[0] =~ m/^http:/) {
+            LJ::Request->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
+            LJ::Request->header_out('X-REPROXY-URL', join(' ', @$paths));
+        }
+
+        # reproxy file
+        else {
+            LJ::Request->header_out('X-REPROXY-FILE', $paths->[0]);
+        }
+
+        LJ::Request->header_out("Content-length", 0); # it's true. Response body and content-length is added by proxy.
+
+        $send_headers->();
+
         return LJ::Request::OK;
     }
+
+    if ($LJ::IS_DEV_SERVER) {
+        my ($path) = @{ $result->{'paths'} };
+        if ($path) {
+            my $ua = LWP::UserAgent->new;
+            my $content = $ua->get($path)->content;
+            $send_headers->();
+            LJ::Request->print($content);
+            return LJ::Request::OK;
+        }
+    }
+
     return LJ::Request::NOT_FOUND;
 }
 
