@@ -4061,6 +4061,8 @@ inbox.nav.switch=Menu
 
 inbox.nav.suspicious=Suspicious
 
+inbox.nav.ver=Switch to old version
+
 inbox.noconversations.compose=New Message
 
 inbox.noconversations.title=No Conversation Selected
@@ -4069,6 +4071,8 @@ inbox.noconversations.unread=Show Unread
 
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
+
+inbox.ver=Switch to new version
 
 inbox.spellcheck=Spellcheck
 
