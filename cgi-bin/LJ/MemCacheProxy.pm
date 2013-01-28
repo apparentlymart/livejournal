@@ -73,8 +73,7 @@ sub set {
 sub replace {
     my ( $key_origin, $value, $expire ) = @_;
 
-    my $key = $key_origin->[1]
-        if ref $key_origin eq 'ARRAY';
+    my $key = ref $key_origin eq 'ARRAY' ? $key_origin->[1] : $key_origin;
 
     $singletons{$key} = $value;
     return LJ::MemCache::replace($key_origin, $value, $expire);
