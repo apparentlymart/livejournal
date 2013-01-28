@@ -4465,6 +4465,8 @@ sub get_previous_statusvis {
 # set_statusvis only change statusvis parameter, all accompanied actions are done in set_* methods
 sub set_statusvis {
     my ($u, $statusvis) = @_;
+    
+    LJ::MemCache::delete('u:s:' . $u->userid);    
 
     croak "Invalid statusvis: $statusvis"
         unless $statusvis =~ /^(?:
@@ -11030,6 +11032,58 @@ sub get_aggregated_user {
         ($row->{'identity_'.$method}) = @result > 1 ? \@result : @result;
     }
 
+}
+
+sub get_journal_short_info_multi {
+    my @keys = ();
+    foreach my $userid (@_) {
+        push @keys, "u:s:$userid";
+    }
+
+    my %final_result = ();
+    my $result = LJ::MemCacheProxy::get_multi(@keys);
+
+    my @users_to_load = ();
+    foreach my $userid (@_) {
+        my $data = $result->{"u:s:$userid"};
+        unless ($data) {
+            push @users_to_load, $userid;
+        } else {
+            my %user_result = ();
+
+            my ($status, $cid, $type) = split(/:/, $data);
+            $user_result{statusvis}    = $status;
+            $user_result{clusterid}    = $cid;
+            $user_result{journaltype}  = $type;
+            
+            $final_result{$userid} = \%user_result;
+        }
+    } 
+
+    my $users = LJ::load_userids(@users_to_load);
+
+    foreach my $userid (@users_to_load) {
+        my $user = $users->{$userid}; 
+        
+        if ($user) {        
+            my $status  = $user->{statusvis};
+            my $cid     = $user->{clusterid};
+            my $type    = $user->{journaltype};
+        
+            my %user_result = ();
+
+            $user_result{statusvis}    = $status;
+            $user_result{clusterid}    = $cid;
+            $user_result{journaltype}  = $type; 
+
+            $final_result{$userid} = \%user_result;
+
+            my $cache = join(':', $status, $cid, $type);
+            LJ::MemCacheProxy::set("u:s:$userid", $cache, 60*60*24);
+        }
+    }  
+
+    return \%final_result;
 }
     
 1;

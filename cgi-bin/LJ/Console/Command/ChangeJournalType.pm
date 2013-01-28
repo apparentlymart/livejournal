@@ -71,6 +71,7 @@ sub execute {
 
     my $dbh = LJ::get_db_writer();
 
+    LJ::MemCache::delete('u:s:' .  $u->userid) if $u;
     #############################
     # going to a personal journal. do they have any entries posted by other users?
     if ($type eq "person") {
