@@ -2,7 +2,10 @@
 body<=
 <?_code
 {
+#line 6
     use strict;
+    use warnings;
+
     use vars qw(%GET %POST %FORM $title $windowtitle $headextra @errors @warnings);
     use LJ::Subscription::GroupSet;
     use LJ::Widget::SubscribeInterface;
@@ -165,8 +168,8 @@ body<=
     LJ::run_hooks("settings_extra_cats", \%cats_with_settings, user => $u);
 
     # Active tab
-    my $given_cat = $GET{cat};
-    my $selfuri = '/manage/settings/?cat='.$given_cat;
+    my $given_cat = $GET{cat} || '';
+    my $selfuri = "/manage/settings/?cat=$given_cat";
 
     if ($u) {
         $given_cat = "account"
@@ -213,7 +216,7 @@ body<=
     }
 
     my $save_rv;
-    my $submit_msg;
+    my $submit_msg = '';
     if (LJ::did_post() && $given_cat ne 'notifications') {
         return LJ::bad_input($ML{'error.invalidform'})
             unless LJ::check_form_auth() || $given_cat eq 'notifications';
@@ -347,7 +350,8 @@ body<=
         if ($cats_with_settings{$cat}->{disabled}) {
             $ret .= "<li class='disabled'>$cats_with_settings{$cat}->{name}</li>";
         } else {
-            my $active_class = " class='active'" if $cat eq $given_cat;
+            my $active_class = '';
+            $active_class = " class='active'" if $cat eq $given_cat;
             $ret .= "<li><a href='$LJ::SITEROOT/manage/settings/$getextra${getsep}cat=$cat'$active_class>$cats_with_settings{$cat}->{name}</a></li>";
         }
     }

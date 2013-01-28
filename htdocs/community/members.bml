@@ -650,7 +650,8 @@ body<=
 
     # how to make links back to this page
     my $self_link = sub {
-        my $sort = "&sort=$GET{'sort'}" if $GET{'sort'};
+        my $sort = '';
+        $sort = "&sort=$GET{'sort'}" if $GET{'sort'};
         return "members.bml?authas=$cname&page=$_[0]$sort";
     };
 

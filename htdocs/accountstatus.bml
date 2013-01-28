@@ -148,7 +148,8 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'showall' => 1, type => 'S' }) . "\n";
     $ret .= "</form>\n\n";
 
-    my $getextra = "?authas=$authas" unless $authas eq $remote->{'user'};
+    my $getextra;
+    $getextra = "?authas=$authas" unless $authas eq $remote->username;
     $ret .= "<form method='post' action='accountstatus.bml$getextra'>\n";
     $ret .= LJ::form_auth();
 

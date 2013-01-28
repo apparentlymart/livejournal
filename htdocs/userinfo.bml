@@ -391,7 +391,8 @@
     ### Username
     my $new_margin = $boxad ? " style='margin-right: 320px;'" : '';
     my $user_alias = LJ::ljuser_alias($u->{user}, {side_alias => 1});
-    my $user_alias_sp = "<span class='alias-value'> &mdash; ".LJ::ehtml($user_alias)."</span>" if $user_alias;
+    my $user_alias_sp;
+    $user_alias_sp = "<span class='alias-value'> &mdash; ".LJ::ehtml($user_alias)."</span>" if $user_alias;
     $body .= "<div class='username'$new_margin>" . $u->ljuser_display({side_alias => 1});
     if ($u->{public_key}) {
         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
@@ -634,9 +635,11 @@
     my $lastupdated = substr(LJ::TimeUtil->mysql_time($u->timeupdate), 0, 10);
     my $ago_text = LJ::TimeUtil->ago_text($u->{secondsold});
 
-    my $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
+    my $search_link;
+    $search_link = "[<a href='$LJ::SITEROOT/tools/search.bml?journal=$user'>$ML{'.details.search'}</a>]"
         if LJ::is_enabled("offsite_journal_search") && $pm->has_journal;
-    my $nudge_link = "[<a href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>$ML{'.details.nudge'}</a>]"
+    my $nudge_link;
+    $nudge_link = "[<a href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>$ML{'.details.nudge'}</a>]"
         if $remote && $u->can_be_nudged_by($remote);
 
     my $num_comments_received = $u->num_comments_received( dbh => $dbcr );
@@ -1198,7 +1201,8 @@
             $body .= "</p><div class='inner_section_body'>$intlist</div>";
         }
         if ($instant_message) {
-            my $new_im_margin = " style='margin-top: 0;'" unless $intlist;
+            my $new_im_margin;
+            $new_im_margin = " style='margin-top: 0;'" unless $intlist;
             $body .= "<div class='external_services'$new_im_margin>";
             $body .= "<p class='inner_section_header'$new_im_margin>$ML{'.im.header2'}";
             $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/manage/profile/?authas=" . $u->user . "#iminfo'>$ML{'.section.edit'}</a>]</span>" if $remote && $remote->can_manage($u);
@@ -1207,7 +1211,8 @@
             $body .= "</div>";
         }
         if ($schools_list) {
-            my $new_schools_margin = " style='margin-top: 0;'" unless $intlist;
+            my $new_schools_margin;
+            $new_schools_margin = " style='margin-top: 0;'" unless $intlist;
             $body .= "<div class='schools'$new_schools_margin>";
             $body .= "<p class='inner_section_header'$new_schools_margin>$ML{'.schools.header'}";
             $body .= " <span class='inner_section_header_link'>[<a href='$LJ::SITEROOT/schools/manage.bml?authas=$user'>$ML{'.schools.manage'}</a>]</span>" if $remote && $remote->can_manage($u);
@@ -1224,7 +1229,8 @@
         # get the list of maintainers and moderators (userid only)
         my $maintainers = LJ::load_rel_user_cache($userid, 'A') || [];
         my $super_maintainers = LJ::load_rel_user_cache($userid, 'S') || [];
-        my $moderators  = (LJ::load_rel_user_cache($userid, 'M') || [])
+        my $moderators;
+        $moderators = (LJ::load_rel_user_cache($userid, 'M') || [])
             if $u->{'moderated'};
 
         if (scalar @$super_maintainers || scalar @$maintainers || ($u->{'moderated'} && scalar @$moderators)) {

@@ -51,8 +51,10 @@ body<=
 
     #### Message history
 
-    my $year  = $POST{year}+0  if $POST{year}+0;
-    my $month = $POST{month}+0 if defined $POST{month};
+    my $year = 0;
+    $year = int $POST{'year'} if defined $POST{'year'} && int $POST{'year'};
+    my $month = 0;
+    $month = int $POST{'month'} if defined $POST{'month'};
 
     my ($curmonth, $curyear) = (localtime())[4,5];
     $curmonth++;

@@ -140,7 +140,13 @@ body<=
     my $status = LJ::run_hook("sms_status_msg", $u);
 
     my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
-    my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
+
+    my ( $area, $prefix, $num );
+    if ($current_msisdn) {
+        ( $area, $prefix, $num ) =
+            $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/;
+    }
+
     $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
 
     my $msisdn = LJ::html_text({

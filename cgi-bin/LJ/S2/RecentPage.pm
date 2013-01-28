@@ -111,7 +111,7 @@ sub RecentPage
         'err' => \$err,
         'poster'  => $get->{'poster'} || '',
         'show_sticky_on_top' => 1,
-    }) if ($itemshow >= 0) ;
+    });
 
     my $is_prev_exist = scalar @items - $itemshow > 0 ? 1 : 0;
     if ($is_prev_exist) {

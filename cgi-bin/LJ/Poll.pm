@@ -1782,8 +1782,8 @@ sub render_new {
     my $results_table = "";
     my $posted = '';
 
-    my $ago = time() - LJ::TimeUtil->mysqldate_to_time($self->entry->logtime_mysql, 0)
-        if $opts{widget};
+    my $ago;
+    $ago = time() - $self->entry->logtime_unix if $opts{'widget'};
 
     my $choice;
     my $close_time;

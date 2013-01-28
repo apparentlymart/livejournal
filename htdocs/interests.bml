@@ -391,7 +391,12 @@ body<=
             return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p Sorry, we're unable to help you find users matching the interests you've provided. p?>");
         }
 
-        my $search_ad = LJ::search_ads(query => $GET{int}, count => 2) if $GET{int};
+        my $search_ad;
+        if ( $GET{'int'} ) {
+            $search_ad = LJ::search_ads(
+                'query' => $GET{'int'}, 'count' => 2 );
+        }
+
         my $e_int = LJ::ehtml($GET{int});
 
         my $ret = '';

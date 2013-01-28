@@ -73,7 +73,8 @@ sub prepare_template_params {
     my ($class, $params, %opts) = @_;
 
     # we need a valid id
-    my $id = $opts{'id'} if $opts{'id'} =~ /^\d+$/;
+    my $id;
+    $id = $opts{'id'} if defined $opts{'id'} && $opts{'id'} =~ /^\d+$/;
     die("You have not specified a layer to edit.")
         unless $id;
 
@@ -163,7 +164,9 @@ sub handle_post {
     my $build;
     if ($post->{'action'} eq "compile") {
         # we need a valid id
-        my $id = $post->{'id'} if $post->{'id'} =~ /^\d+$/;
+        my $id;
+        $id = $post->{'id'}
+            if defined $post->{'id'} && $post->{'id'} =~ /^\d+$/;
 
         die("You have not specified a layer to edit.") unless $id;
 

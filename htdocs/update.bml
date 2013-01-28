@@ -728,7 +728,10 @@ EMBED
     {
         my $ad_details;
         my $ad = LJ::get_ads({ location => 'bml.update/main', get_slots_params => \$ad_details, interests_extra => $qid ? { qotd => $qotd } : {} });
-        my $trynbuy = LJ::Widget::Trynbuy->render(stage => 'simple') if($show_trynbuy);
+
+        my $trynbuy;
+        $trunbuy = LJ::Widget::Trynbuy->render( 'stage' => 'simple' )
+            if $show_trynbuy;
 
         if ( $ad ) {
             my $width = $ad_details->[-1]->{width};

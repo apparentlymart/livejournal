@@ -282,7 +282,7 @@ sub _profile {
     return unless $enable_profiling;
 
     unless ( defined $logfile ) {
-        open $logfile, ">>$ENV{LJHOME}/var/memcache-profile/$$.log"
+        open $logfile, '>>', "$ENV{LJHOME}/var/memcache-profile/$$.log"
             or die "cannot open log: $!";
 
         $logfile->autoflush;
@@ -772,18 +772,16 @@ sub new {
 
 sub can_gets { 0 }
 
-{
-    no strict 'refs';
+sub append {
+    return Cache::Memcached::_set( 'append', @_ );
+}
 
-    # Cache::Memcached doesn't support some methods, so let's add them!
-    #
-    # this is a hacky way that uses a private method from Cache::Memcached,
-    # but oh well
-    foreach my $cmd (qw( append prepend cas )) {
-        *$cmd = sub {
-            return Cache::Memcached::_set( $cmd, @_ );
-        };
-    }
+sub prepend {
+    return Cache::Memcached::_set( 'prepend', @_ );
+}
+
+sub cas {
+    return Cache::Memcached::_set( 'cas', @_ );
 }
 
 1;

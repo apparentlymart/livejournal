@@ -294,7 +294,8 @@ EMAIL_END
 
     # convert email body to utf-8
     my $content_type = $head->get('Content-type:');
-    my $charset      = $1
+    my $charset;
+    $charset = $1
       if $content_type =~ /\bcharset=[\'\"]?(\S+?)[\'\"]?[\s\;]/i;
     if (   defined($charset)
         && $charset !~ /^UTF-?8$/i
