@@ -4198,6 +4198,10 @@ sub getevents {
 
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
 
+        $orderby = "ORDER BY jitemid";
+        unless ($sort_order eq 'default') {
+            $orderby .= ' '.uc($sort_order);
+        }
 
         if (@ids > $skip) {
             @ids = @ids[$skip..(@ids-1)];
