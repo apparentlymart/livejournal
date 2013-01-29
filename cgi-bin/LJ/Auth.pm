@@ -3,9 +3,14 @@
 
 package LJ::Auth;
 use strict;
+
+use Carp qw (croak);
 use Digest::HMAC_SHA1 qw(hmac_sha1_hex);
 use Digest::SHA1 qw(sha1_hex);
-use Carp qw (croak);
+use Digest::MD5;
+use MIME::Base64;
+
+use LJ::Redis;
 
 # Generate an auth token for AJAX requests to use.
 # Arguments: ($remote, $action, %postvars)
@@ -236,6 +241,57 @@ sub login {
         session  => $cursess,
         do_login => 1,
     }, $errors;
+}
+
+sub generate_redis_challenge {
+    my ( $class, $duration ) = @_;
+
+    # duration defaults to five munites or two weeks
+    $duration ||= ( $LJ::IS_DEV_SERVER ? 300 : 86_400 * 14 );
+
+    my $challenge_base = LJ::rand_chars(50);
+
+    my ( $stime, $secret ) = LJ::get_secret();
+
+    my $challenge_sig =
+        Digest::MD5::md5_hex( $challenge_base . $stime . $secret );
+
+    my $challenge = $challenge_base . '-' . $stime . '-' . $challenge_sig;
+
+    my $redis   = LJ::Redis->get_connection;
+    my $set_res = $redis->setnx( "challenge:$challenge_base", 1 );
+
+    return unless $set_res;
+
+    $redis->expire( "challenge:$challenge_base", $duration );
+    return $challenge;
+}
+
+sub check_redis_challenge {
+    my ( $class, $challenge ) = @_;
+
+    my ( $challenge_base, $stime, $challenge_sig ) =
+        split m{-}xsm, $challenge;
+
+    return unless $challenge_base && $stime && $challenge_sig;
+
+    my $secret    = LJ::get_secret($stime);
+    my $valid_sig = Digest::MD5::md5_hex( $challenge_base . $stime . $secret );
+
+    return unless $challenge_sig eq $valid_sig;
+
+    my $redis = LJ::Redis->get_connection;
+    return $redis->del("challenge:$challenge_base");
+}
+
+sub check_redis_challenge_response {
+    my ( $class, $challenge, $response, $password ) = @_;
+
+    return unless $class->check_redis_challenge($challenge);
+
+    my $valid_response = Digest::MD5::md5_hex(
+        $challenge . Digest::MD5::md5_hex($password) );
+    return $response eq $valid_response;
 }
 
 sub error {
