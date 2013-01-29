@@ -3885,6 +3885,9 @@ sub getevents {
 
     $skip = 500 if $skip > 500;
 
+    my $sort_order = $req->{'sort_order'};
+    $sort_order = ($sort_order && $sort_order =~ /asc|desc|default/ ? $sort_order : 'default');
+
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         my $res = {};
 
@@ -4065,6 +4068,9 @@ sub getevents {
 
         $where .= "AND $rtime_what > $rtime_after ";
         $orderby = "ORDER BY $rtime_what";
+        unless ($sort_order eq 'default') {
+            $orderby .= ' '.uc($sort_order);
+        }
 
         unless ($skip) {
             $where .= "OR ( journalid=$ownerid $secwhere $where AND jitemid=$sticky_id)" if defined $sticky_id;
@@ -4221,6 +4227,10 @@ sub getevents {
 
         my $rtime_what = $is_community ? "rlogtime" : "revttime";
         $orderby = "ORDER BY $rtime_what";
+
+        unless ($sort_order eq 'default') {
+            $orderby .= ' '.uc($sort_order);
+        }
 
         my $jitemids;
 
