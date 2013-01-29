@@ -4219,6 +4219,9 @@ sub getevents {
         $limit = "LIMIT $howmany";
         $offset = "OFFSET $skip";
 
+        my $rtime_what = $is_community ? "rlogtime" : "revttime";
+        $orderby = "ORDER BY $rtime_what";
+
         my $jitemids;
 
         my ($tagids, $tagnames, $tags, $known_tags) = ([], [], {}, {});
