@@ -2041,6 +2041,53 @@ BODY div .b-helplink:active {
 		display: block;
 		}
 
+.b-msgsystem-warningbox {
+	display: none;
+	min-height: 50px;
+	margin: 0 -45px 2em -25px;
+	padding: 10px 140px 10px 120px;
+	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
+	background: #FFFFD5 url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	}
+	.b-msgsystem-warningbox-age-14 {
+		/* background-image: url(/img/icons/warning-age-16.png); */
+		}
+	.b-msgsystem-warningbox-age-18 {
+		/* background-image: url(/img/icons/warning-age-18.png); */
+		}
+	.b-msgsystem-warningbox-head {
+		margin: 0 0 5px;
+		padding: 0;
+		color: #9e9d73;
+		font-size: 1em;
+		font-weight: bold;
+		}
+	.b-msgsystem-warning {
+		margin: 0 0 10px;
+		padding: 0;
+		color: #787878;
+		}
+	.b-msgsystem-warningbox-confirm {
+		margin: 5px 0 0;
+	}
+#js .b-msgsystem-warningbox-show {
+	display: block;
+	}
+	.b-msgsystem-warning {
+		display: none;
+		}
+	.b-msgsystem-warningbox-show .b-msgsystem-warning-ajax {
+		display: block;
+		}
+.b-msgsystem-warningbox-warnings {
+	display: block;
+	}
+	.b-msgsystem-warningbox-warnings .b-msgsystem-warning-server {
+		display: block;
+		}
+
 .b-msgsystem-messagebox {
 	display: none;
 	min-height: 50px;
