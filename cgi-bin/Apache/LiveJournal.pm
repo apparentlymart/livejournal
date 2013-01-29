@@ -1807,6 +1807,12 @@ sub send_files {
             my $expires_str = HTTP::Date::time2str(time + $max_age);
             LJ::Request->header_out("Expires" => $expires_str);
             LJ::Request->header_out("Cache-Control", "no-transform, public, max-age=$max_age");
+        } elsif ($uri =~ m|^/communityreader/|) {
+            ## communityreader icons may be changed rarely.
+            my $max_age = 86400 * 30 + 600; # 30 days and 10 minutes
+            my $expires_str = HTTP::Date::time2str(time + $max_age);
+            LJ::Request->header_out("Expires" => $expires_str);
+            LJ::Request->header_out("Cache-Control", "no-transform, public, max-age=$max_age");
         } else {
             ## ... no Expires by defaul
             ## Set Cache-Control only
