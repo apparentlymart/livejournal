@@ -760,7 +760,7 @@ sub getcomments {
             }
             $item_data->{privileges}->{'spam'} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
             $item_data->{privileges}->{'unspam'} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
-            $item_data->{privileges}->{'reply'} =  LJ::Talk::Post::require_captcha_test($u, $journal, '', $req->{ditemid}) ? 1 : 0;
+            $item_data->{privileges}->{'reply'} = (LJ::Talk::Post::require_captcha_test($u, $journal, '', $req->{ditemid}) ? 0 : 1);
         }
 
         if ( $req->{calculate_count} ){
