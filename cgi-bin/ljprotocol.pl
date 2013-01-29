@@ -755,12 +755,12 @@ sub getcomments {
             $item_data->{privileges}->{'unfreeze'} = ($comment->is_frozen && LJ::Talk::can_unfreeze($u, $journal, $up, $item->{userpost}));
             my $pu = $comment->poster;
             unless ($pu && $pu->is_suspended){
-                $item_data->{privileges}->{screen}   = (!$comment->is_screened && LJ::Talk::can_screen($u, $journal, $up, $item->{userpost}));
-                $item_data->{privileges}->{unscreen} = ($comment->is_screened && LJ::Talk::can_unscreen($u, $journal, $up, $item->{userpost}));
+                $item_data->{privileges}->{'screen'}   = (!$comment->is_screened && LJ::Talk::can_screen($u, $journal, $up, $item->{userpost}));
+                $item_data->{privileges}->{'unscreen'} = ($comment->is_screened && LJ::Talk::can_unscreen($u, $journal, $up, $item->{userpost}));
             }
-            $item_data->{privileges}->{spam} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
-            $item_data->{privileges}->{unspam} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
-            # $item_data->{privileges}->{'reply'} = 1;
+            $item_data->{privileges}->{'spam'} = (!$comment->is_spam && LJ::Talk::can_marked_as_spam($u, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{'unspam'} = ($comment->is_spam && LJ::Talk::can_unmark_spam($u, $journal, $up, $item->{userpost}));
+            $item_data->{privileges}->{'reply'} =  LJ::Talk::Post::require_captcha_test($u, $journal, '', $req->{ditemid}) ? 1 : 0;
         }
 
         if ( $req->{calculate_count} ){
