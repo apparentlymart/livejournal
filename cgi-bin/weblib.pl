@@ -1617,7 +1617,7 @@ sub res_includes {
         $locale = $locale eq 'debug'? $locale : LJ::lang_to_locale($locale);
 
         my %comm_access = ();
-        if ($ju && $ju->is_community) {
+        if ($ju && $ju->is_community && $remote && $remote->is_validated) {
             my @c_acc = LJ::get_comm_settings ($ju);
             $comm_access{'membership'} = $c_acc[0] if scalar @c_acc;
         }
