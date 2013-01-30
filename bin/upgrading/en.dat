@@ -3960,6 +3960,8 @@ inbox.button.markasread=Mark as read
 
 inbox.button.markasunread=Mark as unread
 
+inbox.button.spam=Mark as spam
+
 inbox.button.unmark=Unmark
 
 inbox.checkall=check all conversations
