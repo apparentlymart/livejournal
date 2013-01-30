@@ -235,7 +235,14 @@ sub enter_comment {
     # fire events
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
-        LJ::Event::JournalNewComment->new($cmtobj)->fire;
+
+        # Dont send notification for some reason
+        {
+            last if ! $posterid && $comment->{state} eq 'B';
+
+            LJ::Event::JournalNewComment->new($cmtobj)->fire;
+        }
+
         LJ::EventLogRecord::NewComment->new($cmtobj)->fire;
     }
 
