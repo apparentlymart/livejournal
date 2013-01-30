@@ -1629,6 +1629,7 @@ sub res_includes {
                 siteroot                 => "$siteroot",
                 statprefix               => "$statprefix",
                 jsonrpcprefix            => "$LJ::JSON_RPC_PREFIX",
+                logprefix                => "$LJ::JSLOGPREFIX",
                 picsUploadDomain         => $LJ::PICS_UPLOAD_DOMAIN,
                 currentJournalBase       => "$journal_base",
                 currentJournal           => "$journal",
@@ -1678,6 +1679,7 @@ sub res_includes {
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
                 Site.page = $jsvar_out;
+                Site.timer = Date.now();
                 (function(){
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
