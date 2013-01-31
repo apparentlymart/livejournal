@@ -3982,7 +3982,11 @@ inbox.confirm.cancel=Cancel
 
 inbox.confirm.remove=Remove all messages from dialogue
 
-inbox.confirm.remove.users=Remove all messages from [[user]]
+inbox.confirm.remove.users=Remove all messages from selected users
+
+inbox.confirm.spam=Mark all messages as spam and ban user [[user]]
+
+inbox.confirm.spam.users=Mark all messages as spam and ban all selected users
 
 inbox.confirm.warn.all=[[amount]] [[?amount|message|messages]] will be deleted
 
