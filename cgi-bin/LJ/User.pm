@@ -11031,7 +11031,78 @@ sub get_aggregated_user {
         my @result = eval {$i->$method};
         ($row->{'identity_'.$method}) = @result > 1 ? \@result : @result;
     }
+}
 
+# Return friends with type
+# Types:  
+#   C -> Community
+#   P -> Personal
+#   I -> Identity 
+#   Y -> Syndicated
+#   S -> Shared
+#   N -> News
+sub get_friends_with_type {
+    my ($u, $options) = @_;
+
+    my $types = $options->{types};
+    my $limit = $options->{limit};
+
+    die "no user" unless $u;
+    die "no type" unless $types;
+
+    my %allow_list = map { $_ => 1 } @$types;
+   
+    if ($allow_list{'P'}) {
+        my %types_data = map { $_ => 1 } @$types;
+
+        my @types = ('I', 'Y', 'N', 'C');
+        my @types_to_load = ();
+        foreach my $type (@types) {
+            push @types_to_load, $type;
+        }
+
+        my @exclude = get_friends_with_type($u, { types => \@types_to_load,
+                                                  limit => $limit });
+
+        my %exclude_list = map { $_ => 1 } @exclude;
+        my @friends = $u->friend_uids(limit => $limit);
+        my @list =  grep { !$exclude_list{$_}  } @friends;
+
+        return @list;
+    } 
+
+    #mnenonic User:FriendsList:
+    my @keys = map { "u:fl:" . $u->userid . ":$_"} @$types ;
+
+    my $redis = LJ::Redis->get_connection();
+    my @list = ();
+    foreach my $key (@keys) {
+        my @result = $redis->smembers($key);
+        push @list, @result if @result;;
+    }
+
+    return @list if @list;
+
+    # get and set a list
+
+    my @friends = $u->friend_uids();
+    my $friends_data = LJ::get_journal_short_info_multi($u, @friends);
+
+    my @typed_journals;   
+    my %cache = ();
+    foreach my $friend (@friends) {
+        my $type = $friends_data->{$friend}->{journaltype};
+        next unless $allow_list{$type};
+        push @{$cache{$type}}, $friend;
+        push @typed_journals, $friend;
+    } 
+
+    foreach my $type (keys %cache) {
+        my $key = "u:fl:" . $u->userid . ":$type";
+        $redis->sadd($key, @{$cache{$type}});    
+    }
+
+    return @typed_journals;
 }
 
 sub get_journal_short_info_multi {
@@ -11041,6 +11112,7 @@ sub get_journal_short_info_multi {
     }
 
     my %final_result = ();
+
     my $result = LJ::MemCache::get_multi(@keys);
 
     my @users_to_load = ();
