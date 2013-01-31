@@ -152,7 +152,7 @@ body<=
     };
 
     $body .= qq{
-        <a href="$LJ::SITEROOT/inbox/?v=1"><?_ml inbox.ver _ml?></a> |
+        <a href="$LJ::SITEROOT/inbox/switch"><?_ml inbox.ver _ml?></a> |
     } if (LJ::is_enabled('inbox_controller'));
 
     $body .= qq{

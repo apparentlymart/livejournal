@@ -1,0 +1,17 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw($title $body $head %GET %POST);
+ 
+    LJ::Request->set_cookie(
+        ljinbox  => 1,
+        expires => time + 86400 * 7,
+    );
+ 
+    LJ::Request->redirect($LJ::SITEROOT . "/inbox");
+}
+_code?>
+<=body
+page?>
