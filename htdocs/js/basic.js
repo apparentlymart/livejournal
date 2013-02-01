@@ -955,7 +955,8 @@ function plural_form_is(count) {
 	 */
 	LJ.mltext = function (key) {
 		var dict = {},
-			args = Array.prototype.slice.call(arguments, 1);
+			args = Array.prototype.slice.call(arguments, 1),
+			i, l;
 
 		for (i = 0, l = args.length; i < l; i += 2) {
 			dict[args[i]] = args[i + 1] || '';
