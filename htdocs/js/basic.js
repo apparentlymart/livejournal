@@ -950,6 +950,19 @@ function plural_form_is(count) {
 		return str;
 	};
 
+	/**
+	 * LJ.ml alias for templates
+	 */
+	LJ.mltext = function (key) {
+		var dict = {},
+			args = Array.prototype.slice.call(arguments, 1);
+
+		for (i = 0, l = args.length; i < l; i += 2) {
+			dict[args[i]] = args[i + 1] || '';
+		}
+
+		return LJ.ml(key, dict);
+	};
 }());
 
 /**
