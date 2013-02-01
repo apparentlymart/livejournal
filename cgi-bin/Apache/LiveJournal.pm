@@ -202,7 +202,13 @@ sub handler
                         warn(@_);
                     }
                 };
-                my $good = do $file;
+
+                my $good;
+                {
+                    local *Readonly::croak = sub {};
+                    $good = do $file;
+                }
+
                 if ($good) {
                     $LJ::LIB_MOD_TIME{$file} = (stat($file))[9];
                 } else {
