@@ -11108,6 +11108,7 @@ sub get_friends_with_type {
     foreach my $type (keys %cache) {
         my $key = "u:fl:" . $u->userid . ":$type";
         $redis->sadd($key, @{$cache{$type}});    
+        $redis->expire($key, 24 * 60 * 60);
     }
 
     return @typed_journals;
