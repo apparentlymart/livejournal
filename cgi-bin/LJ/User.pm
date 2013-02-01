@@ -11113,13 +11113,26 @@ sub get_friends_with_type {
     return @typed_journals;
 }
 
+sub remove_from_friend_list {
+    my ($u, $friend) = @_;
+
+    my $type = $friend->journaltype;
+    my $key  = "u:fl:" . $u->userid . ":$type";
+    my $redis = LJ::Redis->get_connection();
+    
+    $redis->sdelete($key);
+}
+
 sub add_to_friend_list {
     my ($u, $friend) = @_;
 
     my $type = $friend->journaltype;
     my $key  = "u:fl:" . $u->userid . ":$type";
     my $redis = LJ::Redis->get_connection();
-    $redis->sadd($key, $friend);
+
+    if ($redis->exists($key)) {
+        $redis->sadd($key, $friend);
+    }
 }
 
 sub get_journal_short_info_multi {
