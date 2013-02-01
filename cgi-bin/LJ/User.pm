@@ -9268,6 +9268,9 @@ sub add_friend
     my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
                  && $friender->is_visible && $friender->is_person;
 
+
+    # load all users at once
+    LJ::load_userids(@add_ids);
     foreach my $add_id (@add_ids) {
         LJ::RelationService->create_relation_to(
             $friender, $add_id, 'F', 
@@ -9276,11 +9279,13 @@ sub add_friend
             bgcolor   => $bgcol,
         );
 
+        my $friendee = LJ::load_userid($add_id);
+        LJ::add_to_friend_list($friender, $friendee);
+
         if ($sclient) {
             my @jobs;
 
             # only fire event if the friender is a person and not banned and visible
-            my $friendee = LJ::load_userid($add_id);
             if ($notify && !$friendee->is_banned($friender)) {
                 require LJ::Event::BefriendedDelayed;
                 LJ::Event::BefriendedDelayed->send($friendee, $friender);
@@ -9342,10 +9347,13 @@ sub remove_friend {
     foreach my $del_id (@del_ids) {
         LJ::RelationService->remove_relation_to( $u, $del_id, 'F' );
     }
-    
+
+    LJ::load_userids(@del_ids); 
     # delete friend-of memcache keys for anyone who was removed
     foreach my $fid (@del_ids) {
         my $friendee = LJ::load_userid($fid);
+
+        LJ::remove_from_friend_list($u, $friendee);
         if ($sclient) {
             my @jobs;
 
@@ -11105,6 +11113,15 @@ sub get_friends_with_type {
     return @typed_journals;
 }
 
+sub add_to_friend_list {
+    my ($u, $friend) = @_;
+
+    my $type = $friend->journaltype;
+    my $key  = "u:fl:" . $u->userid . ":$type";
+    my $redis = LJ::Redis->get_connection();
+    $redis->sadd($key, $friend);
+}
+
 sub get_journal_short_info_multi {
     my @keys = ();
     foreach my $userid (@_) {
@@ -11157,5 +11174,5 @@ sub get_journal_short_info_multi {
 
     return \%final_result;
 }
-    
+
 1;
