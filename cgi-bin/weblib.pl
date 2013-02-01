@@ -1674,12 +1674,12 @@ sub res_includes {
         $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
         $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
 
-        $ret_js .= qq {
+        $ret_js .= <<"";
             <script type="text/javascript">
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
                 Site.page = $jsvar_out;
-                Site.timer = Date.now();
+                Site.timer = +(new Date());
                 (function(){
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
@@ -1687,7 +1687,7 @@ sub res_includes {
                 Site.current_journal = $journal_info_json;
                 Site.version = '$site_version';
            </script>
-        };
+
 
     } ## / unless $only_needed
 
