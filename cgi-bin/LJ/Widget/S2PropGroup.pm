@@ -244,7 +244,20 @@ sub output_prop {
         return $ret;
     }
 
-    $ret .= "<td class='prop-header'>" . LJ::eall($prop->{des}) . " " . LJ::help_icon("s2opt_$name") . "</td>"
+    # Override description of properties S2 layer (in i18n)
+    my $remote = LJ::get_remote();
+    my $langcode = $remote ? $remote->prop('browselang') : '';
+    my $i18n = LJ::Customize->save_language($u, $langcode, 'return' => 1);
+    $i18n = $i18n->{i18n};
+    my $des;
+    if ($i18n) {
+        LJ::S2::load_layers($i18n);
+        $des = S2::get_set_des($i18n, $prop->{name});
+    }
+
+    $des ||= $prop->{des};
+
+    $ret .= "<td class='prop-header'>" . LJ::eall($des) . " " . LJ::help_icon("s2opt_$name") . "</td>"
         unless $type eq "Color" or $type eq "OptionsDelimeter";
 
     if ($prop->{values}) {
@@ -329,9 +342,11 @@ sub output_prop {
     my $offhelp = ! $can_use ? LJ::help_icon('s2propoff', ' ') : "";
     $ret .= " $offhelp";
 
-    my $note = "";
-    $note .= LJ::eall($prop->{note}) if $prop->{note};
-    $ret .= "</tr><tr class='prop-row-note$row_class'><td colspan='100%' class='prop-note'>$note</td>" if $note;
+    # Override note of properties S2 layer (in i18n)
+    my $note = $i18n && S2::get_set_note($i18n, $prop->{name});
+    $note ||= $prop->{note};
+    
+    $ret .= $note && "</tr><tr class='prop-row-note$row_class'><td colspan='100%' class='prop-note'>" . LJ::eall($note) . "</td>";
 
     $ret .= "</tr>";
     return $ret;
