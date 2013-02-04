@@ -1620,10 +1620,6 @@ DOM = {
 	setSelectedRange: LJ.DOM.setSelection
 };
 
-$ = DOM.getElement;
-
-
-
 //httpreq.js
 
 // opts:
