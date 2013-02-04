@@ -1,5 +1,3 @@
-jQuery.noConflict();
-
 jQuery.ajaxSetup({
 	cache: false
 });
