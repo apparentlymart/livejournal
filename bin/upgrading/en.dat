@@ -6448,6 +6448,10 @@ talk.commentpost=Post a new comment
 talk.comments.counted|staleness=1
 talk.comments.counted=[[replycount]] [[?replycount|comment|comments]]
 
+talk.comments.disabled=Comments for this post was disable by author
+
+talk.comments.lockedandzero=Comments for this post was locked by author
+
 talk.commentsread=Read comments
 
 talk.commentsread.counted|staleness=1
