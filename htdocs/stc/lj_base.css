@@ -2071,7 +2071,7 @@ BODY div .b-helplink:active {
 	.b-msgsystem-warningbox-head {
 		margin: 0 0 5px;
 		padding: 0;
-		color: #9e9d73;
+		color: #000;
 		font-size: 1em;
 		font-weight: bold;
 		}
