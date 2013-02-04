@@ -2043,19 +2043,30 @@ BODY div .b-helplink:active {
 
 .b-msgsystem-warningbox {
 	display: none;
+	overflow: hidden;
 	min-height: 50px;
 	margin: 0 -45px 2em -25px;
-	padding: 10px 140px 10px 120px;
+	padding: 10px 140px 10px 35px;
 	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
-	background: #FFFFD5 url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	background-color: #FFFFD5;
 	}
-	.b-msgsystem-warningbox-age-14 {
-		/* background-image: url(/img/icons/warning-age-16.png); */
+	.b-msgsystem-warningbox .warningbox-icon {
+		clear: both;
+		float: left;
+		overflow: hidden;
+		width: 55px;
+		height: 58px;
+		margin-right: 30px;
+		background: url(/img/icons/warning-age-sprite.png) no-repeat;
+		text-indent: -9999px;
 		}
-	.b-msgsystem-warningbox-age-18 {
-		/* background-image: url(/img/icons/warning-age-18.png); */
+	.b-msgsystem-warningbox-age-14 .warningbox-icon {
+		background-position: 0 0;
+		}
+	.b-msgsystem-warningbox-age-18 .warningbox-icon {
+		background-position: 0 -57px;
 		}
 	.b-msgsystem-warningbox-head {
 		margin: 0 0 5px;
