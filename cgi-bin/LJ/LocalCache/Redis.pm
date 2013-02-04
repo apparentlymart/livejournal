@@ -26,6 +26,8 @@ sub __get_connection {
    
     if ($@) {
         $failed = 1;  
+        $LJ::DISABLED{'local_cache'} = 1;
+        
         warn "connection error: $@"
             if $LJ::IS_DEV_SERVER;
     }
