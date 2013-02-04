@@ -7,8 +7,11 @@ use warnings;
 use Redis;
 
 my $local_connection;
+my $failed = 0;
 
 sub __get_connection {
+    return undef if $failed;    
+
     if ($local_connection) {
         if ($local_connection->ping) {
             return $local_connection;
@@ -20,8 +23,11 @@ sub __get_connection {
     $local_connection = eval { Redis->new( encoding => undef,
                                            sock   => $LJ::LOCAL_REDIS_UNIX_SOCKET,
                                            debug => 0) };
-    if ($@ && $LJ::IS_DEV_SERVER) {
-        warn "connection error: $@";
+   
+    if ($@) {
+        $failed = 1;  
+        warn "connection error: $@"
+            if $LJ::IS_DEV_SERVER;
     }
 
     return $local_connection;
