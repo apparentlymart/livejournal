@@ -2899,8 +2899,14 @@ sub get_social_capital {
         return $soc_capital;
     } else {  
         $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
-        my $value = $soc_capital ? int($soc_capital->{result}->{authority}/1000) : return 0;
-        LJ::MemCache::set( $key, $value, 60*60);
+        
+        my $value = 0;
+        if ($soc_capital) {
+            $value = int($soc_capital->{result}->{authority}/1000);
+            LJ::MemCache::set( $key, $value, 5*60);
+        } else {
+            LJ::MemCache::set( $key, 0, 60);
+        }
         return $value;
     }
 }
