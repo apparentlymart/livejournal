@@ -11060,13 +11060,21 @@ sub get_friends_with_type {
 
     my %allow_list = map { $_ => 1 } @$types;
    
+    #
+    # Exclude some friends types to type  P.
+    #
     if ($allow_list{'P'}) {
         my %types_data = map { $_ => 1 } @$types;
 
-        my @types = ('I', 'Y', 'N', 'C');
+        my @types_list = ('I', 'Y', 'N', 'C');
         my @types_to_load = ();
-        foreach my $type (@types) {
-            push @types_to_load, $type;
+
+        #
+        # May do not need to exclude  all friends
+        #
+        foreach my $type (@types_list) {
+            push @types_to_load, $type 
+                unless $types_data{$type};
         }
 
         my @exclude = get_friends_with_type($u, { types => \@types_to_load,
@@ -11108,7 +11116,7 @@ sub get_friends_with_type {
     foreach my $type (keys %cache) {
         my $key = "u:fl:" . $u->userid . ":$type";
         $redis->sadd($key, @{$cache{$type}});    
-        $redis->expire($key, 24 * 60 * 60);
+        $redis->expire($key, time() + 24 * 60 * 60);
     }
 
     return @typed_journals;
@@ -11182,7 +11190,8 @@ sub get_journal_short_info_multi {
             $final_result{$userid} = \%user_result;
 
             my $cache = join(':', $status, $cid, $type);
-            LJ::MemCache::set("u:s:$userid", $cache, 60*60*24*30);
+            my $expire_time = time + 60*60*24*30;
+            LJ::MemCache::set("u:s:$userid", $cache, $expire_time);
         }
     }  
 
