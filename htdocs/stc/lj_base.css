@@ -2052,7 +2052,7 @@ BODY div .b-helplink:active {
 	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	background-color: #FFFFD5;
 	}
-	.b-msgsystem-warningbox .warningbox-icon {
+	.b-msgsystem-warningbox .b-warningbox-icon {
 		clear: both;
 		float: left;
 		overflow: hidden;
@@ -2062,10 +2062,10 @@ BODY div .b-helplink:active {
 		background: url(/img/icons/warning-age-sprite.png) no-repeat;
 		text-indent: -9999px;
 		}
-	.b-msgsystem-warningbox-age-14 .warningbox-icon {
+	.b-msgsystem-warningbox-age-14 .b-warningbox-icon {
 		background-position: 0 0;
 		}
-	.b-msgsystem-warningbox-age-18 .warningbox-icon {
+	.b-msgsystem-warningbox-age-18 .b-warningbox-icon {
 		background-position: 0 -57px;
 		}
 	.b-msgsystem-warningbox-head {
