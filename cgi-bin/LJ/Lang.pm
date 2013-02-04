@@ -698,7 +698,9 @@ sub get_text {
 # you wouldn't be calling this anyway!
 # args: $lang, $dmid, array ref of lang codes
 sub get_text_multi {
-    my ( $lang, $dmid, $codes ) = @_;
+    my ( $lang, $dmid, $codes, $opts ) = @_;
+
+    my $ignor_local_cache = $opts->{ignore_local_cache};
 
     $lang ||= $LJ::DEFAULT_LANG;
     return {} unless $codes;
@@ -742,7 +744,7 @@ sub get_text_multi {
     return \%strings unless %memkeys;
 
     my $mem = {};
-    if (LJ::is_enabled('local_cache') &&  LJ::is_web_context()) {
+    if (!$ignor_local_cache && LJ::is_enabled('local_cache') &&  LJ::is_web_context()) {
         my @keys_memcache = ();
         my @keys = keys %memkeys;
 
