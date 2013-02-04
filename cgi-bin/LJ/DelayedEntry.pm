@@ -721,8 +721,10 @@ sub load_data {
 
     my ($data_ser)= $dbcr->selectrow_array( "SELECT request_stor " .
                                             "FROM delayedblob2 " .
-                                            "WHERE journalid=$journalid AND " .
-                                            "delayedid = $delayedid" );
+                                            "WHERE journalid=? AND " .
+                                            "delayedid=?",
+                                            undef,
+                                            $journalid, $delayedid );
 
     my $self = bless {}, $class;
     $self->{delayed_id} = $delayedid;
@@ -739,7 +741,8 @@ sub get_entry_by_id {
     my ($class, $journal, $delayedid, $options) = @_;
     __assert($journal, "no journal");
     return undef unless $delayedid;
-
+    
+    $delayedid = int($delayedid);
     my $journalid = $journal->userid;
     my $userid    = $options->{userid} || 0;
     my $user      = LJ::get_remote() || LJ::want_user($userid);
@@ -772,8 +775,10 @@ sub get_entry_by_id {
 
     my $opts = $dbcr->selectrow_arrayref( "SELECT journalid, delayedid, posterid, posttime, logtime " .
                                           "FROM delayedlog2 ".
-                                          "WHERE journalid=$journalid AND ".
-                                          "delayedid = $delayedid $sql_poster");
+                                          "WHERE journalid=? AND ".
+                                          "delayedid = ? $sql_poster",
+                                          undef,
+                                          $journalid, $delayedid);
     return undef unless $opts;
 
     my $req = undef;
@@ -783,8 +788,10 @@ sub get_entry_by_id {
     if (!$data_ser) {
         ($data_ser) = $dbcr->selectrow_array( "SELECT request_stor " .
                                               "FROM delayedblob2 ".
-                                              "WHERE journalid=$journalid AND ".
-                                              "delayedid = $delayedid");
+                                              "WHERE journalid=? AND ".
+                                              "delayedid=?",
+                                              undef,
+                                              $journalid, $delayedid);
         return undef unless $data_ser;
         LJ::MemCache::set($memcache_key, $data_ser, 3600);
     }
@@ -862,9 +869,11 @@ sub entries_exists {
         or die "get cluster for journal failed";
 
     my ($delayeds) =  $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                                "FROM delayedlog2 WHERE journalid=$journalid AND posterid = $userid ".
+                                                "FROM delayedlog2 WHERE journalid=? AND posterid=? ".
                                                 "AND finaltime IS NULL " .
-                                                "LIMIT 1");
+                                                "LIMIT 1",
+                                                undef, 
+                                                $journalid, $userid);
     return @$delayeds;
 }
 
@@ -879,7 +888,8 @@ sub get_usersids_with_delated_entry {
 
     return $dbcr->selectcol_arrayref(  "SELECT posterid " .
                                        "FROM delayedlog2 ".
-                                       "WHERE journalid = $journalid AND finaltime IS NULL GROUP BY posterid" );
+                                       "WHERE journalid=? AND finaltime IS NULL GROUP BY posterid",  
+                                        undef, $journalid );
 }
 
 sub get_entries_count {
@@ -904,16 +914,18 @@ sub get_entries_count {
 
     return $dbcr->selectrow_array(  "SELECT count(delayedid) " .
                                     "FROM delayedlog2 ".
-                                    "WHERE journalid=$journalid AND finaltime IS NULL" );
+                                    "WHERE journalid=? AND finaltime IS NULL",
+                                    undef,
+                                    $journalid );
 }
 
 sub get_entries_by_journal {
     my ( $class, $journal, $opts ) = @_;
     return [] unless $journal;
 
-    my $skip          = $opts->{'skip'} || 0;
-    my $show          = $opts->{'show'} || 0;
-    my $userid        = $opts->{'userid'};
+    my $skip          = int($opts->{'skip'}) || 0;
+    my $show          = int($opts->{'show'}) || 0;
+    my $userid        = int($opts->{'userid'});
     my $only_my       = $opts->{'only_my'};
     my $sticky_on_top = $opts->{'sticky_on_top'};
 
@@ -1046,7 +1058,9 @@ sub get_itemid_near2 {
     }
 
     my ($stime, $is_current_sticky) = $dbr->selectrow_array( "SELECT revptime, is_sticky FROM delayedlog2 WHERE ".
-                                        "journalid=$jid AND delayedid=$delayedid");
+                                                             "journalid=? AND delayedid=?", 
+                                                             undef,
+                                                             $jid, $delayedid);
     return 0 unless $stime;
 
     my $sql_poster = '';
