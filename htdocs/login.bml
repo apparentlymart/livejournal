@@ -37,8 +37,8 @@
     my $want_fail_redirect = sub {
         my @error_codes = @_;
 
-        if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
-            $LJ::REDIRECT_ALLOWED{$1}) 
+        if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i &&
+            $LJ::REDIRECT_ALLOWED{$1})
         {
             BML::redirect($POST{ret_fail} . LJ::eurl(join(',', @error_codes)));
             return 1;
@@ -64,7 +64,7 @@
         # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
         if ($POST{ret} && $POST{ret} != 1) {
             my ($redir_host) = $POST{ret} =~ m#^https?://([\.:\w-]+)#i;
-        
+
             # if the redirect is going to FotoBilder, and they don't have the fb_account cap,
             # then we don't redirect them, but keep them here and display an error message
             my $u = LJ::load_user($user);
@@ -74,7 +74,7 @@
                 $body = LJ::bad_input("Your account type does not allow logins to remote FotoBilder sites");
                 return 1;
             }
-        
+
             if ($LJ::REDIRECT_ALLOWED{$redir_host} || $redir_host eq $LJ::DOMAIN_WEB) {
                 LJ::run_hook('login_redirect_extra', $redir_host);
                 BML::redirect($POST{ret});
@@ -104,7 +104,7 @@
             $forwhat  = "&forwhat=oauth-$token";
             $ret      = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$token";
         }
-    
+
         # can't do challenge/response with LDAP.
         $nojs = 1 if $LJ::LDAP_HOST;
 
@@ -116,18 +116,38 @@
             $body .= LJ::error_list(map {$_->[1]} @errors);
             $body .= "</div>\n";
 
-        } elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
+        }
+        elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
             $body .= "<div style='clear: both'>\n";
             my $text = $form_auth_ok? $ML{'.login.optionssaved'} : $ML{'error.invalidform'};
             $body .= "<?warningbar <b>$text</b> warningbar?>\n";
             $body .= "</div>\n";
 
-        } elsif (LJ::did_post() && $POST{'action:logout'}) {
+        }
+        elsif (LJ::did_post() && $POST{'action:logout'}) {
             my $url = $old_remote ? "$LJ::SITEROOT/logout.bml?user=" . $old_remote->user : "$LJ::SITEROOT/logout.bml";
             return BML::redirect($url);
         }
 
+        if ( $GET{'style'} eq 'mobile' ) {
+            my $template = LJ::HTML::Template->new(
+                { use_expr => 1 }, # force HTML::Template::Pro with Expr support
+                filename          => "$ENV{'LJHOME'}/templates/Mobile/login/loginform.tmpl",
+                die_on_bad_params => 0,
+                case_sensitive    => 1,
+            ) or die "Can't open template: $!";
+
+            $template->param(
+                'imgprefix' => $LJ::IMGPREFIX,
+            );
+
+            BML::set_content_type('text/html');
+            BML::finish();
+            return $template->output;;
+        }
+
         $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
+
         if ($require_tos) {
             my $err_code = (ref $require_tos eq 'HASH') ? $require_tos->{code} : 'tos_required';
             return if $want_fail_redirect->($err_code);
@@ -214,7 +234,8 @@
             $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn1'}' />";
             $body .= "</td></tr></table>\n";
             $body .= "</form>\n";
-        } else {
+        }
+        else {
             $body .= "<div class='columns-2-r300 pkg'>\n";
             $body .= "<div class='columns-2-left'>\n";
             $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $ret,
@@ -248,6 +269,7 @@
         }
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
+
         if ($remote) {
             my $box = LJ::CProd->full_box_for($remote, width => 300);
             # because post_login_news is really post_login_ad in ljcom ....
@@ -258,14 +280,19 @@
             }
             $body .= $box;
         }
+
         $body .= "</td></tr></table>";
+
         return $body;
     };
+
     my $logout_remote = sub {
         $remote->kill_session if $remote;
+
         foreach (qw(langpref BMLschemepref)) {
             delete $COOKIE{$_} if $COOKIE{$_};
         }
+
         $remote      = undef;
         $cursess = undef;
         LJ::set_remote(undef);
@@ -366,8 +393,7 @@
                 if $u->{statusvis} eq 'L';
 
             if (@errors) {
-                $login_html->();
-                return;
+                return $login_html->();
             }
 
             LJ::load_user_props($u, "browselang", "schemepref", "legal_tosagree");
@@ -430,7 +456,8 @@
         $logout_remote->();
     }
 
-    $login_html->();
+    my $tmp_body = $login_html->();
+    return $tmp_body if $GET{'style'} eq 'mobile';
     return;
 }
  _code?><?_info
