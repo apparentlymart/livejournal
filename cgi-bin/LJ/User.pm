@@ -36,6 +36,7 @@ use LJ::User::PropStorage;
 use LJ::User::Userlog;
 use LJ::Response::CachedTemplate;
 use LJ::PersonalStats::DB;
+use LJ::Redis;
 
 # TODO: get rid of Class::Autouse, maybe? it's pretty useless
 # in web context and leads to some nasty bugs otherwise, so probably
