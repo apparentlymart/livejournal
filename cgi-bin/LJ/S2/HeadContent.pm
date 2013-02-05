@@ -153,22 +153,8 @@ sub _entry_page_head {
 
     my $head_content = $opts->{entry_cmtinfo} || '';
 
-    if ( $opts->{entry_metadata} ) {
-        my %meta = %{ $opts->{entry_metadata} };
-        $head_content .= qq(<meta property="og:title" name="title" );
-        $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'title'} ) || '';
-        $head_content .= qq(" />\n);
-
-        $head_content .= qq(<meta property="og:description" );
-        $head_content .= qq(name="description" content=");
-        $head_content .= LJ::ehtml( $meta{'description'} ) || '';
-        $head_content .= qq(" />\n);
-
-        $head_content .= qq(<meta property="og:image" );
-        $head_content .= qq(content=");
-        $head_content .= LJ::ehtml( $meta{'image'} ) || '';
-        $head_content .= qq( " />\n);
+    if ( my $metadata_html = $opts->{entry_metadata_html} ) {
+        $head_content .= $metadata_html;
     }
 
     if ( $opts->{dont_show_nav_strip} ) {

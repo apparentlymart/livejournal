@@ -408,7 +408,10 @@ sub EntryPage
     }
     
     $p->{head_content}->set_options( { entry_cmtinfo => $entry_cminfo} );
-    $p->{head_content}->set_options( { entry_metadata => $entry->extract_metadata } );
+    if ( $entry && $entry->isa('LJ::Entry') ) {
+        $p->{head_content}->set_options(
+            { entry_metadata_html => $entry->metadata_html } );
+    }
 
     LJ::need_res(qw(
                     js/commentmanage.js

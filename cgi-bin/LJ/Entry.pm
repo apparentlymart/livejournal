@@ -1579,9 +1579,37 @@ sub extract_metadata {
 
         return $userhead_url;
     };
-    die "cannot get entry image: $@" unless defined $meta{'image'};
+    die "cannot get entry image: $@" unless $meta{'image'};
 
     return \%meta;
+}
+
+# http://ogp.me/, https://dev.twitter.com/docs/cards
+sub metadata_html {
+    my ($self) = @_;
+
+    my $meta = eval { $self->extract_metadata };
+    return '' unless $meta;
+
+    my %tags = (
+        'og:title'       => $meta->{'title'}       || '(no title)',
+        'og:description' => $meta->{'description'} || '(entry text)',
+        'og:image'       => $meta->{'image'},
+        'og:type'        => 'website',
+        'og:url'         => $self->url || $LJ::SITEROOT,
+        'twitter:card'   => 'summary',
+        'twitter:site'   => '@livejournal',
+    );
+
+    my $html = '';
+    foreach my $k ( sort keys %tags ) {
+        my $property_ehtml = LJ::ehtml($k);
+        my $content_ehtml  = LJ::ehtml( $tags{$k} );
+        $html .=
+            qq{<meta property="$property_ehtml" content="$content_ehtml" />};
+    }
+
+    return $html;
 }
 
 sub is_sticky {
