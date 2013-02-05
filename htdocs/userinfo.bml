@@ -1027,12 +1027,7 @@
         $body .= "<div class='ljclear'></div>";
         my $label = $u->is_person || $u->is_identity ? $ML{'.bio.header'} : $ML{'.about.header'};
 
-        if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
-            $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
-            $u->{'bio'} =~ s!\n!<br />!g;
-        } else {
-            LJ::CleanHTML::clean_userbio(\$u->{'bio'}, poster => $u);
-        }
+        LJ::CleanHTML::clean_userbio(\$u->{'bio'}, poster => $u);
 
         LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
         $body .= "<div class='section'><span class='expandcollapse on' id='bio_header'>" . $arrowimg->("bio") . " $label</span>";
