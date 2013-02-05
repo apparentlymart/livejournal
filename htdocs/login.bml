@@ -103,6 +103,7 @@
         if (my $token = $GET{'oauth_token'}) {
             $forwhat  = "&forwhat=oauth-$token";
             $ret      = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$token";
+            $ret     .= "&style=".$GET{style} if $GET{style};
         }
 
         # can't do challenge/response with LDAP.
@@ -132,14 +133,25 @@
         if ( $GET{'style'} eq 'mobile' ) {
             my $template = LJ::HTML::Template->new(
                 { use_expr => 1 }, # force HTML::Template::Pro with Expr support
-                filename          => "$ENV{'LJHOME'}/templates/Mobile/login/loginform.tmpl",
+                filename          => "$ENV{'LJHOME'}/templates/Mobile/login/main.tmpl",
                 die_on_bad_params => 0,
                 case_sensitive    => 1,
             ) or die "Can't open template: $!";
 
             $template->param(
+                'auth_type' => $GET{auth_type},
+                'forwhat'   => $forwhat,
+                'returnto'  => $POST{returnto},
+                'return'    => $GET{ret} || $ret,
                 'imgprefix' => $LJ::IMGPREFIX,
+                'self_url'  => $LJ::SSLROOT."/login.bml?style=mobile" .
+                               ($GET{'oauth_token'} ? "&oauth_token=" . $GET{'oauth_token'} : ''),
+                'identity_url' => $LJ::SITEROOT."/identity/login.bml?mobile=1$forwhat",
             );
+
+            if (@errors) {
+                 $template->param( 'errors' => [map { {'message' => $_->[1]} } @errors] );
+            }
 
             BML::set_content_type('text/html');
             BML::finish();
