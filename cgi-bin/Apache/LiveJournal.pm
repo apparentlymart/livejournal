@@ -1915,6 +1915,12 @@ sub journal_content
             LJ::Request->print($_) foreach @extra;
         }
 
+        # for twitter cards
+        unless ($LJ::IS_DEV_SERVER) {
+            LJ::Request->print("User-Agent: TwitterBot\n");
+            LJ::Request->print("Disallow: \n");
+        }
+
         LJ::Request->print("User-Agent: *\n");
         if ($u->should_block_robots or !$is_unsuspicious_user) {
             LJ::Request->print("Disallow: /\n");
