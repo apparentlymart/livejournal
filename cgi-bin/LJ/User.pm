@@ -11115,7 +11115,11 @@ sub get_friends_with_type {
     my @typed_journals;   
     my %cache = ();
     foreach my $friend (@friends) {
-        my $type = $friends_data->{$friend}->{journaltype};
+        my $friend_info = $friends_data->{$friend};
+        next if $friend_info->{statusvis} eq 'X' ||
+                $friend_info->{clusterid} == 0; 
+   
+        my $type = $friend_info->{journaltype}; 
         next unless $allow_list{$type};
         push @{$cache{$type}}, $friend;
         push @typed_journals, $friend;
