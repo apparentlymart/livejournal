@@ -24,12 +24,12 @@ sub true  { $wrap->true  };
 sub false { $wrap->false };
 
 sub to_boolean {
-    my ($what) = @_;
+    my ( $class, $what ) = @_;
     return $what ? $wrap->true : $wrap->false;
 }
 
 sub to_number {
-    my ($what) = @_;
+    my ( $class, $what ) = @_;
 
     # not using int deliberately because we may be handling floats here
     return $what + 0;
