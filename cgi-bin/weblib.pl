@@ -23,6 +23,7 @@ use Class::Autouse qw(
 use LJ::ControlStrip;
 use LJ::SiteScheme;
 use LJ::Pics::Album;
+use LJ::URI::Shortener;
 use Apache::WURFL;
 use Encode;
 
@@ -1818,6 +1819,12 @@ sub res_includes {
                 if ($do_concat) {
                     my $csep = join(',', @$list);
                     my $mtime = $oldest{$type}{$cond}{$args};
+
+                    ## shorten long (>20 symbols) links
+                    if (length ($csep) > 20 and not LJ::Request->get_param('fullstatlinks')) {
+                        my $short = LJ::URI::Shortener->uri_to_id($csep);
+                        $csep = "." . $short if $short;
+                    }
 
                     ## stc/0 is the empty file.
                     ## touch-ing it changes ?v= param for all included res.
