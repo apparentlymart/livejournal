@@ -164,7 +164,7 @@
 
             BML::set_content_type('text/html');
             BML::finish();
-            return $template->output;;
+            return $template->output;
         }
 
         $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
@@ -304,7 +304,7 @@
 
         $body .= "</td></tr></table>";
 
-        return $body;
+        return;
     };
 
     my $logout_remote = sub {
@@ -477,9 +477,8 @@
         $logout_remote->();
     }
 
-    my $tmp_body = $login_html->();
-    return $tmp_body if $GET{'style'} eq 'mobile';
-    return;
+    return $login_html->();
+
 }
  _code?><?_info
 nocache=>1
