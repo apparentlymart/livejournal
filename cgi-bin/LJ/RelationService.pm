@@ -174,7 +174,11 @@ sub remove_relation_to {
     }
     my $interface = $class->relation_api($u);
     if ($u ne '*' && UNIVERSAL::isa($u, 'LJ::User')) {
-        delete $singletons{$u->userid}->{$friend->userid};
+        if  ($friend ne '*' && UNIVERSAL::isa($friend, 'LJ::User')) {
+            delete $singletons{$u->userid}->{$friend->userid};
+        } else {
+            delete $singletons{$u->userid};
+        }
     }
     return $interface->remove_relation_to($u, $friend, $type);
 }
