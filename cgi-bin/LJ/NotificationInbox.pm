@@ -1,13 +1,10 @@
-# This package is for managing a queue of notifications
-# for a user.
-# Mischa Spiegelmock, 4/28/06
-
 package LJ::NotificationInbox;
 
 use strict;
 use Carp 'croak';
+use LJ::NotificationItem;
 use Class::Autouse qw{
-    LJ::NotificationItem LJ::Event LJ::NotificationArchive
+    LJ::Event LJ::NotificationArchive
     LJ::Event::InboxUserMessageRecvd LJ::Event::JournalNewComment
 };
 
@@ -21,12 +18,13 @@ sub new {
     croak "Invalid user" unless LJ::isu($u);
 
     # return singleton from $u if it already exists
-    return $u->{_notification_inbox} if $u->{_notification_inbox};
+    return $LJ::REQ_CACHE_INBOX{'inbox'} if $LJ::REQ_CACHE_INBOX{'inbox'};
 
     my $self = {
-        uid => $u->userid,
-        count => undef, # defined once ->count is loaded/cached
-        items => undef, # defined to arrayref once items loaded
+        userid    => $u->id,
+        user      => $u,
+        count     => undef, # defined once ->count is loaded/cached
+        items     => undef, # defined to arrayref once items loaded
         bookmarks => undef, # defined to arrayref
     };
 
@@ -34,19 +32,16 @@ sub new {
     $rmessage_typeid ||= LJ::Event::UserMessageRecvd->etypeid;
     $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
 
-    return $u->{_notification_inbox} = bless $self, $class;
+    return $LJ::REQ_CACHE_INBOX{'inbox'} = bless $self, $class;
 }
 
 # returns the user object associated with this queue
-*owner = \&u;
-sub u {
-    my $self = shift;
-    return LJ::load_userid($self->{uid});
-}
+*u = \&owner;
+sub owner { $_[0]->{'user'} }
 
 # Returns a list of LJ::NotificationItems in this queue.
 sub items {
-    my $self = shift;
+    my $self = $_[0];
 
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
@@ -57,7 +52,7 @@ sub items {
 
     my @items = ();
     foreach my $qid (@qids) {
-        push @items, LJ::NotificationItem->new($self->owner, $qid);
+        push @items, LJ::NotificationItem->new(&owner, $qid);
     }
 
     $self->{items} = \@items;
@@ -74,35 +69,29 @@ sub items {
 
 # returns a list of all notification items except for sent user messages
 sub all_items {
-    my $self = shift;
-
-    return grep { $_->{state} ne 'S' } grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $self->items;
+    grep { $_->{state} ne 'S' } grep { $_->event->class ne "LJ::Event::UserMessageSent" } grep {$_->event} $_[0]->items;
 }
 
 # returns a list of friend-related notificationitems
 sub friend_items {
-    my $self = shift;
-
     my @friend_events = friend_event_list();
 
     my %friend_events = map { "LJ::Event::" . $_ => 1 } @friend_events;
-    return grep { $friend_events{$_->event->class} } grep {$_->event} $self->items;
+
+    grep { $friend_events{$_->event->class} } grep {$_->event} $_[0]->items;
 }
 
 # returns a list of friend-related notificationitems
 sub friendplus_items {
-    my $self = shift;
-
     my @friend_events = friendplus_event_list();
 
     my %friend_events = map { "LJ::Event::" . $_ => 1 } @friend_events;
-    return grep { $friend_events{$_->event->class} } grep {$_->event} $self->items;
+
+    grep { $friend_events{$_->event->class} } grep {$_->event} $_[0]->items;
 }
 
 # returns a list of non user-messaging notificationitems
 sub non_usermsg_items {
-    my $self = shift;
-
     my @usermsg_events = qw(
                            UserMessageRecvd
                            UserMessageSent
@@ -111,15 +100,14 @@ sub non_usermsg_items {
     @usermsg_events = (@usermsg_events, (LJ::run_hook('usermsg_notification_types') || ()));
 
     my %usermsg_events = map { "LJ::Event::" . $_ => 1 } @usermsg_events;
-    return grep { !$usermsg_events{$_->event->class} } grep {$_->event} $self->items;
+
+    grep { !$usermsg_events{$_->event->class} } grep {$_->event} $_[0]->items;
 }
 
 # returns a list of non user-message recvd notificationitems
 sub usermsg_recvd_items {
-    my $self = shift;
-
     my @events = ( 'UserMessageRecvd' );
-    my @items = $self->subset_items(@events);
+    my @items = $_[0]->subset_items(@events);
 
     @items = grep { $_->{state} ne 'S' } @items if LJ::is_enabled('spam_inbox');
 
@@ -128,72 +116,46 @@ sub usermsg_recvd_items {
 
 # returns a list of non user-message recvd notificationitems
 sub usermsg_sent_items {
-    my $self = shift;
-
-    my @events = ( 'UserMessageSent' );
-
-    return $self->subset_items(@events);
+    $_[0]->subset_items('UserMessageSent');
 }
 
 # returns a list of spam notificationitems
 sub spam_items {
-    my $self = shift;
-
-    my @events = ( 'UserMessageRecvd' );
-
-    return grep { $_->{state} eq 'S' } $self->subset_items(@events);
+    grep { $_->{'state'} eq 'S' } $_[0]->subset_items('UserMessageRecvd');
 }
 
 sub birthday_items {
-    my $self = shift;
-
-    my @events = ( 'Birthday' );
-
-    return $self->subset_items(@events);
+    $_[0]->subset_items('Birthday');
 }
 
 sub befriended_items {
-    my $self = shift;
-
-    my @events = ( 'Befriended' );
-
-    return $self->subset_items(@events);
+    $_[0]->subset_items('Befriended');
 }
 
 sub entrycomment_items {
-    my $self = shift;
-
-    my @events = entrycomment_event_list();
-
-    return $self->subset_items(@events);
+    $_[0]->subset_items(entrycomment_event_list());
 }
 
 # return a subset of notificationitems
 sub subset_items {
     my ($self, @subset) = @_;
 
-     my %subset_events = map { "LJ::Event::" . $_ => 1 } @subset;
-     return grep { $subset_events{$_->event->class} } $self->items;
+    my %subset_events = map { "LJ::Event::" . $_ => 1 } @subset;
+    return grep { $subset_events{$_->event->class} } $self->items;
 }
 
 # return flagged notifications
 sub bookmark_items {
-    my $self = shift;
-
-    return grep { $self->is_bookmark($_->qid) } $self->items;
+    grep { $_[0]->is_bookmark($_->qid) } $_[0]->items;
 }
 
 # return archived notifications
 sub archived_items {
-    my $self = shift;
-
-    my $u = $self->u;
-    my $archive = $u->notification_archive;
-    return $archive->items;
+    &owner->notification_archive->items;
 }
 
 sub count {
-    my $self = shift;
+    my $self = $_[0];
 
     return $self->{count} if defined $self->{count};
 
@@ -201,7 +163,7 @@ sub count {
         return $self->{count} = scalar @{$self->{items}};
     }
 
-    my $u = $self->owner;
+    my $u = &owner;
     
     my $count = LJ::MemCache::get($self->_count_memkey) ;
     unless (defined $count) {
@@ -218,7 +180,7 @@ sub count {
 # returns a maximum of 1000, if you get 1000 it's safe to
 # assume "more than 1000"
 sub unread_count {
-    my $self = shift;
+    my $self = $_[0];
 
     # cached unread count
     my $unread = LJ::MemCacheProxy::get($self->_unread_memkey);
@@ -226,7 +188,7 @@ sub unread_count {
     return $unread if defined $unread;
 
     # not cached, load from DB
-    my $u = $self->u or die "No user";
+    my $u = &owner or die "No user";
 
     my $sth = $u->prepare("SELECT COUNT(*) FROM notifyqueue WHERE userid=? AND state='N' LIMIT 1000");
     $sth->execute($u->id);
@@ -242,43 +204,12 @@ sub unread_count {
 # load the items in this queue
 # returns internal items hashref
 sub _load {
-    my $self = shift;
+    my $self = $_[0];
 
-    my $u = $self->u
-        or die "No user object";
+    &LJ::NotificationItem::_load, $self->{'_loaded'} = 1
+        unless $self->{'_loaded'};
 
-    # is it memcached?
-    my $qids;
-    $qids = LJ::MemCache::get($self->_memkey) and return @$qids;
-
-    # not cached, load
-    my $sth = $u->prepare
-        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=?");
-    $sth->execute($u->{userid});
-    die $sth->errstr if $sth->err;
-
-    my @items = ();
-    while (my $row = $sth->fetchrow_hashref) {
-        my $qid = $row->{qid};
-
-        # load this item into process cache so it's ready to go
-        my $qitem = LJ::NotificationItem->new($u, $qid);
-        $qitem->absorb_row($row);
-
-        push @items, $qitem;
-    }
-
-    # sort based on create time
-    @items = sort { $a->when_unixtime <=> $b->when_unixtime } @items;
-
-    # get sorted list of ids
-    my @item_ids = map { $_->qid } @items;
-
-    # cache
-    LJ::MemCache::set($self->_memkey, \@item_ids, 86400);
-
-    return @item_ids;
+    return reverse sort map $_->{'qid'}, @{ $LJ::REQ_CACHE_INBOX{'events'} };
 }
 
 sub instantiate_singletons {
@@ -311,28 +242,26 @@ sub instantiate_singletons {
 }
 
 sub _memkey {
-    my $self = shift;
-    my $userid = $self->u->id;
+    my $userid = $_[0]->{'userid'};
     return [$userid, "inbox:$userid"];
 }
 
 sub _count_memkey {
-    my $self = shift;
-    my $userid = $self->u->id;
+    my $userid = $_[0]->{'userid'};
     return [$userid, "inbox:cnt:$userid"];
 }
 
 sub _unread_memkey {
-    my $self = shift;
-    my $userid = $self->u->id;
+    my $userid = $_[0]->{'userid'};
     return [$userid, "inbox:newct:${userid}"];
 }
 
 sub _bookmark_memkey {
-    my $self = shift;
-    my $userid = $self->u->id;
+    my $userid = $_[0]->{'userid'};
     return [$userid, "inbox:bookmarks:${userid}"];
 }
+
+*_events_memkey = \&LJ::NotificationItem::_events_memkey;
 
 # deletes an Event that is queued for this user
 # args: Queue ID to remove from queue
@@ -346,7 +275,7 @@ sub delete_from_queue {
 
     croak "no queueid for queue item passed to delete_from_queue" unless int($qid);
 
-    my $u = $self->u
+    my $u = &owner
         or die "No user object";
 
     $u->do("DELETE FROM notifyqueue WHERE userid=? AND qid=?", undef, $u->id, $qid);
@@ -359,19 +288,23 @@ sub delete_from_queue {
 }
 
 sub expire_cache {
-    my $self = shift;
+    my $self = $_[0];
 
-    $self->{count} = undef;
-    $self->{items} = undef;
+    $self->{'count'}   = undef;
+    $self->{'items'}   = undef;
+    $self->{'_loaded'} = 0;
+
+    delete $LJ::REQ_CACHE_INBOX{'events'};
 
     LJ::MemCache::delete($self->_memkey);
     LJ::MemCache::delete($self->_count_memkey);
     LJ::MemCache::delete($self->_unread_memkey);
+    LJ::MemCache::delete($self->_events_memkey);
 }
 
 # FIXME: make this faster
 sub oldest_item {
-    my $self = shift;
+    my $self = $_[0];
     my @items = $self->items;
 
     my $oldest;
@@ -392,7 +325,7 @@ sub enqueue {
     croak "No event" unless $evt;
     croak "Extra args passed to enqueue" if %opts;
 
-    my $u = $self->u or die "No user";
+    my $u = &owner or die "No user";
 
     # if over the max, delete the oldest notification
     my $max = $u->get_cap('inbox_max');
@@ -489,8 +422,8 @@ sub is_bookmark {
 sub load_bookmarks {
     my ($self) = @_;
 
-    my $u = $self->u;
-    my $uid = $self->u->id;
+    my $u = &owner;
+    my $uid = $self->{'userid'};
     my $row = LJ::MemCache::get($self->_bookmark_memkey);
 
     $self->{bookmarks} = ();
@@ -518,18 +451,20 @@ sub load_bookmarks {
 
 ## returns array of qid of 'bookmarked' messages
 sub get_bookmarks_ids {
-    my $self = shift;
+    my $self = $_[0];
     
-    $self->load_bookmarks unless $self->{bookmarks};
-    return keys %{ $self->{bookmarks} };
+    &load_bookmarks
+        unless $self->{'bookmarks'};
+
+    return keys %{ $self->{'bookmarks'} };
 }
 
 # add a bookmark
 sub add_bookmark {
     my ($self, $qid) = @_;
 
-    my $u = $self->u;
-    my $uid = $self->u->id;
+    my $u = &owner;
+    my $uid = $self->{'userid'};
 
     return 0 unless LJ::is_enabled('inbox_controller') || $self->can_add_bookmark;
 
@@ -550,8 +485,8 @@ sub add_bookmark {
 sub remove_bookmark {
     my ($self, $qid) = @_;
 
-    my $u = $self->u;
-    my $uid = $self->u->id;
+    my $u = &owner;
+    my $uid = $self->{'userid'};
 
     my $sql = "DELETE FROM notifybookmarks WHERE userid=? AND qid=?";
     $u->do($sql, undef, $uid, $qid);
@@ -622,7 +557,7 @@ sub delete_all {
         push @ret, {qid => $item->qid};
     }
 
-    my $u = $self->u;
+    my $u = &owner;
     my $interface = $opts{'interface'};
 
     LJ::User::UserlogRecord::InboxMassDelete->create( $u,
@@ -700,7 +635,7 @@ sub mark_all_read {
 sub ensure_queued {
     my ($self, $qid) = @_;
 
-    my $u = $self->u
+    my $u = &owner
         or die "No user object";
 
     my $sth = $u->prepare
@@ -742,43 +677,31 @@ sub subset_unread_count {
 }
 
 sub all_event_count {
-    my $self = shift;
-
-    my @events = grep { $_->event->class ne 'LJ::Event::UserMessageSent' && $_->unread } grep {$_->event} $self->items;
-    return scalar @events;
+    scalar grep { $_->event->class ne 'LJ::Event::UserMessageSent' && $_->unread } grep { $_->event } $_[0]->items;
 }
 
 sub friend_event_count {
-    my $self = shift;
-    return $self->subset_unread_count(friend_event_list());
+    $_[0]->subset_unread_count(friend_event_list());
 }
 
 sub friendplus_event_count {
-    my $self = shift;
-    return $self->subset_unread_count(friendplus_event_list());
+    $_[0]->subset_unread_count(friendplus_event_list());
 }
 
 sub entrycomment_event_count {
-    my $self = shift;
-    return $self->subset_unread_count(entrycomment_event_list());
+    $_[0]->subset_unread_count(entrycomment_event_list());
 }
 
 sub usermsg_recvd_event_count {
-    my $self = shift;
-    my @events = ('UserMessageRecvd' );
-    return $self->subset_unread_count(@events);
+    $_[0]->subset_unread_count('UserMessageRecvd');
 }
 
 sub usermsg_sent_event_count {
-    my $self = shift;
-    my @events = ('UserMessageSent' );
-    return $self->subset_unread_count(@events);
+    $_[0]->subset_unread_count('UserMessageSent');
 }
 
 sub spam_event_count {
-    my $self = shift;
-
-    return scalar $self->spam_items();
+    scalar &spam_items;
 }
 
 # Methods that return Arrays of Event categories

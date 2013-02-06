@@ -2341,6 +2341,7 @@ sub start_request
     %LJ::REQ_CACHE_USER_ID = ();      # users by id
     %LJ::REQ_CACHE_REL = ();          # relations from LJ::check_rel()
     %LJ::REQ_CACHE_DIRTY = ();        # caches calls to LJ::mark_dirty()
+    %LJ::REQ_CACHE_INBOX = ();        # various inbox data
     %LJ::REQ_LANGDATFILE = ();        # caches language files
     %LJ::SMS::REQ_CACHE_MAP_UID = (); # cached calls to LJ::SMS::num_to_uid()
     %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()

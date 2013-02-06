@@ -1,28 +1,28 @@
 package LJ::NotificationItem;
 use strict;
 use warnings;
-no warnings "redefine";
+use Carp 'croak';
 
-use Class::Autouse qw(
-                      LJ::NotificationInbox
-                      LJ::Event
-                      );
-use Carp qw(croak);
+use Class::Autouse qw{
+    LJ::NotificationInbox
+    LJ::Event
+};
 
 *new = \&instance;
 
 # parameters: user, notification inbox id
 sub instance {
     my ($class, $u, $qid) = @_;
-
     my $singletonkey = $qid;
 
-    $u->{_inbox_items} ||= {};
-    return $u->{_inbox_items}->{$singletonkey}
-        if defined $u->{_inbox_items}->{$singletonkey} && $u->{_inbox_items}->{$singletonkey};
+    my $items = \%LJ::REQ_CACHE_INBOX;
+
+    return $items->{$singletonkey}
+        if $items->{$singletonkey};
 
     my $self = {
         userid  => $u->id,
+        user    => $u,
         qid     => $qid,
         state   => undef,
         event   => undef,
@@ -30,24 +30,24 @@ sub instance {
         _loaded => 0,
     };
 
-    $u->{_inbox_items}->{$singletonkey} = $self;
+    $items->{$singletonkey} = $self;
 
     return bless $self, $class;
 }
 
 # returns whose notification this is
 *u = \&owner;
-sub owner { LJ::load_userid($_[0]->{userid}) }
+sub owner { $_[0]->{'user'} }
 
 # returns this item's id in the notification queue
-sub qid { $_[0]->{qid} }
+sub qid { $_[0]->{'qid'} }
 
 # returns true if this item really exists
 sub valid {
-    my $self = shift;
+    my $self = $_[0];
 
-    return undef unless $self->u && $self->qid;
-    $self->_load unless $self->{_loaded};
+    return undef unless &owner && $self->qid;
+    &_load unless $self->{_loaded};
 
     return $self->event;
 }
@@ -87,62 +87,80 @@ sub event {
     return $_[0]->{'event'};
 }
 
-# loads this item
+sub _events_memkey {
+    my $userid = $_[0]->{'userid'};
+    return [$userid, join ':', 'inbox:events', $userid];
+}
+
+# Loads this item and all unloaded singletods
 sub _load {
     my $self = $_[0];
 
-    my $qid = $self->qid;
-    my $u = $self->owner;
+    return if $self->{'_loaded'};
 
-    return if $self->{_loaded};
-
-    # load info for all the currently instantiated singletons
-    # get current singleton qids
-    $u->{_inbox_items} ||= {};
-    my @qids = map { $_->qid } values %{$u->{_inbox_items}};
-
-    my $bind = join(',', map { '?' } @qids);
-
-    my $sth = $u->prepare
-        ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=? AND qid IN ($bind)");
-    $sth->execute($u->id, @qids);
-    die $sth->errstr if $sth->err;
-
+    my $user  = &owner;
+    my $items = \%LJ::REQ_CACHE_INBOX;
     my @items;
-    while (my $row = $sth->fetchrow_hashref) {
-        my $qid = $row->{qid} or next;
-        $u->{_inbox_items}->{$qid} or next;
-        push @items => $row;
+
+    if ($LJ::REQ_CACHE_INBOX{'events'}) {
+        @items = @{ $LJ::REQ_CACHE_INBOX{'events'} };
+    } else {
+        my $key = &_events_memkey;
+        my $events = LJ::MemCache::get($key);
+        my $format = "(CNNNNNNA)*";
+        my @fields = qw{ etypeid userid qid journalid arg1 arg2 createtime state };
+
+        unless (defined $events) {
+            my $sth = prepare $user <<"";
+                SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime
+                FROM notifyqueue WHERE userid=?
+
+            $sth->execute($self->{'userid'});
+
+            die $sth->errstr if $sth->err;
+
+            while (my $row = $sth->fetchrow_hashref()) {
+                push @items, $row;
+            }
+
+            my $value = pack $format, map { $_ || 0 } map { @{ $_ }{ @fields } } @items;
+
+            LJ::MemCache::set($key, $value, 86400);
+        } else {
+            my @cache = unpack $format, $events;
+            my $i = 0;
+
+            while ($i < @cache) {
+                my $item = {};
+                @{ $item }{ @fields } = @cache[$i .. $i + $#fields];
+                push @items, $item;
+                $i += @fields;
+            }
+        }
+
+        $LJ::REQ_CACHE_INBOX{'events'} = \@items;
     }
 
-    ## preload journal objects
-    LJ::load_userids( map { $_->{journalid} } @items );
+    foreach (@items) {
+        my $item = $items->{$_->{'qid'}};
 
-    @items = map {
-            my $row = $_;
-            my $qid = $row->{qid} or next;
-            my $singleton = $u->{_inbox_items}->{$qid} or next;
+        next if not $item or $item->{'_loaded'};
 
-            $singleton->absorb_row($row);
-        } @items;
-    
+        $item->absorb_row($_)
+    }
 }
 
 # fills in a skeleton item from a database row hashref
 sub absorb_row {
     my ($self, $row) = @_;
 
-    $self->{_loaded} = 1;
+    $self->{'_loaded'} = 1;
+    $self->{'state'}   = $row->{'state'};
+    $self->{'when'}    = $row->{'createtime'};
 
-    $self->{state} = $row->{state};
-    $self->{when} = $row->{createtime};
-
-    my $evt = LJ::Event->new_from_raw_params($row->{etypeid},
-                                             $row->{journalid},
-                                             $row->{arg1},
-                                             $row->{arg2});
-    $self->{event} = $evt;
+    $self->{'event'}   = LJ::Event->new_from_raw_params(
+        @{ $row }{qw{ etypeid journalid arg1 arg2 }}
+    );
 
     return $self;
 }
@@ -217,14 +235,21 @@ sub mark_unread {
 # sets the state of this item
 sub _set_state {
     my ($self, $state) = @_;
+    my $user = &owner;
 
-    $self->owner->do("UPDATE notifyqueue SET state=? WHERE userid=? AND qid=?", undef, $state, $self->owner->id, $self->qid)
-        or die $self->owner->errstr;
+    $user->do("UPDATE notifyqueue SET state=? WHERE userid=? AND qid=?", undef, $state, $user->id, $self->qid)
+        or die $user->errstr;
+
     $self->{state} = $state;
 
     # expire unread cache
-    my $userid = $self->u->id;
+    my $userid = $user->id;
     my $memkey = [$userid, "inbox:newct:${userid}"];
+    LJ::MemCache::delete($memkey);
+
+    $memkey = &_events_memkey;
+
+    # Expire events cache
     LJ::MemCache::delete($memkey);
 }
 
