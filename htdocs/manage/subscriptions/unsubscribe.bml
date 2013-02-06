@@ -1,57 +1,59 @@
-<?page
-title=><?_ml esn.subscriptions.unsubscribe.title _ml?>
-body<=
 <?_code
+    use strict;
+    use warnings;
 
-use strict;
-use vars qw/%GET $title/;
+    # External modules
+    use Digest::MD5 qw/md5_hex/;
 
-use LJ::Subscription;
+    # Internal modules
+    use LJ::Request;
+    use LJ::Response::Template;
 
-use Digest::MD5 qw/md5_hex/;
+    my $user    = LJ::Request->get_param('user');
+    my $hash    = LJ::Request->get_param('hash');
+    my $subs_id = LJ::Request->get_param('subs_id');
+    my $remote  = LJ::get_remote();
 
-my $remote = LJ::get_remote ();
+    $user =~ s/[^\w]+//g;
 
-my $user     = $GET{'user'};
-my $timest   = $GET{'timest'} || 0;
-my $subs_id  = $GET{'subs_id'};
-my $hash     = $GET{'hash'};
+    unless ($remote) {
+        $remote = LJ::load_user($user);
+    }
 
-my $check_crc = md5_hex ($timest, $user, $subs_id, $LJ::ESN_UNSUBSCR_SECRET_CODE) eq $hash ? 1 : 0;
+    unless ($remote) {
+        return LJ::Response::Redirect->new(where => $LJ::SITEROOT)->output;
+    }
 
-my $ret = '';
+    unless ($hash eq md5_hex($user, $LJ::ESN_UNSUBSCR_SECRET_CODE)) {
+        return LJ::Response::Redirect->new(where => $LJ::SITEROOT)->output;
+    }
 
-$ret = '<p>' . LJ::Lang::ml('esn.subscriptions.unsubscribe.link', { aopts => "href='$LJ::SITEROOT/manage/settings/?cat=notifications'" }) . '</p>';
+    $subs_id =~ s/[^\d,]+//g;
 
-## check sum has an error
-unless ($check_crc) {
-    return $ML{'esn.subscriptions.unsubscribe.crc_error'} . $ret;
-}
+    my @subs    = ();
+    my @subs_id = split ',', $subs_id;
 
-## url has been expired
-if ($timest + 2629743 < time()) {
-    return $ML{'esn.subscriptions.unsubscribe.link_expired'} . $ret;
-}
+    if (@subs_id) {
+        foreach my $sub_id (@subs_id) {
+            my $sub = LJ::Subscription->new_by_id($remote, $sub_id);
 
-## passed user is not exists
-my $u = LJ::load_user ($user);
-unless ($u) {
-    return $ML{'esn.subscriptions.unsubscribe.user_not_found'} . $ret;
-}
+            next unless $sub;
+            next unless $sub->active;
+            next unless $sub->method eq 'LJ::NotificationMethod::Email';
 
-# deactivate
-my $sub = LJ::Subscription->new_by_id ($u, $subs_id);
-if ($sub) {
-    $sub->delete;
-    $ret = $ML{'esn.subscriptions.unsubscribe.success'} . $ret;
-} else {
-    ## Ooops, we can't find subscription
-    $ret = $ML{'esn.subscriptions.unsubscribe.subs_not_found'} . $ret;
-}
+            $sub->delete;
 
-return $ret;
+            push @subs, { name => $sub->as_html };
+        }
+    }
 
+    return LJ::Response::Template->new(
+        file               => '/templates/Manage/Subscriptions/unsubscribe.tmpl',
+        title              => LJ::Lang::ml('esn.subscriptions.unsubscribe.title'),
+        params             => {
+            subs        => \@subs,
+            siteroot    => $LJ::SITEROOT,
+        },
+        use_site_scheme    => 1
+    )->output();
 _code?>
-<=body
-page?>
-

@@ -260,7 +260,7 @@
             $body .= "<div class='columns-2-r300 pkg'>\n";
             $body .= "<div class='columns-2-left'>\n";
             $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $ret,
-                                                returnto => $POST{returnto}, nojs => $nojs, user => $user );
+                                                returnto => $GET{returnto}, nojs => $nojs, user => $user );
             $body .= "<div class='login-create-account'>\n";
             $body .= "<hr class='hr' />\n";
             $body .= "<h4>$ML{'.createaccount.header'}</h4>\n";

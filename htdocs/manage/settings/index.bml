@@ -23,6 +23,18 @@ body<=
     my $authas;
     my $u;
 
+    # If user no login and come from manage/subscriptions/unsubscribe.bml
+    # we redirect it to login.bml
+    unless ($remote) {
+        if ($FORM{from}) {
+            if ($FORM{from} eq 'unsubscribe') {
+                return BML::redirect(
+                    $LJ::SITEROOT . "/login.bml?returnto=/manage/settings/?cat=notifications"
+                );
+            }
+        }
+    }
+
     if ($remote) {
         $authas = $GET{authas} || $remote->user;
         $u = LJ::get_authas_user($authas);
