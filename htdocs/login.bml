@@ -100,10 +100,17 @@
         my $ret = $POST{'ret'};
         my $forwhat  = $POST{'forwhat'} ? '&forwhat='.$POST{'forwhat'} : '';
 
-        if (my $token = $GET{'oauth_token'}) {
+        my $style  = $GET{'style'};
+        my $mobile = $style eq 'mobile' ? 1 : 0;
+        my $token  = $GET{'oauth_token'};
+
+        my $auth_type =  $POST{'action:login'} ? 'livejournal' : $GET{'auth_type'};
+        
+        if ( $token ) {
             $forwhat  = "&forwhat=oauth-$token";
+            $forwhat .= "-mobile" if $mobile;
             $ret      = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$token";
-            $ret     .= "&style=".$GET{style} if $GET{style};
+            $ret     .= "&style=".$style if $style;
         }
 
         # can't do challenge/response with LDAP.
@@ -130,7 +137,7 @@
             return BML::redirect($url);
         }
 
-        if ( $GET{'style'} eq 'mobile' ) {
+        if ( $mobile ) {
             my $template = LJ::HTML::Template->new(
                 { use_expr => 1 }, # force HTML::Template::Pro with Expr support
                 filename          => "$ENV{'LJHOME'}/templates/Mobile/login/main.tmpl",
@@ -139,14 +146,16 @@
             ) or die "Can't open template: $!";
 
             $template->param(
-                'auth_type' => $GET{auth_type},
+                'auth_type' => $auth_type,
                 'forwhat'   => $forwhat,
                 'returnto'  => $POST{returnto},
                 'return'    => $GET{ret} || $ret,
                 'imgprefix' => $LJ::IMGPREFIX,
                 'self_url'  => $LJ::SSLROOT."/login.bml?style=mobile" .
-                               ($GET{'oauth_token'} ? "&oauth_token=" . $GET{'oauth_token'} : ''),
-                'identity_url' => $LJ::SITEROOT."/identity/login.bml?mobile=1$forwhat",
+                               ($token ? "&oauth_token=$token" : '') .
+                               ($auth_type ? "&auth_type=$auth_type" : ''),
+                'identity_url' => $LJ::SITEROOT."/identity/login.bml?$forwhat",
+                'failed'       => $GET{failed},
             );
 
             if (@errors) {

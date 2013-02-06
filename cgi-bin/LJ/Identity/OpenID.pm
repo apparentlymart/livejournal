@@ -150,33 +150,40 @@ sub attempt_login {
 
     $errs ||= [];
     my $returl = $opts{'returl'} || $LJ::SITEROOT;
-    my $returl_fail = $opts{'returl_fail'} || $returl || $LJ::SITEROOT;
+    my $returl_fail = $opts{'returl_fail'};
     my $forwhat = $opts{'forwhat'} || '';
+
+    my $fail = sub {
+        return LJ::Request->redirect($returl_fail) if $returl_fail;
+        return;
+    };
+
+    my $returl_fail ||= $returl || $LJ::SITEROOT;
 
     my $csr = $class->consumer;
     my $url = LJ::Request->post_param('openid:url') || $opts{'openidurl'};
 
     if ($url =~ /[\<\>\s]/) {
         push @$errs, "Invalid characters in identity URL.";
-        return;
+        return $fail->();
     }
 
     my $tried_local_ref = $class->blocked_hosts($csr);
     if ($$tried_local_ref) {
         push @$errs, "You can't use a LiveJournal OpenID account on LiveJournal &mdash; ".
                      "just <a href='/login.bml'>go login</a> with your actual LiveJournal account.";
-        return;
+        return $fail->();
     }
 
     my $claimed_id = eval { $csr->claimed_identity($url) };
     if ($@) {
         push @$errs, $@;
-        return;
+        return $fail->();
     }
 
     unless ($claimed_id) {
         push @$errs, $csr->err;
-        return;
+        return $fail->();
     }
 
     my $check_url = $claimed_id->check_url(

@@ -156,7 +156,7 @@ sub do_login {
         if ($idclass && $idclass->enabled) {
             ## Where to go?
             my $returnto = LJ::Request->post_param("returnto") || $thispage;
-            my $returl_fail = "$thispage?type=$idtype";
+            my $returl_fail = LJ::Request->post_param("returl_fail") || "$thispage?type=$idtype&failed=1";
             if ( $opts->{'embedded'}
               || $returnto !~ m!^https?://\Q$LJ::DOMAIN_WEB\E/! )
             {

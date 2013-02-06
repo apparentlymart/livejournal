@@ -260,9 +260,11 @@ sub unpack_forwhat {
             warn 'invalid format ' . $extra;
             die;
         }
-    } elsif ( $forwhat =~ /^oauth\-([a-z0-9]+)$/i ) {
-        $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?oauth_token=$1&auth_type=".$class->short_code;
-        $returl_fail = $returl;
+    } elsif ( $forwhat =~ /^oauth\-([a-z0-9]+)(-mobile)?$/i ) {
+        my $style = $2 ? 'mobile' : 'full';
+        my $params = "oauth_token=$1&auth_type=".$class->short_code."&style=$style";
+        $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?$params";
+        $returl_fail = "$LJ::SSLROOT/login.bml?$params";
         $skip_interstitial = 1;
     } else {
         # the warning will sit in error logs, and the exception
