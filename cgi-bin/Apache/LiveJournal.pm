@@ -1019,9 +1019,10 @@ sub trans {
                 $mode = "calendar";
             }
         }
-        elsif ( $uuri =~ m!
-                 /([a-z\_]+)?           # optional /<viewname>
-                 (.*)                   # path extra: /FriendGroup, for example
+        elsif ( 
+            $uuri =~ m!
+                 /(.*?)           # optional /<viewname>
+                 (/.*?)?$         # path extra: /FriendGroup, for example
                  !x && ($1 eq "" || defined $LJ::viewinfo{$1}) )
         {
             ( $mode, $pe ) = ($1, $2);
