@@ -11141,7 +11141,7 @@ sub remove_from_friend_list {
     my $key  = "u:fl:" . $u->userid . ":$type";
     my $redis = LJ::Redis->get_connection();
     
-    $redis->srem($key);
+    $redis->srem($key, $friend);
 }
 
 sub add_to_friend_list {
