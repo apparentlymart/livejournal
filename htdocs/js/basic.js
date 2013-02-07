@@ -1013,42 +1013,6 @@ Object.extend(Function.prototype, {
 	}
 });
 
-// for back compatiblity with legacy code
-// we can't rely on version === 9 because of browser/document mode
-if (jQuery.browser.msie) {
-	Function.prototype.bind = function(that) { // .length is 1
-		var target = this,
-			slice = [].slice;
-		if (typeof target.apply != "function" || typeof target.call != "function")
-			return new TypeError();
-
-		var args = slice.call(arguments, 1); // for normal call
-		var bound = function () {
-
-			if (this instanceof bound) {
-
-				var self = Object.create(target.prototype);
-				var result = target.apply(
-					self,
-					args.concat(slice.call(arguments))
-				);
-				if (result !== null && Object(result) === result)
-					return result;
-				return self;
-
-			} else {
-				return target.apply(
-					that,
-					args.concat(slice.call(arguments))
-				);
-
-			}
-		};
-
-		return bound;
-	}
-}
-
 Object.extend(Function, {
 	defer: function(func, args/*, more than one*/) {
 		args = Array.prototype.slice.call(arguments, 1);
