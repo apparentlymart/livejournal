@@ -48,6 +48,7 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     TwitterSkipped
     TwitterSuccess
     UserpicResizer
+    JournalRestore
 );
 
 my %ActionToSubclassMap;
