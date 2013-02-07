@@ -803,6 +803,9 @@ sub trans {
         }
 
         if ($opts->{'mode'} eq "profile") {
+
+            return redir($u->profile_url) if $opts->{'pathextra'};
+
             my $burl = LJ::remote_bounce_url();
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
