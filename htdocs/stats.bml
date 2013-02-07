@@ -6,6 +6,10 @@ body<=
 
  use strict;
 
+unless ( LJ::is_enabled('stats.bml') ) {
+    return qq{<?errorbar The service is currently unavailable. errorbar?>};
+}
+
  LJ::set_active_crumb('stats');
  my $ret= '';
 
