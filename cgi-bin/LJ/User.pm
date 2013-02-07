@@ -11099,13 +11099,16 @@ sub get_friends_with_type {
     my @keys = map { "u:fl:" . $u->userid . ":$_"} @$types ;
 
     my $redis = LJ::Redis->get_connection();
-    my @list = ();
-    foreach my $key (@keys) {
-        my @result = $redis->smembers($key);
-        push @list, @result if @result;;
-    }
+    
+    if ($redis) {
+        my @list = ();
+        foreach my $key (@keys) {
+            my @result = $redis->smembers($key);
+            push @list, @result if @result;;
+        }
 
-    return @list if @list;
+        return @list if @list;
+    }
 
     # get and set a list
 
@@ -11125,10 +11128,12 @@ sub get_friends_with_type {
         push @typed_journals, $friend;
     } 
 
-    foreach my $type (keys %cache) {
-        my $key = "u:fl:" . $u->userid . ":$type";
-        $redis->sadd($key, @{$cache{$type}});    
-        $redis->expire($key, time() + 24 * 60 * 60);
+    if ($redis) {
+        foreach my $type (keys %cache) {
+            my $key = "u:fl:" . $u->userid . ":$type";
+            $redis->sadd($key, @{$cache{$type}});    
+            $redis->expire($key, time() + 60 * 60);
+        }
     }
 
     return @typed_journals;
@@ -11140,8 +11145,9 @@ sub remove_from_friend_list {
     my $type = $friend->journaltype;
     my $key  = "u:fl:" . $u->userid . ":$type";
     my $redis = LJ::Redis->get_connection();
-    
-    $redis->srem($key, $friend);
+    if ($redis) { 
+        $redis->srem($key, $friend);
+    }
 }
 
 sub add_to_friend_list {
@@ -11151,7 +11157,7 @@ sub add_to_friend_list {
     my $key  = "u:fl:" . $u->userid . ":$type";
     my $redis = LJ::Redis->get_connection();
 
-    if ($redis->exists($key)) {
+    if ($redis && $redis->exists($key)) {
         $redis->sadd($key, $friend);
     }
 }
