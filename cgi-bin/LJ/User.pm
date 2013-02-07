@@ -11113,7 +11113,7 @@ sub get_friends_with_type {
     # get and set a list
 
     my @friends = $u->friend_uids();
-    my $friends_data = LJ::get_journal_short_info_multi($u, @friends);
+    my $friends_data = LJ::get_journal_short_info_multi(@friends);
 
     my @typed_journals;   
     my %cache = ();
