@@ -1,6 +1,7 @@
 package LJ::Event::friendedDelayed;
 use strict;
 use LJ::FriendQueue;
+use base 'LJ::Event';
 
 use constant BASE_DELAY       => 1800;         # sec
 use constant DELAY_PER_ACTION => 600;          # sec
