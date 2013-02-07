@@ -3428,7 +3428,7 @@ sub editevent {
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
-        $poster->clear_prop('dupsig_post') if $poster;
+        $poster->clear_prop('dupsig_post') if $poster && LJ::get_cluster_reader($poster);
 
         my $res = {
             'itemid' => $itemid,
