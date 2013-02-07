@@ -537,7 +537,7 @@ sub addcomment
 
     return fail($err,200,"body") unless($req->{body});
     return fail($err,200,"ditemid") unless($req->{ditemid});
-    return fail($err,200,"journal/journalid") unless($req->{journal} || $req->{journalid});
+    return fail($err,200,"journal/journalid") unless($u || $req->{journal} || $req->{journalid});
 
     my $journal;
     if ($req->{journal}) {
@@ -574,9 +574,7 @@ sub addcomment
                                        props        => { picture_keyword => $pk }
         );
     };
-    if($@) {
-        warn "Error occured: $@";
-    }
+
     return fail($err,337) unless $comment;
 
     ## Counter "new_comment" for monitoring
@@ -618,7 +616,7 @@ sub getcomments {
 
     return fail($err,200,"journal") unless($journal);
     return fail($err,200,'xmlrpc.des.or', {'first'=>'ditemid', 'second'=>'itemid'}) unless($req->{ditemid} || $req->{itemid});
-
+    
     my $itemid = int($req->{ditemid} / 256);
     $itemid ||= $req->{itemid} + 0;
 
