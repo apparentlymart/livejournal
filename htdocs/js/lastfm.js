@@ -68,7 +68,10 @@ LJ.LastFM = {
     }
 };
 
-function lastfm_current ( username, show_error ) {
+/**
+ * @param {boolean} onInit Called on page init
+ */
+function lastfm_current(onInit) {
     'use strict';
 
     var user = Site.page.last_fm_user,
@@ -78,6 +81,11 @@ function lastfm_current ( username, show_error ) {
 
     if (!user) {
         console.error('No last.fm user');
+        return;
+    }
+
+    // do not update on page init if something is already in the music field
+    if (onInit && input.value.length > 0) {
         return;
     }
 
@@ -107,7 +115,7 @@ if (Site.page.ljpost) {
         'use strict';
 
         if (Site.page.last_fm_user) {
-            lastfm_current();
+            lastfm_current(true);
         }
     });
 }
