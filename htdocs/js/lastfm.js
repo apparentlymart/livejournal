@@ -7,9 +7,13 @@ LJ.LastFM = {
         'use strict';
 
         var tracks = data.recenttracks,
-            last = tracks && tracks.track[0],
+            last = tracks && tracks.track && tracks.track[0],
             date = null,
             justListened = false;
+
+        if (!last) {
+            return;
+        }
 
         if (last.name && last.artist && (last.artist.name || last.artist['#text'])) {
 
