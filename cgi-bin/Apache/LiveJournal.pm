@@ -165,6 +165,12 @@ sub handler
                     @req_hosts = ($real);
                 }
                 LJ::Request->header_in('X-Forwarded-For', join(", ", @hosts));
+
+                ## At this point remote IP should be specified
+                warn "No remote IP: " 
+                    . "swlb=" . LJ::Request->header_in('X-Gateway') ." "
+                    . "uri=". LJ::Request->hostname . LJ::Request->uri . '?' . LJ::Request->args
+                    unless LJ::Request->remote_ip();
             }
 
             # and now, deal with getting the right Host header
