@@ -10,6 +10,7 @@ my $local_connection;
 my $failed = 0;
 
 sub __get_connection {
+    my $class = shift;
     return undef if $failed;    
 
     if ($local_connection) {
@@ -24,10 +25,10 @@ sub __get_connection {
                                            sock   => $LJ::LOCAL_REDIS_UNIX_SOCKET,
                                            debug => 0) };
    
-    if ($@) {
+    unless ($local_connection) {
         $failed = 1;  
-        $LJ::DISABLED{'local_cache'} = 1;
-        
+        $class->__critical_error('LJ::LocalCache::Redis');     
+ 
         warn "connection error: $@"
             if $LJ::IS_DEV_SERVER;
     }
@@ -36,8 +37,8 @@ sub __get_connection {
 }
 
 sub get {
-    my ($class,$key) = @_;
-    my $connection = __get_connection();
+    my ($class, $key) = @_;
+    my $connection = $class->__get_connection();
     if (!$connection) {
         return;
     }
@@ -48,7 +49,7 @@ sub get {
 sub get_multi {
     my ($class, $keys, $not_fetched_keys) = @_;
 
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
     if (!$connection) {
         @$not_fetched_keys = @$keys;
         return;
@@ -72,7 +73,7 @@ sub get_multi {
 
 sub set {
     my ($class, $key, $value, $expire) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
     if (!$connection) {
         return 0;
     }
@@ -89,7 +90,7 @@ sub set {
 
 sub expire {
     my ($class, $key, $expire) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
     if (!$connection) {
         return 0;
     }
@@ -104,7 +105,7 @@ sub replace {
 
 sub delete {
     my ($class, $key) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -115,7 +116,7 @@ sub delete {
 
 sub incr {
     my ($class, $key, $value) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -131,7 +132,7 @@ sub incr {
 
 sub decr {
     my ($class, $key, $value) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -148,7 +149,7 @@ sub decr {
 
 sub exists {
     my ($class, $key) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -159,7 +160,7 @@ sub exists {
 
 sub rpush {
     my ($class, $key, $value) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -170,7 +171,7 @@ sub rpush {
 
 sub lpush {
     my ($class, $key, $value) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return 0;
@@ -181,7 +182,7 @@ sub lpush {
 
 sub lpop {
     my ($class, $key) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return undef;
@@ -192,7 +193,7 @@ sub lpop {
 
 sub rpop {
     my ($class, $key) = @_;
-    my $connection = __get_connection();
+    my $connection = $class->__get_connection();
 
     if (!$connection) {
         return undef;

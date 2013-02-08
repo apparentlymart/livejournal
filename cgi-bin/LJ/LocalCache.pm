@@ -1,4 +1,5 @@
 package LJ::LocalCache;
+
 use strict;
 use warnings;
 
@@ -11,21 +12,49 @@ use LJ::ModuleLoader;
 
 
 my @SUBCLASSES = LJ::ModuleLoader->module_subclasses(__PACKAGE__);
-
+my %modules_info;
 my $loaded = 0;
+
+use constant {
+    LOAD_SUCCESSFUL => 1,
+    LOAD_FAILED     => -1,
+    NOT_LOADED      => 0,
+    CRITICAL_ERROR  => 2,
+};
 
 sub __load_packages {
     return if $loaded;
-    if (LJ::is_enabled("local_cache")) {
-        foreach my $class (@SUBCLASSES) {
-            eval "use $class";
-            if ($@) {
-                warn "Error loading package $class: $@" 
-            }
-        }
 
+    if (LJ::is_enabled("local_cache")) {
+        %modules_info = map { $_ => NOT_LOADED } @SUBCLASSES;
         $loaded = 1;
     }
+}
+
+# this function will disable a module from using 
+# even it is already loaded
+sub __critical_error {
+    my $module = shift;
+    $modules_info{$module} = CRITICAL_ERROR;
+}
+
+sub __get_package { 
+    my $module = shift;
+    my $status = $modules_info{$module};
+    
+    return "LJ::LocalCache::$module" if $status == LOAD_SUCCESSFUL;
+    return 'LJ::LocalCache' if $status == LOAD_FAILED ||
+                               $status == CRITICAL_ERROR;
+
+    # try to load
+    eval  "use $module" ;
+
+    if ($@) {
+        $modules_info{$module} = LOAD_FAILED;
+        return 'LJ::LocalCache';
+    }
+ 
+    return $module;
 }
 
 sub get_cache {
@@ -34,7 +63,7 @@ sub get_cache {
 
     return 'LJ::LocalCache' if !LJ::is_enabled("local_cache");
     __load_packages();
-    return "LJ::LocalCache::$handler";
+    return __get_package("LJ::LocalCache::$handler"); 
 }
 
 sub expire {
