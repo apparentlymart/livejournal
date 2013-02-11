@@ -1821,7 +1821,7 @@ sub res_includes {
                     my $mtime = $oldest{$type}{$cond}{$args};
 
                     ## shorten long (>20 symbols) links
-                    if (!$LJ::DISABLED{shorten_long_stat_links} and length ($csep) > 40 and not LJ::Request->get_param('fullstatlinks')) {
+                    if (!$LJ::DISABLED{shorten_long_stat_links} and length ($csep) > 100 and not LJ::Request->get_param('fullstatlinks')) {
                         my $short = LJ::URI::Shortener->uri_to_id($csep);
                         $csep = "." . $short if $short;
                     }
