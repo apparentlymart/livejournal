@@ -148,8 +148,8 @@
             $template->param(
                 'auth_type' => $auth_type,
                 'forwhat'   => $forwhat,
-                'returnto'  => $POST{returnto},
-                'return'    => $GET{ret} || $ret,
+                'returnto'  => $POST{returnto} || $ret,
+                'return'    => $GET{ret},
                 'imgprefix' => $LJ::IMGPREFIX,
                 'self_url'  => $LJ::SSLROOT."/login.bml?style=mobile" .
                                ($token ? "&oauth_token=$token" : '') .
