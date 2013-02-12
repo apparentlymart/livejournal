@@ -1658,17 +1658,6 @@ sub repost_offer {
     return $self->prop('repost_offer');
 }
 
-sub repost_budget {
-    my $self = shift;
-
-    return undef unless $self->repost_offer;
-
-    return LJ::Pay::Repost::Offer->get_budget(
-                                              $self->posterid,
-                                              $self->repost_offer,
-                                              );
-}
-
 package LJ;
 
 use Class::Autouse qw (

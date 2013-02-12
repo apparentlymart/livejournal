@@ -2466,6 +2466,7 @@ sub postevent {
             \$event, 
             {repost_budget => $req->{'repost_budget'},
              limit_sc      => $req->{'repost_limit_sc'},
+             audience_opt  => $req->{'repost_audience_opt'},
              journalid     => $ownerid,
              userid        => $posterid}, 
             \$error
@@ -3493,12 +3494,12 @@ sub editevent {
                 jitemid     => $itemid,
                 budget      => $req->{repost_budget},
                 limit_sc    => $req->{repost_limit_sc},
+                audience_opt=> $req->{repost_audience_opt},
                 revoke      => !$req->{paid_repost_on},
             },
             \$error,
         );
-        
-        
+                
         unless ($flags->{noauth}) {
             # cannot create or edit repost offer via api
             return fail($err,222) if $repost_offer && $repost_offer_action =~ /create|edit/;
@@ -3671,6 +3672,7 @@ sub editevent {
             $repost_offer->edit(\$error, 
                                 add_budget => $repost_offer->{add_budget},
                                 limit_sc   => $repost_offer->{limit_sc},
+                                audience_opt => $repost_offer->{audience_opt},
                                 ) or fail(\$warning,160,$error);
        
         } elsif($repost_offer_action eq 'revoke') {

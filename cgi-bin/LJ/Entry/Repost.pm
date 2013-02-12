@@ -12,6 +12,7 @@ use LJ::Pay::Repost::Blocking;
 
 use constant { REPOST_KEYS_EXPIRING    => 60*60*2,
                REPOST_USERS_LIST_LIMIT => 25,
+               REPOST_IDS_LIST_LIMIT   => 5, # 1000
              };
 
 # memcache namespace: reposters chunks are stored with these keys in memcache
@@ -35,7 +36,7 @@ sub __get_count {
                                                   'FROM repost2 ' .
                                                   'WHERE journalid = ? AND jitemid = ?',
                                                    undef,
-                                                   $u->userid,
+                                                   $journalid,
                                                    $jitemid, );
 
     LJ::MemCache::set(  $memcache_key,
@@ -74,14 +75,14 @@ sub __get_repost_full {
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
-    my ($repost_jitemid, $cost, $blid) = $dbcr->selectrow_array( 'SELECT reposted_jitemid, cost, blid ' .
-                                                                 'FROM repost2 ' .
-                                                                 'WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
-                                                                 undef,
-                                                                 $u->userid,
-                                                                 $jitemid,
-                                                                 $reposterid, );
-    return ($repost_jitemid, $cost, $blid);
+    my ($repost_jitemid, $cost, $blid, $repost_time) = $dbcr->selectrow_array( 'SELECT reposted_jitemid, cost, blid, repost_time ' .
+                                                                               'FROM repost2 ' .
+                                                                               'WHERE journalid = ? AND jitemid = ? AND reposterid = ?',
+                                                                               undef,
+                                                                               $u->userid,
+                                                                               $jitemid,
+                                                                               $reposterid, );
+    return ($repost_jitemid, $cost, $blid, $repost_time);
 }
 
 
@@ -220,41 +221,13 @@ sub __create_repost {
         return;
     }
 
-    if($cost) {
-        my $budget = $entry_obj->repost_budget;
-        
-        unless ($budget) {
-            $$error = LJ::API::Error->get_error('repost_notpaid');
-            return;
-        }
-        
-        if ($cost > $budget) {
-            $$error = LJ::API::Error->get_error('repost_budget_error');
-            return;
-        }
+    my $post_obj;
 
-        if ($cost > __get_cost($entry_obj, $u)) {
-            $$error = LJ::API::Error->get_error('repost_cost_error');
-            return;
-        }
-    }
-    
-    my $post_obj = __create_post($u, 
-                                 $timezone, 
-                                 $entry_obj->url, 
-                                 $error);
-    if (!$post_obj) {
-        return;
-    }
-
-    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
-    $post_obj->convert_to_repost($mark);
-    $post_obj->set_prop( 'repost' => 'e' );
-
+    # TODO: lock all post???
     my $lock_name = join ':', ('repost', 
                                $entry_obj->journalid, 
-                               $entry_obj->jitemid, 
-                               $u->id);
+                               $entry_obj->jitemid,
+                               $cost ? () : $u->id);
                                          
     my $get_lock = sub {
         LJ::get_lock( LJ::get_db_writer(), 'global', $lock_name );
@@ -267,11 +240,37 @@ sub __create_repost {
     my $fail = sub {
         $$error = shift;
         $release_lock->();
-        LJ::delete_entry($u->id, $post_obj->jitemid, undef, $post_obj->anum);
+        LJ::delete_entry($u->id, $post_obj->jitemid, undef, $post_obj->anum) if $post_obj;
         return;
     };
 
     $get_lock->() or return $fail->(LJ::API::Error->get_error('unknown_error'));
+
+    if($cost) {
+        my $offerid = $entry_obj->repost_offer;
+
+        my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid) if $offerid;
+
+        unless ($repost_offer && $repost_offer->budget) {
+            return $fail->(LJ::API::Error->get_error('repost_notpaid'));
+        }
+        
+        if ($cost > $repost_offer->cost($u)) {
+            return $fail->(LJ::API::Error->get_error('repost_cost_error'));
+        }
+    }
+    
+    $post_obj = __create_post($u, 
+                              $timezone, 
+                              $entry_obj->url, 
+                              $error);
+    if (!$post_obj) {
+        return $fail->(LJ::API::Error->get_error('unknown_error'));
+    }
+
+    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
+    $post_obj->convert_to_repost($mark);
+    $post_obj->set_prop( 'repost' => 'e' );
 
     my ($repost_itemid) = __get_repost( $entry_obj->journal,
                                         $entry_obj->jitemid,
@@ -279,12 +278,12 @@ sub __create_repost {
     if ($repost_itemid) {
         return $fail->(LJ::API::Error->get_error('repost_already_exist'));
     }
-
+    
     my $blid = 0;
 
     if ($cost) {
         my $err;
-        
+
         $blid = LJ::Pay::Repost::Blocking->create(\$err,
                                                   offerid          => $entry_obj->repost_offer,
                                                   journalid        => $entry_obj->journalid,
@@ -297,6 +296,13 @@ sub __create_repost {
         unless($blid){
             return $fail->(LJ::API::Error->get_error('repost_blocking_error'));
         }
+    }
+
+    if (my $offerid = $entry_obj->repost_offer) {
+        my $offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid);
+        $offer->on_repost_create(
+                                 reposterid => $u->userid,
+                                 cost       => $cost );
     }
 
     #
@@ -312,7 +318,6 @@ sub __create_repost {
                            $cost,
                            $blid,
                            );
-
     $release_lock->();
 
     return $post_obj;
@@ -321,66 +326,62 @@ sub __create_repost {
 sub get_status {
     my ($class, $entry_obj, $u) = @_;
 
-    my $reposted = 0;
-    my $paid     = 0;
-    my $cost     = 0;
-    
-    my $is_owner = ($u && $entry_obj->posterid == $u->userid) ? 1 : 0;
+
+    my $result = {
+        'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid),
+        reposted   => 0,
+        paid       => 0,
+        cost       => 0,
+    };
 
     if ($u) {
-        ($reposted, $cost) = __get_repost( $entry_obj->journal, 
-                                           $entry_obj->jitemid, 
-                                           $u->userid );
+
+        my $is_owner = ($entry_obj->posterid == $u->userid) ? 1 : 0;
+
+        my ($reposted, $cost) = __get_repost( $entry_obj->journal, 
+                                              $entry_obj->jitemid, 
+                                              $u->userid );
         $reposted = (!!$reposted) || 0;
-        $paid = $reposted && !$is_owner ? 
+        
+        my $paid = $reposted && !$is_owner ? 
             (!!$cost || 0) :
             (!!$entry_obj->repost_offer || 0);
                
         if ($paid && !$reposted) {
-            $cost = __get_cost($entry_obj, $u);
+            my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $entry_obj->repost_offer);
 
-            $paid = 0 if ($cost == 0 && !$is_owner) || !$entry_obj->repost_budget;
+            $cost = $repost_offer->cost($u);
+            my $budget = $repost_offer->budget;
+
+            $paid = 0 if ($cost == 0 && !$is_owner) || !$budget;
+
+            $result->{budget} = LJ::delimited_number( $budget ) if $is_owner;
         }
-    }
 
-    my $result = { 'count'    =>  __get_count($entry_obj->journal, $entry_obj->jitemid), 
-                   'reposted' => $reposted,
-                   'paid'     => $paid,
-                   'cost'     => LJ::delimited_number( $cost ),
-                 };
-
-    if ($is_owner && $paid) {
-        $result->{budget} = LJ::delimited_number( $entry_obj->repost_budget );
+        $result->{reposted} = $reposted; 
+        $result->{paid}     = $paid;
+        $result->{cost}     = LJ::delimited_number( $cost );
     }
 
     return $result;    
 }
 
-sub get_budget {
-    my ($class, $entry_obj) = @_;
-
-    my $budget = 0;
-    
-    if($entry_obj->repost_offer) {
-        $budget = $entry_obj->repost_budget;
-    }
-
-    return { 'budget' => $budget };
-}
-
-sub __get_cost {
-    my ($entry_obj, $u) = @_;
-    
-    return LJ::Pay::Repost::Offer->get_cost($entry_obj->posterid, $entry_obj->repost_offer, $u);
-}
-
-
 sub __reposters {
-    my ($dbcr, $journalid, $jitemid) = @_;
+    my ($dbcr, $journalid, $jitemid, $limit, $offset, $opts) = @_;
 
-    my $reposted = $dbcr->selectcol_arrayref( 'SELECT reposterid ' .
-                                              'FROM repost2 ' .
-                                              'WHERE journalid = ? AND jitemid = ? LIMIT 1000',
+    $limit  ||= 1000;
+    $offset ||= 0;
+    $opts   ||= {};
+
+    my $where = '';
+
+    $where .= " AND repost_time >= '".$opts->{mintime}."'" if $opts->{mintime};
+
+    my $reposted = $dbcr->selectcol_arrayref( "SELECT reposterid " .
+                                              "FROM repost2 " .
+                                              "WHERE journalid = ? AND jitemid = ?" .
+                                              $where .
+                                              "LIMIT $limit OFFSET $offset",
                                               undef,
                                               $journalid,
                                               $jitemid, );
@@ -543,6 +544,32 @@ sub get_list {
     return $reposters_info; 
 }
 
+sub get_reposters_ids {
+    my ($class, $dbcr, $journal, $jitemid, $lastrequest, $opts) = @_;
+
+    $opts ||= {};
+
+    my $journalid = $journal->id;
+
+    if (!$lastrequest || $lastrequest < 0) {
+        $lastrequest = 0;
+    }
+
+    my $limit  = REPOST_IDS_LIST_LIMIT;
+    my $offset = REPOST_IDS_LIST_LIMIT * $lastrequest;
+    
+    #
+    # get from db
+    #
+    my $repostersids = __reposters( $dbcr,
+                                    $journalid,
+                                    $jitemid,
+                                    $limit,
+                                    $offset,
+                                    $opts);
+    return $repostersids;
+}
+
 sub delete_all_reposts_records {
     my ($class, $journalid, $jitemid) = @_;
 
@@ -574,16 +601,26 @@ sub delete {
     #
     # Get entry id to delete
     #
-    my ($repost_itemid, $cost, $blid) = __get_repost_full( $entry_obj->journal, 
-                                                           $entry_obj->jitemid, 
-                                                           $u->userid );
-    #
-    # If blocking exists
-    #
+    my ($repost_itemid, $cost, $blid, $repost_time) = __get_repost_full( $entry_obj->journal, 
+                                                                         $entry_obj->jitemid, 
+                                                                         $u->userid );
+
     if ($blid) {
         my $blocking = LJ::Pay::Repost::Blocking->load($blid);
         die 'Cannot load blocking' unless $blocking;
         $blocking->release unless ($blocking->released || $blocking->paid);
+    }
+
+    #
+    # If repost offer
+    #
+    if (my $offerid = $entry_obj->repost_offer) {
+        my $offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid);
+        $offer->on_repost_delete(
+            reposterid  => $u->userid,
+            cost        => $cost,
+            repost_time => $repost_time,
+        );
     }
 
     #
