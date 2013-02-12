@@ -146,14 +146,14 @@ sub load_rel_user_cache
     $userid = $u->{'userid'};
 
     my $key = [ $userid, "reluser:$userid:$type" ];
-    my $res = LJ::MemCache::get($key);
+    my $res = LJ::MemCacheProxy::get($key);
 
     return $res if $res;
 
     $res = LJ::load_rel_user($userid, $type);
 
     my $exp = time() + 60*30; # 30 min
-    LJ::MemCache::set($key, $res, $exp);
+    LJ::MemCacheProxy::set($key, $res, $exp);
 
     return $res;
 }
@@ -203,7 +203,7 @@ sub _get_rel_memcache {
     my $modtkey = [$targetid, "relmodt:$targetid:$type"    ]; # rel modtime for targetid
 
     # do a get_multi since $relkey and $modukey are both hashed on $userid
-    my $memc = LJ::MemCache::get_multi($relkey, $modukey);
+    my $memc = LJ::MemCacheProxy::get_multi($relkey, $modukey);
     return undef unless $memc && ref $memc eq 'HASH';
 
     # [{0|1}, modtime]
@@ -215,7 +215,7 @@ sub _get_rel_memcache {
     return undef if ! $relmodu || $relmodu > $rel->[1];
 
     # check rel modtime for $targetid
-    my $relmodt = LJ::MemCache::get($modtkey);
+    my $relmodt = LJ::MemCacheProxy::get($modtkey);
     return undef if ! $relmodt || $relmodt > $rel->[1];
 
     # return memcache value if it's up-to-date
@@ -245,12 +245,12 @@ sub _set_rel_memcache {
 
     my $now = time();
     my $exp = $now + 3600*6; # 6 hour
-    LJ::MemCache::set($relkey, [$val, $now], $exp);
-    LJ::MemCache::set($modukey, $now, $exp);
-    LJ::MemCache::set($modtkey, $now, $exp);
+    LJ::MemCacheProxy::set($relkey, [$val, $now], $exp);
+    LJ::MemCacheProxy::set($modukey, $now, $exp);
+    LJ::MemCacheProxy::set($modtkey, $now, $exp);
 
     # Also, delete this key, since the contents have changed.
-    LJ::MemCache::delete([$userid, "reluser:$userid:$type"]);
+    LJ::MemCacheProxy::delete([$userid, "reluser:$userid:$type"]);
 
     return 1;
 }

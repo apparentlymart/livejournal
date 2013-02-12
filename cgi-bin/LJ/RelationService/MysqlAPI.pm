@@ -296,7 +296,7 @@ sub _remove_relation_to_type_other {
     my $u      = shift;
     my $friend = shift;
     my $type   = shift;
-    
+
     my $typeid = LJ::get_reluser_id($type)+0;
     my $userid = ref($u) ? $u->userid : $u;
     my $friendid = ref($friend) ? $friend->userid : $friend;
@@ -327,9 +327,9 @@ sub _remove_relation_to_type_other {
     # what they got from memcache
     my $eff_type = $typeid || $type;
     if ($userid eq '*') {
-        LJ::MemCache::set([$friendid, "relmodt:$friendid:$eff_type"], time());
+        LJ::MemCacheProxy::set([$friendid, "relmodt:$friendid:$eff_type"], time());
     } elsif ($friendid eq '*') {
-        LJ::MemCache::set([$userid, "relmodu:$userid:$eff_type"], time());
+        LJ::MemCacheProxy::set([$userid, "relmodu:$userid:$eff_type"], time());
 
     # if neither userid nor targetid are '*', then just call _set_rel_memcache
     # to update the rel:userid:targetid:type memcache key as well as the
