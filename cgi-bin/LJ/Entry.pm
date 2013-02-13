@@ -562,6 +562,8 @@ sub normalize_props {
     return unless $self->{_loaded_props};
 
     foreach my $pname ( keys %{$self->{props}} ) {
+        next if $pname eq 'replycount';
+
         my $pval  = $self->{props}{$pname};
         
         next unless defined $pval;
