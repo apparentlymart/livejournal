@@ -6813,6 +6813,8 @@ talk.link.button.delete=Delete
 talk.link.insert|staleness=1
 talk.link.insert=Insert
 
+talk.link.remove=Remove all links in selection
+
 talk.ljlikes|staleness=1
 talk.ljlikes=Insert Social Buttons
 
