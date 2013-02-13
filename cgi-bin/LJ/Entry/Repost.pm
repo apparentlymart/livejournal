@@ -12,7 +12,7 @@ use LJ::Pay::Repost::Blocking;
 
 use constant { REPOST_KEYS_EXPIRING    => 60*60*2,
                REPOST_USERS_LIST_LIMIT => 25,
-               REPOST_IDS_LIST_LIMIT   => 5, # 1000
+               REPOSTS_LIST_LIMIT      => 1000,
              };
 
 # memcache namespace: reposters chunks are stored with these keys in memcache
@@ -223,12 +223,13 @@ sub __create_repost {
 
     my $post_obj;
 
-    # TODO: lock all post???
-    my $lock_name = join ':', ('repost', 
-                               $entry_obj->journalid, 
-                               $entry_obj->jitemid,
-                               $cost ? () : $u->id);
-                                         
+    my $offerid = $entry_obj->repost_offer;
+    my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid) if $offerid;
+
+    my $lock_name = $repost_offer
+        ? 'repost:'.$entry_obj->journalid.":".$entry_obj->jitemid
+        : 'repost:'.$entry_obj->journalid.":".$entry_obj->jitemid.":".$u->id;
+        
     my $get_lock = sub {
         LJ::get_lock( LJ::get_db_writer(), 'global', $lock_name );
     };
@@ -246,11 +247,14 @@ sub __create_repost {
 
     $get_lock->() or return $fail->(LJ::API::Error->get_error('unknown_error'));
 
+    my ($repost_itemid) = __get_repost( $entry_obj->journal,
+                                        $entry_obj->jitemid,
+                                        $u->userid );
+    if ($repost_itemid) {
+        return $fail->(LJ::API::Error->get_error('repost_already_exist'));
+    }
+
     if($cost) {
-        my $offerid = $entry_obj->repost_offer;
-
-        my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid) if $offerid;
-
         unless ($repost_offer && $repost_offer->budget) {
             return $fail->(LJ::API::Error->get_error('repost_notpaid'));
         }
@@ -271,13 +275,6 @@ sub __create_repost {
     my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
     $post_obj->convert_to_repost($mark);
     $post_obj->set_prop( 'repost' => 'e' );
-
-    my ($repost_itemid) = __get_repost( $entry_obj->journal,
-                                        $entry_obj->jitemid,
-                                        $u->userid );
-    if ($repost_itemid) {
-        return $fail->(LJ::API::Error->get_error('repost_already_exist'));
-    }
     
     my $blid = 0;
 
@@ -285,7 +282,7 @@ sub __create_repost {
         my $err;
 
         $blid = LJ::Pay::Repost::Blocking->create(\$err,
-                                                  offerid          => $entry_obj->repost_offer,
+                                                  offerid          => $offerid,
                                                   journalid        => $entry_obj->journalid,
                                                   jitemid          => $entry_obj->jitemid,
                                                   reposterid       => $u->id,
@@ -298,11 +295,9 @@ sub __create_repost {
         }
     }
 
-    if (my $offerid = $entry_obj->repost_offer) {
-        my $offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid);
-        $offer->on_repost_create(
-                                 reposterid => $u->userid,
-                                 cost       => $cost );
+    if ($repost_offer) {
+        $repost_offer->on_repost_create( reposterid => $u->userid,
+                                         cost       => $cost );
     }
 
     #
@@ -367,21 +362,11 @@ sub get_status {
 }
 
 sub __reposters {
-    my ($dbcr, $journalid, $jitemid, $limit, $offset, $opts) = @_;
-
-    $limit  ||= 1000;
-    $offset ||= 0;
-    $opts   ||= {};
-
-    my $where = '';
-
-    $where .= " AND repost_time >= '".$opts->{mintime}."'" if $opts->{mintime};
+    my ($dbcr, $journalid, $jitemid) = @_;
 
     my $reposted = $dbcr->selectcol_arrayref( "SELECT reposterid " .
                                               "FROM repost2 " .
-                                              "WHERE journalid = ? AND jitemid = ?" .
-                                              $where .
-                                              "LIMIT $limit OFFSET $offset",
+                                              "WHERE journalid = ? AND jitemid = ? LIMIT 1000",
                                               undef,
                                               $journalid,
                                               $jitemid, );
@@ -544,30 +529,29 @@ sub get_list {
     return $reposters_info; 
 }
 
-sub get_reposters_ids {
-    my ($class, $dbcr, $journal, $jitemid, $lastrequest, $opts) = @_;
-
-    $opts ||= {};
-
-    my $journalid = $journal->id;
+sub get_reposts {
+    my ($class, $dbcr, $journalid, $jitemid, $lastrequest, %opts) = @_;
 
     if (!$lastrequest || $lastrequest < 0) {
         $lastrequest = 0;
     }
 
-    my $limit  = REPOST_IDS_LIST_LIMIT;
-    my $offset = REPOST_IDS_LIST_LIMIT * $lastrequest;
-    
-    #
-    # get from db
-    #
-    my $repostersids = __reposters( $dbcr,
-                                    $journalid,
-                                    $jitemid,
-                                    $limit,
-                                    $offset,
-                                    $opts);
-    return $repostersids;
+    my $limit  = REPOSTS_LIST_LIMIT;
+    my $offset = REPOSTS_LIST_LIMIT * $lastrequest;
+    my $where  = '';
+
+    $where .= "AND repost_time >= $opts{mintime} " if $opts{mintime};    
+
+    my $reposts = $dbcr->selectall_arrayref( "SELECT reposterid, repost_time " .
+                                             "FROM repost2 " .
+                                             "WHERE journalid = ? AND jitemid = ? " .
+                                             $where .
+                                             "LIMIT $limit OFFSET $offset",
+                                             { Slice => {} },
+                                             $journalid,
+                                             $jitemid, );
+    return undef unless scalar @$reposts;
+    return $reposts;
 }
 
 sub delete_all_reposts_records {
