@@ -1741,9 +1741,9 @@ LJ.siteMessage = (function ($) {
 			var that = this;
 
 			LJ.Api.call('sitemessage.get_message', { locale: Site.locale, country: Site.country }, function (data) {
-                if (!data.error) {
-                    that.show(data.message);
-                }
+				if (!data.error) {
+					that.show(data.message);
+				}
 			});
 		},
 
