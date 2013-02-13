@@ -157,24 +157,19 @@ sub archived_items {
 sub count {
     my $self = $_[0];
 
-    return $self->{count} if defined $self->{count};
+    my $count = LJ::MemCacheProxy::get(&_count_memkey);
 
-    if (defined $self->{items}) {
-        return $self->{count} = scalar @{$self->{items}};
-    }
+    return $count
+        if defined $count;
 
-    my $u = &owner;
-    
-    my $count = LJ::MemCache::get($self->_count_memkey) ;
-    unless (defined $count) {
-        $count = $u->selectrow_array
-                    ("SELECT COUNT(*) FROM notifyqueue WHERE userid=?",
-                     undef, $u->id);
-        LJ::MemCache::set($self->_count_memkey, $count, 3600);
-    }
+    &_load;
 
-    return $self->{count} = $count;
-}
+    $count = @{ $LJ::REQ_CACHE_INBOX{'events'} };
+
+    LJ::MemCacheProxy::set(&_count_memkey, $count, 86400);
+
+    return $count;
+} # count
 
 # returns number of unread items in inbox
 # returns a maximum of 1000, if you get 1000 it's safe to
@@ -182,24 +177,21 @@ sub count {
 sub unread_count {
     my $self = $_[0];
 
-    # cached unread count
-    my $unread = LJ::MemCacheProxy::get($self->_unread_memkey);
+    my $unread = LJ::MemCacheProxy::get(&_unread_memkey);
 
-    return $unread if defined $unread;
+    return $unread
+        if defined $unread;
 
-    # not cached, load from DB
-    my $u = &owner or die "No user";
+    &_load;
 
-    my $sth = $u->prepare("SELECT COUNT(*) FROM notifyqueue WHERE userid=? AND state='N' LIMIT 1000");
-    $sth->execute($u->id);
-    die $sth->errstr if $sth->err;
-    ($unread) = $sth->fetchrow_array;
+    $unread = grep {
+        'N' eq uc $_->{'state'}
+    } @{ $LJ::REQ_CACHE_INBOX{'events'} };
 
-    # cache it
-    LJ::MemCacheProxy::set($self->_unread_memkey, $unread, 30 * 60);
+    LJ::MemCacheProxy::set(&_unread_memkey, $unread, 86400);
 
     return $unread;
-}
+} # unread_count
 
 # load the items in this queue
 # returns internal items hashref
@@ -253,12 +245,12 @@ sub _count_memkey {
 
 sub _unread_memkey {
     my $userid = $_[0]->{'userid'};
-    return [$userid, "inbox:newct:${userid}"];
+    return [$userid, "inbox:newct:$userid"];
 }
 
 sub _bookmark_memkey {
     my $userid = $_[0]->{'userid'};
-    return [$userid, "inbox:bookmarks:${userid}"];
+    return [$userid, "inbox:bookmarks:$userid"];
 }
 
 *_events_memkey = \&LJ::NotificationItem::_events_memkey;
@@ -296,10 +288,10 @@ sub expire_cache {
 
     delete $LJ::REQ_CACHE_INBOX{'events'};
 
-    LJ::MemCache::delete($self->_memkey);
-    LJ::MemCache::delete($self->_count_memkey);
-    LJ::MemCache::delete($self->_unread_memkey);
-    LJ::MemCache::delete($self->_events_memkey);
+    LJ::MemCacheProxy::delete(&_memkey);
+    LJ::MemCacheProxy::delete(&_count_memkey);
+    LJ::MemCacheProxy::delete(&_unread_memkey);
+    LJ::MemCacheProxy::delete(&_events_memkey);
 }
 
 # FIXME: make this faster

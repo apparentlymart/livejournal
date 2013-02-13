@@ -240,17 +240,15 @@ sub _set_state {
     $user->do("UPDATE notifyqueue SET state=? WHERE userid=? AND qid=?", undef, $state, $user->id, $self->qid)
         or die $user->errstr;
 
-    $self->{state} = $state;
+    $self->{'state'} = $state;
 
-    # expire unread cache
-    my $userid = $user->id;
-    my $memkey = [$userid, "inbox:newct:${userid}"];
-    LJ::MemCache::delete($memkey);
-
-    $memkey = &_events_memkey;
+    # Expire unread cache
+    my $memkey = &NotificationInbox::_unread_memkey;
+    LJ::MemCacheProxy::delete($memkey);
 
     # Expire events cache
-    LJ::MemCache::delete($memkey);
+    $memkey = &_events_memkey;
+    LJ::MemCacheProxy::delete($memkey);
 }
 
 1;
