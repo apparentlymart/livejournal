@@ -7094,11 +7094,15 @@ talk.post.draft.confirm=Do you want to restore the text from saved draft?
 talk.post.draft.autosave|staleness=1
 talk.post.draft.autosave=Draft autosaved
 
+talk.post.draft.no=No, delete draft
+
 talk.post.draft.restore|staleness=1
 talk.post.draft.restore=Restore draft?
 
 talk.post.draft.restored|staleness=1
 talk.post.draft.restored=Draft restored
+
+talk.post.draft.yes=Yes, restore draft
 
 talk.post.edit.title|staleness=1
 talk.post.edit.title=Edit entry

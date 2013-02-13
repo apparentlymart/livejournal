@@ -1113,32 +1113,32 @@ DIV.lj_ippu_app {
 		position: relative;
 		width: 100%;
 		}
-	.b-dialog-header {
-		padding: 0 15px 0 0;
-		margin: 0 0 10px;
-		line-height: 16px;
-		font-size: 14px;
-		font-weight: bold;
-		color: #000;
-		}
-	.b-dialog-body {
-		max-width: 500px;
-		min-width: 300px;
-		margin: 10px 0;
-		}
-	.b-dialog-footer {
-		margin: 10px 0 0;
-		text-align: center;
-		}
-	.b-dialog-prompt {
-		display: block;
-		width: 100%;
-		margin: 10px 0 0;
-		padding: 2px 5px;
-		-moz-box-sizing: border-box;
-		-webkit-box-sizing: border-box;
-		box-sizing: border-box;
-		}
+		.b-dialog-header {
+			padding: 0 15px 0 0;
+			margin: 0 0 10px;
+			line-height: 16px;
+			font-size: 14px;
+			font-weight: bold;
+			color: #000;
+			}
+		.b-dialog-body {
+			max-width: 500px;
+			min-width: 300px;
+			margin: 10px 0 20px;
+			}
+		.b-dialog-footer {
+			margin: 10px 0 0;
+			text-align: center;
+			}
+		.b-dialog-prompt {
+			display: block;
+			width: 100%;
+			margin: 10px 0 0;
+			padding: 2px 5px;
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+			}
 	/* Put here styles for popups that need to reset */
 	.b-popup,
 	.b-popup-outer,
