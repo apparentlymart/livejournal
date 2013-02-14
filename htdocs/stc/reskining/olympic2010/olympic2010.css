@@ -2,7 +2,7 @@
 --------------------------------------*/
 /* Logged-in */
 .logged-in #navigation {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-in-bg.jpg?v=1) 100% 0 no-repeat;
+	background: #000 url(/img/reskining/olympic2010/olympic2010-in-bg.jpg?v=16223) 100% 0 no-repeat;
 	}
 .logged-in #Logo A {
 	position:relative;
@@ -12,7 +12,7 @@
 
 /* Logged-out */
 .logged-out #navigation {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-out-bg.jpg?v=1) 0 0 no-repeat;
+	background: #000 url(/img/reskining/olympic2010/olympic2010-out-bg.jpg?v=16223) 0 0 no-repeat;
 	}
 .logged-out #Logo A {
 	width:250px;
@@ -21,7 +21,7 @@
 /* Lanzelot
 --------------------------------------*/
 #header {
-	background:#000 url(/img/reskining/olympic2010/olympic2010-lanz-bg.jpg?v=1) 0 100% no-repeat;
+	background: #000 url(/img/reskining/olympic2010/olympic2010-lanz-bg.jpg?v=16223) 0 100% no-repeat;
 	}
 	#header .logo,
 	#header .logo A,

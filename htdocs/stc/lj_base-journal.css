@@ -458,7 +458,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 	*display: block;
 	}
 	.b-postform-captchabox-active #captcha-container {
-		background: url(/img/preloader-s.gif?v=1) no-repeat 5px 50%;
+		background: url(/img/preloader-s.gif?v=9673) no-repeat 5px 50%;
 		}
 
 
@@ -535,7 +535,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			margin: 0 !important;
 			padding: 0 !important;
 			border: 0 !important;
-			background: #FFF url(/img/showmore-login.gif?v=1) no-repeat 26px 2px !important;
+			background: #FFF url(/img/showmore-login.gif?v=11457) no-repeat 26px 2px !important;
 			cursor: pointer !important;
 			text-align: left !important;
 			text-decoration: none !important;
@@ -551,7 +551,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			left: 0 !important;
 			width: 47px !important;
 			height: 26px !important;
-			background: #FFF url(/img/showmore-login.gif?v=1) no-repeat 28px 2px !important;
+			background: #FFF url(/img/showmore-login.gif?v=11457) no-repeat 28px 2px !important;
 			outline: 0;
 			}
 			.b-postform-login-services-current-pic {
@@ -822,28 +822,28 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 		left: 0;
 		width: 100%;
 		height: 144px;
-		background: #FFF url(/img/repost/pics-bg.png?v=1) repeat 0 0;
+		background: #FFF url(/img/repost/pics-bg.png?v=9861) repeat 0 0;
 		}
 	.b-repost-pics-l {
 		top: 0;
 		left: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-l.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-l.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-r {
 		top: 0;
 		right: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-r.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-r.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-arr {
 		top: 138px;
 		left: 160px;
 		width: 13px;
 		height: 13px;
-		background: url(/img/repost/pics-arr.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-arr.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-head,
 	#updateForm .b-repost-pics-head {
@@ -941,7 +941,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			padding: 5px;
 			list-style: none;
 			text-align: center;
-			background: url(/img/repost/pics-frame.gif?v=1) no-repeat 0 0;
+			background: url(/img/repost/pics-frame.gif?v=9859) no-repeat 0 0;
 			cursor: pointer;
 			}
 		.b-repost-pics-items SPAN.b-repost-pics-no,
@@ -952,7 +952,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 		#updateForm .b-repost-pics-items SPAN:hover,
 		.b-repost-pics-items SPAN.b-repost-pics-active,
 		#updateForm .b-repost-pics-items SPAN.b-repost-pics-active {
-			background: url(/img/repost/pics-aframe.gif?v=1) no-repeat 0 0;
+			background: url(/img/repost/pics-aframe.gif?v=9960) no-repeat 0 0;
 			}
 			.b-repost-pics-no EM {
 				position: absolute;
@@ -1218,7 +1218,7 @@ A.lj-button-link:active {
 	width: 12px!important;
 	height: 10px!important;
 	margin: 0 5px 0 0!important;
-	background: url(/img/icons/donate-inactive.png)!important;
+	background: url(/img/icons/donate-inactive.png?v=13054)!important;
 	vertical-align: middle;
 	}
 .lj-button-light.donate-button.embed-button A.lj-button-b {
@@ -1324,11 +1324,11 @@ A.lj-button-link:active {
 	width: 16px!important;
 	height: 16px!important;
 	margin: 3px 5px 0 0!important;
-	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	background: url(/img/icons/repost.png?v=20181) no-repeat 50%!important;
 	vertical-align: middle;
 	}
 .lj-button-light.repost-button-inactive .lj-button-icon {
-	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	background: url(/img/icons/repost.png?v=20181) no-repeat 50%!important;
 	opacity: 0.5;
 	}
 .lj-button-light.repost-button .lj-button-icon-sinlge {
@@ -1432,11 +1432,11 @@ A.lj-button-link:active {
 	width: 16px!important;
 	height: 16px!important;
 	margin: 3px 5px 0 0!important;
-	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	background: url(/img/icons/repost.png?v=20181) no-repeat 50%!important;
 	vertical-align: middle;
 	}
 .lj-button-light.paidrepost-button-inactive .lj-button-icon {
-	background: url(/img/icons/repost.png?v=1) no-repeat 50%!important;
+	background: url(/img/icons/repost.png?v=20181) no-repeat 50%!important;
 	opacity: 0.5;
 	}
 .lj-button-light.paidrepost-button .lj-button-icon-sinlge {
@@ -1502,7 +1502,7 @@ A.lj-button-link:active {
 	padding: 0 14px 0 5px;
 	margin: 0;
 	height: 22px;
-	background: url(/img/icons/paidrepost.png?v=1) no-repeat 100% 50%!important;
+	background: url(/img/icons/paidrepost.png?v=22784) no-repeat 100% 50%!important;
 	line-height: 23px;
 	}
 	.paidrepost-button-cost:before {
@@ -1602,7 +1602,7 @@ A.lj-button-link:active {
 		color: #2D2D2D !important;
 		}
 	.b-reposted-popup .b-reposted-popup-load {
-		background: url(/img/preloader/preloader-blue-white.gif?v=1) no-repeat 50% 30px; 
+		background: url(/img/preloader/preloader-blue-white.gif?v=16618) no-repeat 50% 30px; 
 		}
 	.b-reposted-popup .b-reposted-popup-content {
 		overflow-y: auto;
@@ -1738,7 +1738,7 @@ HTML BODY * .b-mediaplaceholder-good:focus {
 			display: block;
 			margin: 0;
 			padding: 0;
-			background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
+			background: url(/img/mediaplaceholder.png?v=11488) no-repeat 0 0;
 			font: 0/0 serif;
 			cursor: pointer;
 			}
@@ -1758,7 +1758,7 @@ HTML BODY * .b-mediaplaceholder-good:focus {
 			width: 11px;
 			height: 3px;
 			margin-top: -2px;
-			background: url(/img/preloader-s.gif?v=1) no-repeat 0 0;
+			background: url(/img/preloader-s.gif?v=9673) no-repeat 0 0;
 			}
 		.b-mediaplaceholder .b-mediaplaceholder-label {
 			display: none;
@@ -1820,7 +1820,7 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		height: 37px;
 		margin: 0;
 		padding: 0;
-		background: url(/img/mediaplaceholder.png?v=1) no-repeat 0 0;
+		background: url(/img/mediaplaceholder.png?v=11488) no-repeat 0 0;
 		font: 0/0 serif;
 		}
 	.b-mediaplaceholder-external:hover .b-mediaplaceholder-bg {
@@ -1836,7 +1836,7 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		height: 16px;
 		margin: 0;
 		padding: 0;
-		background: url(/img/mediaplaceholder.png?v=1) no-repeat -19px -37px;
+		background: url(/img/mediaplaceholder.png?v=11488) no-repeat -19px -37px;
 		font: 0/0 serif;
 		}
 	.b-mediaplaceholder-external .b-mediaplaceholder-arr {

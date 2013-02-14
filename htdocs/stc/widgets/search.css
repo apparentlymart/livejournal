@@ -3,7 +3,7 @@
     margin: 0 0 15px !important;
     } 
     .appwidget-search H2 SPAN.w-head-in {
-        background: url("/img/search.gif?v=1") no-repeat  0 50%;
+        background: url(/img/search.gif?v=2135) no-repeat  0 50%;
         }
     .appwidget-search .w-body {
         padding: 10px; 
@@ -27,7 +27,7 @@
                 }
 
 .appwidget-browse .appwidget-search H2 span.w-head-in {
-	background:url(/img/icons/search-lite.png) no-repeat 0 0;
+	background: url(/img/icons/search-lite.png?v=9674) no-repeat 0 0;
 	}
 .appwidget-browse .vertical_view .appwidget-search INPUT.type-text {
 	width:200px;

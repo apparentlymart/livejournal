@@ -1322,7 +1322,7 @@ li.cke_panel_listItem {
 .cke_skin_v2 .cke_button_LJCut .cke_icon,
 .cke_skin_v2 .cke_button_LJLike .cke_icon,
 .cke_skin_v2 .cke_button_LJSpoiler .cke_icon {
-	background: url(icons-new.png?v=3) no-repeat 0 0;
+	background: url(icons-new.png?v=17018) no-repeat 0 0;
 	}
 .cke_skin_v2 .cke_button_LJUserLink .cke_icon {
 	background-position: 0 -95px;
@@ -1380,7 +1380,7 @@ li.cke_panel_listItem {
 		.cke-dialog-likes-list LI LABEL {
 			float: left;
 			display: block;
-			background: url(/js/ck/images/lj-like-buttons.png?v=2) no-repeat;
+			background: url(/js/ck/images/lj-like-buttons.png?v=20747) no-repeat;
 			text-indent: -3333px;
 			cursor: pointer;
 			}

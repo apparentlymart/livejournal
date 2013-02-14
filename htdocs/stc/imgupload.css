@@ -80,7 +80,7 @@ h1 {
     width: 15px; 
     height: 15px; 
     text-indent: -9999px; 
-    background: url(/img/CloseButton.gif?v=1) no-repeat 0 0; 
+    background: url(/img/CloseButton.gif?v=7618) no-repeat 0 0; 
 }
 .insobjNav { 
     background: #ccc; 
@@ -192,7 +192,7 @@ span.inputcontainer {
 	position: relative;
 	margin: 0 15px 20px 15px;
 	border-radius: 6px;
-	background: url(/img/pics/sh.png) 0 50% no-repeat #4e92c1;
+	background: url(/img/pics/sh.png?v=18262) 0 50% no-repeat #4e92c1;
 	}
 	.b-pics-promo-wrapper .b-pics-promo-box {
 		display: block;

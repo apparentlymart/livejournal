@@ -22,11 +22,11 @@ form {
 	height: 25px;
 	width: 400px;
 	margin: 1em;
-	background: url(/img/progress/inactive.gif?v=1) repeat;
+	background: url(/img/progress/inactive.gif?v=6460) repeat;
 	}
 
 .lj_progressoverlay {
-	background: url(/img/progress/active.gif?v=1) repeat;
+	background: url(/img/progress/active.gif?v=6460) repeat;
 	}
 
 .lj_progressindefinite {
@@ -572,7 +572,7 @@ It must be invisible, use it only for reskining */
 	display: block;
 	width: 20px;
 	height: 15px;
-	background: url(/img/play-button.png?v=1) no-repeat;
+	background: url(/img/play-button.png?v=8454) no-repeat;
 	}
 .appwidget-friendbirthdays .adnectar-play {
 	display: none;	
@@ -583,7 +583,7 @@ It must be invisible, use it only for reskining */
 .b-button-close {
 	width: 15px;
 	height: 15px;
-	background: url(/img/CloseButton2.gif?v=1) no-repeat;
+	background: url(/img/CloseButton2.gif?v=16083) no-repeat;
 	position: relative;
 	top: 0;
 	margin: -25px -25px 0 10px;
@@ -677,7 +677,7 @@ HTML BODY.logged-out {
 			right: 8px;
 			width: 12px;
 			height: 12px;
-			background: url(/img/message-system-close.gif?v=1) no-repeat;
+			background: url(/img/message-system-close.gif?v=9067) no-repeat;
 			cursor: pointer;
 			font-size: 0;
 			}
@@ -789,7 +789,7 @@ HTML BODY.logged-out {
 			height: 7px;
 			margin: -3px 0 0;
 			padding: 0;
-			background: url(/img/buttons/pending-close.gif?v=1) no-repeat 0 0;
+			background: url(/img/buttons/pending-close.gif?v=9474) no-repeat 0 0;
 			cursor: pointer;
 			}
 .b-pending-reason {
@@ -1537,7 +1537,7 @@ DIV.lj_ippu_app {
 		right: 12px;
 		width: 12px;
 		height: 12px;
-		background: url(/img/popup-cls.gif?v=1) no-repeat 0 0;
+		background: url(/img/popup-cls.gif?v=10883) no-repeat 0 0;
 		font: 0/0 serif;
 		cursor: pointer;
 		}
@@ -1599,7 +1599,7 @@ DIV.lj_ippu_app {
 		right:5px;
 		width:12px;
 		height:12px;
-		background:url(/img/popup-close.gif?v=1) no-repeat 0 0;
+		background: url(/img/popup-close.gif?v=9045) no-repeat 0 0;
 		cursor:pointer;
 		}
 	.b-popup-messagebox .b-popup-content {
@@ -1970,7 +1970,7 @@ BODY div .b-helplink:active {
 		height: 16px;
 		margin: -7px 0 0;
 		padding: 0;
-		background: url(/img/icons/help.png?v=1) 0 0 no-repeat;
+		background: url(/img/icons/help.png?v=15718) 0 0 no-repeat;
 		font: 0/0 serif;
 		cursor: pointer;
 		}
@@ -2011,7 +2011,7 @@ BODY div .b-helplink:active {
 	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
-	background: #FFEFEF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	background: #FFEFEF url(/img/icons/error.png?v=15718) no-repeat 2.7em 50%;
 	}
 	.b-msgsystem-errorbox-head {
 		margin: 0 0 5px;
@@ -2059,7 +2059,7 @@ BODY div .b-helplink:active {
 		width: 55px;
 		height: 58px;
 		margin-right: 30px;
-		background: url(/img/icons/warning-age-sprite.png) no-repeat;
+		background: url(/img/icons/warning-age-sprite.png?v=13161) no-repeat;
 		text-indent: -9999px;
 		}
 	.b-msgsystem-warningbox-age-14 .b-warningbox-icon {
@@ -2107,7 +2107,7 @@ BODY div .b-helplink:active {
 	-moz-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	-webkit-box-shadow: 0 2px 3px rgba(53,99,161,0.7);
 	box-shadow: 0 2px 3px rgba(53,99,161,0.7);
-	background: #E9EEDF url(/img/icons/error.png?v=1) no-repeat 2.7em 50%;
+	background: #E9EEDF url(/img/icons/error.png?v=15718) no-repeat 2.7em 50%;
 	}
 	.b-msgsystem-messagebox-head {
 		margin: 0 0 5px;
@@ -2283,7 +2283,7 @@ BODY div .b-helplink:active {
 		display: none;
 		margin: 0;
 		padding: 10px 0 10px 30px;
-		background: url(/img/icons/error-mini.png?v=1) no-repeat 0 6px;
+		background: url(/img/icons/error-mini.png?v=15718) no-repeat 0 6px;
 		color: #CB1427;
 		}
 		.b-massaction-error {
@@ -2302,7 +2302,7 @@ BODY div .b-helplink:active {
 		height: 30px;
 		margin: 0;
 		padding: 0;
-		background: url(/img/preloader/preloader-blue-blue.gif?v=1) no-repeat 0 0;
+		background: url(/img/preloader/preloader-blue-blue.gif?v=16423) no-repeat 0 0;
 		font: 0/0 serif;
 		}
 	.b-massaction-processing .b-massaction-preloader {
@@ -2729,7 +2729,7 @@ BODY div .b-helplink:active {
 		height: 16px;
 		margin: 0;
 		padding: 0;
-		background: url(/img/icons/popup-close.png?v=1) 0 0 no-repeat;
+		background: url(/img/icons/popup-close.png?v=15718) 0 0 no-repeat;
 		font: 0/0 serif;
 		cursor: pointer;
 		}
@@ -2842,7 +2842,7 @@ HTML BODY .i-ljuser {
 /* lj-cut preloader */
 .ljcut-link-expanding {
 	padding: 0 20px 0 0;
-	background: url(/img/preloader-s.gif?v=1) no-repeat 100% 60%;
+	background: url(/img/preloader-s.gif?v=9673) no-repeat 100% 60%;
 	}
 
 /* Update button */

@@ -63,7 +63,7 @@ HTML {
 	height: 7px!important;
 	background-color: #FFF;
 	border: 0 dashed #BCBCBC;
-	background: url(/js/ck/images/ljcut.png?v=2) no-repeat 0 0;
+	background: url(/js/ck/images/ljcut.png?v=20797) no-repeat 0 0;
 	}
 .lj-cut-open {
 	background-position: 0 1px;
@@ -77,7 +77,7 @@ HTML {
     height: 7px!important;
     background-color: #FFF;
     border: 0 dashed #BCBCBC;
-    background: url(/js/ck/images/lj-spoiler.png) no-repeat 0 0;
+    background: url(/js/ck/images/lj-spoiler.png?v=17725) no-repeat 0 0;
     }
 .lj-spoiler-open {
     border-width: 0 0 1px;
@@ -156,7 +156,7 @@ lj|wishlist {
 	width: 212px;
 	height: 212px;
 	border: 1px solid #d2d2d2;
-	background: url(/img/widget/wishlist/bag_212x212.png?v=1) no-repeat 0 0;
+	background: url(/img/widget/wishlist/bag_212x212.png?v=10704) no-repeat 0 0;
 	}
 
 lj\:raw {
@@ -229,7 +229,7 @@ lj\:cut {
 	.lj-like-item {
 		display: inline-block;
 		margin-right: 15px;
-		background: url(/js/ck/images/lj-like-buttons.png?v=2) no-repeat;
+		background: url(/js/ck/images/lj-like-buttons.png?v=20747) no-repeat;
 		vertical-align: middle;
 		font-size: 0;
 		cursor: pointer;

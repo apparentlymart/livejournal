@@ -19,7 +19,7 @@
 }
 
 .customize-inner-wrapper {
-    background: url(/img/customize/bluepixel.gif?v=1) repeat-y scroll 134px 50%;
+    background: url(/img/customize/bluepixel.gif?v=12565) repeat-y scroll 134px 50%;
 }
 
 .customize-wrapper h2 {
@@ -46,7 +46,7 @@
     font-size: 13px;
     font-weight: bold;
     padding: 5px 0 5px 25px;
-    background: #ECF6FF url(/img/customize/arrow-right.gif?v=1) left center no-repeat;
+    background: #ECF6FF url(/img/customize/arrow-right.gif?v=12565) left center no-repeat;
     border-bottom: 1px solid #C7E0F6;
     display: inline-block;
 }
@@ -54,7 +54,7 @@
     display: block;
 }
 .customize-content .subheader.on {
-    background: #ECF6FF url(/img/customize/arrow-down.gif?v=1) left center no-repeat;
+    background: #ECF6FF url(/img/customize/arrow-down.gif?v=12565) left center no-repeat;
 }
 .customize-content fieldset {
     border: 0px none;
@@ -129,7 +129,7 @@
 }
 
 .customize-nav li.on a {
-    background: #fff url(/img/customize/arrow-right.gif?v=1) no-repeat right 50%;
+    background: #fff url(/img/customize/arrow-right.gif?v=12565) no-repeat right 50%;
     border-right: 1px solid #FFFFFF;
 }
 

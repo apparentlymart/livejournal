@@ -10,7 +10,7 @@ legend
     border: 1px solid #cdcdcd;
     font-weight: bold;
     /* font-family: Arial; */
-    /* background: #eee url(/img/grey_gradbg.gif?v=1); */
+    /* background: #eee url(/img/grey_gradbg.gif?v=5065); */
 }
 
 .tagsec
@@ -28,7 +28,7 @@ legend
 {
     color: #777;
     padding: 4px;
-    background: #eee url(/img/grey_gradbg.gif?v=1);
+    background: #eee url(/img/grey_gradbg.gif?v=5065);
     border: 1px solid #cdcdcd;
 }
 
@@ -132,7 +132,7 @@ legend
 {
     color: #777;
     padding: 4px;
-    background: #eee url(/img/grey_gradbg.gif?v=1);
+    background: #eee url(/img/grey_gradbg.gif?v=5065);
     border: 1px solid #cdcdcd;
     text-align: center;
 }

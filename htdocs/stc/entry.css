@@ -385,7 +385,7 @@
 	padding: 0px;
 	margin: 0px;
 	position: relative;
-	background: url(/img/entry-tab-bg.gif?v=1) repeat-x 0 bottom;
+	background: url(/img/entry-tab-bg.gif?v=9535) repeat-x 0 bottom;
 }
 #entry p {
 	margin: 0 !important;
@@ -499,32 +499,32 @@
 	text-decoration: none;
 }
 #htmltools ul li.image a {
-	background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -125px;
+	background: url(/js/ck/skins/v2/icons-new.png?v=17018) no-repeat 0 -125px;
 	padding-left: 15px;
 }
 #htmltools ul li.image-beta {
 	width: 18px;
 	}
 	#htmltools ul li.image-beta a {
-		background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -309px;
+		background: url(/js/ck/skins/v2/icons-new.png?v=17018) no-repeat 0 -309px;
 		padding-left: 18px;
 		}
 	#htmltools ul li.image a:hover {
-		/* background: url(/img/html-buttons-image.gif?v=1) no-repeat 0 -40px; */
+		/* background: url(/img/html-buttons-image.gif?v=9533) no-repeat 0 -40px; */
 		}
 #htmltools ul li.media a {
-	background: url(/js/ck/skins/v2/icons-new.png?v=1) no-repeat 0 -110px;
+	background: url(/js/ck/skins/v2/icons-new.png?v=17018) no-repeat 0 -110px;
 	padding-left: 15px;
 }
 #htmltools ul li.media a:hover {
-/*    background: url(/stc/fck/editor/plugins/livejournal/ljvideo.gif?v=1) no-repeat 0 -40px; */
+/*    background: url(/stc/fck/editor/plugins/livejournal/ljvideo.gif?v=14608) no-repeat 0 -40px; */
 }
 #htmltools ul li.movie a {
 	width: 21px;
-	background: url(/img/html-buttons-media.gif?v=1) no-repeat 0 0;
+	background: url(/img/html-buttons-media.gif?v=9533) no-repeat 0 0;
 }
 #htmltools ul li.movie a:hover {
-	background: url(/img/html-buttons-media.gif?v=1) no-repeat 0 -40px;
+	background: url(/img/html-buttons-media.gif?v=9533) no-repeat 0 -40px;
 }
 #linebreaks {
 	position: absolute;
@@ -749,7 +749,7 @@
 	width: 101px;
 	height: 29px;
 	float: left;
-	background: url(/stc/img/lastfm_logo.gif?v=1) no-repeat;
+	background: url(/stc/img/lastfm_logo.gif?v=14360) no-repeat;
 	border-bottom: 0px !important;
 }
 
@@ -849,7 +849,7 @@ td.tabs {
 /* Sponsored QotD*/
 #updateForm .b-qotd {
 	margin: 10px 0;
-	background: url(/img/qotd/qotd-wepc.png?v=1) repeat-x;
+	background: url(/img/qotd/qotd-wepc.png?v=7506) repeat-x;
 	border: 1px solid #054f90;
 	}
 	#updateForm .b-qotd H3 {
@@ -981,7 +981,7 @@ td.tabs {
 		.b-updatepage-paidrepost-budget {
 			margin: 0 0 0 0.5em;
 			padding: 0 20px 0 0;
-			background: url(/img/icons/paidrepost.png?v=1) no-repeat 100% 50%;
+			background: url(/img/icons/paidrepost.png?v=22784) no-repeat 100% 50%;
 			}
 		.b-updatepage-paidrepost-cs {
 			margin: 0 0 0 0.5em;
@@ -1051,28 +1051,28 @@ td.tabs {
 		left: 0;
 		width: 100%;
 		height: 144px;
-		background: #FFF url(/img/repost/pics-bg.png?v=1) repeat 0 0;
+		background: #FFF url(/img/repost/pics-bg.png?v=9861) repeat 0 0;
 		}
 	.b-repost-pics-l {
 		top: 0;
 		left: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-l.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-l.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-r {
 		top: 0;
 		right: -9px;
 		width: 9px;
 		height: 144px;
-		background: url(/img/repost/pics-r.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-r.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-arr {
 		top: 138px;
 		left: 160px;
 		width: 13px;
 		height: 13px;
-		background: url(/img/repost/pics-arr.png?v=1) repeat 0 0;
+		background: url(/img/repost/pics-arr.png?v=9859) repeat 0 0;
 		}
 	.b-repost-pics-head,
 	#updateForm .b-repost-pics-head {
@@ -1170,7 +1170,7 @@ td.tabs {
 			padding: 5px;
 			list-style: none;
 			text-align: center;
-			background: url(/img/repost/pics-frame.gif?v=1) no-repeat 0 0;
+			background: url(/img/repost/pics-frame.gif?v=9859) no-repeat 0 0;
 			cursor: pointer;
 			}
 		.b-repost-pics-items SPAN.b-repost-pics-no,
@@ -1181,7 +1181,7 @@ td.tabs {
 		#updateForm .b-repost-pics-items SPAN:hover,
 		.b-repost-pics-items SPAN.b-repost-pics-active,
 		#updateForm .b-repost-pics-items SPAN.b-repost-pics-active {
-			background: url(/img/repost/pics-aframe.gif?v=1) no-repeat 0 0;
+			background: url(/img/repost/pics-aframe.gif?v=9960) no-repeat 0 0;
 			}
 			.b-repost-pics-no EM {
 				position: absolute;

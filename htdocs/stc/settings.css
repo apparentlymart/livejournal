@@ -487,7 +487,7 @@
 	width: 100%;
 	overflow: hidden;
 	zoom: 1;
-	background: url('/img/corners/adsense-tabs.gif?v=1') repeat-x 0 100%;
+	background: url(/img/corners/adsense-tabs.gif?v=7925) repeat-x 0 100%;
 	margin-bottom: 12px;
 	}
 
@@ -624,7 +624,7 @@
 		height:66px;
 		margin:0 0 6px 0;
 		overflow:hidden;
-		background:#CCC url(/img/adsense/adsense-scheme.gif?v=1) 0 0 repeat-y;
+		background: #CCC url(/img/adsense/adsense-scheme.gif?v=7798) 0 0 repeat-y;
 		}
 	.adsense-scheme-alt .adsense-scheme-content {
 		margin:0 0 11px 0;
@@ -635,7 +635,7 @@
 		height:10px;
 		margin:7px 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -95px 0 no-repeat;
+		background: #000 url(/img/adsense/adsense-scheme.gif?v=7798) -95px 0 no-repeat;
 		}
 	.adsense-scheme-b2 {
 		display:block;
@@ -644,7 +644,7 @@
 		border-right:49px solid #FFFFE7;
 		margin:22px 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -72px 0 no-repeat;
+		background: #000 url(/img/adsense/adsense-scheme.gif?v=7798) -72px 0 no-repeat;
 		}
 	.adsense-scheme .adsense-scheme-b3 {
 		position:absolute;
@@ -653,7 +653,7 @@
 		width:11px;
 		height:54px;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -74px 0 repeat-y;
+		background: #000 url(/img/adsense/adsense-scheme.gif?v=7798) -74px 0 repeat-y;
 		}
 	.adsense-scheme-alt .adsense-scheme-b2 {
 		position:absolute;
@@ -678,7 +678,7 @@
 		height:10px;
 		margin:0 0 0 0;
 		overflow:hidden;
-		background:#000 url(/img/adsense/adsense-scheme.gif?v=1) -95px 0 no-repeat;
+		background: #000 url(/img/adsense/adsense-scheme.gif?v=7798) -95px 0 no-repeat;
 		}
 
 /* Adv types wrap */
@@ -822,7 +822,7 @@
     top: 0.4em;
     width: 9px;
     height: 9px;
-    background: url(/img/arrows-menu.gif?v=1) no-repeat;
+    background: url(/img/arrows-menu.gif?v=9114) no-repeat;
     }
     .b-settings-apps-item-open .m-switch {
          background-position: 0 -10px;
@@ -996,7 +996,7 @@
 					width: 100px;
 					margin: 0 auto;
 					padding: 40px 0 0;
-					background: url(/img/widget/trynbuy/trynbuy.gif?v=1) no-repeat 50% 0;
+					background: url(/img/widget/trynbuy/trynbuy.gif?v=11082) no-repeat 50% 0;
 					text-align: center;
 					}
 				.b-accstats-community .b-accstats-button .b-accstats-trynbuy {
@@ -1007,7 +1007,7 @@
 					width: 100px;
 					margin: 0 auto;
 					padding: 40px 0 0;
-					background: url(/img/widget/trynbuy/upgrade.gif?v=1) no-repeat 50% 0;
+					background: url(/img/widget/trynbuy/upgrade.gif?v=11082) no-repeat 50% 0;
 					text-align: center;
 					}
 				.b-accstats-community .b-accstats-button .b-accstats-upgrade,
@@ -1206,7 +1206,7 @@
 	width: 18px;
 	height: 16px;
 	vertical-align: top;
-	background: url("/img/preloader/preloader-blue-blue.gif") no-repeat scroll -5px 50% transparent;    
+	background: url(/img/preloader/preloader-blue-blue.gif?v=16423) no-repeat scroll -5px 50% transparent;    
 	}
 .b-journalpromo-manage .b-splatest-more-count,
 .b-journalpromo-manage-loading .b-journalpromo-manage-count {
@@ -1276,7 +1276,7 @@
 				height: 7px;
 				margin: -3px 0 0;
 				padding: 0;
-				background: url(/img/buttons/pending-close.gif?v=1) no-repeat 0 0;
+				background: url(/img/buttons/pending-close.gif?v=9474) no-repeat 0 0;
 				cursor: pointer;
 				}
 			.b-journalpromo-manage-userlist .b-journalpromo-comma-hide .b-journalpromo-users-comma {

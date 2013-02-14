@@ -328,7 +328,7 @@ a:hover {
 		height: 16px;
 		margin: 0;
 		padding: 0;
-		background: url("/img/icons/popup-close.png?v=1") no-repeat 0 0;
+		background: url(/img/icons/popup-close.png?v=15718) no-repeat 0 0;
 		font: 0/0 serif;
 		cursor: pointer;
 		}
