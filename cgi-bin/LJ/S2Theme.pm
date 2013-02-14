@@ -34,6 +34,7 @@ sub default_theme {
     $layout =~ s/\/layout$//;
 
     my %default_themes = (
+        'chameleon' => 'chameleon/heavenly_clouds',
         'classic' => 'classic/standard',
         'cleansimple' => 'cleansimple/standard',
         'deardiary' => 'deardiary/royalty',
