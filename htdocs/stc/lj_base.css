@@ -462,6 +462,9 @@ Must be removed after implementation of Framework! */
 .b-bubble-intext {
 	margin: 10px 0 !important;
 	}
+.b-bubble-center {
+	text-align: center;
+	}
 
 
 /* Disabled block
@@ -1928,7 +1931,7 @@ DIV.lj_ippu_app {
 	*font: 0/0 serif;
 	}
 	.b-linkbar-item {
-		display: inline;
+		display: inline-block;
 		margin: 0 2px;
 		padding: 0;
 		border: 0;
