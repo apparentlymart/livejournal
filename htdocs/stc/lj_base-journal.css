@@ -1895,5 +1895,9 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 			display: none;
 			}
 
-
+/* LJSUP-14684: [Journal, feed] Display GitHub gists */
+.gist .line-pre,
+.gist .line-numbers {
+	line-height: 22px !important;
+	}
 
