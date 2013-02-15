@@ -254,13 +254,19 @@ sub __create_repost {
         return $fail->(LJ::API::Error->get_error('repost_already_exist'));
     }
 
+    my ($reposter_cost, $total_cost);
+
     if($cost) {
         unless ($repost_offer && $repost_offer->budget) {
             return $fail->(LJ::API::Error->get_error('repost_notpaid'));
         }
         
-        if ($cost > $repost_offer->cost($u)) {
+        ($reposter_cost, $total_cost) = $repost_offer->cost($u);
+
+        if ($cost > $reposter_cost) {
             return $fail->(LJ::API::Error->get_error('repost_cost_error'));
+        } elsif ($cost < $reposter_cost) {
+            $total_cost = $repost_offer->total_cost($cost);
         }
     }
     
@@ -288,7 +294,8 @@ sub __create_repost {
                                                   reposterid       => $u->id,
                                                   reposted_jitemid => $post_obj->jitemid,
                                                   posterid         => $entry_obj->posterid,
-                                                  qty              => $cost,
+                                                  qty              => $total_cost,
+                                                  system_profit    => ($total_cost - $cost),
                                                   );
         unless($blid){
             return $fail->(LJ::API::Error->get_error('repost_blocking_error'));
