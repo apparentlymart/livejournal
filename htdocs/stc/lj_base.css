@@ -386,6 +386,7 @@ Must be removed after implementation of Framework! */
 	border-radius: 5px;
 	font-size: 90%;
 	color: #000;
+	*zoom: 1;
 	}
 	.i-bubble-arrow,
 	.i-bubble-arrow-border {
@@ -1937,6 +1938,8 @@ DIV.lj_ippu_app {
 		border: 0;
 		vertical-align: top;
 		font: 10px/1 Arial,sans-serif;
+		*display: inline;
+		*zoom: 1;
 		}
 
 /* Help Link
