@@ -182,7 +182,7 @@ body<=
     $showlinks .= LJ::html_submit(undef, 'Refresh');
     $showlinks .= "</form>";
 
-    my $filter = ''
+    my $filter = '';
     $filter = "&show=$GET{show}" if $GET{show};
     my $sortlink = BML::get_uri() . "?authas=$cname$filter&sort=";
     $ret .= "<br /><div align='center'>$showlinks";
