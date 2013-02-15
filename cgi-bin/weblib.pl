@@ -2592,6 +2592,9 @@ sub get_body_class_for_service_pages {
         push @classes, "b-foto-branding"
             if LJ::_is_pics_branding_active();
     }
+
+    LJ::run_hooks( 'get_body_class_for_service_pages', \@classes );
+
     return join(" ", @classes);
 }
 
