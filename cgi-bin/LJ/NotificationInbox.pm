@@ -172,8 +172,6 @@ sub count {
 } # count
 
 # returns number of unread items in inbox
-# returns a maximum of 1000, if you get 1000 it's safe to
-# assume "more than 1000"
 sub unread_count {
     my $self = $_[0];
 
@@ -192,6 +190,37 @@ sub unread_count {
 
     return $unread;
 } # unread_count
+
+# unread message count
+sub unread_message_count {
+    &_load;
+
+    return scalar grep {
+        'N' eq uc $_->{'state'}
+    } grep {
+        $_->{'etypeid'} == $rmessage_typeid
+    } @{ $LJ::REQ_CACHE_INBOX{'events'} };
+} # unread_message_count
+
+# unread message count
+sub unread_event_count {
+    &_load;
+
+    return scalar grep {
+        'N' eq uc $_->{'state'}
+    } grep {
+        $_->{'etypeid'} != $rmessage_typeid and
+        $_->{'etypeid'} != $smessage_typeid
+    } @{ $LJ::REQ_CACHE_INBOX{'events'} };
+} # unread_msg_count
+
+sub spam_event_count {
+     &_load;
+
+    return scalar grep {
+        'S' eq $_->{'state'}
+    } @{ $LJ::REQ_CACHE_INBOX{'events'} };   
+} # spam_event_count
 
 # load the items in this queue
 # returns internal items hashref
@@ -692,9 +721,6 @@ sub usermsg_sent_event_count {
     $_[0]->subset_unread_count('UserMessageSent');
 }
 
-sub spam_event_count {
-    scalar &spam_items;
-}
 
 # Methods that return Arrays of Event categories
 sub friend_event_list {

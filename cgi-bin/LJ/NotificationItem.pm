@@ -243,7 +243,7 @@ sub _set_state {
     $self->{'state'} = $state;
 
     # Expire unread cache
-    my $memkey = &NotificationInbox::_unread_memkey;
+    my $memkey = &LJ::NotificationInbox::_unread_memkey;
     LJ::MemCacheProxy::delete($memkey);
 
     # Expire events cache
