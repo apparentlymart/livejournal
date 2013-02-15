@@ -434,41 +434,45 @@ sub is_bookmark {
     my ($self, $qid) = @_;
 
     # load bookmarks if they don't already exist
-    $self->load_bookmarks unless defined $self->{bookmarks};
+    &load_bookmarks
+        unless $self->{'bookmarks'};
 
-    return $self->{bookmarks}{$qid} ? 1 : 0;
+    return $self->{'bookmarks'}{$qid}? 1 : 0;
 }
 
 # populate the bookmark hash
 sub load_bookmarks {
     my ($self) = @_;
+    my $format = 'N*';
+
+    return scalar keys %{ $self->{'bookmarks'} }
+        if $self->{'bookmarks'};
 
     my $u = &owner;
     my $uid = $self->{'userid'};
-    my $row = LJ::MemCache::get($self->_bookmark_memkey);
+    my $row = LJ::MemCacheProxy::get(&_bookmark_memkey);
 
-    $self->{bookmarks} = ();
-    if ($row){
-        my @qids = unpack("N*", $row);
-        foreach my $qid (@qids) {
-            $self->{bookmarks}{$qid} = 1;
-        }
-        return;
+    if ($row) {
+        $self->{'bookmarks'}{$_} = 1
+            foreach unpack $format, $row;
+
+        return scalar keys %{ $self->{'bookmarks'} };
     }
 
-    my $sql = "SELECT qid FROM notifybookmarks WHERE userid=?";
-    my $qids = $u->selectcol_arrayref($sql, undef, $uid);
-    die "Failed to load bookmarks: " . $u->errstr . "\n" if $u->err;
+    my $qids = $u->selectcol_arrayref('SELECT qid FROM notifybookmarks WHERE userid=?', undef, $uid);
 
-    foreach my $qid (@$qids) {
-        $self->{bookmarks}{$qid} = 1;
-    }
+    die sprintf "Failed to load bookmarks: %s\n", $u->errstr
+        if $u->err;
 
-    $row = pack("N*", @$qids);
-    LJ::MemCache::set($self->_bookmark_memkey, $row, 3600);
+    $self->{'bookmarks'}{$_} = 1
+        foreach @$qids;
 
-    return;
-}
+    $row = pack $format, @$qids;
+
+    LJ::MemCacheProxy::set(&_bookmark_memkey, $row, 86400);
+
+    return scalar keys %{ $self->{'bookmarks'} };
+} # load_bookmarks
 
 ## returns array of qid of 'bookmarked' messages
 sub get_bookmarks_ids {
@@ -497,7 +501,7 @@ sub add_bookmark {
     $self->ensure_queued($qid);
 
     $self->{bookmarks}{$qid} = 1 if defined $self->{bookmarks};
-    LJ::MemCache::delete($self->_bookmark_memkey);
+    LJ::MemCacheProxy::delete($self->_bookmark_memkey);
 
     return 1;
 }
@@ -514,7 +518,7 @@ sub remove_bookmark {
     die "Failed to remove bookmark: " . $u->errstr . "\n" if $u->err;
 
     delete $self->{bookmarks}->{$qid} if defined $self->{bookmarks};
-    LJ::MemCache::delete($self->_bookmark_memkey);
+    LJ::MemCacheProxy::delete($self->_bookmark_memkey);
 
     return 1;
 }
