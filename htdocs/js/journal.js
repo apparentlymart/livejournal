@@ -425,7 +425,7 @@ LiveJournal.register_hook('page_load', function () {
 (function($) {
 	'use strict';
 
-	var gistBase = 'https://gist.github.com/',
+	var gistBase = '://gist.github.com/',
 		gistCss  = {
 			'clear'       : 'both',
 			'display'     : 'block',
@@ -433,14 +433,14 @@ LiveJournal.register_hook('page_load', function () {
 		};
 
 	$(function() {
-		var gist = $('a[href^="' + gistBase + '"]'),
+		var gist = $('a[href*="' + gistBase + '"]'),
 			head = $('head');
 
 		gist.each(function(_, element) {
 			var link  = $(element),
 				href  = link.attr('href'),
-				match = href  && href.match(/gist.github.com\/([a-zA-Z0-9]+)/),
-				id    = match && match[1];
+				match = href  && href.match(/gist.github.com(.*)\/([a-zA-Z0-9]+)/),
+				id    = match && match.pop();
 
 			if (!id) {
 				console.error('Bad GitHub id');
@@ -453,7 +453,7 @@ LiveJournal.register_hook('page_load', function () {
 				.html('Loading the gist...');
 
 			$.ajax({
-			    url: gistBase + id + '.json',
+			    url: 'https' + gistBase + id + '.json',
 			    dataType: 'jsonp',
 			    timeout: 10000
 			}).done(function(result) {
