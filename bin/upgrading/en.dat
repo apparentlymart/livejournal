@@ -7558,6 +7558,8 @@ talk.video.hint=Hint
 talk.video.insert|staleness=1
 talk.video.insert=Insert
 
+talk.video.paste=Paste a Video URL (embed, iframe, <a href="http://www.youtube.com/watch?v=-LMebrVm-uU" target="_blank">youtube</a> or <a href="http://vimeo.com/59545564" target="_blank">vimeo</a>)
+
 talk.willscreen|staleness=1
 talk.willscreen=Your reply will be screened
 
