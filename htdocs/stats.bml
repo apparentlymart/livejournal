@@ -6,7 +6,7 @@ body<=
 
  use strict;
 
-unless ( LJ::is_enabled('stats.bml') ) {
+unless ( LJ::is_enabled('obsolete_stats.bml') ) {
     return qq{<?errorbar The service is currently unavailable. errorbar?>};
 }
 
