@@ -21,6 +21,17 @@
         my $server  = $GET{server} eq 'beta' ? 'beta.tackthis.com' : 'www.tackthis.com';
 
         return qq|<script src="http://$server/widget-validate-iframe.php?api=$api$pid_arg$cat_arg" type="text/javascript"></script>|;
+    
+    } elsif ($mode eq 'ecwid'){
+        ##
+        my $api     = $GET{api};
+        return qq|<div> 
+        <script type="text/javascript" src="http://app.ecwid.com/script.js?$api" charset="utf-8"></script> 
+        <script type="text/javascript"> xProductBrowser("categoriesPerRow=3","views=grid(3,3) list(10) table(20)","categoryView=grid","searchView=list","style="); </script> 
+        <noscript>Your browser does not support JavaScript. Please proceed to <a href="http://verbic.ecwid.com">HTML version of My Test Store</a></noscript> 
+        </div>
+        |;
+
 
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
