@@ -7,6 +7,7 @@ no warnings 'uninitialized';
 package LJ;
 
 use LJ::TimeUtil;
+use LJ::CaptchaServer;
 
 # <LJFUNC>
 # name: LJ::sysban_check
@@ -365,6 +366,10 @@ sub sysban_create {
         LJ::MemCache::delete("sysban:contentflag");
     }
 
+    if ($opts{'what'} eq 'ip_captcha'){
+        LJ::CaptchaServer->add_ip_to_banned($opts{'value'});
+    }
+
     # log in statushistory
     my $remote = LJ::get_remote();
     $banuntil = $opts{'bandays'} ? LJ::TimeUtil->mysql_time($exptime) : "forever";
@@ -540,6 +545,7 @@ sub sysban_validate {
                'lostpassword_email' => 'email',
                'talk_ip_test' => 'ip',
                'contentflag' => 'user',
+               'ip_captcha'  => 'ip',
                );
 
     while (my ($new, $existing) = splice(@map, 0, 2)) {
