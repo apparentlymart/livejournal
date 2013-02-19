@@ -272,23 +272,18 @@ jQuery(document).click(function(e)
 (function() {
 	var storage = {
 		init: function() {
-			this._store = window.sessionStorage && sessionStorage.getItem('placeholders') || '';
-		},
-
-		makeHash: function(link) {
-			return ' ' + encodeURIComponent(link) + ' ';
+			this._store = jQuery.storage.getItem('placeholders') || {};
 		},
 
 		inStorage: function(link) {
-			return this._store.indexOf(this.makeHash(link)) !== -1;
+			return this._store.hasOwnProperty(link);
 		},
 
 		addUrl: function(link) {
-			if (!window.sessionStorage) { return; }
-			if (this.inStorage(link)) { return; }
-
-			this._store += this.makeHash(link);
-			sessionStorage.setItem('placeholders', this._store);
+			if (!this.inStorage(link)) {
+				this._store[link] = true;
+				jQuery.storage.setItem('placeholders', this._store);
+			}
 		}
 	};
 
