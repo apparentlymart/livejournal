@@ -11120,8 +11120,8 @@ sub get_friends_with_type {
     my %put_in_cache = ();
     foreach my $friend (@friends) {
         my $friend_info = $friends_data->{$friend};
-        next if $friend_info->{statusvis} eq 'X' ||
-                $friend_info->{clusterid} == 0; 
+        next if $friend_info->{statusvis} eq 'X';# ||
+        #        $friend_info->{clusterid} == 0; 
    
         my $type = $friend_info->{journaltype}; 
         next unless $allow_list{$type};
@@ -11165,8 +11165,10 @@ sub add_to_friend_list {
 }
 
 sub get_journal_short_info_multi {
+    my @userids = @_;
     my @keys = ();
-    foreach my $userid (@_) {
+    
+    foreach my $userid (@userids) {
         push @keys, "u:s:$userid";
     }
 
@@ -11175,7 +11177,7 @@ sub get_journal_short_info_multi {
     my $result = LJ::MemCache::get_multi(@keys);
 
     my @users_to_load = ();
-    foreach my $userid (@_) {
+    foreach my $userid (@userids) {
         my $data = delete $result->{"u:s:$userid"};
         unless ($data) {
             push @users_to_load, $userid;
