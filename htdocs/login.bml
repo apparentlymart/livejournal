@@ -398,7 +398,7 @@
             if ($banned) {
                 return if $want_fail_redirect->("banned_ip");
 
-                $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
+                $body = LJ::bad_input(LJ::Lang::ml('error.ipbanned'));
                 return;
             }
 
