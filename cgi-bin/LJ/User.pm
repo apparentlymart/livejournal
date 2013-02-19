@@ -11074,7 +11074,7 @@ sub get_friends_with_type {
     if ($allow_list{'P'}) {
         my %types_data = map { $_ => 1 } @$types;
 
-        my @types_list = ('I', 'S', 'Y', 'N', 'C');
+        my @types_list = ('I', 'Y', 'N', 'C');
         my @types_to_load = ();
 
         #
@@ -11104,8 +11104,6 @@ sub get_friends_with_type {
         foreach my $key (@keys) {
             my @result = $redis->smembers($key);
             push @list, @result if @result;
-#debug expire 
-            $redis->expire($key, 60);
         }
 
         return @list if @list;
@@ -11120,8 +11118,8 @@ sub get_friends_with_type {
     my %put_in_cache = ();
     foreach my $friend (@friends) {
         my $friend_info = $friends_data->{$friend};
-        next if $friend_info->{statusvis} eq 'X';# ||
-        #        $friend_info->{clusterid} == 0; 
+        next if $friend_info->{statusvis} eq 'X' ||
+                $friend_info->{clusterid} == 0; 
    
         my $type = $friend_info->{journaltype}; 
         next unless $allow_list{$type};
