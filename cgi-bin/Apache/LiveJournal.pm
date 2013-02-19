@@ -1220,6 +1220,9 @@ sub trans {
             return $view if defined $view;
         }
         elsif ( $func eq 'api' || LJ::Request->uri =~ /^\/__api_endpoint.*$/) {
+            if (LJ::Request->uri =~ /^\/gadgets(.*)/) {
+                return LJ::URI->bml_handler("gadgets$1");
+            }
             return LJ::URI->api_handler();
         }
         elsif ( $func eq "games" ) {
