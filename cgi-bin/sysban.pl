@@ -367,7 +367,7 @@ sub sysban_create {
     }
 
     if ($opts{'what'} eq 'ip_captcha'){
-        LJ::CaptchaServer->add_ip_to_banned($opts{'value'});
+        LJ::CaptchaServer->ban_ip($opts{'value'});
     }
 
     # log in statushistory
