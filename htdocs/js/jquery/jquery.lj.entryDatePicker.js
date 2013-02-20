@@ -150,7 +150,13 @@
 				this._startTimer();
 			} else {
 				var inputs = this._dateInputs,
-					timeParts = inputs.time.val().match(/([0-9]{1,2}):([0-9]{1,2})/);
+					timeParts = inputs.time && inputs.time.val().match(/([0-9]{1,2}):([0-9]{1,2})/);
+
+				if (!timeParts) {
+					// this case could happen if some widget selectors are not presend
+					// for example when editing not your entry
+					return;
+				}
 
 				this.currentDate = null;
 				if (this._isOldDesign) {
