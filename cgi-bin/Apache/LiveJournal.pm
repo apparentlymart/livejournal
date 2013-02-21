@@ -1220,10 +1220,10 @@ sub trans {
             return $view if defined $view;
         }
         elsif ( $func eq 'api' || LJ::Request->uri =~ /^\/__api_endpoint.*$/) {
-            if (LJ::Request->uri =~ /^\/gadgets(.*)/) {
-                return LJ::URI->bml_handler("gadgets$1");
+            unless (LJ::Request->uri =~ /^\/gadgets(.*)/) {
+               # return LJ::URI->bml_handler("gadgets$1");
+                return LJ::URI->api_handler();
             }
-            return LJ::URI->api_handler();
         }
         elsif ( $func eq "games" ) {
             LJ::get_remote();
@@ -1264,6 +1264,7 @@ sub trans {
      && !$skip_domain_checks
      && $host ne $LJ::DOMAIN_WEB
      && $host ne $LJ::DOMAIN
+     && $host ne $LJ::API_DOMAIN
      && $host =~ /\./
      && $host =~ /[^\d\.]/
      && LJ::Request->uri !~ m{^/__rpc} )
