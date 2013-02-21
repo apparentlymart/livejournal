@@ -12,27 +12,24 @@ my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
 
 # constructor takes a $u
 sub new {
-    my ($class, $u) = @_;
+    my ($class, $user) = @_;
 
-    croak "Invalid args to construct LJ::NotificationQueue" unless $class && $u;
-    croak "Invalid user" unless LJ::isu($u);
+    croak 'Invalid args to construct LJ::NotificationInbox' unless $class and $user;
+    croak 'Invalid user' unless LJ::isu($user);
 
     # return singleton from $u if it already exists
     return $LJ::REQ_CACHE_INBOX{'inbox'} if $LJ::REQ_CACHE_INBOX{'inbox'};
 
     my $self = {
-        userid    => $u->id,
-        user      => $u,
-        count     => undef, # defined once ->count is loaded/cached
-        items     => undef, # defined to arrayref once items loaded
-        bookmarks => undef, # defined to arrayref
+        userid    => $user->id,
+        user      => $user,
     };
 
     $comment_typeid  ||= LJ::Event::JournalNewComment->etypeid;
     $rmessage_typeid ||= LJ::Event::UserMessageRecvd->etypeid;
     $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
 
-    return $LJ::REQ_CACHE_INBOX{'inbox'} = bless $self, $class;
+    return $LJ::REQ_CACHE_INBOX{'inbox'} = bless $self;
 }
 
 # returns the user object associated with this queue
@@ -41,30 +38,23 @@ sub owner { $_[0]->{'user'} }
 
 # Returns a list of LJ::NotificationItems in this queue.
 sub items {
-    my $self = $_[0];
+    return @{ $_[0]->{'items'} }
+        if $_[0]->{'items'};
 
-    croak "notifications is an object method"
-        unless (ref $self) eq __PACKAGE__;
+    my $user = &owner;
 
-    return @{$self->{items}} if defined $self->{items};
-
-    my @qids = $self->_load;
-
-    my @items = ();
-    foreach my $qid (@qids) {
-        push @items, LJ::NotificationItem->new(&owner, $qid);
-    }
-
-    $self->{items} = \@items;
+    $_[0]->{'items'} = [map {
+        LJ::NotificationItem->new($user, $_);
+    } &_load];
 
     # optimization:
     #   now items are defined ... if any are comment 
     #   objects we'll instantiate those ahead of time
     #   so that if one has its data loaded they will
     #   all benefit from a coalesced load
-    $self->instantiate_singletons;
+    &instantiate_singletons;
 
-    return @items;
+    return @{ $_[0]->{'items'} };
 }
 
 # returns a list of all notification items except for sent user messages
@@ -155,8 +145,6 @@ sub archived_items {
 }
 
 sub count {
-    my $self = $_[0];
-
     my $count = LJ::MemCacheProxy::get(&_count_memkey);
 
     return $count
@@ -225,19 +213,18 @@ sub spam_event_count {
 # load the items in this queue
 # returns internal items hashref
 sub _load {
-    my $self = $_[0];
+    &LJ::NotificationItem::_load;
 
-    &LJ::NotificationItem::_load, $self->{'_loaded'} = 1
-        unless $self->{'_loaded'};
+    return
+        unless defined wantarray;
 
-    return reverse sort map $_->{'qid'}, @{ $LJ::REQ_CACHE_INBOX{'events'} };
+    return map $_->{'qid'}, @{ $LJ::REQ_CACHE_INBOX{'events'} };
 }
 
 sub instantiate_singletons {
-    my $self = $_[0];
     return 1 unless $LJ::DISABLED{'inbox_controller'};
 
-    foreach ($self->items()) {
+    foreach (&items) {
         my $event = $_->event() or next;
         my $etypeid = $event->etypeid();
 
@@ -287,23 +274,26 @@ sub _bookmark_memkey {
 # deletes an Event that is queued for this user
 # args: Queue ID to remove from queue
 sub delete_from_queue {
-    my ($self, $qitem) = @_;
+    my ($self, $item) = @_;
 
-    croak "delete_from_queue is an object method"
-        unless (ref $self) eq __PACKAGE__;
+    my $qid = $item->qid();
 
-    my $qid = $qitem->qid;
+    croak 'no queueid for queue item passed to delete_from_queue'
+        unless int $qid;
 
-    croak "no queueid for queue item passed to delete_from_queue" unless int($qid);
+    my $user = &owner
+        or die 'No user object';
 
-    my $u = &owner
-        or die "No user object";
+    # Try to remove bookmark first
+    $self->remove_bookmark($qid);
 
-    $u->do("DELETE FROM notifyqueue WHERE userid=? AND qid=?", undef, $u->id, $qid);
-    die $u->errstr if $u->err;
+    $user->do('DELETE FROM notifyqueue WHERE userid=? AND qid=?', undef, $self->{'userid'}, $qid);
+
+    die $user->errstr
+        if $user->err;
 
     # invalidate caches
-    $self->expire_cache;
+    &expire_cache;
 
     return 1;
 }
@@ -311,8 +301,8 @@ sub delete_from_queue {
 sub expire_cache {
     my $self = $_[0];
 
-    $self->{'count'}   = undef;
-    $self->{'items'}   = undef;
+    delete $self->{'items'};
+
     $self->{'_loaded'} = 0;
 
     delete $LJ::REQ_CACHE_INBOX{'events'};
@@ -321,19 +311,7 @@ sub expire_cache {
     LJ::MemCacheProxy::delete(&_count_memkey);
     LJ::MemCacheProxy::delete(&_unread_memkey);
     LJ::MemCacheProxy::delete(&_events_memkey);
-}
-
-# FIXME: make this faster
-sub oldest_item {
-    my $self = $_[0];
-    my @items = $self->items;
-
-    my $oldest;
-    foreach my $item (@items) {
-        $oldest = $item if !$oldest || $item->when_unixtime < $oldest->when_unixtime;
-    }
-
-    return $oldest;
+    LJ::MemCacheProxy::delete(&_bookmark_memkey);
 }
 
 # This will enqueue an event object
@@ -449,17 +427,29 @@ sub load_bookmarks {
         if $self->{'bookmarks'};
 
     my $u = &owner;
-    my $uid = $self->{'userid'};
     my $row = LJ::MemCacheProxy::get(&_bookmark_memkey);
 
     if ($row) {
         $self->{'bookmarks'}{$_} = 1
             foreach unpack $format, $row;
 
-        return scalar keys %{ $self->{'bookmarks'} };
+        &_load;
+
+        my %items = map { $_->{'qid'} => 1 } @{ $LJ::REQ_CACHE_INBOX{'events'} };
+
+        my @obsolete = grep {
+            not exists $items{$_}
+        } keys %{ $self->{'bookmarks'} };
+
+        return scalar keys %{ $self->{'bookmarks'} }
+            unless @obsolete;
+
+        $self->{'bookmarks'} = {};
+
+        $u->do(join(join(',', map '?', @obsolete), 'DELETE FROM notifybookmarks WHERE userid=? AND qid IN (', ')'), undef, $self->{'userid'}, @obsolete);
     }
 
-    my $qids = $u->selectcol_arrayref('SELECT qid FROM notifybookmarks WHERE userid=?', undef, $uid);
+    my $qids = $u->selectcol_arrayref('SELECT qid FROM notifybookmarks WHERE userid=?', undef, $self->{'userid'});
 
     die sprintf "Failed to load bookmarks: %s\n", $u->errstr
         if $u->err;
@@ -488,20 +478,25 @@ sub get_bookmarks_ids {
 sub add_bookmark {
     my ($self, $qid) = @_;
 
-    my $u = &owner;
-    my $uid = $self->{'userid'};
+    my $user = &owner;
 
-    return 0 unless LJ::is_enabled('inbox_controller') || $self->can_add_bookmark;
+    return 0
+        unless &can_add_bookmark;
 
-    my $sql = "INSERT IGNORE INTO notifybookmarks (userid, qid) VALUES (?, ?)";
-    $u->do($sql, undef, $uid, $qid);
-    die "Failed to add bookmark: " . $u->errstr . "\n" if $u->err;
+    return 1
+        if &is_bookmark;
+
+    $user->do('INSERT IGNORE INTO notifybookmarks (userid, qid) VALUES (?, ?)', undef, $self->{'userid'}, $qid);
+
+    die $user->errstr
+        if $user->err;
 
     # Make sure notice is in inbox
     $self->ensure_queued($qid);
 
-    $self->{bookmarks}{$qid} = 1 if defined $self->{bookmarks};
-    LJ::MemCacheProxy::delete($self->_bookmark_memkey);
+    $self->{'bookmarks'}{$qid} = 1;
+
+    LJ::MemCacheProxy::delete(&_bookmark_memkey);
 
     return 1;
 }
@@ -510,39 +505,31 @@ sub add_bookmark {
 sub remove_bookmark {
     my ($self, $qid) = @_;
 
-    my $u = &owner;
-    my $uid = $self->{'userid'};
+    my $user = &owner;
 
-    my $sql = "DELETE FROM notifybookmarks WHERE userid=? AND qid=?";
-    $u->do($sql, undef, $uid, $qid);
-    die "Failed to remove bookmark: " . $u->errstr . "\n" if $u->err;
+    return 0
+        unless &is_bookmark;
 
-    delete $self->{bookmarks}->{$qid} if defined $self->{bookmarks};
-    LJ::MemCacheProxy::delete($self->_bookmark_memkey);
+    $user->do('DELETE FROM notifybookmarks WHERE userid=? AND qid=?', undef, $self->{'userid'}, $qid);
+
+    die $user->errstr
+        if $user->err;
+
+    delete $self->{'bookmarks'}{$qid};
+
+    LJ::MemCacheProxy::delete(&_bookmark_memkey);
 
     return 1;
 }
 
 # add or remove bookmark based on whether it is already bookmarked
-sub toggle_bookmark {
-    my ($self, $qid) = @_;
-
-    my $ret = $self->is_bookmark($qid)
-        ? $self->remove_bookmark($qid)
-        : $self->add_bookmark($qid);
-
-    return $ret;
-}
+sub toggle_bookmark { &is_bookmark? &remove_bookmark : &add_bookmark }
 
 # return true if can add a bookmark
 sub can_add_bookmark {
-    my ($self, $count) = @_;
+    my $max = &owner->get_cap('inbox_max');
 
-    my $max = $self->u->get_cap('bookmark_max');
-    $count = $count || 1;
-    my $bookmark_count = scalar $self->bookmark_items;
-
-    return 0 if (($bookmark_count + $count) > $max);
+    return 0 if $max <= &load_bookmarks + 1;
     return 1;
 }
 

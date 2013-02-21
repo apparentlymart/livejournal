@@ -94,34 +94,34 @@ sub _events_memkey {
 
 # Loads this item and all unloaded singletods
 sub _load {
-    my $self = $_[0];
-
-    return if $self->{'_loaded'};
+    return if $_[0]->{'_loaded'};
 
     my $user  = &owner;
     my $items = \%LJ::REQ_CACHE_INBOX;
-    my @items;
 
-    if ($LJ::REQ_CACHE_INBOX{'events'}) {
-        @items = @{ $LJ::REQ_CACHE_INBOX{'events'} };
-    } else {
+    unless ($LJ::REQ_CACHE_INBOX{'events'}) {
         my $key = &_events_memkey;
         my $events = LJ::MemCache::get($key);
         my $format = "(CNNNNNNA)*";
         my @fields = qw{ etypeid userid qid journalid arg1 arg2 createtime state };
+        my @items;
 
         unless (defined $events) {
+            my %items;
+
             my $sth = prepare $user <<"";
                 SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime
                 FROM notifyqueue WHERE userid=?
 
-            $sth->execute($self->{'userid'});
+            $sth->execute($_[0]->{'userid'});
 
             die $sth->errstr if $sth->err;
 
             while (my $row = $sth->fetchrow_hashref()) {
-                push @items, $row;
+                $items{$row->{'qid'}} = $row;
             }
+
+            @items = map $items{$_}, reverse sort keys %items;
 
             my $value = pack $format, map { $_ || 0 } map { @{ $_ }{ @fields } } @items;
 
@@ -141,7 +141,7 @@ sub _load {
         $LJ::REQ_CACHE_INBOX{'events'} = \@items;
     }
 
-    foreach (@items) {
+    foreach (@{ $LJ::REQ_CACHE_INBOX{'events'} }) {
         my $item = $items->{$_->{'qid'}};
 
         next if not $item or $item->{'_loaded'};
@@ -201,13 +201,14 @@ sub spam {
 
 # delete this item from its inbox
 sub delete {
-    my $self = shift;
-    my $inbox = $self->owner->notification_inbox;
+    my $inbox = &owner->notification_inbox;
 
     # delete from the inbox so the inbox stays in sync
-    my $ret = $inbox->delete_from_queue($self);
-    %$self = ();
-    return $ret;
+    $inbox->delete_from_queue($_[0]);
+
+    %{ $_[0] } = ();
+
+    return 1;
 }
 
 # mark this item as read
