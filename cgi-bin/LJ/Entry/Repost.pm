@@ -267,7 +267,7 @@ sub __create_repost {
             return $fail->(LJ::API::Error->get_error('repost_cost_error'));
         } elsif ($cost < $reposter_cost) {
             $total_cost = $repost_offer->total_cost($cost);
-        }
+        } 
     }
     
     $post_obj = __create_post($u, 
@@ -295,7 +295,7 @@ sub __create_repost {
                                                   reposted_jitemid => $post_obj->jitemid,
                                                   posterid         => $entry_obj->posterid,
                                                   qty              => $total_cost,
-                                                  system_profit    => ($total_cost - $cost),
+                                                  system_profit    => $total_cost - $cost,
                                                   );
         unless($blid){
             return $fail->(LJ::API::Error->get_error('repost_blocking_error'));
