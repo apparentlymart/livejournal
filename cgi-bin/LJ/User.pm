@@ -2105,7 +2105,7 @@ sub profile_url {
 
     my $url;
     if ($u->{journaltype} eq "I") {
-        if ($LJ::DISABLED{profile_controller} || ($remote && $remote->prop('profile_ver') eq "1" )) {
+        if ($LJ::DISABLED{profile_controller}) {
             $url = "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
             $url .= "&mode=full" if $opts{full};
         } else {
