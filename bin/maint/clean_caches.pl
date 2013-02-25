@@ -185,6 +185,13 @@ $maint{'clean_caches'} = sub
     }
     print "    deleted $cnt_delete\n";
 
+=head
+    print "-I- Cleanup old unused rating records for homepage\n";
+    use LJ::HomePage::Category;
+    my $count = LJ::HomePage::Category->clear_unused_processed_items ();
+    print "    deleted $count records\n\n";
+=cut
+
     print "-I- Remove outdated sessions.\n";
     LJ::disconnect_dbs();
     foreach my $c (@LJ::CLUSTERS) {
