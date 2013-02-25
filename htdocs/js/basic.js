@@ -966,18 +966,6 @@ function plural_form_is(count) {
 	};
 }());
 
-/**
- * @namespace LJ.Support The namespace should contain variables to check whether some funcionality is availible in the current browser.
- * If this part will become hige enough, we should switch to modernizr.
- * All fields should have the same names as in modernizr
- */
-LJ.Support = LJ.Support || {};
-
-LJ.Support.geoLocation = 'geolocation' in navigator;
-//Incomplete implementation from modernizr
-LJ.Support.touch = Boolean(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch);
-LJ.Support.cors = window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest();
-LJ.Support.history = !!window.history.pushState;
 
 
 /* object extensions */
