@@ -41,9 +41,8 @@ sub jobs_of_unique_matching_subs {
     $debug_args ||= {};
     my @subjobs;
 
-    my $params = $evt->raw_params;
-
     if ($ENV{DEBUG}) {
+        my $params = $evt->raw_params;
         warn "jobs of unique subs (@$subs) matching event (@$params)\n";
     }
 
@@ -59,13 +58,17 @@ sub jobs_of_unique_matching_subs {
     
     foreach my $s (@subs_filtered) {
         next if $has_done{$s->unique}++;
+
+        my $params_sub   = $evt->raw_params;
+        $params_sub->[0] = $s->etypeid;
+
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
             priority => $evt->priority,
             arg      => {
                 'userid'    => $s->userid + 0,
                 'subdump'   => $s->dump,
-                'e_params'  => $params,
+                'e_params'  => $params_sub,
                 %$debug_args,
             },
         );
@@ -327,6 +330,8 @@ sub work {
         next unless $sub->available_for_user($sub->owner);
 
         my $params = $evt->raw_params;
+        $params->[0] = $sub->etypeid; 
+
         push @jobs, TheSchwartz::Job->new(
             'funcname' => 'LJ::Worker::ProcessSubMass',
             'arg' => {
