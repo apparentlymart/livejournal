@@ -56,7 +56,6 @@ sub EntryPage
     # quickreply js libs
     LJ::need_res(qw(
         js/basic.js
-        js/json.js
         js/template.js
         js/ippu.js
         js/lj_ippu.js

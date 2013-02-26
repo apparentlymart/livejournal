@@ -8,7 +8,6 @@ sub need_res {
 
    return qw( js/core.js
               js/dom.js
-              js/json.js
               js/template.js
               js/ippu.js
               js/lj_ippu.js
