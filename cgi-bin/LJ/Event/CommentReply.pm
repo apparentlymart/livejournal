@@ -14,6 +14,73 @@ sub is_subscription_visible_to { 1 }
 
 sub is_tracking { 0 }
 
+sub as_push {
+    my $self = shift;
+    my $u    = shift;
+    my $lang = shift;
+    my %opts = @_;
+
+    my $edited  = $self->comment->is_edited;
+    my $parent  = $self->comment->parent;
+    my $entry   = $self->comment->entry;
+
+    my $user = $self->comment->poster ? $self->comment->poster->display_username(1) : '(Anonymous user)';
+
+    my $subject;
+    if($subject = $entry->subject_text) {
+
+        $subject = (substr $subject, 0, $opts{cut})."..."
+            if $opts{cut} && length($subject) > $opts{cut};
+
+    } else {
+        $subject = LJ::Lang::get_text($lang, "widget.officialjournals.nosubject")
+    }
+
+    my $ml_key;
+    if ($parent) {
+        if ($edited) {
+            $ml_key = LJ::u_equals($parent->poster, $u)
+                    ? 'esn.push.commentreply.edit_reply_your_comment' : 'esn.push.commentreply.edit_reply_a_comment';
+        } else {
+            $ml_key = LJ::u_equals($parent->poster, $u)
+                    ? 'esn.push.commentreply.replied_your_comment' : 'esn.push.commentreply.replied_a_comment';
+        }
+    } else {
+        if ($edited) {
+            $ml_key = LJ::u_equals($self->comment->entry->poster, $u)
+                    ? 'esn.push.commentreply.edit_reply_your_post' : 'esn.push.commentreply.edit_reply_a_post';
+        } else {
+            $ml_key = LJ::u_equals($self->comment->entry->poster, $u)
+                    ? 'esn.push.commentreply.replied_your_post' : 'esn.push.commentreply.replied_a_post';
+        }
+    }
+
+    return LJ::Lang::get_text($lang, $ml_key, undef,
+                              { user    => $user, 
+                                subject => $subject, 
+                                journal => $entry->journal->user } );
+}
+
+sub as_push_payload {
+    my ($self, $u, $lang) = @_;
+
+    my $user    = $self->comment->poster ? $self->comment->poster->display_username(1) : '(Anonymous user)';
+    my $edited  = $self->comment->is_edited;
+
+    my $payload = { 't' => 27,
+                    'e' => $edited ? 0 : 1,
+                    'j' => $user,
+                    'p' => $self->comment->entry->ditemid,
+                    'c' => $self->comment->dtalkid,
+                  };
+
+    if ($self->comment->parent) {
+        $payload->{'r'} =  $self->comment->parent->dtalkid;
+    }
+
+    return $payload;
+}
+
 sub as_sms {
     my ($self, $u, $opt) = @_;
 

@@ -285,8 +285,9 @@ sub subscriptions {
     my $u = $self->u;
     return unless ( $cid == $u->clusterid );
 
-    my $row = { userid  => $self->u->{userid},
-                ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
+    my $row = { userid      => $self->u->{userid},
+                journalid   => $self->u->{userid},
+                ntypeid     => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
               };
 
     push @subs, LJ::Subscription->new_from_row($row);
