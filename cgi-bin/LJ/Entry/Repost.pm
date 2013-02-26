@@ -284,6 +284,11 @@ sub __create_repost {
     
     my $blid = 0;
 
+    if ($repost_offer) {
+        $repost_offer->on_repost_create( reposterid => $u->userid,
+                                         cost       => $total_cost );
+    }
+
     if ($cost) {
         my $err;
 
@@ -300,11 +305,6 @@ sub __create_repost {
         unless($blid){
             return $fail->(LJ::API::Error->get_error('repost_blocking_error'));
         }
-    }
-
-    if ($repost_offer) {
-        $repost_offer->on_repost_create( reposterid => $u->userid,
-                                         cost       => $cost );
     }
 
     #
@@ -595,13 +595,7 @@ sub delete {
     my ($repost_itemid, $cost, $blid, $repost_time) = __get_repost_full( $entry_obj->journal, 
                                                                          $entry_obj->jitemid, 
                                                                          $u->userid );
-
-    if ($blid) {
-        my $blocking = LJ::Pay::Repost::Blocking->load($blid);
-        die 'Cannot load blocking' unless $blocking;
-        $blocking->release unless ($blocking->released || $blocking->paid);
-    }
-
+    
     #
     # If repost offer
     #
@@ -612,6 +606,12 @@ sub delete {
             cost        => $cost,
             repost_time => $repost_time,
         );
+    }
+    
+    if ($blid) {
+        my $blocking = LJ::Pay::Repost::Blocking->load($blid);
+        die 'Cannot load blocking' unless $blocking;
+        $blocking->release unless ($blocking->released || $blocking->paid);
     }
 
     #
