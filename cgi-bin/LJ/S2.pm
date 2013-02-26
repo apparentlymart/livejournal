@@ -306,22 +306,28 @@ sub s2_run
 
     S2::Builtin::LJ::start_css($ctx) if $css_mode;
 
+    my $error;
+
     eval {
         S2::run_code($ctx, $entry, $page, @args);
     };
     if ($@) {
+        $error = $@;
         warn $@;
     }
 
+    eval {
     # real work for header generating, now all res in NEED_RES
     LJ::S2::subst_header($page);
 
     S2::Builtin::LJ::end_css($ctx) if $css_mode;
 
     $LJ::S2::CURR_PAGE = undef;
+    };
 
-    if ($@) {
-        my $error = $@;
+    $error .= "\n".$@ if $@;
+
+    if ($error) {
         $error =~ s/\n/<br \/>\n/g;
         S2::pout("<b>Error running style:</b> $error");
         return 0;
