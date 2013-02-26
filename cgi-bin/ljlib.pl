@@ -59,7 +59,8 @@ use Class::Autouse qw(
                       LJ::Browse
                       LJ::FriendsTags
                       LJ::MemCacheProxy
-                      );
+                      LJ::PushNotification::Storage
+                    );
 
 use LJ::TimeUtil;
 
@@ -2382,7 +2383,8 @@ sub start_request
 
     LJ::RelationService->reset_singletons;
     LJ::UniqCookie->clear_request_cache;
-
+    LJ::PushNotification::Storage->clear_data();
+    
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
     # authentication domains.  see the FotoBilder interface.
