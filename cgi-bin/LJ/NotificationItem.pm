@@ -89,7 +89,7 @@ sub event {
 
 sub _events_memkey {
     my $userid = $_[0]->{'userid'};
-    return [$userid, join ':', 'inbox:events', $userid];
+    return [$userid, join ':', 'inbox:events2', $userid];
 }
 
 # Loads this item and all unloaded singletods
@@ -102,7 +102,7 @@ sub _load {
     unless ($LJ::REQ_CACHE_INBOX{'events'}) {
         my $key = &_events_memkey;
         my $events = LJ::MemCache::get($key);
-        my $format = "(CNNNNNNA)*";
+        my $format = "(INNNNNNA)*";
         my @fields = qw{ etypeid userid qid journalid arg1 arg2 createtime state };
         my @items;
 
