@@ -60,7 +60,7 @@ sub jobs_of_unique_matching_subs {
         next if $has_done{$s->unique}++;
 
         my $params_sub   = $evt->raw_params;
-        $params_sub->[0] = $s->etypeid if $s->etypeid;
+        $params_sub->[0] = $s->etypeid;
 
         push @subjobs, TheSchwartz::Job->new(
             funcname => 'LJ::Worker::ProcessSub',
@@ -330,7 +330,7 @@ sub work {
         next unless $sub->available_for_user($sub->owner);
 
         my $params = $evt->raw_params;
-        $params->[0] = $sub->etypeid if $sub->etypeid; 
+        $params->[0] = $sub->etypeid; 
 
         push @jobs, TheSchwartz::Job->new(
             'funcname' => 'LJ::Worker::ProcessSubMass',
