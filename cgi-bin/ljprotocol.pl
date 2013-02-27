@@ -5803,10 +5803,10 @@ sub registerpush {
     my $u = $flags->{u};
 
     return fail($err, 200)
-        unless $u && $req->{platform} && $req->{registrationid};
+        unless $u && $req->{platform} && $req->{deviceid};
 
-    my $res = LJ::PushNotification->subscribe($u, $req) 
-        || return fail($err, 412);
+    my $error = LJ::PushNotification->subscribe($u, $req); 
+    return fail($error, 412) if $error;
 
     return { status => 'OK' }
 }
@@ -5830,10 +5830,8 @@ sub unregisterpush {
     return fail($err,200)
         unless $req->{platform};
 
-    my $res = LJ::PushNotification->unsubscribe($u, $req);
-
-    return fail($err,200)
-        unless $res;
+    my $error = LJ::PushNotification->unsubscribe($u, $req);
+    return $error if $error;
 
     return { status => 'OK' };
 }
@@ -5851,9 +5849,10 @@ sub pushsubscriptions {
             my $res = eval{ 
                 LJ::PushNotification->manage(
                     $u,
+                    app_name        => $req->{app_name},
                     platform        => $req->{platform},
                     deviceid        => $req->{deviceid},
-                    registrationid  => $req->{registrationid},
+                    optional_data   => $req->{optional_data},
                     %$event,
                 )
             };
