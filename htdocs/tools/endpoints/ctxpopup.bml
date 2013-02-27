@@ -145,9 +145,12 @@
             if (ref $position eq 'HASH') {
                 $first = $position->{result}->{position}!=0 ? 0 : 1;
             }
-
-            $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
-
+            
+            if ( $soc_capital == -1 ) {
+                $soc_capital = '&nbsp;&ndash;';
+            } else {
+                $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
+            }
         }
 
         $ret{first}  = $first; 
