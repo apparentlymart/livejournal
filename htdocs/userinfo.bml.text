@@ -513,6 +513,10 @@
 .optionlinks.addfriend.title.self|staleness=1
 .optionlinks.addfriend.title.self=Add yourself as a friend
 
+.optionlinks.friendsfeed=View friends feed
+
+.optionlinks.friendsfeed.title=View friends feed
+
 .optionlinks.joincomm|staleness=1
 .optionlinks.joincomm=Join
 
