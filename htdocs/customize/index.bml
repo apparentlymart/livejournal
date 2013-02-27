@@ -4,7 +4,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    LJ::need_res(qw( stc/customize.css js/customize.js js/jquery/customize/jquery.lj.customizeFriendsFeed.js ));
+    LJ::need_res(qw( stc/customize.css js/customize.js js/jquery/customize/jquery.lj.customizeFriendsFeed.js js/jquery/customize/jquery.lj.customizeFriendsFeedVersions.js));
     LJ::need_res_group('colorpicker', 'dialogs');
     LJ::need_string('friendsfeed.settings.reset.message');
 
