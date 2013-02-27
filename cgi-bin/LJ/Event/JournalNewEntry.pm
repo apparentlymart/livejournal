@@ -431,10 +431,18 @@ sub zero_journalid_subs_means { undef }
 sub as_push {
     my ($self, $u, $lang) = @_;
 
-    return LJ::Lang::get_text($lang, "esn.push.notification.eventtrackjournalpostsentry", { user => $u->user }) . 
-    ($self->entry->tags 
-       ? LJ::Lang::get_text($lang, "esn.push.notification.eventtrackjournalpostsentry.tagged", { tag => join(', ', $self->entry->tags )})
-       : '' );
+    my $main = LJ::Lang::get_text(  $lang, 
+                                    "esn.push.notification.eventtrackjournalpostsentry", 
+                                    undef,
+                                    { user => $u->user });
+    my $tags = ''; 
+    if ($self->entry->tags) {
+        $tags = LJ::Lang::get_text( $lang, 
+                                    "esn.push.notification.eventtrackjournalpostsentry.tagged", 
+                                    undef, 
+                                    { tag => join(', ', $self->entry->tags )});
+    }
+    return $main . " "  . $tags; 
 }
 
 sub as_push_payload {
