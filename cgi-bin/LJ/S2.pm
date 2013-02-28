@@ -2107,7 +2107,21 @@ sub Entry
            $e->{'sticky'} = 1;
            $e->{'sticky_icon'} = Image_std("sticky-entry");
         }
-   
+
+        my $display_metadata = 1;
+        LJ::run_hooks( 'substitute_entry_content', $entry,
+            \$e->{'text'},
+            {
+                'subject'          => \$e->{'subject'},
+                'display_metadata' => \$display_metadata,
+            },
+        );
+
+        if ( !$display_metadata ) {
+            $e->{'metadata'} = {};
+            $e->{'tags'}     = [];
+        }
+
      } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
                                                        $e->{delayedid} );

@@ -1486,7 +1486,21 @@ sub create_view_lastn
                 $lastn_event{'reposted_by'} =  $ref_text;
             }
         }
-    
+
+        my $display_metadata = 1;
+        LJ::run_hooks( 'substitute_entry_content', $entry_obj,
+            \$lastn_event{'event'},
+            {
+                'subject'          => \$lastn_event{'subject'},
+                'display_metadata' => \$display_metadata,
+            },
+        );
+
+        if ( !$display_metadata ) {
+            delete $lastn_event{'Mood'};
+            delete $lastn_event{'Music'};
+        }
+
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
@@ -2149,6 +2163,20 @@ sub create_view_friends {
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
                                     { 'reposter' => LJ::ljuser($reposter) } );
             }
+        }
+
+        my $display_metadata = 1;
+        LJ::run_hooks( 'substitute_entry_content', $entry_obj,
+            \$friends_event{'event'},
+            {
+                'subject'          => \$friends_event{'subject'},
+                'display_metadata' => \$display_metadata,
+            },
+        );
+
+        if ( !$display_metadata ) {
+            delete $friends_event{'Mood'};
+            delete $friends_event{'Music'};
         }
 
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
@@ -2885,6 +2913,20 @@ sub create_view_day
                 my $ref_text = LJ::Lang::ml( 'entry.reference.reposter',
                                     { 'reposter' => LJ::ljuser($reposter) } );
             }
+        }
+
+        my $display_metadata = 1;
+        LJ::run_hooks( 'substitute_entry_content', $entry_obj,
+            \$day_event{'event'},
+            {
+                'subject'          => \$day_event{'subject'},
+                'display_metadata' => \$display_metadata,
+            },
+        );
+
+        if ( !$display_metadata ) {
+            delete $day_event{'Mood'};
+            delete $day_event{'Music'};
         }
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
