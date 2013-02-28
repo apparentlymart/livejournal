@@ -1901,3 +1901,27 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	line-height: 22px !important;
 	}
 
+/* LJSV-2616: Content placeholder 
+-----------------------------------------------*/
+.b-contentplaceholder {
+	width: 50%;
+	margin: 1em auto;
+	padding: 10px 15px 15px;
+	background: #A6A6A6;
+	-webkit-border-radius: 6px;
+	        border-radius: 6px;
+	color: #fff;
+	}
+.b-contentplaceholder-title {
+	padding: 0 0 0 25px;
+	margin: 0 0 7px;
+	font: normal 25px/32px Arial, Tahoma, sans-serif !important;
+	}
+	.b-contentplaceholder-451 .b-contentplaceholder-title {
+		background: url(/img/contentplaceholder-451.gif?v=1) no-repeat 0 50%;
+		}
+.b-contentplaceholder-text {
+	padding: 0 0 0 25px;
+	font: normal 16px/22px Arial, Tahoma, sans-serif !important;
+	}
+
