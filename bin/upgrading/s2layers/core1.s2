@@ -48,6 +48,9 @@ class string
     function builtin length() : int
     "Return the number of characters in the string.";
 
+    function builtin length_utf8() : int
+    "Return the number of characters in the string.";
+
     function builtin repeat(int n) : string
     "Returns the string repeated n times";
 

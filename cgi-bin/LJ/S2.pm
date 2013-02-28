@@ -5256,11 +5256,20 @@ sub string__substr
     return Encode::encode_utf8($result);
 }
 
+# given a string, returns its length in bytes
 sub string__length
 {
     use utf8;
     my ($ctx, $this) = @_;
     return length($this);
+}
+
+# given a string, returns its length in characters
+sub string__length_utf8
+{
+    my ($ctx, $str) = @_;
+    $str = Encode::decode_utf8($str);
+    return length($str);
 }
 
 sub string__lower
