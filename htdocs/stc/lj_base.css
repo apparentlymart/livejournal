@@ -2251,6 +2251,9 @@ BODY div .b-helplink:active {
 	margin: 0 -25px;
 	padding: 1.15em 25px;
 	}
+.s-horizon.p-footer-lite .b-massaction {
+	margin-bottom: -33px;
+	}
 .s-lanzelot .b-massaction {
 	margin: 0 -26px;
 	padding: 1.15em 26px;
@@ -2260,6 +2263,9 @@ BODY div .b-helplink:active {
 	bottom: 24px;
 	width: 100%;
 	}
+.s-horizon.p-footer-lite .b-massaction-fixed {
+	margin-bottom: 0;
+	}	
 .ljtimes-disabled .b-massaction-fixed,
 .ljtimes-minimized .b-massaction-fixed {
 	bottom: 0;
