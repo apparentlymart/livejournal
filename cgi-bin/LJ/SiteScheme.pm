@@ -159,6 +159,9 @@ sub common_template_params {
     my $additional_head_content = '';
     LJ::run_hooks( 'head_content', \$additional_head_content );
 
+    my $current_lang = LJ::Lang::current_language();
+    my $html_lang    = $LJ::LANG_TO_HTML_LANG{$current_lang} || $current_lang;
+
     my $error_list = '';
     if ( my @errors = @BMLCodeBlock::errors ) {
         $error_list = LJ::error_list(@errors);
@@ -399,6 +402,7 @@ sub common_template_params {
     }
 
     return {
+        'html_lang'          => $html_lang,
         'pretitle'           => $args->{'pretitle'},
         'title'              => $args->{'title'},
         'windowtitle'        => $args->{'windowtitle'} || $args->{'title'},
