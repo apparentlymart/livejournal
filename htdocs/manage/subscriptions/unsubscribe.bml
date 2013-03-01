@@ -55,5 +55,7 @@
             siteroot    => $LJ::SITEROOT,
         },
         use_site_scheme    => 1
-    )->output();
+    )->output(
+        nogzip => 1
+    );
 _code?>
