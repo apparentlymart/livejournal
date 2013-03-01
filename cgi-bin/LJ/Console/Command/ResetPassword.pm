@@ -61,6 +61,7 @@ sub execute {
                 'url'      => "$LJ::SITEROOT/lostinfo.bml",
                 'sitename' => $LJ::SITENAME,
                 'siteroot' => $LJ::SITEROOT,
+                'username' => $u->{user},
             }
         );
     }
