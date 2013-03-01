@@ -415,7 +415,7 @@ sub common_template_params {
         'error_list'         => $error_list,
         'warning_list'       => $warning_list,
         'breadcrumbs'        => $class->template_param_breadcrumbs,
-        'logo_element'       => $args->{'logo_element'},
+        'index_page'         => $args->{'index_page'},
         'chalresp_js'        => $chalresp_js,
         'after_bml_title'    => $after_bml_title,
         'show_mobile_link'   => $show_mobile_link,
