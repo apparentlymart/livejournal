@@ -3,6 +3,9 @@
 #line 3
     use strict;
 
+    use LJ::Antimat;
+    use Encode qw/decode_utf8 encode_utf8/;
+
     our ( %ML, %GET, %POST, %RQ, $title, $body );
     my ( $status, $result, $answer, $redirected, $user_url, $message );
     my $add = '';
@@ -221,6 +224,10 @@
                 . 'docid='   . LJ::eurl($docid)                    . '&'
                 . 'domain='  . LJ::eurl( $POST{'partner_domain'} ) . '&'
                 . 'replyto=' . $replyto;
+
+            $POST{'body'} = decode_utf8($POST{'body'});         
+            $POST{'body'} = LJ::Antimat->process($POST{'body'});
+            $POST{'body'} = encode_utf8($POST{'body'});     
         }
 
         # special case here (LJINT-408), only applies to the partners case:
