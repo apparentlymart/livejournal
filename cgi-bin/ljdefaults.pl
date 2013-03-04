@@ -499,6 +499,7 @@ use strict;
                     'phoneposts' => 3,
                     'file'       => 1,
                     'photo'      => 2,
+                    'temp'       => 1,
                 },
             );
         }
