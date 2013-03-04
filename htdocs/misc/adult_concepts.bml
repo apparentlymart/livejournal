@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings %COOKIE);
+    use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings);
 
     BML::set_language_scope("/misc/adult_content.bml");
     $windowtitle = $ML{'.title'};
