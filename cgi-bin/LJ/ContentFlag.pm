@@ -639,6 +639,8 @@ sub interstitial_page_content {
             my $age = $adult_content eq 'explicit' ? 18 : 14;
             my $message_ml = "adult_content.message_$adult_content" . ($is_blocked ? "_blocked" : "");
             my $res;
+            my $u = LJ::User->new_from_url ("http://" . LJ::Request->hostname);
+            my $meta = $u ? $u->openid_tags() : "";
             my %params = (
                 age             => $age,
                 title           => LJ::Lang::ml("adult_content.title"),
@@ -660,8 +662,11 @@ sub interstitial_page_content {
                 $res->template->param (%params);
             } else {
                 $res = LJ::Response::Template->new(file => 'templates/Entries/AdultContent.tmpl.xhtml',
-                    params => \%params,
-                    use_site_scheme => 1,
+                    params              => \%params,
+                    use_site_scheme     => 1,
+                    site_scheme_params  => {
+                        meta    => $meta,
+                    },
                 );
             }
             return $res;
