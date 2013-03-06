@@ -902,6 +902,10 @@ LiveJournal.parseMedia = (function() {
 
 					var matcher = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/,
 						match = input.match(matcher);
+						
+					if (match && match[0].indexOf('youtu') === -1) {
+						return null;
+					}
 
 					return (match && match[7]) || null;
 				}
