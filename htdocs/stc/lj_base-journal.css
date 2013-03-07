@@ -1925,3 +1925,9 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 	font: normal 16px/22px Arial, Tahoma, sans-serif !important;
 	}
 
+
+
+/* LJSUP-14995: Remove Google ReCaptcha Iframes (for height removing) */
+iframe[src="about:blank"] {
+	display: none;
+	}
