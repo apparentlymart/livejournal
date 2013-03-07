@@ -116,7 +116,7 @@ sub make_feed {
         }
 
         if (LJ::Entry::Repost->substitute_content($entry, 
-                                              { 'original_post_obj' => \$entry,} )) {
+                                                 { 'original_post_obj' => \$entry,} )) {
             
             if ( ! $entry || ! $entry->valid || ! $entry->visible_to($remote) ) {
                 $opts->{'handler_return'} = 404;
@@ -314,6 +314,7 @@ sub make_feed {
 
         my $createtime = $LJ::EndOfTime - $entry_obj->{rlogtime};
         push @cleanitems, {
+            entry      => $entry_obj,
             itemid     => $entry_obj->jitemid,
             ditemid    => $ditemid,
             subject    => $subject,
@@ -392,7 +393,7 @@ sub create_view_rss {
 
     # output individual item blocks
     foreach my $it (@$cleanitems) {
-        my $entry = shift @$objs;
+        my $entry = $it->{entry};
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
         my $url  = $entry->url;
@@ -619,7 +620,7 @@ sub create_view_atom
 
     # output individual item blocks
     foreach my $it ( @$cleanitems ) {
-        my $obj = shift @$entrylist;
+        my $obj = $it->{entry};
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
         my $poster = $posteru->{$it->{posterid}};
