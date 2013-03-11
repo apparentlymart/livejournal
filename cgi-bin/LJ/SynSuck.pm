@@ -9,6 +9,7 @@ require "cleanhtml.pl";
 
 use LJ::TimeUtil;
 use Encode qw(encode_utf8 is_utf8);
+use Compress::Zlib ();
 
 sub update_feed {
     my ($urow, $verbose) = @_;
@@ -134,6 +135,10 @@ sub process_content {
     # XML::Parser doesn't include Windows-1252, but we put it in cgi-bin/XML/* for it
     # to find.
     my $encoding;
+    ## we should unzip content if it was zipped
+    if ($res->header ('content-encoding') eq 'gzip') {
+        $content = Compress::Zlib::memGunzip($content);
+    }
     if ($content =~ /(<\?xml.+?>)/ && $1 =~ /encoding=([\"\'])(.+?)\1/) {
         $encoding = lc($2);
     }
