@@ -17,6 +17,7 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     CustomRatingsUnscreen
     DeleteDelayedEntry
     DeleteEntry
+    DeleteRepost
     DeleteUserpic
     DeleteVGift
     DeleteVGiftRow
@@ -126,7 +127,6 @@ sub create {
 
     my $arg_extra = $data{'extra'} || {};
     my $extra = LJ::encode_url_string($arg_extra);
-
     my $dbh = LJ::get_cluster_master($u);
     $dbh->do(
         'INSERT INTO userlog ' .

@@ -588,7 +588,7 @@ sub delete_all_reposts_records {
 
 sub delete {
     my ($class, $u, $entry_obj) = @_;
-    
+
     #
     # Get entry id to delete
     #
@@ -618,8 +618,11 @@ sub delete {
     # If entry exists in db 
     #
     if ($repost_itemid) {        
-        LJ::set_remote($u);    
+        LJ::set_remote($u);
 
+        my $remote = LJ::get_remote();
+        my $entry = LJ::Entry->new($u->userid, jitemid => $repost_itemid);
+       
         #
         # Try to delete entry
         #
@@ -643,7 +646,13 @@ sub delete {
         __delete_repost_record( $entry_obj->journal, 
                                 $entry_obj->jitemid, 
                                 $u->userid);
-    
+
+        LJ::User::UserlogRecord::DeleteRepost->create( $remote,
+            'remote' => $remote,
+            'jitemid' => $repost_itemid*256 + $entry->{'anum'},
+            'journalid' => $u->userid,
+        );
+
         my $status = $class->get_status($entry_obj, $u);
         $status->{'delete'} = 'OK';  
         return $status;

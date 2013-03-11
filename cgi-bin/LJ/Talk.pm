@@ -295,7 +295,6 @@ sub get_journal_item
     my ($u, $itemid) = @_;
     return unless $u && $itemid;
 
-    my $uid = $u->{'userid'}+0;
     $itemid += 0;
 
     my $item = LJ::get_log2_row($u, $itemid);
