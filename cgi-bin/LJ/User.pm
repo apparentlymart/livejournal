@@ -3932,40 +3932,104 @@ sub timeupdate {
     return $timeupdate->{$u->id};
 }
 
-# when was last time new public entry was created
+# when was last time new public entry was created 
+# (fast reposts are excluded)
 sub last_public_entry_time {
     my $u = shift;
-    return $u->{_cache_last_public_time} if $u->{_cache_last_public_time};
+    
+    my $key  = "lpt." . $u->id;
+    my $attr = '_cache_last_public_time';
+    
+    return $u->{$attr} if defined $u->{$attr};
 
-    my $memkey = [$u->id, "lpt:" . $u->id];
-    my $lastpublic = LJ::MemCache::get($memkey);
-    if ($lastpublic) {
-        $u->{_cache_last_public_time} = $lastpublic;
+    my $redis = LJ::Redis->get_connection;
+
+    my $lastpublic = $redis ? $redis->get($key) : undef;
+
+    if (defined $lastpublic) {
+        $u->{$attr} = $lastpublic;
         return $lastpublic;
     }
 
     my $err;
-    my @entries = LJ::get_recent_items({ 
-                            'userid'    => $u->userid,
-                            'clusterid' => $u->clusterid,
-                            'skip'      => 0,
-                            'itemshow'  => 1,
-                            'friendsview' => 1,
-                            'err'       => \$err,
-                            });
+
+    my $is_person = $u->is_person;
+
+    my $req = {
+        'userid'      => $u->userid,
+        'clusterid'   => $u->clusterid,
+        'skip'        => 0,
+        'itemshow'    => 1,
+        'friendsview' => 1,
+        'security'    => "public",
+        'load_props'  => $is_person ? 1 : 0,
+        'err'         => \$err,
+    };
 
     $lastpublic = 0;
-    if ($err) {
-        warn "Error loading recent_entries: $err";
-    } else {
-        my $entry = shift @entries;
-        $lastpublic = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
+       
+    my ($skip, $itemshow) = (0, 10);
+        
+    until ( $lastpublic ) {
+
+        my @entries = ();
+        $req->{'entry_objects'} = \@entries;
+
+        $req->{'skip'}     = $skip;
+        $req->{'itemshow'} = $is_person ? $itemshow : 1;
+        
+        LJ::get_recent_items($req);
+        
+        if ($err) {
+            warn "Error loading recent_entries: $err";
+            undef $lastpublic;
+            last;
+        }
+
+        last unless @entries;
+        
+        foreach my $entry (@entries) {
+            unless( $is_person && $entry->prop('repost') && $entry->prop('repost') eq 'e' ) {
+                $lastpublic = LJ::TimeUtil->mysqldate_to_time($entry->{logtime}, 0);
+                last;
+            }
+        }
+
+        $skip += $itemshow;
     }
 
-    $u->{_cache_last_public_time} = $lastpublic;
-    LJ::MemCache::set($memkey, $lastpublic, 60*3);
+    if (defined $lastpublic) {
+        $u->{$attr} = $lastpublic;
+        $redis->set($key, $lastpublic) if $redis;
+    }
 
     return $lastpublic;
+}
+
+# set the last public entry time
+# do it only if key already exists, i.e. if somebody has already request it
+sub set_last_public_entry_time {
+    my ($u, $lastpublic) = @_;
+
+    my $key  = "lpt." . $u->id;
+    my $attr = '_cache_last_public_time';
+
+    $u->{$attr} = $lastpublic;
+
+    my $redis = LJ::Redis->get_connection || return;
+
+    if ( defined $lastpublic ) {
+        return unless $redis->exists($key);
+        $redis->set($key, $lastpublic);
+    } else {
+        $redis->del($key);
+    }
+}
+
+# delete last public entry time
+sub del_last_public_entry_time {
+    my $u = shift;
+    $u->set_last_public_entry_time();
 }
 
 # can this user use ESN?

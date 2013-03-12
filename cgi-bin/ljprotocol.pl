@@ -3010,6 +3010,7 @@ sub postevent {
         'req'       => $req,
         'res'       => $res,
         'entryrepost' => $flags->{'entryrepost'},
+        'logtime'   => $now,
     });
 
     # cluster tracking
