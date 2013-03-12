@@ -34,6 +34,8 @@ sub enter_comment {
     my $partid = $parent->{talkid};
     my $itemid = $item->{itemid};
 
+    my $entry = LJ::Entry->new( $journalu, 'jitemid' => $itemid );
+
     my $err = sub {
         $$errref = join(": ", @_);
         return 0;
@@ -221,11 +223,11 @@ sub enter_comment {
 
     # update the "hasscreened" property of the log item if needed
     if ($comment->{state} eq 'S') {
-        LJ::set_logprop($journalu, $itemid, { 'hasscreened' => 1 });
+        $entry->set_prop( 'hasscreened' => 1 );
     }
 
     # update the comment alter property
-    LJ::Talk::update_commentalter($journalu, $itemid);
+    $entry->touch_commentalter;
 
     # journals data consists of two types of data: posts and comments.
     # last post time is stored in 'userusage' table.

@@ -2892,6 +2892,8 @@ sub postevent {
                                              1; # LJSUP-9142: All users should be able to use give button
     }
 
+    my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
+
     # meta-data
     if (%{$req->{'props'}}) {
         my $propset = {};
@@ -2906,7 +2908,7 @@ sub postevent {
         }
 
         my %logprops;
-        LJ::set_logprop($uowner, $jitemid, $propset, \%logprops) if %$propset;
+        $entry->set_prop_multi( $propset, \%logprops );
 
         for my $key ( keys %logprops ) {
             next if $key =~ /^\d+$/;
@@ -2919,7 +2921,7 @@ sub postevent {
             }
         }
 
-        # if set_logprop modified props above, we can set the memcache key
+        # if set_prop_multi modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
         LJ::MemCache::set([$uowner->{'userid'}, "logprop2:$uowner->{'userid'}:$jitemid"],
                           \%logprops) if %logprops;
@@ -2973,8 +2975,6 @@ sub postevent {
             'url' => LJ::journal_base($u) . "/",
         });
       }
-
-    my $entry = LJ::Entry->new($uowner, jitemid => $jitemid, anum => $anum);
 
     my $ip = LJ::get_remote_ip();
     my $uniq = LJ::UniqCookie->current_uniq();
@@ -3715,6 +3715,8 @@ sub editevent {
         delete $req->{'props'}->{'copyright'};
     }
 
+    my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
+
     # handle the props
     {
         my $propset = {};
@@ -3723,7 +3725,7 @@ sub editevent {
             next unless $p;
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
-        LJ::set_logprop($uowner, $itemid, $propset);
+        $entry->set_prop_multi($propset);
 
         if ($req->{'props'}->{'copyright'} ne $curprops{$itemid}->{'copyright'}) {
             LJ::Entry->new($ownerid, jitemid => $itemid)->put_logprop_in_history('copyright', $curprops{$itemid}->{'copyright'},
@@ -3761,7 +3763,6 @@ sub editevent {
              "WHERE userid=$ownerid");
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
-    my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
     LJ::EventLogRecord::EditEntry->new($entry)->fire;
     my @jobs; # jobs to insert into TheSchwartz
     LJ::run_hooks("editpost", $entry, \@jobs);

@@ -145,6 +145,8 @@
     # check auth token
     return $err->($ML{'.error.invalidform'}) if $check_form_auth and not LJ::check_form_auth();
 
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
+
     # do the work:
     if ($mode eq "delete" || $mode eq 'deletespam') {
         # first, unscreen everything for replycount and hasscreened to adjust
@@ -181,7 +183,8 @@
         my ($num, $numspam) = LJ::delete_comments($u, "L", $itemid, @talkids);
         LJ::replycount_do($u, $itemid, "decr", $num);
         LJ::replyspamcount_do($u, $itemid, "decr", $numspam);
-        LJ::Talk::update_commentalter($u, $itemid);
+
+        $entry->touch_commentalter;
 
     } elsif ($mode eq "unscreen") {
         LJ::Talk::unscreen_comment($u, $itemid, @talkids);

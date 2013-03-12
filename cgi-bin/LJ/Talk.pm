@@ -473,11 +473,6 @@ sub screening_level {
     return $journalu->{opt_whoscreened} || 'R';
 }
 
-sub update_commentalter {
-    my ($u, $itemid) = @_;
-    LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
-}
-
 sub update_journals_commentalter {
     my $u = shift;
 
@@ -566,6 +561,9 @@ sub get_comments_in_thread {
 sub delete_thread {
     my ($u, $jitemid, $jtalkid) = @_;
 
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
+
     # get comments and delete 'em
     my @screened;
     my $ids = LJ::Talk::get_comments_in_thread($u, $jitemid, $jtalkid, undef, \@screened);
@@ -573,7 +571,9 @@ sub delete_thread {
     my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, @$ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
-    LJ::Talk::update_commentalter($u, $jitemid);
+
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
@@ -591,6 +591,9 @@ sub delete_thread {
 sub delete_author {
     my ($u, $jitemid, $posterid) = @_;
 
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
+
     # get all comments to post
     my $comments = LJ::Talk::get_talk_data($u, 'L', $jitemid) || {};
 
@@ -607,7 +610,9 @@ sub delete_author {
     my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, @ids);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
-    LJ::Talk::update_commentalter($u, $jitemid);
+
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
     return 1;
 }
@@ -628,6 +633,9 @@ sub delete_comment {
     my ($u, $jitemid, $jtalkid, $state) = @_;
     return undef unless $u && $jitemid && $jtalkid;
 
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $jitemid );
+
     unless ($state) {
         my $td = LJ::Talk::get_talk_data($u, 'L', $jitemid);
         return undef unless $td;
@@ -644,7 +652,9 @@ sub delete_comment {
     my ($num, $numspam) = LJ::delete_comments($u, "L", $jitemid, $jtalkid);
     LJ::replycount_do($u, $jitemid, "decr", $num);
     LJ::replyspamcount_do($u, $jitemid, "decr", $numspam);
-    LJ::Talk::update_commentalter($u, $jitemid);
+
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
 
     # done
@@ -745,6 +755,9 @@ sub screen_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
 
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
+
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
     return unless $in;
@@ -765,10 +778,11 @@ sub screen_comment {
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "decr", $updated);
-        LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
+        $entry->set_prop( 'hasscreened' => 1 );
     }
 
-    LJ::Talk::update_commentalter($u, $itemid);
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
 
     LJ::run_hooks('screen_comment', $userid, $itemid, [@batch]); # jitemid, [jtalkid]
@@ -781,6 +795,9 @@ sub unscreen_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
+
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
 
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
@@ -805,12 +822,16 @@ sub unscreen_comment {
         my $dbcm = LJ::get_cluster_master($u);
         my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
-        LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
+
+        unless ($hasscreened) {
+            $entry->set_prop( 'hasscreened' => 0 );
+        }
     }
     
     LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
-    LJ::Talk::update_commentalter($u, $itemid);
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
 
     return;
@@ -821,6 +842,9 @@ sub spam_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
+
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
 
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
@@ -846,10 +870,11 @@ sub spam_comment {
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "decr", $updated);
-        LJ::set_logprop($u, $itemid, { 'hasspamed' => 1 });
+        $entry->set_prop( 'hasspamed' => 1 );
     }
 
-    LJ::Talk::update_commentalter($u, $itemid);
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
 
     return;
@@ -861,7 +886,10 @@ sub unspam_comment {
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
     
-    my $new_state = 'A';    
+    # TODO: have an LJ::Entry in the signature
+    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
+
+    my $new_state = 'A';
     my $screening = LJ::Talk::screening_level( $u, $itemid ); 
     if ($screening eq 'A') {
         $new_state = 'S';
@@ -898,10 +926,14 @@ sub unspam_comment {
         my $dbcm = LJ::get_cluster_master($u);
         my $hasspamed = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='B'");
-        LJ::set_logprop($u, $itemid, { 'hasspamed' => 0 }) unless $hasspamed;
+
+        unless ($hasspamed) {
+            $entry->set_prop( 'hasspamed' => 0 );
+        }
     }
-    
-    LJ::Talk::update_commentalter($u, $itemid);
+
+    $entry->touch_commentalter;
+
     LJ::Talk::update_journals_commentalter($u);
 
     return $spam_counter;

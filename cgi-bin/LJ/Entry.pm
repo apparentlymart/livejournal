@@ -547,13 +547,63 @@ sub _load_props {
 }
 
 sub set_prop {
-    my $self = shift;
-    my $prop = shift;
-    my $val = shift;
+    my ( $self, $prop, $val ) = @_;
 
-    LJ::set_logprop($self->journal, $self->jitemid, { $prop => $val });
-    $self->{props}{$prop} = $val;
+    $self->set_prop_multi( { $prop => $val } );
+
     return 1;
+}
+
+sub set_prop_multi {
+    # hashref to set, hashref of what was done:
+    my ( $self, $hashref, $logprops ) = @_;
+
+    return unless $hashref && %$hashref;
+
+    my $uid     = $self->journalid;
+    my $u       = LJ::load_userid($uid);
+    my $jitemid = $self->jitemid;
+
+    my $kill_mem = 0;
+    my $del_ids;
+    my $ins_values;
+
+    $logprops ||= {};
+
+    while ( my ( $k, $v ) = each %$hashref ) {
+        $self->{'props'}->{$k} = $v;
+
+        my $prop = LJ::get_prop("log", $k);
+        next unless $prop;
+
+        $kill_mem = 1 unless $prop eq "commentalter";
+
+        my $memkey_ind = [ $uid, "log2indprop:$uid:$jitemid:$prop->{'id'}" ];
+        LJ::MemCache::delete($memkey_ind);
+
+        if ($v) {
+            $ins_values .= "," if $ins_values;
+            $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $u->quote($v) . ")";
+            $logprops->{$k} = $v;
+        }
+        else {
+            $del_ids .= "," if $del_ids;
+            $del_ids .= $prop->{'id'};
+        }
+    }
+
+    $u->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
+           "VALUES $ins_values") if $ins_values;
+    $u->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
+           "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
+
+    if ($kill_mem) {
+        LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]);
+        my $cached_entry =  $singletons{$uid}->{$jitemid};
+        $cached_entry->{_loaded_props} = 0 if $cached_entry;
+    }
+
+    LJ::run_hooks( 'set_entry_prop', $self, $hashref );
 }
 
 sub normalize_props {
@@ -1660,6 +1710,11 @@ sub repost_offer {
     return $self->prop('repost_offer');
 }
 
+sub touch_commentalter {
+    my ($self) = @_;
+    $self->set_prop( 'commentalter' => time );
+}
+
 package LJ;
 
 use Class::Autouse qw (
@@ -2464,47 +2519,6 @@ sub get_before_item_link {
 }
 
 
-
-sub set_logprop {
-    my ($u, $jitemid, $hashref, $logprops) = @_;  # hashref to set, hashref of what was done
-
-    $jitemid += 0;
-    my $uid = $u->{'userid'} + 0;
-    my $kill_mem = 0;
-    my $del_ids;
-    my $ins_values;
-
-    while (my ($k, $v) = each %{$hashref||{}}) {
-        my $prop = LJ::get_prop("log", $k);
-        next unless $prop;
-
-        $kill_mem = 1 unless $prop eq "commentalter";
-
-        my $memkey_ind = [ $uid, "log2indprop:$uid:$jitemid:$prop->{'id'}" ];
-        LJ::MemCache::delete($memkey_ind);
-
-        if ($v) {
-            $ins_values .= "," if $ins_values;
-            $ins_values .= "($uid, $jitemid, $prop->{'id'}, " . $u->quote($v) . ")";
-            $logprops->{$k} = $v;
-        }
-        else {
-            $del_ids .= "," if $del_ids;
-            $del_ids .= $prop->{'id'};
-        }
-    }
-
-    $u->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
-           "VALUES $ins_values") if $ins_values;
-    $u->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
-           "AND propid IN ($del_ids)", undef, $u->{'userid'}, $jitemid) if $del_ids;
-
-    if ($kill_mem) {
-        LJ::MemCache::delete([$uid,"logprop2:$uid:$jitemid"]);
-        my $cached_entry =  $singletons{$uid}->{$jitemid};
-        $cached_entry->{_loaded_props} = 0 if $cached_entry;
-    }
-}
 
 # <LJFUNC>
 # name: LJ::load_log_props2
