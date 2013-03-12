@@ -11196,7 +11196,7 @@ sub get_friends_with_type {
         foreach my $type (keys %put_in_cache) {
             my $key = "u:fl:" . $u->userid . ":$type";
             $redis->sadd($key, @{$put_in_cache{$type}});    
-            $redis->expire($key, time() + 60 * 60);
+            $redis->expire($key, 60 * 60);
         }
     }
 
