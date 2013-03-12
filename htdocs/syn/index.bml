@@ -93,6 +93,11 @@ body<=
                     return "<?h1 $ML{'.invalid.http.title'} h1?><?p $msg p?>";
                 }
 
+                ## we should unzip content if it was zipped
+                if ($res->header ('content-encoding') eq 'gzip') {
+                    $content = Compress::Zlib::memGunzip($content);
+                }
+
                 # Start out with the syn_url being equal to the url
                 # they entered of the resource.  If we end up parsing
                 # the resource and finding it has a link to the real
