@@ -1800,6 +1800,12 @@ entryform.userpics=User Picture Icon:
 entryform.view_thumbnails|staleness=1
 entryform.view_thumbnails=View Thumbnails
 
+entryunit.comments=[[reply_count]] [[?reply_count|comment|comments]]
+
+entryunit.hide=Hide author
+
+entryunit.read=Mark entry as read
+
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
