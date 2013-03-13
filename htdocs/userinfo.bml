@@ -1,4 +1,3 @@
-
 <?_code
 {
     use strict;
@@ -728,8 +727,7 @@
                          "</li>";
         }
  
-        my $soc_capital = $u->get_social_capital();
-        $soc_capital = $soc_capital < 10 ? ' <10 ' : LJ::commafy($soc_capital);
+        my $soc_capital = LJ::User::display_soccap($u->get_social_capital());
         $soc_image ||= "<img src='$LJ::IMGPREFIX/profile_icons/social-capital.png?v=17298'/>";
 
         if ($u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {

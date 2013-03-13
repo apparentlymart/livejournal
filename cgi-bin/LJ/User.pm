@@ -2898,18 +2898,34 @@ sub get_social_capital {
     my $soc_capital = LJ::MemCache::get( $key );
     if (defined $soc_capital) {
         return $soc_capital;
-    } else {  
+    } else {
         $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
         my $value = 0;
         if (defined $soc_capital) {
             $value = int($soc_capital->{result}->{authority}/1000);
             LJ::MemCache::set( $key, $value, 5*60);
         } else {
-            $value = -1;
-            LJ::MemCache::set( $key, $value, 60);
+        	return undef;
         }
-        return $value;
     }
+}
+
+# <LJFUNC>
+# name: LJ::display_soccap
+# class: text
+# des: Encode social capital into nice look text
+# args: number
+# returns: nice string
+# </LJFUNC>
+sub display_soccap
+{
+	my $soc_capital = shift;
+	if ( $soc_capital =~ /^\d+$/ ) {
+		$soc_capital = $soc_capital < 10 ? LJ::Lang::ml('/tools/endpoints/ctxpopup.bml.social_capital_less_that') : LJ::commafy($soc_capital);               
+	} else {
+		$soc_capital = LJ::Lang::ml('social_capital_undef');
+	}
+	return $soc_capital;
 }
 
 # <LJFUNC>

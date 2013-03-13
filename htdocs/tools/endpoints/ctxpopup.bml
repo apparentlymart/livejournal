@@ -140,17 +140,12 @@
                 %filter,
             });
 
-            $soc_capital = $u->get_social_capital(); 
+            $soc_capital = LJ::User::display_soccap($u->get_social_capital()); 
 
             if (ref $position eq 'HASH') {
                 $first = $position->{result}->{position}!=0 ? 0 : 1;
             }
-            
-            if ( $soc_capital == -1 ) {
-                $soc_capital = '&nbsp;&ndash;';
-            } else {
-                $soc_capital = $soc_capital < 10 ? BML::ml('.social_capital_less_that') : LJ::commafy($soc_capital);
-            }
+
         }
 
         $ret{first}  = $first; 
