@@ -2345,24 +2345,42 @@ sub get_recent_talkitems {
 sub last_login_time {
     my ($u) = @_;
 
+    my $userid = $u->userid;
+    my $cache  = ( $LJ::REQ_GLOBAL{'user_last_login_time'} ||= {} );
+
+    return $cache->{$userid} if exists $cache->{$userid};
+
     my $dbr = LJ::get_cluster_reader($u);
-    my ($time) = $dbr->selectrow_array(qq{
-        SELECT MAX(logintime) FROM loginlog WHERE userid=?
-    }, undef, $u->id);
+    my ($time) = $dbr->selectrow_array(
+        'SELECT MAX(logintime) FROM loginlog WHERE userid=?',
+        undef, $userid );
 
     $time ||= 0;
 
+    $cache->{$userid} = $time;
     return $time;
 }
 
 sub last_password_change_time {
     my ($u) = @_;
 
+    my $userid = $u->userid;
+    my $cache  = ( $LJ::REQ_GLOBAL{'user_last_password_change_time'} ||= {} );
+
+    return $cache->{$userid} if exists $cache->{$userid};
+
     my $infohistory = LJ::User::InfoHistory->get( $u, 'password' );
     my @password_change_timestamps = map { $_->timechange_unix } @$infohistory;
 
-    return 0 unless @password_change_timestamps;
-    return List::Util::max( @password_change_timestamps );
+    my $time;
+    if (@password_change_timestamps) {
+        $time = List::Util::max( @password_change_timestamps );
+    } else {
+        $time = 0;
+    }
+
+    $cache->{$userid} = $time;
+    return $time;
 }
 
 # THIS IS DEPRECATED DO NOT USE
