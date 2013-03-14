@@ -1205,6 +1205,7 @@ sub entry_form_decode
     $req->{'prop_opt_lockcomments'} ||= $POST->{'comment_settings'} eq 'lockcomments' ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
+    $req->{'prop_opt_norating'}       = $POST->{'prop_opt_norating'} ? 1 : 0;
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
     $req->{'prop_poster_ip'} = LJ::get_remote_ip();
