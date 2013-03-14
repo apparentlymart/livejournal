@@ -3058,3 +3058,23 @@ HTML BODY .i-ljuser {
 	.b-toggle-left:after {
 		right: -1em;
 		}
+
+/*  This styles was removed from screen.css*/
+.standout {
+    text-align: center;
+	}
+.standout .container {
+    width: auto;
+    padding: 3px;
+    margin: auto;
+    background-color: #C5DFF9 !important;
+    border: 1px solid #8FC3F7;
+	text-align: left;
+	color: #000; 
+    }
+.standout span.container {
+    display: inline-block;
+    padding: 8px 7px !important;
+	}
+
+
