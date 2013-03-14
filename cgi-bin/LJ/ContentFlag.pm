@@ -618,7 +618,7 @@ sub interstitial_page_content {
 
         # if they've confirmed that they're over 18, then they're over 14 too
         if ($adult_content eq "concepts" && !$cookie) {
-            $cookie = 1 if $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
+            $cookie = 1 if $BML::COOKIE{LJ::ContentFlag->cookie_name("explicit")};
         }
 
         # logged in users with defined ages are blocked from content that's above their age level
