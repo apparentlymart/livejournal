@@ -54,7 +54,7 @@ body<=
  LJ::set_active_crumb('supporthelp');
 
  my ($ret, $sth);
- my $dbr = LJ::get_db_reader();
+ my $dbr = LJ::get_db_writer();
 
  my $remote = LJ::get_remote();
  LJ::Support::init_remote($remote);
@@ -161,7 +161,7 @@ body<=
      $filterwhere = ' AND s.spcatid IN ('. join( ',', @shown_cats ) .')'
         if @shown_cats;
 
-     my $dbr = LJ::get_db_reader();
+     my $dbr = LJ::get_db_writer();
      if ($state eq "closed") {
          $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND " .
                               "s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere");
