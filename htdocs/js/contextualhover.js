@@ -654,7 +654,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 		// ajax request to change relation
 		changeRelation: function (info, ctxPopupId, action, e) {
-			function changeRelation(data) {
+			function changedRelation(data) {
 				if (data.error) {
 					return ContextualPopup.showNote(data.error);
 				}
