@@ -7056,6 +7056,8 @@ talk.post.adult.none=none
 talk.post.backdated|staleness=1
 talk.post.backdated=do not add to friends page and RSS
 
+talk.post.backdated.edit=Remove this entry friends page and RSS
+
 talk.post.beta.about|staleness=1
 talk.post.beta.about=<a href="#" target="_blank">About</a>
 
@@ -7238,6 +7240,10 @@ talk.post.paidrepost.desc=description
 
 talk.post.paidrepost.pay|staleness=1
 talk.post.paidrepost.pay=Pay for reposts of this entry
+
+talk.post.ratings=Do not show this entry in the ratings
+
+talk.post.ratings.edit=Remove this entry from the ratings
 
 talk.post.repost.facebook|staleness=1
 talk.post.repost.facebook=Facebook
