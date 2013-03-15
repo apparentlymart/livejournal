@@ -43,7 +43,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 				edit_node[1].style.display = 'none';
 			}
 		}
-		
+
 		var username = data.res.username,
 			alias = data.res.alias;
 		if(ContextualPopup.cachedResults[username]) {
@@ -90,7 +90,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 Aliases = {};
 function addAlias(target, ptitle, ljusername, oldalias, callback) {
 	if (! ptitle) { return true; }
-	
+
 	new LJWidgetIPPU_AddAlias({
 		title: ptitle,
 		width: 440,
@@ -241,7 +241,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					label = data.ml_this_is_you;
 				} else {
 					label = username;
-					
+
 					if (data.is_friend_of) {
 						if (data.is_friend) {
 							label += data.ml_mutual_friend;
@@ -264,7 +264,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					if (data.alias) {
 						buildObject.headLinks.push('<i>' + data.alias.encodeHTML() + '</i>');
 					}
-					
+
 					buildObject.headLinks.push({
 						url: Site.siteroot + '/manage/notes.bml',
 						click: function(e)
@@ -317,7 +317,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 
 			var linkGroup = [];
-			
+
 			// member of community
 			if (data.is_logged_in && data.is_comm) {
 				linkGroup.push({
@@ -563,7 +563,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				ljuser.posted_in = parent.parentNode.getAttribute('data-journal');
 				ljuser.className += ' ContextualPopup';
 			}
-			
+
 			ljusers = node.getElementsByTagName('img');
 			i = -1;
 			while (ljusers[++i]) {
@@ -654,42 +654,40 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 		// ajax request to change relation
 		changeRelation: function (info, ctxPopupId, action, e) {
-			var changedRelation = function(data) {
+			function changeRelation(data) {
 				if (data.error) {
 					return ContextualPopup.showNote(data.error);
 				}
-				
+
 				if (ContextualPopup.cachedResults[ctxPopupId]) {
 					jQuery.extend(ContextualPopup.cachedResults[ctxPopupId], data);
 				}
-				
+
 				// if the popup is up, reload it
 				ContextualPopup.renderPopup(ctxPopupId);
-			};
-			
-			var xhr = jQuery.post(LiveJournal.getAjaxUrl('changerelation'),
-						{
-							target: info.username,
-							action: action,
-							auth_token: info[action + '_authtoken']
-						},
-						function(data)
-						{
-							ContextualPopup.hourglass = null;
-							changedRelation(data);
-						},
-						'json'
-					);
-			
+			}
+
+			LJ.Api.call(
+				'change_relation.' + action.toLowerCase(),
+				{ target: info.username },
+				function (data) {
+					ContextualPopup.hourglass.hide();
+					ContextualPopup.hourglass = null;
+					changedRelation(data);
+				}
+			);
+
 			ContextualPopup.hideHourglass();
-			ContextualPopup.hourglass = jQuery(e).hourglass(xhr)[0];
+			ContextualPopup.hourglass = jQuery(e).hourglass()[0];
+
 			//entering mouse on the hourglass should no close popup
 			jQuery(ContextualPopup.hourglass.ele).bind('mouseenter', function(ev) {
 				popup.element.trigger('mouseenter');
 			});
+
 			// so mousing over hourglass doesn't make ctxpopup think mouse is outside
 			ContextualPopup.hourglass.add_class_name('lj_hourglass');
-			
+
 			return false;
 		},
 
@@ -747,18 +745,18 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					if( target.posted_in ) {
 						data.posted_in = target.posted_in;
 					}
-					
+
 					t.cachedResults[String(data.userid)] =
 					t.cachedResults[data.username] =
 					t.cachedResults[data.url_userpic] = data;
-					
+
 					// non default userpic
 					if (target.up_url) {
 						t.cachedResults[target.up_url] = data;
 					}
-					
+
 					t.currentRequests[popup_id] = null;
-					
+
 					if (t.currentId === popup_id) {
 						t.renderPopup(popup_id);
 					}
