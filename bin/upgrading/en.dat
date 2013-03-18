@@ -6780,6 +6780,9 @@ talk.insertlink=Insert Link
 talk.insertmap|staleness=1
 talk.insertmap=Insert Map
 
+talk.maptext|staleness=1
+talk.maptext=Map
+
 talk.insertphoto|staleness=1
 talk.insertphoto=Insert Photo
 
