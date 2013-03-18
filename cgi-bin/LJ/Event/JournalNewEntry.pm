@@ -430,11 +430,18 @@ sub zero_journalid_subs_means { undef }
 
 sub as_push {
     my ($self, $u, $lang) = @_;
+    my $entry   = $self->entry;
+    my $journal = $entry->journal;
+    my $poster  = $entry->poster;
+
+    my $lang_var = $self->entry->journal->is_comm ? 'esn.push.notification.eventtrackjournalpostsentry.comm' :
+                                                    'esn.push.notification.eventtrackjournalpostsentry';
 
     my $main = LJ::Lang::get_text(  $lang, 
-                                    "esn.push.notification.eventtrackjournalpostsentry", 
+                                    $lang_var,
                                     undef,
-                                    { user => $u->user });
+                                    { journal => $journal->display_username(1),
+                                      poster  => $poster->display_username(1), });
     my $tags = ''; 
     if ($self->entry->tags) {
         $tags = LJ::Lang::get_text( $lang, 
@@ -442,6 +449,7 @@ sub as_push {
                                     undef, 
                                     { tag => join(', ', $self->entry->tags )});
     }
+
     return $main . " "  . $tags; 
 }
 

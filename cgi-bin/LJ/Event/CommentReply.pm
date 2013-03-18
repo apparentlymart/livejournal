@@ -58,7 +58,7 @@ sub as_push {
     return LJ::Lang::get_text($lang, $ml_key, undef,
                               { user    => $user, 
                                 subject => $subject, 
-                                journal => $entry->journal->user } );
+                                journal => $entry->journal->display_username(1) } );
 }
 
 sub as_push_payload {
