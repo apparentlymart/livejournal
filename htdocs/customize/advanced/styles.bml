@@ -285,11 +285,18 @@
 
         $body .= "<div><?h1 $ML{'.yourstyles.header'} h1?></div>\n";
 
+        my @purchased = LJ::Pay::Theme->get_purchased ($u);
+
         # show style listing
         $body .= "<table style='margin-left: 40px'>\n";
         if (%$ustyle) {
             my $journalbase = LJ::journal_base($u);
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
+                my $styleinfo= LJ::S2::get_style_layers ($u, $styleid);
+                my $style = eval { LJ::S2Theme->new ( themeid => $styleinfo->{'theme'} ) };
+
+                next if ( ! ($style && $style->is_buyable && grep { $style->s2lid == $_->s2lid } @purchased));
+
                 $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
                 $body .= $formauth;
                 my @b = $styleid == $u->{'s2_style'} ? "<b>" : "</b>";
