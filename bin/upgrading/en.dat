@@ -4202,6 +4202,8 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.menu.index=Home
+
 mediaplaceholder.link|staleness=1
 mediaplaceholder.link=Link
 
