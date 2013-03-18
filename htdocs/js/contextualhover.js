@@ -308,6 +308,22 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					}())
 				});
 
+				// subscribe/unsubscribe. Depends on server flag
+				if ( data.new_friends_and_subscriptions ) {
+					if ( !data.is_friend ) {
+						buildObject.headLinks.push({
+							selector: 'a[href=#subscription]',
+							url: '#subscription',
+							click: function (e) {
+								ContextualPopup.changeRelation(data, ctxPopupId, data.is_subscribedon ? 'unsubscribe' : 'subscribe', e);
+								e.preventDefault();
+								e.stopPropagation();
+							},
+							text: data.is_subscribedon ? data.ml_unsubscribe : data.ml_subscribe
+						});
+					}
+				}
+
 				if (data.is_friend && !data.is_identity) {
 					buildObject.headLinks.push({
 						url: data.url_addfriend,
@@ -500,7 +516,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					}
 
 					//maybe this object has children with events to be set
-					if(typeof value === "object") {
+					if (typeof value === 'object') {
 						walkObject(value);
 					}
 				});
@@ -656,7 +672,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		changeRelation: function (info, ctxPopupId, action, e) {
 			function changedRelation(data) {
 				if (data.error) {
-					return ContextualPopup.showNote(data.error);
+					return ContextualPopup.showNote(data.error.message);
 				}
 
 				if (ContextualPopup.cachedResults[ctxPopupId]) {
