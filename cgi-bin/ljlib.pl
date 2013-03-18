@@ -2320,18 +2320,7 @@ sub show_contextual_hover {
     return ($LJ::CTX_POPUP and !$LJ::IS_SSL and $args{ctxpp} ne 'no');
 }
 
-# <LJFUNC>
-# name: LJ::start_request
-# des: Before a new web request is obtained, this should be called to
-#      determine if process should die or keep working, clean caches,
-#      reload config files, etc.
-# returns: 1 if a new request is to be processed, 0 if process should die.
-# </LJFUNC>
-sub start_request
-{
-    handle_caches();
-    # TODO: check process growth size
-
+sub __clean_singletons {
     # clear per-request caches
     LJ::unset_remote();               # clear cached remote
     $LJ::ACTIVE_JOURNAL = undef;      # for LJ::{get,set}_active_journal
@@ -2373,6 +2362,7 @@ sub start_request
     $LJ::COUNT_LOAD_PROPS_MULTI_DB = 0;     # Counter for number of requests for props load to DB
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
+
     LJ::Userpic->reset_singletons;
     LJ::Comment->reset_singletons;
     LJ::Entry->reset_singletons;
@@ -2384,11 +2374,27 @@ sub start_request
     LJ::RelationService->reset_singletons;
     LJ::UniqCookie->clear_request_cache;
     LJ::PushNotification::Storage->clear_data();
-    
+
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
     # authentication domains.  see the FotoBilder interface.
     $LJ::_XFER_REMOTE_IP = undef;
+}
+
+# <LJFUNC>
+# name: LJ::start_request
+# des: Before a new web request is obtained, this should be called to
+#      determine if process should die or keep working, clean caches,
+#      reload config files, etc.
+# returns: 1 if a new request is to be processed, 0 if process should die.
+# </LJFUNC>
+sub start_request
+{
+    handle_caches();
+    # TODO: check process growth size
+ 
+    # clean sigletons
+    __clean_singletons();
 
     # clear the handle request cache (like normal cache, but verified already for
     # this request to be ->ping'able).
@@ -2423,6 +2429,8 @@ sub end_request
     LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
 
     LJ::run_hooks("end_request");
+
+    __clean_singletons();
 }
 
 # <LJFUNC>
