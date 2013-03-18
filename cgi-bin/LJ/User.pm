@@ -16,6 +16,11 @@ no warnings 'uninitialized';
 
 use lib "$ENV{LJHOME}/cgi-bin";
 
+use base qw/
+    LJ::User::Relations::Friends
+    LJ::User::Relations::Subscribers
+/;
+
 use Carp;
 use HTTP::Date qw( str2time );
 use List::Util qw();
@@ -2084,13 +2089,6 @@ sub userpic_quota {
     return $quota;
 }
 
-sub friendsfriends_url {
-    my $u = shift;
-    croak "invalid user object passed" unless LJ::isu($u);
-
-    return $u->journal_base . "/friendsfriends";
-}
-
 sub wishlist_url {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
@@ -2120,15 +2118,6 @@ sub profile_url {
         $url .= "?mode=full" if $opts{full};
     }
     return $url;
-}
-
-
-
-sub addfriend_url {
-    my $u = shift;
-    croak "invalid user object passed" unless LJ::isu($u);
-
-    return "$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}";
 }
 
 # returns the gift shop URL to buy a gift for that user
@@ -2193,90 +2182,6 @@ sub large_journal_icon {
 sub caps_icon {
     my $u = shift;
     return LJ::user_caps_icon($u->{caps});
-}
-
-# <LJFUNC>
-# name: LJ::User::get_friends_birthdays
-# des: get the upcoming birthdays for friends of a user. shows birthdays 3 months away by default
-#      pass in full => 1 to get all friends' birthdays.
-# returns: arrayref of [ month, day, user ] arrayrefs
-# </LJFUNC>
-sub get_friends_birthdays {
-    my $u = shift;
-    return undef unless LJ::isu($u);
-
-    my %opts = @_;
-    my $months_ahead = $opts{months_ahead} || 3;
-    my $full = $opts{full};
-
-    # what day is it now?
-    my $now = $u->time_now;
-    my ($mnow, $dnow) = ($now->month, $now->day);
-
-    my $bday_sort = sub {
-        # first we sort them normally...
-        my @bdays = sort {
-            ($a->[0] <=> $b->[0]) || # month sort
-            ($a->[1] <=> $b->[1])    # day sort
-        } @_;
-
-        # fast path out if we're getting all birthdays.
-        return @bdays if $full;
-
-        # then we need to push some stuff to the end. consider "three months ahead"
-        # from november ... we'd get data from january, which would appear at the
-        # head of the list.
-        my $nowstr = sprintf("%02d-%02d", $mnow, $dnow);
-        my $i = 0;
-        while ($i++ < @bdays && sprintf("%02d-%02d", @{ $bdays[0] }) lt $nowstr) {
-            push @bdays, shift @bdays;
-        }
-
-        return @bdays;
-    };
-
-    my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
-    my $cached_bdays = LJ::MemCache::get($memkey);
-    return $bday_sort->(@$cached_bdays) if $cached_bdays;
-
-    my @friends = $u->friends;
-    my @bdays;
-
-    foreach my $friend (@friends) {
-        my ($year, $month, $day) = split('-', $friend->{bdate});
-        next unless $month > 0 && $day > 0;
-
-        # skip over unless a few months away (except in full mode)
-        unless ($full) {
-            # the case where months_ahead doesn't wrap around to a new year
-            if ($mnow + $months_ahead <= 12) {
-                # discard old months
-                next if $month < $mnow;
-                # discard months too far in the future
-                next if $month > $mnow + $months_ahead;
-
-            # the case where we wrap around the end of the year (eg, oct->jan)
-            } else {
-                # we're okay if the month is in the future, because
-                # we KNOW we're wrapping around. but if the month is
-                # in the past, we need to verify that we've wrapped
-                # around and are still within the timeframe
-                next if ($month < $mnow) && ($month > ($mnow + $months_ahead) % 12);
-            }
-
-            # month is fine. check the day.
-            next if ($month == $mnow && $day < $dnow);
-        }
-
-        if ($friend->can_show_bday) {
-            push @bdays, [ $month, $day, $friend->user ];
-        }
-    }
-
-    # set birthdays in memcache for later
-    LJ::MemCache::set($memkey, \@bdays, 86400);
-
-    return $bday_sort->(@bdays);
 }
 
 # tests to see if a user is in a specific named class. class
@@ -3553,12 +3458,9 @@ sub is_identity {
     return $u->{journaltype} eq "I";
 }
 
-## Can we add this account to someone's friendsOf list
-sub can_be_counted_as_friendof {
+sub is_redirected {
     my $u = shift;
-    return 0 unless $u->statusvis =~ /^[VML]$/o;
-    return 0 unless $u->journaltype =~ /^[PI]$/o;
-    return 1;
+    return $u->{journaltype} eq "R";
 }
 
 ## We trust OpenID users if they are either from trusted OpenID provider or
@@ -3605,22 +3507,6 @@ sub journaltype_readable {
         N => 'news',
         C => 'community',
     }->{$u->{journaltype}};
-}
-
-*has_friend = \&is_friend;
-sub is_friend {
-    my $ua = shift;
-    my $ub = shift;
-
-    return LJ::is_friend($ua, $ub);
-}
-
-sub is_mutual_friend {
-    my $ua = shift;
-    my $ub = shift;
-
-    return 1 if ($ua->is_friend($ub) && $ub->is_friend($ua));
-    return 0;
 }
 
 sub who_invited {
@@ -3887,25 +3773,6 @@ sub opt_usermsg {
         return 'M' if ($u->is_minor);
         return 'Y';
     }
-}
-
-sub add_friend {
-    my ($u, $target, $opts) = @_;
-    $opts->{nonotify} = 1 if $u->is_friend($target);
-    return LJ::add_friend($u, $target, $opts);
-}
-
-sub friend_and_watch {
-    my ($u, $target, $opts) = @_;
-    $opts->{defaultview} = 1;
-    $u->add_friend($target, $opts);
-}
-
-sub remove_friend {
-    my ($u, $target, $opts) = @_;
-
-    $opts->{nonotify} = 1 unless $u->has_friend($target);
-    return LJ::remove_friend($u, $target, $opts);
 }
 
 sub view_control_strip {
@@ -4341,17 +4208,6 @@ sub get_opt_imagelinks {
     return $opt;
 }
 
-sub opt_placeholders_friendspage {
-    my $u = shift;
-    my $opt = $u->get_opt_imagelinks;
-
-    if ( $opt =~ /^(\d)\:\d$/ ) {
-        return $1;
-    }
-
-    return 0;
-}
-
 sub opt_placeholders_comments {
     my $u = shift;
     my $opt = $u->get_opt_imagelinks;
@@ -4391,19 +4247,6 @@ sub opt_videoplaceholders_comments {
     }
 
     return 0;
-}
-
-sub opt_showmutualfriends {
-    my $u = shift;
-    return $u->raw_prop('opt_showmutualfriends') ? 1 : 0;
-}
-
-# only certain journaltypes can show mutual friends
-sub show_mutualfriends {
-    my $u = shift;
-
-    return 0 unless $u->journaltype =~ /[PSI]/;
-    return $u->opt_showmutualfriends ? 1 : 0;
 }
 
 sub opt_getting_started {
@@ -4885,38 +4728,6 @@ sub journaltype {
     return $u->{journaltype};
 }
 
-sub friends {
-    my $u = shift;
-    my @friendids = $u->friend_uids;
-    my $users = LJ::load_userids(@friendids);
-    while(my ($uid, $u) = each %$users){
-        delete $users->{$uid} unless $u;
-    }
-    return values %$users if wantarray;
-    return $users;
-}
-
-# Returns a list of friends who are actual people, not communities or feeds
-sub people_friends {
-    my $u = shift;
-
-    return grep { $_->is_person || $_->is_identity } $u->friends;
-}
-
-# the count of friends that the user has added
-# -- eg, not initial friends auto-added for them
-sub friends_added_count {
-    my $u = shift;
-    my %init_friends_ids;
-
-    for ( @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user ) {
-        my $u = LJ::load_user($_);
-        $init_friends_ids{ $u->id }++ if $u;
-    }
-
-    return scalar grep { ! $init_friends_ids{$_} } $u->friend_uids;
-}
-
 sub set_password {
     my ($u, $password) = @_;
     return LJ::set_password($u->id, $password);
@@ -4925,221 +4736,6 @@ sub set_password {
 sub set_email {
     my ($u, $email) = @_;
     return LJ::set_email($u->id, $email);
-}
-
-# returns array of friendof uids.  by default, limited at 50,000 items.
-sub friendof_uids {
-    my ($u, %args) = @_;
-    my $limit = int(delete $args{limit}) || 50000;
-    Carp::croak("unknown option") if %args;
-
-    return LJ::RelationService->find_relation_sources($u, 'F', limit => $limit);
-}
-
-# returns array of friend uids.  by default, limited at 50,000 items.
-sub friend_uids {
-    my ($u, %args) = @_;
-    my $limit = int(delete $args{limit}) || 50000;
-    Carp::croak("unknown option") if %args;
-
-    return LJ::RelationService->find_relation_destinations($u, 'F', limit => $limit);
-}
-
-# helper method since the logic for both friends and friendofs is so similar
-sub _friend_friendof_uids {
-    my $u = shift;
-    my %args = @_;
-
-    ## check cache first
-    my $res = $u->_load_friend_friendof_uids_from_memcache($args{mode}, $args{limit});
-    return @$res if defined $res;
-
-    # call normally if no gearman/not wanted
-    my $gc = '';
-    return $u->_friend_friendof_uids_do(skip_memcached => 1, %args) # we've already checked memcached above
-        unless LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id) and $gc = LJ::gearman_client();
-
-    # invoke gearman
-    my @uids;
-    my $args = Storable::nfreeze({uid => $u->id, opts => \%args});
-    my $task = Gearman::Task->new("load_friend_friendof_uids", \$args,
-                                  {
-                                      uniq => join("-", $args{mode}, $u->id, $args{limit}),
-                                      on_complete => sub {
-                                          my $res = shift;
-                                          return unless $res;
-                                          my $uidsref = Storable::thaw($$res);
-                                          @uids = @{$uidsref || []};
-                                      }
-                                  });
-    my $ts = $gc->new_task_set();
-    $ts->add_task($task);
-    $ts->wait(timeout => 30); # 30 sec timeout
-
-    return @uids;
-
-}
-
-# actually get friend/friendof uids, should not be called directly
-sub _friend_friendof_uids_do {
-    my ($u, %args) = @_;
-## method is also called from load-friends-gm worker.
-
-    my $limit = int(delete $args{limit}) || 50000;
-    my $mode  = delete $args{mode};
-    my $skip_memcached = delete $args{skip_memcached};
-    Carp::croak("unknown option") if %args;
-
-    ## cache
-    unless ($skip_memcached){
-        my $res = $u->_load_friend_friendof_uids_from_memcache($mode, $limit);
-        return @$res if $res;
-    }
-
-    ## db
-    my $uids = $u->_load_friend_friendof_uids_from_db($mode, $limit);
-
-    # if the list of uids is greater than 950k
-    # -- slow but this definitely works
-    my $pack = pack("N*", $limit);
-    foreach (@$uids) {
-        last if length $pack > 1024*950;
-        $pack .= pack("N*", $_);
-    }
-
-    ## memcached
-    my $memkey = $u->_friend_friendof_uids_memkey($mode);
-    LJ::MemCache::add($memkey, $pack, 3600) if $uids;
-
-    return @$uids;
-}
-
-sub _friend_friendof_uids_memkey {
-    my ($u, $mode) = @_;
-    my $memkey;
-
-    if ($mode eq "friends") {
-        $memkey = [$u->id, "friends2:" . $u->id];
-    } elsif ($mode eq "friendofs") {
-        $memkey = [$u->id, "friendofs2:" . $u->id];
-    } else {
-        Carp::croak("mode must either be 'friends' or 'friendofs'");
-    }
-
-    return $memkey;
-}
-
-sub _load_friend_friendof_uids_from_memcache {
-    my ($u, $mode, $limit) = @_;
-
-    my $memkey = $u->_friend_friendof_uids_memkey($mode);
-
-    if (my $pack = LJ::MemCache::get($memkey)) {
-        my ($slimit, @uids) = unpack("N*", $pack);
-        # value in memcache is good if stored limit (from last time)
-        # is >= the limit currently being requested.  we just may
-        # have to truncate it to match the requested limit
-        if ($slimit >= $limit) {
-            @uids = @uids[0..$limit-1] if @uids > $limit;
-            return \@uids;
-        }
-
-        # value in memcache is also good if number of items is less
-        # than the stored limit... because then we know it's the full
-        # set that got stored, not a truncated version.
-        return \@uids if @uids < $slimit;
-    }
-
-    return undef;
-}
-
-## Attention: if 'limit' arg is omited, this method loads all userid from friends table.
-sub _load_friend_friendof_uids_from_db {
-    my $u     = shift;
-    my $mode  = shift;
-    my $limit = shift;
-    
-    my @uids;
-    if ($mode eq 'friends'){
-        @uids = LJ::RelationService->find_relation_destinations($u, 'F', limit => $limit);
-    } elsif ($mode eq 'friendofs'){
-        @uids = LJ::RelationService->find_relation_sources($u, 'F', limit => $limit);
-    } else {
-        Carp::croak("mode must either be 'friends' or 'friendofs'");
-    }
-
-    return \@uids;
-}
-
-## Returns exact friendsOf count. Whitout limit.
-## Use it with care.
-sub precise_friendsof_count {
-    my $u = shift;
-
-    my $cnt_key = "friendof:person_cnt:" . $u->userid;
-    my $counter = LJ::MemCache::get([ $u->userid, $cnt_key ]);
-    return $counter if $counter;
-
-    ## arrayref with all users friends
-    my $uids = $u->_load_friend_friendof_uids_from_db('friendofs', 100_000);
-
-    my $res = 0;
-    ## work with batches
-    while (my @uid_batch = splice @$uids, 0 => 5000){
-        my $us = LJ::load_userids(@uid_batch);
-        foreach my $fuid (@uid_batch){
-            my $fu = $us->{$fuid};
-            next unless $fu;
-            next unless $fu->can_be_counted_as_friendof;
-            
-            ## Friend!!!
-            $res++;
-        }
-    }
-
-    ## actual data
-    LJ::MemCache::set([ $u->userid, $cnt_key ]  => $res, 24*3600);
-
-    return $res;
-}
-
-## Class method
-sub increase_friendsof_counter {
-    my $class = shift;
-    my $uid   = shift;
-    $class->_incr_decr_friendsof_counter($uid, 'incr');
-}
-sub decrease_friendsof_counter {
-    my $class = shift;
-    my $uid   = shift;
-    $class->_incr_decr_friendsof_counter($uid, 'decr');
-}
-sub _incr_decr_friendsof_counter {
-    my $class  = shift;
-    my $uid    = shift;
-    my $action = shift;
-
-    ## it takes a lot of time (>5 seconds) to calculate 'friendof:person_cnt:X' counter.
-    ## So update it with a bit of intellect.
-    my $precise_friendsof_counter = [ $uid, "friendof:person_cnt:$uid" ];
-    my $counter = LJ::MemCache::get($precise_friendsof_counter);
-
-    if ($counter){
-        my $u = LJ::load_userid($uid);
-        ## Memcached: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
-        ##  the item must already
-        ##  exist for incr/decr to work; these commands won't pretend that a
-        ##  non-existent key exists with value 0; instead, they will fail.
-        ##
-        ## Incr/Decr doesn't change a key expiration time, 
-        ##
-        if ($action eq 'incr'){
-            LJ::MemCache::incr($precise_friendsof_counter);
-        } elsif ($action eq 'decr'){
-            LJ::MemCache::decr($precise_friendsof_counter);
-        }
-    }
-
 }
 
 sub fb_push {
@@ -5537,18 +5133,6 @@ sub unban_user_multi {
     return 1;
 }
 
-# return if $target is in $fgroupid
-sub user_in_friend_group {
-    my ($u, $target, $fgroupid) = @_;
-    return 0 unless $u->is_friend($target);
-
-    my $grpmask = 1 << $fgroupid;
-    my $frmask = LJ::get_groupmask($u, $target);
-    return 0 unless $grpmask && $frmask;
-
-    return $grpmask & $frmask;
-}
-
 # returns if this user's polls are clustered
 sub polls_clustered {
     my $u = shift;
@@ -5574,51 +5158,6 @@ sub upgrade_to_dversion_8 {
     LJ::update_user($u, { 'dversion' => 8 }) if $ok;
 
     return $ok;
-}
-
-# can this user add any more friends?
-sub can_add_friends {
-    my ($u, $err, $opts) = @_;
-
-    if ($u->is_suspended) {
-        $$err = "Suspended journals cannot add friends.";
-        return 0;
-    }
-
-    if ($u->{'status'} ne 'A') {
-        $$err = qq|Sorry, you aren't allowed to add to friends until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="http://www.livejournal.com/register.bml">have it re-sent.</a>|;
-        return 0;
-    }
-
-    # have they reached their friend limit?
-    my $fr_count = $opts->{'numfriends'} || $u->friend_uids;
-    my $maxfriends = $u->get_cap('maxfriends');
-    if ($fr_count >= $maxfriends) {
-        $$err = "You have reached your limit of $maxfriends friends.";
-        return 0;
-    }
-
-    # are they trying to add friends too quickly?
-
-    # don't count mutual friends
-    if (exists($opts->{friend})) {
-        my $fr_user = $opts->{friend};
-        # we needed LJ::User object, not just a hash.
-        if (ref($fr_user) eq 'HASH') {
-            $fr_user = LJ::load_user($fr_user->{username});
-        } else {
-            $fr_user = LJ::want_user($fr_user);
-        }
-
-        return 1 if $fr_user && $fr_user->is_friend($u);
-    }
-
-    unless ($u->rate_log('addfriend', 1)) {
-        $$err = "You are trying to add too many friends in too short a period of time.";
-        return 0;
-    }
-
-    return 1;
 }
 
 # returns if this user can join an adult community or not
