@@ -239,6 +239,13 @@ sub reply_url {
         \$overridden_url );
     return $overridden_url if $overridden_url;
 
+    my $remote = LJ::get_remote();
+    if ( $remote && $remote->prop('opt_stylemine') &&
+        ! LJ::u_equals( $self->journal, $remote ) )
+    {
+        $opts{'style'} = 'mine';
+    }
+
     return $self->url( %opts, 'mode' => 'reply', 'anchor' => 'add_comment' );
 }
 
@@ -259,6 +266,12 @@ sub comments_url {
 
     if ( $remote && $remote->prop('opt_nctalklinks') && $replycount ) {
         $opts{'nc'} = $replycount;
+    }
+
+    if ( $remote && $remote->prop('opt_stylemine') &&
+        ! LJ::u_equals( $self->journal, $remote ) )
+    {
+        $opts{'style'} = 'mine';
     }
 
     $opts{'anchor'} = 'comments';
