@@ -3061,20 +3061,33 @@ HTML BODY .i-ljuser {
 
 /*  This styles was removed from screen.css*/
 .standout {
-    text-align: center;
+	text-align: center;
 	}
 .standout .container {
-    width: auto;
-    padding: 3px;
-    margin: auto;
-    background-color: #C5DFF9 !important;
-    border: 1px solid #8FC3F7;
+	width: auto;
+	padding: 3px;
+	margin: auto;
+	background-color: #C5DFF9 !important;
+	border: 1px solid #8FC3F7;
 	text-align: left;
 	color: #000; 
-    }
-.standout span.container {
-    display: inline-block;
-    padding: 8px 7px !important;
 	}
+.standout span.container {
+	display: inline-block;
+	padding: 8px 7px !important;
+	}
+
+.borderedtable {
+	border: solid 1px black;
+	}
+	.borderedtable th {
+		background-color: #dddddd;
+		border-bottom: solid 1px black;
+		padding-left: 10px;
+		padding-right: 10px;
+		white-space: nowrap;
+		}
+
+
 
 
