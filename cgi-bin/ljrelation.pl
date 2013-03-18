@@ -18,6 +18,21 @@ use LJ::RelationService;
 # J - ban in journalpromo
 #########################
 
+sub get_relation_types {
+    return ('P', # - poster
+            'A', # - maintainer
+            'B', # - ban
+            'N', # - pre-approved
+            'M', # - moderator
+            'S', # - supermaintainer
+            'I', # - inviter
+            'D', # - spammer
+            'W', # - journal sweeper
+            'C', # - do not receive mass mailing from community
+            'J', #- ban in journalpromo
+            );
+}
+
 # <LJFUNC>
 # name: LJ::is_friend
 # des: Checks to see if a user is a friend of another user.
