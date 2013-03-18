@@ -75,9 +75,11 @@ sub _find_relation_destinations_type_other {
         ", undef, $userid, $type);
     }
 
-    my $packed = pack('v*', @$uids);
-    LJ::MemCacheProxy::set("rellist:dst:$eff_type:$userid", $packed, 24 * 3600)
-        unless $opts{dont_set_cache};
+    unless ($opts{dont_set_cache}) {
+        my $packed = pack('v*', @$uids);
+        LJ::MemCacheProxy::set("rellist:dst:$eff_type:$userid", $packed, 24 * 3600)
+    }
+    ;
     return @$uids;
 }
 
@@ -153,9 +155,11 @@ sub _find_relation_sources_type_other {
         ", undef, $userid, $type);
     }
 
-    my $packed = pack('v*', @$uids);
-    LJ::MemCacheProxy::set("rellist:src:$eff_type:$userid", $packed, 24 * 3600)
-        unless $opts{dont_set_cache};
+    unless ($opts{dont_set_cache}) {
+        my $packed = pack('v*', @$uids);
+        LJ::MemCacheProxy::set("rellist:src:$eff_type:$userid", $packed, 24 * 3600);
+    }
+
     return @$uids;
 }
 
