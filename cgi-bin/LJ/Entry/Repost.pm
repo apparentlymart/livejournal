@@ -278,6 +278,7 @@ sub __create_repost {
         return $fail->(LJ::API::Error->get_error('unknown_error'));
     }
 
+    my $ret = eval {
     my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
     $post_obj->convert_to_repost($mark);
     $post_obj->set_prop( 'repost' => 'e' );
@@ -320,6 +321,17 @@ sub __create_repost {
                            $cost,
                            $blid,
                            );
+
+    return;
+    }; # eval
+
+    if ($@) {
+        warn $@;
+        return $fail->(LJ::API::Error->get_error('unknown_error'));
+    }
+
+    return $ret if $ret;
+
     $release_lock->();
 
     return $post_obj;
