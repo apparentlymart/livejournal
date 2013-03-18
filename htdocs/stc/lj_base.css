@@ -3089,5 +3089,57 @@ HTML BODY .i-ljuser {
 		}
 
 
+.userslist-table {
+	border: 1px solid #DDD;
+	}
+	.userslist-table TH,
+	.aliaslist-table TH  {
+		background: #DDD;
+		padding: 2px 10px;
+		white-space: nowrap;
+		text-align: left;
+		}
+	.aliaslist-table TH {
+		padding: 4px 10px;
+		}
+	.userslist-table TD {
+		padding: 3px 10px;
+		}
 
+.aliaslist-table {
+	border: 0;
+	border-spacing: 0px;
+	}
+	.aliaslist-table TD {
+		padding: 3px 3px 3px 10px;
+		}
+		.aliaslist-table TD .user_check {
+			margin-right: 10px;
+			}
+	.aliaslist-table TD.more {
+		padding: 3px 3px 7px 10px;
+		}
+	.aliaslist-table .notedel {
+		padding: 17px 0px 0px 10px;
+		}
+	.aliaslist-table .user_alias {
+		padding: 3px 0px 3px 10px;
+		}
+		.aliaslist-table .user_alias INPUT {
+			width: 300px;
+			}
+		.aliaslist-table .user_alias .type-checkbox {
+			margin-left: 1.2em;
+			margin-right: 1.2em;
+			width: auto;
+			}
+	.aliaslist-table .newalias TD {
+		padding: 14px 0px 3px 10px;
+		font-weight: bold;
+		}
+		.aliaslist-table .user_alias_error {
+			position: absolute;
+			margin: .25em 0 0 1em;
+			color: #F00;
+			}
 
