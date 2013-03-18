@@ -124,3 +124,8 @@
 .you_watching|staleness=1
 .you_watching=You are watching [[username]]
 
+.subscribe|staleness=1
+.subscribe=Subscribe
+
+.unsubscribe|staleness=1
+.unsubscribe=Unsubscribe

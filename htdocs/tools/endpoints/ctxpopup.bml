@@ -181,6 +181,7 @@
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community
         your_friend you_member you_subscribed you_watching ljtalk online offline
+        subscribe unsubscribe
     /;
 
     ## optimization: load all ML strings into local cache at once
@@ -277,6 +278,16 @@
         $ret{partner} = 1;
     } else {
         $ret{partner} = 0;
+    }
+
+    # Subscribe/Unscubscribe to/from user
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        if ($remote && $u) {
+            $ret{is_subscriber}   = $remote->is_subscriber($u);
+            $ret{is_subscribedon} = $remote->is_subscribedon($u);
+        }
+
+        $ret{new_friends_and_subscriptions} = LJ::JSON::true;
     }
 
     $ret{success} = 1;
