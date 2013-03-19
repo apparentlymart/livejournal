@@ -2,7 +2,7 @@ package LJ::MemCacheable;
 
 use strict;
 use warnings;
-use LJ::MemCache;
+use LJ::MemCacheProxy;
 use String::CRC32 qw/crc32/;
 
 ##
@@ -31,14 +31,14 @@ sub _store_to_memcache {
     foreach my $key (@props) {
         push @data, $self->{$key};
     }
-    LJ::MemCache::set($self->_memcache_key, \@data, $self->_memcache_expires);
+    LJ::MemCacheProxy::set($self->_memcache_key, \@data, $self->_memcache_expires);
 }
 
 sub _load_from_memcache {
     my $class = shift;
     my $id = shift;
 
-    my $data = LJ::MemCache::get($class->_memcache_key($id));
+    my $data = LJ::MemCacheProxy::get($class->_memcache_key($id));
     return unless $data && ref $data eq 'ARRAY';
     
     my ($version, @props) = $class->_memcache_stored_props;
@@ -56,7 +56,7 @@ sub _load_from_memcache {
 sub _remove_from_memcache {
     my $class = shift;
     my $id = shift;
-    LJ::MemCache::delete($class->_memcache_key($id));
+    LJ::MemCacheProxy::delete($class->_memcache_key($id));
 }
 
 sub _memcache_key {
