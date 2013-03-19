@@ -103,6 +103,28 @@ sub as_html {
             });
 }
 
+sub tmpl_params {
+    my $self = shift;
+    my $u    = shift;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $lang_var = $self->arg1 ? 'html.notify.bday_today' :
+                                 'html.notify.bday';
+   
+    return {
+           body => LJ::Lang::get_text($lang, $lang_var, undef, {
+                   who     => $self->bdayuser->ljuser_display(),
+                   bdate   => $self->bday,
+           }),
+           userpic    => $self->bdayuser->userpic ? $self->bdayuser->userpic->url : '',
+           subject    => LJ::Lang::get_text($lang, 'esn.bday.params.subject'),
+           actions    => [{
+                   action_url => $self->bdayuser->gift_url({ item => 'vgift' }),
+                   action     => LJ::Lang::get_text($lang, 'send.a.gift'),
+           }],
+    }
+}
+
 sub as_html_actions {
     my ($self) = @_;
 
@@ -148,7 +170,9 @@ my @_ml_strings = (
                               #[[bdayuser]]'s birthday is today!
                               # 
                               #You can:
-    'esn.post_happy_bday'     #[[openlink]]Post to wish them a happy birthday[[closelink]]
+    'esn.post_happy_bday',    #[[openlink]]Post to wish them a happy birthday[[closelink]]
+
+    'esn.bday.params.subject' # Someone has birthday
 );
 
 sub as_email_subject {

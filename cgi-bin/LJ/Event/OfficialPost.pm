@@ -103,6 +103,31 @@ sub as_html {
         });
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+    my $entry = $self->entry or return { body => "(Invalid entry)" };
+
+    my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+
+    return { 
+        body => LJ::Lang::get_text(
+        $lang,
+        _construct_prefix($self) . '.html',
+        undef,
+        {
+            siteroot        => $LJ::SITEROOT,
+            sitename        => $LJ::SITENAME,
+            sitenameshort   => $LJ::SITENAMESHORT,
+            subject         => $self->entry->subject_text || '',
+            username        => $entry->journal->ljuser_display,
+            url             => $entry->url,
+            rcpt            => $u->ljuser_display,
+        }),
+        subject => LJ::Lang::get_text($lang, 'esn.officialpost.params.subject'),
+        content => $entry->event_html( {cuturl => $entry->url} ),
+    }
+}
+
 sub as_string {
     my $self = shift;
     my $u = shift;

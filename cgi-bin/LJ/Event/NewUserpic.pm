@@ -25,6 +25,24 @@ sub as_html {
     return $self->event_journal->ljuser_display . " has uploaded a new <a href='" . $up->url . "'>userpic</a>.";
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $up = $self->userpic;
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return { 
+        body    => LJ::Lang::get_text($lang, 'esn.new_userpic.nouserpic.params.body'), 
+        subject => LJ::Lang::get_text($lang, 'esn.new_userpic.nouserpic.params.subject'), 
+    }  unless $up && $up->valid;
+
+    return { 
+        body    => LJ::Lang::get_text($lang, 'esn.new_userpic.params.body', undef, { user => $self->event_journal->ljuser_display, url => $up->url}),
+        userpic => $up->url,
+        subject => LJ::Lang::get_text($lang, 'esn.new_userpic.params.subject'),
+    }
+}
+
 sub as_sms {
     my ($self, $u) = @_;
     my $lang = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;

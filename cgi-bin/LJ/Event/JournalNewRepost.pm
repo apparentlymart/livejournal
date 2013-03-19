@@ -266,6 +266,69 @@ sub as_html {
         }); 
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+    
+    my $lang    = ($u && $u->prop('browselang')) || $LJ::DEFAULT_LANG;
+    my $entry   = $self->entry;
+    my $journal = $self->journal;
+
+    if (!$entry || !$entry->valid) {
+        my $ml_string = 'notification.string.usernewrepost.deleted';
+        return {
+            body => LJ::Lang::get_text($lang, $ml_string, undef,
+                                {
+                                    reposter => $self->reposter->display_username,
+                                }),
+            subject => LJ::Lang::get_text($lang, 'esn.journal_new_repost.params.subject'),
+        }
+    }
+
+    my $url = $entry->url;
+
+    my $ml_string = $journal->is_community ? 'esn.user_new_repost_community.ashtml' :
+                                             'esn.user_new_repost.ashtml';
+
+    my $ljuser_journal  = LJ::ljuser($self->journal);
+    my $poster   = LJ::ljuser($self->poster);
+    my $reposter = LJ::ljuser($self->reposter);
+    my $reply_url = $entry->url(mode => 'reply');
+
+    my $tags = '';
+    # add tag info for entries that have tags
+    if ($entry->tags) {
+        $tags = ' ' . LJ::Lang::get_text($lang, 'esn.tags', undef,
+                        {
+                            tags => join(', ', $entry->tags )
+                        });
+    }
+
+    my $about = $entry->subject_text ? "\"" . $entry->subject_text . "\"" : '';
+
+    my $content = $entry->visible_to($u) && $entry->event_html;
+
+    return {
+        body => LJ::Lang::get_text($lang, $ml_string, undef, 
+            {
+                reposter  => $reposter,
+                poster    => $poster,
+                community => $ljuser_journal,
+                about     => $about,
+                tags      => $tags,
+            }),
+        userpic => $self->poster->userpic ? $self->poster->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.journal_new_repost.params.subject'),
+        content => $content,
+        actions => [{
+            action_url => $reply_url,
+            action     => LJ::Lang::get_text($lang, 'esn.journal_new_repost.actions.reply'),
+        },{
+            action_url => $url,
+            action     => LJ::Lang::get_text($lang, 'esn.journal_new_repost.actions.link'),
+        }],
+    }
+}
+
 sub as_html_actions {
     my ($self) = @_;
 

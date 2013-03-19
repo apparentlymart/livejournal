@@ -32,6 +32,22 @@ sub as_html {
     return $self->event_journal->ljuser_display . " has been purged.";
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.user_expunged.params.body', undef, { user => $self->event_journal->ljuser_display } ),
+        userpic => $self->event_journal->userpic ? $self->event_journal->userpic->url : '',
+        subject =>  LJ::Lang::get_text($lang, 'esn.user_expunged.params.subject' ),
+        actions => [{
+            action_url => "$LJ::SITEROOT/rename/",
+            action     => LJ::Lang::get_text($lang, 'esn.user_expunged.actions.rename'),
+        }],        
+    }
+}
+
 sub as_html_actions {
     my $self = shift;
 

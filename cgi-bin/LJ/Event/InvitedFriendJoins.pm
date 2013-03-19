@@ -27,6 +27,12 @@ my @_ml_strings = (
                                                 # Your friend [[newuser]] has created a journal on [[sitenameshort]]!
                                                 #
                                                 # You can:'
+
+    'esn.invitedjoins.friend.actions.view.journal', # View Journal
+    'esn.invitedjoins.friend.params.body',          # A friend you invited has created the journal [[journal]]
+    'esn.invitedjoins.friend.params.subject',       # Someone has created the journal
+    'esn.invitedjoins.nofriend.params.body',        # A friend you invited has created a journal.
+    'esn.invitedjoins.nofriend.params.subject',     # Someone has created the journal
 );
 
 sub as_email_subject {
@@ -88,6 +94,27 @@ sub as_html {
         unless $self->friend;
 
     return sprintf "A friend you invited has created the journal %s", $self->friend->ljuser_display;
+}
+
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $lang    = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return { 
+        body    => LJ::Lang::get_text($lang, 'esn.invitedjoins.nofriend.params.body'),
+        subject => LJ::Lang::get_text($lang, 'esn.invitedjoins.nofriend.params.subject'), 
+    } unless $self->friend;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.invitedjoins.friend.params.body', undef, { journal => $self->friend->ljuser_display } ),
+        userpic => $self->friend->userpic ? $self->friend->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.invitedjoins.friend.params.subject'),
+        actions => [{
+            action_url => $self->friend->journal_base,
+            action     => LJ::Lang::get_text($lang, 'esn.invitedjoins.friend.actions.view.journal'),
+        }],
+    }
 }
 
 sub as_html_actions {

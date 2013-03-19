@@ -46,6 +46,29 @@ sub as_html {
                    $self->comm->ljuser_display);
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.comm_join.params.body', undef, { 
+                        user      => $self->requestor->ljuser_display, 
+                        community => $self->comm->ljuser_display,
+                        url       => "$LJ::SITEROOT/community/pending.bml?authas=" . $self->comm->user, 
+        }),
+        userpic => $self->requestor->userpic ? $self->requestor->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.comm_join.params.subject'), 
+        actions => [{
+            action_url => $self->requestor->profile_url,
+            action     => LJ::Lang::get_text($lang, 'esn.comm_join.actions.view.profile'),
+        },{
+            action_url => "$LJ::SITEROOT/community/pending.bml?authas=" . $self->comm->user,
+            action     => LJ::Lang::get_text($lang, 'esn.comm_join.actions.manage.members'),
+        }],
+    }
+}
+
 sub as_html_actions {
     my ($self) = @_;
 
@@ -80,6 +103,11 @@ my @_ml_strings_en = (
                                             #[[username]] has requested to join your community, [[communityname]].
                                             #
                                             #You can:',
+
+    'esn.comm_join.actions.view.profile',   # View Profile
+    'esn.comm_join.actions.manage.members', # Manage Members
+    'esn.comm_join.params.body',            # The user [[user]] has <a href="[[url]]">requested to join</a> the community [[community]].
+    'esn.comm_join.params.subject',         # Someone has requested to join the community
 );
 
 sub as_email_subject {

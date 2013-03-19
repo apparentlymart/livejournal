@@ -33,6 +33,12 @@ my @_ml_strings_en = (
                                         #[[poster]] has added you to their Friends list.
                                         #
                                         #You can:',
+                                        #
+    'esn.befriended.params.body',       # [[user]] has added you as a friend.
+    'esn.befriended.params.subject',    # Someone has addded you as friend.
+    'esn.befriended.actions.add.friend', # Add Friend
+    'esn.befriended.actions.view.profile', # View Profile
+
 );
 
 sub as_email_subject {
@@ -168,6 +174,36 @@ sub subscription_as_html {
 sub content {
     my ($self, $target) = @_;
     return $self->as_html_actions;
+}
+
+sub tmpl_params {
+    my ($self, $remote) = @_; 
+    
+    my $u = $self->u;
+    my $friend = $self->friend;
+
+    my $lang = $remote && $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    my $actions = [];
+
+    if ($u->is_friend($friend)) {
+        push @$actions, {
+            action_url => $friend->profile_url,
+            action     => LJ::Lang::get_text($lang, "esn.befriended.actions.view.profile"),
+        }
+    } else {
+        push @$actions, {
+            action_url => $friend->addfriend_url,
+            action     => LJ::Lang::get_text($lang, "esn.befriended.actions.add.friend"),
+        }
+    }
+ 
+    return {
+        body    => LJ::Lang::get_text($lang, "esn.befriended.params.body", undef, { user => $friend->ljuser_display } ),
+        userpic => $friend->userpic ? $friend->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, "esn.befriended.params.subject"), 
+        actions => $actions,
+    }
 }
 
 sub available_for_user  {

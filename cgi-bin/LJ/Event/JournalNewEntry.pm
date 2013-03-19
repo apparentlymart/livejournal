@@ -152,6 +152,49 @@ sub as_html_actions {
     return $ret;
 }
 
+sub tmpl_params {
+    my ($self, $target) = @_;
+
+    my $journal = $self->u;
+    my $entry = $self->entry;
+
+    my $lang = $target->prop('browselang') || $LJ::DEFAULT_LANG;
+                                            
+    return {body => LJ::Lang::get_text($lang, 'esn.journal_new_entry.deleted.params.body', undef, { journal => $journal->ljuser_display })}
+        unless $entry && $entry->valid;
+    return { body => LJ::Lang::get_text($lang, 'esn.journal_new_entry.noauth.params.body') }
+        unless $self->entry->visible_to($target);
+
+    my $ju = LJ::ljuser($journal);
+    my $pu = LJ::ljuser($entry->poster);
+    my $url = $entry->url;
+    my $reply_url = $entry->url(mode => 'reply');
+
+    my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
+    my $where = LJ::u_equals($journal, $entry->poster) ? "$pu" : "$pu in $ju";
+
+    my $content = $entry->visible_to($target) && $entry->event_html;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.journal_new_entry.params.body', undef, 
+        {
+            url   => $url,
+            about => $about,
+            where => $where,
+        }),
+        userpic => $entry->poster->userpic ? $entry->poster->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.journal_new_entry.params.subject'), 
+        content => $content,
+        actions => [{
+            action_url => $reply_url,
+            action     => 'Reply',
+        },{
+            action_url => $url,
+            action     => 'Link',
+        }],
+    }
+}
+
 my @_ml_strings_en = (
     'esn.journal_new_entry.alert',                  # '[[who]] posted a new entry in [[journal]]!',
     'esn.journal_new_entry.posted_new_entry',       # '[[who]] posted a new entry in [[journal]]!',

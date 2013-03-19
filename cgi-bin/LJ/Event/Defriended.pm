@@ -28,6 +28,12 @@ my @_ml_strings_en = (
                                     #[[poster]] has removed you from their Friends list.
                                     #
                                     #You can:',
+
+    'esn.defriended.actions.remove.friend', # Remove Friend
+    'esn.defriended.actions.view.profile',  # View Profile
+    'esn.defriended.params.body',           # [[user]] has removed you from their Friends list
+    'esn.defriended.params.subject',        # Someone has removed you from their Friends list
+
 );
 
 sub as_email_subject {
@@ -91,6 +97,34 @@ sub as_html {
     my $self = shift;
     return sprintf("%s has removed you from their Friends list.",
                    $self->friend->ljuser_display);
+}
+
+sub tmpl_params {
+    my ($self, $remote) = @_;
+
+    my $u = $self->u;
+    my $friend = $self->friend;
+
+    my $lang = $remote && $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    my $actions = [];
+
+    push @$actions, {
+        action_url => $friend->addfriend_url,
+        action     => LJ::Lang::get_text($lang, 'esn.defriended.actions.remove.friend'),
+    } if LJ::is_friend($u, $friend);
+
+    push @$actions, {
+        action_url => $friend->profile_url,
+        action     => LJ::Lang::get_text($lang, 'esn.defriended.actions.view.profile'),
+    };
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.defriended.params.body', undef, { user => $self->friend->ljuser_display }),
+        userpic => $self->friend->userpic ? $self->friend->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.defriended.params.subject'), 
+        actions => $actions,
+    }
 }
 
 sub as_html_actions {

@@ -403,6 +403,8 @@ sub as_html {
     return $self->as_string;
 }
 
+sub tmpl_params {return {}}
+
 # return a string representing an IM (Jabber) notification sent to the passed
 # user notifying them that this event has happened.
 #

@@ -152,6 +152,33 @@ sub as_html {
     return "User $pu has posted a new <a href=\"$url\">entry</a> in $ju.";
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    my $entry = $self->entry;
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.user_new_entry.invalid.params.body'),
+        subject => LJ::Lang::get_text($lang, 'esn.user_new_entry.invalid.params.subject'),
+    } unless $entry && $entry->valid;
+
+    my $url = $entry->url;
+
+    my $ju = LJ::ljuser($self->journal);
+    my $pu = LJ::ljuser($self->poster);
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.user_new_entry.params.body', undef, 
+        {
+            user    => $pu,
+            url     => $url, 
+            journal => $ju,
+        }),
+        subject => LJ::Lang::get_text($lang, 'esn.user_new_entry.params.subject'),
+    }
+}
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
 

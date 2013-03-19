@@ -49,6 +49,19 @@ my @_ml_strings_en = (
     'esn.mail_comments.alert.anonymous_edited_reply_to_a_post',         #Anonymous user edited a reply to a post.
     'esn.mail_comments.alert.anonymous_reply_to_your_post',             #Anonymous user replied to your post.
     'esn.mail_comments.alert.anonymous_reply_to_a_post',                #Anonymous user replied to a post.
+
+    'esn.journal_new_comment.actions.link',                # Link
+    'esn.journal_new_comment.actions.reply',               # Reply
+    'esn.journal_new_comment.comment.params.body',        # New <a href="[[url]]">comment</a> [[subject]] [[poster]] on [[in_text]] in [[journal]].
+    'esn.journal_new_comment.comment.params.subject',     # Someone has posted new comment
+    'esn.journal_new_comment.del.comment.params.body',    # (Deleted comment in [[journal]])
+    'esn.journal_new_comment.del.comment.params.subject', # (Deleted comment)
+    'esn.journal_new_comment.del.entry.params.body',      # (Comment on a deleted entry in [[journal]])
+    'esn.journal_new_comment.del.entry.params.subject',   # (Comment on a deleted entry)
+    'esn.journal_new_comment.edited.params.body',         # Edited <a href="[[url]]">comment</a> [[subject]] [[poster]] on [[in_text]] in [[journal]].
+    'esn.journal_new_comment.edited.params.subject',      # Someone has edited comment
+    'esn.journal_new_comment.noauth.params.body',         # (You are not authorized to view this comment)
+    'esn.journal_new_comment.noauth.params.subject',      # (You are not authorized to view this comment)
 );
 
 sub as_email_from_name {
@@ -166,7 +179,7 @@ sub as_email_html {
 
         return $comment->format_template_html_mail($u, $t) if $t;
     }
- 
+   
     return $comment->format_html_mail($u);
 }
 
@@ -366,6 +379,86 @@ sub as_html {
         return "Edited <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
     } else {
         return "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
+    }
+}
+
+sub tmpl_params {
+    my ($self, $target) = @_;
+
+    my $comment = $self->comment;
+    my $journal = $self->u;
+
+    my $lang = $target->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return { 
+        body    => LJ::Lang::get_text($lang, 'esn.journal_new_comment.del.comment.params.body', undef, { journal => $journal->ljuser_display } ),
+        subject => LJ::Lang::get_text($lang, 'esn.journal_new_comment.del.comment.params.subject'),
+    } unless $comment && $comment->valid && !$comment->is_deleted;
+
+    my $entry = $comment->entry;
+    return { 
+        body    => LJ::Lang::get_text($lang, 'esn.journal_new_comment.del.entry.params.body', undef, { journal => $journal->ljuser_display } ),
+        subject => LJ::Lang::get_text($lang, 'esn.journal_new_comment.del.entry.params.subject'),
+    } unless $entry && $entry->valid;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.journal_new_comment.noauth.params.body'),
+        subject => LJ::Lang::get_text($lang, 'esn.journal_new_comment.noauth.params.subject'),
+    } unless $comment->visible_to($target);
+
+    my $ju = LJ::ljuser($journal);
+    my $pu = LJ::ljuser($comment->poster);
+    my $url = $comment->url;
+    my $reply_url = $comment->reply_url;
+
+    my $in_text = '<a href="' . $entry->url . '">an entry</a>';
+    my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
+    my $comment_body = $comment->body_html;
+    $comment_body =~ s/\n/<br \/>/g;
+
+    my $poster = $comment->poster ? "by $pu" : '';
+    if ($comment->is_edited) {
+        return { 
+            body    => LJ::Lang::get_text($lang, 'esn.journal_new_comment.edited.params.body', undef, 
+            { 
+                url     => $url, 
+                subject => $subject, 
+                poster  => $poster, 
+                in_text => $in_text, 
+                journal => $ju 
+            } ),
+            subject => LJ::Lang::get_text($lang, 'esn.journal_new_comment.edited.params.subject'), 
+            content => $comment_body,
+            userpic => $comment->poster && $comment->poster->userpic ? $comment->poster->userpic->url : '',
+            actions => [{
+                action_url => $reply_url,
+                action     => LJ::Lang::get_text($lang, 'esn.journal_new_comment.actions.reply'),
+            },{
+                action_url => $url,
+                action     => LJ::Lang::get_text($lang, 'esn.journal_new_comment.actions.link'),
+            }],
+        }
+    } else {
+        return {
+            body    => LJ::Lang::get_text($lang, 'esn.journal_new_comment.comment.params.body', undef, 
+            { 
+                url     => $url, 
+                subject => $subject, 
+                poster  => $poster, 
+                in_text => $in_text, 
+                journal => $ju 
+            } ),
+            subject => LJ::Lang::get_text($lang, 'esn.journal_new_comment.comment.params.subject'),,
+            content => $comment_body,
+            userpic => $comment->poster && $comment->poster->userpic ? $comment->poster->userpic->url : '',
+            actions => [{
+                action_url => $reply_url,
+                action     => LJ::Lang::get_text($lang, 'esn.journal_new_comment.actions.reply'),
+            },{
+                action_url => $url,
+                action     => LJ::Lang::get_text($lang, 'esn.journal_new_comment.actions.link'),
+            }],
+        }
     }
 }
 
@@ -716,7 +809,7 @@ sub subscriptions {
     my $cid   = delete $args{'cluster'};  # optional
     my $limit = int delete $args{'limit'};    # optional
     my $original_limit = int $limit;
-
+    
     croak("Unknown options: " . join(', ', keys %args)) if %args;
     croak("Can't call in web context") if LJ::is_web_context();
 

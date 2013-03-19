@@ -27,6 +27,11 @@ my @_ml_strings = (
     'esn.read_last_comm_entries',   # '[[openlink]]Read the latest entries in [[journal]][[closelink]]'
     'esn.view_profile',             # '[[openlink]]View [[postername]]'s profile[[closelink]]',
     'esn.add_friend',               # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]'
+
+    'esn.comm_invite.params.body',            # The user [[user]] has invited you to join the community [[community]]
+    'esn.comm_invite.params.subject' ,        # Someone has invited you to join the community
+    'esn.comm_invite.actions.view.profile',   # View Profile
+    'esn.comm_invite.actions.join.community', # Join Community
 );
 
 sub as_email_subject {
@@ -112,6 +117,25 @@ sub as_html_actions {
     $ret .= "</div>";
 
     return $ret;
+}
+
+sub tmpl_params {
+    my ($self, $u) = @_;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.comm_invite.params.body', undef, { user => $self->inviter->ljuser_display, community => $self->comm->ljuser_display }),
+        userpic => $self->comm->userpic ? $self->comm->userpic->url : '',
+        subject => LJ::Lang::get_text($lang, 'esn.comm_invite.params.subject'),
+        actions => [{
+            action_url => $self->comm->profile_url,
+            action     => LJ::Lang::get_text($lang, 'esn.comm_invite.actions.view.profile'),
+        },{
+            action_url => "$LJ::SITEROOT/manage/invites.bml",
+            action     => LJ::Lang::get_text($lang, 'esn.comm_invite.actions.join.community'),
+        }],
+    }
 }
 
 sub content {

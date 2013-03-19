@@ -78,6 +78,40 @@ sub as_html {
                    $voter->ljuser_display, $entry->url, $self->pollname);
 }
 
+sub tmpl_params {
+    my ($self, $u) = @_;
+    my $voter = $self->voter;
+    my $poll = $self->poll;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.pollvote.deleted.params.body', undef, {user => $voter->ljuser_display}),
+        subject => LJ::Lang::get_text($lang, 'esn.pollvote.deleted.params.subject'),
+    } unless $poll && $poll->valid;
+
+    my $entry     = $self->entry;
+    my $entry_url = $entry->url;
+    my $poll_url  = $poll->url;
+
+    return {
+        body    => LJ::Lang::get_text($lang, 'esn.pollvote.params.body', undef, 
+        { 
+            user     => $voter->ljuser_display, 
+            url      => $entry->url, 
+            pollname => $self->pollname,
+        }),
+        subject => LJ::Lang::get_text($lang, 'esn.pollvote.params.subject'),
+        actions => [{
+            action_url => $entry_url,
+            action     => LJ::Lang::get_text($lang, 'esn.pollvote.actions.discuss.results'),
+        },{
+            action_url => $poll_url,
+            action     => LJ::Lang::get_text($lang, 'esn.pollvote.actions.poll.status'),
+        }],
+    }
+}
+
 sub as_html_actions {
     my $self = shift;
 
