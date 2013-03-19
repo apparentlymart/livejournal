@@ -4202,6 +4202,8 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
+
 main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
 
 main.promo.head=Promo
