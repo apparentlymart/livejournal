@@ -2827,6 +2827,7 @@ sub get_social_capital {
         if (defined $soc_capital) {
             $value = int($soc_capital->{result}->{authority}/1000);
             LJ::MemCache::set( $key, $value, 5*60);
+            return $value;
         } else {
         	return undef;
         }
