@@ -565,10 +565,14 @@ sub adult_interstitial_link {
     my $url = $entry->url;
     my $msg;
 
-    if ($type eq 'explicit') {
-        $msg = LJ::Lang::ml('contentflag.viewingexplicit');
+    if (LJ::is_enabled('remove_adult_concepts')) {
+        $msg = $type eq 'explicit' ? LJ::Lang::ml('contentflag.viewingexplicit') : '';
     } else {
-        $msg = LJ::Lang::ml('contentflag.viewingconcepts');
+        if ($type eq 'explicit') {
+            $msg = LJ::Lang::ml('contentflag.viewingexplicit');
+        } else {
+            $msg = LJ::Lang::ml('contentflag.viewingconcepts');
+        }
     }
 
     return '' unless $msg;
@@ -610,7 +614,7 @@ sub interstitial_page_content {
     my $adult_content = $u->adult_content_calculated;
     my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 
-    if ($adult_content ne "none" && !$should_show_page) {
+    if ( (( LJ::is_enabled('remove_adult_concepts') && $adult_content eq "explicit" ) || ( !LJ::is_enabled('remove_adult_concepts') && $adult_content ne "none" )) && !$should_show_page ) {
 
         LJ::Request->notes("journalid" => $u->{userid}) if $u;
 

@@ -5527,6 +5527,9 @@ setting.adultcontent.label=Adult Content
 setting.adultcontent.option.comm|staleness=1
 setting.adultcontent.option.comm=My community contains
 
+setting.adultcontent.option.comm2|staleness=1
+setting.adultcontent.option.comm2=My community contains adult content
+
 setting.adultcontent.option.select.concepts|staleness=1
 setting.adultcontent.option.select.concepts=adult concepts
 
@@ -5538,6 +5541,9 @@ setting.adultcontent.option.select.none=no adult content
 
 setting.adultcontent.option.self|staleness=1
 setting.adultcontent.option.self=My journal contains
+
+setting.adultcontent.option.self2|staleness=1
+setting.adultcontent.option.self2=My journal contains adult content 
 
 setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
 setting.bio.desc=_none
@@ -5946,6 +5952,9 @@ setting.safesearch.error.invalid=Invalid safe search setting.
 setting.safesearch.label|staleness=1
 setting.safesearch.label=Safe Search Filter
 
+setting.safesearch.option|staleness=1
+setting.safesearch.option=Use strict filtering (filters all adult and offensive content)
+
 setting.safesearch.option.select.concepts|staleness=1
 setting.safesearch.option.select.concepts=Use strict filtering (filters all adult and offensive content)
 
@@ -6044,6 +6053,9 @@ setting.viewingadultcontent.label=Viewing Adult Content
 
 setting.viewingadultcontent.option|staleness=1
 setting.viewingadultcontent.option=Collapse
+
+setting.viewingadultcontent.option2|staleness=1
+setting.viewingadultcontent.option2=Collapse adult content
 
 setting.viewingadultcontent.option.select.concepts|staleness=1
 setting.viewingadultcontent.option.select.concepts=adult concepts and explicit adult content

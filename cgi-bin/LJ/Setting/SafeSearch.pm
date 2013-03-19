@@ -27,19 +27,35 @@ sub option {
 
     my $safesearch = $class->get_arg($args, "safesearch") || $u->safe_search;
 
-    my @options = (
-        none => $class->ml('setting.safesearch.option.select.none'),
-        10 => $class->ml('setting.safesearch.option.select.explicit'),
-        20 => $class->ml('setting.safesearch.option.select.concepts'),
-    );
+    my $ret;
 
-    my $ret = LJ::html_select({
-        name => "${key}safesearch",
-        selected => $safesearch,
-    }, @options);
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
 
-    my $errdiv = $class->errdiv($errs, "safesearch");
-    $ret .= "<br />$errdiv" if $errdiv;
+        $ret = LJ::html_check({
+            name => "${key}safesearch",
+            id => "${key}safesearch",
+            value => '20',
+            selected => $safesearch eq '20' ? 1 : 0,
+        });
+
+        $ret .= "<label for='${key}safesearch'>" . $class->ml('setting.safesearch.option') . "</label> ";
+
+    } else {
+
+        my @options = (
+            none => $class->ml('setting.safesearch.option.select.none'),
+            10 => $class->ml('setting.safesearch.option.select.explicit'),
+            20 => $class->ml('setting.safesearch.option.select.concepts'),
+        );
+
+        $ret = LJ::html_select({
+            name => "${key}safesearch",
+            selected => $safesearch,
+        }, @options);
+
+        my $errdiv = $class->errdiv($errs, "safesearch");
+        $ret .= "<br />$errdiv" if $errdiv;
+    }
 
     return $ret;
 }
@@ -56,9 +72,19 @@ sub error_check {
 
 sub save {
     my ($class, $u, $args) = @_;
-    $class->error_check($u, $args);
 
-    my $val = $class->get_arg($args, "safesearch");
+    my $val;
+
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
+
+        $val = $class->get_arg($args, "safesearch") ? '20' : 'none';
+
+    } else {
+        $class->error_check($u, $args);
+
+        $val = $class->get_arg($args, "safesearch");
+    }
+
     $u->set_prop( safe_search => $val );
 
     return 1;

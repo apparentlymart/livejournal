@@ -27,33 +27,49 @@ sub option {
 
     my $viewingadultcontent = $class->get_arg($args, "viewingadultcontent") || $u->hide_adult_content;
 
-    my @options = (
-        {
-            value => "none",
-            text => $class->ml('setting.viewingadultcontent.option.select.none'),
-            disabled => $u->is_minor || !$u->best_guess_age ? 1 : 0,
-        },
-        {
-            value => "explicit",
-            text => $class->ml('setting.viewingadultcontent.option.select.explicit'),
-            disabled => $u->is_child || !$u->best_guess_age ? 1 : 0,
-        },
-        {
-            value => "concepts",
-            text => $class->ml('setting.viewingadultcontent.option.select.concepts'),
-            disabled => 0,
-        },
-    );
+    my $ret;
 
-    my $ret = "<label for='${key}viewingadultcontent'>" . $class->ml('setting.viewingadultcontent.option') . "</label> ";
-    $ret .= LJ::html_select({
-        name => "${key}viewingadultcontent",
-        id => "${key}viewingadultcontent",
-        selected => $viewingadultcontent,
-    }, @options);
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
 
-    my $errdiv = $class->errdiv($errs, "viewingadultcontent");
-    $ret .= "<br />$errdiv" if $errdiv;
+        $ret = LJ::html_check({
+            name => "${key}viewingadultcontent",
+            id => "${key}viewingadultcontent",
+            value => 'explicit',
+            selected => $viewingadultcontent eq 'explicit' ? 1 : 0,
+        });
+
+        $ret .= "<label for='${key}viewingadultcontent'>" . $class->ml('setting.viewingadultcontent.option2') . "</label> ";
+
+    } else {
+
+        my @options = (
+            {
+                value => "none",
+                text => $class->ml('setting.viewingadultcontent.option.select.none'),
+                disabled => $u->is_minor || !$u->best_guess_age ? 1 : 0,
+            },
+            {
+                value => "explicit",
+                text => $class->ml('setting.viewingadultcontent.option.select.explicit'),
+                disabled => $u->is_child || !$u->best_guess_age ? 1 : 0,
+            },
+            {
+                value => "concepts",
+                text => $class->ml('setting.viewingadultcontent.option.select.concepts'),
+                disabled => 0,
+            },
+        );
+
+        $ret = "<label for='${key}viewingadultcontent'>" . $class->ml('setting.viewingadultcontent.option') . "</label> ";
+        $ret .= LJ::html_select({
+            name => "${key}viewingadultcontent",
+            id => "${key}viewingadultcontent",
+            selected => $viewingadultcontent,
+        }, @options);
+
+        my $errdiv = $class->errdiv($errs, "viewingadultcontent");
+        $ret .= "<br />$errdiv" if $errdiv;
+    }
 
     return $ret;
 }
@@ -70,16 +86,26 @@ sub error_check {
 
 sub save {
     my ($class, $u, $args) = @_;
-    $class->error_check($u, $args);
 
-    my $val = $class->get_arg($args, "viewingadultcontent");
+    my $val;
 
-    if ($u->is_child || !$u->best_guess_age) {
-        $val = "concepts";
-    } elsif ($u->is_minor) {
-        $val = "explicit" unless $val eq "concepts";
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
+
+        $val = $class->get_arg($args, "viewingadultcontent") ? "explicit" : "none";
+
+    } else {
+
+        $class->error_check($u, $args);
+
+        $val = $class->get_arg($args, "viewingadultcontent");
+
+        if ($u->is_child || !$u->best_guess_age) {
+            $val = "concepts";
+        } elsif ($u->is_minor) {
+            $val = "explicit" unless $val eq "concepts";
+        }
     }
-
+        
     $u->set_prop( hide_adult_content => $val );
 
     return 1;

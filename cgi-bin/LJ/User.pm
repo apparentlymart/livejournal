@@ -5179,7 +5179,7 @@ sub can_join_adult_comm {
     my $adult_content = $comm->adult_content_calculated;
     $$adultref = $adult_content;
 
-    if ($adult_content eq "concepts" && ($u->is_child || !$u->best_guess_age)) {
+    if ($adult_content eq "concepts" && ($u->is_child || !$u->best_guess_age) && $LJ::DISABLED{'remove_adult_concepts'}) {
         return 0;
     } elsif ($adult_content eq "explicit" && ($u->is_minor || !$u->best_guess_age)) {
         return 0;
@@ -5443,7 +5443,7 @@ sub hide_adult_content {
 
     my $prop_value = $u->prop('hide_adult_content');
 
-    if ($u->is_child || !$u->best_guess_age) {
+    if (($u->is_child || !$u->best_guess_age) && $LJ::DISABLED{'remove_adult_concepts'}) {
         return "concepts";
     }
 

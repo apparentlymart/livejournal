@@ -27,21 +27,40 @@ sub option {
 
     my $adultcontent = $class->get_arg($args, "adultcontent") || $u->adult_content;
 
-    my @options = (
-        none => $class->ml('setting.adultcontent.option.select.none'),
-        concepts => $class->ml('setting.adultcontent.option.select.concepts'),
-        explicit => $class->ml('setting.adultcontent.option.select.explicit'),
-    );
+    my $ret;
 
-    my $ret = "<label for='${key}adultcontent'>" . ($u->is_community ? $class->ml('setting.adultcontent.option.comm') : $class->ml('setting.adultcontent.option.self')) . "</label> ";
-    $ret .= LJ::html_select({
-        name => "${key}adultcontent",
-        id => "${key}adultcontent",
-        selected => $adultcontent,
-    }, @options);
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
 
-    my $errdiv = $class->errdiv($errs, "adultcontent");
-    $ret .= "<br />$errdiv" if $errdiv;
+        my $adultcontent = $class->get_arg($args, "adultcontent") || $u->adult_content;
+
+        $ret = LJ::html_check({
+            name => "${key}adultcontent",
+            id => "${key}adultcontent",
+            value => 'explicit',
+            selected => $adultcontent eq 'explicit' ? 1 : 0,
+        });
+
+        $ret .= "<label for='${key}adultcontent'>" . ($u->is_community ? $class->ml('setting.adultcontent.option.comm2') : $class->ml('setting.adultcontent.option.self2')) . "</label> ";
+
+    } else {
+
+        my @options = (
+            none => $class->ml('setting.adultcontent.option.select.none'),
+            concepts => $class->ml('setting.adultcontent.option.select.concepts'),
+            explicit => $class->ml('setting.adultcontent.option.select.explicit'),
+        );
+
+        $ret = "<label for='${key}adultcontent'>" . ($u->is_community ? $class->ml('setting.adultcontent.option.comm') : $class->ml('setting.adultcontent.option.self')) . "</label> ";
+        $ret .= LJ::html_select({
+            name => "${key}adultcontent",
+            id => "${key}adultcontent",
+            selected => $adultcontent,
+        }, @options);
+
+        my $errdiv = $class->errdiv($errs, "adultcontent");
+        $ret .= "<br />$errdiv" if $errdiv;
+
+    }
 
     return $ret;
 }
@@ -58,9 +77,20 @@ sub error_check {
 
 sub save {
     my ($class, $u, $args) = @_;
-    $class->error_check($u, $args);
 
-    my $val = $class->get_arg($args, "adultcontent");
+    my $val;
+
+    if ( LJ::is_enabled('remove_adult_concepts') ) {
+    
+        $val = $class->get_arg($args, "adultcontent") ? "explicit" : "none";
+
+    } else {
+
+        $class->error_check($u, $args);
+
+        $val = $class->get_arg($args, "adultcontent");
+    }
+
     $u->set_prop( adult_content => $val );
 
     return 1;
