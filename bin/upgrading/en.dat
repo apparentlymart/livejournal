@@ -4202,6 +4202,14 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
+
+main.promo.head=Promo
+
+main.promo.nav.next=Next Item
+
+main.promo.nav.prev=Previous Item
+
 main.menu.index=Home
 
 mediaplaceholder.link|staleness=1
