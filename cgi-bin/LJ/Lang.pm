@@ -295,11 +295,11 @@ sub get_chgtime_unix {
     my $itid = LJ::Lang::get_itemid( $dmid, $itcode )
         or return 0;
 
-    my $dbr     = LJ::get_db_reader();
-    my $chgtime = $dbr->selectrow_array(
+    my $dbh     = LJ::get_db_writer();
+    my $chgtime = $dbh->selectrow_array(
         'SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=? AND lnid=?',
         undef, $dmid, $itid, $lnid, );
-    die $dbr->errstr if $dbr->err;
+    die $dbh->errstr if $dbh->err;
 
     return $chgtime ? LJ::TimeUtil->mysqldate_to_time($chgtime) : 0;
 }
@@ -315,14 +315,13 @@ sub get_itemid {
         $itcode = substr( $itcode, 0, MAXIMUM_ITCODE_LENGTH );
     }
 
-    my $dbr  = LJ::get_db_reader();
-    my $itid = $dbr->selectrow_array(
+    my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh;
+
+    my $itid = $dbh->selectrow_array(
         "SELECT itid FROM ml_items WHERE dmid=? AND itcode=?",
         undef, $dmid, $itcode, );
     return $itid if defined $itid;
-
-    my $dbh = LJ::get_db_writer();
-    return 0 unless $dbh;
 
     # allocate a new id
     LJ::get_lock( $dbh, 'global', 'mlitem_dmid' ) || return 0;
@@ -789,10 +788,10 @@ sub get_text_multi {
     # This shouldn't happen!
     die "Unable to load language code: $lang" unless $l;
 
-    my $dbr = LJ::get_db_reader();
+    my $dbw = LJ::get_db_writer();
     my $bind = join( ',', map {'?'} keys %dbload );
 
-    my $rows = $dbr->selectall_arrayref(
+    my $rows = $dbw->selectall_arrayref(
         qq{
             SELECT i.itcode, t.text
             FROM ml_text t, ml_latest l, ml_items i
@@ -825,7 +824,7 @@ sub get_text_multi {
         $TXT_CACHE{$cache_key} = $text;
 
         if ($text) {
-            LJ::MemCache::set( $cache_key, $text );
+            LJ::MemCache::set( $cache_key, $text, 3600 + int rand 30 );
         } else {
             ## Do not cache empty values forever - they may be inserted later.
             ## This is a hack, what we actually need is a mechanism to delete
