@@ -107,7 +107,7 @@
             my $style = eval { LJ::S2Theme->new ( themeid => $styleinfo->{'theme'} ) };
 
             return $err->($ML{'.error.stylenotfound'})
-                if ( ! ($style && $style->is_buyable && grep { $style->s2lid == $_->s2lid } @purchased));
+                if ( $style && $style->is_buyable && !grep { $style->s2lid == $_->s2lid } @purchased);
 
             # save to db and update user object
             $u->set_prop({ 'stylesys' => 2,
