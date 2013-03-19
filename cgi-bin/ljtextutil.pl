@@ -142,6 +142,29 @@ sub ehtml
     $a =~ s/>/&gt;/g;
     return $a;
 }
+
+# <LJFUNC>
+# name: LJ::ehtm
+# class: text
+# des: Escapes a value before it can be put in HTML. Modified ehtml. Don't encode & if it parth of mnemonic.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
+sub ehtm
+{
+    # fast path for the commmon case:
+    return $_[0] unless $_[0] =~ /[&\"\'<>]/;
+
+    # this is faster than doing one substitution with a map:
+    my $a = $_[0];
+    $a =~ s/\&(?!(#?\w{2,7};))/&amp;/g;
+    $a =~ s/\"/&quot;/g;
+    $a =~ s/\'/&\#39;/g;
+    $a =~ s/</&lt;/g;
+    $a =~ s/>/&gt;/g;
+    return $a;
+}
 *eall = \&ehtml;  # old BML syntax required eall to also escape BML.  not anymore.
 
 # <LJFUNC>

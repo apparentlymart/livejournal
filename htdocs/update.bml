@@ -205,7 +205,7 @@ EMBED
         }
 
         if ($entry->visible_to($remote)) {
-            $subject ||= (LJ::ehtml($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
+            $subject ||= ( LJ::ehtm($entry->subject_orig) || LJ::Lang::ml("repost.default_subject"));
 
             unless ($event) {
                 $event = $entry->event_raw;
