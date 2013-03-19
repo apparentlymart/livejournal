@@ -22,4 +22,13 @@ LJ::register_hook('head_content', sub {
     }
 });
 
+LJ::register_hook('head_content', sub {
+    my ($headref) = @_; 
+    return unless $LJ::IS_LJCOM_BETA;
+
+    my $prefix = $LJ::IS_SSL ? $LJ::SSLSTATPREFIX : $LJ::STATPREFIX;
+    $$headref .= qq{<script src="$prefix/js/ads/axz.min.js"></script>};
+});
+
+
 1;
