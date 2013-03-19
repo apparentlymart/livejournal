@@ -1778,13 +1778,18 @@ sub bday_string {
 sub age {
     my $u = shift;
     croak "Invalid user object" unless LJ::isu($u);
+    my $age = $u->{__age} || 0;
+    return $age if $age;
 
     my $bdate = $u->{bdate};
     return unless length $bdate;
 
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
-    return $age if $age > 0;
+    $age = LJ::TimeUtil->calc_age($year, $mon, $day);
+    if ($age > 0) {
+        $u->{__age} = $age;
+        return $age;
+    } 
     return;
 }
 
