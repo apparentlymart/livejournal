@@ -301,7 +301,11 @@
                 my $styleinfo= LJ::S2::get_style_layers ($u, $styleid);
                 my $style = eval { LJ::S2Theme->new ( themeid => $styleinfo->{'theme'} ) };
 
-                next if ( ! ($style && $style->is_buyable && grep { $style->s2lid == $_->s2lid } @purchased));
+                if ($style) {
+                    if ($style->is_buyable && !grep { $style->s2lid == $_->s2lid } @purchased) {
+                        next;
+                    }
+                }
 
                 $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
                 $body .= $formauth;
