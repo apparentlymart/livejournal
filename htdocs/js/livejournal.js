@@ -907,6 +907,12 @@ LiveJournal.parseMedia = (function() {
 						return null;
 					}
 
+					// we really should move from regexp to querystring parsing
+					var qs = LiveJournal.parseGetArgs(input);
+					if (qs.v) {
+						return qs.v;
+					}
+
 					return (match && match[7]) || null;
 				}
 			}
