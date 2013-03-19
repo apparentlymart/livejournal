@@ -547,7 +547,11 @@ sub current_uniq {
     # -- this accounts for cases when the cookie was initially
     #    set in this request, so it wasn't received in an 
     #    incoming headerno cookie was sent in
-    return LJ::Request->notes('uniq');
+    $val = LJ::Request->notes('uniq');
+    return $val if $val;
+
+    $val = $class->parts_from_cookie;
+    return $val;
 }
 
 1;
