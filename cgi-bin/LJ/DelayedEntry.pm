@@ -923,9 +923,9 @@ sub get_entries_by_journal {
     my ( $class, $journal, $opts ) = @_;
     return [] unless $journal;
 
-    my $skip          = int($opts->{'skip'}) || 0;
-    my $show          = int($opts->{'show'}) || 0;
-    my $userid        = int($opts->{'userid'});
+    my $skip          = $opts->{'skip'} ? int($opts->{'skip'}) : 0;
+    my $show          = $opts->{'show'} ? int($opts->{'show'}) : 0;
+    my $userid        = $opts->{'userid'}  ? int($opts->{'userid'}) : 0;
     my $only_my       = $opts->{'only_my'};
     my $sticky_on_top = $opts->{'sticky_on_top'};
 
