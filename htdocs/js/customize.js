@@ -1,3 +1,5 @@
+/*global Hourglass, DOM */
+
 var Customize = {};
 
 Customize.init = function () {
@@ -51,28 +53,34 @@ Customize.resetFilters = function () {
 
 Customize.cursorHourglass = function (evt) {
     var pos = DOM.getAbsoluteCursorPosition(evt);
-    if (!pos) return;
+
+    if (!pos) {
+        return;
+    }
 
     if (!Customize.hourglass) {
         Customize.hourglass = new Hourglass();
-        Customize.hourglass.init();
-        Customize.hourglass.hourglass_at(pos.x, pos.y);
+        Customize.hourglass.setPosition(pos.x, pos.y);
+        Customize.hourglass.show();
     }
 };
 
 Customize.elementHourglass = function (element) {
-    if (!element) return;
+    if (!element) {
+        return;
+    }
 
     if (!Customize.hourglass) {
         Customize.hourglass = new Hourglass();
-        Customize.hourglass.init();
-        Customize.hourglass.hourglass_at_widget(element);
+        Customize.hourglass.setContainer(element);
+        Customize.hourglass.show();
     }
 };
 
 Customize.hideHourglass = function () {
     if (Customize.hourglass) {
         Customize.hourglass.hide();
+        Customize.hourglass.remove();
         Customize.hourglass = null;
     }
 };
