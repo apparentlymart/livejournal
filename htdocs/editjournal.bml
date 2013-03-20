@@ -170,7 +170,6 @@ body<=
         my %opts = @_;
 
         my @res = @$ref;
-        my $show_ad = $opts{show_ad} ? 1 : 0;
 
         my ( $link_prev, $link_next );
         my $is_first_page = $opts{'first_page'};
@@ -202,19 +201,12 @@ body<=
             }
         }
 
-        my $adhtml = '';
-        if ($show_ad) {
-            $adhtml = LJ::get_ads(
-                { 'location' => 'bml.editjournal', 'ljadwrapper' => 1 } );
-        }
-
         return ($journal->is_identity && !$usejournal) ? "" : LJ::Widget::EntryChooser->render(
             'link_prev'    => $link_prev,
             'link_next'    => $link_next,
             'show_posters' => $usejournal ? 1 : 0,
             'entries'      => \@entries,
             'real_entries' => $real_entries,
-            'adhtml'       => $adhtml,
         );
     };
 
@@ -491,12 +483,6 @@ body<=
                 $result .= "<li><a href='$LJ::SITEROOT/editjournal.bml'>$ML{'.success.fromhere.manageentries'}</a></li>";
                 $result .= "</ul></div>";
                 $result .= "</td>";
-
-                my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
-                if ($ad) {
-                    $result .= "<td valign='top' style='width: 300px;'>$ad</td>";
-                }
-
                 $result .= "</tr></table>";
 
                 return $result;
@@ -662,11 +648,6 @@ body<=
             $ret .= $js;
 
             $ret .= "</td>";
-            my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
-            if ($ad) {
-                $ret .= "<td valign='top' style='width: 300px;'>$ad</td>";
-            }
-
             $ret .= "</tr></table>";
 
             my $qotd = LJ::QotD->get_single_question($entry->{prop_qotdid});
@@ -795,8 +776,7 @@ body<=
         # header
         $ret .= "<div class='b-editentries-header'>";
         $ret .= "<h1>$title</h1>";
-        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
-        $ret .= $editprivacy_link if !$ad;
+        $ret .= $editprivacy_link;
 
         # edit form
 
@@ -884,14 +864,9 @@ JS_INIT
                                 next => $have_next_page         ? $skip + $items_per_page : 0
         );
 
-        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
-        if ($ad) {
-            $ret .= "</td><td valign='top'>$editprivacy_link $ad";
-        }
-
         $ret .= "</td></tr></table>";
-
         $ret .= LJ::Widget::SettingWindow->render;
+
         return $ret;
     }
 }

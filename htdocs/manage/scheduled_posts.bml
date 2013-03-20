@@ -55,7 +55,6 @@ body<=
         my %opts = @_;
 
         my @res = @$ref;
-        my $show_ad = $opts{show_ad} ? 1 : 0;
 
         my ( $link_prev, $link_next );
         my $is_first_page = $opts{'first_page'};
@@ -84,18 +83,11 @@ body<=
             }
         }
 
-        my $adhtml = '';
-        if ($show_ad) {
-            $adhtml = LJ::get_ads(
-                { 'location' => 'bml.editjournal', 'ljadwrapper' => 1 } );
-        }
-
         return LJ::Widget::EntryChooser->render(
             'link_prev'    => $link_prev,
             'link_next'    => $link_next,
             'show_posters' => $usejournal ? 1 : 0,
             'entries'      => \@entries,
-            'adhtml'       => $adhtml,
             'scheduled'    => BML::ml('.date.scheduled'),
         );
     };
