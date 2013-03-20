@@ -1802,9 +1802,13 @@ entryform.view_thumbnails=View Thumbnails
 
 entryunit.comments=[[reply_count]] [[?reply_count|comment|comments]]
 
+entryunit.expromo=This entry has been promoted
+
 entryunit.hide=Hide author
 
 entryunit.read=Mark entry as read
+
+entryunit.updown=This entry has changed its position in the rating
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
