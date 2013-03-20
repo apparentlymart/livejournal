@@ -235,6 +235,7 @@ sub truncate_with_ellipsis {
     return $str;
 }
 
+#unit test for that function located in LJHOME/bin/tests/unittests/t/Test/LJ/TextTest.pm
 sub truncate_to_word_with_ellipsis {
     my ($class, @opts) = @_;
 
@@ -281,6 +282,7 @@ sub truncate_to_word_with_ellipsis {
 
         return $str;
     };
+    my $trimmed = 0;
 
     if ($bytes && $class->byte_len($str) > $bytes) {
         my $bytes_trunc = $bytes - $class->byte_len($ellipsis);
@@ -291,7 +293,7 @@ sub truncate_to_word_with_ellipsis {
 
         $str = $remove_last_word->($str);
         $remainder = substr($original_string, $class->byte_len($str));
-
+		$trimmed = 1;
     }
 
     if ($chars && $class->char_len($str) > $chars) {
@@ -327,6 +329,7 @@ sub truncate_to_word_with_ellipsis {
         $remainder = substr($original_string, $class->byte_len($str));
         
         $str .= ' ' if($add_space && $str =~ /\S$/);
+        $trimmed = 1;
 
     } elsif($force_ellipsis) {
         $str .= ' ' if($str =~ /\S$/);
@@ -340,7 +343,7 @@ sub truncate_to_word_with_ellipsis {
         }
     }
 
-    $str .= $ellipsis;
+    $str .= $ellipsis if ($trimmed);
 
     $str ||= $ellipsis if($fill_empty);
 
