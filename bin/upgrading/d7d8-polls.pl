@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 use lib "$ENV{'LJHOME'}/cgi-bin/";
-require "ljlib.pl";
+use LJ;
 use LJ::Poll;
 use Term::ReadLine;
 use Getopt::Long;

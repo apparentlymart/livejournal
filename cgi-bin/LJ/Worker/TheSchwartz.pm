@@ -3,7 +3,7 @@ use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::Worker", "Exporter";
-require "ljlib.pl";
+use LJ;
 use vars qw(@EXPORT @EXPORT_OK);
 
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);

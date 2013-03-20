@@ -44,7 +44,7 @@ unless (($list   && (($banid && ! $an_opt) || (! $banid && $an_opt)) ||
 
 # now load in the beast
 use lib "$ENV{'LJHOME'}/cgi-bin/";
-require "ljlib.pl";
+use LJ;
 require "sysban.pl";
 use LJ::TimeUtil;
 

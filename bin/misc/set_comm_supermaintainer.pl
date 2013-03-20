@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'once';
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 require "ljdb.pl";
 use LJ::Lang;
 require 'ljprotocol.pl';

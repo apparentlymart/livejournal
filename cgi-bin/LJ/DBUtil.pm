@@ -2,7 +2,7 @@ package LJ::DBUtil;
 use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 
 die "Don't use this in web context, it's only for admin scripts!"
     if LJ::is_web_context();

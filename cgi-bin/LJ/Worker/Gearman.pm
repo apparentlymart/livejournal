@@ -5,7 +5,7 @@ use Gearman::Worker;
 use base "LJ::Worker", "Exporter";
 use LJ::WorkerResultStorage;
 
-require "ljlib.pl";
+use LJ;
 use vars qw(@EXPORT @EXPORT_OK);
 use Getopt::Long qw(:config pass_through);
 use IO::Socket::INET ();

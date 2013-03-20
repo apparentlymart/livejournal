@@ -258,7 +258,7 @@ sub parse_a {
 
 =comment Debug:
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 
 my $input = join('', <ARGV>);
 print $input;

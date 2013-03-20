@@ -4,7 +4,7 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base "LJ::NewWorker", "Exporter";
 use POSIX ();
-require "ljlib.pl";
+use LJ;
 
 my $interval        = 10;
 my $verbose         = 0;

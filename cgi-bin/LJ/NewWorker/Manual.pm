@@ -2,7 +2,7 @@ package LJ::NewWorker::Manual;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker';
-require "ljlib.pl";
+use LJ;
 
 my  $interval   = 10;
 

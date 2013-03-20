@@ -13,10 +13,8 @@ use File::Basename ();
 use File::Copy ();
 use Image::Size ();
 
-BEGIN {
-    require "ljlib.pl";
-    require "ljviews.pl";
-}
+use LJ;
+BEGIN { require 'ljviews.pl'; }
 
 use LJ::S2;
 use MogileFS::Admin;

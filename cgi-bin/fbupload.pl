@@ -7,7 +7,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Config;
 LJ::Config->load;
 
-require "ljlib.pl";
+use LJ;
 
 use MIME::Words ();
 use XML::Simple;

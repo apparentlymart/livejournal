@@ -7,7 +7,7 @@ use Getopt::Long;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::Blob;
 use Image::Size ();
-require "ljlib.pl";
+use LJ;
 
 my $opt_fast;
 exit 1 unless

@@ -5,7 +5,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 use LJ::SMS::Message;
 
-require "ljlib.pl";
+use LJ;
 
 my ($user, $msg) = @ARGV[0,1];
 

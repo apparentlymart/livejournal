@@ -5,7 +5,7 @@ use strict;
 use Class::Autouse qw(LJ::Event);
 
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 require "ljmail.pl";
 
 package LJ::Cmdbuffer;

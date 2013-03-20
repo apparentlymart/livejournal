@@ -2,7 +2,7 @@ package LJ::Worker::Manual;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::Worker';
-require "ljlib.pl";
+use LJ;
 
 # don't override this in subclasses.
 sub run {

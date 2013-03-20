@@ -22,6 +22,8 @@ use Apache::LiveJournal::PalImg;
 use Apache::LiveJournal::Interface::Api;
 use Apache::WURFL;
 
+use LJ;
+
 use LJ::AccessLogSink;
 use LJ::AccessLogRecord;
 use LJ::AccessLogSink::Database;
@@ -39,9 +41,8 @@ use LJ::Handlers;
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
 
-    require "ljlib.pl";
-    require "ljviews.pl";
-    require "ljprotocol.pl";
+    require 'ljviews.pl';
+    require 'ljprotocol.pl';
     if (%LJ::FOTOBILDER_IP) {
         use Apache::LiveJournal::Interface::FotoBilder;
     }

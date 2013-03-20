@@ -6,7 +6,7 @@ use Getopt::Long;
 use LJ::Worker::ErrorLog;
 use POSIX;
 
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 use LJ::Lang;
 

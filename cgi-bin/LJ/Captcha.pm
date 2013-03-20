@@ -5,7 +5,7 @@ use strict;
 use LJ::Blob qw{};
 
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 
 ### get_visual_id() -> ( $capid, $anum )
 sub get_visual_id { get_id('image') }

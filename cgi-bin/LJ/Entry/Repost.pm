@@ -3,7 +3,7 @@ package LJ::Entry::Repost;
 use strict;
 use warnings;
 
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 use LJ::Lang;
 

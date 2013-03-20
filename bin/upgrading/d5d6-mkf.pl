@@ -6,7 +6,7 @@ use Getopt::Long;
 $| = 1;
 
 use lib ("$ENV{LJHOME}/cgi-bin");
-require "ljlib.pl";
+use LJ;
 use LJ::User;
 
 use constant DEBUG => 0;  # turn on for debugging (mostly db handle crap)

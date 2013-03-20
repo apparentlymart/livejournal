@@ -13,7 +13,7 @@ use List::Util qw( shuffle );
 
 use TheSchwartz::FuncMap;
 
-require 'ljlib.pl';
+use LJ;
 
 use constant MAX_RETRIES   => 5;
 

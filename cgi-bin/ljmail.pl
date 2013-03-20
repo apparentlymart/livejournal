@@ -18,7 +18,7 @@
 use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 
 package LJ;
 

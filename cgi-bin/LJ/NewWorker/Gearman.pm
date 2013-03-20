@@ -5,7 +5,7 @@ use Gearman::Worker;
 use base "LJ::NewWorker";
 use LJ::WorkerResultStorage;
 
-require "ljlib.pl";
+use LJ;
 use IO::Socket::INET ();
 use Carp qw(croak);
 
