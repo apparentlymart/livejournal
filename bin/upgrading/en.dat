@@ -7068,6 +7068,8 @@ talk.poll.type.submit=Add question
 talk.poll.type.text|staleness=1
 talk.poll.type.text=Text entry
 
+talk.poll.reset=Reset poll fields to default
+
 talk.post.adult|staleness=1
 talk.post.adult=Adult content
 
