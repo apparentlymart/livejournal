@@ -5,6 +5,6 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 use LJ::NewWorker::Reminders;
 
-require 'ljlib.pl';
+use LJ;
 LJ::NewWorker::Reminders->new()->start();
 

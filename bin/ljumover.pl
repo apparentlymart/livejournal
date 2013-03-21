@@ -1,5 +1,8 @@
 #!/usr/bin/perl
-##############################################################################
+use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 =head1 NAME
 
@@ -120,7 +123,6 @@ package umover;
 use strict;
 use warnings qw{all};
 
-
 ###############################################################################
 ###  I N I T I A L I Z A T I O N
 ###############################################################################
@@ -148,9 +150,6 @@ BEGIN {
     use IO::Socket          qw{};
     use Sys::Hostname       qw{hostname};
     use Time::HiRes         qw{gettimeofday};
-
-    # LiveJournal functions
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
     # Turn on option bundling (-vid)
     Getopt::Long::Configure( "bundling" );
@@ -680,9 +679,6 @@ sub abort (@) {
 package Mover;
 
 BEGIN {
-    # LiveJournal functions
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-
     use vars qw{$AUTOLOAD};
 
     use Carp        qw{confess croak};
@@ -1220,9 +1216,6 @@ DESTROY {
 package Mover::Thread;
 
 BEGIN {
-    # LiveJournal functions
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-
     use vars qw{$AUTOLOAD};
     use Carp qw{croak confess};
 }

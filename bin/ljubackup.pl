@@ -1,5 +1,8 @@
 #!/usr/bin/perl
-##############################################################################
+use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 =head1 NAME
 
@@ -504,9 +507,6 @@ sub abort (@) {
 package BackupAgent;
 
 BEGIN {
-    # LiveJournal functions
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-
     use vars qw{$AUTOLOAD};
 
     use Carp        qw{confess croak};
@@ -996,9 +996,6 @@ DESTROY {
 package BackupAgent::Thread;
 
 BEGIN {
-    # LiveJournal functions
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-
     use vars qw{$AUTOLOAD};
     use Carp qw{croak confess};
 	use IO::File qw{};

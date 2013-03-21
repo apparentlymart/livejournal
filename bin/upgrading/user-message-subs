@@ -1,7 +1,8 @@
 #! /usr/bin/perl
 use strict;
-use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $dbslo = LJ::get_dbh("slow")
     or die "cannot connect to slow role";

@@ -2,6 +2,9 @@
 #
 
 use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+
 use Getopt::Long;
 
 my $debs_only = 0;
@@ -227,14 +230,14 @@ sub check_env {
     $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/etc/ljconfig.pl")
         unless -e "$ENV{'LJHOME'}/etc/ljconfig.pl";
 
-    eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
-    $err->("Failed to load ljlib.pl: $@") if $@;
+    eval { require LJ; };
+    $err->("Failed to load LJ.pm: $@") if $@;
 
 }
 
 sub check_database {
 
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+    require LJ;
     my $dbh = LJ::get_dbh("master");
     unless ($dbh) {
         $err->("Couldn't get master database handle.");

@@ -1,10 +1,10 @@
 #!/usr/bin/perl
-#
-
 use strict;
-$| = 1;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
+$| = 1;
 
 my $BLOCK_MOVE   = 5000;  # user rows to get at a time before moving
 my $BLOCK_INSERT =   25;  # rows to insert at a time when moving users

@@ -1,18 +1,15 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: Fcntl::, cgi-bin/ljlib.pl
+# lib: Fcntl::, LJ
 # file: bin/maint/taskinfo.txt, bin/maint/taskinfo-local.txt
 # </LJDEP>
 
 use strict;
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
 use vars qw(%maint %maintinfo $VERBOSE);
-
-unless (-d $ENV{'LJHOME'}) {
-    die "\$LJHOME not set.\n";
-}
-
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 if ($LJ::DISABLED{ljmaint_tasks}) {
     print "ljmaint.pl tasks disabled, exiting\n";

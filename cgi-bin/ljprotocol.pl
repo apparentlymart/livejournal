@@ -5517,7 +5517,7 @@ sub check_altusage
 {
     my ($req, $err, $flags) = @_;
 
-    # see note in ljlib.pl::can_use_journal about why we return
+    # see note in LJ::can_use_journal about why we return
     # both 'ownerid' and 'u_owner' in $flags
 
     my $alt = $req->{'usejournal'} || $req->{'journal'};

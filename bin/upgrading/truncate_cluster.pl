@@ -1,13 +1,12 @@
 #!/usr/bin/perl
-
 use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $clusterid = shift;
 die "Usage: truncate_cluster.pl <clusterid>\n"
     unless $clusterid;
-
-# load libraries now
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 # force this option on, since that's the point of the tool
 $LJ::COMPRESS_TEXT = 1;

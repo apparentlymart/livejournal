@@ -12,7 +12,7 @@ package LJ::Worker::SupportNotify;
 use TheSchwartz::Worker;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'TheSchwartz::Worker';
-require 'ljlib.pl';
+use LJ;
 require "supportlib.pl";    # <-- here is LJ::Worker::SupportNotify::work().
 require "ljmail.pl";
 

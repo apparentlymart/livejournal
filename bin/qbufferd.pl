@@ -1,14 +1,19 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: Proc::ProcessTable, cgi-bin/ljlib.pl
+# lib: Proc::ProcessTable, LJ
 # </LJDEP>
 
 use strict;
-use Getopt::Long
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+BEGIN {
+    require 'supportlib.pl';
+    require 'ljcmdbuffer.pl';
+}
+
+use Getopt::Long;
 
 my $opt_foreground;
 my $opt_debug;

@@ -7,7 +7,7 @@
 #
 #
 # <LJDEP>
-# lib: Socket::, Text::Wrap, cgi-bin/ljlib.pl
+# lib: Socket::, Text::Wrap, LJ
 # </LJDEP>
 
 my $bindhost = shift @ARGV;
@@ -17,7 +17,8 @@ unless ($bindhost) {
     $bindhost = "0.0.0.0";
 }
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 use Socket;
 use Text::Wrap;

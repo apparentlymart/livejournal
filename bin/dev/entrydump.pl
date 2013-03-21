@@ -3,7 +3,7 @@
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::Entry;
 
 my $url = shift;

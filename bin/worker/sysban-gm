@@ -2,14 +2,14 @@
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 require 'sysban.pl';
 use LJ::NewWorker::Gearman;
 LJ::NewWorker::Gearman::Sysban->start();
 package LJ::NewWorker::Gearman::Sysban;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 require 'sysban.pl';
 use base 'LJ::NewWorker::Gearman';
 use Storable;

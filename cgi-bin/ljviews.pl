@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/LJ/Lang.pm, cgi-bin/cleanhtml.pl
+# lib: cgi-bin/ljconfig.pl, cgi-bin/LJ/Lang.pm, cgi-bin/cleanhtml.pl
 # </LJDEP>
 
 use strict;

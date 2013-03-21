@@ -8,7 +8,7 @@ use warnings;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::Manual';
-require 'ljlib.pl';
+use LJ;
 require 'ljdb.pl';
 use LJ::DBUtil;
 

@@ -1,14 +1,14 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 use LJ::NewWorker::Gearman;
 LJ::NewWorker::Gearman::LoadFriendsGM->start();
 package LJ::NewWorker::Gearman::LoadFriendsGM;
 use base 'LJ::NewWorker::Gearman';
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::RelationService;
 
 use LJ::NewWorker::Gearman;

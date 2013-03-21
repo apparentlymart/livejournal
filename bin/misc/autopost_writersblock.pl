@@ -9,7 +9,7 @@ use Getopt::Long;
 use Data::Dumper;
 
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 require 'ljfeed.pl';
 

@@ -6,7 +6,8 @@
 
 use strict;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $fromver = shift;
 die "Usage: pop-clusterprops.pl <fromdversion>\n\t(where fromdversion is one of: 3)\n"

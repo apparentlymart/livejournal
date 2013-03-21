@@ -1,14 +1,11 @@
 #!/usr/bin/perl
-#
-# <LJDEP>
-# lib: cgi-bin/ljlib.pl
-# </LJDEP>
-
 use strict;
-use Getopt::Long;
+
 use lib "$ENV{'LJHOME'}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::User::Rename;
+
+use Getopt::Long;
 
 sub usage {
     die "Usage: [--swap --force] <from_user> <to_user>\n";

@@ -1,9 +1,8 @@
 #!/usr/bin/perl
-#
-
 use strict;
-use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $dbh = LJ::get_db_writer();
 

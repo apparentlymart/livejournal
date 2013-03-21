@@ -12,7 +12,7 @@ __PACKAGE__->start();
 
 package LJ::Worker::MassPrivacy;
 use base 'TheSchwartz::Worker';
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 use LJ::MassPrivacy; # work() is in cgi-bin/LJ/MassPrivacy.pm as LJ::Worker::MassPrivacy class.
 

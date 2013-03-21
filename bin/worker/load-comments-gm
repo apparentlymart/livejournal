@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::NewWorker::Gearman;
 
 LJ::NewWorker::Gearman::LoadComments->start();
@@ -11,7 +11,7 @@ LJ::NewWorker::Gearman::LoadComments->start();
 package LJ::NewWorker::Gearman::LoadComments;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use base 'LJ::NewWorker::Gearman';
 
 use Storable;

@@ -2,14 +2,14 @@
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 require 'taglib.pl';
 use LJ::NewWorker::Gearman;
 LJ::NewWorker::Gearman::Taglib->start();
 package LJ::NewWorker::Gearman::Taglib;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 require 'taglib.pl';
 use base 'LJ::NewWorker::Gearman';
 use Storable;

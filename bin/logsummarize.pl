@@ -7,7 +7,8 @@ unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $db = LJ::get_dbh("logs");
 unless ($db) {

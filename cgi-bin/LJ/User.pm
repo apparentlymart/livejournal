@@ -1,15 +1,3 @@
-#
-# LiveJournal user object
-#
-# 2004-07-21: we're transitioning from $u hashrefs to $u objects, currently
-#             backed by hashrefs, to ease migration.  in the future,
-#             more methods from ljlib.pl and other places will move here,
-#             and the representation of a $u object will change to 'fields'.
-#             at present, the motivation to moving to $u objects is to do
-#             all database access for a given user through his/her $u object
-#             so the queries can be tagged for use by the star replication
-#             daemon.
-
 package LJ::User;
 use strict;
 no warnings 'uninitialized';

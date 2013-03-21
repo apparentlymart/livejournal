@@ -8,12 +8,14 @@
 # </LJDEP>
 
 use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
 use IO::Socket;
 use IO::Handle;
 use Proc::ProcessTable;
 use DBI;
-
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 # Max message length and port to bind.
 my $MAXLEN = 512;

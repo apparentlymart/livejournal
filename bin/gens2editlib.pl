@@ -7,6 +7,11 @@
 
 use strict;
 use warnings;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+use LJ::S2;
+
 use Getopt::Long;
 use Pod::Usage;
 
@@ -19,9 +24,7 @@ GetOptions(
 	'output|o=s' => \$outputpath) or pod2usage(1);
 pod2usage(0) if $help;
 
-my $home = $ENV{LJHOME} or die "You'll have to set \$LJHOME first.\n";
-require "$home/cgi-bin/ljlib.pl";
-require "$home/cgi-bin/LJ/S2.pm";
+my $home = $ENV{'LJHOME'};
 
 $outputpath ||= "$home/htdocs/customize/advanced/s2edit/s2library.js";
 

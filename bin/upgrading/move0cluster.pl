@@ -4,6 +4,12 @@
 #
 
 use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+use LJ::TimeUtil;
+BEGIN { require 'ljcmdbuffer.pl'; }
+
 use Getopt::Long;
 
 my $opt_del = 0;
@@ -26,10 +32,6 @@ exit 1 unless GetOptions('delete' => \$opt_del,
 			 'ignorebit' => \$opt_ignorebit,
                          );
 my $optv = $opt_verbose;
-
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
-use LJ::TimeUtil;
 
 my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;

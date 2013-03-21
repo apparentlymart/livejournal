@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::NewWorker::Gearman;
 
 LJ::NewWorker::Gearman::UserPicResize->start();
@@ -10,7 +10,7 @@ LJ::NewWorker::Gearman::UserPicResize->start();
 package LJ::NewWorker::Gearman::UserPicResize;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use LJ;
 use base 'LJ::NewWorker::Gearman';
 use Image::Magick;
 use Gearman::Worker;

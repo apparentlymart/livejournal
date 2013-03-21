@@ -1,9 +1,8 @@
 #!/usr/bin/perl
-#
-
 use strict;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $lock = LJ::locker()->trylock("weblog-summarize");
 exit 0 unless $lock;

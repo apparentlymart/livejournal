@@ -83,7 +83,7 @@ unless ( -d $ENV{'LJHOME'} ) {
         . "You must fix this before you can run this database update script.";
 }
 
-require 'ljlib.pl';
+use LJ;
 use LJ::Lang;
 require 'weblib.pl';
 

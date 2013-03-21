@@ -7,7 +7,7 @@ LJ::NewWorker::TheSchwartz::SendEmail->start();
 
 package LJ::NewWorker::TheSchwartz::SendEmail;
 use base 'LJ::NewWorker::TheSchwartz';
-require 'ljlib.pl';
+use LJ;
 use TheSchwartz::Worker::SendEmail;
 use Time::HiRes ();
 

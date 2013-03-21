@@ -1,9 +1,11 @@
 #!/usr/bin/perl
 
 use strict;
-$| = 1;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
+$| = 1;
 
 my $sysid = LJ::get_userid("system");
 die "Couldn't find system userid"

@@ -5,7 +5,8 @@
 # on disk is newer than the one in the database.
 
 use strict;
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 # create list of files to check
 my $dir = "$ENV{'LJHOME'}/htdocs/inc";

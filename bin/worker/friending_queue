@@ -3,7 +3,7 @@ package TheSchwartz::Worker::FriendingQueue;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
-require 'ljlib.pl';
+use LJ;
 
 sub capabilities { 'LJ::Worker::HandleUserFriendingActions', "LJ::Worker::FlushUserFriendingActions" }
 

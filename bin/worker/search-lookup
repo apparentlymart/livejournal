@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::NewWorker::Gearman;
 
 LJ::NewWorker::Gearman::SearchLookup->start();

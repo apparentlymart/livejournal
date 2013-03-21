@@ -15,7 +15,7 @@ BEGIN {
     }
 }
 
-require 'ljlib.pl';
+use LJ;
 require 'ljemailgateway-web.pl';
 require 'ljprotocol.pl';
 require 'fbupload.pl';

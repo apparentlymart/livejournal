@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use lib "$ENV{'LJHOME'}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 
 use Getopt::Long;
 

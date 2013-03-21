@@ -2,7 +2,7 @@
 #
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::Entry;
 use LJ::Event::OfficialPost;
 use LJ::Event::SupOfficialPost;

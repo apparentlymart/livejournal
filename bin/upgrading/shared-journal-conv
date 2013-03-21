@@ -5,8 +5,8 @@
 # any account it's processed will no longer be journaltype='S'.
 
 use strict;
-use lib "$ENV{LJHOME}/cgi-bin";
-require "ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
 
 my $dbh = LJ::get_db_writer()
     or die "Unable to get global master database";

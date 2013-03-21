@@ -1,9 +1,9 @@
 #!/usr/bin/perl
-#
-
 use strict;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
 my $dbh = LJ::get_dbh("master");
 $dbh->{'RaiseError'} = 1;
 $dbh->{'PrintError'} = 1;

@@ -12,7 +12,7 @@ use XML::Simple qw/XMLin/;
 use Data::Dumper;
 use Encode();
 use lib "$ENV{'LJHOME'}/cgi-bin";
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use LJ;
 use LJ::Poll;
 use Getopt::Long;
 

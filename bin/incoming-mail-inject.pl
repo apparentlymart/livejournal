@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-BEGIN {
-    $ENV{LJHOME} ||= "/home/lj";
-}
-use lib "$ENV{LJHOME}/cgi-bin";
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+
+BEGIN { $ENV{'LJHOME'} ||= '/home/lj'; }
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
 use Class::Autouse qw(
                       LJ::IncomingEmailHandle
                       );

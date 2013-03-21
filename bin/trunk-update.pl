@@ -1,6 +1,9 @@
 #!/usr/bin/perl
-
 use strict;
+
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ;
+
 use IO::Socket::INET;
 
 unless ($ENV{LJHOME}) {
@@ -12,7 +15,6 @@ my $cvsreport = "$ENV{LJHOME}/bin/cvsreport.pl";
 
 die "cvsreport.pl missing or unexecutable" unless -x $cvsreport;
 
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 die "NO DO NOT RUN THIS IN PRODUCTION" if $LJ::IS_LJCOM_PRODUCTION;
 
 

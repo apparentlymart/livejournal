@@ -6,7 +6,7 @@ package LJ::NewWorker::TheSchwart::SMS;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::NewWorker::TheSchwartz';
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 use LJ::Lang;
 require 'ljfeed.pl';

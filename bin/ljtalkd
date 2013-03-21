@@ -3,7 +3,7 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use Danga::Socket;
 use IO::Socket::INET;
-require 'ljlib.pl';
+use LJ;
 
 die "This is currently for dev servers only.\n" unless $LJ::IS_DEV_SERVER;
 die "No gearmand servers configured in \@LJ::GEARMAN_SERVERS.\n" unless @LJ::GEARMAN_SERVERS;
