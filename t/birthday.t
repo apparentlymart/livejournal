@@ -4,7 +4,7 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Test qw(temp_user memcache_stress);
-require 'ljlib.pl';
+use LJ;
 
 sub run_tests {
     {

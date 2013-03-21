@@ -3,7 +3,7 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require "parsefeed.pl";
-require 'ljlib.pl';
+use LJ;
 
 #  These tests check for correct handling of xml:base
 

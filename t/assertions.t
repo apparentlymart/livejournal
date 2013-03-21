@@ -3,7 +3,7 @@
 use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 
 ok(LJ::assert_is("foo", "foo"));
 ok(! eval { LJ::assert_is("foo", "bar") });

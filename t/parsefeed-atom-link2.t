@@ -3,7 +3,7 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require "parsefeed.pl";
-require 'ljlib.pl';
+use LJ;
 
 #  These tests are of the correct identification of an "alternate" link.
 #  We assume here that an HTML alternate link is preferred over text/plain, despite the

@@ -5,7 +5,7 @@
 use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 
 # Set more manageable limit for testing
 $LJ::CAP_DEF{'inbox_max'} = 10;

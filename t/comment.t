@@ -3,7 +3,7 @@
 use strict;
 use Test::More tests => 177;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 require 'talklib.pl';
 require 'ljprotocol.pl';
 use LJ::Comment;

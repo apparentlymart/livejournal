@@ -1026,7 +1026,7 @@ sub raw_dump {
 }
 
 sub exml {
-    # stolen from ljlib.pl, LJ::exml
+    # stolen from LJ::exml
 
     # fast path for the commmon case:
     return $_[0] unless $_[0] =~ /[&\"\'<>\x00-\x08\x0B\x0C\x0E-\x1F]/;
@@ -1044,7 +1044,7 @@ sub exml {
 }
 
 sub ehtml {
-    # also stolen from ljlib.pl, LJ::ehtml
+    # also stolen from LJ::ehtml
 
     # fast path for the commmon case:
     return $_[0] unless $_[0] =~ /[&\"\'<>]/;

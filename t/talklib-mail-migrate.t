@@ -8,7 +8,7 @@ chdir "$Bin/data/userpics" or die "Failed to chdir to t/data/userpics";
 
 package LJ;
 
-require 'ljlib.pl';
+use LJ;
 require 'htmlcontrols.pl';
 require 'talklib.pl';
 require 'phonepost.pl';

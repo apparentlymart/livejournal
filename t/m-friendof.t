@@ -3,7 +3,7 @@
 use strict;
 use Test::More tests => 144;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use FindBin qw($Bin);
 use LJ::Test qw(memcache_stress temp_user temp_comm);
 use LJ::M::FriendsOf;

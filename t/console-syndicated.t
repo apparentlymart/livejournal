@@ -2,7 +2,7 @@
 use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::Console;
 use LJ::Test qw (temp_user temp_feed);
 local $LJ::T_NO_COMMAND_PRINT = 1;

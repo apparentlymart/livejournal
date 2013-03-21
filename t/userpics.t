@@ -3,7 +3,7 @@
 use strict;
 use Test::More tests => 68;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::Userpic;
 use LJ::Test;
 use LJ::Blob;

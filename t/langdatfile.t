@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::LangDatFile;
 use Test::More 'no_plan';
 

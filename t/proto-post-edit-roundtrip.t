@@ -4,7 +4,7 @@ use strict;
 use Test::More tests => 10;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Test;
-require 'ljlib.pl';
+use LJ;
 require 'ljprotocol.pl';
 
 my $u = temp_user();

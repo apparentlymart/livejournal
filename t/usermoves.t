@@ -3,7 +3,7 @@
 use strict;
 use Test::More;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 use LJ::Event;
 use FindBin qw($Bin);
 

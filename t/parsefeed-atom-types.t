@@ -3,7 +3,7 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require "parsefeed.pl";
-require 'ljlib.pl';
+use LJ;
 
 ## These test cases are based roughly on Phil Ringnalda's eight <title> conformance tests:
 ##    <http://weblog.philringnalda.com/2005/12/18/who-knows-a-title-from-a-hole-in-the-ground>

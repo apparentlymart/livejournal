@@ -4,7 +4,7 @@ use strict;
 use Test::More qw(no_plan);
 use lib "$ENV{LJHOME}/cgi-bin";
 
-require 'ljlib.pl';
+use LJ;
 use LJ::Lang;
 
 use LJ::Faq;

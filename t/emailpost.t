@@ -3,7 +3,7 @@
 use strict;
 use Test::More tests => 13;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use LJ;
 require 'ljemailgateway-web.pl';
 require 'ljemailgateway.pl';
 use LJ::Test;
