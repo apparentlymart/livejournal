@@ -28,31 +28,6 @@ sub render
     };
     my $data_control_strip = {};
 
-    my $data_lj = {
-        siteroot  => $LJ::SITEROOT,
-        sslroot   => $LJ::SSLROOT,
-        imgprefix => $LJ::IMGPREFIX,
-
-        url => {
-            send_vgift      => "$LJ::SITEROOT/shop/vgift.bml",
-        },
-       
-        link => {
-            login           => html_link("$LJ::SITEROOT/?returnto=$uri", BML::ml('web.controlstrip.links.login')),
-            home            => html_link("$LJ::SITEROOT/", BML::ml('web.controlstrip.links.home')),
-            create_account  => LJ::run_hook("override_create_link_on_navstrip", $journal) ||
-                               html_link("$LJ::SITEROOT/create.bml", BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT})),
-            syndicated_list => html_link("$LJ::SITEROOT/syn/list.bml", BML::ml('web.controlstrip.links.popfeeds')),
-            learn_more      => LJ::run_hook('control_strip_learnmore_link') ||
-                               html_link("$LJ::SITEROOT/", BML::ml('web.controlstrip.links.learnmore')),
-            explore         => html_link("$LJ::SITEROOT/explore/", BML::ml('web.controlstrip.links.explore', { sitenameabbrev => $LJ::SITENAMEABBREV })),
-            support         => html_link("$LJ::SITEROOT/support/", BML::ml('web.controlstrip.links.support')),
-        },
-        # login_openid   = "$LJ::SITEROOT/identity/login.bml?type=openid";
-        # login_facebook = "$LJ::SITEROOT/identity/login.bml?type=facebook";
-        # login_twitter  = "$LJ::SITEROOT/identity/login.bml?type=twitter";
-    };
-
     if ($remote && LJ::u_equals($remote, $journal)) {
         $data_journal->{type} = 'own';
     } elsif ($journal->is_personal || $journal->is_identity) {
@@ -153,19 +128,20 @@ sub render
         $data_remote->{url}->{edit_profile}        = $remote->journal_base . "/profile/";
         $data_remote->{url}->{community_catalogue} = "$LJ::SITEROOT/community/directory.bml";
 
-        $data_remote->{link}->{recent_comments} = html_link("$LJ::SITEROOT/tools/recent_comments.bml", BML::ml('web.controlstrip.links.recentcomments'));
-        $data_remote->{link}->{manage_friends}  = html_link("$LJ::SITEROOT/friends/", BML::ml('web.controlstrip.links.managefriends'));
-        $data_remote->{link}->{manage_entries}  = html_link("$LJ::SITEROOT/editjournal.bml", BML::ml('web.controlstrip.links.manageentries'));
-        $data_remote->{link}->{invite_friends}  = html_link("$LJ::SITEROOT/friends/invite.bml", BML::ml('web.controlstrip.links.invitefriends'));
-        $data_remote->{link}->{add_friend}      = html_link("$LJ::SITEROOT/friends/add.bml?user=$journal->{user}", BML::ml('web.controlstrip.links.addfriend'));
-        $data_remote->{link}->{view_friends}    = html_link($remote->journal_base . "/friends/", BML::ml('web.controlstrip.links.viewfriendspage2'));
-
         my $friend = LJ::is_friend($remote, $journal);
         my $friendof = LJ::is_friend($journal, $remote);
 
         $data_remote->{is_mutualfriend} = ($friend && $friendof);
         $data_remote->{is_friend} = $friend;
         $data_remote->{is_friendof} = $friendof;
+        $data_remote->{is_subscriber} = 0;
+        $data_remote->{is_subscribedon} = 0;
+
+        # Subscribe/Unscubscribe to/from user
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            $data_remote->{is_subscriber}   = $remote->is_subscriber($journal);
+            $data_remote->{is_subscribedon} = $remote->is_subscribedon($journal);
+        }
 
         if ($data_journal->{is_own})
         {
@@ -228,9 +204,6 @@ sub render
                 }
             }
         }
-        elsif ($data_journal->{is_personal})
-        {
-        }
         elsif ($data_journal->{is_community})
         {
             $data_remote->{can_post}    = LJ::check_rel($journal, $remote, 'P');
@@ -238,60 +211,8 @@ sub render
             $data_remote->{is_watcher}  = $data_remote->{is_friend};
             $data_remote->{is_memberof} = $data_remote->{is_friendof};
 
-            $data_remote->{link}->{join_community} = html_link(
-                "$LJ::SITEROOT/community/join.bml?comm=$journal->{user}",
-                BML::ml('web.controlstrip.links.joincomm')
-            );
-            $data_remote->{link}->{leave_community} = html_link(
-                "$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}",
-                BML::ml('web.controlstrip.links.leavecomm')
-            );
-            $data_remote->{link}->{watch_community} = html_link(
-                "$LJ::SITEROOT/friends/add.bml?user=$journal->{user}",
-                BML::ml('web.controlstrip.links.watchcomm')
-            );
-            $data_remote->{link}->{unwatch_community} = html_link(
-                "$LJ::SITEROOT/friends/add.bml?user=$journal->{user}",
-                BML::ml('web.controlstrip.links.removecomm')
-            );
-            $data_remote->{link}->{post_to_community} = html_link(
-                "$LJ::SITEROOT/update.bml?usejournal=$journal->{user}",
-                BML::ml('web.controlstrip.links.postcomm')
-            );
-            $data_remote->{link}->{edit_community_profile} = html_link(
-                "$LJ::SITEROOT/manage/profile/?authas=$journal->{user}",
-                BML::ml('web.controlstrip.links.editcommprofile')
-            );
-            $data_remote->{link}->{edit_community_invites} = html_link(
-                "$LJ::SITEROOT/community/sentinvites.bml?authas=$journal->{user}",
-                BML::ml('web.controlstrip.links.managecomminvites')
-            );
-            $data_remote->{link}->{edit_community_members} = html_link(
-                "$LJ::SITEROOT/community/members.bml?authas=$journal->{user}",
-                BML::ml('web.controlstrip.links.editcommmembers')
-            );
-
             my $pending_members = LJ::get_pending_members($journal->id()) || [];
             $data_journal->{pending_members} = scalar(@$pending_members);
-        }
-
-        if ($remote->is_person) {
-            $data_remote->{link}->{post_journal} = html_link(
-                "$LJ::SITEROOT/update.bml",
-                BML::ml('web.controlstrip.links.post2')
-            );
-        }
-
-        if ($data_journal->{is_syndicated} || $data_journal->{is_news})
-        {
-            $data_remote->{link}->{add_feed} = html_link(
-                "$LJ::SITEROOT/friends/add.bml?user=$journal->{user}",
-                BML::ml('web.controlstrip.links.addfeed')
-            );
-            $data_remote->{link}->{remove_feed} = html_link(
-                "$LJ::SITEROOT/friends/add.bml?user=$journal->{user}",
-                BML::ml('web.controlstrip.links.removefeed')
-            );
         }
     }
     else
@@ -333,19 +254,20 @@ sub render
     }
 
     my $data = {
+        lj            => {
+            siteroot  => $LJ::SITEROOT,
+            sslroot   => $LJ::SSLROOT,
+            imgprefix => $LJ::IMGPREFIX,
+        },
         widget        => {
             calendar => LJ::Widget::Calendar->render(),
         },
-        lj            => $data_lj,
         remote        => $data_remote,
         journal       => $data_journal,
         control_strip => $data_control_strip,
     };
 
     $data->{remote}->{status} = get_status($data);
-
-    # my $h = { flatten($data) };
-    # warn join('', map { "$_ => $h->{$_}\n" } sort keys %$h);
 
     my $tmpl = LJ::HTML::Template->new(
         {
@@ -399,14 +321,12 @@ sub render
 
     $tmpl->param(flatten($data), link_mobile => $mobile_link );
 
-    return $tmpl->output;    
-}
+    # Need vars for js
+    LJ::need_var({
+        remote => $data_remote
+    });
 
-sub html_link
-{
-    my ($url, $text) = @_;
-    
-    return "<a href='$url'>$text</a>";
+    return $tmpl->output;    
 }
 
 sub get_status
@@ -436,6 +356,10 @@ sub get_status
                 return BML::ml('web.controlstrip.status.friend', {user => $journal_display});
             } elsif ($data->{remote}->{is_friendof}) {
                 return BML::ml('web.controlstrip.status.friendof', {user => $journal_display});
+            } elsif ($data->{remote}->{is_subscribedon}) {
+                return BML::ml('web.controlstrip.status.subscribedon', {user => $journal_display});
+            } elsif ($data->{remote}->{is_subscriber}) {
+                return BML::ml('web.controlstrip.status.subscriber', {user => $journal_display});
             }
         }
 

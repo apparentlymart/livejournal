@@ -9018,6 +9018,7 @@ web.controlstrip.btn.view=View
 web.controlstrip.links.addfeed=Add it to your Friends Page
 
 web.controlstrip.links.addfriend=Add them as a friend
+web.controlstrip.links.removefriend=Delete from friend
 
 web.controlstrip.links.calendar|staleness=1
 web.controlstrip.links.calendar=Calendar
@@ -9148,6 +9149,12 @@ web.controlstrip.links.viewownstyle=View in own style
 
 web.controlstrip.links.watchcomm=Watch this community
 
+web.controlstrip.links.subscribe|staleness=1
+web.controlstrip.links.subscribe=Subscribe to a user
+
+web.controlstrip.links.unsubscribe|staleness=1
+web.controlstrip.links.unsubscribe=Unsubscribe
+
 web.controlstrip.login.forgot=Forgot your password?
 
 web.controlstrip.login.google|staleness=1
@@ -9210,6 +9217,10 @@ web.controlstrip.status.yourfriendsfriendspage=You are viewing your Friends of F
 web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
 
 web.controlstrip.status.yourjournal=You are viewing your journal
+
+web.controlstrip.status.subscribedon=You subscribed on [[user]]
+
+web.controlstrip.status.subscriber=[[user]] subscribed on you
 
 web.controlstrip.userpic.alt=Userpic
 
