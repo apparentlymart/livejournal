@@ -3143,3 +3143,33 @@ HTML BODY .i-ljuser {
 			color: #F00;
 			}
 
+/* Ad wrapper styles (for ads printed in BML directly) */
+.ljadwrapper-app-full-width {
+	width: 100%;
+	margin-bottom: 1em;
+	text-align: center;
+	}
+
+.ljadwrapper-app-info-1column,
+.ljadwrapper-app-func-1column,
+.ljadwrapper-app-confirm,
+.ljadwrapper-app-home-login,
+.ljadwrapper-app-schools,
+.ljadwrapper-search,
+.ljadwrapper-journal-indiv-entry,
+.ljadwrapper-journal-skyscraper,
+.ljadwrapper-app-search-skyscraper {
+	float: right;
+	display: table-cell;
+	margin-left: 2em;
+	margin-bottom: 1em;
+	}
+
+.ljadwrapper-app-func-2column,
+.ljadwrapper-app-info-2column,
+.ljadwrapper-journal-userinfo {
+	width: 100%;
+	margin-top: 2em;
+	text-align: center;
+	}
+
