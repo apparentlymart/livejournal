@@ -50,6 +50,31 @@ sub can_reuse_account {
     return 0;
 }
 
+## return true if two journal belong one user.
+##
+## Input:
+##      username1
+##      username2
+## Output: 1 or 0
+##
+sub is_one_owner {
+    my $u1 = shift;
+    my $u2 = shift;
+    
+    return 0 unless ($u1 && $u2);
+
+    if (
+    	lc($u1->email_raw) eq lc($u2->email_raw) && 
+    	$u1->is_visible && $u1->is_person &&
+    	$u2->is_visible && $u2->is_person &&
+    	$u1->password eq $u2->password &&
+    	$u1->is_validated && $u2->is_validated
+    ) {
+        return 1;
+    }
+    return 0;
+}
+
 ##
 ## Input:
 ##  [optional] template name (will be used as prefix)

@@ -29,17 +29,6 @@ sub verify_username {
                                                 : LJ::Lang::ml('createaccount.error.username.invalid');
     }
 
-    # you can give people sharedjournal priv ahead of time to create
-    # reserved communities:
-    if (! LJ::check_priv(LJ::get_remote(), "sharedjournal", $user)) {
-        foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
-            if ($user =~ /$re/) {
-                return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.reserved') 
-                                                        : LJ::Widget::CreateAccount->ml('createaccount.error.username.reserved');
-            }
-        }
-    }
-
     if (my $u = LJ::load_user($user)) {
         ##
         ## different rules for cases 
@@ -83,6 +72,19 @@ sub verify_username {
                     return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml( 'widget.createaccount.error.username.inuse') 
                                                             : LJ::Widget::CreateAccount->ml( 'createaccount.error.username.inuse');
                 }
+            }
+        }
+    }
+
+    return if LJ::User::Rename::is_one_owner( LJ::load_user($user), LJ::get_remote() );
+
+    # you can give people sharedjournal priv ahead of time to create
+    # reserved communities:
+    if (! LJ::check_priv(LJ::get_remote(), "sharedjournal", $user)) {
+        foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
+            if ($user =~ /$re/) {
+                return $LJ::DISABLED{create_controller} ? LJ::Widget::CreateAccount->ml('widget.createaccount.error.username.reserved') 
+                                                        : LJ::Widget::CreateAccount->ml('createaccount.error.username.reserved');
             }
         }
     }
