@@ -14,6 +14,14 @@ userproplist.adult_content:
   multihomed: 0
   prettyname: Adult Content Flag
 
+userproplist.adv_adfox_ru_quality:
+  cldversion: 7
+  datatype: char
+  des: Adfox content quality marker
+  indexed: 0
+  multihomed: 0
+  prettyname: Adfox content quality marker
+
 userproplist.ad_categories:
   cldversion: 4
   datatype: char
@@ -86,21 +94,21 @@ userproplist.city:
   multihomed: 0
   prettyname: City
 
-userproplist.closed_sm:
-  cldversion: 8
-  datatype: char
-  des: List of closed site messages
-  indexed: 1
-  multihomed: 0
-  prettyname: 
-
 userproplist.closed_feed_line:
   cldversion: 8
   datatype: char
   des: Is friends feed line closed?
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
+
+userproplist.closed_sm:
+  cldversion: 8
+  datatype: char
+  des: List of closed site messages
+  indexed: 1
+  multihomed: 0
+  prettyname:  
 
 userproplist.comment_alter_time:
   cldversion: 8
@@ -108,7 +116,7 @@ userproplist.comment_alter_time:
   des: Unix time of last modification of comment's data in journal. Comment added/deleted/updated/screened/etc...
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.comm_promo_blurb:
   cldversion: 4
@@ -188,7 +196,7 @@ userproplist.dont_expunge_journal:
   des: explicitly prevent the system from purging this user
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.dont_load_members:
   cldversion: 4
@@ -1068,7 +1076,7 @@ userproplist.purge_external_content:
   des: Should external content be deleted when journal is deleted. Two bool flags separated by comma: <delete-comments>:<delete-community-entries>
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.push_notification_devices:
   cldversion: 8
@@ -1396,7 +1404,7 @@ userproplist.talkleftct:
   des: Count of comments left by the user
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.talkleftct2:
   cldversion: 8
@@ -1404,7 +1412,7 @@ userproplist.talkleftct2:
   des: Count of comments left by the user
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.theme_preview_styleid:
   cldversion: 4
@@ -1500,7 +1508,7 @@ userproplist.webmastertools_google:
   des: Meta tag content value provided by Google
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.webmastertools_yandex:
   cldversion: 8
@@ -1508,7 +1516,7 @@ userproplist.webmastertools_yandex:
   des: Meta tag content value provided by Yandex
   indexed: 1
   multihomed: 0
-  prettyname: 
+  prettyname:  
 
 userproplist.who_invited:
   cldversion: 4
@@ -1541,14 +1549,6 @@ userproplist.zip:
   indexed: 1
   multihomed: 0
   prettyname: ZIP code
-
-userproplist.adv_adfox_ru_quality:
-  cldversion: 7
-  datatype: char
-  des: Adfox content quality marker
-  indexed: 0
-  multihomed: 0
-  prettyname: Adfox content quality marker
 
 talkproplist.deleted_poster:
   datatype: char
@@ -1642,7 +1642,7 @@ logproplist.copyright:
   datatype: char
   des: Copyrighted status: 'C' - copyrighted, 'P' - public, full cite allowed.
   prettyname: Copyrighted status
-  sortorder: 
+  sortorder: 0
 
 logproplist.crosspost_fb:
   datatype: char
@@ -1746,17 +1746,17 @@ logproplist.opt_nocomments:
   prettyname: Don't Allow Comments and hide comments already posted to the
   sortorder: 25
 
-logproplist.opt_norating:
-  datatype: bool
-  des: Turn on if entry shouldn't be in ratings
-  prettyname: Don't display in ratings
-  sortorder: 20
-
 logproplist.opt_noemail:
   datatype: bool
   des: Turn on if the poster isn't interested in receiving comments to this post by email
   prettyname: Don't email comments
   sortorder: 40
+
+logproplist.opt_norating:
+  datatype: bool
+  des: Turn on if entry shouldn't be in ratings
+  prettyname: Don't display in ratings
+  sortorder: 20
 
 logproplist.opt_preformatted:
   datatype: bool
@@ -1798,13 +1798,13 @@ logproplist.ratingbot_comment:
   datatype: char
   des: highest interval in ratings [SUP|UA|NONCYR]
   prettyname: highest interval in ratings
-  sortorder: 
+  sortorder: 0
 
 logproplist.reposted_from:
   datatype: char
   des: In case this entry is a repost, the URL of the original entry that was reposted
   prettyname: Reposted from
-  sortorder: 
+  sortorder: 0
 
 logproplist.repost_link:
   datatype: char
@@ -1922,4 +1922,49 @@ pollproplist2.supermaintainer:
 
 pollproplist2.unique:
   des: If set to 1, then a person with a given email address can only vote once in the poll
+
+ratelist.addfriend:
+  des: Logged when a user adds someone to their Friends list
+
+ratelist.comm_in_vertical:
+  des: Logged when a community's entry gets added to a vertical
+
+ratelist.ctflag:
+  des: Logged when user flags content
+
+ratelist.failed_login:
+  des: Logged when wrong username/password is used
+
+ratelist.freevgifts:
+  des: Logged when a user sends a free VGift
+
+ratelist.invitefriend:
+  des: Logged when a user sends a friend invite
+
+ratelist.in_vertical:
+  des: Logged when a journal's entry gets added to a vertical
+
+ratelist.lostinfo:
+  des: Logged when a forgotten password or username e-mail is requested
+
+ratelist.post:
+  des: Logged whenever user posts (to any journal)
+
+ratelist.sms_register:
+  des: Logged when a user registers a number for SMS
+
+ratelist.syn_in_vertical:
+  des: Logged when a syndicated account's entry gets added to a vertical
+
+ratelist.tellafriend:
+  des: Logged when a users sends a message via Tell A Friend
+
+ratelist.twitter_api_request:
+  des: Logged for the 'system' user every time a site does a Twitter API request
+
+ratelist.twitter_digest:
+  des: Logged for the 'system' user every time the Twitter Digest system posts a digest to some journal
+
+ratelist.usermessage:
+  des: Logged when a users sends a message to another user
 
