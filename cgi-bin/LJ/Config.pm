@@ -4,8 +4,25 @@ package LJ::Config;
 use strict;
 use warnings;
 
+use Carp qw();
+
 $LJ::CONFIG_LOADED = 0;
 $LJ::CACHE_CONFIG_MODTIME = 0;
+
+sub import {
+    my ( $class, @args ) = @_;
+
+    foreach my $arg (@args) {
+        if ( $arg eq ':load' ) {
+            $class->load;
+            next;
+        }
+
+        Carp::croak "Unknown import: $arg";
+    }
+
+    return;
+}
 
 # loads all configurations from scratch
 sub load {
