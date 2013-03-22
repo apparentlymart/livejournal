@@ -1950,6 +1950,9 @@ ratelist.lostinfo:
 ratelist.post:
   des: Logged whenever user posts (to any journal)
 
+ratelist.subscribedon:
+  des: Logged when a user subscribe to someone
+
 ratelist.sms_register:
   des: Logged when a user registers a number for SMS
 

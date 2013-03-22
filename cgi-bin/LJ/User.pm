@@ -6382,6 +6382,12 @@ sub clear_spam_counter {
     $u->set_prop('spam_counter', 0);
 }
 
+# If true, user migrated old friends to friends and subscriptions
+sub is_migrated_to_friends_and_subscriptions {
+    my ($u) = @_;
+    return $u->prop('migrated_to_friends_and_subscriptions');
+}
+
 package LJ;
 
 use Carp;
