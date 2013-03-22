@@ -2822,9 +2822,27 @@ sub get_social_capital {
             LJ::MemCache::set( $key, $value, 5*60);
             return $value;
         } else {
-        	return undef;
+            return undef;
         }
     }
+}
+
+sub get_social_capital_multi {
+    my ($class, $uids) = @_;
+    
+    # TODO: get from redis
+    
+    return unless $uids && @$uids;
+
+    # TMP
+    if ( $LJ::IS_DEV_SERVER && ( my $getter = $LJ::FAKE_SOCIAL_CAPITAL ) ) {
+        my $users = LJ::load_userids(@$uids);
+        return { map {$_ => $getter->($users->{$_})} @$uids };
+    }
+
+    my @keys = map {$_.":sccap"} @$uids;
+
+    return LJ::MemCache::get_multi(@keys);
 }
 
 # <LJFUNC>
@@ -3899,6 +3917,25 @@ sub last_public_entry_time {
     }
 
     return $lastpublic;
+}
+
+
+sub get_last_public_entry_time_multi {
+    my ($class, $uids) = @_;
+
+    return unless $uids && @$uids;
+
+    my @keys = map {"lpt.".$_} @$uids;
+
+    my $redis = LJ::Redis->get_connection || return;
+    
+    my @res = $redis->mget(@keys);
+    
+    keys my %res = @keys;
+
+    map { $res{$keys[$_]} = $res[$_] } (0..$#res);
+
+    return \%res;
 }
 
 # set the last public entry time
