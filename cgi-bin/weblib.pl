@@ -1770,7 +1770,8 @@ sub res_includes {
             map  {
                 my $res = $_;
                 ## is the key part of library/package
-                if (my $library = $LJ::JS_SOURCE_MAP_REV{$_}){
+                my $library;
+                if ($library = ($LJ::JS_SOURCE_MAP_REV{$_} || $LJ::CSS_SOURCE_MAP_REV{$_})){
                     $res = $libs{$library}++ ? '' : $library;
                 }
                 $res;
@@ -1783,7 +1784,8 @@ sub res_includes {
         my $library;
 
         ## for libraries check mtime of all files
-        if (my $library_files = $LJ::JS_SOURCES_MAP{$key}){
+        my $library_files;
+        if ($library_files = ($LJ::JS_SOURCES_MAP{$key} || $LJ::CSS_SOURCES_MAP{$key})){
             $library = $key;
             $libs{$library} = 1;
             foreach my $file (@$library_files){
@@ -1798,7 +1800,7 @@ sub res_includes {
             $add->("js$library", $1, $mtime, $LJ::NEEDED_RES{$key} || {});
         }
         elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stccss", $2, $mtime, $LJ::NEEDED_RES{$key});
+            $add->("${1}stccss$library", $2, $mtime, $LJ::NEEDED_RES{$key});
         }
         elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
             $add->("${1}stcjs", $2, $mtime, $LJ::NEEDED_RES{$key});
@@ -1858,6 +1860,10 @@ sub res_includes {
     ##
     unless ($opts->{only_js}) {
         $ret .= $ret_css;
+        foreach my $library (@LJ::CSS_SOURCES_ORDER){ ## add libraries in strict order
+            next unless $libs{$library};
+            $tags->("stccss$library",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
+        }
         $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
         $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
     }
