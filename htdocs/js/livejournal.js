@@ -872,21 +872,34 @@ LiveJournal.isMobile = function() {
  * @param {String} input Input can contain link or html.
  * @return {Object} Object representing the media.
  */
+
 LiveJournal.parseMedia = (function() {
 	'use strict';
 
 	function parseMediaLink(input) {
 		var link = {
 			'youtube': 'http://youtube.com/watch?v={id}',
-			'vimeo': 'http://vimeo.com/{id}'
+			'vimeo': 'http://vimeo.com/{id}',
+			'vine': 'http://vine.co/v/{id}'
 		};
 
 		var embed = {
 			'youtube': '<iframe src="http://www.youtube.com/embed/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.youtube}),
-			'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo})
+			'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo}),
+			'vine'   : '<iframe src="http://vine.co/v/{id}/card" width="380" height="380" frameborder="0" data-link="{link}"></iframe>'.supplant({link: link.vine})
 		};
 
 		var provider = {
+			'vine': {
+				parse: function(input) {
+					// http://vine.co/v/bdbF0i72uwA
+					var matcher = /vine.co\/v\/([^\/]*)/,
+						match = input.match(matcher);
+
+					return (match && match[1]) || null;
+				}
+			},
+
 			'vimeo': {
 				parse: function(input) {
 					var matcher = /^(http:\/\/)?(www\.)?(player\.)?vimeo.com\/(video\/)?(\d+)*/,
@@ -899,7 +912,6 @@ LiveJournal.parseMedia = (function() {
 			'youtube': {
 				parse: function(input) {
 					// http://stackoverflow.com/a/8260383
-
 					var matcher = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/,
 						match = input.match(matcher);
 						
@@ -920,7 +932,7 @@ LiveJournal.parseMedia = (function() {
 
 		var id, key, result;
 		for (key in provider) {
-			id = provider[key].parse(input);
+			id = provider[key].parse(input.trim());
 			if (id) {
 				result = {
 					site: key,
