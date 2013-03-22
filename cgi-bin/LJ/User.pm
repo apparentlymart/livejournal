@@ -2841,8 +2841,10 @@ sub get_social_capital_multi {
     }
 
     my @keys = map {$_.":sccap"} @$uids;
+    my $cache = LJ::MemCache::get_multi(@keys); 
+    my $res = { map {$_ => $cache->{$_.":sccap"} } @$uids };     
 
-    return LJ::MemCache::get_multi(@keys);
+    return $res;
 }
 
 # <LJFUNC>
@@ -3848,7 +3850,7 @@ sub timeupdate {
 # when was last time new public entry was created 
 # (fast reposts are excluded)
 sub last_public_entry_time {
-    my $u = shift;
+    my ($u, %opts) = @_;
     
     my $key  = "lpt." . $u->id;
     my $attr = '_cache_last_public_time';
@@ -3857,7 +3859,7 @@ sub last_public_entry_time {
 
     my $redis = LJ::Redis->get_connection;
 
-    my $lastpublic = $redis ? $redis->get($key) : undef;
+    my $lastpublic = $redis && !$opts{nocache} ? $redis->get($key) : undef;
 
     if (defined $lastpublic) {
         $u->{$attr} = $lastpublic;
@@ -3933,7 +3935,7 @@ sub get_last_public_entry_time_multi {
     
     keys my %res = @keys;
 
-    map { $res{$keys[$_]} = $res[$_] } (0..$#res);
+    map { $res{$uids->[$_]} = $res[$_] } (0..$#res);
 
     return \%res;
 }
