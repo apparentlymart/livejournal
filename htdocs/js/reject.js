@@ -1,10 +1,6 @@
 ;(function ($) {
     'use strict';
 
-    $(function () {
-        rejectFormManager.init();
-    });
-
     var rejectFormManager = (function () {
         var config,
             _container,
@@ -96,5 +92,22 @@
                 initPlaceholder();
             }
         };
-    })();
+    }());
+
+    $(function () {
+        // check all
+        var container = $('.userslist-table'); // container for check all inputs
+
+        if (container.length) {
+            container.on('change', '.js-check-all', function () {
+                container
+                    .find('input[type=checkbox]')
+                    .not(this)
+                    .prop('checked', $(this).is(':checked'));
+            });
+        }
+
+        rejectFormManager.init();
+    });
+
 }(jQuery));
