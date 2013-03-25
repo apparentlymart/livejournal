@@ -1024,7 +1024,7 @@ sub clean {
                         ( $attr eq 'class' || $attr eq 'id' ) &&
                         $opts->{'strongcleancss'} )
                     {
-                        if (not exists $LJ::CLASSNAME_WHITELIST{$hash->{$attr}}) {
+                        unless (exists $LJ::CLASSNAME_WHITELIST{$hash->{$attr}}) {
                             delete $hash->{$attr};
                         }
                         next;
