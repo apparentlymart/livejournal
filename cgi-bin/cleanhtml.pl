@@ -2058,6 +2058,9 @@ sub pre_clean_event_for_entryform
                 $p->get_tag("/$tag");
                 next TOKEN;
             }
+            if ($tag eq 'meta') {
+                next TOKEN;
+            }
             if ($tag =~ /:set$/) {
                 next TOKEN;
             }
