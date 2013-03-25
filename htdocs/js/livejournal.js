@@ -912,7 +912,7 @@ LiveJournal.parseMedia = (function() {
 			'youtube': {
 				parse: function(input) {
 					// http://stackoverflow.com/a/8260383
-					var matcher = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/,
+					var matcher = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\??v?=?))([^#\&\?]*).*/,
 						match = input.match(matcher);
 						
 					if (match && match[0].indexOf('youtu') === -1) {
