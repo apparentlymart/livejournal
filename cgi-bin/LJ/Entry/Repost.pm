@@ -859,9 +859,9 @@ sub substitute_content {
             my $event =  LJ::Lang::get_text( $lang,
                                              $text_var,
                                              $domain->{'dmid'},
-                                            { 'author'          => $original_entry_obj->poster,
-                                              'reposter'        => $entry_obj->poster,
-                                              'communityname'   => $original_entry_obj->journal,
+                                            { 'author'          => $original_entry_obj->poster->display_username,
+                                              'reposter'        => $entry_obj->poster->display_username,
+                                              'communityname'   => $original_entry_obj->journal->display_username,
                                               'datetime'        => $entry_obj->eventtime_mysql,
                                               'text'            => $event_text, });
             ${$opts->{'event'}} = $event;
@@ -888,9 +888,9 @@ sub substitute_content {
             my $event =  LJ::Lang::ml(  $lang,
                                         $text_var,  
                                         $domain->{'dmid'},
-                                        { 'author'          => $original_entry_obj->poster,
-                                          'reposter'        => $entry_obj->poster,
-                                          'communityname'   => $original_entry_obj->journal,
+                                        { 'author'          => $original_entry_obj->poster->display_username,
+                                          'reposter'        => $entry_obj->poster->display_username,
+                                          'communityname'   => $original_entry_obj->journal->display_username,
                                           'datetime'        => $entry_obj->eventtime_mysql,
                                           'text'            => "", });
 
@@ -912,9 +912,9 @@ sub substitute_content {
             my $event = LJ::Lang::ml(  $lang,
                                        $text_var, 
                                        $domain->{'dmid'},
-                                       { 'author'           => $original_entry_obj->poster,
-                                         'communityname'    => $original_entry_obj->journal,
-                                         'reposter'         => $entry_obj->poster,
+                                       { 'author'           => $original_entry_obj->poster->display_username,
+                                         'communityname'    => $original_entry_obj->journal->display_username,
+                                         'reposter'         => $entry_obj->poster->display_username,
                                          'datetime'         => $entry_obj->eventtime_mysql,
                                          'text'             => $event_text, });
 
