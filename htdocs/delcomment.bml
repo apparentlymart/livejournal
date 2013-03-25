@@ -20,6 +20,9 @@ _info?><?_code
         $mode = 'json' if $format and $format eq 'json';
     }
 
+    # LJSUP-15424: Forbid embedding delcomment.bml to iframe
+    LJ::Request->header_out("X-Frame-Options" => 'deny');
+
     # helper subroutines
 
     my $site_scheme_wrap = sub {
