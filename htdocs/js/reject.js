@@ -1,3 +1,6 @@
+/**
+ * Should not be used anymore. Moved to: js/community/pending.js
+ */
 ;(function ($) {
     'use strict';
 

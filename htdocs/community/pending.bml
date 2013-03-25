@@ -7,7 +7,7 @@ body<=
     use vars qw(%GET %POST);
 
     LJ::set_active_crumb('commpending');
-	LJ::need_res('js/reject.js');
+	LJ::need_res('js/community/pending.js');
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
