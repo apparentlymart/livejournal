@@ -37,7 +37,7 @@ body<=
     # is $remote an admin?
     unless ($remote && ($remote->can_manage($c) || $remote->can_moderate($c))) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p ";
-        $ret .= BML::ml('/community/members.bml.error.noaccess', 
+        $ret .= BML::ml('/community/members.bml.error.noaccess',
                         { comm => LJ::ljuser($cname, { type => 'C' }) });
         $ret .= " p?>";
         return $ret;
@@ -71,7 +71,7 @@ body<=
         if ($POST{'reject_done'} eq '1' or ($POST{'approve'} and scalar @is_selected)) {
             $ret .= "<?h1 $ML{'/community/members.bml.success.header'} h1?><?p $ML{'/community/members.bml.success.message'} p?>";
         }
- 
+
         if ($POST{'reject_select'} eq '1' and scalar @is_selected) {
             $ret .= '<div class="b-pending">';
 
@@ -128,7 +128,7 @@ body<=
 
             # need a db handle now
             my $dbh = LJ::get_db_writer();
-            
+
             # hit up each user to find out what to do with them
             foreach my $id (@userids) {
                 if ($POST{"reject"}) {
@@ -208,21 +208,21 @@ body<=
 
         # table headers
         $ret .= "<br /><table class='userslist-table' cellspacing='0' cellpadding='2'>\n<tr><th>";
-        $ret .= LJ::html_check({ id => 'all', name => 'all', checked => 'checked', 
+        $ret .= LJ::html_check({ id => 'all', name => 'all', class => 'js-check-all', checked => 'checked',
         onchange =>
             "var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
                     inputs[i].checked = this.checked;
                 }
-            }", 
+            }",
         onclick =>
             "var inputs = document.getElementById('content-wrapper').getElementsByTagName('input');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].type == 'checkbox' && inputs[i].getAttribute('id') !== 'all') {
                     inputs[i].checked = this.checked;
                 }
-            }", 
+            }",
          selected => 0 });
         $ret .= "</th><th>$ML{'/community/members.bml.key.user'}</th></tr>\n";
 
@@ -231,7 +231,7 @@ body<=
         foreach (@users) {
             my $rstyle = ($rc++ & 1) ? '#efefef' : '#fff';
             $ret .= "<tr style='background-color: $rstyle;'><td>";
-            $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid, 
+            $ret .= LJ::html_check({ id => 'pending_' . $_->userid, name => 'pending_' . $_->userid,
                                      selected => $jumpto ? ($_->user eq $jumpto ? 1 : 0) : 1 });
             $ret .= "</td><td>" . LJ::ljuser($_->{user}) . "</td></tr>\n";
         }
