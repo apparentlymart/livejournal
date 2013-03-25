@@ -3852,9 +3852,9 @@ sub timeupdate {
 sub last_public_entry_time {
     my ($u, %opts) = @_;
     
-    my $key  = "lpt." . $u->id;
+    my $key  = "lpt.".$u->id;
     my $attr = '_cache_last_public_time';
-    
+
     return $u->{$attr} if defined $u->{$attr};
 
     my $redis = LJ::Redis->get_connection;
@@ -3927,17 +3927,15 @@ sub get_last_public_entry_time_multi {
 
     return unless $uids && @$uids;
 
-    my @keys = map {"lpt.".$_} @$uids;
-
     my $redis = LJ::Redis->get_connection || return;
     
+    my @keys = map {"lpt.$_"} @$uids;
+
     my @res = $redis->mget(@keys);
     
-    keys my %res = @keys;
+    my $res = { map { $uids->[$_] => $res[$_] } (0..$#res) };
 
-    map { $res{$uids->[$_]} = $res[$_] } (0..$#res);
-
-    return \%res;
+    return $res;
 }
 
 # set the last public entry time
@@ -3945,25 +3943,29 @@ sub get_last_public_entry_time_multi {
 sub set_last_public_entry_time {
     my ($u, $lastpublic) = @_;
 
-    my $key  = "lpt." . $u->id;
+    my $key  = "lpt.".$u->id;
     my $attr = '_cache_last_public_time';
 
     $u->{$attr} = $lastpublic;
 
     my $redis = LJ::Redis->get_connection || return;
 
-    if ( defined $lastpublic ) {
-        return unless $redis->exists($key);
-        $redis->set($key, $lastpublic);
-    } else {
-        $redis->del($key);
-    }
+    return unless $redis->exists($key);
+    $redis->set($key, $lastpublic);
+    
 }
 
 # delete last public entry time
 sub del_last_public_entry_time {
-    my $u = shift;
-    $u->set_last_public_entry_time();
+    my ($u) = @_;
+
+    my $key  = "lpt.".$u->id;
+    my $attr = '_cache_last_public_time';
+
+    delete $u->{$attr};
+
+    my $redis = LJ::Redis->get_connection || return;
+    $redis->del($key);
 }
 
 # can this user use ESN?
