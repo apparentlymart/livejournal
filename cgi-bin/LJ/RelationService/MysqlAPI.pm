@@ -51,7 +51,7 @@ sub _find_relation_destinations_type_other {
     my $eff_type = $typeid ? $typeid : $type;
     my $cached_data = LJ::MemCacheProxy::get("rellist:dst:$eff_type:$userid");
     if ($cached_data) {
-        my @userids = unpack('v*', $cached_data);
+        my @userids = unpack('V*', $cached_data);
         return @userids;
     }
 
@@ -76,7 +76,7 @@ sub _find_relation_destinations_type_other {
     }
 
     unless ($opts{dont_set_cache}) {
-        my $packed = pack('v*', @$uids);
+        my $packed = pack('V*', @$uids);
         LJ::MemCacheProxy::set("rellist:dst:$eff_type:$userid", $packed, 24 * 3600)
     }
     ;
@@ -131,7 +131,7 @@ sub _find_relation_sources_type_other {
     my $eff_type = $typeid ? $typeid : $type;
     my $cached_data = LJ::MemCacheProxy::get("rellist:src:$eff_type:$userid");
     if ($cached_data) {
-        my @userids = unpack('v*', $cached_data);
+        my @userids = unpack('V*', $cached_data);
         return @userids;
     }
 
@@ -156,7 +156,7 @@ sub _find_relation_sources_type_other {
     }
 
     unless ($opts{dont_set_cache}) {
-        my $packed = pack('v*', @$uids);
+        my $packed = pack('V*', @$uids);
         LJ::MemCacheProxy::set("rellist:src:$eff_type:$userid", $packed, 24 * 3600);
     }
 
