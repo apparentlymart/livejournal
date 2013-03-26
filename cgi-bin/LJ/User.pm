@@ -2810,21 +2810,24 @@ sub get_social_capital {
         return $getter->($u);
     }
 
-    my $key = $u->userid . ":sccap",;
+    my $key = $u->userid . ":sccap";
+    my $attr = '_social_capital';
+
+    return $u->{$attr} if defined $u->{$attr};
+    
     my $soc_capital = LJ::MemCache::get( $key );
-    if (defined $soc_capital) {
-        return $soc_capital;
-    } else {
-        $soc_capital = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
-        my $value = 0;
-        if (defined $soc_capital) {
-            $value = int($soc_capital->{result}->{authority}/1000);
-            LJ::MemCache::set( $key, $value, 5*60);
-            return $value;
-        } else {
-            return undef;
+
+    unless (defined $soc_capital) {
+        my $response = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
+        if ($response) {
+            $soc_capital = int($response->{result}->{authority}/1000);
+            LJ::MemCache::set( $key, $soc_capital, 5*60);
         }
     }
+
+    $u->{$attr} = $soc_capital if defined $soc_capital;
+
+    return $soc_capital;
 }
 
 sub get_social_capital_multi {
