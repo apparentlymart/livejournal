@@ -49,7 +49,7 @@ sub _find_relation_destinations_type_other {
     my $uids;
 
     my $eff_type = $typeid ? $typeid : $type;
-    my $cached_data = LJ::MemCacheProxy::get("rellist:dst:$eff_type:$userid");
+    my $cached_data = LJ::MemCacheProxy::get("rlist:dst:$eff_type:$userid");
     if ($cached_data) {
         my @userids = unpack('V*', $cached_data);
         return @userids;
@@ -77,7 +77,7 @@ sub _find_relation_destinations_type_other {
 
     unless ($opts{dont_set_cache}) {
         my $packed = pack('V*', @$uids);
-        LJ::MemCacheProxy::set("rellist:dst:$eff_type:$userid", $packed, 24 * 3600)
+        LJ::MemCacheProxy::set("rlist:dst:$eff_type:$userid", $packed, 24 * 3600)
     }
     ;
     return @$uids;
@@ -129,7 +129,7 @@ sub _find_relation_sources_type_other {
     my $uids;
 
     my $eff_type = $typeid ? $typeid : $type;
-    my $cached_data = LJ::MemCacheProxy::get("rellist:src:$eff_type:$userid");
+    my $cached_data = LJ::MemCacheProxy::get("rlist:src:$eff_type:$userid");
     if ($cached_data) {
         my @userids = unpack('V*', $cached_data);
         return @userids;
@@ -157,7 +157,7 @@ sub _find_relation_sources_type_other {
 
     unless ($opts{dont_set_cache}) {
         my $packed = pack('V*', @$uids);
-        LJ::MemCacheProxy::set("rellist:src:$eff_type:$userid", $packed, 24 * 3600);
+        LJ::MemCacheProxy::set("rlist:src:$eff_type:$userid", $packed, 24 * 3600);
     }
 
     return @$uids;
@@ -276,8 +276,8 @@ sub _create_relation_to_type_other {
     LJ::_set_rel_memcache($u->userid, $friend->userid, $eff_type, 1);
 
     # drop list rel list
-    LJ::MemCacheProxy::delete("rellist:src:$eff_type:" . $friend->userid);
-    LJ::MemCacheProxy::delete("rellist:dst:$eff_type:" . $u->userid);
+    LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $friend->userid);
+    LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $u->userid);
 
     return 1;
 }
@@ -339,13 +339,13 @@ sub _remove_relation_to_type_other {
     my $eff_type = $typeid ? $typeid : $type;
     if ($friendid eq '*') {
         @rels = $class->_find_relation_destinations_type_other($u, $type, dont_set_cache => 1);
-        LJ::MemCacheProxy::delete("rellist:dst:$eff_type:" . $userid);
-        $cache_base = "rellist:src:$eff_type";
+        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $userid);
+        $cache_base = "rlist:src:$eff_type";
 
     } elsif ($userid eq '*') {
         @rels = $class->_find_relation_sources_type_other($friend, $type, dont_set_cache => 1);
-        LJ::MemCacheProxy::delete("rellist:src:$eff_type:" . $friendid);
-        $cache_base = "rellist:dst:$eff_type";
+        LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $friendid);
+        $cache_base = "rlist:dst:$eff_type";
     }
 
     if ($typeid) {
@@ -888,11 +888,11 @@ sub delete_and_purge_completely {
 
         my @rels = $class->_find_relation_sources_type_other($u, $type, dont_set_cache => 1);
         foreach my $uid (@rels) {
-            LJ::MemCacheProxy::delete("rellist:dst:$eff_type:$uid");
+            LJ::MemCacheProxy::delete("rlist:dst:$eff_type:$uid");
         }
 
-        LJ::MemCacheProxy::delete("rellist:src:$eff_type:" . $u->id);
-        LJ::MemCacheProxy::delete("rellist:dst:$eff_type:" . $u->id);
+        LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $u->id);
+        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $u->id);
     }
 
     return 1;
@@ -941,8 +941,8 @@ sub _mod_rel_multi
         my $typeid = LJ::get_reluser_id($type)+0;
         my $eff_type = $typeid || $type;
 
-        LJ::MemCacheProxy::delete("rellist:src:$eff_type:$targetid");
-        LJ::MemCacheProxy::delete("rellist:dst:$eff_type:$userid");
+        LJ::MemCacheProxy::delete("rlist:src:$eff_type:$targetid");
+        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:$userid");
 
         # working on reluser or reluser2?
         push @{$typeid ? \@reluser2 : \@reluser}, [$userid, $targetid, $eff_type];
