@@ -3688,7 +3688,7 @@ sub posting_access_list {
     my $ids = LJ::load_rel_target($u, 'P');
     my $us = LJ::load_userids(@$ids);
     foreach (values %$us) {
-        next unless $_->is_visible;
+        next unless $_ && $_->is_visible;
         push @res, $_;
     }
 
@@ -6436,7 +6436,7 @@ sub get_authas_list {
                grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }
 
                # can't work as an expunged account
-               grep { $_ && !$_->is_expunged && $_->{clusterid} > 0 }
+               grep { $_ && ref $_ eq 'HASH' && %$_ && !$_->is_expunged && $_->{clusterid} > 0 }
                $u,  sort { $a->{'user'} cmp $b->{'user'} } values %users;
 }
 
