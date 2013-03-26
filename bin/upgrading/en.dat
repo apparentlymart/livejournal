@@ -4220,6 +4220,18 @@ main.menu.index=Home
 
 main.menu.switch=Switch to old version
 
+main.top.aday=A Day
+
+main.top.allcommunities=All Communities
+
+main.top.alltime=All Time
+
+main.top.allusers=All Users
+
+main.top.communities=Communities Top
+
+main.top.users=Users Top
+
 mediaplaceholder.link|staleness=1
 mediaplaceholder.link=Link
 
