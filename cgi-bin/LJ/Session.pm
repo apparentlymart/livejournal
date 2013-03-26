@@ -1156,5 +1156,23 @@ sub allow_login_from_iframe {
     LJ::Request->set_header_out($header_name, $header_body);
 }
 
+sub best_guess_remote {
+    my ($class) = @_;
+
+    my $cookieval = LJ::Request->cookie('ljloggedin');
+    return unless $cookieval;
+
+    my ( undef, $useridval ) = split m{:}, $cookieval;
+    return unless $useridval && $useridval =~ /^u\d+$/;
+
+    my $userid = $useridval;
+    $userid =~ s/^u//;
+    return unless $userid;
+
+    my $u = LJ::load_userid($userid);
+    return unless $u;
+
+    return $u;
+}
 
 1;
