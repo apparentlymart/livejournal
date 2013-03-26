@@ -253,6 +253,14 @@ sub render
         $data_control_strip->{extra_cells} = $extra_cells || '';
     }
 
+    $data_control_strip->{mode} = 'default';
+
+    if ($data_remote->{is_friend}) {
+        $data_control_strip->{mode} = 'friend';
+    } elsif ($data_remote->{is_subscribedon}) {
+        $data_control_strip->{mode} = 'subscr';
+    }
+
     my $data = {
         lj            => {
             siteroot  => $LJ::SITEROOT,
