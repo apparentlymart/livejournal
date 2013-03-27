@@ -24,7 +24,12 @@ body<=
     my $styleid = $theme->get_preview_styleid($u);
 
     my @purchased = LJ::Pay::Theme->get_purchased ($u);
-    if ($theme->is_buyable && !grep { $theme->s2lid == $_->s2lid } @purchased) {
+
+    my $current_theme = LJ::Customize->get_current_theme($u);
+    if (
+        ($theme->is_buyable && !grep { $theme->s2lid == $_->s2lid } @purchased) &&
+        !($current_theme->is_buyable && grep { $current_theme->s2lid == $_->s2lid } @purchased)
+    ) {
         eval {
             my $default_theme = LJ::S2Theme->load_default_of($theme->layoutid, user => $u);
 
