@@ -1,3 +1,5 @@
+/*global Hourglass */
+
 jQuery.ajaxSetup({
 	cache: false
 });
@@ -52,35 +54,35 @@ jQuery.fn.isCollapsed = function() {
 	return selection.start === selection.end;
 };
 
-jQuery.fn.hourglass = function(xhr){
+/**
+ * @deprecated Use hourglass.setEvent instead
+ */
+jQuery.fn.hourglass = function (xhr){
 	var hourglasses = [];
-	this.each(function(){
+
+	this.each(function () {
+		var e,
+			hourglass;
+
 		// is complete or was aborted
-		if(xhr && (xhr.readyState == 0 || xhr.readyState == 4)) return;
+		if (xhr && (xhr.readyState === 0 || xhr.readyState === 4)) {
+			return;
+		}
 
-		if(this.nodeType){ // node
-
-		} else { // position from event
-			var e = jQuery.event.fix(this),
-				hourglass = new Hourglass(),
-				offset = {};
-
-			// from keyboard
-			if(!e.clientX || !e.clientY){
-				offset = jQuery(e.target).offset();
-			}
-
-			hourglass.init();
-			hourglass.hourglass_at(offset.left || e.pageX, offset.top || e.pageY);
+		if( !this.nodeType ) {
+			// position from event
+			e = jQuery.event.fix(this);
+			hourglass = new Hourglass()
+				.setEvent(e)
+				.show();
 		}
 
 		hourglasses.push(hourglass);
 
-		if(xhr){
-			jQuery(hourglass.ele).bind('ajaxComplete', function(event, request){
-				if(request == xhr){
-					hourglass.hide();
-					jQuery(hourglass.ele).unbind('ajaxComplete', arguments.callee);
+		if (xhr) {
+			hourglass.element.on('ajaxComplete', function (event, request){
+				if (request === xhr){
+					hourglass.remove();
 				}
 			});
 		}
