@@ -602,8 +602,11 @@ sub reconstruct {
             ## Right now attribute is silently dropped.
             ## TODO: pass a flag to outer scope that it was dropped, so that
             ## ljprotocol can notify user by throwing an error.
-            if ($tag eq 'object' && $name eq 'data') {
-                next;
+            if ( $tag eq 'object' && $name eq 'data') {
+                my $type = $attr->{'type'} || '';
+                if ( $type ne 'application/x-shockwave-flash' ) {
+                    next;
+                }
             }
 
             my $tribute = " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
