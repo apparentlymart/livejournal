@@ -4230,6 +4230,10 @@ main.top.allusers=All Users
 
 main.top.communities=Communities Top
 
+main.top.promo=Promo
+
+main.top.promo.stat=You can take this place for [[buyout]] [[?buyout|token|tokens]]
+
 main.top.users=Users Top
 
 mediaplaceholder.link|staleness=1
