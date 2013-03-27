@@ -6439,7 +6439,7 @@ sub get_authas_list {
                grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }
 
                # can't work as an expunged account
-               grep { $_ && ref $_ eq 'HASH' && %$_ && !$_->is_expunged && $_->{clusterid} > 0 }
+               grep { $_ && ref $_ eq 'LJ::User' && %$_ && !$_->is_expunged && $_->{clusterid} > 0 }
                $u,  sort { $a->{'user'} cmp $b->{'user'} } values %users;
 }
 
