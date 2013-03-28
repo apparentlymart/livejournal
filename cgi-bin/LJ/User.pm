@@ -2818,6 +2818,16 @@ sub get_social_capital {
     my $soc_capital = LJ::MemCache::get( $key );
 
     unless (defined $soc_capital) {
+        # TODO: Check the date of social capital
+        my $redis = LJ::Redis->get_connection;
+        if ($redis) {
+            my $authority = $redis->get('authority'.$u->userid) || 0;
+            warn "Redis authority (".$u->userid."): $authority";
+            $soc_capital = int($authority / 1000);
+        }
+    }
+
+    unless (defined $soc_capital) {
         my $response = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
         if ($response) {
             $soc_capital = int($response->{result}->{authority}/1000);
