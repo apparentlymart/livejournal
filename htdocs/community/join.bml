@@ -43,6 +43,11 @@ body<=
     # and make sure they're not already a member
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>"
         if LJ::is_friend($cu, $remote);
+        
+    # check valid email
+    unless ($remote->is_validated()) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.email.notvalid'} p?>";
+    }
 
     # make sure underage users can't join adult communities
     my $adult_content;

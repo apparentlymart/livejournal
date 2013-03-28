@@ -7,6 +7,8 @@
 
 .error.already.member=You are already a member of this community.
 
+.error.email.notvalid=You can't join to this community, because your e-mail not validated.
+
 .error.closed=This community is closed to new members.  If you wish to join, please contact one of the following maintainers: [[admins]]
 
 .error.ischild|staleness=1
