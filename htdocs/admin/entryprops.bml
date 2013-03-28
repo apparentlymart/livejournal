@@ -6,6 +6,8 @@ body<=
     use strict;
     use LJ::TimeUtil;
 
+    LJ::need_res('stc/admin/general.css');
+
     use vars qw(%POST);
 
     my $ret;

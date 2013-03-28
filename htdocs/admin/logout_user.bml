@@ -5,7 +5,9 @@ body<=
 {
     use strict;
     use vars qw(%POST %GET);
-
+    
+    LJ::need_res('stc/admin/general.css');
+    
     my $err = sub { return "<?h1 Error h1?><?p $_[0] p?>"; };
 
     my $remote = LJ::get_remote();
@@ -13,6 +15,8 @@ body<=
     return $err->("No access") unless LJ::check_priv($remote, 'suspend');
 
     my $ret = "";
+    
+    $ret .= '<div class="b-adminpage b-adminpage-padding b-adminpage-max">';
     
     if (LJ::did_post()) {
         return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
@@ -44,7 +48,11 @@ User: <input type='text' name='user' value='$popuser' /> <input type='submit' va
 </form>
 FORM
     
+    $ret .= '</div>';
+    
     return $ret;
+    
+    
 }
 _code?>
 <=body
