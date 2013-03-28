@@ -1,4 +1,4 @@
-/*global ContextualPopup */
+/*global ContextualPopup, Hourglass */
 
 /**
  * Contextual popup is displayed on mouse hover near
@@ -795,10 +795,67 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		}
 	};
 
+	// Update changing relations functionality to work through relations manager
+	// that is declared in `js/relations.js`
+	if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+
+		// redeclare `changeRelation` method to interact with relations manager
+		ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {
+			LiveJournal.run_hook('relations.' + action, info.username);
+
+			// hide existed hourglass and add another one
+			ContextualPopup.hideHourglass();
+
+			ContextualPopup.hourglass = new Hourglass()
+				.setEvent(e)
+				.show();
+
+			ContextualPopup.hourglass.element
+				// entering mouse on the hourglass should not close popup
+				.on('mouseenter', function () {
+					popup.element.trigger('mouseenter');
+				})
+				// so mousing over hourglass doesn't make ctxpopup think mouse is outside
+				.addClass('lj_hourglass');
+
+			return false;
+		};
+
+		// subscribe to change relation events
+		(function () {
+			var actions = [
+				'addFriend',
+				'removeFriend',
+				'subscribe',
+				'unsubscribe',
+				'join',
+				'leave',
+				'ban',
+				'unban',
+				'banEverywhere',
+				'unbanEverywhere'
+			];
+
+			actions.forEach(function (action) {
+				LiveJournal.register_hook('relations.' + action + '.done', function (data, username) {
+					if (data.error) {
+						ContextualPopup.showNote(data.error.message);
+						return;
+					}
+
+					if ( ContextualPopup.cachedResults[username] ) {
+						$.extend(ContextualPopup.cachedResults[username], data);
+					}
+
+					// if the popup is up, reload it
+					ContextualPopup.hideHourglass();
+					ContextualPopup.renderPopup(username);
+				});
+			});
+		}());
+	}
+
 }(jQuery));
 
-
 // when page loads, set up contextual popups
-jQuery(function () {
-	ContextualPopup.setup();
-});
+jQuery(ContextualPopup.setup);
