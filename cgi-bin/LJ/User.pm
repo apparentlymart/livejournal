@@ -2821,7 +2821,7 @@ sub get_social_capital {
         # TODO: Check the date of social capital
         my $redis = LJ::Redis->get_connection;
         if ($redis) {
-            my $authority = $redis->get('authority'.$u->userid) || 0;
+            my $authority = $redis->get('authority.'.$u->userid) || 0;
             warn "Redis authority (".$u->userid."): $authority";
             $soc_capital = int($authority / 1000);
         }
