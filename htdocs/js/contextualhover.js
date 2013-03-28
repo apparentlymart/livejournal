@@ -835,8 +835,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				'unsubscribe',
 				'join',
 				'leave',
-				'ban',
-				'unban',
+				'setBan',
+				'setUnban',
 				'banEverywhere',
 				'unbanEverywhere'
 			];
