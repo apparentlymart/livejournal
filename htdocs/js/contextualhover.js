@@ -309,14 +309,19 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 					}())
 				});
 
-				// subscribe/unsubscribe. Depends on server flag
-				if ( data.new_friends_and_subscriptions ) {
+				// subscribe/unsubscribe
+				if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
 					if ( !data.is_friend ) {
 						buildObject.headLinks.push({
 							selector: 'a[href=#subscription]',
 							url: '#subscription',
 							click: function (e) {
-								ContextualPopup.changeRelation(data, ctxPopupId, data.is_subscribedon ? 'unsubscribe' : 'subscribe', e);
+								ContextualPopup.changeRelation(
+									data,
+									ctxPopupId,
+									data.is_subscribedon ? 'unsubscribe' : 'subscribe',
+									e
+								);
 								e.preventDefault();
 								e.stopPropagation();
 							},
