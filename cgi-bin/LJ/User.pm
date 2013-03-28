@@ -6501,9 +6501,7 @@ sub trusted {
 # args: remote, item
 # des-item: Hashref from the 'log' table.
 # </LJFUNC>
-sub can_view
-{
-    &nodb;
+sub can_view {
     my $remote = shift;
     my $item = shift;
 
@@ -6564,126 +6562,11 @@ sub wipe_major_memcache
 # name: LJ::load_user_props
 # des: Given a user hashref, loads the values of the given named properties
 #      into that user hashref.
-# args: dbarg?, u, opts?, propname*
+# args: u, opts?, propname*
 # des-opts: hashref of opts.  set key 'cache' to use memcache.
 # des-propname: the name of a property from the [dbtable[userproplist]] table.
-# README: this function is overridden below if user_props_multi flag is enabled
 # </LJFUNC>
 sub load_user_props {
-    &nodb;
-
-    my $u = shift;
-    return unless isu($u);
-    return if $u->is_expunged;
-
-    my $opts = ref $_[0] ? shift : {};
-    my (@props) = @_;
-
-    my $extend_user_object = sub {
-        my ($propmap) = @_;
-
-        foreach my $propname ( keys %$propmap ) {
-            $u->{$propname} = $propmap->{$propname};
-        }
-    };
-
-    unless ( $opts->{'reload'} ) {
-        @props = grep { ! exists $u->{$_} } @props;
-    }
-
-    return unless @props;
-
-    $LJ::COUNT_LOAD_PROPS_MULTI++;
-
-    my $groups = LJ::User::PropStorage->get_handler_multi(\@props);
-    my $memcache_available = @LJ::MEMCACHE_SERVERS;
-    my $use_master = $memcache_available || $opts->{'use_master'};
-
-    my $memc_expire = time() + 3600 * 24;
-
-    foreach my $handler (keys %$groups) {
-        # if there is no memcache, or if the handler doesn't wish to use
-        # memcache, hit the storage directly, update the user object,
-        # and get straight to the next handler
-        if ( !$memcache_available || !defined $handler->use_memcache )
-        {
-            my $propmap
-                = $handler->get_props( $u, $groups->{$handler},
-                                       { 'use_master' => $use_master } );
-
-            $extend_user_object->($propmap);
-
-            next;
-        }
-
-        # now let's find out what we're going to do with memcache
-        my $memcache_policy = $handler->use_memcache;
-
-        if ( $memcache_policy eq 'lite' ) {
-            # the handler loads everything from the corresponding
-            # table and uses only one memcache key to cache that
-
-            my $memkey = $handler->memcache_key($u);
-            if ( my $packed = LJ::MemCacheProxy::get([ $u->userid, $memkey ]) ) {
-                my $propmap
-                    = LJ::User::PropStorage->unpack_from_memcache($packed);
-
-                $extend_user_object->($propmap);
-
-                # we've loaded everything handled by this handler,
-                # let's get to the next one
-                next;
-            }
-
-            # actually load everything from DB, cache it, and update
-            # the user object
-            my $propmap
-                = $handler->get_props( $u, [],
-                                       { 'use_master' => $use_master } );
-
-            my $packed = LJ::User::PropStorage->pack_for_memcache($propmap);
-            LJ::MemCacheProxy::set( [$u->userid, $memkey],
-                                    $packed, $memc_expire );
-
-            $extend_user_object->($propmap);
-        } elsif ( $memcache_policy eq 'blob' ) {
-            # the handler uses one memcache key for each prop
-            # hit memcache for them first, then hit db and update
-            # memcache
-
-            my $handled_props = $groups->{$handler};
-
-            my $propmap_memc
-                = $handler->fetch_props_memcache( $u, $handled_props );
-
-            $extend_user_object->($propmap_memc);
-
-            my @load_from_db = grep { !exists $propmap_memc->{$_} }
-                               @$handled_props;
-
-            # if we can avoid hitting the db, avoid it
-            next unless @load_from_db;
-
-            my $propmap_db
-                = $handler->get_props( $u, \@load_from_db,
-                                       { 'use_master' => $use_master } );
-
-            $extend_user_object->($propmap_db);
-
-            # now, update memcache
-            $handler->store_props_memcache( $u, $propmap_db );
-        }
-    }
-
-    LJ::User->init_userprop_def;
-    foreach my $propname (@props) {
-        next if defined $u->{$propname};
-        next unless defined $LJ::USERPROP_DEF{$propname};
-        $u->{$propname} = $LJ::USERPROP_DEF{$propname};
-    }
-}
-
-sub load_user_props_v2 {
     my ($u, @props) = @_;
     return unless ref $u;
 
@@ -6693,11 +6576,6 @@ sub load_user_props_v2 {
     }
 
     LJ::load_user_props_multi([$u], \@props, $opts);
-}
-
-unless ( $LJ::DISABLED{'user_props_multi'} ) {
-    no strict 'refs';
-    *load_user_props = \&LJ::load_user_props_v2;
 }
 
 sub load_user_props_multi {
@@ -6844,15 +6722,13 @@ sub load_userids {
 #       as is $memcache_only; but it is still preserved for now. 
 #       Really, this whole API (i.e. LJ::load_userids_multiple) is clumsy. 
 #       Use [func[LJ::load_userids]] instead.
-# args: dbarg?, map, have, memcache_only?
+# args: map, have, memcache_only?
 # des-map: Arrayref of pairs (userid, destination scalarref).
 # des-have: Arrayref of user objects caller already has.
 # des-memcache_only: Flag to only retrieve data from memcache.
 # returns: Nothing.
 # </LJFUNC>
-sub load_userids_multiple
-{
-    &nodb;
+sub load_userids_multiple {
     # the $have parameter is deprecated, as is $memcache_only, but it's still preserved for now.
     # actually this whole API is crap.  use LJ::load_userids() instead.
     my ($map, undef, $memcache_only) = @_;
@@ -7016,15 +6892,13 @@ sub load_user_arg {
 # <LJFUNC>
 # name: LJ::load_user
 # des: Loads a user record, from the [dbtable[user]] table, given a username.
-# args: dbarg?, user, force?
+# args: user, force?
 # des-user: Username of user to load.
 # des-force: if set to true, won't return cached user object and will
 #            query a dbh.
 # returns: Hashref, with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
-sub load_user
-{
-    &nodb;
+sub load_user {
     my ($user, $force) = @_;
 
     $user = LJ::canonical_username($user);
@@ -7142,15 +7016,13 @@ sub u_equals {
 # <LJFUNC>
 # name: LJ::load_userid
 # des: Loads a user record, from the [dbtable[user]] table, given a userid.
-# args: dbarg?, userid, force?
+# args: userid, force?
 # des-userid: Userid of user to load.
 # des-force: if set to true, won't return cached user object and will
 #            query a dbh
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
-sub load_userid
-{
-    &nodb;
+sub load_userid {
     my ($userid, $force) = @_;
     return undef unless $userid;
 
@@ -7327,9 +7199,7 @@ sub journal_base
 # des-arg: Optional argument.  See also [func[LJ::check_priv]].
 # returns: boolean
 # </LJFUNC>
-sub load_user_privs
-{
-    &nodb;
+sub load_user_privs {
     my $remote = shift;
     my @privs = @_;
     return unless $remote and @privs;
@@ -7361,7 +7231,7 @@ sub load_user_privs
 #       See [func[LJ::get_remote]].  As such, a $u argument of undef
 #       is okay to pass: 0 will be returned, as an unknown user can't
 #       have any rights.
-# args: dbarg?, u, priv, arg?
+# args: u, priv, arg?
 # des-priv: Priv name to check for (see [dbtable[priv_list]])
 # des-arg: Optional argument.  If defined, function only returns true
 #          when $remote has a priv of type $priv also with arg $arg, not
@@ -7369,9 +7239,7 @@ sub load_user_privs
 #          an $arg. Arg can be "*", for all args.
 # returns: boolean; true if user has privilege
 # </LJFUNC>
-sub check_priv
-{
-    &nodb;
+sub check_priv {
     my ($u, $priv, $arg) = @_;
     return 0 unless $u;
 
@@ -7428,17 +7296,9 @@ sub users_by_priv {
 #
 # <LJFUNC>
 # name: LJ::remote_has_priv
-# class:
 # des: Check to see if the given remote user has a certain privilege.
-# info: <strong>Deprecated</strong>.  You should
-#       use [func[LJ::load_user_privs]] + [func[LJ::check_priv]], instead.
-# args:
-# des-:
-# returns:
 # </LJFUNC>
-sub remote_has_priv
-{
-    &nodb;
+sub remote_has_priv {
     my $remote = shift;
     my $privcode = shift;     # required.  priv code to check for.
     my $ref = shift;  # optional, arrayref or hashref to populate
@@ -8363,13 +8223,12 @@ sub get_calendar_data_for_month {
 # <LJFUNC>
 # name: LJ::set_interests
 # des: Change a user's interests.
-# args: dbarg?, u, old, new
+# args: u, old, new
 # des-old: hashref of old interests (hashing being interest => intid)
 # des-new: listref of new interests
 # returns: 1 on success, undef on failure
 # </LJFUNC>
-sub set_interests
-{
+sub set_interests {
     my ($u, $old, $new) = @_;
 
     $u = LJ::want_user($u);
@@ -8851,7 +8710,7 @@ sub handle_bad_login
 # <LJFUNC>
 # name: LJ::userpic_count
 # des: Gets a count of userpics for a given user.
-# args: dbarg?, upics, idlist
+# args: upics, idlist
 # des-upics: hashref to load pictures into, keys being the picids
 # des-idlist: [$u, $picid] or [[$u, $picid], [$u, $picid], +] objects
 #             also supports deprecated old method, of an array ref of picids.
@@ -8906,9 +8765,7 @@ sub _friends_do {
 #                    'groupmask' key means use this group mask
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
-sub add_friend
-{
-    &nodb;
+sub add_friend {
     my ($userid, $to_add, $opts) = @_;
 
     $userid = LJ::want_userid($userid);
@@ -9493,11 +9350,10 @@ sub get_extuser_map
 #      not really too useful but should be extended to be useful so
 #      htdocs/create.bml can use it, rather than doing the work itself.
 # returns: integer of userid created, or 0 on failure.
-# args: dbarg?, opts
+# args: opts
 # des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'.
 # </LJFUNC>
 sub create_account {
-    &nodb;
     my $opts = shift;
     my $u = LJ::User->create(%$opts)
         or return 0;
@@ -9548,18 +9404,10 @@ sub random_cluster {
 }
 
 
-# <LJFUNC>
 # name: LJ::make_journal
-# class:
-# des:
-# info:
-# args: dbarg, user, view, remote, opts
-# des-:
-# returns:
+# args: user, view, remote, opts
 # </LJFUNC>
-sub make_journal
-{
-    &nodb;
+sub make_journal {
     my ($user, $view, $remote, $opts) = @_;
 
     my $geta = $opts->{'getargs'};
@@ -10246,12 +10094,11 @@ sub canonical_username
 #       to use this many times in a row... only once or twice perhaps
 #       per request.  Tons of serialized db requests, even when small,
 #       are slow.  Opposite of [func[LJ::get_username]].
-# args: dbarg?, user
+# args: user
 # des-user: Username whose userid to look up.
 # returns: Userid, or 0 if invalid user.
 # </LJFUNC>
 sub get_userid {
-    &nodb;
     my $user = shift;
 
     $user = LJ::canonical_username($user);
@@ -10334,13 +10181,11 @@ sub want_user
 #       to use this many times in a row... only once or twice perhaps
 #       per request.  Tons of serialized db requests, even when small,
 #       are slow.  Opposite of [func[LJ::get_userid]].
-# args: dbarg?, user
+# args: user
 # des-user: Username whose userid to look up.
 # returns: Userid, or 0 if invalid user.
 # </LJFUNC>
-sub get_username
-{
-    &nodb;
+sub get_username {
     my $userid = shift;
     $userid += 0;
 

@@ -2818,15 +2818,6 @@ sub postevent {
     }
     #### /embedding
 
-    ### extract links for meme tracking
-    unless ($req->{'security'} eq "usemask" ||
-            $req->{'security'} eq "private")
-    {
-        foreach my $url (LJ::get_urls($event)) {
-            LJ::record_meme($url, $posterid, $ditemid, $ownerid);
-        }
-    }
-
     # record journal's disk usage
     my $bytes = length($event) + length($req->{'subject'});
     $uowner->dudata_set('L', $jitemid, $bytes);
@@ -5050,7 +5041,7 @@ sub editfriendgroups
     foreach my $friend (keys %{$req->{'groupmasks'}})
     {
         my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
-        my $friendid = LJ::get_userid($dbh, $friend);
+        my $friendid = LJ::get_userid($friend);
 
         $dbh->do("UPDATE friends SET groupmask=$mask ".
                  "WHERE userid=$userid AND friendid=?",

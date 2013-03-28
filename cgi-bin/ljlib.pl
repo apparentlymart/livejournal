@@ -607,7 +607,7 @@ sub get_times_multi {
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.
-# args: dbarg?, opts
+# args: opts
 # des-opts: Hashref of options:
 #           - userid
 #           - remoteid
@@ -625,7 +625,6 @@ sub get_times_multi {
 # returns: Array of item hashrefs containing the same elements
 # </LJFUNC>
 sub get_friend_items {
-    &nodb;
     my $opts = shift;
 
     my $dbr = LJ::get_db_reader();
@@ -1052,7 +1051,7 @@ sub get_friend_items {
 # class:
 # des: Returns journal entries for a given account.
 # info:
-# args: dbarg, opts
+# args: opts
 # des-opts: Hashref of options with keys:
 #           -- err: scalar ref to return error code/msg in
 #           -- userid
@@ -1086,9 +1085,7 @@ sub get_friend_items {
 #           -- load_props: if set, objects into entry_objects comes whis preloaded props
 #           -- load_text: if set, objects into entry_objects comes whis preloaded text
 # </LJFUNC>
-sub get_recent_items
-{
-    &nodb;
+sub get_recent_items {
     my $opts = shift;
 
     my $sth;
@@ -1423,7 +1420,7 @@ sub get_recent_items
 #       back (usually in a URL you make for them) to prove they got it.  This
 #       function creates a secret, attaching what it's for and an optional argument.
 #       Background maintenance jobs keep track of cleaning up old unvalidated secrets.
-# args: dbarg?, userid, action, arg?
+# args: userid, action, arg?
 # des-userid: Userid of user to register authaction for.
 # des-action: Action type to register.   Max chars: 50.
 # des-arg: Optional argument to attach to the action.  Max chars: 255.
@@ -1432,9 +1429,7 @@ sub get_recent_items
 #          a 15 character string of random characters from
 #          [func[LJ::make_auth_code]].
 # </LJFUNC>
-sub register_authaction
-{
-    &nodb;
+sub register_authaction {
     my $dbh = LJ::get_db_writer();
 
     my $userid = shift;  $userid += 0;
@@ -1470,15 +1465,13 @@ sub get_authaction {
 # des: Adds a row to a user's statushistory
 # info: See the [dbtable[statushistory]] table.
 # returns: boolean; 1 on success, 0 on failure
-# args: dbarg?, userid, adminid, shtype, notes?
+# args: userid, adminid, shtype, notes?
 # des-userid: The user being acted on.
 # des-adminid: The site admin doing the action.
 # des-shtype: The status history type code.
 # des-notes: Optional notes associated with this action.
 # </LJFUNC>
-sub statushistory_add
-{
-    &nodb;
+sub statushistory_add {
     my $dbh = LJ::get_db_writer();
 
     my $userid = shift;
@@ -1615,14 +1608,11 @@ sub shared_member_request {
 # des: Validates a shared secret (authid/authcode pair)
 # info: See [func[LJ::register_authaction]].
 # returns: Hashref of authaction row from database.
-# args: dbarg?, aaid, auth
+# args: aaid, auth
 # des-aaid: Integer; the authaction ID.
 # des-auth: String; the auth string. (random chars the client already got)
 # </LJFUNC>
-sub is_valid_authaction
-{
-    &nodb;
-
+sub is_valid_authaction {
     # we use the master db to avoid races where authactions could be
     # used multiple times
     my $dbh = LJ::get_db_writer();
@@ -1662,34 +1652,6 @@ sub get_urls
 }
 
 # <LJFUNC>
-# name: LJ::record_meme
-# des: Records a URL reference from a journal entry to the [dbtable[meme]] table.
-# args: dbarg?, url, posterid, itemid, journalid?
-# des-url: URL to log
-# des-posterid: Userid of person posting
-# des-itemid: Itemid URL appears in.  This is the display itemid,
-#             which is the jitemid*256+anum from the [dbtable[log2]] table.
-# des-journalid: Optional, journal id of item, if item is clustered.  Otherwise
-#                this should be zero or undef.
-# </LJFUNC>
-sub record_meme
-{
-    my ($url, $posterid, $itemid, $jid) = @_;
-    return if $LJ::DISABLED{'meme'};
-
-    $url =~ s!/$!!;  # strip / at end
-    LJ::run_hooks("canonicalize_url", \$url);
-
-    # canonicalize_url hook might just erase it, so
-    # we don't want to record it.
-    return unless $url;
-
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE DELAYED INTO meme (url, posterid, journalid, itemid) " .
-             "VALUES (?, ?, ?, ?)", undef, $url, $posterid, $jid, $itemid);
-}
-
-# <LJFUNC>
 # name: LJ::make_auth_code
 # des: Makes a random string of characters of a given length.
 # returns: string of random characters, from an alphabet of 30
@@ -1697,8 +1659,7 @@ sub record_meme
 # args: length
 # des-length: length of auth code to return
 # </LJFUNC>
-sub make_auth_code
-{
+sub make_auth_code {
     my $length = shift;
     my $digits = "abcdefghjkmnpqrstvwxyz23456789";
     my $auth;
@@ -1712,13 +1673,11 @@ sub make_auth_code
 #      [dbtable[logproplist]], [dbtable[talkproplist]], and [dbtable[userproplist]], which describe
 #      the various meta-data that can be stored on log (journal) items,
 #      comments, and users, respectively.
-# args: dbarg?, table*
+# args: table*
 # des-table: a list of tables' proplists to load. Can be one of
 #            "log", "talk", "user", or "rate".
 # </LJFUNC>
-sub load_props
-{
-    my $dbarg = ref $_[0] ? shift : undef;
+sub load_props {
     my @tables = @_;
     my $dbr;
     my %keyname = qw(log  propid
@@ -1799,14 +1758,12 @@ sub get_prop
 # des: Populates hashrefs with lookup data from the database or from memory,
 #      if already loaded in the past.  Examples of such lookup data include
 #      state codes, country codes, color name/value mappings, etc.
-# args: dbarg?, whatwhere
+# args: whatwhere
 # des-whatwhere: a hashref with keys being the code types you want to load
 #                and their associated values being hashrefs to where you
 #                want that data to be populated.
 # </LJFUNC>
-sub load_codes
-{
-    &nodb;
+sub load_codes {
     my $req = shift;
 
     my $dbr = LJ::get_db_reader()
@@ -1843,13 +1800,10 @@ sub load_codes
 # <LJFUNC>
 # name: LJ::load_state_city_for_zip
 # des: Fetches state and city for the given zip-code value
-# args: dbarg?, zip
+# args: zip
 # des-zip: zip code
 # </LJFUNC>
-sub load_state_city_for_zip
-{
-    &nodb;
-
+sub load_state_city_for_zip {
     my $zip = shift;
     my ($zipcity, $zipstate);
 
@@ -2523,10 +2477,7 @@ sub do_to_cluster {
 #                 If not present, default behavior is the old
 #                 style -- yes, do automatically create the keyword.
 # </LJFUNC>
-sub get_keyword_id
-{
-    &nodb;
-
+sub get_keyword_id {
     # see if we got a user? if so we use userkeywords on a cluster
     my $u;
     if (@_ >= 2) {
@@ -2611,18 +2562,7 @@ sub get_interest_id {
     return wantarray() ? ($intid, $intcount) : $intid;
 }
 
-# <LJFUNC>
-# name: LJ::can_use_journal
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub can_use_journal
-{
-    &nodb;
+sub can_use_journal {
     my ($posterid, $reqownername, $res) = @_;
 
     ## find the journal owner's info
@@ -2985,44 +2925,6 @@ sub color_todb
     return hex(substr($c, 1, 6));
 }
 
-
-# <LJFUNC>
-# name: LJ::event_register
-# des: Logs a subscribable event, if anybody is subscribed to it.
-# args: dbarg?, dbc, etype, ejid, eiarg, duserid, diarg
-# des-dbc: Cluster master of event
-# des-etype: One character event type.
-# des-ejid: Journalid event occurred in.
-# des-eiarg: 4 byte numeric argument
-# des-duserid: Event doer's userid
-# des-diarg: Event's 4 byte numeric argument
-# returns: boolean; 1 on success; 0 on fail.
-# </LJFUNC>
-sub event_register
-{
-    &nodb;
-    my ($dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
-    my $dbr = LJ::get_db_reader();
-
-    # see if any subscribers first of all (reads cheap; writes slow)
-    return 0 unless $dbr;
-    my $qetype = $dbr->quote($etype);
-    my $qejid = $ejid+0;
-    my $qeiarg = $eiarg+0;
-    my $qduserid = $duserid+0;
-    my $qdiarg = $diarg+0;
-
-    my $has_sub = $dbr->selectrow_array("SELECT userid FROM subs WHERE etype=$qetype AND ".
-                                        "ejournalid=$qejid AND eiarg=$qeiarg LIMIT 1");
-    return 1 unless $has_sub;
-
-    # so we're going to need to log this event
-    return 0 unless $dbc;
-    $dbc->do("INSERT INTO events (evtime, etype, ejournalid, eiarg, duserid, diarg) ".
-             "VALUES (NOW(), $qetype, $qejid, $qeiarg, $qduserid, $qdiarg)");
-    return $dbc->err ? 0 : 1;
-}
-
 # <LJFUNC>
 # name: LJ::procnotify_add
 # des: Sends a message to all other processes on all clusters.
@@ -3034,9 +2936,7 @@ sub event_register
 #           required args for different commands.
 # returns: new serial number on success; 0 on fail.
 # </LJFUNC>
-sub procnotify_add
-{
-    &nodb;
+sub procnotify_add {
     my ($cmd, $argref) = @_;
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh;

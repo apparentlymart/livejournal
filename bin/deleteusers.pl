@@ -20,7 +20,7 @@ print "Users to delete: ", scalar(@delusers), "\n";
 # Get hashref mapping {userid => $u} for all users to be deleted
 my $user = LJ::load_userids(@delusers);
 
-LJ::load_props($dbh, "talk");
+LJ::load_props('talk');
 my $p_delposter = LJ::get_prop("talk", "deleted_poster");
 die "No 'deleted_poster' talkprop?" unless $p_delposter;
 my $ids;
