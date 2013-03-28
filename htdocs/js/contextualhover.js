@@ -1,3 +1,5 @@
+/*global ContextualPopup */
+
 /**
  * Contextual popup is displayed on mouse hover near
  * every userpic and userhead
@@ -107,8 +109,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 
 (function($) {
-
-	"use strict";
+	'use strict';
 
 	/**
 	 * Object contains methods to build and display user popup.
@@ -177,7 +178,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		},
 
 		setVisibile: function(isVisible, force) {
-			var action = isVisible ? "show" : "hide",
+			var action = isVisible ? 'show' : 'hide',
 				self = this;
 
 			force = force || false;
@@ -534,14 +535,16 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 		hourglass      : null,
 
 		setup: function() {
+			var body;
+
 			// don't do anything if no remote
 			if (!Site.ctx_popup) { return; }
 
 			popup.init();
-			var body = jQuery(document.body);
+			body = $(document.body);
 
 			body
-				.mouseover(ContextualPopup.mouseOver)
+				.on('mouseover', ContextualPopup.mouseOver)
 				.ljAddContextualPopup();
 
 			if (LJ.Support.touch) {
@@ -796,4 +799,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 
 // when page loads, set up contextual popups
-jQuery(ContextualPopup.setup);
+jQuery(function () {
+	ContextualPopup.setup();
+});
