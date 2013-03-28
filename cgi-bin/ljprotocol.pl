@@ -1341,7 +1341,7 @@ sub getfriendspage
         # event result data structure
         my %h = ();
 
-        my $repost_props = { use_repost_signature => 1 };
+        my $repost_props = { use_repost_signature => 0 };
         my ($original_entry, $repost_entry, $event_raw);
         my $opts = {original_post_obj => \$original_entry, repost_obj => \$repost_entry, event => \$event_raw};
         if (LJ::Entry::Repost->substitute_content( $entry, $opts, $repost_props )) {
@@ -4383,7 +4383,7 @@ sub getevents {
         #
         # use repost signnture before event text
         #
-        my $repost_props = { use_repost_signature => 1 };
+        my $repost_props = { use_repost_signature => 0 };
 
         if (LJ::Entry::Repost->substitute_content( $entry, $content, $repost_props )) {
              $evt->{'repost_text'}    = $repost_text;
