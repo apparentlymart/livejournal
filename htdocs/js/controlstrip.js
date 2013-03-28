@@ -123,8 +123,10 @@
          * Hide hourglass
          */
         function hideHourglass() {
-            hourglass.remove();
-            hourglass = null;
+            if (hourglass) {
+                hourglass.remove();
+                hourglass = null;
+            }
         }
 
         /**
