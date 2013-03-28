@@ -65,11 +65,14 @@ sub as_push_payload {
     my ($self, $u, $lang) = @_;
 
     my $user    = $self->comment->poster ? $self->comment->poster->display_username(1) : '(Anonymous user)';
+    my $journal = $self->comment->journal->display_username(1);
+
     my $edited  = $self->comment->is_edited;
 
     my $payload = { 't' => 27,
                     'e' => $edited ? 0 : 1,
-                    'j' => $user,
+                    'u' => $user,
+                    'j' => $journal,
                     'p' => $self->comment->entry->ditemid,
                     'c' => $self->comment->dtalkid,
                   };
