@@ -32,7 +32,7 @@
         ($w, $h) = ($upf->[2], $upf->[3]) if ($upf && $upf->[2]);
     }
 
-    my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax&authas=$GET{authas}";
+    my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax&authas=$GET{authas}&ncrnd=" . int( rand 10_000 );
 
     $head .= qq {
         <script>
