@@ -577,6 +577,9 @@
 .optionlinks.postentry.title|staleness=1
 .optionlinks.postentry.title=Post to your journal
 
+.optionlinks.removefriend|staleness=1
+.optionlinks.removefriend=Remove from friendlist
+
 .optionlinks.sendmessage|staleness=1
 .optionlinks.sendmessage=Send Message
 
@@ -597,6 +600,12 @@
 
 .optionlinks.sub.title.loggedout|staleness=1
 .optionlinks.sub.title.loggedout=You must be logged in to add this feed to your Friends page
+
+.optionlinks.subscribe|staleness=1
+.optionlinks.subscribe=Subscribe
+
+.optionlinks.unsubscribe|staleness=1
+.optionlinks.unsubscribe=Unsubscribe
 
 .optionlinks.track|staleness=1
 .optionlinks.track=Track
