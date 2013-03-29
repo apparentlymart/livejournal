@@ -190,13 +190,16 @@ sub clean_poll {
     my $poll_allow  = [qw[a b i u strong em img strike]];
     my $poll_remove = [qw[bgsound embed object caption link font]];
 
+    my $remote = LJ::get_remote();
+
     LJ::CleanHTML::clean($ref, {
-        'wordlength' => 40,
-        'addbreaks'  => 0,
-        'eat'        => $poll_eat,
-        'mode'       => 'deny',
-        'allow'      => $poll_allow,
-        'remove'     => $poll_remove,
+        'wordlength'       => 40,
+        'addbreaks'        => 0,
+        'eat'              => $poll_eat,
+        'mode'             => 'deny',
+        'allow'            => $poll_allow,
+        'remove'           => $poll_remove,
+        'img_placeholders' => $remote ? $remote->opt_placeholders_friendspage : 0,
     });
     LJ::text_out($ref);
 }
@@ -1824,7 +1827,7 @@ sub render_new {
         my $text = $q->text;
         $text = LJ::trim_at_word($text, 150) if $opts{widget};
         LJ::Poll->clean_poll(\$text);
-        
+
         $posted = '';
 
         my $type  = $q->type;
