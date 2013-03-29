@@ -497,10 +497,11 @@ sub as_push {
 }
 
 sub as_push_payload {
-    my ($self,$u) = @_;
+    my ($self, $u) = @_;
 
     return { 't' => 19,
-             'j' => $u->user,
+             'j' => $self->entry->journal->display_username,
+             'u' => $self->entry->poster->display_username,
              'p' => $self->entry->ditemid,
            };
 }
