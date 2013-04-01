@@ -2817,8 +2817,8 @@ sub get_social_capital {
     
     my $soc_capital = LJ::MemCache::get( $key );
 
-    unless (defined $soc_capital) {
-        # TODO: Check the date of social capital
+    unless (defined $soc_capital || $LJ::IS_DEV_SERVER || !LJ::is_enabled('authority_redis_storage')) {
+        # TODO: Check the date of social capital (if the data is wrong that try to get actual version of social cap from service 
         my $redis = LJ::Redis->get_connection;
         if ($redis) {
             my $authority = $redis->get('authority.'.$u->userid) || 0;
