@@ -24,6 +24,7 @@ LJ::register_hook('head_content', sub {
 
 LJ::register_hook('head_content', sub {
     my ($headref) = @_; 
+    return if $LJ::DISABLED{siteconfidence_rum_script};
     return unless $LJ::IS_LJCOM_BETA;
 
     my $prefix = $LJ::IS_SSL ? $LJ::SSLSTATPREFIX : $LJ::STATPREFIX;
