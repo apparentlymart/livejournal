@@ -604,8 +604,17 @@
 .optionlinks.subscribe|staleness=1
 .optionlinks.subscribe=Subscribe
 
-.optionlinks.unsubscribe|staleness=1
-.optionlinks.unsubscribe=Unsubscribe
+.optionlinks.subscribesyn|staleness=1
+.optionlinks.subscribesyn=Subscribe
+
+.optionlinks.unsubscribesyn|staleness=1
+.optionlinks.unsubscribesyn=Unsubscribe
+
+.optionlinks.subscribecomm|staleness=1
+.optionlinks.subscribecomm=Subscribe
+
+.optionlinks.unsubscribecomm|staleness=1
+.optionlinks.unsubscribecomm=Unsubscribe
 
 .optionlinks.track|staleness=1
 .optionlinks.track=Track
