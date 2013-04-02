@@ -372,7 +372,14 @@ sub clean {
                     next TOKEN;
                 }
                 if ($tag eq 'embed') {
-                    delete $attr->{allowscriptaccess};
+                	# LJSUP-15368: don't delete allowScriptAccess from trusted sites
+                	# probably it's must placed in transform_embed hook...
+                    my $site = $attr->{src};
+                    $site =~ m{http://(?:[\w\-]+\.)*([\w\-]+\.\w*)}; #get site url from src
+                    $site = $1;
+                    unless ( grep($_ eq 'allowScriptAccess', @{$LJ::WHITELIST_VIDEO_HOSTS{$site}->{'other_whitelist'}}) ) {
+                        delete $attr->{allowscriptaccess};
+                    }
                 }
             }
 
