@@ -343,6 +343,7 @@ sub truncate_to_word_with_ellipsis {
         }
     }
 
+    $str =~ s/\s*$//;
     $str .= $ellipsis if ($trimmed);
 
     $str ||= $ellipsis if($fill_empty);
