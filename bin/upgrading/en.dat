@@ -4232,9 +4232,9 @@ main.top.communities=Communities Top
 
 main.top.promo=Promo
 
-main.top.promo.empty.users=Promote your journal here for [[buyout]] [[?buyout|token|tokens]]
+main.top.promo.empty.users=Promote your journal here for 100 tokens
 
-main.top.promo.empty.communities=Promote your community here for [[buyout]] [[?buyout|token|tokens]]
+main.top.promo.empty.communities=Promote your community here for 100 tokens
 
 main.top.promo.stat=You can take this place for [[buyout]] [[?buyout|token|tokens]]
 
