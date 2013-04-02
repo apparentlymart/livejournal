@@ -2262,6 +2262,7 @@ sub control_strip_js_inject
 
     LJ::need_res(qw(
                     js/livejournal.js
+                    js/jquery/jquery.lj.relations.js
                     js/controlstrip.js
                     js/jquery/jquery.calendarEvents.js
                     js/jquery/jquery.lj.modal.js
