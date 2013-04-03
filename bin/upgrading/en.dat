@@ -4206,7 +4206,9 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
-main.intro.mystat.toggle=My posts and communities positions
+main.intro.mystat.collapse=Hide my posts and communities positions
+
+main.intro.mystat.expand=Show my posts and communities positions
 
 main.intro.mystat.you=[[user_display]] you on [[position]] position on the users top
 
