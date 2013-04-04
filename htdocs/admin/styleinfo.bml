@@ -8,17 +8,19 @@ body<=
 
     use vars qw(%POST %GET);
 
+    LJ::need_res('stc/admin/general.css');
+
     my $remote = LJ::get_remote();
     BML::redirect("$LJ::SITEROOT/customize/")
         unless LJ::Support::has_any_support_priv($remote) || $LJ::IS_DEV_SERVER;
 
     my $ret;
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<form method='POST'>";
     $ret .= "View user: ";
     $ret .= LJ::html_text({name => 'user', maxlength => '15', size => '15', value => $GET{user} || $POST{user}});
     $ret .= LJ::html_submit(value => "View");
     $ret .= "</form>";
-    $ret .= "<?hr?>";
 
     my $user = $POST{user} || $GET{user};
     return $ret unless $user;
@@ -78,7 +80,7 @@ body<=
             }
             $ret .= "<li><a href='$uri'>$view</a>: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a></li>";
         }
-        $ret .= "</ul>";
+        $ret .= "</ul></div>";
 
         if ($u->{'useoverrides'} eq 'Y') {
             $ret .= "<?p (<a href='/support/see_overrides.bml?user=" . $u->user . "'>view overrides</a>) p?>";

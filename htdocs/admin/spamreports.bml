@@ -5,6 +5,8 @@
 
     use vars qw($title $body %GET %POST);
 
+    LJ::need_res('stc/admin/general.css');
+
     $title = "Spam Reports";
     $body = "";
     
@@ -24,7 +26,7 @@
     };
     my $dellink = sub {
         my ($srids, $text, $extra) = @_;
-        return "<form method=\"post\" action=\"spamreports.bml\">" .
+        return "<form class=\"b-adminpage-form\" method=\"post\" action=\"spamreports.bml\">" .
             LJ::html_hidden('mode', 'del') .
             LJ::html_hidden('srids', join(',', @$srids)) .
             LJ::html_hidden('ret', "spamreports.bml?" . join('&amp;', map { "$_=" . LJ::eurl($GET{$_}) } keys %GET)) .
@@ -190,7 +192,7 @@
             $body .= "No reports found.";
             return undef;
         }
-        $body .= '<table>';
+        $body .= '<div class="b-adminpage"> <table class="b-admin-table">';
         my @srids;
         foreach (@$res) {
             my $u2 = LJ::load_userid($_->[1]);
@@ -219,7 +221,7 @@
             }
         }
 
-        $body .= "</table><br />" . ($state eq 'open' ? $dellink->(\@srids, 'Close All', $extra) : '');
+        $body .= "</table></div>" . ($state eq 'open' ? $dellink->(\@srids, 'Close All', $extra) : '');
 
     } elsif ($mode =~ /^del/) {
         # figure out our combination
@@ -249,7 +251,7 @@
         # standard
         my %modes = (top10user => 'Top 10 by User', top10ip => 'Top 10 by IP Address', tlast10 => 'Last 10 Reports',
                      last01hr => 'Last 1 Hour', last06hr => 'Last 6 Hours', last24hr => 'Last 24 Hours');
-        $body .= "<?p Available reports: p?>\n<ul>";
+        $body .= "<div class=\"b-adminpage b-adminpage-padding\"> <?p Available reports: p?>\n<ul>";
         foreach (sort keys %modes) {
             $body .= "<li><a href=\"spamreports.bml?mode=$_\">$modes{$_}</a>";
             if ($_ =~ /last/) {
@@ -266,13 +268,14 @@
                 <input type="hidden" name="mode" value="view" />
             </label></form></li>
         };
-        $body .= "</ul>\n<?p Please select one of the above reports to view.  Actions can be taken when viewing a report. p?>";
+        $body .= "</ul>\n<?p Please select one of the above reports to view.  Actions can be taken when viewing a report. p?></div>";
     }
 
     # now spit out the requested table
     return unless @headers;
+    $body .= '<div class="b-adminpage b-adminpage-padding">';
     $body .= "<?p [ <a href=\"spamreports.bml\">&lt;&lt; Front Page</a> ] p?>";
-    $body .= "<table width=\"50%\">\n<tr>";
+    $body .= "<table class=\"b-admin-table\" width=\"50%\">\n<tr>";
     $body .= "<th align=\"center\">$_</th>" foreach @headers;
     $body .= "</tr>\n";
     foreach (@rows) {
@@ -281,6 +284,7 @@
         $body .= "</tr>\n";
     }
     $body .= "</table>\n";
+    $body .= "</div>";
 
     return;
 }
