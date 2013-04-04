@@ -2847,7 +2847,7 @@ sub get_authority_multi {
 
     if ( $LJ::IS_DEV_SERVER && ( my $getter = $LJ::FAKE_SOCIAL_CAPITAL ) ) {
         my $users = LJ::load_userids(@$uids);
-        return { map {$_ => $getter->($users->{$_})} @$uids };
+        return { map {$_ => ($getter->($users->{$_})*1000)} @$uids };
     }
 
     my $redis = LJ::Redis->get_connection || return;
