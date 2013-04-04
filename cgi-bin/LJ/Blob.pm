@@ -133,6 +133,7 @@ sub get_disk_usage {
     shift @_ unless LJ::isu($_[0]);  # let it be called as class method (LJ::Blob->get_disk_usage($u,...))
     my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
+    return undef unless $dbcr;
     if ($domain) {
         return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
                                       "WHERE journalid=? AND domain=?", undef,
