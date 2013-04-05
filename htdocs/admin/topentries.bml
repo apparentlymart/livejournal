@@ -10,7 +10,8 @@ body<=
     use LJ::TopEntries;
 
     LJ::need_res('js/admin/topentries.js', 'stc/framework/modules.css');
-
+    LJ::need_res('stc/admin/general.css');
+    
     my $remote = LJ::get_remote();
 
     my @domains = LJ::TopEntries->domains($remote);
@@ -77,15 +78,16 @@ body<=
     
     ## Page
     my $ret = qq|
+        <div class="b-adminpage b-adminpage-padding b-adminpage-max">
         <div class="canyon">
             <div class="canyon-side"> | . 
                 LJ::Widget::TopEntries->render(domain => $domain) . qq|
             </div>
             <div class="canyon-section">
-                <form method="GET">
+                <form class="b-adminpage-form" method="GET">
                     Select widget: $selector <input type="submit" value="go">
                 </form>
-                <form method="POST">
+                <form class="b-adminpage-form" method="POST">
                 <input type="hidden" name="domain" value="$domain">
                 |;
 
@@ -137,7 +139,7 @@ body<=
         $ret .= "</ul>\n";
         $ret .= qq|<input type="submit" value="delete selected">|;
     }
-    $ret .= "</form>\n</div>\n</div>";
+    $ret .= "</form>\n</div>\n</div></div>";
 
     return $ret;
 }
