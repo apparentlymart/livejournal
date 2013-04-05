@@ -460,68 +460,6 @@ sub trans {
         }
     }
 
-    my $middleware_response;
-    LJ::run_hooks( 'middleware_handler', \$middleware_response );
-    if ($middleware_response) {
-        LJ::Request->handler('perl-script');
-        LJ::Request->set_handlers( 'PerlHandler' => sub {
-            LJ::Lang::current_language(undef);
-            my $result = eval { $middleware_response->output; 1 };
-            warn $@ unless $result;
-            return LJ::Request::DONE;
-        } );
-
-        return LJ::Request::OK;
-    }
-
-    # process controller
-    # if defined
-    if ( my $controller = LJ::Request->notes('controller') ) {
-        LJ::Request->handler('perl-script');
-        LJ::Request->set_handlers(PerlHandler => sub {
-            my @args = split ( m{/}, LJ::Request->uri );
-            shift @args if @args;
-
-            LJ::Lang::current_language(undef);
-
-            my $response;
-            my $controller_result = eval {
-                local $SIG{'__DIE__'} = \&Carp::confess;
-                $response = $controller->process(\@args) ||
-                    $controller->default_response;
-                1;
-            };
-
-            unless ($controller_result) {
-                my $error  = "$@";
-                my $remote = LJ::get_remote();
-
-                if ( $LJ::IS_DEV_SERVER ||
-                    ( $remote && $remote->show_raw_errors ) )
-                {
-                    $response = LJ::Response::Template->new(
-                        'file'            => 'templates/CodeError.tmpl',
-                        'params'          => { 'error' => $error },
-                        'use_site_scheme' => 1,
-                        'title'           => 'Code Error',
-                    );
-                } else {
-                    die $error;
-                }
-            }
-
-            # processing result of controller
-            my $result = eval { $response->output };
-
-            warn "response error: $@"
-                if $@;
-
-            return LJ::Request::DONE;
-        } );
-
-        return LJ::Request::OK;
-    }
-
     my $bml_handler = sub {
         my $filename = shift;
 
@@ -594,6 +532,68 @@ sub trans {
             LJ::Request->set_handlers(PerlHandler => sub { blocked_bot('forbid_request', @_) } );
             return LJ::Request::OK
         }
+    }
+
+    my $middleware_response;
+    LJ::run_hooks( 'middleware_handler', \$middleware_response );
+    if ($middleware_response) {
+        LJ::Request->handler('perl-script');
+        LJ::Request->set_handlers( 'PerlHandler' => sub {
+            LJ::Lang::current_language(undef);
+            my $result = eval { $middleware_response->output; 1 };
+            warn $@ unless $result;
+            return LJ::Request::DONE;
+        } );
+
+        return LJ::Request::OK;
+    }
+
+    # process controller
+    # if defined
+    if ( my $controller = LJ::Request->notes('controller') ) {
+        LJ::Request->handler('perl-script');
+        LJ::Request->set_handlers(PerlHandler => sub {
+            my @args = split ( m{/}, LJ::Request->uri );
+            shift @args if @args;
+
+            LJ::Lang::current_language(undef);
+
+            my $response;
+            my $controller_result = eval {
+                local $SIG{'__DIE__'} = \&Carp::confess;
+                $response = $controller->process(\@args) ||
+                    $controller->default_response;
+                1;
+            };
+
+            unless ($controller_result) {
+                my $error  = "$@";
+                my $remote = LJ::get_remote();
+
+                if ( $LJ::IS_DEV_SERVER ||
+                    ( $remote && $remote->show_raw_errors ) )
+                {
+                    $response = LJ::Response::Template->new(
+                        'file'            => 'templates/CodeError.tmpl',
+                        'params'          => { 'error' => $error },
+                        'use_site_scheme' => 1,
+                        'title'           => 'Code Error',
+                    );
+                } else {
+                    die $error;
+                }
+            }
+
+            # processing result of controller
+            my $result = eval { $response->output };
+
+            warn "response error: $@"
+                if $@;
+
+            return LJ::Request::DONE;
+        } );
+
+        return LJ::Request::OK;
     }
 
     if(LJ::Request->headers_in->{Accept} eq 'application/xrds+xml'){
