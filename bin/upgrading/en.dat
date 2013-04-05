@@ -9280,6 +9280,21 @@ web.controlstrip.view.calendar-t=T
 web.controlstrip.view.calendar-w|staleness=1
 web.controlstrip.view.calendar-w=W
 
+web.ctxpopup.status.mutualfriends|staleness=1
+web.ctxpopup.status.mutualfriends=[[username]] and you is mutual friends
+
+web.ctxpopup.status.friend|staleness=1
+web.ctxpopup.status.friend=[[username]] in your friendlist
+
+web.ctxpopup.status.subscribedon|staleness=1
+web.ctxpopup.status.subscribedon=You read [[username]]
+
+web.ctxpopup.status.friendof|staleness=1
+web.ctxpopup.status.friendof=You are in [[username]] friendlist
+
+web.ctxpopup.status.subscriber|staleness=1
+web.ctxpopup.status.subscriber=[[username]] read you
+
 web.lj-replace.first_post=Your journal currently has no entries. Start by <a [[update_link]]>Posting an Entry</a>.
 
 web.lj-replace.first_post.subject=Welcome to [[sitename]]

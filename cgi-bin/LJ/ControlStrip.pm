@@ -4,14 +4,14 @@ use strict;
 use LJ::Widget::Calendar;
 use LJ::Widget::JournalPromoStrip;
 
-sub render
-{
+sub render {
     my ($class, $user) = @_;
-
     my $show_strip = 1;
+
     if (LJ::are_hooks("show_control_strip")) {
         $show_strip = LJ::run_hook("show_control_strip", { user => $user });
     }
+
     return "" unless $show_strip;
 
     my $remote = LJ::get_remote();
@@ -45,19 +45,20 @@ sub render
     $data_journal->{'is_' . $data_journal->{type}} = 1;
 
     $data_journal->{view} = LJ::Request->notes('view');
-    
     $data_journal->{view_friends} = $data_journal->{view} eq 'friends';
     $data_journal->{view_friendsfriends} = $data_journal->{view} eq 'friendsfriends';
     $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
     $data_journal->{display} = LJ::ljuser($journal);
     $data_journal->{has_friendspage_per_day} = ($journal->get_cap('friendspage_per_day') ? 1 : 0);
-
     $data_journal->{view_entry_is_valid} = 0;
+
     if ($data_journal->{view_entry}) {
         my $uri = LJ::Request->uri();
+
         if ($uri =~ /(\d+)\.html/) {
             my $entry = LJ::Entry->new($journal, ditemid => $1);
+
             if ($entry and $entry->correct_anum) {
                 $data_journal->{view_entry_is_valid} = 1;
                 $data_journal->{view_entry_is_public} = ($entry->is_public() ? 1 : 0);
@@ -65,8 +66,7 @@ sub render
         }
     }
 
-    if ($remote)
-    {
+    if ($remote) {
         $data_remote->{is_logged_in} = 1;
         $data_remote->{user}         = $remote->{user};
         $data_remote->{display}      = LJ::ljuser($remote);
@@ -79,8 +79,8 @@ sub render
         if ($remote->{defaultpicid}) {
             $data_remote->{userpic} = {
                 src   => "$LJ::USERPIC_ROOT/$remote->{defaultpicid}/$remote->{userid}",
-                alt   => BML::ml('web.controlstrip.userpic.alt'),
-                title => BML::ml('web.controlstrip.userpic.title'),
+                alt   => LJ::Lang::ml('web.controlstrip.userpic.alt'),
+                title => LJ::Lang::ml('web.controlstrip.userpic.title'),
             };
         } else {
             my $tinted_nouserpic_img = "";
@@ -100,12 +100,13 @@ sub render
 
             $data_remote->{userpic} = {
                 src   => $tinted_nouserpic_img || "$LJ::IMGPREFIX/controlstrip/nouserpic.gif?v=6802",
-                alt   => BML::ml('web.controlstrip.nouserpic.alt'),
-                title => BML::ml('web.controlstrip.nouserpic.title'),
+                alt   => LJ::Lang::ml('web.controlstrip.nouserpic.alt'),
+                title => LJ::Lang::ml('web.controlstrip.nouserpic.title'),
             };
         }
         
         my $inbox = $remote->notification_inbox();
+
         $data_remote->{inbox} = {
             unread_count => $inbox->unread_count,
         };
@@ -114,24 +115,23 @@ sub render
             balance => int(LJ::Pay::Wallet->get_user_balance($remote)),
         };
 
-        $data_remote->{style_always_mine} = LJ::Widget::StyleAlwaysMine->render( u => $remote )
-            if ($remote->{userid} != $journal->{userid});
+        if ($remote->{userid} != $journal->{userid}) {
+            $data_remote->{style_always_mine} = LJ::Widget::StyleAlwaysMine->render(u => $remote);
+        }
 
-        $data_remote->{url}->{base} = $remote->journal_base;
-        $data_remote->{url}->{inbox} = "$LJ::SITEROOT/inbox/";
-        $data_remote->{url}->{tokens} = "$LJ::SITEROOT/shop/tokens.bml";
-        $data_remote->{url}->{edit_pics} = "$LJ::SITEROOT/editpics.bml";
-
-        $data_remote->{url}->{custom_groups}       = "$LJ::SITEROOT/friends/editgroups.bml";
+        $data_remote->{url}->{base}                = $remote->journal_base;
+        $data_remote->{url}->{inbox}               = "$LJ::SITEROOT/inbox/";
+        $data_remote->{url}->{tokens}              = "$LJ::SITEROOT/shop/tokens.bml";
+        $data_remote->{url}->{edit_pics}           = "$LJ::SITEROOT/editpics.bml";
         $data_remote->{url}->{manage_tags}         = "$LJ::SITEROOT/manage/tags.bml";
         $data_remote->{url}->{send_message}        = "$LJ::SITEROOT/inbox/compose.bml";
         $data_remote->{url}->{edit_profile}        = $remote->journal_base . "/profile/";
+        $data_remote->{url}->{custom_groups}       = "$LJ::SITEROOT/friends/editgroups.bml";
         $data_remote->{url}->{community_catalogue} = "$LJ::SITEROOT/community/directory.bml";
 
         my $friend = LJ::is_friend($remote, $journal);
         my $friendof = LJ::is_friend($journal, $remote);
 
-        $data_remote->{is_mutualfriend} = ($friend && $friendof);
         $data_remote->{is_friend} = $friend;
         $data_remote->{is_friendof} = $friendof;
         $data_remote->{is_subscriber} = 0;
@@ -143,18 +143,17 @@ sub render
             $data_remote->{is_subscribedon} = $remote->is_subscribedon($journal);
         }
 
-        if ($data_journal->{is_own})
-        {
-            if ($data_journal->{view_friends})
-            {
+        if ($data_journal->{is_own}) {
+            if ($data_journal->{view_friends}) {
+                my %res;
+                my %group;
                 my @filters = (
-                    all             => BML::ml('web.controlstrip.select.friends.all'),
-                    showpeople      => BML::ml('web.controlstrip.select.friends.journals'),
-                    showcommunities => BML::ml('web.controlstrip.select.friends.communities'),
-                    showsyndicated  => BML::ml('web.controlstrip.select.friends.feeds'),
+                    all             => LJ::Lang::ml('web.controlstrip.select.friends.all'),
+                    showpeople      => LJ::Lang::ml('web.controlstrip.select.friends.journals'),
+                    showcommunities => LJ::Lang::ml('web.controlstrip.select.friends.communities'),
+                    showsyndicated  => LJ::Lang::ml('web.controlstrip.select.friends.feeds'),
                 );
 
-                my %res;
                 # FIXME: make this use LJ::Protocol::do_request
                 LJ::do_request(
                     {
@@ -169,20 +168,22 @@ sub render
                     }
                 );
 
-                my %group;
                 foreach my $k (keys %res) {
                     if ($k =~ /^frgrp_(\d+)_name/) {
                         $group{$1}->{'name'} = $res{$k};
-                    }
-                    elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
+                    } elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
                         $group{$1}->{'sortorder'} = $res{$k};
                     }
                 }
 
                 my $selected_group = undef;
+
                 if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
                     my %GET = LJ::Request->args;
-                    $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1)) if $GET{show};
+
+                    if ($GET{show}) {
+                        $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1));
+                    }
                 } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
                     $selected_group = LJ::durl($1);
                     $data_journal->{view_friends_group} = $selected_group;
@@ -190,6 +191,7 @@ sub render
 
                 foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
                     push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
+
                     my $item = {
                         name  => lc($group{$g}->{name}),
                         value => $group{$g}->{name},
@@ -203,20 +205,14 @@ sub render
                     push @{$data_remote->{friend_groups}}, $item;
                 }
             }
-        }
-        elsif ($data_journal->{is_community})
-        {
-            $data_remote->{can_post}    = LJ::check_rel($journal, $remote, 'P');
-            $data_remote->{can_manage}  = LJ::can_manage_other($remote, $journal);
-            $data_remote->{is_watcher}  = $data_remote->{is_friend};
-            $data_remote->{is_memberof} = $data_remote->{is_friendof};
-
+        } elsif ($data_journal->{is_community}) {
             my $pending_members = LJ::get_pending_members($journal->id()) || [];
+
+            $data_remote->{can_post}         = LJ::check_rel($journal, $remote, 'P');
+            $data_remote->{can_manage}       = $remote->can_manage($journal);
             $data_journal->{pending_members} = scalar(@$pending_members);
         }
-    }
-    else
-    {
+    } else {
         $data_remote->{is_logged_in} = 0;
 
         $data_journal->{login_form}->{use_ssl} = $LJ::USE_SSL_LOGIN;
@@ -231,10 +227,12 @@ sub render
     
     $data_control_strip->{logo} = LJ::run_hook('control_strip_logo', $remote, $journal);
 
-    $data_control_strip->{site_messages} = LJ::Widget::SiteMessages->should_render
-                                           ? LJ::Widget::SiteMessages->render
-                                           : '';
-
+    if (LJ::Widget::SiteMessages->should_render) {
+        $data_control_strip->{site_messages} = LJ::Widget::SiteMessages->render;
+    } else {
+        $data_control_strip->{site_messages} = '';
+    }
+    
     if ( $data_journal->{'view_friends'} ) {
         $data_control_strip->{'switch_friendsfeed'} =
             LJ::Widget::FriendsFeedBeta->render( 'placement' => 'legacy' );
@@ -275,7 +273,11 @@ sub render
         control_strip => $data_control_strip,
     };
 
-    $data->{remote}->{status} = get_status($data);
+    $data->{remote}->{status} = get_status($journal, {
+        %{$data->{remote}},
+        journal => $data->{journal},
+        journal_display => $data->{journal}->{display},
+    });
 
     my $tmpl = LJ::HTML::Template->new(
         {
@@ -287,6 +289,7 @@ sub render
     ) or die "Can't open template: $!";
 
     my $mobile_link = '';
+
     if (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
         my $uri = LJ::Request->uri;
         my $hostname = LJ::Request->hostname;
@@ -299,6 +302,7 @@ sub render
     }
     
     my $daycounts = LJ::get_daycounts($journal, $remote);
+
     if (@$daycounts) {
         my @early_date = @{$daycounts->[0]};
         my @last_date  = @{$daycounts->[-1]};
@@ -337,88 +341,117 @@ sub render
     return $tmpl->output;    
 }
 
-sub get_status
-{
-    my ($data) = @_;
+# This metheod use in 'cgi-bin/LJ/API/ChangeRelation.pm' too.
+sub get_status {
+    my ($journal, $args) = @_;
+    my $remote = LJ::get_remote();
+    my $journal_display = $args->{journal_display};
 
-    my $journal_display = $data->{journal}->{display};
+    $journal_display ||= LJ::ljuser($journal);
 
-    if ($data->{journal}->{is_own})
-    {
-        # $data->{remote}->{is_logged_in} == true
-        if ($data->{journal}->{view_friends}) {
-            return BML::ml('web.controlstrip.status.yourfriendspage');
-        } elsif ($data->{journal}->{view_friendsfriends}) {
-            return BML::ml('web.controlstrip.status.yourfriendsfriendspage');
+    unless ($remote) {
+        return LJ::Lang::ml('web.controlstrip.status.other', {user => $journal_display});
+    }
+
+    ### [ Try define options if not defined
+        unless (exists $args->{is_friend}) {
+            $args->{is_friend} = $remote->is_friend($journal);
+        }
+
+        unless (exists $args->{is_friendof}) {
+            $args->{is_friendof} = $remote->is_friendof($journal);
+        }
+
+        unless (exists $args->{is_subscriber}) {
+            $args->{is_subscriber} = $remote->is_subscriber($journal);
+        }
+
+        unless (exists $args->{is_subscribedon}) {
+            $args->{is_subscribedon} = $remote->is_subscribedon($journal);
+        }
+    ### ]
+
+    if (LJ::u_equals($remote, $journal)) {
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return LJ::Lang::ml('web.controlstrip.status.yourjournal');
+        }
+
+        if ($args->{journal}->{view_friends}) {
+            return LJ::Lang::ml('web.controlstrip.status.yourfriendspage');
+        } elsif ($args->{journal}->{view_friendsfriends}) {
+            return LJ::Lang::ml('web.controlstrip.status.yourfriendsfriendspage');
         } else {
-            return BML::ml('web.controlstrip.status.yourjournal');
+            return LJ::Lang::ml('web.controlstrip.status.yourjournal');
         }
-    }
-    elsif ($data->{journal}->{is_personal})
-    {
-        if ($data->{remote}->{is_logged_in})
-        {
-            if ($data->{remote}->{is_mutualfriend}) {
-                return BML::ml('web.controlstrip.status.mutualfriend', {user => $journal_display});
-            } elsif ($data->{remote}->{is_friend}) {
-                return BML::ml('web.controlstrip.status.friend', {user => $journal_display});
-            } elsif ($data->{remote}->{is_friendof}) {
-                return BML::ml('web.controlstrip.status.friendof', {user => $journal_display});
-            } elsif ($data->{remote}->{is_subscribedon}) {
-                return BML::ml('web.controlstrip.status.subscribedon', {user => $journal_display});
-            } elsif ($data->{remote}->{is_subscriber}) {
-                return BML::ml('web.controlstrip.status.subscriber', {user => $journal_display});
-            }
+    } elsif ($journal->is_personal) {
+        # Is mutual friend
+        if ($args->{is_friend} && $args->{is_friendof}) {
+            return LJ::Lang::ml('web.controlstrip.status.mutualfriend', {user => $journal_display});
+        } elsif ($args->{is_friend}) {
+            return LJ::Lang::ml('web.controlstrip.status.friend', {user => $journal_display});
+        } elsif ($args->{is_subscribedon}) {
+            return LJ::Lang::ml('web.controlstrip.status.subscribedon', {user => $journal_display});
+        } elsif ($args->{is_friendof}) {
+            return LJ::Lang::ml('web.controlstrip.status.friendof', {user => $journal_display});
+        } elsif ($args->{is_subscriber}) {
+            return LJ::Lang::ml('web.controlstrip.status.subscriber', {user => $journal_display});
         }
 
-        if ($data->{journal}->{view_friends}) {
-            return BML::ml('web.controlstrip.status.personalfriendspage', {user => $journal_display});
-        } elsif ($data->{journal}->{view_friendsfriends}) {
-            return BML::ml('web.controlstrip.status.personalfriendsfriendspage', {user => $journal_display});
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return LJ::Lang::ml('web.controlstrip.status.personal', {user => $journal_display});
+        }
+
+        if ($args->{journal}->{view_friends}) {
+            return LJ::Lang::ml('web.controlstrip.status.personalfriendspage', {user => $journal_display});
+        } elsif ($args->{journal}->{view_friendsfriends}) {
+            return LJ::Lang::ml('web.controlstrip.status.personalfriendsfriendspage', {user => $journal_display});
         } else {
-            return BML::ml('web.controlstrip.status.personal', {user => $journal_display});
+            return LJ::Lang::ml('web.controlstrip.status.personal', {user => $journal_display});
         }
-    }
-    elsif ($data->{journal}->{is_community})
-    {
-        if ($data->{remote}->{is_logged_in})
-        {
-            if ($data->{remote}->{can_manage})
-            {
-                return BML::ml('web.controlstrip.status.maintainer', {user => $journal_display});
-            }
-            elsif ($data->{remote}->{is_watcher} && $data->{remote}->{is_memberof})
-            {
-                return BML::ml('web.controlstrip.status.memberwatcher', {user => $journal_display});
-            }
-            elsif ($data->{remote}->{is_watcher})
-            {
-                return BML::ml('web.controlstrip.status.watcher', {user => $journal_display});
-            }
-            elsif ($data->{remote}->{is_memberof})
-            {
-                return BML::ml('web.controlstrip.status.member', {user => $journal_display});
+    } elsif ($journal->is_community) {
+        unless (exists $args->{can_manage}) {
+            $args->{can_manage} ||= $remote->can_manage($journal);
+        }
+
+        if ($args->{can_manage}) {
+            return LJ::Lang::ml('web.controlstrip.status.maintainer', {user => $journal_display});
+        } elsif ($args->{is_friend} && $args->{is_friendof}) {
+            return LJ::Lang::ml('web.controlstrip.status.memberwatcher', {user => $journal_display});
+        } elsif ($args->{is_friend}) {
+            return LJ::Lang::ml('web.controlstrip.status.watcher', {user => $journal_display});
+        } elsif ($args->{is_subscribedon}) {
+            return LJ::Lang::ml('web.controlstrip.status.watcher', {user => $journal_display});
+        } elsif ($args->{is_friendof}) {
+            return LJ::Lang::ml('web.controlstrip.status.member', {user => $journal_display});
+        }
+
+        return LJ::Lang::ml('web.controlstrip.status.community', {user => $journal_display});
+    } elsif ($journal->is_syndicated) {
+        return LJ::Lang::ml('web.controlstrip.status.syn', {user => $journal_display});
+    } elsif ($journal->is_news) {
+        return LJ::Lang::ml('web.controlstrip.status.news', {user => $journal_display, sitename => $LJ::SITENAMESHORT});
+    } else {
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            if ($args->{is_friend} && $args->{is_friendof}) {
+                return LJ::Lang::ml('web.controlstrip.status.mutualfriend', {user => $journal_display});
+            } elsif ($args->{is_friend}) {
+                return LJ::Lang::ml('web.controlstrip.status.friend', {user => $journal_display});
+            } elsif ($args->{is_subscribedon}) {
+                return LJ::Lang::ml('web.controlstrip.status.subscribedon', {user => $journal_display});
+            } elsif ($args->{is_friendof}) {
+                return LJ::Lang::ml('web.controlstrip.status.friendof', {user => $journal_display});
+            } elsif ($args->{is_subscriber}) {
+                return LJ::Lang::ml('web.controlstrip.status.subscriber', {user => $journal_display});
             }
         }
 
-        return BML::ml('web.controlstrip.status.community', {user => $journal_display});
-    }
-    elsif ($data->{journal}->{is_syndicated})
-    {
-        return BML::ml('web.controlstrip.status.syn', {user => $journal_display});
-    }                
-    elsif ($data->{journal}->{is_news})
-    {
-        return BML::ml('web.controlstrip.status.news', {user => $journal_display, sitename => $LJ::SITENAMESHORT});
-    }
-    else
-    {
-        return BML::ml('web.controlstrip.status.other', {user => $journal_display});
+        return LJ::Lang::ml('web.controlstrip.status.other', {user => $journal_display});
     }
 }
 
-sub flatten_hashref
-{
+# Utils
+
+sub flatten_hashref {
     my ($hashref, $prefix, $out) = @_;
 
     while (my ($key, $value) = each %$hashref) {
@@ -430,10 +463,8 @@ sub flatten_hashref
     }
 }
 
-sub flatten
-{
+sub flatten {
     my ($hashref) = @_;
-
     my $out = {};
 
     flatten_hashref($hashref, '', $out);
