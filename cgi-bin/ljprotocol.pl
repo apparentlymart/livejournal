@@ -2414,11 +2414,13 @@ sub postevent {
 
     ## if newpost_minsecurity is set, new entries have to be
     ## a minimum security level
-    $security = "private"
-        if $uowner->newpost_minsecurity eq "private";
-    ($security, $qallowmask) = ("usemask", 1)
-        if $uowner->newpost_minsecurity eq "friends"
-        and $security eq "public";
+    unless ($flags->{'entryrepost'}) {
+        $security = "private"
+            if $uowner->newpost_minsecurity eq "private";
+        ($security, $qallowmask) = ("usemask", 1)
+            if $uowner->newpost_minsecurity eq "friends"
+            and $security eq "public";
+    }
 
     my $qsecurity = $dbh->quote($security);
 
