@@ -31,7 +31,7 @@ sub request_resources {
             'bindLink' => 'http://www.facebook.com/sharer.php?u={url}'
         },
         'twitter' => {
-            'bindLink' => 'http://twitter.com/share?url={url}&text={title}'
+            'bindLink' => 'http://twitter.com/share?url={url}&text={title}&hashtags={hashtags}'
         },
         'vkontakte' => {
             'bindLink' => 'http://vkontakte.ru/share.php?url={url}'
@@ -95,6 +95,8 @@ sub render_js {
             $opts->{'title'}       =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
             $opts->{'title'}       = Encode::encode_utf8($opts->{'title'});
         }
+
+        $opts->{'hashtags'} = LJ::eurl(join ',' , grep {s/^#//} $entry->tags) || ""; 
 
     }
 
