@@ -2384,8 +2384,6 @@ sub UserExtended
     return $o;
 }
 
-
-
 sub UserLink
 {
     my ($link, $options) = @_;
@@ -5298,14 +5296,18 @@ sub string__lower
 {
     use utf8;
     my ($ctx, $this) = @_;
-    return lc($this);
+    $this = Encode::decode_utf8($this);
+    $this = lc($this);
+    return Encode::encode_utf8($this);
 }
 
 sub string__upper
 {
     use utf8;
     my ($ctx, $this) = @_;
-    return uc($this);
+    $this = Encode::decode_utf8($this);
+    $this = uc($this);
+    return Encode::encode_utf8($this);
 }
 
 sub string__upperfirst
