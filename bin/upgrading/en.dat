@@ -7186,6 +7186,8 @@ talk.post.create.title=New entry
 talk.post.delete.confirm|staleness=1
 talk.post.delete.confirm=Are you sure you want to delete this entry?
 
+talk.post.deletespam.confirm=Are you sure you want to delete this entry as spam?
+
 talk.post.draft.confirm=Do you want to restore the text from saved draft?
 
 talk.post.draft.autosave|staleness=1
