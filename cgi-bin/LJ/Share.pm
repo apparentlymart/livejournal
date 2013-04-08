@@ -98,6 +98,12 @@ sub render_js {
 
         $opts->{'hashtags'} = LJ::eurl(join ',' , grep {s/^#//} $entry->tags) || ""; 
 
+        if ( $opts->{'hashtags'} ) { 
+            $opts->{'hashtags'}       = Encode::decode_utf8($opts->{'hashtags'});
+            $opts->{'hashtags'}       =~ s/\r|\n|\x85|\x{2028}|\x{2029}//gsm;
+            $opts->{'hashtags'}       = Encode::encode_utf8($opts->{'hashtags'});
+        }
+
     }
 
     my $opts_out = LJ::JSON->to_json($opts);
