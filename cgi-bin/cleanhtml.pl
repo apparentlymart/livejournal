@@ -129,6 +129,7 @@ sub clean {
 
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
+    $$data =~ s/(<lj\-random\s*\/?>)/int(rand(10_000_000))/gie;
 
     # decode escapes to get a valid unicode string
     # we encode it back before return
@@ -847,15 +848,6 @@ sub clean {
                 } else {
                     $newdata .= "<b>[Unknown LJ tag]</b>";
                 }
-            }
-            elsif ($tag eq "lj-random")
-            {
-                my $max = abs($attr->{'max'}) || 10_000_000;
-                my $min = abs($attr->{'min'}) || 0;
-                if ($max < $min) {
-                    ($max, $min) = ($min, $max);
-                }
-                $newdata .= int(rand($max-$min)) + $min;
             }
             elsif ($tag eq "lj-raw")
             {
