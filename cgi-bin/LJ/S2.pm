@@ -2371,6 +2371,21 @@ sub User
     return $o;
 }
 
+sub UserExtended
+{
+    my ($u) = @_;
+    my $o = UserLite($u);
+    $o->{'_type'} = "UserExtended";
+    $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
+    $o->{'timecreate'} = DateTime_parts( $u->timecreate );
+    $o->{'last_entry_time'} = DateTime_parts( $u->last_public_entry_time );
+    $o->{'friends_count'} = LJ::API::Friend->friends_personal_count($u);
+    $o->{'friendof_count'} = LJ::API::Friend->friendof_count($u);
+    return $o;
+}
+
+
+
 sub UserLink
 {
     my ($link, $options) = @_;
@@ -2481,6 +2496,12 @@ sub UserLite {
     my ($ctx,$username) = @_;
     my $u = LJ::load_user($username);
     return LJ::S2::UserLite($u);
+}
+
+sub UserExtended {
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return LJ::S2::UserExtended($u);
 }
 
 sub start_css {

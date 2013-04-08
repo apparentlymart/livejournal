@@ -474,6 +474,16 @@ class User extends UserLite
     var readonly string website_name "'pretty' name of user's website";
 }
 
+class UserExtended extends UserLite
+"A more information-rich userinfo structure"
+{
+    var Image default_pic "Information about default userpic";
+    var readonly DateTime timecreate "Date of creating account";
+    var readonly DateTime last_entry_time "Time of last posted entry";
+    var readonly string friends_count "Count user's personal/identity/shared friends";
+    var readonly string friendof_count "Count friends of user";
+}
+
 ### Other
 
 class Redirector
@@ -1000,6 +1010,9 @@ function builtin PalItem(int index, Color c) : PalItem
 
 function builtin UserLite(string username) : UserLite
 "Constructor for making a UserLite object from a username";
+
+function builtin UserExtended(string username) : UserExtended
+"Constructor for making a UserExtended object from a username";
 
 function builtin palimg_modify(string filename, PalItem[] items) : string
 "Return a URL to the specified filename (relative to the palimg root) with its palette table altered, once for each provided [class[PalItem]].  Restrictions:  only 7 palette entries may be modified, and the PalItem indexes must be 0-15.";
