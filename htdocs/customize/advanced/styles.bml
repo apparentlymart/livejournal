@@ -86,8 +86,6 @@
         'link' => "<a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>$ML{'.nav.yourlayers'}</a>",
     }) . "\n";
 
-    my @purchased = LJ::Pay::Theme->get_purchased ($u);
-
     # edit mode
     if ($id) {
 
@@ -102,12 +100,6 @@
         # use selected style
         if ($POST{'action:usestyle'} && !$noactions) {
             return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
-
-            my $styleinfo= LJ::S2::get_style_layers ($u, $id);
-            my $style = eval { LJ::S2Theme->new ( themeid => $styleinfo->{'theme'} ) };
-
-            return $err->($ML{'.error.stylenotfound'})
-                if ( $style && $style->is_buyable && !grep { $style->s2lid == $_->s2lid } @purchased);
 
             # save to db and update user object
             $u->set_prop({ 'stylesys' => 2,
@@ -298,14 +290,8 @@
         if (%$ustyle) {
             my $journalbase = LJ::journal_base($u);
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
-                my $styleinfo= LJ::S2::get_style_layers ($u, $styleid);
-                my $style = eval { LJ::S2Theme->new ( themeid => $styleinfo->{'theme'} ) };
 
-                if ($style) {
-                    if ($style->is_buyable && !grep { $style->s2lid == $_->s2lid } @purchased) {
-                        next;
-                    }
-                }
+                next if $ustyle->{$styleid} eq '_for_preview';
 
                 $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
                 $body .= $formauth;
