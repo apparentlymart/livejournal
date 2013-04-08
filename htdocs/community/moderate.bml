@@ -16,8 +16,8 @@ body<=
                     stc/widgets/selecttags.css
                     js/widget_ippu/selecttags.js
                     js/community/moderate.js
-                    ));    
- 
+                    ));
+
     my $ret;
     my $remote = LJ::get_remote();
 
@@ -83,23 +83,23 @@ body<=
         # we need to fix up the username based on the userid we stored
         $req->{user} = $poster->user;
         $req->{username} = $poster->user;
-        
+
         # check poster's and moderator's tags manage permissions
         # to define will we add tags within postevent or after
-        my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) || 
+        my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) ||
                               LJ::Tags::can_add_tags($c,$remote);
         my $p_can_control_tags = LJ::Tags::can_control_tags($c,$poster);
         my $p_can_add_tags = LJ::Tags::can_add_tags($c,$poster);
         # update taglist if poster could add them
-        if ($m_can_edit_tags && 
-            ($p_can_add_tags || $p_can_control_tags) && 
-            $POST{'prop_taglist'}) { 
+        if ($m_can_edit_tags &&
+            ($p_can_add_tags || $p_can_control_tags) &&
+            $POST{'prop_taglist'}) {
                 $req->{props}->{taglist} = $POST{'prop_taglist'};
         }
         if ($mode eq 'approve_do') {
             my $method = $req->{itemid} ? 'editevent' : 'postevent';
-            my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'=>1, 
-                                                                                'noauth'=>1, 
+            my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'=>1,
+                                                                                'noauth'=>1,
                                                                                 'use_custom_time'=> 0, });
             if ($res) { # succeeded
                 $success = 1;
@@ -108,7 +108,7 @@ body<=
                 my $err = sub { return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>"; };
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";
                 $ret .= "<br />" .$err->($prot_err). "<br />" unless $res;
-                
+
                 # does the poster want to know? if they have working email and notification on
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
@@ -198,12 +198,12 @@ body<=
             my $dbh = LJ::get_db_writer();
             my $mods = LJ::load_rel_user($dbh, $cid, 'M') || [];
             if (@$mods) {
-                # load up all these mods and figure out 
+                # load up all these mods and figure out
                 # if they want email or not
                 my $modlist = LJ::load_userids(@$mods);
                 my @emails;
                 foreach my $mod (values %$modlist) {
-                    
+
                     next unless $mod->is_visible;
                     next if $mod->email_status ne "A";
                     next unless $mod->prop('opt_modrejectemail');
@@ -222,16 +222,16 @@ body<=
                                             community   => $c->user,
                                             date        => $etime,
                                             subject     => $req->{subject},
-                                            text        => $req->{event},    
+                                            text        => $req->{event},
                                             reason      => $POST{why},
                                             sitename    => $LJ::SITENAME,
                                            }
                                  );
-                    my $html = ($mod->{opt_htmlemail} eq 'N')? 
-                        '' : 
+                    my $html = ($mod->{opt_htmlemail} eq 'N')?
+                        '' :
                         LJ::Lang::get_text(
                             $mod->prop('browselang'),
-                            'moderation_queue.reject.email.body.html', 
+                            'moderation_queue.reject.email.body.html',
                             undef, {
                                     user        => $mod->ljuser_display,
                                     poster      => $poster->ljuser_display,
@@ -239,11 +239,11 @@ body<=
                                     community   => $c->ljuser_display,
                                     date        => $etime,
                                     subject     => $req->{subject},
-                                    text        => LJ::ehtml($req->{event}),    
+                                    text        => LJ::ehtml($req->{event}),
                                     reason      =>  LJ::html_newlines($POST{why}),
                                     sitename    => $LJ::SITENAME,
                                    }
-                        );                
+                        );
 
                     LJ::send_mail({
                         'to'        => $mod->email_raw,
@@ -256,7 +256,7 @@ body<=
                 }
             }
         }
-        
+
         if ($success) {
             $saved_comm = $c->{'user'};
             $saved_modid = 0;
@@ -401,7 +401,7 @@ body<=
                     my $req = Storable::thaw($frozen);
                     $is_adult = ($req->{prop_adult_content} ne '' && $req->{prop_adult_content} ne 'none')
                                     || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
-                                    ? 1 
+                                    ? 1
                                     : 0;
                     $is_adult = 0 if $req->{prop_adult_content} eq 'none';
                     $is_edited = 1 if $req->{itemid};
@@ -481,7 +481,7 @@ body<=
                                              'journalid' => $c->{'userid'},
                                              'posterid' => $posterid,
                                          });
-        
+
         # create iframe from <lj-embed> tag
         LJ::EmbedModule->expand_entry($c, \$event);
 
@@ -562,10 +562,10 @@ body<=
                               LJ::Tags::can_add_tags($c,$remote);
         my $p_can_edit_tags = LJ::Tags::can_control_tags($c,$up) ||
                               LJ::Tags::can_add_tags($c,$up);
-        if ($p_can_edit_tags) {                      
+        if ($p_can_edit_tags) {
             if ($props->{'taglist'}) {
-                $current{'Tags'} = join(", ", 
-                                        sort split(/\s*,\s*/, 
+                $current{'Tags'} = join(", ",
+                                        sort split(/\s*,\s*/,
                                         $props->{'taglist'})
                                        );
             } else {
@@ -593,7 +593,7 @@ body<=
                            raw   => "autocomplete='off'",
                        }
                     );
-                    $ret .= '<a href="#" onclick="return selectModTags(this);">' . 
+                    $ret .= '<a href="javascript:void(0);" class="js-select-tags-widget">' .
                             $BML::ML{'entryform.selecttags'} . '</a>';
                     } else {
                         $ret .= $current{$key};
@@ -603,7 +603,7 @@ body<=
         }
         $ret .= "</table><p>\n";
         $ret .= "</form>";
-        
+
 
         ### security indicator
         my $sec = "";
@@ -617,7 +617,7 @@ body<=
         $ret .= $sec;
         my $is_adult = ($req->{prop_adult_content} ne '' && $req->{prop_adult_content} ne 'none')
                     || ($c->adult_content_calculated ne 'none' && $c->adult_content_calculated ne '')
-                    ? 1 
+                    ? 1
                     : 0;
         $is_adult = 0 if $req->{prop_adult_content} eq 'none';
         if ($subject) {

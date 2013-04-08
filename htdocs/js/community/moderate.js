@@ -1,17 +1,33 @@
-(function($) {
-	var user = LiveJournal.parseGetArgs().authas;
+/*global LJWidgetIPPU_SelectTags */
+;(function ($) {
+    'use strict';
 
-	window.selectModTags = function(node) {
-		var widget = new LJWidgetIPPU_SelectTags({
-			title: node.firstChild.nodeValue,
-			height: 329,
-			width: jQuery(window).width() / 2
-		}, {
-			user: user || jQuery(document.forms.authForm.authas).val()
-		});
+    function initSelectTagsWidget() {
+        var user = LiveJournal.parseGetArgs().authas,
+            _window = $(window),
+            authForm = $('#authForm [name=authas]');
 
-		return false;
-	}
+        $('.js-select-tags-widget').on('click', function (e) {
+            var widget;
 
-})(jQuery);
+            e.preventDefault();
+
+            widget = new LJWidgetIPPU_SelectTags(
+                {
+                    title: $(this).text(),
+                    height: 329,
+                    width: _window.width() / 2
+                },
+                {
+                    user: user || authForm.val()
+                }
+            );
+        });
+
+    }
+
+    $(function () {
+        initSelectTagsWidget();
+    });
+}(jQuery));
 
