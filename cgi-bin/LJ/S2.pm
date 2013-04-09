@@ -3992,6 +3992,9 @@ sub UserLite__ljuser
     return $ljuser;
 }
 
+*User__ljuser = \&UserLite__ljuser;
+*UserExtended__ljuser = \&UserLite__ljuser;
+
 sub UserLite__get_link
 {
     my ($ctx, $this, $key) = @_;
@@ -4040,6 +4043,7 @@ sub UserLite__get_link
     return $null_link;
 }
 *User__get_link = \&UserLite__get_link;
+*UserExtended__get_link = \&UserLite__get_link;
 
 sub EntryLite__get_link
 {
@@ -5265,6 +5269,7 @@ sub UserLite__equals
     return $_[1]->{'_u'}{'userid'} == $_[2]->{'_u'}{'userid'};
 }
 *User__equals = \&UserLite__equals;
+*UserExtended__equals = \&UserLite__equals;
 *Friend__equals = \&UserLite__equals;
 
 sub string__substr
