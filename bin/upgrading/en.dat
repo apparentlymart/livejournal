@@ -4238,6 +4238,10 @@ main.intro.mystat.expand=Show my posts and communities positions
 
 main.intro.mystat.you=[[user_display]] you on [[position]] position on the users top
 
+main.goods.all=All goods
+
+main.goods.title=LiveJournal Goods
+
 main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
 
 main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
