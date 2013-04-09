@@ -584,10 +584,10 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				background-image: url(/img/userinfo.gif?v=17080);
 				}
 			.b-postform-authtype-facebook .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/facebook-16.gif?v=17127);
+				background-image: url(/img/icons/facebook-16.png?v=17127);
 				}
 			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/twitter-16.gif?v=18540);
+				background-image: url(/img/icons/twitter-16.png?v=18540);
 				}
 			.b-postform-authtype-google .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/google-16.png?v=12457);
@@ -599,7 +599,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				background-image: url(/img/icons/mailru-16.gif?v=11910);
 				}
 			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/vkontakte-16.gif?v=10284);
+				background-image: url(/img/icons/vkontakte-16.png?v=10284);
 				}
 		.b-postform-login-services-items {
 			position: absolute;
