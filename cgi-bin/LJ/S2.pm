@@ -2377,8 +2377,8 @@ sub UserExtended
     my $o = UserLite($u);
     $o->{'_type'} = "UserExtended";
     $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
-    $o->{'timecreate'} = DateTime_parts( $u->timecreate );
-    $o->{'last_entry_time'} = DateTime_parts( $u->last_public_entry_time );
+    $o->{'timecreate'} = DateTime_unix( $u->timecreate );
+    $o->{'last_entry_time'} = DateTime_unix( $u->last_public_entry_time );
     $o->{'friends_count'} = LJ::API::Friend->friends_personal_count($u);
     $o->{'friendof_count'} = LJ::API::Friend->friendof_count($u);
     return $o;
