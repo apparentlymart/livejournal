@@ -254,28 +254,37 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				}
 			}
 
-			// add/remove friend link
 			if (data.is_logged_in && !data.is_requester) {
-				buildObject.headLinks.push({
-					selector: 'a[href="{url}"]:first',
-					url: data.url_addfriend,
-					click: function(e)
-					{
-						e.preventDefault();
-						e.stopPropagation();
-						ContextualPopup.changeRelation(data, ctxPopupId, data.is_friend ? 'removeFriend' : 'addFriend', e);
-					},
-					text: (function()
-					{
-						if (data.is_comm) {
-							return data.is_friend ? data.ml_stop_community : data.ml_watch_community;
-						} else if (data.is_syndicated) {
-							return data.is_friend ? data.ml_unsubscribe_feed : data.ml_subscribe_feed;
-						} else {
-							return data.is_friend ? data.ml_remove_friend : data.ml_add_friend;
+
+				// add/remove friend link
+				(function () {
+
+					// do not show 'add friend / watch community' links. Only subscribe link should be
+					if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+						if (!data.is_person && !data.is_identity) {
+							return;
 						}
-					}())
-				});
+					}
+
+					buildObject.headLinks.push({
+						selector: 'a[href="{url}"]:first',
+						url: data.url_addfriend,
+						click: function (e) {
+							e.preventDefault();
+							e.stopPropagation();
+							ContextualPopup.changeRelation(data, ctxPopupId, data.is_friend ? 'removeFriend' : 'addFriend', e);
+						},
+						text: (function() {
+							if (data.is_comm) {
+								return data.is_friend ? data.ml_stop_community : data.ml_watch_community;
+							} else if (data.is_syndicated) {
+								return data.is_friend ? data.ml_unsubscribe_feed : data.ml_subscribe_feed;
+							} else {
+								return data.is_friend ? data.ml_remove_friend : data.ml_add_friend;
+							}
+						}())
+					});
+				}());
 
 				// subscribe/unsubscribe
 				if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
