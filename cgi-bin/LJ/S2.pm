@@ -4189,12 +4189,22 @@ sub _Entry__get_link
         return $null_link
             unless LJ::is_enabled('sharing') && $entry->is_public;
 
-        my $link_text = $ctx->[S2::PROPS]->{'text_share'};
-        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2",
-                                        24, 24 );
+        my $url = $entry->url;
+        my $title = $entry->subject_text;
+        my $hashtags = join ',' , grep {s/^#//} $entry->tags;
 
-        my $link = LJ::S2::Link('#', $link_text, $link_image);
-        $link->{'_raw'} = LJ::Share->render_js( { 'entry' => $entry } );
+        my $link_text = $ctx->[S2::PROPS]->{'text_share'};
+        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '', 
+            'class' => 'js-lj-share',
+            'data-url' => $url,
+            'data-title' => $title,
+            'data-hashtags' => quotemeta($hashtags) || "",
+        );
+        my $link = LJ::S2::Link(
+            $url . '?title=' . LJ::eurl($title) . '&hashtags=' . LJ::eurl($hashtags),
+            $link_text,
+            $link_image
+        );
 
         return $link;
     } elsif ($key eq "share_facebook") {
