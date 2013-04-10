@@ -783,7 +783,10 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
         // redeclare `changeRelation` method to interact with relations manager
         ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {
-            LiveJournal.run_hook('relations.' + action, info.username);
+            LiveJournal.run_hook('relations.change', {
+                action: action,
+                username: info.username
+            });
 
             // hide existed hourglass and add another one
             ContextualPopup.hideHourglass();
@@ -805,34 +808,23 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
         // subscribe to change relation events
         (function () {
-            var actions = [
-                'addFriend',
-                'removeFriend',
-                'subscribe',
-                'unsubscribe',
-                'join',
-                'leave',
-                'setBan',
-                'setUnban',
-                'banEverywhere',
-                'unbanEverywhere'
-            ];
+            LiveJournal.register_hook('relations.changed', function (eventData) {
+                var data = eventData.data,
+                    username = eventData.username;
 
-            actions.forEach(function (action) {
-                LiveJournal.register_hook('relations.' + action + '.done', function (data, username) {
-                    if (data.error) {
-                        ContextualPopup.showNote(data.error.message);
-                        return;
-                    }
+                ContextualPopup.hideHourglass();
 
-                    if ( ContextualPopup.cachedResults[username] ) {
-                        $.extend(ContextualPopup.cachedResults[username], data);
-                    }
+                if (data.error) {
+                    ContextualPopup.showNote(data.error.message);
+                    return;
+                }
 
-                    // if the popup is up, reload it
-                    ContextualPopup.hideHourglass();
-                    ContextualPopup.renderPopup(username);
-                });
+                if ( ContextualPopup.cachedResults[username] ) {
+                    $.extend(ContextualPopup.cachedResults[username], data);
+                }
+
+                // if the popup is up, reload it
+                ContextualPopup.renderPopup(username);
             });
         }());
     }
