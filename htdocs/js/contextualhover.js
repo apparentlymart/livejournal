@@ -19,8 +19,8 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 
 	changeAlias: function (evt, form) {
 		this.doPost({
-				alias: form["Widget[IPPU_AddAlias]_alias"].value + "",
-				foruser: form["Widget[IPPU_AddAlias]_foruser"].value + ""
+			alias: form['Widget[IPPU_AddAlias]_alias'].value + '',
+			foruser: form['Widget[IPPU_AddAlias]_foruser'].value + ''
 		});
 
 		evt.preventDefault();
@@ -48,7 +48,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 
 		var username = data.res.username,
 			alias = data.res.alias;
-		if(ContextualPopup.cachedResults[username]) {
+		if (ContextualPopup.cachedResults[username]) {
 			ContextualPopup.cachedResults[username].alias_title = alias ? 'Edit Note' : 'Add Note';
 			ContextualPopup.cachedResults[username].alias = alias;
 		}
@@ -59,7 +59,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 	},
 
 	onError: function (msg) {
-		LJ_IPPU.showErrorNote("Error: " + msg);
+		LJ_IPPU.showErrorNote('Error: ' + msg);
 	},
 
 	onRefresh: function () {
@@ -82,7 +82,7 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 		jQuery(form).submit(function(e) { widget.changeAlias(e, form); });
 	},
 
-	cancel: function (e) {
+	cancel: function () {
 		this.close();
 	}
 });
@@ -91,18 +91,20 @@ LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
 //this object contains only authToken
 Aliases = {};
 function addAlias(target, ptitle, ljusername, oldalias, callback) {
-	if (! ptitle) { return true; }
+	var widget;
 
-	new LJWidgetIPPU_AddAlias({
+	if ( !ptitle ) { return true; }
+
+	widget = new LJWidgetIPPU_AddAlias({
 		title: ptitle,
 		width: 440,
 		height: 180,
 		authToken: Aliases.authToken,
 		callback: callback
-		}, {
-			alias: target.alias||oldalias,
-			foruser: ljusername
-		});
+	}, {
+		alias: target.alias||oldalias,
+		foruser: ljusername
+	});
 
 	return false;
 }
@@ -221,40 +223,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 				};
 			}
 
-			// relation
-			// var label, username = '<strong>' + data.display_username + ' </strong>';
-			// if (data.is_comm) {
-			// 	if (data.is_friend_of) {
-			// 		label = data.ml_you_member.replace('[[username]]', username);
-			// 	} else if (data.is_friend) {
-			// 		label = data.ml_you_watching.replace('[[username]]', username);
-			// 	} else {
-			// 		label = username;
-			// 	}
-			// } else if (data.is_syndicated) {
-			// 	if (data.is_friend) {
-			// 		label = data.ml_you_subscribed.replace('[[username]]', username);
-			// 	} else {
-			// 		label = username;
-			// 	}
-			// } else {
-			// 	if (data.is_requester) {
-			// 		label = data.ml_this_is_you;
-			// 	} else {
-			// 		label = username;
-
-			// 		if (data.is_friend_of) {
-			// 			if (data.is_friend) {
-			// 				label += data.ml_mutual_friend;
-			// 			} else {
-			// 				label += data.ml_lists_as_friend;
-			// 			}
-			// 		} else if (data.is_friend) {
-			// 			label += data.ml_your_friend;
-			// 		}
-			// 	}
-			// }
-
 			buildObject.title = {
 				title: data.ctxpopup_status
 			};
@@ -340,7 +308,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
 			var linkGroup = [];
 
-			// member of community
+			// community member
 			if (data.is_logged_in && data.is_comm) {
 				linkGroup.push({
 					selector: 'a[href="{url}"]',
@@ -355,8 +323,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 			}
 
 			//filter community
-			if( ( !data.is_comm && Site.current_journal && ( "is_comm" in Site.current_journal ) &&
-						Site.current_journal.is_comm === "1" ) || data.posted_in ) {
+			if( ( !data.is_comm && Site.current_journal && ( 'is_comm' in Site.current_journal ) &&
+						Site.current_journal.is_comm === '1' ) || data.posted_in ) {
 				linkGroup.push({
 					url: ( ( data.posted_in ) ? data.posted_in : Site.current_journal.url_journal ) + '/?poster=' + data.username,
 					text: ( Site.remoteUser === data.username && !data.posted_in ) ?
