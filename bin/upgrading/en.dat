@@ -4240,6 +4240,8 @@ main.intro.mystat.you=[[user_display]] you on [[position]] position on the users
 
 main.goods.all=All goods
 
+main.goods.shuffle=Shuffle Goods
+
 main.goods.title=LiveJournal Goods
 
 main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
