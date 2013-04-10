@@ -526,10 +526,11 @@ sub init {
         LJ::run_hook('spam_in_all_journals', \$spam, $up) unless $spam;
         $state = 'B' if $spam;
     }
-    
+
     my $parent = {
         state     => $parpost->{state},
         talkid    => $partid,
+        posterid  => $parpost->{posterid},
     };
     my $comment = {
         u               => $up,
@@ -785,6 +786,17 @@ sub post_comment {
     ## Counter "new_comment" for monitoring
     LJ::run_hook ("update_counter", {
         counter => "new_comment",
+    });
+
+    ## Counter for widget 'new comments' on home page
+    LJ::run_hook ("modify_comments_counter", {
+        journalu  => $journalu,
+        entryu    => $entryu,
+        jitemid   => $item->{'itemid'},
+        jtalkid   => $jtalkid,
+        commenter => $commenter,
+        parent    => $parent,
+        action    => 'add',
     });
 
     return 1;
