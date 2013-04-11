@@ -649,6 +649,14 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             this.currentElement = ele;
         },
 
+        /**
+         * Hide currently opened popup
+         */
+        hide: function () {
+            popup.hide(true);
+            return this;
+        },
+
         renderPopup: function(ctxPopupId) {
             popup.render(this.cachedResults[ctxPopupId], ctxPopupId);
         },
@@ -687,7 +695,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             });
 
             // so mousing over hourglass doesn't make ctxpopup think mouse is outside
-            ContextualPopup.hourglass.add_class_name('lj_hourglass');
+            ContextualPopup.hourglass.element.addClass('lj_hourglass');
 
             return false;
         },

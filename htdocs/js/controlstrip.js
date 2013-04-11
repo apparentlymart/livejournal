@@ -1,3 +1,4 @@
+/*global ContextualPopup */
 /**
  * @author Valeriy Vasin (valeriy.vasin@sup.com)
  * @description Control strip functionality
@@ -69,6 +70,24 @@
 
         if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
             $('.w-cs-menu-friends-subscr').relations();
+
+            LiveJournal.register_hook('relations.changed', function (event) {
+                var data = event.data,
+                    status = null;
+
+                if (data.controlstrip_status) {
+                    status = $('.js-controlstrip-status');
+
+                    // if you're trying to change status from contextual popup in control strip
+                    if ( ContextualPopup.currentElement === status.find('.ljuser img').get(0) ) {
+                        ContextualPopup.hide();
+                    }
+
+                    status
+                        .html(data.controlstrip_status)
+                        .ljAddContextualPopup();
+                }
+            });
         }
     }
 
