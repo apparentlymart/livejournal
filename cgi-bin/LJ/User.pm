@@ -4519,7 +4519,7 @@ sub set_expunged {
 }
 
 sub set_suspended {
-    my ($u, $who, $reason, $errref) = @_;
+    my ($u, $who, $reason, $errref, $public_reason) = @_;
     die "Not enough parameters for LJ::User::set_suspended call" unless $who and $reason;
 
     my $res = $u->set_statusvis('S');
@@ -4541,6 +4541,11 @@ sub set_suspended {
     #
     LJ::run_hooks("account_cancel", $u);
     LJ::run_hooks("account_suspend", $u);
+
+    if ($public_reason) {
+        LJ::statushistory_add($u, $who, "suspend_reason", $public_reason);
+        $u->set_prop('suspend_reason' => $public_reason);
+    }
 
     if (my $err = LJ::run_hook("cdn_purge_userpics", $u)) {
         $$errref = $err if ref $errref and $err;
