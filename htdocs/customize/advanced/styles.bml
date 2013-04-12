@@ -229,6 +229,13 @@
                 return BML::ml('.error.layerhierarchymismatch', {'layername' => "<i>$layername</i>", 'type' => $type, 'parentname' => "<i>$parentname</i>"})
                     unless $layer->{'b2lid'} == $parentid;
 
+                my @purchased = LJ::S2Theme->load_purchased ($remote);
+                if ($layer->{'is_buyable'} && $type eq 'theme') {
+                    my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($layer->{'s2lid'});
+                    my $is_bought = (grep { $shop_theme && $layer->{'s2lid'} == $shop_theme->s2tid } @purchased) ? 1 : 0;
+                    return BML::ml('.error.layernotpublic', {'layer' => $lid}) if !$is_bought && $layer->{'is_buyable'};
+                }
+                
                 return undef;
             };
 
