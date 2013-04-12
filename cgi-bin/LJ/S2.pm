@@ -4198,7 +4198,7 @@ sub _Entry__get_link
             'class' => 'js-lj-share',
             'data-url' => $url,
             'data-title' => $title,
-            'data-hashtags' => quotemeta($hashtags) || "",
+            'data-hashtags' =>  LJ::eurl($hashtags) || "",
         );
         my $link = LJ::S2::Link(
             $url . '?title=' . LJ::eurl($title) . '&hashtags=' . LJ::eurl($hashtags),

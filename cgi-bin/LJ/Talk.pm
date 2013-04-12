@@ -203,7 +203,7 @@ sub link_bar
             <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s">
                 <i class="b-controls-bg"></i>%s
             </a>
-        ', $title, $entryurl, $entrytitle, quotemeta($entryhashtags), $title;
+        ', $title, $entryurl, $entrytitle,  LJ::eurl($entryhashtags), $title;
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
