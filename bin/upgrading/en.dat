@@ -4250,6 +4250,10 @@ main.goods.shuffle=Shuffle Goods
 
 main.goods.title=LiveJournal Goods
 
+main.promo.empty.calendarpromo=Promote your entry here for 5 000 tokens
+
+main.promo.empty.selfpromo=Promote your entry here for 2 000 tokens
+
 main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
 
 main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
