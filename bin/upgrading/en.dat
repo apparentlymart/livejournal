@@ -1810,6 +1810,10 @@ entryunit.hide=Hide author
 
 entryunit.read=Mark entry as read
 
+entryunit.toggle.collapse=Collapse
+
+entryunit.toggle.expand=Expand
+
 entryunit.updown=This entry has changed its position in the rating
 
 entryunits.more=Show more 25 entries
@@ -1819,10 +1823,6 @@ entryunits.stat.showhidden=Show all hidden entries
 entryunits.stat.settings=Settings
 
 entryunits.stat.your=<a href="[[href]]" class="[[class]]">[[entries_count]] [[?entries_count|entry|entries]]</a> from blocked users was hidden
-
-entryunits.toggle.collapse=Collapse
-
-entryunits.toggle.expand=Expand
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
