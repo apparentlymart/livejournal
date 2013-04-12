@@ -1800,6 +1800,8 @@ entryform.userpics=User Picture Icon:
 entryform.view_thumbnails|staleness=1
 entryform.view_thumbnails=View Thumbnails
 
+entryunit.badge.fridayvideo=Friday Video
+
 entryunit.comments=[[reply_count]] [[?reply_count|comment|comments]]
 
 entryunit.expromo=This entry has been promoted
@@ -1817,6 +1819,10 @@ entryunits.stat.showhidden=Show all hidden entries
 entryunits.stat.settings=Settings
 
 entryunits.stat.your=<a href="[[href]]" class="[[class]]">[[entries_count]] [[?entries_count|entry|entries]]</a> from blocked users was hidden
+
+entryunits.toggle.collapse=Collapse
+
+entryunits.toggle.expand=Expand
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
