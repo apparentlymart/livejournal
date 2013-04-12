@@ -961,6 +961,12 @@ sub maintainer_linkbar {
         ? '<strong>' . LJ::Lang::ml('/community/manage.bml.commlist.massmailing') . '</strong>'
         : "<a href='$LJ::SITEROOT/community/mailing.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.massmailing') . "</a>";
 
+    if (LJ::is_enabled('lj_art') && $comm->prop('ljart_event')) {
+        push @links, $page eq "ljart" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.ljart') . "</strong>" :
+            "<a href='$LJ::SITEROOT/community/ljart.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.ljart') . "</a>",
+    }
+
     my $ret .= "<strong>" . LJ::Lang::ml('/community/manage.bml.managelinks', { user => $comm->ljuser_display }) . "</strong> ";
     $ret .= join(" | ", @links);
 

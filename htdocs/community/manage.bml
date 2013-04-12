@@ -55,7 +55,7 @@ body<=
     while (my ($uid, $membership) = $sth->fetchrow_array) {
         my $cu = $us->{$uid};
         next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
-        $names{$uid} = { user => $cu->{user}, name => $cu->{name}, count => 0 };
+        $names{$uid} = { user => $cu->{user}, name => $cu->{name}, count => 0, lj_art => $cu->prop('ljart_event') };
         if ($mods{$uid} || $admin{$uid}) {
                 $udbr = LJ::get_cluster_reader($cu);
                 my $sql = "SELECT COUNT(*), posterid" .
@@ -135,6 +135,11 @@ body<=
                                                aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/members.bml?authas=$user'>$ML{'.commlist.actmembers2'}</a>$pend"}) . "&nbsp;&nbsp;";
+
+            if ( LJ::is_enabled('lj_art') && $names{$id}->{'lj_art'} ) {
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/community/ljart.bml?authas=$user'>$ML{'.commlist.ljart'}</a>"}) . "&nbsp;&nbsp;";
+            }   
         }
         if ($mods{$id} && !$admin{$id}) {
             my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
@@ -148,6 +153,7 @@ body<=
         } else {
             $ret .= "&nbsp";
         }
+
         $ret .= "</td></tr>";
     }
     $ret .= "</table>";
