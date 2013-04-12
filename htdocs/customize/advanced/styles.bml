@@ -359,10 +359,22 @@
                                        'disabled' => $dis }, @opts), { 'disabled' => $dis, } ];
         };
 
+        my @purchased = LJ::S2Theme->load_purchased ($remote);
+
         # greps, and sorts a list
         my $greplist = sub {
             my $ref = shift;
             return  sort { $ref->{$a}->{'name'} cmp $ref->{$b}->{'name'} || $a <=> $b}
+                    grep {
+                        if ($ref->{$_}->{'is_buyable'} && $type eq 'theme') {
+                            my $shop_theme = LJ::Pay::Theme->load_by_s2lid ($ref->{$_}->{'s2lid'});
+                            my $is_bought = (grep { $shop_theme && $ref->{$_}->{'s2lid'} == $shop_theme->s2tid } @purchased) ? 1 : 0;
+                            my $res = (!$is_bought && $ref->{$_}->{'is_buyable'}) ? 0 : 1;
+                            $res;
+                        } else {
+                            1
+                        }
+                    }
                     grep {
                         my $is_active = LJ::run_hook("layer_is_active", $ref->{$_}->{uniq});
                         $ref->{$_}->{'type'} eq $type &&
@@ -371,7 +383,7 @@
                         /^\d+$/
                     } keys %$ref;
         };
-        
+
         # public layers
         my $name = $type eq 'core' ? 'majorversion' : 'name';
         push @opts, map { $_, $pub->{$_}->{$name} } $greplist->($pub);
