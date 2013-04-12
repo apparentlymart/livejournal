@@ -78,6 +78,7 @@ sub request_resources {
         LJ::need_res( 'js/share.js' );
         LJ::include_raw( 'js' => "LJShare.init($params_out)" );
     } elsif ( $include_type eq 'define' ) {
+        LJ::need_res( 'js/jquery/jquery.lj.share.js' );
         LJ::include_raw( 'js' => "Site.LJShareParams = $params_out;" );
     }
 }

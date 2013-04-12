@@ -184,9 +184,26 @@ sub link_bar
     }
 
     if ( LJ::is_enabled('sharing') && $entry->is_public && !$entry->is_delayed ) {
-        LJ::Share->request_resources;
-        push @linkele, $mlink->( '#', 'share', 'share')
-                     . LJ::Share->render_js( { 'entry' => $entry } );
+        my $title = LJ::Lang::ml('talk.'. 'share');
+        my $entryurl = '';
+        my $entrytitle = '';
+        my $entryhashtags = '';
+
+        if ($entry) {
+            $entryurl = $entry->url;
+            $entrytitle = $entry->subject_text;
+            $entryhashtags = join ',' , grep {s/^#//} $entry->tags;
+        }
+
+        LJ::Share->request_resources(
+            include_type => 'define'
+        );
+
+        push @linkele, sprintf '
+            <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s">
+                <i class="b-controls-bg"></i>%s
+            </a>
+        ', $title, $entryurl, $entrytitle, quotemeta($entryhashtags), $title;
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
