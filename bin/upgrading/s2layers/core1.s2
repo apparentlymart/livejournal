@@ -198,6 +198,7 @@ class Link
 {
     var readonly string url "URL which the link points to";
     var readonly string caption "The caption for the link";
+    var readonly string{} extra "Extra params for link tag";
     var Image icon
     "A suggestion from the server as to which icon to use. layouts/users can override this of course.
     alt text works similarly to [member[Link.caption]].";

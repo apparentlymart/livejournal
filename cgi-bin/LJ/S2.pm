@@ -2241,14 +2241,15 @@ sub Page
 }
 
 sub Link {
-    my ($url, $caption, $icon) = @_;
+    my ($url, $caption, $icon, %extra) = @_;
 
     my $lnk = {
         '_type'   => 'Link',
         'caption' => $caption,
         'url'     => $url,
         'icon'    => $icon,
-        '_raw'     => '',
+        '_raw'    => '',
+        'extra'   => {%extra},
     };
 
     return $lnk;
@@ -4193,14 +4194,16 @@ sub _Entry__get_link
         my $title = $entry->subject_text;
         my $hashtags = join ',' , grep {s/^#//} $entry->tags;
 
-        my $link_text = $ctx->[S2::PROPS]->{'text_share'};
-        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '', 
+        my $link_text  = $ctx->[S2::PROPS]->{'text_share'};
+        my %link_extra = (
             'class' => 'js-lj-share',
             'data-url' => $url,
             'data-title' => $title,
             'data-hashtags' =>  LJ::eurl($hashtags) || "",
         );
-        my $link = LJ::S2::Link('#', $link_text, $link_image);
+
+        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '', %link_extra);
+        my $link = LJ::S2::Link('#', $link_text, $link_image, %link_extra);
 
         return $link;
     } elsif ($key eq "share_facebook") {
