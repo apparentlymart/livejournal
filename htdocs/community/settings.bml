@@ -39,7 +39,7 @@ body<=
         return $print_with_ad->($ret);
     }
 
-    unless ($remote->{'journaltype'} eq 'P') {
+    unless ($remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I') {
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.maintainertype'} p?>";
         return $print_with_ad->($ret);
     }

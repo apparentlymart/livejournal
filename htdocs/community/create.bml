@@ -16,7 +16,7 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" if !$remote;
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notperson'} p?>"
-        unless $remote->is_person;
+        unless $remote->is_person || $remote->is_identity;
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notactive'} p?>"
         unless $remote->is_visible;
     return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.notvalidated2', { aopts => "'href='$LJ::SITEROOT/register.bml'" }) . " p?>"
