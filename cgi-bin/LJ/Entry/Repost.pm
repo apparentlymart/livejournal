@@ -175,8 +175,7 @@ sub __create_post {
                   'u'                  => $u,
                   'entryrepost'        => 1, };
 
-    my $event_text_stub = LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url}) | 
-                          "Entry reposted from $url";
+    my $event_text_stub = LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url});
 
     #
     # Needs to create new entry
