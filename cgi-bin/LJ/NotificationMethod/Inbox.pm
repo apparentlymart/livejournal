@@ -84,6 +84,10 @@ sub notify {
     my $cache_update_for_user     = "update_for_users:" . $u->userid;
     LJ::MemCache::delete($cache_update_for_user);
 
+    # widget "updates for user" on new homepage
+    my $updates_for_user          = "updates_for_user:" . $u->userid;
+    LJ::MemCache::delete($updates_for_user);
+    
     return 1;
 }
 
