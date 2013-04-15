@@ -4200,11 +4200,7 @@ sub _Entry__get_link
             'data-title' => $title,
             'data-hashtags' =>  LJ::eurl($hashtags) || "",
         );
-        my $link = LJ::S2::Link(
-            $url . '?title=' . LJ::eurl($title) . '&hashtags=' . LJ::eurl($hashtags),
-            $link_text,
-            $link_image
-        );
+        my $link = LJ::S2::Link('#', $link_text, $link_image);
 
         return $link;
     } elsif ($key eq "share_facebook") {
