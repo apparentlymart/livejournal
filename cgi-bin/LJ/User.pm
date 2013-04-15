@@ -8916,6 +8916,8 @@ sub remove_friend {
         my $friendee = LJ::load_userid($fid);
 
         LJ::remove_from_friend_list($u, $friendee);
+        __drop_short_lifetime_cache($u, $friendee);
+
         if ($sclient) {
             my @jobs;
 
@@ -8953,6 +8955,56 @@ sub remove_friend {
     return 1;
 }
 *delete_friend_edge = \&LJ::remove_friend;
+
+sub __drop_short_lifetime_cache {
+    my ($u, $friend) = @_;
+
+    return unless $u;
+    return unless $friend;
+
+    my @clean_clist = ('cfriends', 'member', 'mutual_cfriends');
+    my @clean_flist = ('friends',  'mutual_friends', 'pfriends', 'friendof', 'mutual', 'yfriends');
+        
+    my $remote = LJ::get_remote();
+
+    my $sub_drop = sub {
+        my ($userid, $list_name) = @_;
+
+        my $cached = $list_name !~ /mutual/;
+
+        my $uid = 'logged';
+        if (!$cached) {
+            $uid = $remote ? $remote->userid : 'n';
+        }
+
+        LJ::MemCache::delete("u:profile:l:$userid:$uid:$list_name:");
+        LJ::MemCache::delete("u:profile:l:$userid:$uid:$list_name:150");
+
+        LJ::MemCache::delete("u:profile:l:$userid:n:$list_name:");
+        LJ::MemCache::delete("u:profile:l:$userid:n:$list_name:150");
+    };
+
+
+    my $userid   = $u->userid;
+    my $friendid = $friend->userid;
+
+    foreach my $list_name (@clean_flist) {
+        $sub_drop->($userid, $list_name);
+    }
+
+    foreach my $list_name (@clean_clist) {
+        $sub_drop->($userid, $list_name);
+    }
+
+    foreach my $list_name (@clean_flist) {
+        $sub_drop->($friendid, $list_name);
+    }
+
+    foreach my $list_name (@clean_clist) {
+        $sub_drop->($friendid, $list_name);
+    }    
+
+}
 
 # <LJFUNC>
 # name: LJ::get_friends
