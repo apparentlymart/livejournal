@@ -8843,6 +8843,7 @@ sub add_friend {
 
         my $friendee = LJ::load_userid($add_id);
         LJ::add_to_friend_list($friender, $friendee);
+         __drop_short_lifetime_cache($friender, $friendee);
 
         if ($sclient) {
             my @jobs;
