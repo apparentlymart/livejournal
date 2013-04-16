@@ -9343,6 +9343,30 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+web.users.add.radio.asfriend|staleness=1
+web.users.add.radio.asfriend=Add as friend
+
+web.users.add.radio.asfriend.note|staleness=1
+web.users.add.radio.asfriend.note=<b>note</b>: you can read his entries on you feed, and he can read you friends-only entries
+
+web.users.add.radio.assubscr|staleness=1
+web.users.add.radio.assubscr=Subscribe to him
+
+web.users.add.radio.assubscr.note|staleness=1
+web.users.add.radio.assubscr.note=<b>note</b>: you can read his entrires on you feed
+
+web.users.add.title.subscronly|staleness=1
+web.users.add.title.subscronly=Subscribe to [[user]]
+
+web.users.add.title.friendandsubscr|staleness=1
+web.users.add.title.friendandsubscr=Add [[user]] as
+
+web.users.add.windowtitle.subscronly|staleness=1
+web.users.add.windowtitle.subscronly=Subscribe to [[user]]
+
+web.users.add.windowtitle.friendandsubscr|staleness=1
+web.users.add.windowtitle.friendandsubscr=Add [[user]] as
+
 we_like_this_title|staleness=1
 we_like_this_title=View people who like it
 
