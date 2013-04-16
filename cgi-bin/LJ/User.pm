@@ -4004,30 +4004,14 @@ sub can_use_sms {
 sub can_use_ljphoto {
     my $u = shift;
 
-    return 0 if $LJ::DISABLED{'new_ljphoto'};
-
-=head
-    ## Open access to a new photohosting for all users
-    ## LJSUP-11893
-    foreach my $comm_name (@LJ::LJPHOTO_ALLOW_FROM_COMMUNITIES) {
-        my $comm = LJ::load_user ($comm_name);
-        next unless $comm && $comm->is_visible;
-        return 1 if $u->can_manage ($comm) or $comm->is_friend($u); 
-    }
-=cut
-
-    return $u->is_personal && $u->prop('fotki_migration_status') ? 1 : 0;
+    return $u->is_personal ? 1 : 0;
 }
 
 sub can_upload_photo {
     my $u = shift;
 
     return 0 unless $u->can_use_ljphoto();
-
-    ## Basic user has no access to ljphoto
-    return 0 unless $u->get_cap('disk_quota');
-
-    return 1;
+    return $u->get_cap('disk_quota') ? 1 : 0;
 }
 
 sub ajax_auth_token {

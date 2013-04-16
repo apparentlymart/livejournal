@@ -810,10 +810,7 @@ sub render_htmltools_block {
     my $insert_image = '';
 
     if ($remote) {
-        my $function_name = 'handleInsertImage';
-        if ( LJ::Pics::Migration->user_enabled_new_photohosting($remote) ) {
-            $function_name = 'handleInsertImageBeta';
-        }
+        my $function_name = 'handleInsertImageBeta';
 
         $insert_image = qq{
             <li class='image'>
@@ -1774,7 +1771,7 @@ sub render_ljphoto_block {
             LJ::Auth->sessionless_auth_token( '/' . $remote->username );
 
         $ljphoto_upload_enabled = $remote->can_upload_photo();
-        $ljphoto_enabled = 1 if $remote && !LJ::Pics::Migration->user_under_maintenance ($remote);
+        $ljphoto_enabled = 1;
 
         $photouploader_params = {
             'action'          => 'add_new_post',

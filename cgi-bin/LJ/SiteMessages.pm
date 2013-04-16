@@ -136,7 +136,7 @@ use constant AccountMask => {
                         group       => 5,
                         validate    => sub {
                                             my ($u) = @_;
-                                            return $u && !(LJ::Pics::Migration->user_enabled_new_photohosting($u));
+                                            return $u ? 1 : 0;
                                        }
                     },
 

@@ -847,13 +847,6 @@ sub trans {
                 return LJ::Request::NOT_FOUND;
             }
 
-            if ($LJ::DISABLED{'new_ljphoto'}) {
-                LJ::Request->pnotes ('error' => 'baduser');
-                LJ::Request->pnotes ('remote' => LJ::get_remote());
-                return LJ::Request::NOT_FOUND;
-            }
-
-
             my %post_params = LJ::Request->post_params;
             ## If no remote we can try authtorize by auth_token
             if (LJ::did_post() && !LJ::Auth->check_sessionless_auth_token (
@@ -868,13 +861,6 @@ sub trans {
             }
 
             $remote = LJ::get_remote();
-=head
-            unless ($remote && ($remote->can_use_ljphoto() || LJ::Request->uri =~ m#^/pics/new_photo_service#)) {
-                LJ::Request->pnotes ('error' => 'ljphoto_members');
-                LJ::Request->pnotes ('remote' => LJ::get_remote());
-                return LJ::Request::FORBIDDEN;
-            }
-=cut
 
             unless ($u->is_person) {
                 LJ::Request->pnotes ('error' => 'e404');
