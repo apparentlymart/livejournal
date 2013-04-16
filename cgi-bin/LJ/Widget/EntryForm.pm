@@ -1783,7 +1783,7 @@ sub render_ljphoto_block {
             'guid'            => $auth_token,
         };
 
-        $migration_status = $remote ? ($remote->prop ('fotki_migration_status') || 0) : 0;
+        $migration_status = LJ::Pics::Migration::MIGRATION_STATUS_DONE;
     } else {
         my $user_selected_image_size = $LJ::PICS_DEFAULT_IMAGE_SIZE;
         if ($remote) {
