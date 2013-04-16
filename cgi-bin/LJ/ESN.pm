@@ -41,8 +41,8 @@ sub jobs_of_unique_matching_subs {
     $debug_args ||= {};
     my @subjobs;
 
+    my $params = $evt->raw_params;
     if ($ENV{DEBUG}) {
-        my $params = $evt->raw_params;
         warn "jobs of unique subs (@$subs) matching event (@$params)\n";
     }
 
@@ -57,7 +57,10 @@ sub jobs_of_unique_matching_subs {
     }
     
     foreach my $s (@subs_filtered) {
-        next if $has_done{$s->unique}++;
+        my $s_uid = $s->userid + 0;
+
+        # We are skipping uniqueness check for emails to non-registered users
+        next if $s_uid && $has_done{$s->unique}++;
 
         my $params_sub   = $evt->raw_params;
         $params_sub->[0] = $s->etypeid if $s->etypeid;
@@ -66,9 +69,9 @@ sub jobs_of_unique_matching_subs {
             funcname => 'LJ::Worker::ProcessSub',
             priority => $evt->priority,
             arg      => {
-                'userid'    => $s->userid + 0,
+                'userid'    => $s_uid,
                 'subdump'   => $s->dump,
-                'e_params'  => $params_sub,
+                'e_params'  => $s_uid ? $params_sub : $params,
                 %$debug_args,
             },
         );
@@ -544,7 +547,8 @@ sub work {
     return $job->completed unless $subsc;
 
     # if the user deleted their account (or otherwise isn't visible), bail
-    return $job->completed unless $u->is_visible || $evt->is_significant;
+    # but email unauthorised recipients
+    return $job->completed if $u && !($u->is_visible || $evt->is_significant);
 
     my %opts;
     if ($LJ::DEBUG{esn_email_headers}) {

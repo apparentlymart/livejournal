@@ -92,7 +92,13 @@ sub render_body {
         push @classes, "disabled" if $interface->{'disabled'};
         my $field_num = $self->{'field_num'}++;
 
-        $ret .= '<tr class="'.join(' ', @classes).'">';
+        if ($group->event->is_support_class) {
+            my $group_id = $group->etypeid ."-". $group->arg1 ."-". $group->arg2;
+            $ret .= '<tr id="' . $group_id . '" class="'.join(' ', @classes).'">';
+        }
+        else {
+            $ret .= '<tr class="'.join(' ', @classes).'">';
+        }
 
         if ( exists $group->{'separator'} && $group->{'separator'} ) {
             $ret .= '<td class="separator" colspan="' . (int(@ntypes) + 1) . '"><hr/></td>';
@@ -100,7 +106,7 @@ sub render_body {
         else {
             my $event_html = $group->event_as_html($field_num, (exists $group->{'check_rel'} && $group->{'check_rel'} ? 1 : 0));
 
-            if ($self->{'allow_delete'} && $group->is_tracking) {
+            if ($self->{'allow_delete'} && $group->is_tracking && !$opts->{is_select}) {
                 my $link;
                 my $frozen = $group->freeze;
 

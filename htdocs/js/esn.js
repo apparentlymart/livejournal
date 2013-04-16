@@ -349,19 +349,25 @@ var ESN = {};
 
     jQuery(function($)
     {
-    	ESN.initCheckAllBtns();
-    	ESN.initTrackBtns();
-
-    	$('#settings_form').delegate('a.delete-group', 'click', function(e)
-    	{
-    		var group = this.href.match('&delete_group=(.*?)&')[1];
-    		$.post(location.href, {
-    			delete_group: group
-    		});
-
-    		$(this).parents('tr').eq(0).remove();
-
-    		e.preventDefault();
-    	});
+        ESN.initCheckAllBtns();
+        ESN.initTrackBtns();
+    
+        $('#settings_form').on('click', 'a.delete-group', function(e) {
+        
+            var match = this.search.match(/delete_group=([-\d]+)/),
+                group = match ? match[1] : null;
+            
+            e.preventDefault();
+            
+            if (!group) {
+                return;
+            }
+            
+            $.post(location.href, {
+                delete_group: group
+            });
+            
+            $(this).closest('tr').remove();
+        });
     });
 }(DOM.getElement, ESN));

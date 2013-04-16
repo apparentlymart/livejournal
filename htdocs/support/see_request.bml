@@ -170,6 +170,36 @@ head<=
 
 // -->
 </script>
+<style type="text/css">
+    .b-controls-track,
+    .b-controls-track_active,
+    .b-controls-track_inactive {
+        display: inline !important;
+        }
+    .b-controls-bg {
+		position: absolute;
+		top: -3px;
+		left: 0;
+
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		padding: 0;
+		font: 0/0 serif;
+		background-image: url(<?_code return $LJ::IMGPREFIX _code?>/btn_actions.png);
+		background-repeat: no-repeat;
+		cursor: pointer;
+		}
+    .b-controls-track .b-controls-bg {
+		background-position: 0 -24px;
+		}
+    .b-controls-track_inactive .b-controls-bg {
+		background-position: -24px -24px;
+		}
+    .b-controls-track_active .b-controls-bg {
+		background-position: -48px -24px;
+		}
+</style>
 <=head
 bodyopts=>onLoad="check_replytype();updateFaqLink();"
 body<=
@@ -186,6 +216,7 @@ body<=
 
     my $spid = $FORM{'id'}+0;
     my $sp = LJ::Support::load_request($spid);
+    my $spcat = $sp->{_cat};
     my $props = LJ::Support::load_props($spid);
     my $cats = LJ::Support::load_cats();
     my $remote = LJ::get_remote();
@@ -201,7 +232,7 @@ body<=
         }
         my $spcatand = '';
         if ($sp && ($find eq 'cnext' || $find eq 'cprev')) {
-            my $spcatid = $sp->{_cat}->{'spcatid'} + 0;
+            my $spcatid = $spcat->{'spcatid'} + 0;
             $spcatand = "AND spcatid=$spcatid";
         } else {
             my @filter_cats = LJ::Support::filter_cats($remote, $cats);
@@ -218,7 +249,7 @@ body<=
         if ($foundspid) {
             return BML::redirect("see_request.bml?id=$foundspid");
         } else {
-            my $goback = ''; 
+            my $goback = '';
             $goback = BML::ml('.goback.text', {request_link=>"href='see_request.bml?id=$spid'", spid=>$spid}) if $sp;
             my $what = $find eq 'next' || $find eq 'cnext' ? $ML{'.next'} : $ML{'.previous'};
             my $cat = '';
@@ -287,8 +318,8 @@ body<=
     }
 
     # load category this request is in
-    my $problemarea = $sp->{_cat}->{'catname'};
-    my $catkey = $sp->{_cat}->{'catkey'};
+    my $problemarea = $spcat->{'catname'};
+    my $catkey = $spcat->{'catkey'};
 
     unless (LJ::Support::can_read($sp, $remote, $auth)) {
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.nothaveprivilege'} p?>";
@@ -297,11 +328,13 @@ body<=
     # helper variables for commonly called methods
     my $can_close = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
     my $can_reopen = LJ::Support::can_reopen($sp, $remote, $auth) ? 1 : 0;
-    my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
-    my $stock_mode = LJ::Support::can_see_stocks($sp, $remote) ? 1 : 0;
+    my $helper_mode = LJ::Support::can_help($spcat, $remote) ? 1 : 0;
+    my $stock_mode = LJ::Support::can_see_stocks($spcat, $remote) ? 1 : 0;
     my $is_poster = LJ::Support::is_poster($sp, $remote, $auth) ? 1 : 0;
 
     # fix up the subject if needed
+    # this logic have been copied into bin/worker/incoming-email so, here
+    # it is needed only for backward compatibility with old emailed requests
     eval {
         if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
             my @subj_data;
@@ -323,7 +356,7 @@ body<=
     my $ret = "";
     $ret .= "<table>\n";
     $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.from'}</b></td><td>";
-    
+
     if ($u->{'defaultpicid'} && !$u->is_suspended) {
         my %pic;
         my $picid = $u->{'defaultpicid'};
@@ -333,7 +366,7 @@ body<=
             "height='$pic{$picid}->{'height'}' align='absmiddle' hspace='3' border='0' alt='$u->{'user'}' />";
         $ret .= "</a>";
     }
-    
+
     # show requester name + email
     {
         my $visemail = $email;
@@ -351,7 +384,7 @@ body<=
 
         my %show_history = (
                             user  => $has_sh,
-                            email => ($has_fu || ($has_sh && !$sp->{_cat}->{public_read})),
+                            email => ($has_fu || ($has_sh && !$spcat->{public_read})),
                             );
 
         if ($show_history{user} || $show_history{email}) {
@@ -373,7 +406,7 @@ body<=
     # uniq
     if (LJ::check_priv($remote, 'sysban', 'uniq') ||
         LJ::check_priv($remote, "canview", "userlog") ||
-        LJ::check_priv($remote, 'canview', 'uniq')) { 
+        LJ::check_priv($remote, 'canview', 'uniq')) {
           my $uniq = $props->{'uniq'} || "<i>$ML{'.none'}</i>";
           $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td><a href='$LJ::SITEROOT/admin/uniq.bml?what=$uniq'>$uniq</a></td></tr>\n";
     }
@@ -384,7 +417,7 @@ body<=
     $ret .= LJ::name_caps($u->{'caps'}) || "<i>$ML{'.unknown'}</i>";
     $ret .= "</td></tr>\n";
 
-    if ($u->{'userid'}) {   
+    if ($u->{'userid'}) {
         my $username = $u->username;
 
         $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
@@ -536,11 +569,11 @@ body<=
     }
 
     ## Has JS?
-    my $has_js =    ($props->{'has_js'} && $props->{'has_js'} eq 'Y') ? 'yes' : 
+    my $has_js =    ($props->{'has_js'} && $props->{'has_js'} eq 'Y') ? 'yes' :
                     ($props->{'has_js'} && $props->{'has_js'} eq 'N') ? 'no' : '(unknown)';
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.has_js'}:</b></td>";
     $ret .= "<td>$has_js</td></tr>";
-    
+
     # Is problem occurred on Prod or Beta?
     my $is_beta = $props->{'is_beta'};
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.is_beta'}:</b></td>";
@@ -561,8 +594,8 @@ body<=
     }
 
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.supportcategory'}:</b></td><td>";
-    if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
-        $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$sp->{_cat}->{'catkey'}'>$problemarea</a>";
+    if (LJ::Support::can_read_cat($spcat, $remote)) {
+        $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$spcat->{'catkey'}'>$problemarea</a>";
         $ret .= " [<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>$ML{'.previous'}</a>|";
         $ret .= "<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>$ML{'.next'}</a>]";
     } else {
@@ -615,7 +648,7 @@ body<=
         $state .= " (<b>$winner->{'points'}</b> point$s to ";
         $state .= LJ::ljuser($wuser, { 'full' => 1 }) . ")";
     }
-    $ret .= "<tr><td align='right'><b>$ML{'.status'}:</b></td><td>$state";
+    $ret .= "<tr><td style='height: 24px;' align='right'><b>$ML{'.status'}:</b></td><td>$state";
     if ($can_close || $can_reopen) {
         if ($sp->{'state'} eq "open" && $can_close) {
             $ret .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>$ML{'.close.without.credit'}</b></a>";
@@ -630,10 +663,48 @@ body<=
             }
         }
     }
+    # add "Track(ing) button
+    if ($remote) {
+        my $etypeid = LJ::Event->event_to_etypeid("SupportResponse");
+        my $sub_id = $etypeid ."-". $spid ."-7";
+        if (my $subs = $remote->has_subscription(
+                                        etypeid => $etypeid,
+                                        arg1    => $spid,
+                                        arg2    => 7,
+                                    )) {
+                # sub is inactive
+                if  ($subs < 2) {
+                    my $tracking_btn_title = LJ::Lang::ml('.img.track_inactive');
+                    $ret .=  '&nbsp;&nbsp;<a href="' . $LJ::SITEROOT .
+                            '/support/changenotify.bml#' . $sub_id .
+                            '" rel="nofollow" title="' . $tracking_btn_title .
+                            '" class="b-controls b-controls-track_inactive">' .
+                            '<i class="b-controls-bg"></i></a>';
+                }
+                # sub is active
+                else {
+                    my $tracking_btn_title = LJ::Lang::ml('.img.track_active');
+                    $ret .=  '&nbsp;&nbsp;<a href="' . $LJ::SITEROOT .
+                            '/support/changenotify.bml#' . $sub_id .
+                            '" rel="nofollow" title="' . $tracking_btn_title .
+                            '" class="b-controls b-controls-track_active">' .
+                            '<i class="b-controls-bg"></i></a>';
+                }
+        }
+        elsif (LJ::Support::can_read_internal($spcat, $remote)) {
+                my $track_btn_title = LJ::Lang::ml('img.track');
+                $ret .=  '&nbsp;&nbsp;<a href="' . $LJ::SITEROOT .
+                        '/support/changenotify.bml?spid=' . $spid .  '#' . $sub_id .
+                        '" rel="nofollow" title="' . $track_btn_title .
+                        '" class="b-controls b-controls-track">' .
+                        '<i class="b-controls-bg"></i></a>';
+        }
+    }
+
     $ret .= "</td></tr>\n";
-    
+
     my $tags_string;
-    
+
     if (
         LJ::check_priv($remote, 'supportviewinternal') ||
         LJ::check_priv($remote, 'supporthelp')
@@ -655,7 +726,7 @@ body<=
             $ret .= '</tr>';
         }
     }
-    
+
     $ret .= "<tr><td align='right'><b>$ML{'.summary'}:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
     $ret .= "</table>\n";
 
@@ -671,7 +742,7 @@ body<=
 
     # put in a "this is private!" box if this is a private request and the user viewing
     # this page is the person who opened the request
-    if (!$sp->{_cat}->{public_read} && $is_poster) {
+    if (!$spcat->{public_read} && $is_poster) {
         $ret .= "<div style='margin-top: 15px; margin-bottom: 15px; padding: 5px; " .
                 "text-align: center; background-color: #ffff00; border: solid 2px red;'>" .
                 $ML{'.private.request'}."</div>";
@@ -689,9 +760,9 @@ body<=
             $most_recent_tier = $le->{tier};
         }
 
-        next if ($le->{'type'} eq "internal" && ! (LJ::Support::can_read_internal($sp, $remote) ||
+        next if ($le->{'type'} eq "internal" && ! (LJ::Support::can_read_internal($spcat, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
-        next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($sp, $remote) ||
+        next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($spcat, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
 
         my $up = LJ::load_userid($le->{'userid'});
@@ -832,7 +903,7 @@ body<=
     # form
     $ret .= "<table border='0'>\n";
     $ret .= "<tr valign='middle'><td align='right'>$ML{'.from'}</td><td>";
-    
+
     if ($remote && $remote->{'userid'}) {
         $ret .= "<?ljuser $remote->{'user'} ljuser?>";
     } else {
@@ -906,7 +977,7 @@ body<=
     }
 
     # helpers can do actions:
-    if (LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster)
+    if (LJ::Support::can_perform_actions($spcat, $remote) && ! $is_poster)
     {
         $ret .= "<tr><td align='right'></td><td>\n";
 
@@ -940,7 +1011,7 @@ body<=
     my $lang_ret;
     my $tier_ret;
 
-    if (LJ::is_enabled("support_request_language") && LJ::Support::can_read_internal($sp, $remote) && ! $is_poster) {
+    if (LJ::is_enabled("support_request_language") && LJ::Support::can_read_internal($spcat, $remote) && ! $is_poster) {
         # language
         my %langs;
         my @lang_codes;
@@ -962,7 +1033,7 @@ body<=
         $lang_ret .= "</td>";
     }
 
-    if (LJ::is_enabled("support_response_tier") && LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster && $helper_mode) {
+    if (LJ::is_enabled("support_response_tier") && LJ::Support::can_perform_actions($spcat, $remote) && ! $is_poster && $helper_mode) {
         my @valid_tiers = (
             tier1 => $ML{'.tier.1'},
             tier2 => $ML{'.tier.2'},
@@ -985,7 +1056,7 @@ body<=
         $ret .= "</td></tr>\n";
     }
 
-    if (LJ::Support::can_perform_actions($sp, $remote) && ! $is_poster) {
+    if (LJ::Support::can_perform_actions($spcat, $remote) && ! $is_poster) {
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             $ret .= "<tr><td align='right'>$ML{'.put.in.queue'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch',
@@ -999,7 +1070,7 @@ body<=
             $ret .= "<?de $ML{'.use.this.to.change.awaiting'} de?>\n";
             $ret .= "</td></tr>\n";
         }
-        if (LJ::Support::can_change_summary($sp, $remote)) {
+        if (LJ::Support::can_change_summary($spcat, $remote)) {
             $ret .= "<tr><td align='right'>$ML{'.change.summary'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum', id => 'changesum', 'onClick' => 'doSummaryClick();' });
             $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'}, 'onchange' => 'doSummaryChanged();', 'onkeyup' => 'doSummaryChanged();' });
@@ -1009,8 +1080,8 @@ body<=
             $ret .= "</td></tr>\n";
         }
     }
-    
-    if (LJ::Support::can_read_internal($sp, $remote) && !$is_poster) {
+
+    if (LJ::Support::can_read_internal($spcat, $remote) && !$is_poster) {
         $ret .= '<tr>';
         $ret .= '<td align="right">'.$ML{'.change.tags'}.'</td>';
         $ret .= '<td>';
@@ -1032,7 +1103,7 @@ body<=
         $ret .= '</td>';
         $ret .= '</tr>';
         $ret .= '<tr><td></td><td><p><em>'.$ML{'.tags.only.sh.can.add'}.
-            '</em></p></td></tr>' unless LJ::Support::can_help($sp, $remote);
+            '</em></p></td></tr>' unless LJ::Support::can_help($spcat, $remote);
     }
 
     # Prefill an e-mail validation nag, if needed.
@@ -1047,7 +1118,7 @@ body<=
     # add in canned answers if there are any for this category and the user can use them
     if ($stock_mode && ! $is_poster) {
         # if one category's stock answers exactly matches another's
-        my $stock_spcatid = $LJ::SUPPORT_STOCKS_OVERRIDE{$sp->{_cat}->{catkey}} || $sp->{_cat}->{spcatid};
+        my $stock_spcatid = $LJ::SUPPORT_STOCKS_OVERRIDE{$spcat->{catkey}} || $spcat->{spcatid};
         my $rows = $dbr->selectall_arrayref('SELECT subject, body FROM support_answers WHERE spcatid = ? ORDER BY subject',
                                             undef, $stock_spcatid);
 
@@ -1100,14 +1171,14 @@ _code?>
     use strict;
     use vars qw(%FORM);
     return '' if $FORM{'find'};
-    
+
     my $spid = $FORM{'id'}+0;
     my $ret;
-    
+
     $ret .= BML::ml('.see.preview', {preview_link=>"href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=prev'"});
     $ret .= BML::ml('.see.next', {next_link=>"href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=next'"});
-    
-    return $ret; 
+
+    return $ret;
 }
 _code?>
 <br>

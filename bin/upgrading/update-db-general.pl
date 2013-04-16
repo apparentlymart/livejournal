@@ -2552,6 +2552,20 @@ CREATE TABLE `support_answers` (
 )
 EOC
 
+register_tablecreate('support_answers_backup', <<'EOC');
+CREATE TABLE `support_answers_backup` (
+  `ansid` int(10) unsigned NOT NULL,
+  `spcatid` int(10) unsigned NOT NULL,
+  `modtime` int(10) unsigned NOT NULL,
+  `backuptime` int(10) unsigned NOT NULL,
+  `moduserid` int(10) unsigned NOT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `body` text,
+  PRIMARY KEY (`ansid`,`modtime`),
+  KEY `backuptime` (`backuptime`)
+)
+EOC
+
 register_tablecreate('support_youreplied', <<'EOC');
 CREATE TABLE `support_youreplied` (
   `userid` int(10) unsigned NOT NULL,
@@ -4558,6 +4572,20 @@ register_alter(sub {
         do_alter( "delayedlog2",
                   "ALTER TABLE delayedlog2 " .
                   "ADD lastposttry int(10) unsigned DEFAULT NULL" );
+    }
+
+});
+
+register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("supportpoints", "timeclosed")) {
+        do_alter( "supportpoints",
+                  "ALTER TABLE supportpoints" .
+                  "ADD timeclosed int(11) NOT NULL DEFAULT 0,".
+                  "ADD INDEX (timeclosed)");
     }
 
 });

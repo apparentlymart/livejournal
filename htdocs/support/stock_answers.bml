@@ -35,7 +35,7 @@ body<=
     my %canview; # spcatid => 0/1
     foreach my $cat (values %$cats) {
         $canview{$cat->{spcatid}} = 1
-            if LJ::Support::support_check_priv({ _cat => $cat }, $remote, 'supportviewstocks');
+            if LJ::Support::support_check_priv($cat, $remote, 'supportviewstocks');
     }
     return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.to.view.answers'} p?>"
         unless %canview;
@@ -55,10 +55,39 @@ body<=
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.unable.get.database.handle'} p?>"
             unless $dbh;
 
+        my $bkp = $dbh->do(qq {
+                                INSERT INTO support_answers_backup (
+                                    ansid, spcatid, modtime,
+                                    backuptime, moduserid, subject,
+                                    body
+                                )
+                                SELECT
+                                    ansid, spcatid, lastmodtime,
+                                    UNIX_TIMESTAMP(), lastmoduserid, subject,
+                                    body
+                                FROM
+                                    support_answers
+                                WHERE
+                                    ansid = ?
+                              },
+                           undef,
+                           $ansid
+                  );
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.error'}: " . $dbh->errstr . " p?>" if $dbh->err;
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.answer'} p?>" unless $bkp;
+
+
+
         my $ct = $dbh->do("DELETE FROM support_answers WHERE ansid = ? AND spcatid = ?",
                           undef, $ansid, $spcatid);
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.error'}: " . $dbh->errstr . " p?>" if $dbh->err;
-        return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.answer'} p?>" unless $ct;
+
+        if ($ct) {
+            LJ::Event::SupportStock->new($remote, $ansid, 'delete')->fire;
+        }
+        else {
+            return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.answer'} p?>" unless $ct;
+        }
         return BML::redirect("$self?spcatid=$spcatid&deleted=1");
     }
 
@@ -88,14 +117,39 @@ body<=
                      undef, $newid, $spcatid, $subj, $body, $remote->{userid});
             return "<?h1 $ML{'.error'} h1?><?p $ML{'.error'}: " . $dbh->errstr . " p?>" if $dbh->err;
 
+            LJ::Event::SupportStock->new($remote, $newid, 'new')->fire;
+
             return BML::redirect("$self?user=$remote->{user}&spcatid=$spcatid&ansid=$newid&added=1");
         } else {
             return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.answer.id'} p?>" unless $ansid;
+
+            my $bkp = $dbh->do(qq {
+                                   INSERT INTO support_answers_backup (
+                                       ansid, spcatid, modtime,
+                                       backuptime, moduserid, subject,
+                                       body
+                                   )
+                                   SELECT
+                                       ansid, spcatid, lastmodtime,
+                                       UNIX_TIMESTAMP(), lastmoduserid, subject,
+                                       body
+                                   FROM
+                                       support_answers
+                                   WHERE
+                                       ansid = ?
+                                   },
+                               undef,
+                               $ansid
+                  );
+            return "<?h1 $ML{'.error'} h1?><?p $ML{'.error'}: " . $dbh->errstr . " p?>" if $dbh->err;
+            return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.answer'} p?>" unless $bkp;
 
             $dbh->do("UPDATE support_answers SET subject = ?, body = ?, lastmodtime = UNIX_TIMESTAMP(), " .
                      "lastmoduserid = ? WHERE ansid = ?", undef,
                      $subj, $body, $remote->{userid}, $ansid);
             return "<?h1 $ML{'.error'} h1?><?p $ML{'.error'}: " . $dbh->errstr . " p?>" if $dbh->err;
+
+            LJ::Event::SupportStock->new($remote, $ansid, 'update')->fire;
 
             return BML::redirect("$self?user=$remote->{user}&spcatid=$spcatid&ansid=$ansid&saved=1");
         }
@@ -109,7 +163,7 @@ body<=
         $ret .= "<?p Category: " . LJ::html_select({ name => 'spcatid', selected => $spcatid },
                                                0, "( please select )",
                                                map { $_, $cats->{$_}->{catname} }
-                                                   grep { $canview{$_} } 
+                                                   grep { $canview{$_} }
                                                    sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} }
                                                    keys %$cats) . "<br />";
         $ret .= "$ML{'.subject'} " . LJ::html_text({ name => 'subject', maxlength => 255, size => 40 }) . "<br />";

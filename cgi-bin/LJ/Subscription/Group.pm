@@ -322,6 +322,10 @@ sub get_interface_status {
 
     my $evt = $self->event;
 
+    if ($evt->is_support_class) {
+        return $evt->get_interface_status($u, $self->arg1, $self->arg2);
+    }
+    
     return $evt->get_interface_status($u);
 }
 
@@ -330,6 +334,10 @@ sub get_ntype_interface_status {
 
     my $evt = $self->event;
 
+    if ($evt->is_support_class) {
+        return $evt->get_ntype_interface_status($ntypeid, $u, $self->arg1, $self->arg2);
+    }
+    
     return $evt->get_ntype_interface_status($ntypeid, $u);
 }
 
@@ -349,6 +357,13 @@ sub enabled {
     my ($self) = @_;
 
     my $u = LJ::want_user($self->userid);
+    
+    my $evt = $self->event;
+    
+    if ($evt->is_support_class) {
+        return $evt->check_sub_availability($u, $self->arg1, $self->arg2);
+    }
+    
     return $self->event->available_for_user($u);
 }
 

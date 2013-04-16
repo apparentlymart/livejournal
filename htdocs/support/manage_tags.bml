@@ -142,13 +142,18 @@ body<=
                     $ret .=
                         ' [<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
                         'tags=' . $name . '">' . $ML{'.requests'} . '</a>]';
-
+                    $ret .= "&nbsp;&nbsp;&nbsp;";
                     $ret .= 
                         '[<a href="'.$LJ::SITEROOT.'/support/manage_tags.bml?' .
                         'rename=1&' .
                         'sptagid='. $sptagid . '&' .
                         'spcatid=' . $spcatid . '">' .
                         $ML{'.rename.link'} . '</a>]';
+                    $ret .= "&nbsp;&nbsp;&nbsp;";
+                    $ret .=
+                        '[<a href="'  . $LJ::SITEROOT . '/support/changenotify.bml?' .
+                        'tag='        . $name . 
+                        '&tag_catid=' . $spcatid . '">Subscribe</a>]';
                 } else {
                     $ret .= '<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
                         'tags=' . $name . '">' . $name . '</a>';

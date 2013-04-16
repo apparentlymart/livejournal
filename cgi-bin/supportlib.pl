@@ -13,6 +13,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require "sysban.pl";
 use LJ::TimeUtil;
 use LJ::Support::Request::Tag;
+use LJ::Event::SupportRequest;
 
 # Constants
 my $SECONDS_IN_DAY  = 3600 * 24;
@@ -161,8 +162,9 @@ sub is_poster {
 sub can_see_helper
 {
     my ($sp, $remote) = @_;
-    if ($sp->{_cat}->{'hide_helpers'}) {
-        if (can_help($sp, $remote)) {
+    my $spcat = $sp->{_cat};
+    if ($spcat->{'hide_helpers'}) {
+        if (can_help($spcat, $remote)) {
             return 1;
         }
         if (LJ::check_priv($remote, "supportviewinternal", $sp->{_cat}->{'catkey'})) {
@@ -174,6 +176,25 @@ sub can_see_helper
         return 0;
     }
     return 1;
+}
+
+sub can_see_response {
+    my ($splid, $u) = @_;
+    
+    my $response = load_response($splid);
+    my $type     = $response->{type};
+    my $spid     = $response->{spid};
+    my $sp       = load_request($spid);
+    my $cat      = load_cats()->{ $sp->{spcatid} };
+    
+    my $PRIVS_BY_TYPE = {
+        answer   => can_read_cat($cat, $u),
+        comment  => can_read_cat($cat, $u),
+        screened => can_read_screened($cat, $u),
+        internal => can_read_internal($cat, $u),
+    };
+    
+    return $PRIVS_BY_TYPE->{$type};
 }
 
 sub can_read
@@ -221,11 +242,12 @@ sub can_reopen {
 sub can_append
 {
     my ($sp, $remote, $auth) = @_;
+    my $spcat = $sp->{_cat};
     if (is_poster($sp, $remote, $auth)) { return 1; }
     return 0 unless $remote;
     return 0 unless $remote->{'statusvis'} eq "V";
-    if ($sp->{_cat}->{'allow_screened'}) { return 1; }
-    if (can_help($sp, $remote)) { return 1; }
+    if ($spcat->{'allow_screened'}) { return 1; }
+    if (can_help($spcat, $remote)) { return 1; }
     return 0;
 }
 
@@ -265,11 +287,11 @@ sub unlock
 #      argument = local, priv applies in that category only if it's public or user has supportread
 sub support_check_priv
 {
-    my ($sp, $remote, $priv) = @_;
-    return 1 if can_help($sp, $remote);
-    return 0 unless can_read_cat($sp->{_cat}, $remote);
-    return 1 if LJ::check_priv($remote, $priv, '') && $sp->{_cat}->{public_read};
-    return 1 if LJ::check_priv($remote, $priv, $sp->{_cat}->{catkey});
+    my ($cat, $remote, $priv) = @_;
+    return 0 unless can_read_cat($cat, $remote);
+    return 1 if can_help($cat, $remote);
+    return 1 if LJ::check_priv($remote, $priv, '') && $cat->{public_read};
+    return 1 if LJ::check_priv($remote, $priv, $cat->{catkey});
     return 0;
 }
 
@@ -277,9 +299,9 @@ sub support_check_priv
 # extended supportread (with a plus sign at the end of the category key)
 sub can_read_internal
 {
-    my ($sp, $remote) = @_;
-    return 1 if LJ::Support::support_check_priv($sp, $remote, 'supportviewinternal');
-    return 1 if LJ::check_priv($remote, "supportread", $sp->{_cat}->{catkey}."+");
+    my ($cat, $remote) = @_;
+    return 1 if LJ::Support::support_check_priv($cat, $remote, 'supportviewinternal');
+    return 1 if LJ::check_priv($remote, "supportread", $cat->{catkey}."+");
     return 0;
 }
 
@@ -310,14 +332,14 @@ sub can_see_stocks
 
 sub can_help
 {
-    my ($sp, $remote) = @_;
-    if ($sp->{_cat}->{'public_read'}) {
-        if ($sp->{_cat}->{'public_help'}) {
+    my ($cat, $remote) = @_;
+    if ($cat->{'public_read'}) {
+        if ($cat->{'public_help'}) {
             return 1;
         }
         if (LJ::check_priv($remote, "supporthelp", "")) { return 1; }
     }
-    my $catkey = $sp->{_cat}->{'catkey'};
+    my $catkey = $cat->{'catkey'};
     if (LJ::check_priv($remote, "supporthelp", $catkey)) { return 1; }
     return 0;
 }
@@ -365,6 +387,61 @@ sub set_prop
 
     return 1;
 }
+
+# The following 3 subroutines are working with splid' meta-data from
+# supportlogprop table.
+#
+# prop         : value desc
+# --------------------------------------------------------------------------
+# approved     : splid of approved answer
+# moved_from   : catid of a category support request has been moved from
+# moved_to     : catid of a category support request has been moved to
+# tags_added   : comma separated list of tags being added to the request
+# tags_removed : comma separated list of tags being removed from the request
+#
+sub load_response_props {
+    my $splid = shift;
+    return unless $splid;
+
+    my %props = (); # prop => value
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT prop, value FROM supportlogprop WHERE splid=?");
+    $sth->execute($splid);
+    while (my ($prop, $value) = $sth->fetchrow_array) {
+        $props{$prop} = $value;
+    }
+
+    return \%props;
+}
+
+sub response_prop {
+    my ($splid, $propname) = @_;
+
+    my $props = LJ::Support::load_response_props($splid);
+
+    return $props->{$propname} || undef;
+}
+
+
+# LJ::Support::set_response_prop($splid,'approved',$appsplid);
+sub set_response_prop {
+    my ($splid, $propname, $propval) = @_;
+
+    # TODO:
+    # -- delete on 'undef' propval
+    # -- allow setting of multiple
+
+    my $dbh = LJ::get_db_writer()
+        or die "couldn't contact global master";
+
+    $dbh->do("REPLACE INTO supportlogprop (splid, prop, value) VALUES (?,?,?)",
+             undef, $splid, $propname, $propval);
+    die $dbh->errstr if $dbh->err;
+
+    return 1;
+}
+
 
 # $loadreq is used by /abuse/report.bml and
 # ljcmdbuffer.pl to signify that the full request
@@ -450,22 +527,23 @@ sub get_answer_types
 {
     my ($sp, $remote, $auth) = @_;
     my @ans_type;
+    my $spcat = $sp->{_cat};
 
     if (is_poster($sp, $remote, $auth)) {
         push @ans_type, ("comment", "More information");
         return @ans_type;
     }
 
-    if (can_help($sp, $remote)) {
+    if (can_help($spcat, $remote)) {
         push @ans_type, ("screened" => "Screened Response",
                          "answer" => "Answer",
                          "comment" => "Comment or Question");
-    } elsif ($sp->{_cat}->{'allow_screened'}) {
+    } elsif ($spcat->{'allow_screened'}) {
         push @ans_type, ("screened" => "Screened Response");
     }
 
-    if (can_make_internal($sp, $remote) &&
-        ! $sp->{_cat}->{'public_help'})
+    if (can_make_internal($spcat, $remote) &&
+        ! $spcat->{'public_help'})
     {
         push @ans_type, ("internal" => "Internal Comment / Action");
     }
@@ -582,7 +660,7 @@ sub file_request
         }
     }
 
-    my ($urlauth, $url, $spid, $closeurl);  # used at the bottom
+    my $spid;
 
     my $sql = "INSERT INTO support (spid, reqtype, requserid, reqname, reqemail, state, authcode, spcatid, subject, timecreate, timetouched, timeclosed, timelasthelp) VALUES (NULL, $qreqtype, $qrequserid, $qreqname, $qreqemail, 'open', $qauthcode, $qspcatid, $qsubject, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)";
     $sth = $dbh->prepare($sql);
@@ -633,90 +711,7 @@ sub file_request
         LJ::ContentFlag->set_supportid($o->{flagid}, $spid);
     }
 
-    my $miniauth = mini_auth({ 'authcode' => $authcode });
-    $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-    $urlauth = "$url&auth=$miniauth";
-    $closeurl = "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
-
-    # disable auto-replies for the entire category, or per request
-    if (! $scat->{'no_autoreply'} && ! $o->{'no_autoreply'}) {
-
-        my $closeable = sub {
-            return "" unless $scat->{user_closeable};
-            my $text =  LJ::Lang::get_text (
-                            $lang,
-                            'notification.support.submit.request.closeable',
-                            undef,
-                            { closeurl => $closeurl }
-                        );
-            if ($html) {
-                $text =~ s/\n/<br \/>/g;
-            }
-            return $text;
-        };
-
-        my $requester = LJ::Lang::get_text ($lang,'notification.support.requester');
-        my $subject = LJ::Lang::get_text (
-                        $lang,
-                        'notification.support.submit.request.subject',
-                        undef,
-                        { request_id => $spid }
-                    );
-        my $body = LJ::Lang::get_text (
-                        $lang,
-                        'notification.support.submit.request.body.plain',
-                        undef,
-                        {
-                            username    => $username ||
-                                           $o->{'reqname'} ||
-                                           $requester,
-                            subject     => $o->{'subject'},
-                            request_id  => $spid,
-                            urlauth     => $urlauth,
-                            close_it    => $closeable->(),
-                            sitename    => $LJ::SITENAMESHORT,
-                            siteroot    => $LJ::SITEROOT,
-                        }
-                );
-        if ($html) {
-            my $html_body = LJ::Lang::get_text (
-                                $lang,
-                                'notification.support.submit.request.body.html',
-                                undef,
-                                {
-                                    username    => $ljuser ||
-                                                   $o->{'reqname'} ||
-                                                   $requester,
-                                    subject     => $o->{'subject'},
-                                    request_id  => $spid,
-                                    urlauth     => $urlauth,
-                                    close_it    => $closeable->(),
-                                    sitename    => $LJ::SITENAMESHORT,
-                                    siteroot    => $LJ::SITEROOT,
-                                }
-                            );
-            LJ::send_mail({
-                to          => $email,
-                from        => $LJ::BOGUS_EMAIL,
-                fromname    => "$LJ::SITENAME Support",
-                charset     => 'utf-8',
-                subject     => $subject,
-                body        => $body,
-                html        => $html_body,
-            });
-        } else {
-            LJ::send_mail({
-                to          => $email,
-                from        => $LJ::BOGUS_EMAIL,
-                fromname    => "$LJ::SITENAME Support",
-                charset     => 'utf-8',
-                subject     => $subject,
-                body        => $body,
-            });
-        }
-    }
-
-    support_notify({ spid => $spid, type => 'new' });
+    LJ::Event::SupportRequest->new($u, $spid)->fire;
 
     # and we're done
     return $spid;
@@ -734,6 +729,7 @@ sub append_request
     # $re->{'remote'}  (remote if known)
     # $re->{'uniq'}    (uniq of remote)
     # $re->{'tier'}    (tier of response if type is answer or internal)
+    # $re->{'props'}   (meta-data for supportlogprop)
 
     my $remote = $re->{'remote'};
     my $posterid = $remote ? $remote->{'userid'} : 0;
@@ -780,6 +776,20 @@ sub append_request
     }
     $dbh->do($sql);
     my $splid = $dbh->{'mysql_insertid'};
+    my $props = $re->{'props'};
+    if ($splid) {
+        foreach my $prop (keys %$props) {
+            if ($prop) {
+                LJ::Support::set_response_prop($splid,$prop,$props->{$prop});
+            }
+            if ($prop eq 'tags_added') {
+                LJ::Event::SupportTagAdd->new($remote, $splid)->fire;
+            }
+        }
+        if ($re->{type} eq 'answer') {
+            LJ::Support::set_response_prop($splid,'approved', $splid);
+        }
+    }
 
     if ($posterid) {
         # add to our index of recently replied to support requests per-user.
@@ -801,10 +811,37 @@ sub append_request
         }
     }
 
-    support_notify({ spid => $spid, splid => $splid, type => 'update' });
+    LJ::Event::SupportResponse->new($remote, $spid, $splid)->fire;
 
     return $splid;
 }
+
+#get a sum of support points for the specified period from now
+sub get_sum_points {
+    my ($userid, $period) = @_;
+    
+    my $to   = time() - time()%86400;
+    my $from = $to - $period; 
+    my $dbh  = LJ::get_db_writer();
+    
+    
+    my ($sum) = $dbh->selectrow_array(
+                                    qq{
+                                        SELECT sum(points)
+                                        FROM   supportpoints
+                                        WHERE  userid = ? AND
+                                               timeclosed BETWEEN
+                                               ? AND ?
+                                    },
+                                    undef,
+                                    $userid,
+                                    $from,
+                                    $to
+    );
+    
+    return $sum;
+}
+
 
 # userid may be undef/0 in the setting to zero case
 sub set_points
@@ -813,8 +850,8 @@ sub set_points
 
     my $dbh = LJ::get_db_writer();
     if ($points) {
-        $dbh->do("REPLACE INTO supportpoints (spid, userid, points) ".
-                 "VALUES (?,?,?)", undef, $spid, $userid, $points);
+        $dbh->do("REPLACE INTO supportpoints (spid, userid, points, timeclosed) ".
+                 "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $spid, $userid, $points);
     } else {
         $userid ||= $dbh->selectrow_array("SELECT userid FROM supportpoints WHERE spid=?",
                                           undef, $spid);
@@ -851,27 +888,29 @@ sub close_request_with_points {
         'WHERE spid=? AND type="answer" '.
         'ORDER BY timelogged DESC LIMIT 1', undef, $spid);
 
+    my $res;
     unless (defined $response) {
-        my $res = $dbh->do(
+        $res = $dbh->do(
             'INSERT INTO supportlog '.
             '(spid, timelogged, type, userid, message) VALUES '.
             '(?, UNIX_TIMESTAMP(), "internal", ?, ?)', undef,
             $spid, LJ::want_userid($remote),
             "(Request has been closed as part of mass closure)");
-        return;
+        return 0;
     }
 
+    my $helperid = $response->{'userid'};
     my $points = LJ::Support::calc_points(
         $sp, $response->{'timelogged'} - $sp->{'timecreate'}, $spcat);
 
-    LJ::Support::set_points($spid, $response->{'userid'}, $points);
+    LJ::Support::set_points($spid, $helperid, $points);
 
     # deliberately not using LJ::Support::append_request
     # to avoid sysban checks etc.; this sub is supposed to be fast.
 
     my $username = LJ::want_user($response->{'userid'})->display_name;
 
-    $dbh->do(
+    $res = $dbh->do(
         'INSERT INTO supportlog '.
         '(spid, timelogged, type, userid, message) VALUES '.
         '(?, UNIX_TIMESTAMP(), "internal", ?, ?)', undef,
@@ -879,6 +918,7 @@ sub close_request_with_points {
         "(Request has been closed as part of mass closure, ".
         "granting $points points to $username ".
         "for response #".$response->{'splid'}.")");
+    return $helperid;
 }
 
 sub touch_request
@@ -967,7 +1007,7 @@ sub mail_response_to_user
                   );
     }
 
-    #preparing [[closeable]] param
+    # preparing [[closeable]] param
     my $closeable='';
     if ($sp->{_cat}->{user_closeable}) {
         my $closeurl = "$LJ::SITEROOT/support/act.bml?" .
@@ -1073,9 +1113,7 @@ sub mail_response_to_user
         });
     }
 
-    if ($type eq "answer") {
-        $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
-    }
+
 }
 
 sub mini_auth
@@ -1257,6 +1295,137 @@ sub get_touch_supportlogs_by_user_and_date {
     return \%result_hash;
 }
 
+# <LJFUNC>
+# name: LJ::Support::get_previous_screened_replies
+# des: Get screened replies between approve one and the previous answer
+# args: splid
+# splid: newly approved reply
+# returns: hashref  {splid => userid}
+# </LJFUNC>
+sub get_previous_screened_replies {
+    my $splid = shift;
+
+    my $resp           = LJ::Support::load_response($splid);
+    my $approved_splid = LJ::Support::response_prop($splid, 'approved');
+    my $spid           = $resp->{spid};
+
+
+
+    my $dbr = LJ::get_db_reader();
+    my $touches = $dbr->selectall_arrayref(
+                            qq{
+                                SELECT   splid, type, userid
+                                FROM     supportlog
+                                WHERE    spid = ? AND
+                                         splid < ?
+                                ORDER BY splid DESC
+                            },
+                            { Slice => {} },
+                            $spid,
+                            $splid
+                        );
+    my %res;
+    foreach my $touch (@$touches) {
+        if ($touch->{type} eq 'screened') {
+            $res{$touch->{splid}} = $touch->{userid};
+        }
+        elsif (($touch->{type} eq 'internal') ||
+               ($touch->{splid} == $approved_splid)) {
+            next;
+        } else {
+            last;
+        }
+    }
+
+    return \%res;
+}
+
+# <LJFUNC>
+# name: LJ::Support::get_latest_screen
+# des: Get screened replies between approve one and the previous answer
+# args: splid, userid
+# splid: id of response we are looking after
+# userid: userid of the author
+# returns: splid or undef
+# </LJFUNC>
+sub get_latest_screen {
+    my ($splid, $userid) = @_;
+
+    my $screens = LJ::Support::get_previous_screened_replies($splid);
+
+    foreach my $key (sort {$b <=> $a} keys %$screens) {
+        if ($screens->{$key} eq $userid) {
+            return $key;
+        }
+    }
+
+    return undef;
+}
+
+
+
+# <LJFUNC>
+# name:     LJ::Support::get_touches_by_type
+# des:      Get support request replies of particular type
+# args:     spid, type
+# des-spid: support request id
+# des-type: reply type
+# returns:  hashref  {splid => userid}
+# </LJFUNC>
+sub get_touches_by_type {
+    my ($spid,$type) = @_;
+
+    my $dbr = LJ::get_db_reader();
+    my $touches = $dbr->selectall_arrayref(
+                            qq{
+                                SELECT   splid, userid
+                                FROM     supportlog
+                                WHERE    spid = ? AND
+                                         type = ?
+                                ORDER BY splid DESC
+                            },
+                            { Slice => {} },
+                            $spid,
+                            $type
+                        );
+    my %res;
+    foreach my $touch (@$touches) {
+        $res{$touch->{splid}} = $touch->{userid};
+    }
+
+    return \%res;
+}
+
+# <LJFUNC>
+# name:     LJ::Support::is_helper
+# des:      Check if user answered to the request
+# args:     u, spid
+# des-spid: support request id
+# des-u:    LJ::user object
+# returns:  boolean
+# </LJFUNC>
+sub is_helper {
+    my ($u,$spid) = @_;
+
+    my $dbr = LJ::get_db_reader();
+    my ($splid) = $dbr->selectrow_array(
+                                    qq{
+                                        SELECT splid
+                                        FROM   supportlog
+                                        WHERE  spid = ? AND
+                                               userid = ? AND
+                                               type='answer'
+                                    },
+                                    undef,
+                                    $spid,
+                                    $u->id,
+    );
+
+    return 1 if $splid;
+
+    return 0;
+}
+
 sub support_notify {
     my $params = shift;
     my $sclient = LJ::theschwartz() or
@@ -1280,7 +1449,7 @@ sub work {
     my $spid = $a->{spid}+0;
     my $load_body = $type eq 'new' ? 1 : 0;
     my $sp = LJ::Support::load_request($spid, $load_body, { force => 1 }); # force from master
-
+    my $cat = $sp->{_cat};
     # we're only going to be reading anyway, but these jobs
     # sometimes get processed faster than replication allows,
     # causing the message not to load from the reader
@@ -1289,7 +1458,7 @@ sub work {
     # now branch a bit to select the right user information
     my $level = $type eq 'new' ? "'new', 'all'" : "'all'";
     my $data = $dbr->selectcol_arrayref("SELECT userid FROM supportnotify " .
-                                        "WHERE spcatid=? AND level IN ($level)", undef, $sp->{_cat}{spcatid});
+                                        "WHERE spcatid=? AND level IN ($level)", undef, $cat->{spcatid});
     my $userids = LJ::load_userids(@$data);
 
     # prepare the email
@@ -1299,7 +1468,7 @@ sub work {
     my $req_subject = LJ::Text->fix_utf8($sp->{'subject'});
     if ($type eq 'new') {
         $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
-        $body .= "Category: $sp->{_cat}{catname}\n";
+        $body .= "Category: $cat->{catname}\n";
         $body .= "Subject:  $req_subject\n\n";
         $body .= "You can track its progress or add information here:\n\n";
         $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid";
@@ -1335,9 +1504,9 @@ sub work {
             next unless $u->{status} eq "A";
             next if $posterid == $u->id;
             next if $rtype eq 'screened' &&
-                !LJ::Support::can_read_screened($sp, $u);
+                !LJ::Support::can_read_screened($cat, $u);
             next if $rtype eq 'internal' &&
-                !LJ::Support::can_read_internal($sp, $u);
+                !LJ::Support::can_read_internal($cat, $u);
             push @emails, $u->email_raw;
         }
     }

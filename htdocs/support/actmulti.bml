@@ -72,7 +72,7 @@ body<=
         return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.specified'} p?>";
     } elsif ($POST{'action:move'}) {
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.move.request'} p?>"
-            unless LJ::Support::can_perform_actions({ _cat => $cat }, $remote);
+            unless LJ::Support::can_perform_actions($cat, $remote);
 
         my $newcat = $POST{'changecat'} + 0;
         my $cats = LJ::Support::load_cats();

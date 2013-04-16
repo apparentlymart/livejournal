@@ -40,6 +40,7 @@ use base 'TheSchwartz::Worker';
 
 use MIME::Parser;
 use File::Temp ();
+use LJ::ConvUTF8;
 my $last_job;
 
 sub max_retries {   5 }
@@ -100,10 +101,28 @@ sub work {
     return dequeue("Can't parse MIME: $@") if $@;
 
     my $head = $entity->head;
+    my $type = $entity->mime_type;
     $head->unfold;
 
     my $subject = $head->get('Subject');
     chomp $subject;
+
+    # fix up the subject if needed
+    eval {
+        if ($subject =~ /^=\?(utf-8)?/i) {
+            my $encoding = $1;
+            my @subj_data;
+            require MIME::Words;
+            @subj_data = MIME::Words::decode_mimewords($subject);
+            if (scalar(@subj_data)) {
+                if (!$encoding) {
+                    $subject = LJ::ConvUTF8->to_utf8($subj_data[0][1], $subj_data[0][0]);
+                } else {
+                    $subject = $subj_data[0][0];
+                }
+            }
+        }
+    };
 
     # simple/effective spam/bounce/virus checks:
     return dequeue("Bounce")      if $head->get("Return-Path") =~ /^\s*<>\s*$/;
@@ -140,7 +159,7 @@ sub work {
         }
 
         # hook didn't want to handle this email...
-    }        
+    }
 
     # see if it's a post-by-email
     if (my $dest = journal_destination($head)) {
@@ -167,6 +186,7 @@ sub work {
     $tent = LJ::Emailpost::get_entity( $entity, 'html' ) unless $tent;
     return dequeue("Can't find text or html entity") unless $tent;
     my $body = $tent->bodyhandle->as_string;
+
     $body = LJ::trim($body);
 
     ### spam
@@ -208,6 +228,23 @@ sub work {
     my $from = $adf->address;
     $subject ||= "(No Subject)";
 
+    my $content_type;
+    # check multipart emails
+    if ($type =~ /multipart/) {
+        foreach my $ent_part ($entity->parts) {
+            if ($ent_part->mime_type eq 'text/plain') {
+                if (my $ent_head = $ent_part->head) {
+                    $content_type = $ent_head->get('Content-type:');
+                }
+                last;
+            }
+        }
+    }
+    else {
+        $content_type = $head->get('Content-type:');
+    }
+    chomp($content_type);
+
     # is this a reply to another post?
     if ( $toarg =~ /^(\d+)z(.+)$/ ) {
         my $spid     = $1;
@@ -234,7 +271,10 @@ sub work {
 
         ## try to get rid of reply stuff.
         # Outlook Express:
-        $body =~ s!(\S+.*?)-{4,10} Original Message -{4,10}.+!$1!s;
+        $body =~ s/^(.*?[^\s\n\r\t]+?.*?)\s                   # message
+                   -{4,10} \s?Original\sMessage\s? -{4,10}    # boundary
+                   .+                                         # reply part
+                  /$1/xs;
 
         # Pine/Netscape
         $body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
@@ -244,10 +284,14 @@ sub work {
             $sp,
             {
                 'type' => 'comment',
-                'body' => $body,
+                'body' => convert_to_utf8($content_type, $body),
             }
           )
           or return dequeue("Error appending request?");
+
+        if ($splid) {
+            LJ::Support::set_response_prop($splid,'Content-type',$content_type);
+        }
 
         LJ::Support::touch_request($spid);
 
@@ -292,20 +336,6 @@ EMAIL_END
     # make a new post.
     my @errors;
 
-    # convert email body to utf-8
-    my $content_type = $head->get('Content-type:');
-    my $charset;
-    $charset = $1
-      if $content_type =~ /\bcharset=[\'\"]?(\S+?)[\'\"]?[\s\;]/i;
-    if (   defined($charset)
-        && $charset !~ /^UTF-?8$/i
-        && Unicode::MapUTF8::utf8_supported_charset($charset) )
-    {
-        $body =
-          Unicode::MapUTF8::to_utf8(
-            { -string => $body, -charset => $charset } );
-    }
-
     my $spid = LJ::Support::file_request(
         \@errors,
         {
@@ -314,9 +344,13 @@ EMAIL_END
             'reqtype'  => 'email',
             'reqname'  => $name,
             'reqemail' => $from,
-            'body'     => $body,
+            'body'     => convert_to_utf8($content_type, $body),
         }
     );
+
+    if ($spid) {
+        LJ::Support::set_prop($spid,'Content-type',$content_type);
+    }
 
     if (@errors) {
         # FIXME: detect trasient vs. permanent errors (changes to
@@ -327,6 +361,23 @@ EMAIL_END
     else {
         return completed();
     }
+}
+
+# convert email part to utf-8
+sub convert_to_utf8 {
+    my ($content_type, $text) = @_;
+
+    my $charset = $1
+      if $content_type =~ / \bcharset= [\'\"]? ([\w-]+) [\'\"]? /xi;
+
+    if (   defined($charset)
+        && $charset !~ /^UTF-?8$/i
+        && LJ::ConvUTF8->supported_charset($charset) )
+    {
+        $text = LJ::ConvUTF8->to_utf8($charset, $text);
+    }
+
+    return $text;
 }
 
 # returns true on found virus

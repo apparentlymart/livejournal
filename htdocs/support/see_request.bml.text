@@ -112,6 +112,10 @@ and correct, it will be sent to the user. p?>
 
 .is_beta=Request sent from Beta
 
+.img.track_active=You are watching this request
+
+.img.track_inactive=You have no active subscriptions for this request
+
 .language|staleness=1
 .language=language
 

@@ -604,6 +604,10 @@ sub process {
 
     return 1 if $self->etypeid == LJ::Event::OfficialPost->etypeid && $LJ::DISABLED{"officialpost_esn"};
 
+    # process events for unauthorised users;
+    return 1 if LJ::Event->class($self->etypeid) eq 'LJ::Event::SupportRequest' && 
+                !$self->{userid};
+    
     # significant events (such as SecurityAttributeChanged) must be processed even for inactive users.
     return 1
         unless $self->notify_class->configured_for_user($self->owner)
