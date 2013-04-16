@@ -5335,7 +5335,9 @@ sub string__upperfirst
 {
     use utf8;
     my ($ctx, $this) = @_;
-    return ucfirst($this);
+    $this = Encode::decode_utf8($this);
+    $this = ucfirst($this);
+    return Encode::encode_utf8($this);
 }
 
 sub string__starts_with
