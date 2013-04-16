@@ -4583,7 +4583,7 @@ register_alter(sub {
 
     unless (column_type("supportpoints", "timeclosed")) {
         do_alter( "supportpoints",
-                  "ALTER TABLE supportpoints" .
+                  "ALTER TABLE supportpoints " .
                   "ADD timeclosed int(11) NOT NULL DEFAULT 0,".
                   "ADD INDEX (timeclosed)");
     }
