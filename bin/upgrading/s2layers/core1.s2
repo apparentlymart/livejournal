@@ -39,6 +39,9 @@ class string
     function builtin lower : string
     "Returns string in lower case.";
 
+    function builtin split(string separator) : string[]
+    "Returns array of separated elements";
+
     function builtin upper : string
     "Returns string in upper case";
 

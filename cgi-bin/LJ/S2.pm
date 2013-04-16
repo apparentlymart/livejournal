@@ -5315,6 +5315,13 @@ sub string__lower
     return Encode::encode_utf8($this);
 }
 
+sub string__split
+{
+    use utf8;
+    my ($ctx, $str, $separator) = @_;
+    return [ map { Encode::encode_utf8($_) } split ($separator, Encode::decode_utf8($str)) ];
+}
+
 sub string__upper
 {
     use utf8;
