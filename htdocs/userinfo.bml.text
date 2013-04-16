@@ -580,6 +580,9 @@
 .optionlinks.removefriend|staleness=1
 .optionlinks.removefriend=Remove from friendlist
 
+.optionlinks.removefriend.title|staleness=1
+.optionlinks.removefriend.title=Remove from friendlist
+
 .optionlinks.sendmessage|staleness=1
 .optionlinks.sendmessage=Send Message
 
@@ -604,17 +607,38 @@
 .optionlinks.subscribe|staleness=1
 .optionlinks.subscribe=Subscribe
 
+.optionlinks.subscribe.title|staleness=1
+.optionlinks.subscribe.title=Subscribe
+
+.optionlinks.unsubscribe|staleness=1
+.optionlinks.unsubscribe=Unsubscribe
+
+.optionlinks.unsubscribe.title|staleness=1
+.optionlinks.unsubscribe.title=Unsubscribe
+
 .optionlinks.subscribesyn|staleness=1
 .optionlinks.subscribesyn=Subscribe
+
+.optionlinks.subscribesyn.title|staleness=1
+.optionlinks.subscribesyn.title=Subscribe
 
 .optionlinks.unsubscribesyn|staleness=1
 .optionlinks.unsubscribesyn=Unsubscribe
 
+.optionlinks.unsubscribesyn.title|staleness=1
+.optionlinks.unsubscribesyn.title=Unsubscribe
+
 .optionlinks.subscribecomm|staleness=1
 .optionlinks.subscribecomm=Subscribe
 
+.optionlinks.subscribecomm.title|staleness=1
+.optionlinks.subscribecomm.title=Subscribe
+
 .optionlinks.unsubscribecomm|staleness=1
 .optionlinks.unsubscribecomm=Unsubscribe
+
+.optionlinks.unsubscribecomm.title|staleness=1
+.optionlinks.unsubscribecomm.title=Unsubscribe
 
 .optionlinks.track|staleness=1
 .optionlinks.track=Track
