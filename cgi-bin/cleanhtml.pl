@@ -130,6 +130,7 @@ sub clean {
     # remove the auth portion of any see_request.bml links
     $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
     $$data =~ s/(<lj\-random\s*\/?>)/int(rand(10_000_000))/gie;
+    $$data =~ s/(\&lt\;lj\-random\s*\/?\&gt\;)/int(rand(10_000_000))/gie;
 
     # decode escapes to get a valid unicode string
     # we encode it back before return
