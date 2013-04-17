@@ -78,7 +78,8 @@
                 if (data.controlstrip_status) {
                     status = $('.js-controlstrip-status');
 
-                    // if you're trying to change status from contextual popup in control strip
+                    // Hide contextual popup before
+                    // If you're trying to change status from contextual popup in control strip
                     if ( ContextualPopup.currentElement === status.find('.ljuser img').get(0) ) {
                         ContextualPopup.hide();
                     }
