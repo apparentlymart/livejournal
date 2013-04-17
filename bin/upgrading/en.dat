@@ -4220,11 +4220,15 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.intro.different.hide=Hide different posts from one user
+
+main.intro.different.show=Show different posts from one user
+
 main.intro.follow=Follow
 
-main.intro.friends.with=With Friends
+main.intro.friends.hide=Hide friends posts in rating
 
-main.intro.friends.without=Without Friends
+main.intro.friends.show=Show friends posts in rating
 
 main.intro.length.full=Full Posts
 
