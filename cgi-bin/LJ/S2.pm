@@ -4202,7 +4202,7 @@ sub _Entry__get_link
             'data-hashtags' =>  LJ::eurl($hashtags) || "",
         );
 
-        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '', %link_extra);
+        my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '');
         my $link = LJ::S2::Link('#', $link_text, $link_image, %link_extra);
 
         return $link;

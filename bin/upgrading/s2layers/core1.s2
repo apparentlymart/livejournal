@@ -3084,6 +3084,41 @@ function CommentInfo::print() {
 
 ### Link object functions
 
+# Returns all extra content
+
+function get_extra ( string{} extra ) : string {
+  
+  var string out = "";
+
+  foreach var string extraKey ($extra) {
+    if( $extra{$extraKey} != "" ){
+      $out = $out + """$extraKey="$extra{$extraKey}" """;
+      }
+    }  
+   return $out; 
+}
+
+# Returns extra content filtered by selector
+
+function get_extra_by_selector ( string{} extra, string selector ) : string {
+  
+  if ($selector != "") { 
+
+    var string{} filtered;
+
+    foreach var string extraKey ($extra) {
+      if( $extraKey->contains( $selector )  ){
+        $filtered{$extraKey} = $extra{$extraKey};
+        }
+      }
+
+      $extra = $filtered;  
+
+    }
+
+   return get_extra( $extra ); 
+}
+
 function Link::print_button() [fixed] {
     print $this->as_string();
 }
@@ -3092,14 +3127,10 @@ function Link::as_string() [fixed] : string {
 
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
-    var string{} extra = $.icon.extra;
-    var string extraParams = "";
+    var string link_extraParams = get_extra( $.extra );
+    var string icon_extraParams = get_extra( $.icon.extra );
 
-    foreach var string extraKey ($extra) {
-        $extraParams = $extraParams + """$extraKey="$extra{$extraKey}" """;
-    }
-
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $extraParams /></a>""";
+    return """<a href="$.url" $link_extraParams><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $icon_extraParams /></a>""";
 }
 
 # Redirector
