@@ -1220,13 +1220,16 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
         }
     } elseif ($p.view == "entry") {
         var Link l = new Link;
+        var string link_extra;
         foreach var string ls ($e.link_keyseq) {
             $l = $e->get_link($ls);
-            if (defined $l) {
-                println """<a href="$l.url">$l.caption</a> """;
-		$l->print_raw();
+            if ( $l.url != "" ) {
+                $link_extra = get_extra( $l.extra ); 
+                println """<a href="$l.url" $link_extra>$l.caption</a> """;
+		        $l->print_raw();
+                if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { println """&nbsp;|&nbsp;"""; }
             }
-            if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { println """&nbsp;|&nbsp;"""; }
+            
         }
     } else {
         println "&nbsp;";

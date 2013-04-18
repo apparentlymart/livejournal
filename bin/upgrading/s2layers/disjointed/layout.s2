@@ -1082,6 +1082,7 @@ function EntryLite::print_linkbar() {
 
   var string url  = "";
   var string text = "";
+  var string link_extra = "";
 
   var string btwn_comments = "";
   if (clean_url($*img_btwn_comments) != "") {
@@ -1176,8 +1177,9 @@ if (not $en.comments.locked) {
     var Link link = $this->get_link($link_key);
     $url          = $link.url;
     $text         = $link.caption;
+    $link_extra   = get_extra( $link.extra ); 
     if($url != "" and $link_key != "tell_friend") {
-      print safe """<a href="$url">$text</a>$btwn_comments""";
+      print safe """<a href="$url" $link_extra>$text</a>$btwn_comments""";
       $link->print_raw();
       }
   }

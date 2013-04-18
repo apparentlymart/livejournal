@@ -742,6 +742,8 @@ function EntryLite::print_linkbar() {
     "flag"       => $*text_flag,
   };
 
+  var string link_extra; 
+
   var string btwn_comments = "";
   if (clean_url($*img_btwn_comments) != "") {
     $btwn_comments = """ <img src="$*img_btwn_comments" alt="" /> """;
@@ -829,7 +831,8 @@ function EntryLite::print_linkbar() {
       $url          = $link.url;
       $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
       if($url != "") {
-        print """<a href="$url">$text</a>$btwn_comments""";
+        $link_extra = get_extra( $link.extra ); 
+        print """<a href="$url" $link_extra>$text</a>$btwn_comments""";
         $link->print_raw();
       }
     }

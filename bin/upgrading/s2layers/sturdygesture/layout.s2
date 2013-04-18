@@ -349,7 +349,8 @@ function MonthPage::lay_page_nav() {
 }
 
 function Link::lay_print_textlink(string caption) {
-    println safe """<a href="$.url">"""+($caption != "" ? $caption : $.caption)+"""</a>""";
+    var string link_extra = get_extra( $.extra );     
+    println safe """<a href="$.url" $link_extra>"""+($caption != "" ? $caption : $.caption)+"""</a>""";
 }
 function Link::lay_print_textlink() {
     $this->lay_print_textlink("");

@@ -1161,11 +1161,13 @@ function EntryPage::lay_sidebar_view_navigation() : string {
     print safe "<tr><td>&nbsp;</td></tr>";
     #var string return;
     var Link link;
+    var string link_extra;
     foreach var string k ($.entry.link_keyseq) {
         $link = $.entry->get_link($k);
         if ($link.url != "" and  $k!= "tell_friend") {
+            $link_extra = get_extra( $link.extra ); 
             #$return = """$return<tr><td>$*text_sidebar_link_separator<a href="$link.url">$link.caption</a></td></tr>""";
-            print safe """<tr><td>$*text_sidebar_link_separator<a href="$link.url">$link.caption</a></td></tr>""";
+            print safe """<tr><td>$*text_sidebar_link_separator<a href="$link.url" $link_extra>$link.caption</a></td></tr>""";
 	    $link->print_raw();
         }
     }
