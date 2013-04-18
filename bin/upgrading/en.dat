@@ -9377,17 +9377,23 @@ web.users.add.title.subscronly=Subscribe to [[user]]
 web.users.add.title.friendandsubscr|staleness=1
 web.users.add.title.friendandsubscr=Add [[user]] as
 
+web.users.add.title.friendonly|staleness=1
+web.users.add.title.friendonly=Add [[user]] as friend
+
 web.users.add.windowtitle.subscronly|staleness=1
 web.users.add.windowtitle.subscronly=Subscribe to [[user]]
+
+web.users.add.windowtitle.friendonly|staleness=1
+web.users.add.windowtitle.friendonly=Add [[user]] as friend
 
 web.users.add.windowtitle.friendandsubscr|staleness=1
 web.users.add.windowtitle.friendandsubscr=Add [[user]] as
 
 web.users.add.editomode.friend.title|staleness=1
-web.users.add.editomode.friend.title=Edit you friend [[user]]
+web.users.add.editomode.friend.title=Edit you friend
 
 web.users.add.editomode.subscr.title|staleness=1
-web.users.add.editomode.subscr.title=Edit you subscription [[user]]
+web.users.add.editomode.subscr.title=Edit you subscription
 
 web.users.add.editomode.friend.windowtitle|staleness=1
 web.users.add.editomode.friend.windowtitle=Edit you friend
@@ -9411,7 +9417,7 @@ Adding user as subsription allows you to read new content from it on your friend
 .
 
 web.users.add.status.default.identity.text|staleness=1
-web.users.add.status.default.identity.text=Adding user as subsription allows you to read new content from it on your friends page.
+web.users.add.status.default.identity.text=Adding user as friend share you privacy content for him.
 
 web.users.add.status.default.syndicated.text|staleness=1
 web.users.add.status.default.syndicated.text=Adding a feed allows you to read new content from the feed on your friends page.
