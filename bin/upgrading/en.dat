@@ -1816,6 +1816,8 @@ entryunit.toggle.expand=Expand
 
 entryunit.updown=This entry has changed its position in the rating
 
+entryunits.empty=Sorry, there is no available entries to display
+
 entryunits.more=Show more 25 entries
 
 entryunits.stat.showhidden=Show all hidden entries
@@ -4222,13 +4224,21 @@ lynx.nav.update=Update Journal
 
 main.intro.different.hide=Hide different posts from one user
 
+main.intro.different.hide.title=Hide two or three different posts from one user or community
+
 main.intro.different.show=Show different posts from one user
+
+main.intro.different.show.title=Show two or three different posts from one user or community
 
 main.intro.follow=Follow
 
 main.intro.friends.hide=Hide friends posts in rating
 
+main.intro.friends.hide.title=Hide your friends or communities posts from rating
+
 main.intro.friends.show=Show friends posts in rating
+
+main.intro.friends.show.title=Show your friends or communities posts in rating
 
 main.intro.length.full=Full Posts
 
