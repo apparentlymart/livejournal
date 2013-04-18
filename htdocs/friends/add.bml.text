@@ -11,6 +11,8 @@
 
 .add.text2=[[ljuser]] has been added to your friends list.
 
+.add.text3=[[ljuser]] has been added to your subscriptions list.
+
 .add.title=Friend Added!
 
 .btn.add=Add [[user]]

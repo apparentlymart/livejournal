@@ -666,24 +666,7 @@ sub get_text {
     }
 
     if ($vars) {
-
-        # the following regexp parses the [[?num|singular|plural1|...]] syntax
-        $text =~ s{
-            \[\[\?      # opening literal '[[?'
-            ([\w\-]+)   # the number key
-            \|          # the pipe delimiter
-            (.+?)       # singular/plural variants
-            \]\]        # closing literal ']]'
-        }
-        {resolve_plural($lang, $vars, $1, $2)}xeg;
-
-        # and the following merely substitutes the keys:
-        $text =~ s{
-            \[\[        # opening literal '[['
-            ([^\[]+?)   # the key
-            \]\]        # closing literal ']]'
-        }
-        { defined $vars->{$1} ? $vars->{$1} : "[$1]" }xeg;
+        $text = evaluate_string($lang, $text, $vars);
     }
 
     $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
@@ -698,6 +681,8 @@ sub get_text {
 # args: $lang, $dmid, array ref of lang codes
 sub get_text_multi {
     my ( $lang, $dmid, $codes, $opts ) = @_;
+
+    $opts ||= {};
 
     my $ignore_local_cache = $opts->{ignore_local_cache};
 
@@ -740,7 +725,17 @@ sub get_text_multi {
         }
     }
 
-    return \%strings unless %memkeys;
+    unless (%memkeys) {
+        if ($opts->{vars}) {
+            foreach my $key (keys %strings) {
+                $strings{$key} = evaluate_string(
+                    $lang, $strings{$key}, $opts->{vars}
+                );
+            }
+        }
+
+        return \%strings;
+    }
 
     my $mem = {};
     if (!$ignore_local_cache && LJ::is_enabled('local_cache') &&  LJ::is_web_context()) {
@@ -781,7 +776,17 @@ sub get_text_multi {
         }
     }
 
-    return \%strings unless %dbload;
+    unless (%dbload) {
+        if ($opts->{vars}) {
+            foreach my $key (keys %strings) {
+                $strings{$key} = evaluate_string(
+                    $lang, $strings{$key}, $opts->{vars}
+                );
+            }
+        }
+
+        return \%strings;
+    }
 
     my $l = $LN_CODE{$lang};
 
@@ -833,7 +838,39 @@ sub get_text_multi {
         }
     }
 
+    if ($opts->{vars}) {
+        foreach my $key (keys %strings) {
+            $strings{$key} = evaluate_string(
+                $lang, $strings{$key}, $opts->{vars}
+            );
+        }
+    }
+
     return \%strings;
+}
+
+sub evaluate_string {
+    my ($lang, $text, $vars) = @_;
+
+    # the following regexp parses the [[?num|singular|plural1|...]] syntax
+    $text =~ s{
+        \[\[\?      # opening literal '[[?'
+        ([\w\-]+)   # the number key
+        \|          # the pipe delimiter
+        (.+?)       # singular/plural variants
+        \]\]        # closing literal ']]'
+    }
+    {resolve_plural($lang, $vars, $1, $2)}xeg;
+
+    # and the following merely substitutes the keys:
+    $text =~ s{
+        \[\[        # opening literal '[['
+        ([^\[]+?)   # the key
+        \]\]        # closing literal ']]'
+    }
+    { defined $vars->{$1} ? $vars->{$1} : "[$1]" }xeg;
+
+    return $text;
 }
 
 sub get_lang_names {
