@@ -1149,12 +1149,15 @@ function Entry::print_linkbar() {
     var string sep = "<span class='separator'>|</span>";
     var string url = "";
     var string text = "";
+    var string link_extra = "";
     foreach var string link_key ($.link_keyseq) {
         $link = $this->get_link($link_key);
         $url = $link.url;
         $text = $link.caption;
+        $link_extra = get_extra ( $link.extra );
+
         if (defined $link) {
-            """ $sep <a href="$url">$text</a>""";
+            """ $sep <a href="$url" $link_extra>$text</a>""";
             $link->print_raw();
         }
         if ($link_key == "give_button") {
