@@ -4203,7 +4203,12 @@ sub _Entry__get_link
         );
 
         my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '');
-        my $link = LJ::S2::Link('#', $link_text, $link_image, %link_extra);
+        my $link = LJ::S2::Link(
+            $url . '?title=' . LJ::eurl($title) . '&hashtags=' . LJ::eurl($hashtags),
+            $link_text,
+            $link_image,
+            %link_extra
+        );
 
         return $link;
     } elsif ($key eq "share_facebook") {
