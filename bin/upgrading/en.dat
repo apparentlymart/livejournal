@@ -2812,6 +2812,25 @@ esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 esn.supofficialpost.subscribtion.html|staleness=1
 esn.supofficialpost.subscribtion.html=[[sitename]] makes a new announcement
 
+esn.suspend.byantispam.usersbancounter.email.subject|staleness=1
+esn.suspend.byantispam.usersbancounter.email.subject=Your LiveJournal account [[username]] has been suspended
+
+esn.suspend.byantispam.usersbancounter.email.body.html|staleness=1
+esn.suspend.byantispam.usersbancounter.email.body.html<<
+Dear LiveJournal user [[username]],
+
+Your account has been automatically suspended because many people identified your account as posting spam.  If you believe this suspension is not justified, please see <a href="[[faq_link]]">FAQ</a> for information on how to contact the Abuse Prevention Team about your suspension.
+<br />
+.
+
+esn.suspend.byantispam.usersbancounter.email.body.string|staleness=1
+esn.suspend.byantispam.usersbancounter.email.body.string<<
+Dear LiveJournal user [[username]],
+
+Your account has been automatically suspended because many people identified your account as posting spam.  If you believe this suspension is not justified, please see <a href="[[faq_link]]">FAQ</a> for information on how to contact the Abuse Prevention Team about your suspension.
+<br />
+.
+
 esn.tags|staleness=1
 esn.tags=The entry is tagged "[[tags]]"
 
