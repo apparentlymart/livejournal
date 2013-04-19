@@ -2273,6 +2273,7 @@ sub journal_js_inject
 {
     LJ::need_res(qw(
                     js/journal.js
+                    js/jquery/jquery.calendarEvents.js
                     ));
 
 
