@@ -1810,6 +1810,12 @@ sub best_guess_age {
     return $u->init_age || $u->age;
 }
 
+sub gender {
+    my $u = shift;
+    return $u->{gender} if exists $u->{gender};
+    return $u->prop('gender');
+}
+
 sub gender_for_adcall {
     my $u = shift;
     my $format = shift || '6a';
