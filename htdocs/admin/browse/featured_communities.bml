@@ -6,6 +6,7 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res('stc/admin/general.css');
     LJ::need_res ( qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) );
 
     my $remote = LJ::get_remote();
@@ -22,7 +23,7 @@ body<=
     my $vert_id = $POST{'vert_id'};
     my $journals = $POST{'journals'};
 
-    $ret .= "<div style='float:left;width:500px;'>\n";
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>\n";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
@@ -51,7 +52,7 @@ body<=
         $ret .= <<ADDPOST;
 <form method="post">
 <input type="hidden" name="vert_id" value="$vert_id">
-<table>
+<table class='b-admin-table'>
     <th colspan='2' style='padding:5px;'>Enter community URL for adding:</caption>
     <tr>
         <td style='padding:5px;'>URL:</td>
@@ -60,6 +61,7 @@ body<=
     </tr>
 </table>
 </form>
+</div>
 ADDPOST
 
     }

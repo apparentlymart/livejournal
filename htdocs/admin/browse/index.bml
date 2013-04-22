@@ -6,6 +6,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res('stc/admin/general.css');
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -17,6 +19,7 @@ body<=
     $title = "Verticals And Community Directory Admin";
     my $ret = "";
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<h2>Manage Verticals</h2><ul style='list-style:none;line-height:1.6em;padding:0 0 0 20px;'>";
     $ret .= "<li><a href='./add_verticals.bml'>Add Verticals</a></li>";
     $ret .= "<li><a href='./edit_verticals.bml'>Edit Verticals</a></li>";
@@ -42,6 +45,7 @@ body<=
 
     $ret .= "<p><a href='./load_all_structure.bml'>Load All Structure</a></p>";
     $ret .= "<p><a href='./delete_comm_list.bml'>Delete community by list</a></p>";
+    $ret .= "</div>";
 
     return "<body>$ret</body>";
 }

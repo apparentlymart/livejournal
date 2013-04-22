@@ -7,6 +7,8 @@ body<=
     use vars qw(%GET %POST);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res('stc/admin/general.css');
+
     return "This page is not available." unless LJ::is_enabled("browse");
 
     my $ret = '';
@@ -59,10 +61,11 @@ body<=
 
     }
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<form method='post' method='post'>";
     $ret .= LJ::form_auth();
 
-    $ret .= "<table>";
+    $ret .= "<table class='b-admin-table'>";
     my @verticals = LJ::Vertical->load_all();
     if (!$LJ::DISABLED{'verticals_menu'}) {
         $ret .= "<tr><td valign='top'><!-- $i.-->Vertical</td>";
@@ -107,6 +110,7 @@ body<=
     $ret .= "</div></form>\n\n";
 
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+    $ret .= "</div>";
 
     return $ret;
 

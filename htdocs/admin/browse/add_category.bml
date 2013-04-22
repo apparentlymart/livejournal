@@ -5,7 +5,9 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
-
+    
+    LJ::need_res('stc/admin/general.css');
+    
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -84,7 +86,8 @@ body<=
 
     $headextra = "<style>table td.label { text-align: right; vertical-align: top;}</style>";
 
-    $ret .= "<form method='POST'>\n";
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
+    $ret .= "<form class='b-admin-form' method='POST'>\n";
     $ret .= LJ::form_auth();
 
     $ret .= "<p>";
@@ -95,7 +98,7 @@ body<=
         $vertical = LJ::Vertical->load_by_id($vert_id);
     }
 
-    $ret .= "<table>";
+    $ret .= "<table class='b-admin-table'>";
     my @verticals = LJ::Vertical->load_all();
     if (!$LJ::DISABLED{'verticals_menu'}) {
         $ret .= "<tr><td valign='top'><!-- -->Vertical</td>";
@@ -126,7 +129,7 @@ body<=
     $ret .= "</p>\n";
 
     $ret .= "<h2>New Category Details</h2>";
-    $ret .= "<table>";
+    $ret .= "<table class='b-admin-table'>";
     $ret .= "<tr><td class='label'>*Display Name:</td><td>";
     $ret .= LJ::html_text( {
                 name => 'newcat',
@@ -152,6 +155,7 @@ body<=
     $ret .= LJ::html_hidden("parentcaturl", $category->url_path) if $category;
     $ret .= "</form>";
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+    $ret .= "</div>";
 
     return "<body>$ret</body>";
 }

@@ -5,6 +5,8 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
+    
+    LJ::need_res('stc/admin/general.css');
 
     my $remote = LJ::get_remote();
 
@@ -31,10 +33,11 @@ body<=
 
     my @verticals = LJ::Vertical->load_all();
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding b-adminpage-max'>";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
-    $ret .= "<table style='border-collapse:collapse;margin:0 0 10px;'>";
+    $ret .= "<table class='b-admin-table'>";
     $ret .= "<tr><th>Vertical name</th><th>Vertical Url</th><th>Vertical Journal</th></tr>";
     foreach my $vert (@verticals) {
         my $vert_name    = $vert->{name};
@@ -42,9 +45,9 @@ body<=
         my $vert_id      = $vert->{vert_id};
         my $vert_journal = $vert->{journal};
         $ret .= "<tr>
-            <td style='padding:5px 5px 5px 0;'><input type='text' name='$vert_id-name' value='$vert_name'></td>
-            <td style='padding:5px 5px 5px 0;'><input type='text' name='$vert_id-url' value='$vert_url'></td>
-            <td style='padding:5px 5px 5px 0;'><input type='text' name='$vert_id-journal' value='$vert_journal'></td>
+            <td><input type='text' name='$vert_id-name' value='$vert_name'></td>
+            <td><input type='text' name='$vert_id-url' value='$vert_url'></td>
+            <td><input type='text' name='$vert_id-journal' value='$vert_journal'></td>
         </tr>";
     }
     $ret .= "</table>";
@@ -52,6 +55,7 @@ body<=
 
     $ret .= "</form>";
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+    $ret .= "</div>";
 
 
     return "<body>$ret</body>";
