@@ -450,7 +450,7 @@ LiveJournal.closeSiteMessage = function(node, e, id) {
     }, 'json');
 };
 
-LiveJournal.parseLikeButtons = (function ($) {
+LiveJournal.parseLikeButtons = (function () {
     'use strict';
 
     var selectors = {
@@ -650,7 +650,7 @@ LiveJournal.parseLikeButtons = (function ($) {
     }
 
     return parse;
-}(jQuery));
+}());
 
 LiveJournal.renderRepostButton = function (url, data) {
     data = data || {};
@@ -680,46 +680,66 @@ LiveJournal.renderRepostButton = function (url, data) {
 };
 
 /**
- * Insert script in the document.
+ * Insert script in the document asynchronously.
  *
- * @param {String} url Url of the script
- * @param {Object=} params Data to apply to the scipt node object, e.g. async, text.
- * @param {Node=} parent If exists, script tag will be inserted in this node or before the
- *       first script tag otherwise.
+ * @param {String}  url     Url of the script
+ * @param {Object=} params  Data to apply to the scipt node object, e.g. async, text.
+ * @param {Node=}   parent  If exists, script tag will be inserted in this node or before the
+ *                          first script tag otherwise.
+ *
+ * @return {jQuery.Deferred}    jQuery deferred object that will be resolved when
+ *                              script loaded.
  */
 LiveJournal.injectScript = function(url, params, parent) {
-
-    function loadScript() {
-        var defaults = {
+    var deferred = jQuery.Deferred(),
+        defaults = {
             async: true
-        };
+        },
+        script,
+        prop;
 
-        params = params || {};
+    script = document.createElement('script');
+    script.src = url;
+
+    if (params && jQuery.type(params) === 'object') {
         params = jQuery.extend({}, defaults, params);
 
-        var e = document.createElement('script');
-        e.src = url;
-
-        for (var i in params) {
-            if (params.hasOwnProperty(i)) {
-                e[i] = params[i];
+        for (prop in params) {
+            if ( params.hasOwnProperty(prop) ) {
+                script[prop] = params[prop];
             }
         }
-
-        if (parent) {
-            parent.appendChild(e);
-        } else {
-            s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(e, s);
-        }
     }
 
-    //opera doesn't support async attribute, so we load the scrips on onload event to display page faster
-    if (jQuery.browser.opera) {
-        jQuery(loadScript);
+    if (script.readyState) {
+        // IE
+        script.onreadystatechange = function () {
+            if ( script.readyState === 'loaded' || script.readyState === 'complete' ) {
+                script.onreadystatechange = null;
+                deferred.resolve();
+            }
+        };
     } else {
-        loadScript();
+        // Others
+        script.onload = function(){
+            deferred.resolve();
+        };
     }
+
+
+    if (parent) {
+        parent.appendChild(script);
+    } else {
+        parent = document.getElementsByTagName('script')[0];
+        parent.parentNode.insertBefore(script, parent);
+    }
+
+    deferred.done(function () {
+        script.id = Math.random().toString().slice(2);
+        console.log('script injected: ', url, script.id, params);
+    });
+
+    return deferred;
 };
 
 LiveJournal.getLocalizedStr = LJ.ml;
