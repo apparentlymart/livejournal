@@ -734,11 +734,6 @@ LiveJournal.injectScript = function(url, params, parent) {
         parent.parentNode.insertBefore(script, parent);
     }
 
-    deferred.done(function () {
-        script.id = Math.random().toString().slice(2);
-        console.log('script injected: ', url, script.id, params);
-    });
-
     return deferred;
 };
 
