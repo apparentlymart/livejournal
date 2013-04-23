@@ -167,10 +167,8 @@ sub render_posts {
         $event = $parsed->{'text'};
         my $images = $parsed->{'images'};
 
-        my $sharing_js = '';
         if ( LJ::is_enabled('sharing') ) {
             LJ::Share->request_resources;
-            $sharing_js = LJ::Share->render_js({ 'entry' => $entry });
         }
 
         if ($vertical && $entry_href->{'vert_id'} != $vertical->vert_id) {
@@ -200,7 +198,6 @@ sub render_posts {
             photo_for_post  => scalar @$images ? $images->[0] : '',
             comments_count  => $entry->reply_count,
             is_need_more    => $parsed->{'is_removed_video'} || $parsed->{'is_text_trimmed'},
-            sharing_js      => $sharing_js,
             vertical_name   => $vertical->name,
             vertical_url    => $vertical->url,
         };
@@ -480,7 +477,10 @@ sub render_body {
             next unless $entry->valid;
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
+            my $hashtags = join ',' , grep {s/^#//} $entry->tags;
             push @top_posts, {
+                url             => $entry->url,
+                hashtags        => LJ::eurl($hashtags),
                 subject         => $entry->subject_text || '***',
                 userpic         => $userpic ? $userpic->url : '',
                 updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),
