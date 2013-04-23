@@ -372,7 +372,7 @@ sub _remove_relation_to_type_other {
     # of the reluser edge from the specified id (the one that's not '*')
     # so that subsequent gets on rel:userid:targetid:type will know to ignore
     # what they got from memcache
-    my $eff_type = $typeid || $type;
+    $eff_type = $typeid || $type;
     if ($userid eq '*') {
         LJ::MemCacheProxy::set([$friendid, "relmodt:$friendid:$eff_type"], time());
     } elsif ($friendid eq '*') {
