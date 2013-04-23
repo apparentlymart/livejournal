@@ -123,9 +123,7 @@ sub _page_head {
     my $extra_js = LJ::statusvis_message_js($u);
 
     if ( LJ::is_enabled('sharing') ) {
-        LJ::Share->request_resources(
-            include_type => 'define'
-        );
+        LJ::Share->request_resources();
     }
 
     $head_content .= LJ::res_includes() . $extra_js;
