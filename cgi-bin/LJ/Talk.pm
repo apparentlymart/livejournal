@@ -195,9 +195,7 @@ sub link_bar
             $entryhashtags = join ',' , grep {s/^#//} $entry->tags;
         }
 
-        LJ::Share->request_resources(
-            include_type => 'define'
-        );
+        LJ::Share->request_resources();
 
         push @linkele, sprintf '
             <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s">
