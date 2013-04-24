@@ -584,13 +584,13 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				background-image: url(/img/userinfo.gif?v=17080);
 				}
 			.b-postform-authtype-facebook .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/facebook-16.png?v=17127);
+				background-image: url(/img/icons/facebook-16.png?v=29916);
 				}
 			.b-postform-authtype-twitter .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/twitter-16.png?v=18540);
+				background-image: url(/img/icons/twitter-16.png?v=29916);
 				}
 			.b-postform-authtype-google .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/google-16.png?v=12457);
+				background-image: url(/img/icons/google-16.png?v=29916);
 				}
 			.b-postform-authtype-openid .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/openid-16.gif?v=17127);
@@ -599,7 +599,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				background-image: url(/img/icons/mailru-16.gif?v=11910);
 				}
 			.b-postform-authtype-vkontakte .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/vkontakte-16.png?v=10284);
+				background-image: url(/img/icons/vkontakte-16.png?v=29916);
 				}
 		.b-postform-login-services-items {
 			position: absolute;
@@ -1016,7 +1016,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				-moz-border-radius: 3px;
 				border-radius: 3px;
 				background-color: #FFF;
-				background-image: url(/img/icons/sharethis.png?v=11484);
+				background-image: url(/img/icons/sharethis.png?v=29927);
 				background-position: 0 0;
 				background-repeat: no-repeat;
 				}
