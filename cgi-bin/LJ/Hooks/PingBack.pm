@@ -134,6 +134,28 @@ LJ::register_hook("postpost", sub {
     );
 });
 
+LJ::register_hook('new_comment2', sub {
+    my ($opts) = @_;
+
+    return unless $opts->{'posterid'}; ## anonymous commenters
+
+    my $u       = LJ::load_userid($opts->{'posterid'});
+    my $journal = LJ::load_userid($opts->{'journalid'});
+    my $entry   = LJ::Entry->new($journal, 'jitemid' => $opts->{'itemid'});
+    my $comment = LJ::Comment->new($journal, 'jtalkid' => $opts->{'jtalkid'});
+    my $data    = $opts->{'data'};
+    
+    my $prop_pingback = ($u && $u->prop('pingback')) ? $u->prop('pingback') : 'O';
+    $prop_pingback = 'U' if $prop_pingback eq 'O'; #not notify about entries link
+    
+    LJ::PingBack->notify(
+        uri  => $entry->url,
+        mode => $prop_pingback,
+        comment => $comment,
+        comment_data => $data,
+    );
+});
+
 # Process event's pingback option for updated entry
 LJ::register_hook("editpost", sub {
     my $entry = shift;

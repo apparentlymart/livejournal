@@ -95,8 +95,10 @@ sub notify_about_reference {
 	my $u = $args{user};
 	my $source_uri = $args{source_uri};
 	my $context = $args{context};
+	my $comment = $args{comment};
 	my $target_entry = LJ::Entry->new_from_url($source_uri);
-	my $poster = LJ::load_userid($target_entry->posterid);
+	my $poster = $comment ? LJ::load_userid($comment->{posterid}) : LJ::load_userid($target_entry->posterid);
+	$source_uri = $source_uri.'?thread='.$comment->{dtalkid}.'#t'.$comment->{dtalkid} if $comment;
 	return if $u->is_community();
 	
 #	my $super_maintainer;
@@ -115,7 +117,7 @@ sub notify_about_reference {
 	        'from'    => $LJ::DONOTREPLY_EMAIL,
 	        'subject' => LJ::Lang::get_text(
                             $lang,
-                            "pingback.notifyref.subject",
+                            'pingback.notifyref.subject',
                             undef,
                             {
                                 usernameB   => $poster->username,
@@ -123,7 +125,7 @@ sub notify_about_reference {
                          ),
 	        'body'    => LJ::Lang::get_text(
 			                $lang,
-			                "pingback.notifyref.text",
+			                'pingback.notifyref.'.($comment ? 'textcomment' : 'text'),
 			                undef,
 			                {
 			                	'usernameA'   => $u->username,
@@ -209,6 +211,8 @@ sub notify {
 
     my $uri  = $args{uri};
     my $mode = $args{mode};
+    my $comment  = $args{comment};
+    my $comment_data = $args{comment_data};
 
     return unless $mode =~ m!^[OLEU]$!; # (L)ivejournal only, (O)pen.
 
@@ -225,6 +229,8 @@ sub notify {
         arg      => {
             uri  => $uri,
             mode => $mode,
+            comment => $comment,
+            comment_data => $comment_data,
         },
     );
     $sclient->insert($job);

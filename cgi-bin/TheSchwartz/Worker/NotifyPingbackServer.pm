@@ -12,6 +12,8 @@ sub work {
 
     send_ping(uri  => $args->{uri},
               mode => $args->{mode},
+              comment => $args->{comment},
+              comment_data => $args->{comment_data},
               );
 
     $job->completed;
@@ -23,6 +25,8 @@ sub send_ping {
 
     my $source_uri = $args{uri};
     my $mode = $args{mode};
+    my $comment = $args{comment};
+    my $comment_data = $args{comment_data};
 
     # return unless $mode =~ m/^[LO]$/; # (L)ivejournal only, (O)pen.
 
@@ -40,9 +44,12 @@ sub send_ping {
             return if $weight_data->{reader_weight} < $antispam_params->{min_reader_weight};
         }
     }
-
     my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw) if $mode =~ m/^[LOE]$/;
-    my @users = ExtractLinksWithContext->find_userlink($source_entry->event_raw) if $mode =~ m/^[LOU]$/;
+    my @users;
+    if ( $mode =~ m/^[LOU]$/ ) {
+        my $contents = $comment ? $comment_data->{body} : $source_entry->event_raw;
+        @users = ExtractLinksWithContext->find_userlink($contents);
+    }
     # use Data::Dumper;
     # warn "Links: " . Dumper(\@links);
     return unless (@links || @users);
@@ -69,8 +76,7 @@ sub send_ping {
     foreach my $aUser (@users){
         my $user = LJ::load_user($aUser->{user_name});
         next unless $user;
-        next unless 
-        LJ::PingBack->notify_about_reference( user => $user, source_uri => $source_uri, context => $aUser->{context} );
+        LJ::PingBack->notify_about_reference( user => $user, source_uri => $source_uri, context => $aUser->{context}, comment => $comment );
     }
 
     return 1;
@@ -157,6 +163,7 @@ use Data::Dumper;
 my $prev_link_end = 0;
 my @links = ();
 my @users = ();
+my @used_users = ();
 my $res = '';
 my $orig = '';
 
@@ -287,7 +294,10 @@ sub parse_lj {
 	my $text = shift;
     my $attr = shift;
     
-    push @users => { user_name => $attr->{user}, context => $orig };
+    unless( my $found = grep $_ eq $attr->{user}, @used_users ) { # exclude repeat users
+        push @users => { user_name => $attr->{user}, context => $orig };
+        push @used_users, $attr->{user};
+    }
     return;
 }
 
