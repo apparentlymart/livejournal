@@ -6302,11 +6302,17 @@ settings.pingback=PingBacks
 settings.pingback.option.disabled|staleness=1
 settings.pingback.option.disabled=Disabled
 
+settings.pingback.option.entries|staleness=1
+settings.pingback.option.entries=Only entries
+
+settings.pingback.option.usernames|staleness=1
+settings.pingback.option.usernames=Only usernames
+
 settings.pingback.option.lj_only|staleness=1
 settings.pingback.option.lj_only=LiveJournal.com only
 
 settings.pingback.option.open|staleness=1
-settings.pingback.option.open=Open
+settings.pingback.option.open=Entries & usernames
 
 settings.pingback.process|staleness=1
 settings.pingback.process=Allow sending/receiving link notifications from other journals

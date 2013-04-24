@@ -89,6 +89,79 @@ sub ping_post {
     return $comment;
 }
 
+sub notify_about_reference {
+	my $class = shift;
+    my %args  = @_;
+	my $u = $args{user};
+	my $source_uri = $args{source_uri};
+	my $context = $args{context};
+	my $target_entry = LJ::Entry->new_from_url($source_uri);
+	my $poster = LJ::load_userid($target_entry->posterid);
+	return if $u->is_community();
+	
+#	my $super_maintainer;
+#	if( $u->is_community() ) {
+#        $super_maintainer = LJ::load_rel_user_cache($u, 'S');
+#        $u = LJ::load_userid($super_maintainer);
+#   }
+
+	return 0 unless $class->should_user_recieve_notice($u, $poster);
+	
+	LJ::load_user_props($u, 'browselang');
+    my $lang    = $u->{'browselang'};
+	
+	LJ::send_mail({
+	        'to'      => $u->email_raw,
+	        'from'    => $LJ::DONOTREPLY_EMAIL,
+	        'subject' => LJ::Lang::get_text(
+                            $lang,
+                            "pingback.notifyref.subject",
+                            undef,
+                            {
+                                usernameB   => $poster->username,
+                            }
+                         ),
+	        'body'    => LJ::Lang::get_text(
+			                $lang,
+			                "pingback.notifyref.text",
+			                undef,
+			                {
+			                	'usernameA'   => $u->username,
+			                	'usernameB'   => $poster->username,
+			                    'context'     => $context,
+			                    'entry_URL'   => $source_uri,
+			                }
+			             ),
+	});
+}
+sub should_user_recieve_notice {
+	my $class = shift;
+    my $user = shift;
+    my $poster = shift;
+    
+    return 0 if $user->userid eq $poster->userid;
+    
+#    warn("status: ".$user->statusvis);
+#    warn("locked: ".$user->is_locked);
+#    warn("suspended: ".$user->is_suspended);
+#    warn("readonly: ".$user->is_readonly);
+#    warn("memorial: ".$user->is_memorial);
+#    warn("deleted: ".$user->is_deleted);
+
+    
+    return 0 if $user->is_locked ||
+                $user->is_suspended || 
+                $user->is_readonly || 
+                $user->is_memorial || 
+                $user->is_deleted;
+                
+    return 0 unless $user->is_person || $user->is_identity;
+    
+    return 0 unless ($user->prop("pingback") eq "U") || ($user->prop("pingback") eq "O");
+    
+    return 1;
+}
+
 sub should_entry_recieve_pingback {
     my $class        = shift;
     my $target_entry = shift;
@@ -137,7 +210,7 @@ sub notify {
     my $uri  = $args{uri};
     my $mode = $args{mode};
 
-    return unless $mode =~ m!^[LO]$!; # (L)ivejournal only, (O)pen.
+    return unless $mode =~ m!^[OLEU]$!; # (L)ivejournal only, (O)pen.
 
     my $sclient = LJ::theschwartz();
 
