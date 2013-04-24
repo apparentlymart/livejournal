@@ -68,6 +68,13 @@
                 foreach (@deleted_qids) {
                     push @{$ret{items}}, { qid => $_->{qid}, deleted => 1 };
                 }
+
+                my $sender = LJ::load_userid($senderid);
+
+                if ($senderid && $sender) {
+                    LJ::set_rel($remote, $sender, 'D');
+                    LJ::run_hook('auto_suspender_for_spam', $senderid);
+                }
             } else {
                 $item->delete;
             }
