@@ -296,7 +296,9 @@ sub parse_lj {
     my $attr = shift;
     
     unless( my $found = grep $_ eq $attr->{user}, @used_users ) { # exclude repeat users
-        push @users => { user_name => $attr->{user}, context => $orig };
+        $orig =~ m/(.{0,50})$text(.{0,50})/;
+        my $context = $1.$attr->{user}.$2;
+        push @users => { user_name => $attr->{user}, context => $context };
         push @used_users, $attr->{user};
     }
     return;
