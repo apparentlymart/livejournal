@@ -564,9 +564,10 @@ LiveJournal.parseLikeButtons = (function () {
 
         params = {
             url: link.data('url'),
-            text: link.data('text'),
+            text: link.data('text') || '',
             count: link.data('count'),
-            lang: link.data('lang')
+            lang: link.data('lang') || 'en',
+            hashtags: link.data('hashtags') || ''
         };
 
         iframe = createIframe({
