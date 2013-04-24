@@ -51,7 +51,7 @@ sub send_ping {
         @users = ExtractLinksWithContext->find_userlink($contents);
     }
     # use Data::Dumper;
-    # warn "Links: " . Dumper(\@links);
+    # warn "Links: " . Dumper(\@users);
     return unless (@links || @users);
     
     foreach my $link (@links){
@@ -232,6 +232,7 @@ sub find_userlink {
     $orig = $text;
     
     @users = ();
+    @used_users = ();
     
     my $parser = HTML::Parser->new(
         api_version => 3,
