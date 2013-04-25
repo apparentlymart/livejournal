@@ -523,7 +523,7 @@ body<=
     $ret .= "</div>";
 
     $ret .= "<div id='settings_save'>";
-    $ret .= $cats_with_settings{$given_cat}->{form} ? LJ::html_submit($ML{'.btn.save'}) : "&nbsp;";
+    $ret .= $cats_with_settings{$given_cat}->{form} && !LJ::Setting->is_savebutton_hide() ? LJ::html_submit($ML{'.btn.save'}) : "&nbsp;";
     $ret .= "</div>";
     $ret .= "</form>" if $cats_with_settings{$given_cat}->{form};
 
