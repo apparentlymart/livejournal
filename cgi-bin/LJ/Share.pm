@@ -54,6 +54,7 @@ sub request_resources {
 
     while ( my ( $name, $service ) = each %$services ) {
         $service->{'title'} ||= LJ::Lang::ml("sharing.service.$name");
+        $service->{'openInTab'} = 1 if $name eq 'livejournal';
     }
 
     my $params = {
