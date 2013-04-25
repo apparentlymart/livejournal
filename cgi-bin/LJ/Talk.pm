@@ -191,8 +191,8 @@ sub link_bar
 
         if ($entry) {
             $entryurl = $entry->url;
-            $entrytitle = $entry->subject_text;
-            $entryhashtags = join ',' , grep {s/^#//} $entry->tags;
+            $entrytitle = LJ::eurl($entry->subject_text);
+            $entryhashtags = LJ::eurl(join ',' , grep {s/^#//} $entry->tags);
         }
 
         LJ::Share->request_resources();
