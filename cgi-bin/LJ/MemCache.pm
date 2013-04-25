@@ -329,7 +329,8 @@ sub disconnect_all {
     foreach my $conn ( values %connections ) {
         $conn->disconnect_all;
     }
-    %connections = ();
+    %connections     = ();
+    %connections_pid = ();
 }
 
 sub list_servers {
