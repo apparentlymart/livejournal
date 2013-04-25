@@ -4337,6 +4337,8 @@ main.updates.comments.comments=[[comments_count]] [[?comments_count|comment|comm
 
 main.updates.comments.more=[[comments_count]] more [[?comments_count|comment|comments]]
 
+main.updates.common=[[items_count]] new [[?items_count|event|events]]
+
 main.updates.common.allbirthdays=All birthdays
 
 main.updates.common.birthday=[[ljuser]] has a <a href="[[birthday_url]]">birthday</a> tomorrow
