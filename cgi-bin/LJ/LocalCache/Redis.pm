@@ -6,21 +6,24 @@ use warnings;
 
 use Redis;
 
+my $process_connection_id;
 my $local_connection;
 my $failed = 0;
 
 sub __get_connection {
     my $class = shift;
-    return undef if $failed;    
+    return undef if $failed; 
 
     if ($local_connection) {
-        if ($local_connection->ping) {
+        if ( $process_connection_id == $$ &&
+             $local_connection->ping ) {
             return $local_connection;
         } else {
             $local_connection = undef;
         }
     }    
 
+    $process_connection_id = $$;
     $local_connection = eval { Redis->new( encoding => undef,
                                            sock   => $LJ::LOCAL_REDIS_UNIX_SOCKET,
                                            debug => 0) };
