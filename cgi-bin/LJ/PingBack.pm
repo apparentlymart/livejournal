@@ -159,7 +159,8 @@ sub should_user_recieve_notice {
                 
     return 0 unless $user->is_person || $user->is_identity;
     
-    return 0 unless ($user->prop("pingback") eq "U") || ($user->prop("pingback") eq "O");
+    my $ping_back = $user->prop("pingback") ? $user->prop("pingback") : "O"; #if a user have not pingback parameter then think Open
+    return 0 unless ($ping_back eq "U") || ($ping_back eq "O");
     
     return 1;
 }

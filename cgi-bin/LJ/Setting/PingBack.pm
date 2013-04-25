@@ -37,7 +37,7 @@ sub option {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
 
-    ## no value selected == pingback disabled
+    ## no value selected == pingback for all
     my $value = $u->prop('pingback') || 'O';
     $value = "O" unless $value  =~ /^[OLDEU]$/;
     ## option "Livejournal only" is removed so far, now it means "Open"

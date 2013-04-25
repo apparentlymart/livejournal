@@ -144,7 +144,9 @@ LJ::register_hook('new_comment2', sub {
     my $entry   = LJ::Entry->new($journal, 'jitemid' => $opts->{'itemid'});
     my $comment = LJ::Comment->new($journal, 'jtalkid' => $opts->{'jtalkid'});
     my $data    = $opts->{'data'};
-    
+
+    return if $entry->{security} ne "public";
+
     my $prop_pingback = ($u && $u->prop('pingback')) ? $u->prop('pingback') : 'O';
     $prop_pingback = 'U' if $prop_pingback eq 'O'; #not notify about entries link
     
