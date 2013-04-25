@@ -33,6 +33,10 @@ sub group_from_sub {
     my ($class, $sub) = @_;
 
     my %sub = map { $_ => int $sub->{$_} } @group_cols;
+    
+    if ($sub->{arg2} eq '?') {
+        $sub{arg2} = $sub->{arg2};
+    }
 
     return bless({
         %sub,
