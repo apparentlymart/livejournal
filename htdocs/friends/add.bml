@@ -337,17 +337,18 @@ if ($u->is_visible) {
      $body .= '<h4>' . $ML{'.tags.selected.by.you'} . '</h4>';
      $body .= '<ul class="b-pending-users" id="selectedTagsList">';
 
+    my @selected_tags = ();
+
      {
          foreach (@$friend_tags_list) {
              my $tag_data = $user_tags_map->{$_};
-             my $tag_href = $tag_data ?
-                                $u->journal_base . '/tag/' . LJ::eurl($tag_data->{name}) :
-                                '#';
-             $body .= '<li><span><a target="_blank" href="' . $tag_href . '">' . LJ::ehtml($_) . '</a> ' .
-                      ($tag_data ? $tag_data->{total_uses} : '(-)') .
-                      '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' .
-                      (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+             
              $friend_tags_map->{$_} = 1;
+
+             push @selected_tags, {
+                name => LJ::ehtml($_),
+                uses => $tag_data->{total_uses},
+             };
          }
      }
 
@@ -361,16 +362,18 @@ if ($u->is_visible) {
      $body .= '<p class="i-bubble b-bubble-alert b-bubble-noarrow">' . $ML{'.tags.find.tags'} . '</p>';
      $body .= '<ul class="b-pending-users b-addfriend-alltags" id="allTags">';
 
+     my @all_tags = ();
+
      {
          my @tags = sort grep { !$friend_tags_map->{$_} } keys %$user_tags_map;
-         my $not_last = scalar(@tags);
+
          foreach my $tag (@tags) {
              my $tag_data = $user_tags_map->{$tag};
-             my $tag_href = $u->journal_base . '/tag/' . LJ::eurl($tag_data->{name});
-             $body .= '<li><span><a target="_blank" href="' . $tag_href . '">' . LJ::ehtml($tag) . '</a> ' .
-             $tag_data->{total_uses} .
-             '<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close"></i></span>' .
-             (--$not_last ? '<b>,</b>' : '<b class="i-pending-users-comma">,</b>') . '</li>';
+
+             push @all_tags, {
+                name => LJ::ehtml($tag),
+                uses => $tag_data->{total_uses},
+             };
          }
      }
 
@@ -379,9 +382,23 @@ if ($u->is_visible) {
      $body .= '</dl>';
      $body .= '</div>';
 
-     $body .= '<script id="tagTmpl" type="text/x-jquery-tmpl">
-           <li><span><a href="#" target="_blank">${tagName}</a> (-){{if hasCloseButton }}<i title="' . $ML{'.tags.cross.tooltip'} . '" class="i-pending-close" ></i>{{/if}}</span><b>,</b></li>
-    </script>';
+     $body .= <<HTML;
+         <script id="tagTmpl" type="text/template">
+            <span>
+                <a href="#" target="_blank"><%= name %></a>
+                <% if (uses > 1) { %><i>(<%= uses %>)</i><% } %>
+                <i title="$ML{'.tags.cross.tooltip'}" class="i-pending-close" ></i>
+            </span>
+            <b class='js-comma<% if (!comma) { %> i-pending-users-comma<% } %>'>,</b>
+        </script>
+HTML
+
+    LJ::need_var(
+        Tags => {
+            all      => [@all_tags],
+            selected => [@selected_tags],
+        }
+    );
  }
  
  # retain existing fgcolor
