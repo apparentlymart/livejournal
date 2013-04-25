@@ -1810,6 +1810,8 @@ entryunit.hide=Hide author
 
 entryunit.read=Mark entry as read
 
+entryunit.show=Bring author back
+
 entryunit.toggle.collapse=Collapse
 
 entryunit.toggle.expand=Expand
