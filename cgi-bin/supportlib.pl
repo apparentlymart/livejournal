@@ -788,6 +788,7 @@ sub append_request
         }
         if ($re->{type} eq 'answer') {
             LJ::Support::set_response_prop($splid,'approved', $splid);
+            $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
         }
     }
 
