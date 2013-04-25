@@ -60,11 +60,11 @@ sub render {
             my $entry = LJ::Entry->new($journal, ditemid => $1);
 
             if ($entry and $entry->correct_anum) {
-                my $hashtags = join ',' , grep {s/^#//} $entry->tags;
+                my $hashtags = $entry->twitter_hashtags;
                 
                 $data_journal->{url}                  = $entry->url;
                 $data_journal->{title}                = LJ::eurl($entry->subject_text);
-                $data_journal->{hashtags}             = LJ::eurl($hashtags);
+                $data_journal->{hashtags}             = $hashtags;
                 $data_journal->{view_entry_is_valid}  = 1;
                 $data_journal->{view_entry_is_public} = ($entry->is_public() ? 1 : 0);
             }

@@ -192,7 +192,7 @@ sub link_bar
         if ($entry) {
             $entryurl = $entry->url;
             $entrytitle = LJ::eurl($entry->subject_text);
-            $entryhashtags = LJ::eurl(join ',' , grep {s/^#//} $entry->tags);
+            $entryhashtags = $entry->twitter_hashtags;
         }
 
         LJ::Share->request_resources();
@@ -201,7 +201,7 @@ sub link_bar
             <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s">
                 <i class="b-controls-bg"></i>%s
             </a>
-        ', $title, $entryurl, $entrytitle,  LJ::eurl($entryhashtags), $title;
+        ', $title, $entryurl, $entrytitle,  $entryhashtags, $title;
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {

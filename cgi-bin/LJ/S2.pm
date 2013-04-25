@@ -4192,14 +4192,14 @@ sub _Entry__get_link
 
         my $url = $entry->url;
         my $title = $entry->subject_text;
-        my $hashtags = join ',' , grep {s/^#//} $entry->tags;
+        my $hashtags = $entry->twitter_hashtags;
 
         my $link_text  = $ctx->[S2::PROPS]->{'text_share'};
         my %link_extra = (
             'class' => 'js-lj-share',
             'data-url' => $url,
             'data-title' => LJ::eurl($title),
-            'data-hashtags' =>  LJ::eurl($hashtags) || "",
+            'data-hashtags' =>  $hashtags || "",
         );
 
         my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '');
@@ -4222,7 +4222,7 @@ sub _Entry__get_link
         my $post_id = $entry->journalid . ':' . $entry->ditemid;
         my $entry_url = LJ::eurl($entry->url);
         my $entry_title = LJ::eurl($entry->subject_text);
-        my $hashtags = LJ::eurl(join ',' , grep {s/^#//} $entry->tags) || ""; 
+        my $hashtags = $entry->twitter_hashtags; 
         my $link = LJ::S2::Link("http://twitter.com/share?url=$entry_url&text=$entry_title&hashtags=$hashtags", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     } elsif ($key eq "share_email") {

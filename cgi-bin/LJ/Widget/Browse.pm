@@ -477,10 +477,10 @@ sub render_body {
             next unless $entry->valid;
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
-            my $hashtags = join ',' , grep {s/^#//} $entry->tags;
+            my $hashtags = $entry->twitter_hashtags;
             push @top_posts, {
                 url             => $entry->url,
-                hashtags        => LJ::eurl($hashtags),
+                hashtags        => $hashtags,
                 subject         => $entry->subject_text || '***',
                 userpic         => $userpic ? $userpic->url : '',
                 updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),

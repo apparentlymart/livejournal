@@ -490,6 +490,33 @@ sub tags {
     return values %$entry_taginfo;
 }
 
+## returns string with hashtags 
+## (example #tag) separated by comma
+## use only for twitter
+sub twitter_hashtags {
+    my $self = shift;
+
+    return unless $self;
+
+    my @tags = $self->tags();
+    my @hashtags;
+    
+    for my $tag ( @tags ) {
+
+        $tag = Encode::decode_utf8($tag);
+
+        next unless $tag =~ s/^#//;
+        next unless $tag =~ m/^\w+$/;
+
+        $tag = Encode::encode_utf8($tag);
+
+        push @hashtags, $tag;
+
+    }
+
+    return join ',', @hashtags;
+}
+
 sub handle_prefetched_text {
     my ( $self, $subject, $event ) = @_;
 
