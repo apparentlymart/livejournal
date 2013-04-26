@@ -1361,6 +1361,9 @@ sub getfriendspage
             $h{original_entry_url} = $original_entry->url;
             $h{repostername} = $repost_entry->journal->username;
             $h{postername} = $original_entry->poster->username;
+	    $h{journalname} = $entry->journal->username;
+	    my $userpic = $original_entry->userpic;
+	    $h{poster_userpic_url} = $userpic && $userpic->url;
         }
         
 
@@ -4386,8 +4389,11 @@ sub getevents {
              $evt->{'repost_anum'}    = $final_anum;
              $evt->{'repost_props'}  = $entry->props;
              $evt->{'original_entry_url'} = $entry->url,
-             $evt->{'repostername'} = $repost_entry->journal->username;
+             $evt->{'repostername'} = $repost_entry->poster->username;
              $evt->{'postername'} = $entry->poster->username;
+	     $evt->{'journalname'} = $entry->journal->username;
+	     my $userpic = $entry->userpic;
+	     $evt->{'poster_userpic_url'} = $userpic && $userpic->url;
         }
 
         # now my own post, so need to check for suspended prop
