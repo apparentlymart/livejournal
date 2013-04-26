@@ -570,7 +570,7 @@
         } elsif ($u->is_person) {
             $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/user.gif?v=14273' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         } elsif ($com) {
-            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif?v=14273' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
+            $default_userpic_img = "<img src='$LJ::IMGPREFIX/profile_icons/comm.png?v=14273' class='user_pic' alt=\"$ML{'.userpic.alt'}\" />";
         } elsif ($u->is_identity) {
             # Fanat.ru users have special icon
             my $value = $u->identity->value;
