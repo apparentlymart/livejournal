@@ -5,6 +5,8 @@ body<=
     use Class::Autouse qw( LJ::Browse );
     use vars qw(%GET %POST $title $body);
 
+    LJ::need_res('stc/admin/general.css');
+
     my $remote = LJ::get_remote() or return "<?needlogin?>";
 
     # priv check
@@ -18,7 +20,7 @@ body<=
     my $vert_id = $POST{'vert_id'} ne '' ? $POST{'vert_id'} : undef;
 
     $body = '';
-
+    $body .= "<div class='b-adminpage b-adminpage-padding'>";
     $body .= "<form method='POST'>\n";
     my $form_auth = LJ::form_auth();
     $body .= $form_auth;
@@ -30,7 +32,7 @@ body<=
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
 #    @vert_ids = sort { $a cmp $b } @vert_ids;
 
-    $body .= "<p>";
+    $body .= "<div>";
     $body .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },
@@ -38,8 +40,9 @@ body<=
                 value => '' },
                 @vert_ids
             );
-    $body .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+    $body .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</div>";
     $body .= "</form>";
+    
 
     my $vertical = undef;
     if (LJ::did_post() && $POST{'vert_id'}) {
@@ -101,6 +104,7 @@ body<=
         $body .= '</div></div>';
     }
     $body .= "<p style='clear:both;'><a href='/admin/browse/'>Back to main page</a></p>";
+    $body .= "</div>";
 
     return $body;
 

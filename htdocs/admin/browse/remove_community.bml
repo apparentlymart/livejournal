@@ -9,6 +9,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
 
+    LJ::need_res('stc/admin/general.css');
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -90,6 +92,7 @@ body<=
         }
     }
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
@@ -151,6 +154,8 @@ body<=
 
     $ret .= "</form>";
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
+    $ret .= "</div>";
+
 
     return "<body>$ret</body>";
 }

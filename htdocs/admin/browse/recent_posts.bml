@@ -5,6 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Browse );
+    LJ::need_res('stc/admin/general.css');
 
     my $remote = LJ::get_remote();
 
@@ -19,6 +20,7 @@ body<=
 
     my $vert_id = $POST{'vert_id'} || $GET{'vert_id'};
 
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
@@ -29,7 +31,7 @@ body<=
     my @vert_ids = map { { value => $_->vert_id, text => $_->name } } @verticals;
     @vert_ids = sort { $a->{'text'} cmp $b->{'text'} } @vert_ids;
 
-    $ret .= "<p> ";
+    $ret .= "<div> ";
     $ret .= LJ::html_select({
                 name => 'vert_id',
                 selected => $vert_id },
@@ -37,9 +39,10 @@ body<=
                 value => '' },
                 @vert_ids
             );
-    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</p>";
+    $ret .= "&nbsp;" . LJ::html_submit('go', 'Go') . "</div>";
 
     $ret .= "</form>";
+    $ret .= "</div>";
 
     if (LJ::did_post() && $POST{'delete_post'}) {
         my $vertical = LJ::Vertical->load_by_id($POST{'vert_id'});
@@ -71,6 +74,7 @@ body<=
 
         my @posts = LJ::Browse->search_posts( comms => \@communities, page_size => "$skip,$page_size", vertical => $vertical );
 
+        $ret .= "<div class='b-adminpage b-adminpage-padding'>";
         $ret .= "<ul style='list-style:none;line-height:1.6em;padding:0;'>";
         foreach (@posts) {
             next unless $_->valid;
@@ -94,7 +98,7 @@ body<=
     }
 
     $ret .= "<p><a href='/admin/browse/'>Back to main page</a></p>";
-
+    $ret .= "</div>";
 
     return "<body>$ret</body>";
 }
