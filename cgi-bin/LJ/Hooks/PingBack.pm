@@ -1,6 +1,7 @@
 package LJ::Hooks::PingBack;
 use strict;
 use Class::Autouse qw (LJ::PingBack);
+use LJ::ExtBlock;
 
 #
 LJ::register_hook("add_extra_options_to_manage_comments", sub {
@@ -106,6 +107,9 @@ LJ::register_hook("postpost", sub {
     
     return unless LJ::PingBack->has_user_pingback($journal);
 
+    # check weight
+    return if $journal->get_reader_weight() < _min_reader_weight();
+
     # check security
     return if $security ne 'public';
 
@@ -144,6 +148,9 @@ LJ::register_hook('new_comment2', sub {
     my $entry   = LJ::Entry->new($journal, 'jitemid' => $opts->{'itemid'});
     my $comment = LJ::Comment->new($journal, 'jtalkid' => $opts->{'jtalkid'});
     my $data    = $opts->{'data'};
+
+    # check weight
+    return if $u->get_reader_weight() < _min_reader_weight();
 
     return if $entry->{security} ne "public";
 
@@ -235,6 +242,28 @@ LJ::register_hook("before_journal_content_created", sub {
 
     return;
 });
+
+sub _min_reader_weight {
+
+    my $result = {
+        enable_reader_weight => 0,
+        min_reader_weight    => 0,
+    };
+
+    my $ext_block;
+    my $eval_res = eval { $ext_block = LJ::ExtBlock->load_by_id('antispam_params'); 1 };
+    if ($eval_res) {
+        my $values = $ext_block ? LJ::JSON->from_json($ext_block->blocktext) : { c => {} };
+        if ( $values->{c}->{enable_reader_weight} && $values->{c}->{min_reader_weight} ) {
+            $result = $values->{c}->{enable_reader_weight} ? $values->{c}->{min_reader_weight} : 0;
+        }
+    } else {
+        warn $@;
+    }
+
+    return $result;
+
+}
 
 
 1;
