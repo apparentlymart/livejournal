@@ -7,6 +7,9 @@ body<=
 <?_code
 {
     use strict;
+    
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
 
     my $qs = BML::get_query_string();
     return LJ::bad_input($ML{'.error.invalidargument'})
