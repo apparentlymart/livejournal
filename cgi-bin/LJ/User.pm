@@ -230,6 +230,8 @@ sub create_community {
     my $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_THEME_COMMUNITY);
     LJ::Customize->apply_theme($u, $theme) if $theme;
 
+    $remote->clear_cache_friends($u);
+
     return $u;
 }
 
@@ -5105,17 +5107,8 @@ sub ban_user {
 
     LJ::run_hooks('ban_set', $u, $ban_u);
 
-    my @friendof_uids  = $u->friendof_uids;
-    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
+    $ban_u->clear_cache_friends($u);
 
-    my $ban_uids = LJ::load_rel_user($u, 'B');
-    my %ban_user_hash = map {$_ => 1} @$ban_uids;
-
-    if ($friendof_uids_hash{$ban_u->id} && !$ban_user_hash{$ban_u->id}) {
-         LJ::MemCache::decr($u->user.'_count_friendof') if $ban_u->{journaltype} eq 'P' || $ban_u->{journaltype} eq 'I';
-         LJ::MemCache::decr($u->user.'_count_member')   if $ban_u->{journaltype} eq 'C' || $ban_u->{journaltype} eq 'S';
-    }
- 
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }
 
@@ -5125,22 +5118,16 @@ sub ban_user_multi {
     my $us = LJ::load_userids(@banlist);
     my $remote = LJ::get_remote();
 
-    my @friendof_uids  = $u->friendof_uids;
-    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
-
-    my $ban_uids = LJ::load_rel_user($u, 'B');
-    my %ban_user_hash = map {$_ => 1} @$ban_uids;
-
     foreach my $banuid (@banlist) {
+
+        next unless $us->{$banuid};
+
         LJ::User::UserlogRecord::BanSet->create( $u,
             'bannedid' => $banuid, 'remote' => $remote );
 
         LJ::run_hooks('ban_set', $u, $us->{$banuid}) if $us->{$banuid};
 
-        if ($friendof_uids_hash{$banuid} && !$ban_user_hash{$banuid}) {
-            LJ::MemCache::decr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
-            LJ::MemCache::decr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
-        }
+        $us->{$banuid}->clear_cache_friends($u);
     }
 
     LJ::set_rel_multi(map { [$u->id, $_, 'B'] } @banlist);
@@ -5154,22 +5141,17 @@ sub unban_user_multi {
     my $us = LJ::load_userids(@unbanlist);
     my $remote = LJ::get_remote();
 
-    my @friendof_uids  = $u->friendof_uids;
-    my %friendof_uids_hash = map {$_ => 1} @friendof_uids;
-
-    my $ban_uids = LJ::load_rel_user($u, 'B');
-    my %ban_user_hash = map {$_ => 1} @$ban_uids;
-
     foreach my $banuid (@unbanlist) {
+
+        next unless $us->{$banuid};
+        
         LJ::User::UserlogRecord::BanUnset->create( $u,
             'bannedid' => $banuid, 'remote' => $remote );
 
         LJ::run_hooks('ban_unset', $u, $us->{$banuid}) if $us->{$banuid};
 
-        if ($friendof_uids_hash{$banuid} && $ban_user_hash{$banuid}) {
-            LJ::MemCache::incr($u->user.'_count_friendof') if $us->{$banuid}->{journaltype} eq 'P' || $us->{$banuid}->{journaltype} eq 'I';
-            LJ::MemCache::incr($u->user.'_count_member')   if $us->{$banuid}->{journaltype} eq 'C' || $us->{$banuid}->{journaltype} eq 'S';
-        }
+        $us->{$banuid}->clear_cache_friends($u);
+
     }
 
     LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
@@ -8851,21 +8833,6 @@ sub add_friend {
 
             $sclient->insert_jobs(@jobs) if @jobs;
 
-            # For Profile
-            LJ::MemCache::incr($friender->user.'_count_friends');
-
-            LJ::MemCache::incr($friender->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
-            LJ::MemCache::incr($friender->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
-            LJ::MemCache::incr($friender->user.'_count_yfriends') if $friendee->is_syndicated;
-
-            LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
-            
-            LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
- 
-            if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $friender->userid)) {
-                LJ::MemCache::incr($friender->user.'_count_mutual');
-                LJ::MemCache::incr($friendee->user.'_count_mutual');
-            }
        }
     }
 
@@ -8925,21 +8892,6 @@ sub remove_friend {
  
             $sclient->insert_jobs(@jobs);
 
-            # For Profile
-            LJ::MemCache::decr($u->user.'_count_friends');
-
-            LJ::MemCache::decr($u->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
-            LJ::MemCache::decr($u->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
-            LJ::MemCache::decr($u->user.'_count_yfriends') if $friendee->is_syndicated;
-    
-            LJ::MemCache::decr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
-
-            LJ::MemCache::decr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
-
-            if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $u->userid)) {
-                LJ::MemCache::decr($friendee->user.'_count_mutual');
-                LJ::MemCache::decr($u->user.'_count_mutual');
-            }
         }
     }
 

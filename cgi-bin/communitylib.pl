@@ -387,6 +387,8 @@ sub accept_comm_invite {
         } else {
             LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
 
+            $cu->clear_cache_friends($u);
+
             if ( $_ eq 'admin' && $args->{$_} ) {
                 LJ::User::UserlogRecord::MaintainerAdd->create( $cu,
                     'maintid' => $u->userid,
@@ -413,6 +415,8 @@ sub accept_comm_invite {
                 undef, $cu->{userid}, $u->{userid}, $maintid, 'A');
         return LJ::error("Can't set user $u->{user} as maintainer for $cu->{user}")
     }
+
+    $cu->clear_cache_friends($u);
 
     # done
     return 1;
@@ -448,6 +452,8 @@ sub reject_comm_invite {
     return LJ::error('db') unless $cu->writer;
     $cu->do("UPDATE invitesent SET status = 'rejected' WHERE commid = ? AND userid = ?",
             undef, $cu->{userid}, $u->{userid});
+
+    $cu->clear_cache_friends($u);
 
     # done
     return 1;
@@ -552,6 +558,8 @@ sub leave_community {
     # defriend user -> comm?
     return 1 unless $defriend;
     $u->remove_friend($cu);
+
+    $cu->clear_cache_friends($u);
 
     # don't care if we failed the removal of comm from user's friends list...
     return 1;

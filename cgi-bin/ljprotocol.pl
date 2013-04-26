@@ -4849,19 +4849,7 @@ sub editfriends
                 my $friender = LJ::load_userid($userid);
                 my $friendee = LJ::load_userid($friendid);
 
-                LJ::MemCache::incr($friender->user.'_count_friends');
-
-                LJ::MemCache::incr($friender->user.'_count_pfriends') if $friendee->is_person    || $friendee->is_shared || $friendee->is_identity;
-                LJ::MemCache::incr($friender->user.'_count_cfriends') if $friendee->is_community || $friendee->is_news;
-                LJ::MemCache::incr($friender->user.'_count_yfriends') if $friendee->is_syndicated;
-
-                LJ::MemCache::incr($friendee->user.'_count_friendof') if $friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I';
-                LJ::MemCache::incr($friendee->user.'_count_member')   if $friendee->{journaltype} eq 'C' || $friendee->{journaltype} eq 'S';
-
-                if (($friendee->{journaltype} eq 'P' || $friendee->{journaltype} eq 'I') && LJ::get_groupmask($friendee->userid, $friender->userid)) {
-                    LJ::MemCache::incr($friender->user.'_count_mutual');
-                    LJ::MemCache::incr($friendee->user.'_count_mutual');
-                }
+                $friender->clear_cache_friends($friendee);
 
                 ## delay event to accumulate users activity
                 require LJ::Event::BefriendedDelayed;

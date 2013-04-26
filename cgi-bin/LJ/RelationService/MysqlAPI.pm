@@ -240,6 +240,8 @@ sub _create_relation_to_type_f {
 
     LJ::run_hooks('befriended', $u, $friend);
     LJ::User->increase_friendsof_counter($friend->userid);
+
+    $u->clear_cache_friends($friend);
     
     return $cnt;
 }
@@ -318,6 +320,8 @@ sub _remove_relation_to_type_f {
 
         LJ::memcache_kill($u->userid, 'friends');
         LJ::memcache_kill($u->userid, 'friends2');
+
+        $u->clear_cache_friends($friend);
     }
 
     return $cnt;

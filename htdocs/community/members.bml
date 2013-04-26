@@ -119,6 +119,7 @@ body<=
             LJ::User::UserlogRecord::SetOwner->create( $c,
                 'ownerid' => $new_sm_u->userid, 'remote' => $remote );
             LJ::statushistory_add($c, $remote, 'set_owner', $new_sm_u->{user} . " set as owner by " . $remote->{user});
+            $c->clear_cache_friends($new_sm_u);
         }
     }
 
@@ -299,6 +300,7 @@ body<=
                     }
                 }
             }
+            $c->clear_cache_friends($us->{$id});
             $maints++ if $POST{"edit_${id}_admin"} && !$us->{$id}->is_expunged;
         }
         return $print_with_ad->(LJ::bad_input(@maint_errors)) if @maint_errors;
