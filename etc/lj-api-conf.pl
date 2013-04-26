@@ -34,6 +34,7 @@
         getdaycounts     => 'journal_ro',
         postevent        => 'journal_rw',
         editevent        => 'journal_rw',
+        createrepost     => 'journal_rw',
         syncitems        => 'journal_ro',
         getevents        => 'journal_ro',
         editfriends      => 'friends_rw',

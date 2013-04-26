@@ -25,6 +25,7 @@ use Class::Autouse qw(
                       LJ::API::RateLimiter
                       LJ::Pay::Repost::Offer
                       LJ::MemCacheProxy
+                      LJ::Entry::Repost
                       );
 
 use LJ::TimeUtil;
@@ -106,6 +107,8 @@ my %e = (
      "224" => E_TEMP,
      "225" => E_TEMP,
      "226" => E_TEMP,
+     "227" => E_TEMP,
+     "228" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -183,6 +186,7 @@ my %HANDLERS = (
     editevent         => \&editevent,
     syncitems         => \&syncitems,
     getevents         => \&getevents,
+    createrepost      => \&createrepost,
     editfriends       => \&editfriends,
     editfriendgroups  => \&editfriendgroups,
     consolecommand    => \&consolecommand,
@@ -4656,6 +4660,32 @@ sub getevents {
     }
 
     return $res;
+}
+
+sub createrepost {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'createrepost');
+
+    my $u = $flags->{'u'};
+
+    my $timezone = $req->{'tz'} || return fail($err,215);
+
+    my $url   = $req->{'url'} || return fail($err,200,"url");
+    my $entry = LJ::Entry->new_from_url($url);
+
+    return fail($err, 203, 'url') unless $entry && $entry->valid;
+    return fail($err, 227) unless $entry->visible_to($u);
+
+    my $result = LJ::Entry::Repost->create(  $u, # destination journal
+                                             $entry, # entry to be reposted
+                                             $timezone, # timezone for repost
+                                             );
+
+    if ( my $error = $result->{error} ) {
+        return fail($err, 228, $error->{error_message});
+    }
+    
+    return $result;
 }
 
 sub editfriends
