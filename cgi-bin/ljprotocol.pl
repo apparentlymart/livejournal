@@ -4371,7 +4371,7 @@ sub getevents {
                          'posterid'          => \$jposterid,
                          'eventtime'         => \$eventtime,
                          'security'          => \$sec,
-                         'anum'              => \$anum,
+                         'anum'              => \$final_anum,
                          'event'             => \$repost_text,
                          'subject'           => \$repost_subject,
                          'reply_count'       => \$replycount, };
@@ -4387,6 +4387,7 @@ sub getevents {
              $evt->{'repost_ownerid'} = $final_ownerid;
              $evt->{'repost_itemid'}  = $final_itemid;
              $evt->{'repost_anum'}    = $final_anum;
+             $evt->{'repost_ditemid'} = $final_itemid * 256 + $final_anum;
              $evt->{'repost_props'}  = $entry->props;
              $evt->{'original_entry_url'} = $entry->url,
              $evt->{'repostername'} = $repost_entry->poster->username;
