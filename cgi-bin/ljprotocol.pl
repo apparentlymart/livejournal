@@ -109,6 +109,7 @@ my %e = (
      "226" => E_TEMP,
      "227" => E_TEMP,
      "228" => E_TEMP,
+     "229" => E_TEMP,
 
      # Access Errors
      "300" => E_TEMP,
@@ -187,6 +188,8 @@ my %HANDLERS = (
     syncitems         => \&syncitems,
     getevents         => \&getevents,
     createrepost      => \&createrepost,
+    deleterepost      => \&deleterepost,
+    getrepoststatus   => \&getrepoststatus,
     editfriends       => \&editfriends,
     editfriendgroups  => \&editfriendgroups,
     consolecommand    => \&consolecommand,
@@ -4685,6 +4688,46 @@ sub createrepost {
         return fail($err, 228, $error->{error_message});
     }
     
+    return $result->{result};
+}
+
+sub deleterepost {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'deleterepost');
+
+    my $u = $flags->{'u'};
+
+    my $url   = $req->{'url'} || return fail($err,200,"url");
+    my $entry = LJ::Entry->new_from_url($url);
+
+    return fail($err, 203, 'url') unless $entry && $entry->valid;
+
+    my $result = LJ::Entry::Repost->delete(  $u, # destination journal
+                                             $entry,); # entry to be reposted
+    
+    if ( my $error = $result->{error} ) {
+        return fail($err, 229, $error->{error_message});
+    }
+    
+    return $result;
+}
+
+sub getrepoststatus {
+    my ($req, $err, $flags) = @_;
+
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getevents');
+
+    my $u = $flags->{'u'};
+
+    my $url   = $req->{'url'} || return fail($err,200,"url");
+    my $entry = LJ::Entry->new_from_url($url);
+
+    return fail($err, 203, 'url') unless $entry && $entry->valid;
+    return fail($err, 227) unless $entry->visible_to($u);
+
+    my $result = LJ::Entry::Repost->get_status($entry, $u);
+
     return $result;
 }
 
