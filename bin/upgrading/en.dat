@@ -4245,6 +4245,10 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.banner.close=Close banner for today
+
+main.banner.title=Advertising
+
 main.intro.different.hide=Hide different posts from one user
 
 main.intro.different.hide.title=Hide two or three different posts from one user or community
@@ -4368,6 +4372,8 @@ main.updates.recent=[[entries_count]] [[?entries_count|user|users]] you often re
 main.updates.recent.clear=Clear
 
 main.updates.recent.clear.title=Remove all messages about new posts
+
+main.updates.remove=Remove item from updates list
 
 main.updates.toggle.collapse=Collapse
 
