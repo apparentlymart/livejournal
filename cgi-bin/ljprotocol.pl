@@ -4671,7 +4671,11 @@ sub createrepost {
 
     my $u = $flags->{'u'};
 
-    my $timezone = $req->{'tz'} || return fail($err,215);
+    my $timezone = $req->{'tz'} || 'guess';
+    unless ($timezone eq 'guess' ||
+            $timezone =~ /^[+\-]\d\d\d\d$/) {
+        return fail($err, 203, 'xmlrpc.des.bad_value', {'param'=>'tz'});
+    }
 
     my $url   = $req->{'url'} || return fail($err,200,"url");
     my $entry = LJ::Entry->new_from_url($url);
@@ -4688,6 +4692,8 @@ sub createrepost {
         return fail($err, 228, $error->{error_message});
     }
     
+    $result->{result}{status} = 'OK';
+
     return $result->{result};
 }
 
@@ -4709,6 +4715,8 @@ sub deleterepost {
         return fail($err, 229, $error->{error_message});
     }
     
+    $result->{status} = 'OK';
+    
     return $result;
 }
 
@@ -4727,6 +4735,8 @@ sub getrepoststatus {
     return fail($err, 227) unless $entry->visible_to($u);
 
     my $result = LJ::Entry::Repost->get_status($entry, $u);
+
+    $result->{status} = 'OK';
 
     return $result;
 }
