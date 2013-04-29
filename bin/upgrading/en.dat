@@ -4253,6 +4253,16 @@ main.banner.close=Close banner for today
 
 main.banner.title=Advertising
 
+main.follow.facebook=Follow this rating on Facebook ([[facebook_name]])
+
+main.follow.livejournal=Follow this rating on LiveJournal ([[ljuser_name]])
+
+main.follow.livejournal.undo=Unfollow this rating on LiveJournal ([[ljuser_name]])
+
+main.follow.twitter=Follow this rating on Twitter ([[twitter_name]])
+
+main.follow.vk=Follow this rating on VK.com ([[vk_name]])
+
 main.intro.different.hide=Hide different posts from one user
 
 main.intro.different.hide.title=Hide two or three different posts from one user or community
