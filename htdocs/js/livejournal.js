@@ -623,7 +623,8 @@ LiveJournal.parseLikeButtons = (function () {
         href = link.attr('href'),
         params = {
             url: link.data('url'),
-            name: link.data('title')
+            name: link.data('title'),
+            description: link.data('text')
         };
 
         link.attr('href', LiveJournal.constructUrl(href, params));
