@@ -85,8 +85,8 @@ sub should_render {
 sub widget_ele_id {
     my $class = shift;
 
-    my $widget_id = ref $class ? $class->{id} : $currentId++;
-    return "LJWidget_$widget_id";
+    #my $widget_id = ref $class ? $class->{id} : $currentId++;
+    return ""; #"LJWidget_$widget_id";
 }
 
 # render a widget, including its content wrapper
