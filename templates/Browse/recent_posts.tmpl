@@ -86,7 +86,7 @@
 					</li>
 					<tmpl_if expr="lj_enabled('sharing')">
 						<li class="b-share-sharethis">
-							<a href="#" data-url="<TMPL_VAR NAME="url">" data-title="<TMPL_VAR EXPR="eurl(subject)">" data-hashtags="<TMPL_VAR NAME="hashtags">" class="js-lj-share">
+							<a href="#" data-url="<TMPL_VAR NAME="url">" data-title="<TMPL_VAR EXPR="eurl(subject)">" data-hashtags="<TMPL_VAR NAME="hashtags">" data-event="<TMPL_VAR event>" class="js-lj-share">
 								<TMPL_VAR expr="ml('widget.browse.share')">
 							</a>
 						</li>

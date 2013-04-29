@@ -478,9 +478,11 @@ sub render_body {
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
             my $hashtags = $entry->twitter_hashtags;
+            my $event = $entry->event_text;
             push @top_posts, {
-                url             => $entry->url,
+                url             => LJ::eurl($entry->url),
                 hashtags        => $hashtags,
+                event           => LJ::eurl($event),
                 subject         => $entry->subject_text || '***',
                 userpic         => $userpic ? $userpic->url : '',
                 updated_ago     => LJ::TimeUtil->ago_text($entry->logtime_unix),

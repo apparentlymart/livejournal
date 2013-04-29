@@ -188,20 +188,22 @@ sub link_bar
         my $entryurl = '';
         my $entrytitle = '';
         my $entryhashtags = '';
+        my $entryevent = '';
 
         if ($entry) {
-            $entryurl = $entry->url;
+            $entryurl = LJ::eurl($entry->url);
             $entrytitle = LJ::eurl($entry->subject_text);
             $entryhashtags = $entry->twitter_hashtags;
+            $entryevent = LJ::eurl($entry->event_text);
         }
 
         LJ::Share->request_resources();
 
         push @linkele, sprintf '
-            <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s">
+            <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s" data-event="%s" >
                 <i class="b-controls-bg"></i>%s
             </a>
-        ', $title, $entryurl, $entrytitle,  $entryhashtags, $title;
+        ', $title, $entryurl, $entrytitle,  $entryhashtags, $entryevent, $title;
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
