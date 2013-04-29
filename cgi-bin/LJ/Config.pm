@@ -86,8 +86,12 @@ sub load_defaults {
 
 # loads policy configuration
 sub load_policy {
+    no warnings 'redefine';
+
     my $policyconfig = "$ENV{LJHOME}/etc/policyconfig.pl";
     return unless -e $policyconfig;
+
+    local *Readonly::croak = sub {};
     do "$policyconfig" or die $@;
 }
 
