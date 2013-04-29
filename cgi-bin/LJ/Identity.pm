@@ -267,7 +267,7 @@ sub unpack_forwhat {
         $returl_fail = "$LJ::SSLROOT/login.bml?$params";
         $skip_interstitial = 1;
     } elsif ($forwhat eq 'ljart') {
-        $returl = "$LJ::SITEROOT/create/event";
+        $returl = "$LJ::SITEROOT/event/create";
         $returl_fail = "$LJ::SSLROOT/login.bml";
         $skip_interstitial = 1;
     } else {
