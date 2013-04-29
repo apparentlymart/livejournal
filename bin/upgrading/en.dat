@@ -1822,6 +1822,8 @@ entryunits.empty=Sorry, there is no available entries to display
 
 entryunits.more=Show more 25 entries
 
+entryunits.stat.hidehidden=Hide all hidden entries back
+
 entryunits.stat.showhidden=Show all hidden entries
 
 entryunits.stat.settings=Settings
