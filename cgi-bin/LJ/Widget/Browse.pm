@@ -182,7 +182,11 @@ sub render_posts {
             $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} );
         }
 
+        my $attrs              = $entry->sharing_atttributes();
+        my $sharing_attributes = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
+
         push @temp_array_post, {
+            sharing_attributes => $sharing_attributes,
             subject         => $trimmed_subj,
             is_subject_trimmed => $subject ne $trimmed_subj ? 1 : 0,
             userpic         => $userpic ? $userpic->url : '',
@@ -478,11 +482,7 @@ sub render_body {
             my $userpic = $entry->userpic;
             my $poster = $entry->poster;
 
-            my $attrs              = $entry->sharing_atttributes();
-            my $sharing_attributes = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
-
             push @top_posts, {
-                sharing_attributes => $sharing_attributes,
                 subject            => $entry->subject_text || '***',
                 userpic            => $userpic ? $userpic->url : '',
                 updated_ago        => LJ::TimeUtil->ago_text($entry->logtime_unix),
