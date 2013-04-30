@@ -1177,6 +1177,10 @@ sub entry_form_decode
                 prop_opt_preformatted prop_opt_nocomments prop_opt_lockcomments
                 prop_current_location prop_current_coords
                 prop_taglist prop_qotdid prop_give_features
+                prop_ljart_event_town prop_ljart_event_location
+                prop_ljart_event_paid prop_ljart_event_price
+                prop_ljart_event_type prop_ljart_event_image
+                prop_ljart_event_desc prop_ljart_event
                 repost_budget paid_repost_on repost_limit_sc)) {
         $req->{$_} = $POST->{$_};
     }
@@ -1206,6 +1210,15 @@ sub entry_form_decode
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
     $req->{'prop_opt_norating'}       = $POST->{'prop_opt_norating'} ? 1 : 0;
+
+    my $ljart_date_from = $POST->{'prop_ljart_event_date_from'};
+    my $ljart_date_to   = $POST->{'prop_ljart_event_date_to'};
+    my $ljart_time_from = $POST->{'prop_ljart_event_time_from'};
+    my $ljart_time_to   = $POST->{'prop_ljart_event_time_to'};
+
+    $req->{'prop_ljart_event_date'} = $ljart_date_to ? "$ljart_date_from-$ljart_date_to" : $ljart_date_from;
+    $req->{'prop_ljart_event_time'} = $ljart_time_to ? "$ljart_time_from-$ljart_time_to" : $ljart_time_from; 
+
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
     $req->{'prop_poster_ip'} = LJ::get_remote_ip();
