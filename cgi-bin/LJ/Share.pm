@@ -40,7 +40,7 @@ my $services = {
         'bindLink' => 'http://api.addthis.com/oexchange/0.8/forward/email/offer?username=internal&url={url}&title={title}'
     },
     'tumblr' => {
-        'bindLink' => 'http://www.tumblr.com/share/link?url={url}&name={title}&description={event}'
+        'bindLink' => 'http://www.tumblr.com/share/link?url={url}&name={title}&description={text}'
     },
     'odnoklassniki' => {
         'bindLink' => 'http://www.odnoklassniki.ru/dk?st.cmd=addShare&st.s=1&st._surl={url}'

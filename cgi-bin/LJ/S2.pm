@@ -4190,23 +4190,17 @@ sub _Entry__get_link
         return $null_link
             unless LJ::is_enabled('sharing') && $entry->is_public;
 
-        my $url = LJ::eurl($entry->url);
-        my $title = $entry->subject_text;
-        my $hashtags = $entry->twitter_hashtags;
-        my $event = LJ::eurl($entry->event_text);
+        my $attrs  = $entry->sharing_attributes();
 
         my $link_text  = $ctx->[S2::PROPS]->{'text_share'};
         my %link_extra = (
             'class' => 'js-lj-share',
-            'data-url' => $url,
-            'data-title' => LJ::eurl($title),
-            'data-hashtags' =>  $hashtags || "",
-            'data-event' =>  $event || "",
+            %$attrs
         );
 
         my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=2", 24, 24, '');
         my $link = LJ::S2::Link(
-            $url . '?title=' . LJ::eurl($title) . '&hashtags=' . (LJ::eurl($hashtags) || ''),
+            $attrs->{'data-url'} . '?title=' . $attrs->{'data-title'} . '&hashtags=' . $attrs->{'data-hashtags'} . "&text=" . $attrs->{'data-text'},
             $link_text,
             $link_image,
             %link_extra

@@ -1760,6 +1760,36 @@ sub touch_commentalter {
     $self->set_prop( 'commentalter' => time );
 }
 
+sub sharing_attributes {
+    my ($self) = @_;
+
+    my $hashtags     = $self->twitter_hashtags || ''; 
+    my $text         = $self->event_text       || ''; 
+    my $subject      = $self->subject_text     || '';
+    my $url          = $self->url              || '';
+
+    $text =~ s/&nbsp;/ /gsm;
+    $text =~ s/\s+/ /gsm;
+    $text = LJ::Text->truncate_to_word_with_ellipsis(
+        'str'           => $text,
+        'punct_space'   => 1,
+        'fill_empty'    => 1,
+        'strip_html'    => 1,
+        'chars'         => 256,
+    );  
+
+    $text    = LJ::eurl($text);   
+    $url     = LJ::eurl($url);       
+    $subject = LJ::eurl($subject);
+
+    return { 
+        'data-title'    => $subject,
+        'data-url'      => $url,
+        'data-hashtags' => $hashtags,
+        'data-text'     => $text,
+    }
+} 
+
 package LJ;
 
 use Class::Autouse qw (

@@ -60,13 +60,9 @@ sub render {
             my $entry = LJ::Entry->new($journal, ditemid => $1);
 
             if ($entry and $entry->correct_anum) {
-                my $hashtags = $entry->twitter_hashtags;
-                my $event    = $entry->event_text;
-                
-                $data_journal->{url}                  = LJ::eurl($entry->url);
-                $data_journal->{title}                = LJ::eurl($entry->subject_text);
-                $data_journal->{event}                = LJ::eurl($event);
-                $data_journal->{hashtags}             = $hashtags;
+                my $attrs = $entry->sharing_attributes();
+                                
+                $data_journal->{sharing_attributes}   = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
                 $data_journal->{view_entry_is_valid}  = 1;
                 $data_journal->{view_entry_is_public} = ($entry->is_public() ? 1 : 0);
             }
