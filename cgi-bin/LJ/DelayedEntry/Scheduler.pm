@@ -173,7 +173,7 @@ sub on_pulse {
                  return;
             }
 
-            @$entries = grep { $_->work_in_progress() } @$entries;
+            @$entries = grep { $_ && $_->work_in_progress() } @$entries;
 
             $lock->unlock;
  

@@ -730,10 +730,16 @@ sub load_data {
     $self->{delayed_id} = $delayedid;
     $self->{journal}    = LJ::want_user($opts->{journalid});
     $self->{poster}     = LJ::want_user($opts->{posterid});
-    $self->{data}       = __deserialize($data_ser);
-    $self->{posttime}   = __get_datetime($self->{data});
     $self->{lastposttry} = $opts->{lastposttry};
 
+    if ($data_ser) {
+        $self->{data}       = __deserialize($data_ser);
+        $self->{posttime}   = __get_datetime($self->{data});
+    } else {
+        warn "Wrong entry with delayed_id: " . $delayedid . ". Skipped. Mark as posted";
+        $self->mark_posted();
+        return undef;
+    }
     return $self;
 }
 
