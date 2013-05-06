@@ -675,6 +675,56 @@ sub get_text {
     return $LJ::IS_DEV_SERVER? "[uhhh: $code]" : "";
 }
 
+sub _get_texts_from_database {
+    my ( $lnid, $dmid, $codes ) = @_;
+
+    my $dbh       = LJ::get_db_writer();
+    my $itcode_in = join( ',', map { $dbh->quote($_) } @$codes );
+
+    # we could be smart here and select exactly scalar(@$codes) rows
+    # with maximum txtid for each
+    # (SQL: ORDER BY itcode, txtid DESC LIMIT $itcodes_count);
+    # instead, we filter out unnecessary rows in the application to keep
+    # the logic simple
+    my $rows      = $dbh->selectall_arrayref(
+        "SELECT ml_items.itcode, ml_text.text " .
+        "FROM ml_items INNER JOIN ml_text USING (dmid, itid) " .
+        "WHERE ml_items.itcode IN ($itcode_in) " .
+        "AND ml_items.dmid=? AND ml_text.lnid=? " .
+        "ORDER BY ml_text.txtid DESC",
+        { 'Slice' => {} },
+        $dmid, $lnid,
+    );
+
+    my %ret;
+    foreach my $row (@$rows) {
+        # some MySQL codes might be mixed-case
+        my $itcode = lc $row->{'itcode'};
+
+        # the same itcode can be present multiple times in the result set, see
+        # the 'could be smart' comment above; here we filter out
+        # unnecessary rows
+        next if exists $ret{$itcode};
+        $ret{$itcode} = $row->{'text'};
+    }
+
+    my @codes_remaining = grep { ! exists $ret{$_} } @$codes;
+
+    if (@codes_remaining) {
+        my $lang_struct = get_lang_id($lnid);
+        my $parent_lnid = $lang_struct->{'parentlnid'};
+
+        if ($parent_lnid) {
+            my $from_parent = _get_texts_from_database( $parent_lnid,
+                $dmid, \@codes_remaining );
+
+            %ret = ( %ret, %$from_parent );
+        }
+    }
+
+    return \%ret;
+}
+
 # Loads multiple language strings at once.  These strings
 # cannot however contain variables, if you have variables
 # you wouldn't be calling this anyway!
@@ -788,37 +838,12 @@ sub get_text_multi {
         return \%strings;
     }
 
-    my $l = $LN_CODE{$lang};
+    my $lang_struct   = get_lang($lang);
+    my $from_database = _get_texts_from_database( $lang_struct->{'lnid'},
+        $dmid, [ keys %dbload ] );
 
-    # This shouldn't happen!
-    die "Unable to load language code: $lang" unless $l;
-
-    my $dbw = LJ::get_db_writer();
-    my $bind = join( ',', map {'?'} keys %dbload );
-
-    my $rows = $dbw->selectall_arrayref(
-        qq{
-            SELECT i.itcode, t.text
-            FROM ml_text t, ml_latest l, ml_items i
-            WHERE
-                t.dmid=? AND
-                t.txtid=l.txtid AND
-                l.dmid=? AND
-                l.lnid=? AND
-                l.itid=i.itid AND
-                i.dmid=? AND
-                i.itcode IN ($bind)
-        },
-        { 'Slice' => {} },
-        $dmid, $dmid, $l->{'lnid'}, $dmid, keys %dbload,
-    );
-
-    # now replace the empty strings with the defined ones
-    # that we got back from the database
-    foreach my $row (@$rows) {
-
-        # some MySQL codes might be mixed-case
-        $dbload{ lc $row->{'itcode'} } = $row->{'text'};
+    while ( my ( $code, $text ) = each %$from_database ) {
+        $dbload{$code} = $text;
     }
 
     while ( my ( $code, $text ) = each %dbload ) {
