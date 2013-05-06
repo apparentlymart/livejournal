@@ -110,31 +110,46 @@ sub notify_about_reference {
 	return 0 unless $class->should_user_recieve_notice($u, $poster);
 	
 	LJ::load_user_props($u, 'browselang');
-    my $lang    = $u->{'browselang'};
-	
-	LJ::send_mail({
+    my $lang = $u->{'browselang'};
+    my $html = $u->receives_html_emails;
+    
+    my $body = LJ::Lang::get_text(
+        $lang,
+        'pingback.notifyref.'.($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain'),
+        undef,
+        {
+            'usernameA'   => $u->username,
+            'usernameB'   => $poster->username,
+            'context'     => $context,
+            'entry_URL'   => $source_uri,
+        }
+    );
+    
+    my $subject = LJ::Lang::get_text(
+        $lang,
+        'pingback.notifyref.subject',
+        undef,
+        {
+            usernameB   => $poster->username,
+        }
+    );
+    
+	if ($html) {	
+	   LJ::send_mail({
 	        'to'      => $u->email_raw,
 	        'from'    => $LJ::DONOTREPLY_EMAIL,
-	        'subject' => LJ::Lang::get_text(
-                            $lang,
-                            'pingback.notifyref.subject',
-                            undef,
-                            {
-                                usernameB   => $poster->username,
-                            }
-                         ),
-	        'body'    => LJ::Lang::get_text(
-			                $lang,
-			                'pingback.notifyref.'.($comment ? 'textcomment' : 'text'),
-			                undef,
-			                {
-			                	'usernameA'   => $u->username,
-			                	'usernameB'   => $poster->username,
-			                    'context'     => $context,
-			                    'entry_URL'   => $source_uri,
-			                }
-			             ),
-	});
+	        'subject' => $subject,
+	        'body'    => $body,
+			'html'    => $body,
+	   });
+	} else {
+        LJ::send_mail({
+            'to'      => $u->email_raw,
+            'from'    => $LJ::DONOTREPLY_EMAIL,
+            'subject' => $subject,
+            'body'    => $body,
+        });
+	}
 }
 sub should_user_recieve_notice {
 	my $class = shift;
@@ -142,6 +157,8 @@ sub should_user_recieve_notice {
     my $poster = shift;
     
     return 0 if $user->userid eq $poster->userid;
+    
+    return 0 if LJ::is_banned($poster->userid, $user->userid);
     
 #    warn("status: ".$user->statusvis);
 #    warn("locked: ".$user->is_locked);
