@@ -9080,6 +9080,25 @@ sub get_friend_group {
     return $find_grp->();
 }
 
+sub get_friend_group_sorted {
+    my ($u, %args) = @_;
+
+    my $friendgroups = LJ::get_friend_group($u);
+    
+    my @res = map +{
+        id => $_->{groupnum},
+        name => $_->{groupname},
+        public => $_->{is_public},
+        sortorder => $_->{sortorder},
+    }, sort { $a->{sortorder} <=> $b->{sortorder} } values( %$friendgroups);
+
+    unless ($args{no_unicode}) {
+        LJ::text_out(\$_->{name}) for @res;
+    }
+
+    return \@res;
+}
+
 
 # <LJFUNC>
 # name: LJ::fill_groups_xmlrpc
