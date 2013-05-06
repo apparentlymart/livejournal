@@ -85,6 +85,19 @@ body<=
 
     # approve someone joining a community
     if ($aa->{action} eq 'comm_join_request') {
+    
+        #create list of users which can do it.
+        my @all_which_allowed;
+        my $maintainers = LJ::load_rel_user_cache($aa->{userid}, 'A') || [];
+        my $moderators = LJ::load_rel_user_cache($aa->{userid}, 'M') || [];
+        my $owner = LJ::load_rel_user_cache($aa->{userid}, 'S') || [];
+        push @all_which_allowed, (@$maintainers, @$moderators, @$owner);
+        
+        #find remote user in allow list
+        unless (grep $_ eq $remote->{userid}, @all_which_allowed) {
+            return LJ::bad_input($ML{'.error.nopermission'});
+        }
+        
         my $dbh = LJ::get_db_writer();
 
         # get user we're adding

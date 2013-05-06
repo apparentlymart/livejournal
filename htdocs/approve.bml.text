@@ -16,6 +16,8 @@ other options for this user.
 
 .error.approving=There was an error approving this request to join.
 
+.error.nopermission=You don't have permission for it.
+
 .error.internerr.invalidaction=Internal error: invalid action
 
 .error.invalidargument=Invalid argument given
