@@ -699,8 +699,10 @@ create.cap.year|staleness=1
 create.cap.year=per year
 
 create.event.subhead=Header
+create.event.subhead.login=Header
 
 create.event.extracontent=Content content
+create.event.extracontent.login=Content content
 
 create.features.comments|staleness=1
 create.features.comments=Post comments

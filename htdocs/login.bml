@@ -258,11 +258,6 @@
         }
         else {
             
-            if ( $GET{ljart} ) {
-                $body .= LJ::Lang::ml('ljart.create.event.error.noremote');
-                $forwhat = '&forwhat=ljart';
-            }
-
             $body .= "<div class='columns-2-r300 pkg'>\n";
             $body .= "<div class='columns-2-left'>\n";
             $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $ret,
