@@ -2,9 +2,6 @@ package LJ::Lang;
 use strict;
 use warnings;
 
-use lib "$ENV{'LJHOME'}/cgi-bin";
-require "ljhooks.pl";
-
 use base qw( Exporter );
 our @EXPORT_OK = qw( ml );
 
@@ -103,10 +100,10 @@ my $LAST_ERROR;
 my %TXT_CACHE;
 my $CACHE_CLEAN_TIME = 0;
 
-if ( $LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA ) {
-    LJ::register_hook( 'start_request' => sub { %TXT_CACHE = (); } );
-} else {
-    LJ::register_hook( 'start_request' => sub {
+sub start_request_hook {
+    if ( $LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA ) {
+        %TXT_CACHE = ();
+    } else {
         return unless time > $CACHE_CLEAN_TIME;
         %TXT_CACHE = ();
 
@@ -114,7 +111,7 @@ if ( $LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA ) {
         # this is relevant in worker processes that run for very long time
         # without being restarted
         $CACHE_CLEAN_TIME = time + 1800 + int( rand(1800) );
-    } );
+    }
 }
 
 sub last_error {
