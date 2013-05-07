@@ -691,6 +691,10 @@ sub create {
         return LJ::API::Error->get_error('same_user'); 
     }
 
+    unless ($u->is_validated) {
+        return LJ::API::Error->get_error('not_validated');
+    }
+
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
