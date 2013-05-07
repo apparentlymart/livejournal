@@ -380,7 +380,15 @@ class Entry extends EntryLite
 
     var int itemid "Server stored ID number for this entry";
 
-    
+    var string event "Entry is event"; 
+    var string event_town "Town of event"; 
+    var string event_location "Location of event"; 
+    var string event_paid "Event is paid or free"; 
+    var string event_price "Price of event if paid"; 
+    var string event_type "Type of event"; 
+    var string event_image "Url to small image of event"; 
+    var string event_desc "Short description of event"; 
+
     function builtin get_cutted_text() : string
         "Returns text withiout text that has been cutted. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
 
@@ -486,6 +494,18 @@ class UserExtended extends UserLite
     var readonly DateTime last_entry_time "Time of last posted entry";
     var readonly string friends_count "Count user's personal/identity/shared friends";
     var readonly string friendof_count "Count friends of user";
+}
+
+class Event extends UserLite
+"Lj art or other event. Created from community"
+{
+    var readonly string event "Community is event?";
+    var readonly string event_location "Where an event will be taken place";
+    var readonly string event_town "Town of an event";
+    var readonly string event_type "Type of event: exhibition, presentation, festival, play, meeting, perfomance,...";
+    var readonly string event_paid "Paid or free";
+    var readonly string event_price "Price of event";
+    var readonly string event_organizer "Organizer of event";
 }
 
 ### Other
