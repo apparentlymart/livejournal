@@ -1455,19 +1455,19 @@ sub syn_link {
 }
 
 # group names to be displayed with this entry
-# returns nothing if remote is not the poster of the entry
+# returns nothing if remote is not the poster of the entry (or journal admin)
 # returns names as links to the /security/ URLs if the user can use those URLs
 # returns names as plaintext otherwise
 sub group_names {
     my $self = shift;
 
     my $remote = LJ::get_remote();
-    my $poster = $self->poster;
+    my $journal = $self->journal;
 
-    if ($self->allowmask > 1 && $poster && $poster->equals($remote)) {
-        my $groups = LJ::get_friend_group($poster);
+    if ($self->allowmask > 1 && $remote->can_manage($journal)) {
+        my $groups = LJ::get_friend_group($journal);
 
-        # if the poster has friend groups, return the ones to which this entry is filtered
+        # if the journal has friend groups, return the ones to which this entry is filtered
         if (keys %$groups) {
             my @friendgroups = ();
 
@@ -1475,9 +1475,9 @@ sub group_names {
                 next unless $self->allowmask & 1 << $groupid;
 
                 my $name = LJ::ehtml($groups->{$groupid}->{groupname});
-                my $url = $poster->journal_base . "/security/group:$name";
+                my $url = $journal->journal_base . "/security/group:$name";
 
-                my $group_text = $remote->get_cap("security_filter") || $poster->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
+                my $group_text = $journal->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
                 push @friendgroups, $group_text;
             }
 
