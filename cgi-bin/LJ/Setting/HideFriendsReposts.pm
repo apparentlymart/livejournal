@@ -6,7 +6,10 @@ use warnings;
 sub should_render {
     my ($class, $u) = @_;
 
-    return LJ::is_enabled("hide_friends_reposts") && $u ? 1 : 0;
+    return unless LJ::is_enabled('hide_friends_reposts');
+    return unless $u;
+    return unless $u->is_personal || $u->is_identity;
+    return 1;
 }
 
 sub helpurl {
