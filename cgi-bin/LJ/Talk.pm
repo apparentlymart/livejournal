@@ -852,8 +852,6 @@ sub spam_comment {
     my @jtalkids = @_;
 
     # TODO: have an LJ::Entry in the signature
-    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
-
     my @batch = map { int $_ } @jtalkids;
     my $in = join(',', @batch);
     return unless $in;
@@ -895,8 +893,7 @@ sub unspam_comment {
     my @jtalkids = @_;
     
     # TODO: have an LJ::Entry in the signature
-    my $entry = LJ::Entry->new( $u, 'jitemid' => $itemid );
-
+    
     my $new_state = 'A';
     my $screening = LJ::Talk::screening_level( $u, $itemid ); 
     if ($screening eq 'A') {
@@ -2322,7 +2319,6 @@ sub talkform_mobile {
     }
 
     # run controller
-    my $controller = LJ::Mob::Controller::ReadPost->new;
     $controller->_user(LJ::get_remote());
     my $res = $controller->reply(\@opts);
 

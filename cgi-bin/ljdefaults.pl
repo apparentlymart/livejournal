@@ -69,7 +69,7 @@ use strict;
 
     # this option can be a boolean or a URL, but internally we want a URL
     # (which can also be a boolean)
-    if ($LJ::OPENID_SERVER && $LJ::OPENID_SERVER == 1) {
+    if ($LJ::OPENID_SERVER && $LJ::OPENID_SERVER eq 1) {
         $LJ::OPENID_SERVER = "$LJ::SITEROOT/openid/server.bml";
     }
 

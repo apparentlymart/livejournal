@@ -686,8 +686,8 @@ sub check_form_auth {
     return 0 unless $sess eq $chal_sess;
 
     # check the signature is good and not expired
-    my $opts = { dont_check_count => !$opts->{enable_check_count} };  # in/out
-    my $result = LJ::challenge_check($formauth, $opts);
+    my $request_opts = { dont_check_count => !$opts->{enable_check_count} };  # in/out
+    my $result = LJ::challenge_check($formauth, $request_opts);
     return $result;
 }
 
