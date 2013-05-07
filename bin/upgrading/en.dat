@@ -4257,6 +4257,14 @@ main.banner.close=Close banner for today
 
 main.banner.title=Advertising
 
+main.editors.events=Events and Stories
+
+main.editors.hour=Entry of the hour
+
+main.editors.recommends=LiveJournal Recommends
+
+main.editors.main=Main Entry
+
 main.follow.facebook=Follow this rating on Facebook ([[facebook_name]])
 
 main.follow.livejournal=Follow this rating on LiveJournal ([[ljuser_name]])
