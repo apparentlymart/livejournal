@@ -2438,7 +2438,7 @@ sub postevent {
     return fail($err,102)
         if ($ownerid != $posterid && # community post
             ($req->{'security'} eq "private" ||
-            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 && !($u->can_manage($uowner)) )));
 
     # make sure this user isn't banned from posting here (if
     # this is a community journal)
@@ -3118,7 +3118,7 @@ sub editevent {
     return fail($err,102)
         if ($ownerid != $posterid && # community post
             ($req->{'security'} eq "private" ||
-            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 && !($u->can_manage($uowner)) )));
 
     # make sure user can't change post in a certain community without being its member
     return fail($err,102)
