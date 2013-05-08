@@ -2437,8 +2437,9 @@ sub postevent {
     ### make sure user can't post with "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
+            !($u->can_manage($uowner)) && # poster is not admin
             ($req->{'security'} eq "private" ||
-            ($req->{'security'} eq "usemask" && $qallowmask != 1 && !($u->can_manage($uowner)) )));
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
     # make sure this user isn't banned from posting here (if
     # this is a community journal)
@@ -3117,8 +3118,9 @@ sub editevent {
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
+            !($u->can_manage($uowner)) && # poster is not admin
             ($req->{'security'} eq "private" ||
-            ($req->{'security'} eq "usemask" && $qallowmask != 1 && !($u->can_manage($uowner)) )));
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
     # make sure user can't change post in a certain community without being its member
     return fail($err,102)
