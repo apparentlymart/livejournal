@@ -6505,7 +6505,7 @@ sub can_view {
     my $remoteid = int($remote->{'userid'});
 
     # owners can always see their own.
-    return 1 if ($userid == $remoteid);
+    return 1 if $remote->can_manage($userid);
 
     # author in community can always see their post
     return 1 if $remoteid == $item->{'posterid'} and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $journal_name };;
@@ -7980,7 +7980,7 @@ sub get_daycounts {
                 "viewall", "calendar");
         }
 
-        if ( LJ::u_equals( $u, $remote ) ) {
+        if ( $remote->can_manage($u) ) {
             $kind = ['all'];
         } else {
             if ( my $gmask = LJ::get_groupmask($u, $remote) ) {

@@ -1172,7 +1172,7 @@ sub visible_to
     my $remoteid = int($remote->{userid});
 
     # owners can always see their own.
-    return 1 if $userid == $remoteid;
+    return 1 if $remote->can_manage($self->journal);
 
     # author in community can always see their post
     return 1 if $remoteid == $self->posterid and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $self->journal->{user} };
@@ -1464,7 +1464,7 @@ sub group_names {
     my $remote = LJ::get_remote();
     my $journal = $self->journal;
 
-    if ($self->allowmask > 1 && $remote->can_manage($journal)) {
+    if ($self->allowmask > 1 && $remote && $remote->can_manage($journal)) {
         my $groups = LJ::get_friend_group($journal);
 
         # if the journal has friend groups, return the ones to which this entry is filtered
@@ -2365,11 +2365,11 @@ sub get_log2_recent_user
         ## UNUSED: last unless $left;
         last if $notafter and $item->{'rlogtime'} > $notafter;
         next unless $remote || $item->{'security'} eq 'public';
+        my $permit = $remote && $remote->can_manage($item->{'journalid'});
         next if $item->{'security'} eq 'private'
-            and $item->{'journalid'} != $remote->{'userid'};
+            and !$permit;
         if ($item->{'security'} eq 'usemask') {
             next unless $remote->{'journaltype'} eq "P" || $remote->{'journaltype'} eq 'I';
-            my $permit = ($item->{'journalid'} == $remote->{'userid'});
             unless ($permit) {
                 # $mask for $item{journalid} should always be the same since get_log2_recent_log
                 # selects based on the $u we pass in; $u->id == $item->{journalid} from what I can see
@@ -2438,7 +2438,7 @@ sub get_itemid_near2
     my $remote = LJ::get_remote();
 
     if ($remote) {
-        if ($remote->{'userid'} == $u->{'userid'}) {
+        if ($remote->can_manage($u->{'userid'})) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I') {
             my $gmask = LJ::get_groupmask($u, $remote);
@@ -2527,7 +2527,7 @@ sub get_latest_ditemid {
     my $remote = LJ::get_remote();
 
     if ($remote) {
-        if ($remote->userid == $u->userid) {
+        if ($remote->can_manage($u->userid)) {
             $secwhere = "";   # see everything
         } elsif ($remote->is_person || $remote->is_identity) {
             my $gmask = LJ::get_groupmask($u, $remote);

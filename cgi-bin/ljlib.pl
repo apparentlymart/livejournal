@@ -1157,7 +1157,7 @@ sub get_recent_items {
 
     # decide what level of security the remote user can see
     my $secwhere = "";
-    if ($userid == $remoteid || $opts->{'viewall'}) {
+    if ($remote && $remote->can_manage($userid) || $opts->{'viewall'}) {
         # no extra where restrictions... user can see all their own stuff
         # alternatively, if 'viewall' opt flag is set, security is off.
     } elsif ($mask) {

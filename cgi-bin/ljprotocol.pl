@@ -2437,7 +2437,7 @@ sub postevent {
     ### make sure user can't post with "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
-            !($u->can_manage($uowner)) && # poster is not admin
+            !($u && $u->can_manage($uowner)) && # poster is not admin
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
@@ -3118,7 +3118,7 @@ sub editevent {
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
-            !($u->can_manage($uowner)) && # poster is not admin
+            !($u && $u->can_manage($uowner)) && # poster is not admin
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
@@ -3833,7 +3833,8 @@ sub getevents {
 
         return fail($err, "311", $errmsg) if $errmsg;
     }
-
+    
+    my $can_manage = $u && $u->can_manage($uowner);
     my $secmask = 0;
 
     if ($u && ($u->{'journaltype'} eq "P" || $u->{'journaltype'} eq "I") && $posterid != $ownerid) {
@@ -3844,7 +3845,7 @@ sub getevents {
     # 'getevents' used in small count of places and we will not pass 'viewall' through their call chain
     my $secwhere = "";
 
-    if ($posterid == $ownerid) {
+    if ($can_manage) {
         # no extra where restrictions... user can see all their own stuff
     }
     elsif ($secmask) {

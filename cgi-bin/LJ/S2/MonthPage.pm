@@ -58,7 +58,7 @@ sub MonthPage
             $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
         }
 
-        if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
+        if ($remote && $remote->can_manage($u) || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
             my $gmask = LJ::get_groupmask($u, $remote);

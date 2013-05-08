@@ -91,7 +91,7 @@ LJ::Request->notes("codepath" => "bml.view.index");
 
  my $secwhere = "AND l.security='public'";
  if ($remote) {
-     if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
+     if ($remote->can_manage($u->{'userid'}) || $viewall) {
          $secwhere = "";   # see everything
      } elsif ($remote->{'journaltype'} eq 'P') {
          my $gmask = LJ::get_groupmask($u, $remote);

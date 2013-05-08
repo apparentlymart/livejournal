@@ -533,7 +533,7 @@ sub visible_to {
     my $remoteid = int($remote->userid);
 
     # owners can always see their own.
-    return 1 if $userid == $remoteid;
+    return 1 if $remote->can_manage($self->journal);
 
     # author in community can always see their post
     return 1 if $remoteid == $self->posterid and not $LJ::JOURNALS_WITH_PROTECTED_CONTENT{ $self->journal->{user} };
