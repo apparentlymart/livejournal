@@ -18,14 +18,11 @@ sub render {
         if (! -e $file){
             return "Error include file!";
         }
-    } 
+    }
 
-    open (my $fh, "<" . $file) or die "Can't open: $file\n";
-    local $/;
-    my $data = <$fh>;
-    close $fh;
-    
-    return $data;
+    $file =~ s/.*\///;
+
+    return LJ::load_include($file);
 }
 
 

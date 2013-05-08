@@ -3372,12 +3372,32 @@ sub load_include {
     return unless -e $filename;
 
     # get it and return it
-    my $val;
-    open (INCFILE, $filename)
-        or return "Could not open include file: $file.";
-    { local $/ = undef; $val = <INCFILE>; }
-    close INCFILE;
-    return $val;
+    return File::Slurp::read_file("$ENV{'LJHOME'}/htdocs/inc/$file");
+}
+
+# save an include file, given the bare name of the file.
+#   ($filename)
+# if the file is specified in %LJ::FILEEDIT_VIA_DB
+# then it is saved to memcache/DB, else it falls back to disk.
+sub save_include {
+    my ($file, $content) = @_;
+    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,255}$/;
+
+    if ($LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file}) {
+        my $dbh = LJ::get_db_writer();
+        $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
+                   "VALUES (?, ?, UNIX_TIMESTAMP())", undef, $file, $content);
+        return 0 if $dbh->err;
+        LJ::MemCache::set("includefile:$file", $content);
+        return 1;
+    }
+
+    unless (LJ::is_enabled('fileedit_local')) {
+        return 0;
+    }
+
+    File::Slurp::write_file("$ENV{'LJHOME'}/htdocs/inc/$file", $content);
+    return 1;
 }
 
 # <LJFUNC>
