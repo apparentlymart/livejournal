@@ -3388,7 +3388,7 @@ sub save_include {
         $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
                    "VALUES (?, ?, UNIX_TIMESTAMP())", undef, $file, $content);
         return 0 if $dbh->err;
-        LJ::MemCache::set("includefile:$file", $content);
+        LJ::MemCache::set("includefile:$file", $content, time() + 3600);
         return 1;
     }
 
