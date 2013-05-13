@@ -44,6 +44,7 @@ body<=
             JournalNewEntry
             NewUserpic
             UserExpunged
+            CommunityMantioned
         );
 
         my %etypeids = map { LJ::Event->event_to_etypeid($_) => 1 } @events;
@@ -129,6 +130,7 @@ body<=
         { event => "JournalNewEntry",               'journalid' => $journal->id },
         { event => "NewUserpic",                    'journalid' => $journal->id },
         { event => "Birthday",                      'journalid' => $journal->id },
+        { event => "CommunityMantioned",            'journalid' => $journal->id },
     ];
 
     push @$groups, { event => "JournalNewComment", 'journalid' => $journal->id }

@@ -2911,6 +2911,9 @@ event.befriended.user=Someone adds [[user]] as a friend
 event.birthday.me|staleness=1
 event.birthday.me=One of my friends has an upcoming birthday
 
+event.comm_mantioned|staleness=1
+event.comm_mantioned=[[community]] mantion somewhere
+
 event.birthday.user|staleness=1
 event.birthday.user=[[user]]'s birthday is coming up
 

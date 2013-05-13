@@ -1,6 +1,9 @@
 package LJ::PingBack;
 use strict;
 use LJ::Entry;
+use LJ::Subscription;
+use LJ::Event;
+use LJ::NotificationMethod;
 
 # Add comment to pinged post, if allowed.
 # returns comment object in success,
@@ -92,64 +95,90 @@ sub ping_post {
 sub notify_about_reference {
 	my $class = shift;
     my %args  = @_;
-	my $u = $args{user};
+	my $ref_usr = $args{user};
 	my $source_uri = $args{source_uri};
 	my $context = $args{context};
 	my $comment = $args{comment};
 	my $target_entry = LJ::Entry->new_from_url($source_uri);
 	my $poster = $comment ? LJ::load_userid($comment->{posterid}) : LJ::load_userid($target_entry->posterid);
 	$source_uri = $source_uri.'?thread='.$comment->{dtalkid}.'#t'.$comment->{dtalkid} if $comment;
-	return if $u->is_community();
 	
-#	my $super_maintainer;
-#	if( $u->is_community() ) {
-#        $super_maintainer = LJ::load_rel_user_cache($u, 'S');
-#        $u = LJ::load_userid($super_maintainer);
-#   }
+	my @send_list;
+	if ( $ref_usr->is_community() ) {
+		
+        my @maintainers = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'A')};
+        my @owner = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'S')};
+        
+        #find union mainteiners and owners
+        my %union = ();
+        foreach my $m (@maintainers) { $union{$m} = 1; }
+        foreach my $o (@owner) { $union{$o} = 1; }
 
-	return 0 unless $class->should_user_recieve_notice($u, $poster);
-	
-	LJ::load_user_props($u, 'browselang');
-    my $lang = $u->{'browselang'};
-    my $html = $u->receives_html_emails;
-    
-    my $body = LJ::Lang::get_text(
-        $lang,
-        'pingback.notifyref.'.($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain'),
-        undef,
-        {
+        foreach my $user_id (keys %union) {
+        	my $user = LJ::load_userid($user_id);
+        	my %opts = (
+        	   journalid => $ref_usr->{userid},
+        	   etypeid => LJ::Event::CommunityMantioned->etypeid,
+        	   ntypeid => LJ::NotificationMethod::Email->ntypeid,
+        	);
+            my @subs = LJ::Subscription->find( $user, %opts );
+            delete $union{$user_id} unless @subs;
+        }
+        
+        @send_list = keys %union;
+        @send_list = map { LJ::load_userid($_) } @send_list;
+	} else {
+        push @send_list, $ref_usr;
+    }
+
+    foreach my $u (@send_list) {
+        return 0 unless $class->should_user_recieve_notice($u, $poster);
+
+        LJ::load_user_props($u, 'browselang');
+        my $lang = $u->{'browselang'};
+        my $html = $u->receives_html_emails;
+        
+        my %text_params = (
             'usernameA'   => $u->username,
             'usernameB'   => $poster->username,
             'context'     => $context,
             'entry_URL'   => $source_uri,
+        );
+        
+        my $text_var = 'pingback.notifyref.';
+        if ( $ref_usr->is_community() ) {
+        	$text_var .= ($comment ? 'communitycomment' : 'communitypost').'.'.($html ? 'html' : 'plain');
+        	$text_params{'community'} = $ref_usr->username;
+        } else {
+            $text_var .= ($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain');
         }
-    );
+        
+        warn($text_var);
     
-    my $subject = LJ::Lang::get_text(
-        $lang,
-        'pingback.notifyref.subject',
-        undef,
-        {
-            usernameB   => $poster->username,
-        }
-    );
+        my $body = LJ::Lang::get_text(
+            $lang,
+            $text_var,
+            undef,
+            \%text_params
+        );
     
-	if ($html) {	
-	   LJ::send_mail({
-	        'to'      => $u->email_raw,
-	        'from'    => $LJ::DONOTREPLY_EMAIL,
-	        'subject' => $subject,
-	        'body'    => $body,
-			'html'    => $body,
-	   });
-	} else {
-        LJ::send_mail({
+        my $subject = LJ::Lang::get_text(
+            $lang,
+            'pingback.notifyref.subject',
+            undef,
+            { usernameB   => $poster->username, }
+        );
+        
+        my %mail_options = (
             'to'      => $u->email_raw,
             'from'    => $LJ::DONOTREPLY_EMAIL,
             'subject' => $subject,
             'body'    => $body,
-        });
-	}
+        );
+        $mail_options{'html'} = $body if ($html);
+
+	    LJ::send_mail(\%mail_options);
+    }
 }
 sub should_user_recieve_notice {
 	my $class = shift;
