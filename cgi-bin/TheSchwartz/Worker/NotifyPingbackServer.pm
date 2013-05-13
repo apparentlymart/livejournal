@@ -62,6 +62,8 @@ sub send_ping {
         drop_relation($source_entry, $target_entry) unless ref $res;
     }
     
+    return 1 if @users > $LJ::MAX_USER_NOTIFY; #protection from spam message: if message contains more 50 users then no send notification
+    
     foreach my $aUser (@users){
         my $user = LJ::load_user($aUser->{user_name});
         next unless $user;

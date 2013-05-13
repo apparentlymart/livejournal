@@ -152,8 +152,6 @@ sub notify_about_reference {
         } else {
             $text_var .= ($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain');
         }
-        
-        warn($text_var);
     
         my $body = LJ::Lang::get_text(
             $lang,
