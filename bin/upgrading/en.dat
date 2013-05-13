@@ -2911,9 +2911,6 @@ event.befriended.user=Someone adds [[user]] as a friend
 event.birthday.me|staleness=1
 event.birthday.me=One of my friends has an upcoming birthday
 
-event.comm_mantioned|staleness=1
-event.comm_mantioned=[[community]] mantion somewhere
-
 event.birthday.user|staleness=1
 event.birthday.user=[[user]]'s birthday is coming up
 
@@ -4325,6 +4322,10 @@ main.intro.mystat.collapse=Hide my posts and communities positions
 main.intro.mystat.community=Your community [[my_community]] at [[my_comm_place]] place in the rating of communities
 
 main.intro.mystat.expand=Show my posts and communities positions
+
+main.intro.mystat.oncommunity=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the [[category]] category
+
+main.intro.mystat.ontop=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the common top
 
 main.intro.mystat.you=[[user_display]] you on [[position]] position on the users top
 
