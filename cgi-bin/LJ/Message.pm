@@ -778,8 +778,6 @@ sub _get_msgprop_rows {
                 $have{$uid}->{$msgid}->{$propid} ||= '';
             }
 
-            my $key = join ':', 'msgprop', $uid, $msgid;
-            my $memkey = [$uid, $key];
             LJ::MemCache::set($memkey, LJ::MemCache::hash_to_array(usermsgprop => $have{$uid}->{$msgid}));
         }
     }

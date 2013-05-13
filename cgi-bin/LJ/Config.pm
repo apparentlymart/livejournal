@@ -6,6 +6,12 @@ use warnings;
 
 use Carp qw();
 
+# force this one to load to prevent warnings;
+# we may happen to redefine Readonly::croak in this module
+# and if Readonly is loaded after that, that'd cause
+# a re-definition warning
+use Readonly qw();
+
 $LJ::CONFIG_LOADED = 0;
 $LJ::CACHE_CONFIG_MODTIME = 0;
 
