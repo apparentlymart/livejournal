@@ -4323,7 +4323,7 @@ main.intro.mystat.community=Your community [[my_community]] at [[my_comm_place]]
 
 main.intro.mystat.expand=Show my posts and communities positions
 
-main.intro.mystat.oncommunity=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the [[category]] category
+main.intro.mystat.oncategory=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the <a href="[[category_url]]">[[category]]</a> category
 
 main.intro.mystat.ontop=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the common top
 
