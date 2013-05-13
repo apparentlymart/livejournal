@@ -4385,6 +4385,44 @@ main.top.updown=This user has changed its position in the top
 
 main.top.users=Users Top
 
+main.tour.feature1.text=First column of the Infromation panel
+
+main.tour.feature1.title=Your Recent Common Events
+
+main.tour.feature2.text=Second column of the infromation panel
+
+main.tour.feature2.title=Recent Comments on Your Blog
+
+main.tour.feature3.text=Third column of the information panel
+
+main.tour.feature3.title=Updates on The Blogs That You Often Read
+
+main.tour.feature4.text="Subscription to TOP 15" in the title panel
+
+main.tour.feature4.title=Get the Latest Posts from Rating on Facebook or Twitter
+
+main.tour.feature5.text=The inscription about a user place in the TOP and the button "Rating of my entries and communities" under the title
+
+main.tour.feature5.title=Position of Your Profile, Posts and Community on Rating
+
+main.tour.feature6.text=Filters in the title panel
+
+main.tour.feature6.title=Set Rating to Your Taste
+
+main.tour.feature7.text.ru=	Menu at the left side
+
+main.tour.feature7.title.ru=We Distributed Posts by Rubrics for You
+
+main.tour.feature7.text.en=Users TOP at the left sidebar. Communities + Users  entries rating
+
+main.tour.feature7.title.en=Watch Users in The Rating
+
+main.tour.nav.close=Close tour
+
+main.tour.nav.next=Next feature
+
+main.tour.nav.prev=Previous feature
+
 main.updates.comments=[[comments_count]] <a href="[[comments_url]]">new [[?comments_count|comment|comments]]</a>
 
 main.updates.comments.at=at
