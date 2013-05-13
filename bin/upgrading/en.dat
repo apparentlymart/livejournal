@@ -4296,6 +4296,14 @@ main.intro.friends.show=Show friends posts in rating
 
 main.intro.friends.show.title=Show your friends or communities posts in rating
 
+main.intro.hidden.hide=Hide back hidden posts from rating
+
+main.intro.hidden.hide.title=Hide back marked as read posts and posts from blocked users from rating
+
+main.intro.hidden.show=Show hidden posts in rating
+
+main.intro.hidden.show.title=Show marked as read posts and posts from blocked users in rating
+
 main.intro.length.full=Full Posts
 
 main.intro.length.short=Half Posts

@@ -2451,7 +2451,6 @@ BODY div .b-helplink:active {
 .b-pager {
 	position: relative;
 	margin: 0;
-	//zoom: expression(runtimeStyle.zoom = 1, insertAdjacentHTML('beforeEnd', '<i class="b-pager-pages-after"></i>'));
 	}
 .b-pager-prev,
 .b-pager-next {
