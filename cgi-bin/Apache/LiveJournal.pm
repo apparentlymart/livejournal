@@ -621,19 +621,33 @@ sub trans {
                 }
             }
 
-            my $file = "$LJ::SSLDOCS/$uri";
-
-            unless (-e $file) {
-                # no such file.  send them to the main server if it's a GET.
-                return LJ::Request->method eq 'GET' ? redir("$LJ::SITEROOT$uri$args_wq") : 404;
+            my $uri_extension;
+            if ( $uri =~ m{[.](\w+)$}xsm ) {
+                $uri_extension = $1;
             }
 
-            if (-d _) { $file .= '/index.bml'; }
-            $file =~ s!/{2,}!/!g;
-            LJ::Request->filename($file);
-            if ( $file =~ /[.]bml$/ ) {
+            if ( ! $uri_extension || $uri_extension eq 'bml' ) {
+                my $file = "$LJ::SSLDOCS/$uri";
+
+                unless ( -e $file ) {
+                    # for non-existing files, redirect them to
+                    # the non-SSL version or return a 'non found' error
+                    # if it's a POST request
+                    if ( LJ::Request->method eq 'GET' ) {
+                        return redir ("$LJ::SITEROOT$uri$args_wq");
+                    } else {
+                        return LJ::Request::NOT_FOUND;
+                    }
+                }
+
+                if ( -d $file ) { $file .= '/index.bml'; }
+
+                $file =~ s{/{2,}}{/}gxsm;
+
+                LJ::Request->filename($file);
                 return $bml_handler->($file);
             } else {
+                LJ::Request->filename("$LJ::HTDOCS/$uri");
                 return LJ::Request::OK;
             }
         }
