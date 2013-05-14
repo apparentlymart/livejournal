@@ -647,7 +647,17 @@ sub trans {
                 LJ::Request->filename($file);
                 return $bml_handler->($file);
             } else {
-                LJ::Request->filename("$LJ::HTDOCS/$uri");
+                my $file = "$LJ::HTDOCS/$uri";
+                $file =~ s{/{2,}}{/}gxsm;
+
+                # a hack here: some files are requested as /stc/img/foo
+                # whereas they only exist in htdocs/img (not htdocs/stc/img);
+                # we transparently re-route these
+                if ( ! -e $file && $uri =~ m{^/stc/img} ) {
+                    $file =~ s{/stc}{}xsm;
+                }
+
+                LJ::Request->filename($file);
                 return LJ::Request::OK;
             }
         }
