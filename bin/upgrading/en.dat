@@ -4385,6 +4385,10 @@ main.top.updown=This user has changed its position in the top
 
 main.top.users=Users Top
 
+main.tour.feature0.text=Welcome
+
+main.tour.feature0.title=Take a Look at New Features of The Homepage
+
 main.tour.feature1.text=First column of the Infromation panel
 
 main.tour.feature1.title=Your Recent Common Events
@@ -4418,6 +4422,8 @@ main.tour.feature7.text.en=Users TOP at the left sidebar. Communities + Users  e
 main.tour.feature7.title.en=Watch Users in The Rating
 
 main.tour.nav.close=Close tour
+
+main.tour.nav.finish=Start Using New Homepage
 
 main.tour.nav.next=Next feature
 
