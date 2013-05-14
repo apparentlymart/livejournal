@@ -2125,6 +2125,9 @@ sub Entry
         $e->{$_} = $entry->prop("ljart_$_")
             for (qw{event event_town event_location event_paid event_price event_type event_image event_desc});
 
+        ($e->{event_date_from}, $e->{event_date_to}) = $entry->prop('ljart_event_date') =~ m/^(.*?)(?:-(.*?))?$/;
+        ($e->{event_time_from}, $e->{event_time_to}) = $entry->prop('ljart_event_time') =~ m/^(.*?)(?:-(.*?))?$/;
+
      } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
                                                        $e->{delayedid} );
@@ -2839,7 +2842,31 @@ sub viewer_is_owner
     my $remote = LJ::get_remote();
     return 0 unless $remote;
     return 0 unless defined($LJ::S2::CURR_PAGE);
-    return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
+    if ($LJ::S2::CURR_PAGE->{'_u'}->{'journaltype'} eq 'C') {
+        return LJ::check_rel( $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}, $remote->{'userid'}, 'S');
+    } else {
+        return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}; 
+    }
+}
+
+sub viewer_is_moderator
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+    return 0 unless $LJ::S2::CURR_PAGE->{'_u'}->{'journaltype'} eq 'C';
+    return LJ::check_rel( $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}, $remote->{'userid'}, 'M');
+}
+
+sub viewer_is_maintainer
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+    return 0 unless $LJ::S2::CURR_PAGE->{'_u'}->{'journaltype'} eq 'C';
+    return LJ::check_rel( $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}, $remote->{'userid'}, 'A');
 }
 
 sub viewer_is_friend
@@ -2864,6 +2891,16 @@ sub viewer_is_member
     my $ju = $LJ::S2::CURR_PAGE->{'_u'};
     return 0 if $ju->{journaltype} ne 'C';
     return LJ::is_friend($ju, $remote);
+}
+
+sub viewer_can_post
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+
+    return LJ::can_use_journal($remote->userid, $LJ::S2::CURR_PAGE->{'_u'}->{'user'});
 }
 
 sub viewer_sees_control_strip
@@ -3087,6 +3124,20 @@ sub style_is_active {
     }
 
     return 1;
+}
+
+sub ljart_event_types {
+    my ($ctx) = @_;
+    return [values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
+        ljart.update.event.type.esplanade
+        ljart.update.event.type.exhibitions
+        ljart.update.event.type.music
+        ljart.update.event.type.theater
+        ljart.update.event.type.cinema
+        ljart.update.event.type.literature
+        ljart.update.event.type.sport
+        ljart.update.event.type.other
+    }])}];
 }
 
 sub set_handler
@@ -5026,9 +5077,6 @@ sub Page__get_entries_by_tags {
     my ( $ctx, $this, $taglist, $mode, $count ) = @_;
 
     my $journal = $this->{'_u'};
-
-    return []
-        unless $LJ::S2_TRUSTED{ $journal->userid };
 
     my $tagids = [];
 
