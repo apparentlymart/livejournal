@@ -182,7 +182,7 @@ sub render_posts {
             $vertical = LJ::Vertical->new ( vert_id => $entry_href->{'vert_id'} );
         }
 
-        my $attrs              = $entry->sharing_atttributes();
+        my $attrs              = $entry->sharing_attributes();
         my $sharing_attributes = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
 
         push @temp_array_post, {
