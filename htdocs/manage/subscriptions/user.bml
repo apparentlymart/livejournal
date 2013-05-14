@@ -130,7 +130,6 @@ body<=
         { event => "JournalNewEntry",               'journalid' => $journal->id },
         { event => "NewUserpic",                    'journalid' => $journal->id },
         { event => "Birthday",                      'journalid' => $journal->id },
-        { event => "CommunityMantioned",            'journalid' => $journal->id },
     ];
 
     push @$groups, { event => "JournalNewComment", 'journalid' => $journal->id }
@@ -141,6 +140,9 @@ body<=
 
     push @$groups, { event => "CommunityJoinReject", 'journalid' => $journal->id }
         if $u && $u->can_manage($journal);
+        
+    push @$groups, { event => "CommunityMantioned", 'journalid' => $journal->id }
+        if $u && ($u->can_manage($journal) || $u->can_moderate($journal));
 
     if ( LJ::is_friend($journal, $u) ) {
         push @$groups, { 'separator' => 1 };
