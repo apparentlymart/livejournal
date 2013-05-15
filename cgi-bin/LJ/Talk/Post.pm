@@ -788,17 +788,6 @@ sub post_comment {
         counter => "new_comment",
     });
 
-    ## Counter for widget 'new comments' on home page
-    LJ::run_hook ("modify_comments_counter", {
-        journalu  => $journalu,
-        entryu    => $entryu,
-        jitemid   => $item->{'itemid'},
-        jtalkid   => $jtalkid,
-        commenter => $commenter,
-        parent    => $parent,
-        action    => 'add',
-    });
-
     return 1;
 }
 

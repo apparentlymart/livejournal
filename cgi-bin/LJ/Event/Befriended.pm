@@ -238,4 +238,13 @@ sub as_push_payload {
            };
 }
 
+sub update_events_counter {
+    my $self = shift;
+    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
+        LJ::Lang::ml('widget.updatesforuser.befriended', {
+            ljuser => $self->friend->ljuser_display
+        })
+    );
+}
+
 1;

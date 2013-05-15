@@ -105,7 +105,6 @@ body<=
     $ret .= BML::ml('Actionlink', { 'link' => "Latest Received"}) . " ";
     if ($u->is_person) {
         $ret .= BML::ml('Actionlink', { 'link' => "<a href='#posted'>Latest Posted</a>"}) . " ";
-        $ret .= BML::ml('Actionlink', { 'link' => "<a href='#reply'>Latest Replyies</a>"}) . " ";
     }
     $ret .= BML::ml('Actionlink', { 'link' => "<a href='$LJ::SITEROOT/manage/comments'>$ML{'.managesettings'}</a>"});
 
@@ -262,7 +261,6 @@ body<=
         $ret .= "<div style='text-align: center; margin-top: 1em'><a name='posted'></a>" .
             BML::ml('Actionlink', { 'link'=>"<a href='#received'>Latest Received</a>"}) .
             BML::ml('Actionlink', { 'link' => "Latest Posted"}) . " " .
-            BML::ml('Actionlink', { 'link' => "<a href='#reply'>Latest Replyies</a>"}) .
             "</div>";
         $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
         my %jcount;  # jid -> ct
@@ -295,66 +293,6 @@ body<=
             $ret .= "<tr><td>$hr_ago</td><td>" . LJ::ljuser($ju->{user}) . ": $subject</td></tr>";
         }
         $ret .= "</table>";
-    }
-
-    my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor")) . "\"";
-    $ret .= "<script type=\"text/javascript\">var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
-        "function userhook_screen_comment_ARG (talkid) { setStyle('cmtbar'+talkid, 'background', $js_screen_color); setInner('state'+talkid, 'Screened'); }\n".
-        "function userhook_unscreen_comment_ARG (talkid) { setStyle('cmtbar'+talkid, 'background', 'transparent'); setInner('state'+talkid, ''); }\n".
-        "function userhook_delete_comment_ARG (talkid) { hideElement('ljcmtbar'+talkid); }\n".
-        "</script>";
-
-    if ($u->{journaltype} eq "P") {
-
-        $ret .= "<div style='text-align: center; margin-top: 1em'><a name='posted'></a>" .
-                    BML::ml('Actionlink', { 'link'=>"<a href='#received'>Latest Received</a>"}) .
-                    BML::ml('Actionlink', { 'link'=>"<a href='#posted'>Latest Posted</a>"}) .
-                    BML::ml('Actionlink', { 'link' => "Latest Replyies"}) .
-                "</div>
-                <?h1 Latest Replyies h1?><?p Last $count replyies " . LJ::ljuser($u) . " has received. p?>
-                <div style='text-align: center; margin-top: 1em'><a name='reply'></a>
-                <table style='text-align: left'>
-                <tr><th>Time</th><th>Location</th></tr>";
-
-        my $counter = LJ::MemCache::get($u->userid . ":count:comments");
-
-        if ( ref $counter eq 'HASH' ) {
-
-            delete $counter->{'total_count'};
-            delete $counter->{'cap'};
-
-            my @keys = sort { $counter->{$b}->{'time'} <=> $counter->{$a}->{'time'} } keys %$counter;
-
-            splice ( @keys, $count ) if scalar @keys > $count;
-
-            for my $key ( @keys ) {
-
-                my ($journalid, $itemid, $type) = $key =~ /^(\d+?):(\d+?):(\w+?)$/;
-
-                if ( $type eq 'reply' ) {
-
-                    my $posttime  = $counter->{$key}->{'time'};
-                    my $subject   = $counter->{$key}->{'subject'} || '...';
-                    my $par_url   = $counter->{$key}->{'par_url'};
-                    my $ljuser    = $counter->{$key}->{'ljuser'};
-                    my $entry_url = $counter->{$key}->{'entry_url'};
-
-                    my $hr_ago    = LJ::TimeUtil->ago_text($now - $posttime);
-                
-                    LJ::CleanHTML::clean_subject(\$subject);
-
-                    $ret .= "<tr><td><a href='$par_url'>$hr_ago</a></td><td>$ljuser: <a href='$entry_url'>$subject</a></td></tr>";
-
-                }
-
-            }
-
-        }
-
-        $ret .= "</table>";
-
-        LJ::MemCache::delete($u->userid . ":count:comments");        
-
     }
 
     return $@ || $ret;

@@ -1093,4 +1093,42 @@ sub as_push_payload {
     }
 }  
 
+sub update_events_counter {
+    my $self = shift;
+
+    my $comment   = $self->comment;
+    my $journalu  = $self->event_journal;
+
+    my $entry     = $comment->entry;
+    my $parent    = $comment->parent;
+    my $jtalkid   = $comment->jtalkid; 
+
+    my $jitemid   = $entry->jitemid;
+    my $user      = $entry->poster;
+
+    my $journalid = $journalu->userid; 
+
+    my $pjtalkid; 
+
+    return if $user->equals($comment->poster);
+
+    if ( $parent ) {
+
+        return if $parent->poster->equals($comment->poster);
+
+        $user = $parent->poster;
+
+        $pjtalkid = $parent->jtalkid;
+
+    }
+
+    LJ::Widget::HomePage::CommentsCounter->add_comment($user, 
+        field    => "$journalid:$jitemid", 
+        jtalkid  => $jtalkid, 
+        pjtalkid => $pjtalkid
+    ); 
+
+    return;
+}
+
 1;

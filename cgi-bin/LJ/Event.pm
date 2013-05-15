@@ -982,4 +982,6 @@ sub go_through_clusters {1}
 
 sub has_frame { 0 }
 
+sub update_events_counter { 0 }
+
 1;

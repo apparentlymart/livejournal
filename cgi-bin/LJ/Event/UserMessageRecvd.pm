@@ -382,4 +382,21 @@ sub get_subscription_ntype_force {
     return $self->SUPER::get_subscription_ntype_force($ntypeid, $u);
 }
 
+sub update_events_counter {
+    my $self = shift;
+
+    my $msg     = $self->load_message;
+    return unless $msg;
+    
+    my $msgid   = $msg->msgid;
+    my $qid     = $msg->qid;
+
+    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
+        LJ::Lang::ml('widget.updatesforuser.message.recvd', {
+            ljuser => $msg->other_u->ljuser_display,
+            url    => "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid",
+        })
+    );
+}
+
 1;

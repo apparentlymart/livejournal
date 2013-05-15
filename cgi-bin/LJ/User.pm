@@ -9904,12 +9904,7 @@ sub make_journal {
 
     if ( $entry ) {
         ## Counter for widget 'new comments' on home page
-        LJ::run_hook ("modify_comments_counter", {
-            journalu  => $u,
-            jitemid   => $entry->jitemid,
-            commenter => $remote,
-            action    => 'clear',
-        });
+        LJ::Widget::HomePage::CommentsCounter->remove_comment($remote, $u->userid.":".$entry->jitemid);
     }
 
     if ($stylesys == 2) {

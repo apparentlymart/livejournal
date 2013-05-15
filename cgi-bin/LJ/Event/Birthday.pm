@@ -301,5 +301,16 @@ sub fire {
     return $h ? 1 : 0;
 }
 
+sub update_events_counter {
+    my $self = shift;
+    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
+        LJ::Lang::ml('widget.updatesforuser.birthday', { 
+            ljuser => $self->bdayuser->ljuser_display,
+            url    => $self->bdayuser->gift_url({ item => 'vgift' }),
+            date   => $self->email_bday($self->u->prop('browselang')),
+        })
+    ); 
+}
+
 1;
 

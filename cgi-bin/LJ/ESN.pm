@@ -153,6 +153,8 @@ sub work {
 
     my $params = $evt->raw_params;
 
+    $evt->update_events_counter();
+
     if ($ENV{DEBUG}) {
         warn "split_per_cluster=[$split_per_cluster], params=[@$params]\n";
     }
