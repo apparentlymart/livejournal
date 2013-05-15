@@ -685,7 +685,7 @@ sub _get_texts_from_database {
     # the logic simple
     my $rows      = $dbh->selectall_arrayref(
         "SELECT ml_items.itcode, ml_text.text " .
-        "FROM ml_items INNER JOIN ml_text USING (dmid, itid) " .
+        "FROM ml_items FORCE INDEX (dmid) INNER JOIN ml_text FORCE INDEX(lnid) USING (dmid, itid) " .
         "WHERE ml_items.itcode IN ($itcode_in) " .
         "AND ml_items.dmid=? AND ml_text.lnid=? " .
         "ORDER BY ml_text.txtid DESC",
