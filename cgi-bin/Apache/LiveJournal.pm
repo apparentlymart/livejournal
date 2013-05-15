@@ -551,49 +551,7 @@ sub trans {
     # process controller
     # if defined
     if ( my $controller = LJ::Request->notes('controller') ) {
-        LJ::Request->handler('perl-script');
-        LJ::Request->set_handlers(PerlHandler => sub {
-            my @args = split ( m{/}, LJ::Request->uri );
-            shift @args if @args;
-
-            LJ::Lang::current_language(undef);
-
-            my $response;
-            my $controller_result = eval {
-                local $SIG{'__DIE__'} = \&Carp::confess;
-                $response = $controller->process(\@args) ||
-                    $controller->default_response;
-                1;
-            };
-
-            unless ($controller_result) {
-                my $error  = "$@";
-                my $remote = LJ::get_remote();
-
-                if ( $LJ::IS_DEV_SERVER ||
-                    ( $remote && $remote->show_raw_errors ) )
-                {
-                    $response = LJ::Response::Template->new(
-                        'file'            => 'templates/CodeError.tmpl',
-                        'params'          => { 'error' => $error },
-                        'use_site_scheme' => 1,
-                        'title'           => 'Code Error',
-                    );
-                } else {
-                    die $error;
-                }
-            }
-
-            # processing result of controller
-            my $result = eval { $response->output };
-
-            warn "response error: $@"
-                if $@;
-
-            return LJ::Request::DONE;
-        } );
-
-        return LJ::Request::OK;
+        return $controller->request_handler;
     }
 
     if(LJ::Request->headers_in->{Accept} eq 'application/xrds+xml'){
@@ -646,19 +604,6 @@ sub trans {
 
                 LJ::Request->filename($file);
                 return $bml_handler->($file);
-            } else {
-                my $file = "$LJ::HTDOCS/$uri";
-                $file =~ s{/{2,}}{/}gxsm;
-
-                # a hack here: some files are requested as /stc/img/foo
-                # whereas they only exist in htdocs/img (not htdocs/stc/img);
-                # we transparently re-route these
-                if ( ! -e $file && $uri =~ m{^/stc/img} ) {
-                    $file =~ s{/stc}{}xsm;
-                }
-
-                LJ::Request->filename($file);
-                return LJ::Request::OK;
             }
         }
         else {
@@ -1517,7 +1462,7 @@ sub trans {
 
     LJ::Request->pnotes ('error' => 'e404');
     LJ::Request->pnotes ('remote' => LJ::get_remote());
-    return LJ::Request::DECLINED
+    return LJ::Request::NOT_FOUND;
 }
 
 sub userpic_trans
