@@ -388,6 +388,10 @@ class Entry extends EntryLite
     var string event_type "Type of event"; 
     var string event_image "Url to small image of event"; 
     var string event_desc "Short description of event"; 
+    var string event_date_from ""; 
+    var string event_date_to ""; 
+    var string event_time_from ""; 
+    var string event_time_to ""; 
 
     function builtin get_cutted_text() : string
         "Returns text withiout text that has been cutted. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
@@ -971,6 +975,14 @@ function builtin viewer_is_owner() : bool
 "Returns true if the user viewing the page is both logged in, and is the owner of the content in question.
 Useful for returning links to manage information, or edit entries.";
 
+function builtin viewer_is_maintainer() : bool
+"Returns true if the user viewing community page, and is the maintainer of this community.
+Useful for returning links to manage information, or edit entries.";
+
+function builtin viewer_is_moderator() : bool
+"Returns true if the user viewing community page, and is the moderator of this community.
+Useful for returning links to manage information, or edit entries.";
+
 function builtin viewer_is_friend() : bool
 "Returns true if the user viewing the page is both logged in, and is a friend of the journal being viewed. Always returns false for communities, since they cannot have friends.";
 
@@ -997,6 +1009,9 @@ function builtin viewer_sees_ebox() [fixed] : bool
 
 function builtin viewer_sees_control_strip [fixed] : bool
 "Returns true if reader will see the built in control strip.";
+
+function builtin viewer_can_post() : bool
+"Returns true if the user can post in journal";
 
 function builtin control_strip_logged_out_userpic_css [fixed] : string
 "Returns CSS for the userpic div in the logged out version of the control strip.";
@@ -1031,12 +1046,14 @@ function builtin weekdays() : int[]
 function builtin PalItem(int index, Color c) : PalItem
 "Convenience constructor to make populating an array of PalItems (like in [function[palimg_modify(string,PalItem[])]]) easy.";
 
-
 function builtin UserLite(string username) : UserLite
 "Constructor for making a UserLite object from a username";
 
 function builtin UserExtended(string username) : UserExtended
 "Constructor for making a UserExtended object from a username";
+
+function builtin Event(string username) : Event
+"Constructor for making a Event object from a username";
 
 function builtin palimg_modify(string filename, PalItem[] items) : string
 "Return a URL to the specified filename (relative to the palimg root) with its palette table altered, once for each provided [class[PalItem]].  Restrictions:  only 7 palette entries may be modified, and the PalItem indexes must be 0-15.";
@@ -1063,6 +1080,9 @@ function builtin journal_current_datetime() : DateTime
 
 function builtin style_is_active() : bool
 "Returns if the style (layout and theme) calling it is active based on a hook.  If hook isn't defined, returns true always.";
+
+function builtin ljart_event_types() : string[]
+"Returns list of types of ljart events";
 
 ##[ properties ]
 
