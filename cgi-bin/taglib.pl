@@ -69,8 +69,8 @@ sub get_usertagsmulti {
 
     # spawn gearman jobs to get each of the users
     my $ts = $gc->new_task_set();
-    foreach my $u (values %need) {
-        $ts->add_task(Gearman::Task->new("load_usertags", "$u->{userid}",
+    foreach my $userid ( keys %need ) {
+        $ts->add_task(Gearman::Task->new("load_usertags", \$userid,
             {
                 uniq => '-',
                 on_complete => sub {
@@ -78,9 +78,9 @@ sub get_usertagsmulti {
                     my $tags = LJ::Tags::_unpack_tags($$resp);
                     return unless $tags;
 
-                    $LJ::REQ_CACHE_USERTAGS{$u->{userid}} = $tags;
-                    $res->{$u->{userid}} = $tags;
-                    delete $need{$u->{userid}};
+                    $LJ::REQ_CACHE_USERTAGS{$userid} = $tags;
+                    $res->{$userid} = $tags;
+                    delete $need{$userid};
                 },
             }));
     }
