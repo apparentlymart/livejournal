@@ -3128,7 +3128,7 @@ sub style_is_active {
 
 sub ljart_event_types {
     my ($ctx) = @_;
-    return [values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
+    return [sort {$a cmp $b} values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
         ljart.update.event.type.esplanade
         ljart.update.event.type.exhibitions
         ljart.update.event.type.music
