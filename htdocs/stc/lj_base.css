@@ -1079,7 +1079,7 @@ DIV.lj_ippu_app {
 .b-popup {
 	position: absolute;
 	font-size: 12px;
-	z-index: 4000;
+	z-index: 4001;
 	background: url(about:blank);
 	}
 	.b-popup input[type="text"],
