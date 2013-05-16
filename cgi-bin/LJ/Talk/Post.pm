@@ -1,6 +1,9 @@
 package LJ::Talk::Post;
-use strict;
 
+use strict;
+use warnings;
+
+# Internal modules
 use LJ::SpamFilter;
 use LJ::Admin::Spam::Urls;
 use LJ::EventLogRecord::NewComment;
@@ -184,17 +187,16 @@ sub enter_comment {
         LJ::MemCache::set([$journalu->{'userid'}, "talkprop:$journalu->{'userid'}:$jtalkid"], $hash);
     }
 
-    my %urls = map { $_ => 1 } LJ::SpamFilter::get_urls($comment->{body});
-    my @urls = keys %urls;
+    my $urls = $comment->{parsed}->{urls};
 
     # record up to $LJ::TALK_MAX_URLS urls from a comment
-    if ($LJ::TALK_MAX_URLS && @urls) {
+    if ($LJ::TALK_MAX_URLS && $urls) {
         LJ::Admin::Spam::Urls::insert(
             $posterid,
             $journalu->{userid},
             $jtalkid,
             $comment->{state} eq 'B' ? 'S' : '',
-            @urls
+            @$urls
         );
     }
 
@@ -203,9 +205,13 @@ sub enter_comment {
     if ($comment->{state} eq 'B') {
         my $change = 0;
 
-        foreach my $url (@urls) {
-            if (LJ::Admin::Spam::Urls::is_url_in_top_of_spam($url)) {
-                $change++;
+        foreach my $url (@$urls) {
+            next unless $url;
+
+            if ($url->{url}) {
+                if (LJ::Admin::Spam::Urls::is_url_in_top_of_spam($url->{url}->as_string)) {
+                    $change++;
+                }
             }
         }
 
@@ -497,14 +503,14 @@ sub init {
     $form->{'subject'} = LJ::text_trim($form->{'subject'}, 100, 100);
 
     my $subjecticon = "";
-    if ($form->{'subjecticon'} ne "none" && $form->{'subjecticon'} ne "") {
+    if ($form->{'subjecticon'} && $form->{'subjecticon'} ne "none" && $form->{'subjecticon'} ne "") {
         $subjecticon = LJ::trim(lc($form->{'subjecticon'}));
     }
 
     # New comment state
     my $state = 'A';
     my $screening = LJ::Talk::screening_level($journalu, int($ditemid / 256));
-    if ($form->{state} =~ /^[A-Z]\z/){
+    if ($form->{state} && $form->{state} =~ /^[A-Z]\z/){
         # use provided state.
         $state = $form->{state};
     } else {
@@ -517,14 +523,14 @@ sub init {
         $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     }
 
-    my $can_mark_spam = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
-    my $need_spam_check = 0;
-    LJ::run_hook('need_spam_check_comment', \$need_spam_check, $entry, $state, $journalu, $up);
-    if ( $need_spam_check && !$can_mark_spam ) {
-        my $spam = 0;
-        LJ::run_hook('spam_comment_detector', $form, \$spam, $journalu, $up);
-        LJ::run_hook('spam_in_all_journals', \$spam, $up) unless $spam;
-        $state = 'B' if $spam;
+    my $parsed_comment  = LJ::SpamFilter::Utils::parse_text($form->{body});
+    my $can_mark_spam   = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
+    my $need_spam_check = LJ::SpamFilter->need_spam_check_comment($journalu, $up, $state);
+
+    if ($need_spam_check && !$can_mark_spam) {
+        if (LJ::SpamFilter->is_spam_comment($journalu, $up, $parsed_comment)) {
+            $state = 'B';
+        }
     }
 
     my $parent = {
@@ -543,6 +549,7 @@ sub init {
         picture_keyword => $form->{'prop_picture_keyword'},
         state           => $state,
         editid          => $form->{editid},
+        parsed          => $parsed_comment,
     };
 
     $init->{item} = $item;
@@ -710,14 +717,14 @@ sub post_comment {
     my ($entryu, $journalu, $comment, $parent, $item, $errref) = @_;
 
     # unscreen the parent comment if needed
-    if ($parent->{state} eq 'S') {
+    if ($parent->{state} && $parent->{state} eq 'S') {
         LJ::Talk::unscreen_comment($journalu, $item->{itemid}, $parent->{talkid});
         $parent->{state} = 'A';
     }
 
     # unban the parent comment if needed
     my $commenter = $comment->{'u'} || LJ::get_remote();
-    if ($parent->{state} eq 'B' && $commenter && LJ::Talk::can_unmark_spam($commenter, $journalu, $entryu)) {
+    if ($parent->{state} && $parent->{state} eq 'B' && $commenter && LJ::Talk::can_unmark_spam($commenter, $journalu, $entryu)) {
         LJ::Talk::unspam_comment($journalu, $item->{itemid}, $parent->{talkid});
         $parent->{state} = 'A';
     }
@@ -738,8 +745,8 @@ sub post_comment {
     my $memkey;
     if (@LJ::MEMCACHE_SERVERS) {
         my $md5_b64 = Digest::MD5::md5_base64(
-            join(":", ($comment->{body}, $comment->{subject},
-                       $comment->{subjecticon}, $comment->{preformat},
+            join(":", ($comment->{body}, $comment->{subject} || '',
+                       $comment->{subjecticon} || '', $comment->{preformat} || '',
                        $comment->{picture_keyword})));
         $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$parent->{talkid}-$posterid-$md5_b64" ];
         $jtalkid = LJ::MemCache::get($memkey);

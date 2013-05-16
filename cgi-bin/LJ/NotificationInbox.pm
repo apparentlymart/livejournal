@@ -1,12 +1,18 @@
 package LJ::NotificationInbox;
 
 use strict;
+use warnings;
+
+# External modules
 use Carp 'croak';
-use LJ::NotificationItem;
 use Class::Autouse qw{
     LJ::Event LJ::NotificationArchive
     LJ::Event::InboxUserMessageRecvd LJ::Event::JournalNewComment
 };
+
+# Internal modules
+use LJ::SpamFilter;
+use LJ::NotificationItem;
 
 my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
 
@@ -353,11 +359,36 @@ sub enqueue {
     my $qid = LJ::alloc_user_counter($u, 'Q')
         or die "Could not alloc new queue ID";
     my $spam = 0;
+
     if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == LJ::Event::UserMessageRecvd->etypeid ) {
-        my $need_check = 0;
-        LJ::run_hook('need_spam_check_inbox', \$need_check, $evt->arg1, $evt->userid);
-        LJ::run_hook('spam_inbox_detector', \$spam, $evt->arg1, $evt->userid)
-            if $need_check;
+        {
+            last unless $evt->arg1;
+            last unless $evt->userid;
+
+            my $msg = LJ::Message->load({
+                msgid     => $evt->arg1,
+                journalid => $evt->userid
+            });
+
+            last unless $msg;
+
+            my $sender = $msg->other_u;
+
+            last unless $sender;
+
+            my $journal = LJ::load_userid($evt->userid);
+
+            last unless $journal;
+
+            if (LJ::SpamFilter->need_spam_check_inbox($journal, $sender)) {
+                my $body    = $msg->body_raw || '';
+                my $subject = $msg->subject_raw || '';
+
+                $spam = LJ::SpamFilter->is_spam_inbox_message(
+                    $journal, $sender, $body . $subject
+                );
+            }
+        }
     }
 
     my %item = (qid        => $qid,
