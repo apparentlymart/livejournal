@@ -187,14 +187,15 @@ sub link_bar
         my $title = LJ::Lang::ml('talk.'. 'share');
         
         my $attrs = $entry->sharing_attributes(); 
+        my $extra_attrs  = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
 
         LJ::Share->request_resources();
 
         push @linkele, sprintf '
-            <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" data-url="%s" data-title="%s" data-hashtags="%s" data-text="%s" >
+            <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" %s>
                 <i class="b-controls-bg"></i>%s
             </a>
-        ', $title, $attrs->{'data-url'}, $attrs->{'data-title'},  $attrs->{'data-hashtags'}, $attrs->{'data-text'}, $title;
+        ', $title, $extra_attrs, $title;
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {

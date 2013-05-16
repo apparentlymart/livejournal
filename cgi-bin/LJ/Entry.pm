@@ -1767,6 +1767,9 @@ sub sharing_attributes {
     my $text         = $self->event_text       || ''; 
     my $subject      = $self->subject_text     || '';
     my $url          = $self->url              || '';
+    my $ditemid      = $self->ditemid          || '';
+
+    my $poster       = $self->poster && $self->poster->user || '';
 
     $text =~ s/&nbsp;/ /gsm;
     $text =~ s/\s+/ /gsm;
@@ -1781,12 +1784,16 @@ sub sharing_attributes {
     $text    = LJ::eurl($text);   
     $url     = LJ::eurl($url);       
     $subject = LJ::eurl($subject);
+    $poster  = LJ::eurl($poster);
+    $ditemid = LJ::eurl($ditemid);
 
     return { 
         'data-title'    => $subject,
         'data-url'      => $url,
         'data-hashtags' => $hashtags,
         'data-text'     => $text,
+        'data-poster'   => $poster,
+        'data-ditemid'  => $ditemid,
     }
 } 
 
