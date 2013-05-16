@@ -116,7 +116,7 @@
         $ret{userpic_h} = 100;
     }
 
-    if ($u && ($u->is_personal || $u->is_comm)) {
+    if ($u && (!$u->prop('ratings') || $u->prop('ratings') eq 'Y' || LJ::check_priv($remote, 'siteadmin', 'selfpromo'))) {
         my ($position, $first, $soc_capital, %filter);
 
         if ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
