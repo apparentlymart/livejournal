@@ -4,6 +4,7 @@ use Scalar::Util qw(blessed);
 use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use LJ::Client::BitLy;
+use LJ::SpamFilter;
 use base 'LJ::Event';
 
 # we don't allow subscriptions to comments on friends' journals, so
