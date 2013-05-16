@@ -6381,6 +6381,10 @@ sub is_migrated_to_friends_and_subscriptions {
     return $u->prop('migrated_to_friends_and_subscriptions');
 }
 
+sub should_show_welcome_page {
+    return 0;
+}
+
 package LJ;
 
 use Carp;
