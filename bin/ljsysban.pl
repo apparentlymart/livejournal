@@ -62,7 +62,14 @@ if ($list) {
         push @where, ("status=" . $dbh->quote($status)) if $status;
         push @where, ("bandate=" . $dbh->quote($bandate)) if $bandate;
         push @where, ("banuntil=" . $dbh->quote($banuntil)) if $banuntil;
-        push @where, ("note=" . $dbh->quote($note)) if $note;
+        if ($note){
+            if ($note =~ /\*|\%/){
+                $note =~ s/\*/%/s;
+                push @where, ("note like " . $dbh->quote($note));
+            } else {
+                push @where, ("note=" . $dbh->quote($note));
+            }
+        }
         $where = join(" AND ", @where);
     }
 
