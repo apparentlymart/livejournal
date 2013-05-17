@@ -141,8 +141,8 @@ sub notify_about_reference {
         my $html = $u->receives_html_emails;
         
         my %text_params = (
-            'usernameA'   => $u->username,
-            'usernameB'   => $poster->username,
+            'usernameA'   => $html ? $u->ljuser_display : $u->username,
+            'usernameB'   => $html ? $poster->ljuser_display : $poster->username,
             'context'     => $context,
             'entry_URL'   => $source_uri,
         );
@@ -150,7 +150,7 @@ sub notify_about_reference {
         my $text_var = 'pingback.notifyref.';
         if ( $ref_usr->is_community() ) {
         	$text_var .= ($comment ? 'communitycomment' : 'communitypost').'.'.($html ? 'html' : 'plain');
-        	$text_params{'community'} = $ref_usr->username;
+        	$text_params{'community'} = $html ? $ref_usr->ljuser_display : $ref_usr->username;
         } else {
             $text_var .= ($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain');
         }
