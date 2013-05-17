@@ -498,6 +498,7 @@ class UserExtended extends UserLite
     var readonly DateTime last_entry_time "Time of last posted entry";
     var readonly string friends_count "Count user's personal/identity/shared friends";
     var readonly string friendof_count "Count friends of user";
+    var readonly int social_capital "Social capital of user";
 }
 
 class Event extends UserLite
