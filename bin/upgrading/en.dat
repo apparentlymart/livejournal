@@ -4489,6 +4489,8 @@ main.updates.comments.comments=[[comments_count]] [[?comments_count|comment|comm
 
 main.updates.comments.empty=Sorry, there is currently no comments to display
 
+main.updates.comments.empty.title=No new comments
+
 main.updates.comments.more=[[comments_count]] more [[?comments_count|comment|comments]]
 
 main.updates.common=[[items_count]] new [[?items_count|event|events]]
@@ -4502,6 +4504,8 @@ main.updates.common.clear=Clear
 main.updates.common.clear.title=Remove all messages about new events
 
 main.updates.common.empty=Sorry, there is currently no events to display
+
+main.updates.common.empty.title=No new events
 
 main.updates.common.feed=[[feed_count]] new [[?feed_count|post|posts]] on <a href="[[feed_url]]">friends feed</a>
 
@@ -4518,6 +4522,8 @@ main.updates.recent.clear=Clear
 main.updates.recent.clear.title=Remove all messages about new posts
 
 main.updates.recent.empty=Sorry, there is currently no recent posts to display
+
+main.updates.recent.empty.title=No recent posts
 
 main.updates.remove=Remove item from updates list
 
