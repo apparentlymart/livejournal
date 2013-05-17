@@ -1846,54 +1846,7 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		display: none !important;
 		}
 
-/* LJ Spoiler
------------------------------------ */
-.lj-spoiler {
-	position: static;
-	top: auto;
-	left: auto;
-	display: inline-block;
-	width: auto;
-	height: auto;
-	margin: 0;
-	padding: 0;
-	}
-	.lj-spoiler .lj-spoiler-head {
-		position: static;
-		top: auto;
-		left: auto;
-		display: none;
-		width: auto;
-		height: auto;
-		margin: 0;
-		padding: 0;
-		}
-	.lj-spoiler .lj-spoiler-body {
-		position: static;
-		top: auto;
-		left: auto;
-		display: block;
-		width: auto;
-		height: auto;
-		margin: 0;
-		padding: 0;
-		}
-	#js .lj-spoiler .lj-spoiler-head {
-		display: block;
-		}
-	#js .lj-spoiler .lj-spoiler-body {
-		display: none;
-		}
-	#js .lj-spoiler.lj-spoiler-opened > .lj-spoiler-head {
-		display: none;
-		}
-	#js .lj-spoiler.lj-spoiler-opened  > .lj-spoiler-body {
-		display: block;
-		}
-		#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body BR:first-child,
-		#js .lj-spoiler.lj-spoiler-opened .lj-spoiler-body BR:last-child {
-			display: none;
-			}
+
 
 /* LJSUP-14684: [Journal, feed] Display GitHub gists */
 .gist .line-pre,
