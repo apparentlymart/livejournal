@@ -49,6 +49,7 @@
             journalid => $journalid,
             moduleid  => $moduleid,
             preview => $preview,
+            attrstrip => [qw{width height}],
         );
         LJ::run_hooks('modify_embed_content', \$content, \%GET);
 

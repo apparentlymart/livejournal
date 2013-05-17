@@ -559,6 +559,7 @@ sub module_content {
             noexpandembedded => 1,
             transform_embed_nocheck => 1,
             journalid => $opts{journalid},
+            attrstrip => $opts{attrstrip},
         });
     }
 
