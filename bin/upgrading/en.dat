@@ -4265,6 +4265,10 @@ main.editors.recommends=LiveJournal Recommends
 
 main.editors.main=Main Entry
 
+main.featured.ljmaps.title=LiveJournal Maps
+
+main.featured.title=Interesting Journal
+
 main.follow.facebook=Follow this rating on Facebook ([[facebook_name]])
 
 main.follow.livejournal=Follow this rating on LiveJournal ([[ljuser_name]])
