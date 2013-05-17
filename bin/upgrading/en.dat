@@ -53,6 +53,48 @@ admin.backup.recovery.th.added=Added
 
 admin.backup.recovery.th.status=Status
 
+admin.homepage.not.show.media=do not show media
+
+admin.homepage.cancel=Cancel
+
+admin.homepage.cat.facebook=Facebook:
+
+admin.homepage.cat.help=help text
+
+admin.homepage.cat.name=Category name:
+
+admin.homepage.cat.twitter=Twitter:
+
+admin.homepage.cat.user=LJ User:
+
+admin.homepage.cat.visible=Visible on site
+
+admin.homepage.cat.vk=Vkontakte:
+
+admin.homepage.close=Close
+
+admin.homepage.confirm=Confirm
+
+admin.homepage.full=Full
+
+admin.homepage.header=Homepage admin panel
+
+admin.homepage.menu.archive=Archive
+
+admin.homepage.menu.cat=Categories
+
+admin.homepage.menu.new_posts=New posts
+
+admin.homepage.new.cat=New category
+
+admin.homepage.save=Save
+
+admin.homepage.select.page=Select page:
+
+admin.homepage.select.rating=Please select rating:
+
+admin.homepage.time.left=Time left to update rating:
+
 adv_page.sup_about.text<<
 <p class="b-contact-address">127006, Россия, Москва, бизнес-центр "Школа журналистов",<br />ул. Малая Дмитровка, 20, 3 этаж</p> <dl class="b-contact-list"> <dt>Телефон:</dt> <dd>+7 (495) 980-80-68</dd> <dt>Факс:</dt> <dd>+7 (495) 662-38-57</dd> <dt>E-mail:</dt> <dd><a href="mailto:info@sup.com">info@sup.com</a></dd> <dt>Для прессы, проектов и сотрудничества:</dt> <dd>+7 (495) 980-80-68 доб. 1148,<br /><a href="mailto:pr@sup.com">pr@sup.com</a></dd> </dl> 
 .
