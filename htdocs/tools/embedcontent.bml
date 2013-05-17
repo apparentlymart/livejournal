@@ -64,7 +64,7 @@
 
         $content =~ s!src=(["'])(https?://www\.youtube\.com/embed/.*?)\1! 'src=' . $1 . $transform_youtube_url->($2) . $1 !ige;
 
-        return qq {<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>iframe</title><style type="text/css">HTML, BODY { background:transparent; padding:0; margin:0; border:0; overflow:hidden; }</style></head><body>$content</body></html>};
+        return qq {<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Video Iframe</title><style>HTML,BODY {overflow: hidden; margin: 0; padding: 0; border: 0; background: transparent;} IFRAME {width: 100%; height: 100%;}</style></head><body>$content</body></html>};
     }
 } 
 _code?>
