@@ -1451,8 +1451,10 @@ sub trans {
         }
     }
 
+    # not checking domain here because once we got here, it's checked
+    # above and %SUBDOMAIN_FUNCTION indicates it's a 'normal' one
     my $uri = LJ::Request->uri;
-    if ( $host eq $LJ::DOMAIN_WEB && defined $uri && $uri =~ /[.]bml$/ ) {
+    if ( defined $uri && $uri =~ /[.]bml$/ ) {
         my $filename_full = File::Spec->catfile( $LJ::HTDOCS, $uri );
         ($filename_full) = File::Spec->no_upwards($filename_full);
         if ( defined $filename_full && -e $filename_full ) {
