@@ -104,7 +104,9 @@ sub notify_about_reference {
 	$source_uri = $source_uri.'?thread='.$comment->{dtalkid}.'#t'.$comment->{dtalkid} if $comment;
 	
 	my @send_list;
-	if ( $ref_usr->is_community() ) {
+    if ( $ref_usr->is_community() ) {
+        my $prop_pingback = $ref_usr->prop('pingback') || 'O';
+        return if $prop_pingback eq 'D';
 		
         my @maintainers = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'A')};
         my @owner = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'S')};

@@ -262,12 +262,13 @@ sub parse_a {
 sub parse_lj {
 	my $text = shift;
     my $attr = shift;
+    my $user = $attr->{user} || $attr->{comm};
     
-    unless( my $found = grep $_ eq $attr->{user}, @used_users ) { # exclude repeat users
+    unless( my $found = grep $_ eq $user, @used_users ) { # exclude repeat users
         $orig =~ m/(.{0,50})$text(.{0,50})/;
-        my $context = $1.$attr->{user}.$2;
-        push @users => { user_name => $attr->{user}, context => $context };
-        push @used_users, $attr->{user};
+        my $context = $1.$user.$2;
+        push @users => { user_name => $user, context => $context };
+        push @used_users, $user;
     }
     return;
 }

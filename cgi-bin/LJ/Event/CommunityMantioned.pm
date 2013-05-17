@@ -19,6 +19,7 @@ sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 
     my ($class, $u) = @_;
     
+    return 0 if ($class->{user}->prop('pingback') eq 'D');
     return 1 if ($u->can_manage($class->{user}) || $u->can_moderate($class->{user}));
     return 0;
 }

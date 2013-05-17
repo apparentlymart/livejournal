@@ -6445,6 +6445,18 @@ settings.pingback.option.open=Entries & usernames
 settings.pingback.process|staleness=1
 settings.pingback.process=Allow sending/receiving link notifications from other journals
 
+settings.pingbackcomm|staleness=1
+settings.pingbackcomm=Allow send a notice if community mention
+
+settings.pingbackcomm.option.open|staleness=1
+settings.pingbackcomm.option.open=Open
+
+settings.pingbackcomm.option.disabled|staleness=1
+settings.pingbackcomm.option.disabled=Disabled
+
+settings.pingbackcomm.process|staleness=1
+settings.pingbackcomm.process=Allow send a notice if community mention
+
 settings.province=or non-US State/province/territory
 
 settings.settingprod.intro|staleness=1

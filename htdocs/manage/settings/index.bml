@@ -134,6 +134,7 @@ body<=
                 LJ::Setting::Display::BanUsers
                 LJ::Setting::FindByEmail
                 LJ::Setting::PingBack
+                LJ::Setting::PingBackComm
                 LJ::Setting::Ratings
                 LJ::Setting::InvisibilityGuests
             )],
