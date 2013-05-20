@@ -5964,7 +5964,7 @@ sub resetpushcounter {
         if $req->{platform} eq 'android';
 
 
-    if(LJ::PushNotification::Storage->reset_counter($u, $req->{platform}, $req->{deviceid})) {
+    if(LJ::PushNotification::Storage->reset_counter($u, $req)) {
         return { status => 'OK' }
     }
 
