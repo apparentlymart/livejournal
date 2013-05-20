@@ -4479,6 +4479,8 @@ main.tour.nav.prev=Previous feature
 
 main.updates.comments=[[comments_count]] <a href="[[comments_url]]">new [[?comments_count|comment|comments]]</a>
 
+main.updates.comments2=[[comments_count]] <a href="[[comments_url]]">new [[?count|comment|comments|comments]]</a>
+
 main.updates.comments.at=at
 
 main.updates.comments.clear=Clear
@@ -4494,6 +4496,8 @@ main.updates.comments.empty.title=No new comments
 main.updates.comments.more=[[comments_count]] more [[?comments_count|comment|comments]]
 
 main.updates.common=[[items_count]] new [[?items_count|event|events]]
+
+main.updates.common2=[[items_count]] new [[?count|event|events|events]]
 
 main.updates.common.allbirthdays=All birthdays
 

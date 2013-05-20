@@ -1107,25 +1107,20 @@ sub update_events_counter {
 
     my $journalid = $journalu->userid; 
 
-    my $pjtalkid; 
-
-    return if $user->equals($comment->poster);
-
-    if ( $parent ) {
-
-        return if $parent->poster->equals($comment->poster);
-
-        $user = $parent->poster;
-
-        $pjtalkid = $parent->jtalkid;
-
+    unless ( $user->equals($comment->poster) ) {
+        LJ::Widget::HomePage::CommentsCounter->add_comment($user, 
+            field    => "$journalid:$jitemid", 
+            jtalkid  => $jtalkid, 
+        ); 
     }
 
-    LJ::Widget::HomePage::CommentsCounter->add_comment($user, 
-        field    => "$journalid:$jitemid", 
-        jtalkid  => $jtalkid, 
-        pjtalkid => $pjtalkid
-    ); 
+    if ( $parent && !$parent->poster->equals($comment->poster) && !$user->equals($parent->poster) ) {
+        LJ::Widget::HomePage::CommentsCounter->add_comment($parent->poster,
+            field    => "$journalid:$jitemid", 
+            jtalkid  => $jtalkid, 
+            pjtalkid => $parent->jtalkid,
+        ); 
+    }
 
     return;
 }
