@@ -385,8 +385,14 @@ sub enqueue {
                 my $subject = $msg->subject_raw || '';
 
                 $spam = LJ::SpamFilter->is_spam_inbox_message(
-                    $journal, $sender, $body . $subject
+                    $journal, $sender, $subject
                 );
+
+                unless ($spam) {
+                    $spam = LJ::SpamFilter->is_spam_inbox_message(
+                        $journal, $sender, $body
+                    );
+                }
             }
         }
     }
