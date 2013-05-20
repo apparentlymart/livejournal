@@ -1409,6 +1409,14 @@ sub get_recent_items {
         }
     }
 
+    if ( exists $opts->{load_tags} && $opts->{load_tags} ) {
+        my $tags = LJ::Tags::get_logtagsmulti( { $u->clusterid => [ map { [ $userid, $_ ] } @{$opts->{'itemids'}} ] } );
+
+        for my $Entry ( @{$opts->{'entry_objects'}} ) {
+            $Entry->handle_prefetched_tags( $tags->{ $userid.' '.$Entry->{jitemid} } );
+        }
+    } 
+
     return @items;
 }
 
