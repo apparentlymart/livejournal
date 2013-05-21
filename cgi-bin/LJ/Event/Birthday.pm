@@ -303,8 +303,13 @@ sub fire {
 
 sub update_events_counter {
     my $self = shift;
-    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
-        LJ::Lang::ml('widget.updatesforuser.birthday', { 
+
+    my $u = $self->u;
+    return unless $u;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
+        LJ::Lang::get_text($lang, 'widget.updatesforuser.birthday', undef, { 
             ljuser => $self->bdayuser->ljuser_display,
             url    => $self->bdayuser->gift_url({ item => 'vgift' }),
             date   => $self->email_bday($self->u->prop('browselang')),

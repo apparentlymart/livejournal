@@ -240,8 +240,13 @@ sub as_push_payload {
 
 sub update_events_counter {
     my $self = shift;
-    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
-        LJ::Lang::ml('widget.updatesforuser.befriended', {
+
+    my $u = $self->u;
+    return unless $u;
+
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
+        LJ::Lang::get_text($lang, 'widget.updatesforuser.befriended', undef, {
             ljuser => $self->friend->ljuser_display
         })
     );

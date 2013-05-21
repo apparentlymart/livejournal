@@ -385,14 +385,18 @@ sub get_subscription_ntype_force {
 sub update_events_counter {
     my $self = shift;
 
+    my $u = $self->u;
+    return unless $u;
+
     my $msg     = $self->load_message;
     return unless $msg;
     
     my $msgid   = $msg->msgid;
     my $qid     = $msg->qid;
 
-    LJ::Widget::HomePage::UpdatesForUser->add_event($self->u, 
-        LJ::Lang::ml('widget.updatesforuser.message.recvd', {
+    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
+        LJ::Lang::get_text($lang, 'widget.updatesforuser.message.recvd', undef, {
             ljuser => $msg->other_u->ljuser_display,
             url    => "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid",
         })
