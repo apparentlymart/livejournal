@@ -1108,18 +1108,11 @@ sub update_events_counter {
     my $journalid = $journalu->userid; 
 
     unless ( $user->equals($comment->poster) ) {
-        LJ::Widget::HomePage::CommentsCounter->add_comment($user, 
-            field    => "$journalid:$jitemid", 
-            jtalkid  => $jtalkid, 
-        ); 
+        LJ::Widget::HomePage::CommentsCounter->add_comment($user, "$journalid:$jitemid:$jtalkid"); 
     }
 
     if ( $parent && !$parent->poster->equals($comment->poster) && !$user->equals($parent->poster) ) {
-        LJ::Widget::HomePage::CommentsCounter->add_comment($parent->poster,
-            field    => "$journalid:$jitemid", 
-            jtalkid  => $jtalkid, 
-            pjtalkid => $parent->jtalkid,
-        ); 
+        LJ::Widget::HomePage::CommentsCounter->add_comment($parent->poster, "$journalid:$jitemid:$jtalkid"); 
     }
 
     return;
