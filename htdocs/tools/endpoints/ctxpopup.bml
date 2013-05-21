@@ -119,7 +119,7 @@
     if ($u && (!$u->prop('ratings') || $u->prop('ratings') eq 'Y' || LJ::check_priv($remote, 'siteadmin', 'selfpromo'))) {
         my ($position, $first, $soc_capital, %filter);
 
-        if ( $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
+        if ( LJ::is_enabled('new_homepage_noncyr_sc') || $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
 
             my $country = LJ::GeoLocation->get_country_info_by_ip;
             $country = $u->prop('country') if $u && $country ne 'UA';
