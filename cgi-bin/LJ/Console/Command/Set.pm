@@ -15,7 +15,7 @@ sub args_desc { [
                  'reason' => "Optional; reason why you do it."
                  ] }
 
-sub usage { '[ "for" <community> ] <propname> <value> <reason>' }
+sub usage { '[ "for" <community> ] <propname> <value> [ <reason> ]' }
 
 sub can_execute { 1 }
 
