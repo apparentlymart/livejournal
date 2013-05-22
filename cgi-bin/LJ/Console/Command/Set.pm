@@ -12,24 +12,25 @@ sub args_desc { [
                  'community' => "Optional; community to set property for, if you're a maintainer.",
                  'propname' => "Property name to set.",
                  'value' => "Value to set property to.",
+                 'reason' => "Optional; reason why you do it."
                  ] }
 
-sub usage { '[ "for" <community> ] <propname> <value>' }
+sub usage { '[ "for" <community> ] <propname> <value> <reason>' }
 
 sub can_execute { 1 }
 
 sub execute {
     my ($self, @args) = @_;
 
-    return $self->error("This command takes either two or four arguments. Consult the reference.")
-        unless scalar(@args) == 2 || scalar(@args) == 4;
+    return $self->error("This command takes either two, four or five arguments. Consult the reference.")
+        unless scalar(@args) == 2 || scalar(@args) == 4 || scalar(@args) == 5;
 
     my $remote = LJ::get_remote();
     my $journal = $remote;   # may be overridden later
     my $errmsg;
     my $rv;
 
-    if (scalar(@args) == 4) {
+    if (scalar(@args) > 2) {
         # sanity check
         my $for = shift @args;
         return $self->error("First argument must be 'for'")
@@ -64,14 +65,14 @@ sub execute {
             unless ($remote && $remote->can_manage($journal)) || LJ::check_priv($remote, "siteadmin", "propedit");
     }
 
-    my ($key, $value) = @args;
+    my ($key, $value, $reason) = @args;
     return $self->error("Unknown property '$key'")
         unless ref $LJ::SETTER{$key} eq "CODE";
 
     $rv = $LJ::SETTER{$key}->($journal, $key, $value, \$errmsg);
     return $self->error("Error setting property: $errmsg")
         unless $rv;
-
+    LJ::statushistory_add($journal, $remote, 'prop change', "User property '$key' set to '$value' for " . $journal->user . ($reason ? " by reason \"$reason\"" : "") );
     return $self->print("User property '$key' set to '$value' for " . $journal->user);
 }
 

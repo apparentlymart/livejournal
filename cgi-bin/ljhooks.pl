@@ -401,6 +401,22 @@ register_setter("opt_ctxpopup", sub {
     return 1;
 });
 
+register_setter("pingback", sub {
+    my ($u, $key, $value, $err) = @_;
+    
+    my $remote = LJ::get_remote();
+    unless ($remote && LJ::check_priv($remote, 'siteadmin', 'propedit')) {
+        $$err = "You do not have privileges to set this property.";
+        return 0;
+    }
+    unless ($value =~ /^[OLDEUB]$/) {
+        $$err = "Illegal value. Legal values: O, L, D, E, U, B.";
+        return 0;
+    }
+    $u->set_prop("pingback", $value);
+    return 1;
+});
+
 register_setter("s2privs", sub {
     my ($u, $key, $value, $err) = @_;
 

@@ -39,19 +39,26 @@ sub option {
 
     ## no value selected == pingback for all
     my $value = $u->prop('pingback') || 'O';
-    $value = "O" unless $value  =~ /^[OLDEU]$/;
+    $value = "O" unless $value  =~ /^[OLDEUB]$/;
     ## option "Livejournal only" is removed so far, now it means "Open"
     $value = "O" if $value eq 'L'; 
     
     # PingBack options
     my $ret = '';
+    my $disabled = LJ::PingBack->has_user_pingback($u) ? 0 : 1;
+
+    my %opts = (
+        "O" => $class->ml("settings.pingback.option.open"),
+        "E" => $class->ml("settings.pingback.option.entries"),
+        "U" => $class->ml("settings.pingback.option.usernames"),
+        "D" => $class->ml("settings.pingback.option.disabled"),
+    );
+    if ($value eq 'B') {
+    	$disabled = 1;
+        $opts{"B"} = $class->ml("settings.pingback.option.blocked");
+    }
     $ret .= $class->ml('settings.pingback.process') . "&nbsp;<br />";
-    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $value, disabled => LJ::PingBack->has_user_pingback($u) ? 0 : 1 },
-                              "O" => $class->ml("settings.pingback.option.open"),
-                              "E" => $class->ml("settings.pingback.option.entries"),
-                              "U" => $class->ml("settings.pingback.option.usernames"),
-                              "D" => $class->ml("settings.pingback.option.disabled"),
-                            );
+    $ret .= LJ::html_select({ 'name' => "${key}pingback", 'selected' => $value, disabled => $disabled }, %opts );
     return $ret;
 }
 
@@ -62,7 +69,7 @@ sub save {
     return unless $class->should_render($u);
     
     my $value = $class->get_arg($args, "pingback");
-    $value = "O" unless $value  =~ /^[OLDEU]$/;
+    $value = "O" unless $value  =~ /^[OLDEUB]$/;
     $value = "O" if $value eq 'L';
     return $u->set_prop('pingback', $value);
 }
