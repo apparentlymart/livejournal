@@ -19,7 +19,7 @@ sub ping_post {
     #
     my $target_entry = LJ::Entry->new_from_url($targetURI);
 
-    unless ($target_entry){
+    unless ($target_entry) {
         warn "Unknown entry: $targetURI";
         return "Unknown entry";
     }
@@ -93,43 +93,46 @@ sub ping_post {
 }
 
 sub notify_about_reference {
-	my $class = shift;
+    my $class = shift;
     my %args  = @_;
-	my $ref_usr = $args{user};
-	my $source_uri = $args{source_uri};
-	my $context = $args{context};
-	my $comment = $args{comment};
-	my $target_entry = LJ::Entry->new_from_url($source_uri);
-	my $poster = $comment ? LJ::load_userid($comment->{posterid}) : LJ::load_userid($target_entry->posterid);
-	$source_uri = $source_uri.'?thread='.$comment->{dtalkid}.'#t'.$comment->{dtalkid} if $comment;
-	
-	my @send_list;
+    my $ref_usr    = $args{user};
+    my $source_uri = $args{source_uri};
+    my $context    = $args{context};
+    my $comment    = $args{comment};
+    my $target_entry = LJ::Entry->new_from_url($source_uri);
+    my $poster = $comment ? LJ::load_userid($comment->{posterid}) : LJ::load_userid($target_entry->posterid);
+    $source_uri = $source_uri . '?thread=' . $comment->{dtalkid} . '#t' . $comment->{dtalkid} if $comment;
+
+    my @send_list;
+
     if ( $ref_usr->is_community() ) {
         my $prop_pingback = $ref_usr->prop('pingback') || 'O';
         return if $prop_pingback eq 'D';
-		
+
         my @maintainers = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'A')};
         my @owner = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'S')};
-        
+
         #find union mainteiners and owners
         my %union = ();
+
         foreach my $m (@maintainers) { $union{$m} = 1; }
         foreach my $o (@owner) { $union{$o} = 1; }
 
         foreach my $user_id (keys %union) {
-        	my $user = LJ::load_userid($user_id);
-        	my %opts = (
-        	   journalid => $ref_usr->{userid},
-        	   etypeid => LJ::Event::CommunityMantioned->etypeid,
-        	   ntypeid => LJ::NotificationMethod::Email->ntypeid,
-        	);
+            my $user = LJ::load_userid($user_id);
+            my %opts = (
+               journalid => $ref_usr->{userid},
+               etypeid   => LJ::Event::CommunityMantioned->etypeid,
+               ntypeid   => LJ::NotificationMethod::Email->ntypeid,
+            );
             my @subs = LJ::Subscription->find( $user, %opts );
             delete $union{$user_id} unless @subs;
         }
-        
+
         @send_list = keys %union;
         @send_list = map { LJ::load_userid($_) } @send_list;
-	} else {
+    }
+    else {
         push @send_list, $ref_usr;
     }
 
@@ -139,36 +142,38 @@ sub notify_about_reference {
         LJ::load_user_props($u, 'browselang');
         my $lang = $u->{'browselang'};
         my $html = $u->receives_html_emails;
-        
+
         my %text_params = (
             'usernameA'   => $html ? $u->ljuser_display : $u->username,
             'usernameB'   => $html ? $poster->ljuser_display : $poster->username,
             'context'     => $context,
             'entry_URL'   => $source_uri,
         );
-        
+
         my $text_var = 'pingback.notifyref.';
+
         if ( $ref_usr->is_community() ) {
-        	$text_var .= ($comment ? 'communitycomment' : 'communitypost').'.'.($html ? 'html' : 'plain');
-        	$text_params{'community'} = $html ? $ref_usr->ljuser_display : $ref_usr->username;
-        } else {
+            $text_var .= ($comment ? 'communitycomment' : 'communitypost').'.'.($html ? 'html' : 'plain');
+            $text_params{'community'} = $html ? $ref_usr->ljuser_display : $ref_usr->username;
+        }
+        else {
             $text_var .= ($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain');
         }
-    
+
         my $body = LJ::Lang::get_text(
             $lang,
             $text_var,
             undef,
             \%text_params
         );
-    
+
         my $subject = LJ::Lang::get_text(
             $lang,
             'pingback.notifyref.subject',
             undef,
             { usernameB   => $poster->username, }
         );
-        
+
         my %mail_options = (
             'to'      => $u->email_raw,
             'from'    => $LJ::DONOTREPLY_EMAIL,
@@ -177,18 +182,17 @@ sub notify_about_reference {
         );
         $mail_options{'html'} = $body if ($html);
 
-	    LJ::send_mail(\%mail_options);
+        LJ::send_mail(\%mail_options);
     }
 }
+
 sub should_user_recieve_notice {
-	my $class = shift;
-    my $user = shift;
-    my $poster = shift;
-    
+    my ( $class, $user, $poster ) = @_;
+
     return 0 if $user->userid eq $poster->userid;
-    
+
     return 0 if LJ::is_banned($poster->userid, $user->userid);
-    
+
 #    warn("status: ".$user->statusvis);
 #    warn("locked: ".$user->is_locked);
 #    warn("suspended: ".$user->is_suspended);
@@ -196,18 +200,17 @@ sub should_user_recieve_notice {
 #    warn("memorial: ".$user->is_memorial);
 #    warn("deleted: ".$user->is_deleted);
 
-    
     return 0 if $user->is_locked ||
-                $user->is_suspended || 
-                $user->is_readonly || 
-                $user->is_memorial || 
+                $user->is_suspended ||
+                $user->is_readonly ||
+                $user->is_memorial ||
                 $user->is_deleted;
-                
+
     return 0 unless $user->is_person || $user->is_identity;
-    
+
     my $ping_back = $user->prop("pingback") ? $user->prop("pingback") : "O"; #if a user have not pingback parameter then think Open
     return 0 unless ($ping_back eq "U") || ($ping_back eq "O");
-    
+
     return 1;
 }
 
@@ -244,21 +247,17 @@ sub should_entry_recieve_pingback {
     return 1;
 =cut
 
-    return 1; #
-
+    return 1;
 }
 
-
-#
 sub notify {
-    my $class = shift;
-    my %args  = @_;
+    my ( $class, %args ) = @_;
 
     return if $LJ::DISABLED{pingback};
 
-    my $uri  = $args{uri};
-    my $mode = $args{mode};
-    my $comment  = $args{comment};
+    my $uri          = $args{uri};
+    my $mode         = $args{mode};
+    my $comment      = $args{comment};
     my $comment_data = $args{comment_data};
 
     return unless $mode =~ m!^[OLEU]$!; # (L)ivejournal only, (O)pen.
@@ -270,29 +269,25 @@ sub notify {
         return;
     }
 
-    #
     my $job = TheSchwartz::Job->new(
         funcname => "TheSchwartz::Worker::NotifyPingbackServer",
         arg      => {
-            uri  => $uri,
-            mode => $mode,
-            comment => $comment,
+            uri          => $uri,
+            mode         => $mode,
+            comment      => $comment,
             comment_data => $comment_data,
         },
     );
-    $sclient->insert($job);
 
+    $sclient->insert($job);
 }
 
-
 sub has_user_pingback {
-    my $class = shift;
-    my $u     = shift;
+    my ( $class, $u ) = @_;
 
     return 0 if $LJ::DISABLED{'pingback'};
     #return 0 unless $u->get_cap('pingback');
     return 1;
 }
-
 
 1;

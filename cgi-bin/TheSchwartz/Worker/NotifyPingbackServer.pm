@@ -7,25 +7,25 @@ use LJ::ExtBlock;
 
 sub work {
     my ($class, $job) = @_;
-    my $args = $job->arg;
+    my $args   = $job->arg;
     my $client = $job->handle->client;
 
-    send_ping(uri  => $args->{uri},
-              mode => $args->{mode},
-              comment => $args->{comment},
-              comment_data => $args->{comment_data},
-              );
+    send_ping(
+        uri          => $args->{uri},
+        mode         => $args->{mode},
+        comment      => $args->{comment},
+        comment_data => $args->{comment_data},
+    );
 
     $job->completed;
-
 }
 
 sub send_ping {
     my %args = @_;
 
-    my $source_uri = $args{uri};
-    my $mode = $args{mode};
-    my $comment = $args{comment};
+    my $source_uri   = $args{uri};
+    my $mode         = $args{mode};
+    my $comment      = $args{comment};
     my $comment_data = $args{comment_data};
 
     # return unless $mode =~ m/^[LO]$/; # (L)ivejournal only, (O)pen.
@@ -35,6 +35,7 @@ sub send_ping {
 
     my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw) if $mode =~ m/^[LOE]$/;
     my @users;
+
     if ( $mode =~ m/^[LOU]$/ ) {
         my $contents = $comment ? $comment_data->{body} : $source_entry->event_raw;
         @users = ExtractLinksWithContext->find_userlink($contents);
@@ -42,8 +43,8 @@ sub send_ping {
     # use Data::Dumper;
     # warn "Links: " . Dumper(\@users);
     return unless (@links || @users);
-    
-    foreach my $link (@links){
+
+    foreach my $link ( @links ) {
         my $target_entry = LJ::Entry->new_from_url($link->{uri});
 
         next unless $target_entry;
@@ -51,23 +52,35 @@ sub send_ping {
         next unless LJ::PingBack->should_entry_recieve_pingback($target_entry);
         next unless log_ping($source_entry, $target_entry);
 
-        # on success returns LJ::Comment.
-        my $res =
+        # returns LJ::Comment object on success or error string otherwise.
+        my $res = eval {
             LJ::PingBack->ping_post(
-                    sourceURI => $source_uri,
-                    targetURI => $link->{uri},
-                    context   => $link->{context},
-                    title     => $source_entry->subject_raw,
-                    ); # returns LJ::Comment object on success or error string otherwise.
+                sourceURI => $source_uri,
+                targetURI => $link->{uri},
+                context   => $link->{context},
+                title     => $source_entry->subject_raw,
+            );
+        };
+
+        # delete log item if not comment posted
         drop_relation($source_entry, $target_entry) unless ref $res;
     }
-    
-    return 1 if @users > $LJ::MAX_USER_NOTIFY; #protection from spam message: if message contains more 50 users then no send notification
-    
-    foreach my $aUser (@users){
+
+    #protection from spam message: if message contains more 50 users then no send notification
+    return 1 if @users > $LJ::MAX_USER_NOTIFY;
+
+    foreach my $aUser ( @users ) {
         my $user = LJ::load_user($aUser->{user_name});
         next unless $user;
-        LJ::PingBack->notify_about_reference( user => $user, source_uri => $source_uri, context => $aUser->{context}, comment => $comment );
+
+        eval {
+            LJ::PingBack->notify_about_reference(
+                user       => $user,
+                source_uri => $source_uri,
+                context    => $aUser->{context},
+                comment    => $comment,
+            );
+        };
     }
 
     return 1;
@@ -83,18 +96,26 @@ sub log_ping {
         unless $dbh;
 
     my $sth = $dbh->prepare("
-        INSERT IGNORE INTO pingrel
+        INSERT INTO pingrel
             (suid, sjid, tuid, tjid)
         VALUES
             (?, ?, ?, ?)
     ");
-    $sth->execute(
-        $source_entry->posterid, $source_entry->jitemid,
-        $target_entry->posterid, $target_entry->jitemid
-        ) or return 0;
+
+    eval {
+        $sth->execute(
+            $source_entry->posterid,
+            $source_entry->jitemid,
+            $target_entry->posterid,
+            $target_entry->jitemid,
+        );
+    };
+
+    return 0 if $@;
 
     return 1;
 }
+
 sub drop_relation {
     my ($source_entry, $target_entry) = @_;
     my $target_poster = $target_entry->poster;
@@ -109,14 +130,17 @@ sub drop_relation {
         FROM pingrel
         WHERE
             suid = ?
-            AND sjid = ? 
-            AND tuid = ? 
+            AND sjid = ?
+            AND tuid = ?
             AND tjid = ?
     ");
+
     $sth->execute(
-        $source_entry->posterid, $source_entry->jitemid,
-        $target_entry->posterid, $target_entry->jitemid
-        ) or return 0;
+        $source_entry->posterid,
+        $source_entry->jitemid,
+        $target_entry->posterid,
+        $target_entry->jitemid,
+    ) or return 0;
 
     return 1;
 }
@@ -129,7 +153,7 @@ use Data::Dumper;
 
 # if needed this vars easily can be moved to $parser object as its properties.
 my $prev_link_end = 0;
-my @links = ();
+my @links;
 my @users = ();
 my @used_users = ();
 my $res = '';
@@ -137,8 +161,7 @@ my $orig = '';
 
 
 sub do_parse {
-    my $class = shift;
-    my $text  = shift;
+    my ( $class, $text ) = @_;
 
     $res = '';
     $prev_link_end = 0;
@@ -159,7 +182,7 @@ sub do_parse {
     my $normolized_text = '';
     my $normolize = HTML::Parser->new(
         api_version => 3,
-        start_h     => [ sub { 
+        start_h     => [ sub {
                             my ($self, $tagname, $text, $attr) = @_;
                             $normolized_text .= $text;
                             $self->{_smplf_in_a} = 1 if $tagname eq 'a';
@@ -185,29 +208,28 @@ sub do_parse {
         api_version => 3,
         start_h     => [ \&tag_start, "tagname,text,attr" ],
         end_h       => [ \&tag_end,   "tagname,text,attr" ],
-        text_h      => [ \&text,  "text" ],
+        text_h      => [ \&text,      "text" ],
     );
     $parser->parse($normolized_text);
-    
-    return 
-        map { $_->{context} =  Encode::encode_utf8($_->{context}); $_ } 
+
+    return
+        map { $_->{context} =  Encode::encode_utf8($_->{context}); $_ }
         @links;
 }
 
 sub find_userlink {
-    my $class = shift;
-    my $text  = shift;
+    my ( $class, $text ) = @_;
     $orig = $text;
-    
+
     @users = ();
     @used_users = ();
-    
+
     my $parser = HTML::Parser->new(
         api_version => 3,
         start_h     => [ \&tag_start, "tagname,text,attr" ],
     );
     $parser->parse($text);
-    
+
     return @users;
 }
 
@@ -218,38 +240,43 @@ sub tag_start {
 
     if ($tag_name eq 'a') {
         parse_a ($text, $attr)
-    } elsif ($tag_name =~ m/(br|p|table|hr|object)/) {
+    }
+    elsif ($tag_name =~ m/(br|p|table|hr|object)/) {
         $res .= ' ' if substr($res, -1, 1) ne ' ';
-    } elsif ($tag_name eq 'lj') {
-    	parse_lj ($text, $attr);
+    }
+    elsif ($tag_name eq 'lj') {
+        parse_lj ($text, $attr);
     }
 }
+
 sub tag_end {
     my $tag_name = shift;
+
     if ( ($tag_name eq 'a') || ($tag_name eq 'lj') ){
         my $context = substr $res, (length($res) - 100 < $prev_link_end ? $prev_link_end : -100); # last 100 or less unused chars
-        
+
         if ( length($res) > length($context) ){ # context does not start from the text begining.
             $context =~ s/^(\S{1,5}\s*)//;
         }
 
-        $links[-1]->{context} = $context if scalar @links;        
+        $links[-1]->{context} = $context if scalar @links;
         $prev_link_end = length($res);
     }
+
     return;
 }
+
 sub text {
     my $text = shift;
     my $copy = $text;
     $copy =~ s/\s+/ /g;
     $res .= $copy;
     return;
-
 }
+
 sub parse_a {
-    my $text = shift;
-    my $attr = shift;
-    
+    my ( $text, $attr ) = @_;
+
     my $uri = URI->new($attr->{href});
     return unless $uri;
 
@@ -260,16 +287,17 @@ sub parse_a {
 }
 
 sub parse_lj {
-	my $text = shift;
-    my $attr = shift;
+    my ( $text, $attr ) = @_;
     my $user = $attr->{user} || $attr->{comm};
-    
-    unless( my $found = grep $_ eq $user, @used_users ) { # exclude repeat users
+
+    # exclude repeat users
+    unless( my $found = grep $_ eq $user, @used_users ) {
         $orig =~ m/(.{0,50})$text(.{0,50})/;
         my $context = $1.$user.$2;
         push @users => { user_name => $user, context => $context };
         push @used_users, $user;
     }
+
     return;
 }
 

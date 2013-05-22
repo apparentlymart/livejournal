@@ -101,10 +101,10 @@ LJ::register_hook("postpost", sub {
     my $entry    = $args->{entry};
     my $journal  = $args->{journal};
     my $repost   = $args->{entryrepost}; # repost without pingback
-   
+
     # if repost (fast) then pingpack is not need
     return if $repost;
-    
+
     return unless LJ::PingBack->has_user_pingback($journal);
 
     # check weight
