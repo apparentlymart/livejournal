@@ -61,6 +61,7 @@ sub send_ping {
                 title     => $source_entry->subject_raw,
             );
         };
+        warn($@) if $@;
 
         # delete log item if not comment posted
         drop_relation($source_entry, $target_entry) unless ref $res;
@@ -81,6 +82,7 @@ sub send_ping {
                 comment    => $comment,
             );
         };
+        warn($@) if $@;
     }
 
     return 1;

@@ -4,6 +4,7 @@ use LJ::Entry;
 use LJ::Subscription;
 use LJ::Event;
 use LJ::NotificationMethod;
+use Digest::MD5 qw/md5_hex/;
 
 # Add comment to pinged post, if allowed.
 # returns comment object in success,
@@ -104,6 +105,7 @@ sub notify_about_reference {
     $source_uri = $source_uri . '?thread=' . $comment->{dtalkid} . '#t' . $comment->{dtalkid} if $comment;
 
     my @send_list;
+    my %union = ();
 
     if ( $ref_usr->is_community() ) {
         my $prop_pingback = $ref_usr->prop('pingback') || 'O';
@@ -113,11 +115,10 @@ sub notify_about_reference {
         my @owner = @{LJ::load_rel_user_cache($ref_usr->{userid}, 'S')};
 
         #find union mainteiners and owners
-        my %union = ();
-
         foreach my $m (@maintainers) { $union{$m} = 1; }
         foreach my $o (@owner) { $union{$o} = 1; }
 
+        #take users which have subscription
         foreach my $user_id (keys %union) {
             my $user = LJ::load_userid($user_id);
             my %opts = (
@@ -126,7 +127,11 @@ sub notify_about_reference {
                ntypeid   => LJ::NotificationMethod::Email->ntypeid,
             );
             my @subs = LJ::Subscription->find( $user, %opts );
-            delete $union{$user_id} unless @subs;
+            if (@subs) {
+                $union{$user_id} = $subs[0]->id;
+            } else {
+                delete $union{$user_id};
+            }
         }
 
         @send_list = keys %union;
@@ -138,7 +143,6 @@ sub notify_about_reference {
 
     foreach my $u (@send_list) {
         return 0 unless $class->should_user_recieve_notice($u, $poster);
-
         LJ::load_user_props($u, 'browselang');
         my $lang = $u->{'browselang'};
         my $html = $u->receives_html_emails;
@@ -152,9 +156,17 @@ sub notify_about_reference {
 
         my $text_var = 'pingback.notifyref.';
 
+        #especial params for community
         if ( $ref_usr->is_community() ) {
             $text_var .= ($comment ? 'communitycomment' : 'communitypost').'.'.($html ? 'html' : 'plain');
             $text_params{'community'} = $html ? $ref_usr->ljuser_display : $ref_usr->username;
+            %text_params = (
+                %text_params,
+                'subs_id' => $union{$u->{userid}},
+                'hash' => md5_hex($u->user, $LJ::ESN_UNSUBSCR_SECRET_CODE),
+                'siteroot' => $LJ::SITEROOT,
+                'username' => $u->username,
+            )
         }
         else {
             $text_var .= ($comment ? 'textcomment' : 'text').'.'.($html ? 'html' : 'plain');
