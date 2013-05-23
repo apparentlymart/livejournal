@@ -6,7 +6,7 @@ use Carp qw(croak);
 
 use vars qw(%GET %POST $headextra @errors @warnings);
 
-sub need_res { qw( stc/widgets/widget-layout.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
+sub need_res { qw( stc/widgets/widget-layout.css stc/lj_base-journal.css stc/widgets/search.css stc/widgets/add-community.css stc/widgets/featuredposts.css stc/widgets/featuredcomms.css ) }
 
 use LJ::Browse::Parser;
 use LJ::Share;
@@ -317,8 +317,8 @@ sub render_body {
 
     if ($vertical) {
         @comms = $vertical->get_communities(
-            is_need_child   => 1, 
-            category        => $cat, 
+            is_need_child   => 1,
+            category        => $cat,
             search          => $view eq 'communities' ? $search_str : undef
         );
         $ad = LJ::get_ads({ location => 'bml.explore/vertical', vertical => $vertical->name, ljadwrapper => 1 });
@@ -345,7 +345,7 @@ sub render_body {
         @comms = _get_spotlight_communities();  # Show spotlight communities by default
         if (!@comms && $view eq 'communities') {
             @comms = LJ::Vertical->get_communities(
-                is_need_child   => 1, 
+                is_need_child   => 1,
             );
         }
         $ad = LJ::get_ads({ location => 'bml.explore/novertical', ljadwrapper => 1 });
@@ -520,8 +520,8 @@ sub render_body {
         popular_interests_widget=> LJ::Widget::PopularInterests->render(),
         add_community_widget    => LJ::Widget::AddCommunity->render(vertical => $vertical),
         search_widget           => LJ::Widget::Search->render(
-                                        type        => $vertical ? "tags" : "yandex", 
-                                        view        => $view, 
+                                        type        => $vertical ? "tags" : "yandex",
+                                        view        => $view,
                                         search_text => $search_str,
                                     ),
         top_posts               => \@top_posts,
