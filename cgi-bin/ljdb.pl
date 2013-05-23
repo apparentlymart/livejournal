@@ -13,7 +13,7 @@ LJ::Config->load;
 $LJ::DBIRole = new DBI::Role {
     'timeout' => sub {
         my ($dsn, $user, $pass, $role) = @_;
-        return 0 if $role && $role eq "master";
+        return $LJ::MASTER_DB_TIMEOUT || 0 if $role && $role eq "master";
         return $LJ::DB_TIMEOUT;
     },
     'sources' => \%LJ::DBINFO,

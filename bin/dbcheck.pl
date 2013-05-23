@@ -16,20 +16,23 @@ my $opt_tablestatus;
 my $opt_checkreport = 0;
 my $opt_verbose;
 my $opt_rates;
+my $opt_quick;
 my @opt_run;
-exit 1 unless GetOptions('help' => \$help,
-                         'flushhosts' => \$opt_fh,
-                         'start' => \$opt_start,
-                         'stop' => \$opt_stop,
-                         'checkreport' => \$opt_checkreport,
-                         'rates' => \$opt_rates,
-                         'fix' => \$opt_fix,
-                         'run=s' => \@opt_run,
-                         'onlyerrors' => \$opt_err,
-                         'all' => \$opt_all,
-                         'tablestatus' => \$opt_tablestatus,
-                         'verbose' => \$opt_verbose,
-                         );
+exit 1 unless GetOptions(
+    'help'        => \$help,
+    'flushhosts'  => \$opt_fh,
+    'start'       => \$opt_start,
+    'stop'        => \$opt_stop,
+    'checkreport' => \$opt_checkreport,
+    'rates'       => \$opt_rates,
+    'fix'         => \$opt_fix,
+    'run=s'       => \@opt_run,
+    'onlyerrors'  => \$opt_err,
+    'all'         => \$opt_all,
+    'tablestatus' => \$opt_tablestatus,
+    'quick'       => \$opt_quick,
+    'verbose'     => \$opt_verbose,
+);
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
@@ -51,6 +54,7 @@ if ($help) {
          "    --run <sql>     Run arbitrary SQL.\n".
          "    --onlyerrors    Will be silent unless there are errors.\n".
          "    --tablestatus   Show warnings about full/sparse tables.\n".
+         "    --quick         Time out DB connections quickly.\n".
          "\n".
          "Commands\n".
          "   (none)           Shows replication status.\n".
@@ -59,6 +63,11 @@ if ($help) {
 }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljdb.pl";
+
+if ($opt_quick) {
+    $LJ::MASTER_DB_TIMEOUT = 1;
+    $LJ::DB_TIMEOUT        = 1;
+}
 
 debug("Connecting to master...");
 my $dbh = LJ::DB::dbh_by_role("master");
