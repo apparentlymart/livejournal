@@ -69,11 +69,13 @@ sub execute {
     return $self->error("Unknown property '$key'")
         unless ref $LJ::SETTER{$key} eq "CODE";
 
+    my $old = $journal->prop('pingback') || 'O';
     $rv = $LJ::SETTER{$key}->($journal, $key, $value, \$errmsg);
     return $self->error("Error setting property: $errmsg")
         unless $rv;
-    LJ::statushistory_add($journal, $remote, 'prop change', "User property '$key' set to '$value' for " . $journal->user . ($reason ? " by reason \"$reason\"" : "") );
-    return $self->print("User property '$key' set to '$value' for " . $journal->user);
+    
+    LJ::statushistory_add($journal, $remote, 'propedit', "User property '$key' change from '$old' to '$value' for " . $journal->user . ($reason ? " by reason \"$reason\"" : "") );
+    return $self->print("User property '$key' change from '$old' to '$value' for " . $journal->user);
 }
 
 sub set_privs {
