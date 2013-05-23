@@ -4519,6 +4519,16 @@ main.updates.common.gift=[[ljuser]] sent you <a href="[[gift_url]]">a gift</a>
 
 main.updates.common.messages=[[messages_count]] <a href="[[messages_url]]">unread [[?messages_count|message|messages]]</a>
 
+main.updates.guests=[[guests_count]] <a href="[[guests_url]]">new</a> [[?count|guest|guests|guests]]
+
+main.updates.guests.clear=Clear
+
+main.updates.guests.clear.title=Remove all messages about latest guests
+
+main.updates.guests.empty=Sorry, there is currently no guests to display
+
+main.updates.guests.empty.title=No guests
+
 main.updates.recent=[[entries_count]] [[?entries_count|user|users]] you often read
 
 main.updates.recent.clear=Clear
