@@ -2020,15 +2020,26 @@ sub Entry
     if ($arg->{'security'} eq "public") {
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
-        if ($arg->{'allowmask'} == 0) { # custom security with no group -- essentially private
-            $e->{'security'} = "private";
-            $e->{'security_icon'} = Image_std("security-private");
-        } elsif ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) { # custom group -- only show to journal owner
-            $e->{'security'} = "custom";
-            $e->{'security_icon'} = Image_std("security-groups");
-        } else { # friends only or custom group showing to non journal owner
-            $e->{'security'} = "protected";
-            $e->{'security_icon'} = Image_std("security-protected");
+
+        if ($e->{journal}->{_u}->is_community()) {
+            if ($arg->{'allowmask'} == 0) {
+                $e->{'security'} = "private";
+                $e->{'security_icon'} = Image_std("security-private");
+            } else {
+                $e->{'security'} = "custom";
+                $e->{'security_icon'} = Image_std("security-groups");
+            }
+        } else {
+            if ($arg->{'allowmask'} == 0) { # custom security with no group -- essentially private
+                $e->{'security'} = "private";
+                $e->{'security_icon'} = Image_std("security-private");
+            } elsif ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) { # custom group -- only show to journal owner
+                $e->{'security'} = "custom";
+                $e->{'security_icon'} = Image_std("security-groups");
+            } else { # friends only or custom group showing to non journal owner
+                $e->{'security'} = "protected";
+                $e->{'security_icon'} = Image_std("security-protected");
+            }
         }
     } elsif ($arg->{'security'} eq "private") {
         $e->{'security'} = "private";
