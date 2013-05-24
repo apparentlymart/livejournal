@@ -1098,20 +1098,27 @@ sub update_events_counter {
     my $comment   = $self->comment;
     my $journalu  = $self->event_journal;
 
+    return unless $comment;
+    return unless $journalu;
+
     my $entry     = $comment->entry;
     my $parent    = $comment->parent;
     my $jtalkid   = $comment->jtalkid; 
+
+    return unless $entry;
 
     my $jitemid   = $entry->jitemid;
     my $user      = $entry->poster;
 
     my $journalid = $journalu->userid; 
 
+    return unless $user;
+
     unless ( $user->equals($comment->poster) ) {
         LJ::Widget::HomePage::CommentsCounter->add_comment($user, "$journalid:$jitemid:$jtalkid"); 
     }
 
-    if ( $parent && !$parent->poster->equals($comment->poster) && !$user->equals($parent->poster) ) {
+    if ( $parent && $parent->poster && !$parent->poster->equals($comment->poster) && !$user->equals($parent->poster) ) {
         LJ::Widget::HomePage::CommentsCounter->add_comment($parent->poster, "$journalid:$jitemid:$jtalkid"); 
     }
 
