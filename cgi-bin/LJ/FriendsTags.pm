@@ -1,6 +1,9 @@
 package LJ::FriendsTags;
 
 use strict;
+use warnings;
+
+# External modules
 use Encode;
 
 use constant ALLOW => 'A';
@@ -65,9 +68,15 @@ sub normalize_mode {
 sub save {
     my ($self) = @_;
 
-    while (my ($friendid, $arr) = each %{$self->{_data}}) {
-        unless (LJ::is_friend($self->{_u}, $friendid)) {
-            delete $self->{_data}->{$friendid};
+    while (my ($journalid, $arr) = each %{$self->{_data}}) {
+        my $journal = LJ::load_userid($journalid);
+
+        unless ($journal) {
+            delete $self->{_data}->{$journalid};
+        } else {
+            unless ($self->{_u}->is_subscribedon($journal)) {
+                delete $self->{_data}->{$journalid};
+            }
         }
     }
 
