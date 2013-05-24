@@ -2025,9 +2025,12 @@ sub Entry
             if ($arg->{'allowmask'} == 0) {
                 $e->{'security'} = "private";
                 $e->{'security_icon'} = Image_std("security-private");
-            } else {
+            } elsif ($arg->{'allowmask'} > 1) {
                 $e->{'security'} = "custom";
                 $e->{'security_icon'} = Image_std("security-groups");
+            } else {
+                $e->{'security'} = "protected";
+                $e->{'security_icon'} = Image_std("security-protected");
             }
         } else {
             if ($arg->{'allowmask'} == 0) { # custom security with no group -- essentially private
