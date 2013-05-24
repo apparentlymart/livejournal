@@ -9900,13 +9900,6 @@ sub make_journal {
         return LJ::Feed::make_feed($u, $remote, $opts);
     }
 
-    my $entry = $opts->{ljentry};
-
-    if ( $entry ) {
-        ## Counter for widget 'new comments' on home page
-        LJ::Widget::HomePage::CommentsCounter->remove_comment($remote, $u->userid.":".$entry->jitemid);
-    }
-
     if ($stylesys == 2) {
         LJ::Request->notes('codepath' => "s2.$view") if LJ::Request->is_inited;
 

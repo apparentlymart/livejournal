@@ -422,6 +422,8 @@ sub EntryPage
     $p->{'viewing_thread'} = $get->{'thread'} ? 1 : 0;
     $p->{'_viewing_thread_id'} = $get->{'thread'} + 0;
 
+    LJ::Widget::HomePage::CommentsCounter->remove_comments_by_entry($remote, $entry->journalid.":$itemid:".$copts->{'thread'});
+
     # default values if there were no comments, because
     # LJ::Talk::load_comments() doesn't provide them.
     if ($copts->{'out_error'} eq 'noposts' || scalar @comments < 1) {
