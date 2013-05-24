@@ -435,6 +435,7 @@ END_JS
     $body .= "<input type='button' onClick='moveOut();' value='&lt;&lt;' /></td>";
 
     $body .= "<td><select name='list_in' multiple='1' size='15'>";
+    $body .= "<option value=''>$ML{'talk.post.security.maintainers'}</option>" if ($u && $u->is_community);
     $body .= "<option value=''>---------------</option></select></td>";
 
     $body .= "</tr><tr><td colspan='2'>";
