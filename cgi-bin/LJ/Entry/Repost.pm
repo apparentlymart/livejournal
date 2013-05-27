@@ -695,6 +695,18 @@ sub create {
         return LJ::API::Error->get_error('not_validated');
     }
 
+    if ($u->is_suspended) {
+        return LJ::API::Error->get_error('user_suspended');
+    }
+
+    if ($u->is_deleted) {
+        return LJ::API::Error->get_error('user_deleted');
+    }
+
+    unless ($u->is_visible) {
+        return LJ::API::Error->get_error('invalid_user');
+    }
+
     my $journalid = $entry_obj->journalid;
     my $jitemid   = $entry_obj->jitemid;
 
