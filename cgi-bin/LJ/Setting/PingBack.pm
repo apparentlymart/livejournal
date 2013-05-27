@@ -12,7 +12,7 @@ sub should_render {
 
     # Render if widget enabled on server
     return 0 if $LJ::DISABLED{'pingback'};
-    return 0 unless $u->is_person;
+    return 0 unless ($u->is_person || $u->is_identity);
 
     #return 0 unless $u && $u->get_cap('pingback');
     return 1;
