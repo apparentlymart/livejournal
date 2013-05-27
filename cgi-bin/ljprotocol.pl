@@ -1487,9 +1487,14 @@ sub getinbox
     # check lastsync for valid date
     if ($req->{'lastsync'}) {
         $sync_date = int $req->{'lastsync'};
-        if($sync_date <= 0) {
-            return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'});
-        }
+        return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'}) if $sync_date <= 0;
+    }
+
+    my $before;
+    # check before for valid date
+    if ($req->{'before'}) {
+        $before = int $req->{'before'};
+        return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'}) if $before <= 0;
     }
 
     if ($req->{gettype}) {
@@ -1507,17 +1512,15 @@ sub getinbox
     # Reverse it by "newest are the first"
     @notifications = reverse @notifications;
 
-    if (my $before = $req->{'before'}) {
-        return fail($err,203,'xmlrpc.des.date_unixtime',{'param'=>'syncitems'}) if $before <= 0;
-        @notifications = grep {$_->when_unixtime <= $before} @notifications;
-    }
-
+    @notifications = grep {
+        (!$before    || $_->when_unixtime <= $before) &&
+        (!$sync_date || $_->when_unixtime >= $sync_date)
+    } @notifications;
+    
     $itemshow = scalar @notifications - $skip if scalar @notifications < $skip + $itemshow;
 
     my @res;
     foreach my $item (@notifications[$skip .. $itemshow + $skip - 1]) {
-        next if $sync_date && $item->when_unixtime < $sync_date;
-
         my $raw = $item->event->raw_info($u, {extended => $req->{extended}});
 
         my $type_index = $type_number{$raw->{type}};
