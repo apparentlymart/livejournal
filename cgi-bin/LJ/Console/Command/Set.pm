@@ -74,7 +74,7 @@ sub execute {
     return $self->error("Error setting property: $errmsg")
         unless $rv;
     
-    LJ::statushistory_add($journal, $remote, 'propedit', "User property '$key' change from '$old' to '$value' for " . $journal->user . ($reason ? " by reason \"$reason\"" : "") );
+    LJ::statushistory_add($journal, $remote, 'propedit', "User property '$key' change from '$old' to '$value' " . ($reason ? " by reason \"$reason\"" : "") );
     return $self->print("User property '$key' change from '$old' to '$value' for " . $journal->user);
 }
 
