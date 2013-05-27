@@ -49,10 +49,16 @@ sub option {
 
     my %opts = (
         "O" => $class->ml("settings.pingback.option.open"),
-        "E" => $class->ml("settings.pingback.option.entries"),
-        "U" => $class->ml("settings.pingback.option.usernames"),
         "D" => $class->ml("settings.pingback.option.disabled"),
     );
+    
+    if ($u->is_person) {
+    	%opts = (
+           %opts,
+           "E" => $class->ml("settings.pingback.option.entries"),
+           "U" => $class->ml("settings.pingback.option.usernames"),
+        );
+    }
     if ($value eq 'B') {
     	$disabled = 1;
         $opts{"B"} = $class->ml("settings.pingback.option.blocked");
