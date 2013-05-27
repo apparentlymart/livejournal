@@ -1321,30 +1321,30 @@ property string text_max_comments {
 property string text_read_comments {
     des = "Link text to read comments";
     format = "plurals";
-    example = "1 comment // # comments";
+    example = "# comment // # comments";
 }
 property string text_read_all_comments {
     des = "Link text to read all comments";
     format = "plurals";
-    example = "Read 1 comment // Read # comments";
+    example = "Read # comment // Read # comments";
 }
 set text_post_comment = "Leave a comment";
 set text_max_comments = "Maximum comments reached";
-set text_read_comments = "1 comment // # comments";
-set text_read_all_comments = "Read 1 comment // Read # comments";
+set text_read_comments = "# comment // # comments";
+set text_read_all_comments = "Read # comment // Read # comments";
 
 property string text_read_spam_comments {
     des = "Link text to read spam comments";
     format = "plurals";
-    example = "1 spam comment // # spam comments";
+    example = "# spam comment // # spam comments";
 }
 property string text_read_all_spam_comments {
     des = "Link text to read all suspicious comments";
     format = "plurals";
-    example = "Read 1 suspicious comment // Read # suspicious comments";
+    example = "Read # suspicious comment // Read # suspicious comments";
 }
-set text_read_spam_comments = "1 suspicious comment // # suspicious comments";
-set text_read_all_spam_comments = "Read 1 suspicious comment // Read # suspicious comments";
+set text_read_spam_comments = "# suspicious comment // # suspicious comments";
+set text_read_all_spam_comments = "Read # suspicious comment // Read # suspicious comments";
 
 property string text_post_comment_friends {
     des = "Link text to leave a comment on friends view entry";
@@ -1353,10 +1353,10 @@ property string text_post_comment_friends {
 property string text_read_comments_friends {
     des = "Link text to read comments on a friends view entry";
     format = "plurals";
-    example = "1 comment // # comments";
+    example = "# comment // # comments";
 }
 set text_post_comment_friends = "Leave a comment";
-set text_read_comments_friends = "1 comment // # comments";
+set text_read_comments_friends = "# comment // # comments";
 
 property string text_showspam {
     des = "Show spam messages";
@@ -1390,9 +1390,9 @@ set text_tags_page_header = "Visible Tags";
 property string text_tag_uses {
     des = "Text to show how many times a tag has been used";
     format = "plurals";
-    example = "1 use // # uses";
+    example = "# use // # uses";
 }
-set text_tag_uses = "1 use // # uses";
+set text_tag_uses = "# use // # uses";
 
 property bool show_title_on_tagpage {
     des = "If set, tag’s name(s) will be shown in the title of the page with entries by tag(s)";
