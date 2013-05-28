@@ -9686,6 +9686,18 @@ Adding a community allows you to read the community's public posts on your frien
 web.users.add.status.default.news.text|staleness=1
 web.users.add.status.default.news.text=Adding user as subsription allows you to read new content from it on your friends page.
 
+web.users.add.addtofilters.title|staleness=1
+web.users.add.addtofilters.title=Add to filters
+
+web.users.add.addtofilters.comment|staleness=1
+web.users.add.addtofilters.comment=<i>Optional:</i> Include in one or more custom friends groups.
+
+web.users.add.addtogroups.title|staleness=1
+web.users.add.addtogroups.title=Add to groups
+
+web.users.add.addtogroups.comment|staleness=1
+web.users.add.addtogroups.comment=<i>Optional:</i> Include in one or more custom friends groups.
+
 we_like_this_title|staleness=1
 we_like_this_title=View people who like it
 
