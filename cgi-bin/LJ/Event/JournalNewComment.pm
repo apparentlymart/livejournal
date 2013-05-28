@@ -1101,11 +1101,16 @@ sub update_events_counter {
     return unless $comment;
     return unless $journalu;
 
+    return if $comment->is_deleted || $comment->is_spam;
+
     my $entry     = $comment->entry;
     my $parent    = $comment->parent;
     my $jtalkid   = $comment->jtalkid; 
+    my $poster    = $comment->poster;
 
     return unless $entry;
+
+    return if $poster && ($poster->is_suspended || $poster->is_expunged);
 
     my $jitemid   = $entry->jitemid;
     my $user      = $entry->poster;
@@ -1114,12 +1119,14 @@ sub update_events_counter {
 
     return unless $user;
 
-    unless ( $user->equals($comment->poster) ) {
+    my $pposter = $parent && $parent->poster;
+
+    unless ( $user->equals($poster) ) {
         LJ::Widget::HomePage::CommentsCounter->add_comment($user, "$journalid:$jitemid:$jtalkid"); 
     }
 
-    if ( $parent && $parent->poster && !$parent->poster->equals($comment->poster) && !$user->equals($parent->poster) ) {
-        LJ::Widget::HomePage::CommentsCounter->add_comment($parent->poster, "$journalid:$jitemid:$jtalkid"); 
+    if ( $pposter && !$pposter->equals($poster) && !$pposter->equals($user) ) {
+        LJ::Widget::HomePage::CommentsCounter->add_comment($pposter, "$journalid:$jitemid:$jtalkid"); 
     }
 
     return;
