@@ -393,11 +393,21 @@ sub update_events_counter {
     
     my $msgid   = $msg->msgid;
     my $qid     = $msg->qid;
+    my $sender  = $msg->other_u;
+
+    if (LJ::SpamFilter->need_spam_check_inbox($u, $sender)) {
+
+        my $body    = $msg->body_raw    || '';
+        my $subject = $msg->subject_raw || '';
+
+        return if LJ::SpamFilter->is_spam_inbox_message( $u, $sender, $subject ) || 
+                  LJ::SpamFilter->is_spam_inbox_message( $u, $sender, $body );
+    }
 
     my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
     LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
         LJ::Lang::get_text($lang, 'widget.updatesforuser.message.recvd', undef, {
-            ljuser => $msg->other_u->ljuser_display,
+            ljuser => $sender->ljuser_display,
             url    => "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid",
         })
     );
