@@ -157,7 +157,7 @@
 
         # Subscribe/Unscubscribe to/from user
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
-            $ret{is_subscriber}   = $remote->is_subscriber($u);
+            $ret{is_subscriber}   = $u->is_subscribedon($remote);
             $ret{is_subscribedon} = $remote->is_subscribedon($u);
         }
     }

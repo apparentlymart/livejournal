@@ -142,7 +142,7 @@ sub render {
 
         # Subscribe/Unscubscribe to/from user
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
-            $data_remote->{is_subscriber}   = $remote->is_subscriber($journal);
+            $data_remote->{is_subscriber}   = $journal->is_subscribedon($remote);
             $data_remote->{is_subscribedon} = $remote->is_subscribedon($journal);
         }
 
@@ -366,7 +366,7 @@ sub get_status {
         }
 
         unless (exists $args->{is_subscriber}) {
-            $args->{is_subscriber} = $remote->is_subscriber($journal);
+            $args->{is_subscriber} = $journal->is_subscribedon($remote);
         }
 
         unless (exists $args->{is_subscribedon}) {
