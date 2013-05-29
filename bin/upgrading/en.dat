@@ -4397,6 +4397,10 @@ main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_h
 
 main.promo.head=Promo
 
+main.promo.more.calendarpromo=<a href="http://www.livejournal.com/shop/commpromo.bml">View</a> full calendar promo history
+
+main.promo.more.selfpromo=<a href="http://www.livejournal.com/shop/selfpromo/history">View</a> full selfpromo history
+
 main.promo.nav.next=Next Item
 
 main.promo.nav.prev=Previous Item
