@@ -4375,6 +4375,8 @@ main.intro.mystat.ontop=Your post “<a href="[[entry_url]]">[[subject]]</a>” 
 
 main.intro.mystat.you=[[user_display]] you on [[position]] position on the users top
 
+main.intro.mystat.you.maybe=Turn on the ratings to see Your position on the users top
+
 main.goods.all=All goods
 
 main.goods.shuffle=Shuffle Goods
