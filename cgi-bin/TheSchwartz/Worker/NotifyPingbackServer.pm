@@ -71,7 +71,8 @@ sub send_ping {
     return 1 if @users > $LJ::MAX_USER_NOTIFY;
 
     foreach my $aUser ( @users ) {
-        my $user = LJ::load_user($aUser->{user_name});
+        my $user;
+        eval { $user = LJ::load_user($aUser->{user_name}); };
         next unless $user;
 
         eval {
