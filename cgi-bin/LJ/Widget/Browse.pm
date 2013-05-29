@@ -14,7 +14,6 @@ sub need_res {
         stc/widgets/add-community.css
         stc/widgets/featuredposts.css
         stc/widgets/featuredcomms.css
-        js/browse.js
     )
 }
 

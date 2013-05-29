@@ -45,7 +45,7 @@
 						<dd class="b-catalogue-item-author">Posted <TMPL_VAR posted_ago> by <TMPL_VAR poster> </dd>
 					</tmpl_if>
 					<tmpl_if tags>
-						<dd class="b-catalogue-item-tags">Tags: 
+						<dd class="b-catalogue-item-tags">Tags:
 							<tmpl_loop tags>
 								<tmpl_unless __first__>,&nbsp;</tmpl_unless>
 								<tmpl_var tag>
@@ -75,12 +75,12 @@
 				</div>
 				<ul class="b-share">
 					<li class="b-share-fb">
-						<a href="http://facebook.com/sharer.php?u=<tmpl_var expr="eurl(url_to_post)">" target="_blank">">
+						<a href="#" <TMPL_VAR sharing_attributes> class="js-lj-share-entry" data-service="facebook">
 							<TMPL_VAR expr="ml('widget.browse.share.facebook')">
 						</a>
 					</li>
 					<li class="b-share-twitter">
-						<a href="http://twitter.com/share?url=<tmpl_var expr="eurl(url_to_post)">&text=<tmpl_var expr="eurl(subject)">" target="_blank">
+						<a href="#" <TMPL_VAR sharing_attributes> class="js-lj-share-entry" data-service="twitter">
 							<TMPL_VAR expr="ml('widget.browse.share.twiiter')">
 						</a>
 					</li>
@@ -92,7 +92,9 @@
 						</li>
 					</tmpl_if>
 					<li class="b-share-email">
-						<a href="javascript:void(0);"><TMPL_VAR expr="ml('widget.browse.share.mail')"></a>
+						<a href="#" <TMPL_VAR sharing_attributes> class="js-lj-share-entry" data-service="email">
+							<TMPL_VAR expr="ml('widget.browse.share.mail')">
+						</a>
 					</li>
 					<li class="b-share-fb-like">
 						<iframe src="http://www.facebook.com/plugins/like.php?href=<tmpl_var expr="eurl(url_to_post)">&amp;layout=button_count&amp;show_faces=true&amp;width=150&amp;action=like&amp;font=verdana&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
@@ -103,7 +105,7 @@
 						<a href="<tmpl_var url_to_post>#comments">
 							<tmpl_var comments_count> <TMPL_VAR expr="ml('widget.browse.comments')">
 						</a> |
-					</span> 
+					</span>
 					<a href="<tmpl_var url_to_post>?mode=reply">
 						<TMPL_VAR expr="ml('widget.browse.leave.comment')">
 					</a>
@@ -121,5 +123,5 @@
 		<li class="b-nav-counter-next"><TMPL_IF post_page_next><a href="<TMPL_VAR post_page_next>" title="<TMPL_VAR expr="ml('widget.browse.page.next')">"><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.next')"></i></span></TMPL_IF></li>
 		<li class="b-nav-counter-last"><TMPL_IF post_page_last><a href="<TMPL_VAR post_page_last>" title="<TMPL_VAR expr="ml('widget.browse.page.last')">"><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></a><TMPL_ELSE><span><i><TMPL_VAR expr="ml('widget.browse.page.last')"></i></span></TMPL_IF></li>
 	</ul>
-</TMPL_IF>	 
+</TMPL_IF>
 
