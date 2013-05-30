@@ -1866,6 +1866,8 @@ entryunit.toggle.collapse=Collapse
 
 entryunit.toggle.expand=Expand
 
+entryunit.unread=Mark entry as unread
+
 entryunit.updown=This entry has changed its position in the rating
 
 entryunits.empty=Sorry, there is no available entries to display
