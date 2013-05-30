@@ -4468,7 +4468,11 @@ main.tour.feature4.title=Get the Latest Posts from Rating on Facebook or Twitter
 
 main.tour.feature5.text=The inscription about a user place in the TOP and the button "Rating of my entries and communities" under the title
 
+main.tour.feature5.text.position=The inscription about a user place in the TOP and the button "Rating of my entries and communities" under the title
+
 main.tour.feature5.title=Position of Your Profile, Posts and Community on Rating
+
+main.tour.feature5.title.position=True Position of Your Profile, Posts and Community on Rating
 
 main.tour.feature6.text=Filters in the title panel
 
