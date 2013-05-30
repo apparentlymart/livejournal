@@ -407,7 +407,8 @@ sub init {
     # reply and unscreen it
 
     my $parpost;
-    my $partid = $form->{'parenttalkid'}+0;
+    my $partid = $form->{'parenttalkid'} || 0;
+    $partid += 0;
 
     if ($partid) {
         $parpost = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $partid);
@@ -745,9 +746,9 @@ sub post_comment {
     my $memkey;
     if (@LJ::MEMCACHE_SERVERS) {
         my $md5_b64 = Digest::MD5::md5_base64(
-            join(":", ($comment->{body}, $comment->{subject} || '',
+            join(":", ($comment->{body} || '', $comment->{subject} || '',
                        $comment->{subjecticon} || '', $comment->{preformat} || '',
-                       $comment->{picture_keyword})));
+                       $comment->{picture_keyword} || '')));
         $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$parent->{talkid}-$posterid-$md5_b64" ];
         $jtalkid = LJ::MemCache::get($memkey);
     }
