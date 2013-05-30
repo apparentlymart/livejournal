@@ -299,6 +299,10 @@ sub create_application {
     $app->set_primary($opts{primary}) if $opts{primary};
     $app->set_secondary($opts{secondary}) if $opts{secondary};
     
+    my %have_access = map {$_ => 1} ( @{$opts{primary}}, @{$opts{secondary}} );
+
+    $app->{non_access} = [ grep { ! $have_access{$_} } @{$LJ::USERAPPS_ACCESS_LISTS} ];
+
     return $app;
 }
 
