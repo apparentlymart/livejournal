@@ -2968,6 +2968,9 @@ event.community_join_requst=Someone requests membership in a community I maintai
 event.comm_invite|staleness=1
 event.comm_invite=I receive an invitation to join a community
 
+event.comm_mantioned|staleness=1
+event.comm_mantioned=[[community]] is mention somwhere
+
 event.defriended.me|staleness=1
 event.defriended.me=Someone removes me from their Friends list
 
