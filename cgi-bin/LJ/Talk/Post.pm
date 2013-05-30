@@ -319,7 +319,7 @@ sub init {
     LJ::load_user_props($journalu, "opt_logcommentips");
 
     ### two hacks; unsure if these need to stay
-    if ($form->{'userpost'} && $form->{'usertype'} ne "user") {
+    if ($form->{'userpost'} && $form->{'usertype'} && $form->{'usertype'} ne "user") {
         unless ($form->{'usertype'} eq "cookieuser" &&
                 $form->{'userpost'} eq $form->{'cookieuser'}) {
             $bmlerr->("$SC.error.confused_identity");
@@ -515,7 +515,7 @@ sub init {
         $state = $form->{state};
     } else {
         # figure out whether to post this comment screened
-        if (!$form->{editid} && ($screening eq 'A' ||
+        if (!$form->{editid} && $screening && ($screening eq 'A' ||
             ($screening eq 'R' && ! $up) ||
             ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
             $state = 'S';
@@ -687,8 +687,8 @@ sub require_captcha_test {
     ## 6. Global (site) settings
     ## See if they have any tags or URLs in the comment's body
     ##
-    if ($LJ::HUMAN_CHECK{'comment_html_auth'}
-        || ($LJ::HUMAN_CHECK{'comment_html_anon'} && $anon_commenter))
+    if ($body && ($LJ::HUMAN_CHECK{'comment_html_auth'}
+        || ($LJ::HUMAN_CHECK{'comment_html_anon'} && $anon_commenter)))
     {
         if ($body =~ /<[a-z]/i) {
             # strip white-listed bare tags w/o attributes,
