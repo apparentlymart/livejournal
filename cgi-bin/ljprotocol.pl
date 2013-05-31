@@ -3433,6 +3433,17 @@ sub editevent {
         my $item = LJ::get_log2_row($uowner, $itemid);
         my $poster = $item ? LJ::want_user($item->{'posterid'}) : '';
 
+        if ($req->{delspam}) {
+            if ($uowner) {
+                LJ::mark_entry_as_spam($uowner, $itemid);
+
+                if ($poster) {
+                    $uowner->ban_user($poster);
+                    LJ::set_rel($uowner, $poster, 'D');
+                }
+            }
+        }
+
         LJ::delete_entry($uowner, $itemid, 'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
