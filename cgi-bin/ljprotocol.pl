@@ -693,6 +693,7 @@ sub getcomments {
     $extra{page_size} = $opts->{out_pagesize};
     $extra{pages} = $opts->{out_pages};
     $extra{page} = $opts->{out_page};
+    $extra{ditemid} = $jitem->{ditemid};
 
     my @comments;
     my @parent = ( \{ level => -1, children => \@comments } );
