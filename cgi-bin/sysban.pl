@@ -216,6 +216,9 @@ sub sysban_check {
 sub sysban_populate {
     my ($where, $what) = @_;
 
+    ##
+    return $where if LJ::is_enabled('load_sysbans_from_memcache_only');
+
     # call normally if no gearman/not wanted
     return LJ::_db_sysban_populate($where, $what) 
         unless LJ::conf_test($LJ::LOADSYSBAN_USING_GEARMAN);
