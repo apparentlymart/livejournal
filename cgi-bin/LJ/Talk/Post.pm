@@ -2,6 +2,7 @@ package LJ::Talk::Post;
 
 use strict;
 use warnings;
+use Encode;
 
 # Internal modules
 use LJ::SpamFilter;
@@ -356,7 +357,7 @@ sub init {
     }
 
     return if @$errret or LJ::Request->redirected;
-    
+
     # validate the challenge/response value (anti-spammer)
     unless ($init->{'used_ecp'}) {
         my $chrp_err;
@@ -527,7 +528,6 @@ sub init {
     my $parsed_comment  = LJ::SpamFilter::Utils::parse_text($form->{body});
     my $can_mark_spam   = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     my $need_spam_check = LJ::SpamFilter->need_spam_check_comment($journalu, $up, $state);
-
     if ($need_spam_check && !$can_mark_spam) {
         if (LJ::SpamFilter->is_spam_comment($journalu, $up, $parsed_comment)) {
             $state = 'B';
@@ -658,7 +658,7 @@ sub require_captcha_test {
     unless ($anon_commenter) {
         $soc_cap = $commenter->get_social_capital();
     }
-    return if $soc_cap > 15;
+    return if !$soc_cap || $soc_cap > 15;
  
     ##
     ## 4. Don't show captcha to the owner of the journal, no more checks
@@ -712,7 +712,6 @@ sub require_captcha_test {
     return 0;
 }
 
-
 # returns 1 on success.  0 on fail (with $$errref set)
 sub post_comment {
     my ($entryu, $journalu, $comment, $parent, $item, $errref) = @_;
@@ -745,10 +744,10 @@ sub post_comment {
     # check for dup ID in memcache.
     my $memkey;
     if (@LJ::MEMCACHE_SERVERS) {
-        my $md5_b64 = Digest::MD5::md5_base64(
+        my $md5_b64 = Digest::MD5::md5_base64(encode('utf8',
             join(":", ($comment->{body} || '', $comment->{subject} || '',
                        $comment->{subjecticon} || '', $comment->{preformat} || '',
-                       $comment->{picture_keyword} || '')));
+                       $comment->{picture_keyword} || ''))));
         $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$parent->{talkid}-$posterid-$md5_b64" ];
         $jtalkid = LJ::MemCache::get($memkey);
     }
