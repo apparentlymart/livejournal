@@ -3438,6 +3438,14 @@ sub editevent {
                 LJ::mark_entry_as_spam($uowner, $itemid);
 
                 if ($poster) {
+                    if (my $remote = LJ::get_remote()) {
+                        LJ::User::UserlogRecord::SpamSet->create(
+                            $uowner,
+                            remote => $remote,
+                            spammerid => $poster->userid, 
+                        );
+                    }
+
                     $uowner->ban_user($poster);
                     LJ::set_rel($uowner, $poster, 'D');
                 }
