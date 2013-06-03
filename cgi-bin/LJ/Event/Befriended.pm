@@ -244,12 +244,16 @@ sub update_events_counter {
     my $u = $self->u;
     return unless $u;
 
-    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
-    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
-        LJ::Lang::get_text($lang, 'widget.updatesforuser.befriended', undef, {
-            ljuser => $self->friend->ljuser_display
-        })
-    );
+    my $etypeid = $self->etypeid;
+    return unless $etypeid;
+
+    my $friend = $self->friend;
+    return unless $friend;
+
+    my $friendid  = $friend->userid;
+    return unless $friendid;
+
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, pack("nnN", int(rand(2**16)), $etypeid, $friendid));
 }
 
 1;

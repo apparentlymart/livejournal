@@ -307,14 +307,16 @@ sub update_events_counter {
     my $u = $self->u;
     return unless $u;
 
-    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
-    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
-        LJ::Lang::get_text($lang, 'widget.updatesforuser.birthday', undef, { 
-            ljuser => $self->bdayuser->ljuser_display,
-            url    => $self->bdayuser->gift_url({ item => 'vgift' }),
-            date   => $self->email_bday($self->u->prop('browselang')),
-        })
-    ); 
+    my $etypeid = $self->etypeid;
+    return unless $etypeid;
+
+    my $bdayuser = $self->bdayuser;
+    return unless $bdayuser;
+
+    my $bdayuserid = $bdayuser->userid;
+    return unless $bdayuserid;
+
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, pack("nnN", int(rand(2**16)), $etypeid, $bdayuserid));
 }
 
 1;

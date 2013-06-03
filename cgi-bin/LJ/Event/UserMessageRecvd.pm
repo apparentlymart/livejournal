@@ -392,8 +392,8 @@ sub update_events_counter {
     return unless $msg;
     
     my $msgid   = $msg->msgid;
-    my $qid     = $msg->qid;
     my $sender  = $msg->other_u;
+    return unless $sender;
 
     if (LJ::SpamFilter->need_spam_check_inbox($u, $sender)) {
 
@@ -404,13 +404,13 @@ sub update_events_counter {
                   LJ::SpamFilter->is_spam_inbox_message( $u, $sender, $body );
     }
 
-    my $lang = $u->prop('browselang') || $LJ::DEFAULT_LANG;
-    LJ::Widget::HomePage::UpdatesForUser->add_event($u, 
-        LJ::Lang::get_text($lang, 'widget.updatesforuser.message.recvd', undef, {
-            ljuser => $sender->ljuser_display,
-            url    => "$LJ::SITEROOT/inbox/?view=usermsg_recvd&selected=" . $msgid . "#all_Row_$qid",
-        })
-    );
+    my $etypeid = $self->etypeid;
+    return unless $etypeid;
+
+    my $journalid  = $sender->userid;
+    return unless $journalid;
+
+    LJ::Widget::HomePage::UpdatesForUser->add_event($u, pack("nnNN", int(rand(2**16)), $etypeid, $journalid, $msgid));
 }
 
 1;
