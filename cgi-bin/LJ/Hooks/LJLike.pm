@@ -25,7 +25,6 @@ LJ::register_hook( 'insert_html_before_body_close' => sub {
         <script type="text/javascript">
           window.fbAsyncInit = function() {
             FB.init({appId: '214181831945836', xfbml: true});
-            jQuery(document).trigger('facebook.loaded');
           };
 
           LiveJournal.injectScript(document.location.protocol + '//connect.facebook.net/$locale/all.js', null, document.getElementById('fb-root'))
