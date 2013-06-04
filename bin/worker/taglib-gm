@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ;
-require 'taglib.pl';
+use LJ::Tags;
 use LJ::NewWorker::Gearman;
 LJ::NewWorker::Gearman::Taglib->start();
 package LJ::NewWorker::Gearman::Taglib;

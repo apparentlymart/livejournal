@@ -26,6 +26,7 @@ use Class::Autouse qw(
                       LJ::Pay::Repost::Offer
                       LJ::MemCacheProxy
                       LJ::Entry::Repost
+                      LJ::Tags
                       );
 
 use LJ::TimeUtil;
@@ -33,11 +34,7 @@ use POSIX;
 
 LJ::Config->load;
 
-
-
 use lib "$ENV{LJHOME}/cgi-bin";
-
-require "taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want
 # to do it if the site has enabled the hack

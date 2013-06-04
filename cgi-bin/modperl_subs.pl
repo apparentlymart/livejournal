@@ -58,6 +58,7 @@ use Class::Autouse qw(
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
 
 use LJ::Lang;
+use LJ::Tags;
 require "htmlcontrols.pl";
 require "weblib.pl";
 require "imageconf.pl";
@@ -75,7 +76,6 @@ require "ljmail.pl";
 require "sysban.pl";
 require "synlib.pl";
 require "communitylib.pl";
-require "taglib.pl";
 require "schoollib.pl";
 require "accountcodes.pl";
 require "ljemailgateway-web.pl";

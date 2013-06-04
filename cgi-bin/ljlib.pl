@@ -33,6 +33,7 @@ use LJ::Request;
 use Time::Local ();
 use Storable ();
 use HTML::Entities ();
+use LJ::Tags;
 
 use Class::Autouse qw(
                       TheSchwartz
@@ -116,7 +117,6 @@ sub END { LJ::end_request(); }
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
 
 require "ljdb.pl";
-require "taglib.pl";
 require "ljtextutil.pl";
 require "ljcapabilities.pl";
 require "ljmood.pl";
