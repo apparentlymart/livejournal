@@ -2437,6 +2437,22 @@ sub Event
     return $o;
 }
 
+sub Person
+{
+    my ($u) = @_;
+    my $o = UserLite($u);
+
+    my $row = LJ::LJArt::Artist->artist_row(
+        userid => $u->{'userid'}
+    );
+
+    for my $field (qw{ name specialization town photo }) {
+        $o->{"person_$field"} = $row->{$field};    
+    }
+
+    return $o;
+}    
+
 sub UserLink
 {
     my ($link, $options) = @_;
@@ -2559,6 +2575,12 @@ sub Event {
     my ($ctx,$username) = @_;
     my $u = LJ::load_user($username);
     return LJ::S2::Event($u);
+}
+
+sub Person {
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return LJ::S2::Person($u);
 }
 
 sub start_css {
@@ -4102,6 +4124,7 @@ sub UserLite__ljuser
 *User__ljuser = \&UserLite__ljuser;
 *UserExtended__ljuser = \&UserLite__ljuser;
 *Event__ljuser = \&UserLite__ljuser;
+*Person__ljuser = \&UserLite__ljuser;
 
 sub UserLite__get_link
 {
@@ -4153,6 +4176,7 @@ sub UserLite__get_link
 *User__get_link = \&UserLite__get_link;
 *UserExtended__get_link = \&UserLite__get_link;
 *Event__get_link = \&UserLite__get_link;
+*Person__get_link = \&UserLite__get_link;
 
 sub EntryLite__get_link
 {
@@ -5386,6 +5410,7 @@ sub UserLite__equals
 *User__equals = \&UserLite__equals;
 *UserExtended__equals = \&UserLite__equals;
 *Event__equals = \&UserLite__equals;
+*Person__equals = \&UserLite__equals;
 *Friend__equals = \&UserLite__equals;
 
 sub string__substr

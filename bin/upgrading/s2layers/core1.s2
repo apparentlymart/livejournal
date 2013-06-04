@@ -513,6 +513,16 @@ class Event extends UserLite
     var readonly string event_organizer "Organizer of event";
 }
 
+class Person extends UserLite
+"Lj artist or other person. Created from user"
+{
+    var readonly string person_name "Person name";
+    var readonly string person_town "Person town";
+    var readonly string person_specialization "Person specialization";    
+    var readonly string person_photo "Person photo";
+
+}
+
 ### Other
 
 class Redirector
@@ -1055,6 +1065,9 @@ function builtin UserExtended(string username) : UserExtended
 
 function builtin Event(string username) : Event
 "Constructor for making a Event object from a username";
+
+function builtin Person(string username) : Person
+"Constructor for making a Person object from a username";
 
 function builtin palimg_modify(string filename, PalItem[] items) : string
 "Return a URL to the specified filename (relative to the palimg root) with its palette table altered, once for each provided [class[PalItem]].  Restrictions:  only 7 palette entries may be modified, and the PalItem indexes must be 0-15.";
