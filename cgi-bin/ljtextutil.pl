@@ -749,7 +749,7 @@ sub text_compress
     my $tref = $ref ? $text : \$text;
     my $pre_len = length($$tref);
     unless (substr($$tref,0,2) eq "\037\213" || $pre_len < 100) {
-        my $gz = Compress::Zlib::memGzip(encode('utf8', $$tref));
+        my $gz = Compress::Zlib::memGzip($$tref);
         if (length($gz) < $pre_len) {
             $$tref = $gz;
         }
