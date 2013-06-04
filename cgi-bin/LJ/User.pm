@@ -470,6 +470,19 @@ sub writer {
     return $dbcm || 0;
 }
 
+sub database_cluster_up {
+    my ($u) = @_;
+
+    my $master = eval { LJ::get_cluster_master($u) };
+
+    if ($@) {
+        my $username = $u->username;
+        warn "error getting a cluster handle for $username: $@";
+    }
+
+    return $master ? 1 : 0;
+}
+
 sub userpic {
     my $u = shift;
     return undef unless $u->{defaultpicid};
@@ -3708,12 +3721,12 @@ sub posting_access_list {
 
     my $ids = LJ::load_rel_target($u, 'P');
     my $us = LJ::load_userids(@$ids);
-    foreach (values %$us) {
-        next unless $_ && $_->is_visible;
-        push @res, $_;
+    foreach my $u ( values %$us ) {
+        next unless $u && $u->is_visible && $u->database_cluster_up;
+        push @res, $u;
     }
 
-    return sort { $a->{user} cmp $b->{user} } @res;
+    return sort { $a->username cmp $b->username } @res;
 }
 
 # can $u post to $targetu?

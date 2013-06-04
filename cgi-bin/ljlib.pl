@@ -915,27 +915,32 @@ sub get_friend_items {
         shift @friends_buffer;
 
         # load the next recent updating friend's recent items
-        my $friendid = $fr->[0];
+        my ( $friendid, $timeupdate_reverse, $clusterid,
+            $friendrow, $friendu ) = @$fr;
 
-        $opts->{'friends'}->{$friendid} = $fr->[3];  # friends row
-        $opts->{'friends_u'}->{$friendid} = $fr->[4]; # friend u object
+        next unless $friendu->database_cluster_up;
+
+        $opts->{'friends'}->{$friendid} = $friendrow;  # friends row
+        $opts->{'friends_u'}->{$friendid} = $friendu; # friend u object
 
         my @newitems = LJ::get_log2_recent_user({
-            'clusterid'   => $fr->[2],
+            'clusterid'   => $clusterid,
             'userid'      => $friendid,
             'remote'      => $remote,
             'itemshow'    => $itemsleft,
             'notafter'    => $lastmax,
             'dateformat'  => $opts->{'dateformat'},
-            'update'      => $LJ::EndOfTime - $fr->[1], # reverse back to normal
+
+            # reverse back to normal:
+            'update'      => $LJ::EndOfTime - $timeupdate_reverse,
             'events_date' => $events_date,
         });
 
         # stamp each with clusterid if from cluster, so ljviews and other
         # callers will know which items are old (no/0 clusterid) and which
         # are new
-        if ($fr->[2]) {
-            foreach (@newitems) { $_->{'clusterid'} = $fr->[2]; }
+        if ($clusterid) {
+            foreach (@newitems) { $_->{'clusterid'} = $clusterid; }
         }
 
         if (@newitems) {
