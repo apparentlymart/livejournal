@@ -4196,6 +4196,46 @@ sub EntryLite__get_link
 *Entry__get_link = \&EntryLite__get_link;
 *Comment__get_link = \&EntryLite__get_link;
 
+# return list of communities, 
+# where user is member and community is ljart event
+sub Person__get_events
+{
+    my ($ctx, $this) = @_;
+
+    my $u = $this->{'_u'}; 
+    return unless $u;
+
+    my $list = LJ::MemCache::get('ljart:s2:artist:events:uid:'.$u->userid);
+    return $list if $list;
+
+    my @friendof_uids = $u->friendof_uids();
+
+    my $rel_user = LJ::load_rel_user($u, 'B');
+    my %rel_user_hash = map {$_ => 1} @$rel_user; 
+ 
+    @friendof_uids = grep { !$rel_user_hash{$_} } @friendof_uids;
+
+    my $friendof_users = LJ::load_userids(@friendof_uids);
+
+    @$list = map  { LJ::S2::Event($_) } 
+             grep { 
+                    $_ && ( 
+                        $_->{journaltype} eq "C" || 
+                        $_->{journaltype} eq "S" || 
+                        $_->{journaltype} eq "N" 
+                    ) && !(
+                        $_->{statusvis} eq 'X' || 
+                        $_->{clusterid} == 0
+                    ) && 
+                    $_->prop('ljart_event')
+                  }
+             map  { $friendof_users->{$_} } @friendof_uids;
+
+    LJ::MemCache::set('ljart:s2:artist:events:uid:'.$u->userid, $list, 60*60);
+
+    return $list;
+}
+
 # method for smart converting raw subject to html-link
 sub Entry__formatted_subject {
     my ($ctx, $this, $attrs) = @_;
