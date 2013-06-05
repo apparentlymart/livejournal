@@ -2426,6 +2426,7 @@ sub Event
     });
 
     $o->{'_type'} = "Event";
+    $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
     $o->{'event'}           = $u->{'ljart_event'};
     $o->{'event_location'}  = $u->{'ljart_event_location'};
     $o->{'event_town'}      = $u->{'ljart_event_town'}; 

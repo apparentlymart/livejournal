@@ -506,6 +506,7 @@ class UserExtended extends UserLite
 class Event extends UserLite
 "Lj art or other event. Created from community"
 {
+    var Image default_pic "Information about default userpic";
     var readonly string event "Community is event?";
     var readonly string event_location "Where an event will be taken place";
     var readonly string event_town "Town of an event";
