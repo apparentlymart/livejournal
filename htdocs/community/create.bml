@@ -97,6 +97,7 @@ SUBMIT:
                                             'nonmember_posting' => $POST{nonmember_posting},
                                             'journal_adult_settings' => $POST{journal_adult_settings},
                                             );
+            $remote->subscribe( event => 'CommunityMantioned', journalid => $u->{userid}, method => 'Email' );
         }
 
         LJ::run_hooks("social_influence",
