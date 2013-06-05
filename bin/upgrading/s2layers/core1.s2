@@ -392,6 +392,8 @@ class Entry extends EntryLite
     var string event_date_to ""; 
     var string event_time_from ""; 
     var string event_time_to ""; 
+    var string portfolio "Entry used for portfolio of artist"; 
+    var string portfolio_thumbnail "Url to image for portfolio of artist"; 
 
     function builtin get_cutted_text() : string
         "Returns text withiout text that has been cutted. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";

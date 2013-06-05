@@ -2136,8 +2136,8 @@ sub Entry
             $e->{'tags'}     = [];
         }
 
-        $e->{$_} = $entry->prop("ljart_$_")
-            for (qw{event event_town event_location event_paid event_price event_type event_image event_desc});
+        $e->{$_} = LJ::ehtml($entry->prop("ljart_$_"))
+            for (qw{event event_town event_location event_paid event_price event_type event_image event_desc portfolio portfolio_thumbnail});
 
         ($e->{event_date_from}, $e->{event_date_to}) = $entry->prop('ljart_event_date') =~ m/^(.*?)(?:-(.*?))?$/;
         ($e->{event_time_from}, $e->{event_time_to}) = $entry->prop('ljart_event_time') =~ m/^(.*?)(?:-(.*?))?$/;

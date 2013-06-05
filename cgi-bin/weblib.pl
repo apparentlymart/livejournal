@@ -1181,6 +1181,7 @@ sub entry_form_decode
                 prop_ljart_event_paid prop_ljart_event_price
                 prop_ljart_event_type prop_ljart_event_image
                 prop_ljart_event_desc prop_ljart_event
+                prop_ljart_portfolio_thumbnail prop_ljart_portfolio
                 repost_budget paid_repost_on repost_limit_sc)) {
         $req->{$_} = $POST->{$_};
     }
