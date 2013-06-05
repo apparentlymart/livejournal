@@ -93,7 +93,7 @@
 }
 .account_label, .display_label, .mobile_label, 
 .privacy_label, .history_label, .integration_label, 
-.extensions_label, .adsense_label {
+.extensions_label, .adsense_label, .ljart_label {
     font-weight: bold;
 }
 .display_option, .mobile_option, .privacy_option {
@@ -1285,3 +1285,9 @@
 .b-journalpromo-manage-btns {
 	text-align: right;
 	}
+
+/* Lj Art settings */
+.ljart_option INPUT[type="text"] {
+	width: 25em;
+	}
+
