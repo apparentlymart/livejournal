@@ -44,6 +44,7 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     SetOwner
     SpamSet
     SpamUnset
+    TagsManage
     TryNBuyUpgrade
     TwitterFailed
     TwitterSkipped
@@ -135,6 +136,47 @@ sub create {
         undef,
         $u->userid, $data{'logtime'} || time, $action, $data{'actiontarget'},
         $remoteid, $ip, $uniq, $extra,
+    );
+
+    return;
+}
+
+sub create_multi {
+    my ( $class, $u, @data ) = @_;
+
+    my $action = $class->action;
+    die 'no action for LJ::User::UserlogRecord::create_multi' unless $action;
+
+    my $remote   = LJ::get_remote();
+    my $remoteid = $remote && $remote->userid; 
+    my $ip       = LJ::get_remote_ip();
+    my $uniq     = eval { LJ::Request->notes('uniq') };
+    my $time     = time;
+    my $userid   = $u->userid;
+
+    my @values;
+
+    foreach my $data (@data) {
+        my %data = $class->translate_create_data(%$data);
+
+        push @values, ( $userid,                                                   # userid
+                        $data{'logtime'} || $time,                                 # logtime
+                        $action,                                                   # action
+                        $data{'actiontarget'},                                     # actiontarget
+                        ($data{'remote'} && $data{'remote'}->userid) || $remoteid, # remoteid
+                        $data{'remote_ip'} || $ip,                                 # ip
+                        $data{'remote_uniq'} || $uniq,                             # uniq
+                        LJ::encode_url_string($data{'extra'} || {}) );             # extra
+    }
+
+    my $values = join ',', map {'(?,?,?,?,?,?,?,?)'} 0..$#data;
+    
+    my $dbh = LJ::get_cluster_master($u);
+    $dbh->do(
+        'INSERT INTO userlog (userid, logtime, action, actiontarget, remoteid, ip, uniq, extra)' .
+        'VALUES $values',
+        undef,
+        @values
     );
 
     return;
