@@ -176,6 +176,18 @@ body<=
                 $LJ::DISABLED{'trava'} || ( $u && $u->is_community ) ? undef : 'LJ::Setting::Music',
             ],
         },
+        ljart => {
+            name        => LJ::Lang::ml('.cat.ljart'),
+            visible     => LJ::is_enabled('lj_art'),
+            disabled    => !$u || !LJ::LJArt::Artist->is_artist(userid => $u->userid), 
+            form        => 1,
+            desc        => LJ::Lang::ml('.cat.ljart.desc'),
+            need_ssl    => 0,
+            sort_weight => 70,
+            settings    => [qw(
+                LJ::Setting::LJArt
+            )],
+        },
     );
 
     LJ::run_hooks("settings_extra_cats", \%cats_with_settings, user => $u);

@@ -57,6 +57,9 @@
 .cat.integration.desc|staleness=1
 .cat.integration.desc=Windows Live ID
 
+.cat.ljart.desc|staleness=1
+.cat.ljart.desc=LJ Art Settings
+
 .cat.mobile|staleness=1
 .cat.mobile=Mobile
 
