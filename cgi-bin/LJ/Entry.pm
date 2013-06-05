@@ -1690,7 +1690,7 @@ sub metadata_html {
 
     my %tags = (
         'og:title'       => $meta->{'title'}       || '(no title)',
-        'og:description' => $meta->{'description'} || '(entry text)',
+        'og:description' => $meta->{'description'} || '',
         'og:image'       => $meta->{'image'},
         'og:type'        => 'website',
         'og:url'         => $self->url || $LJ::SITEROOT,
