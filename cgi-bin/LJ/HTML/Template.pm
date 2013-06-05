@@ -1,5 +1,11 @@
 package LJ::HTML::Template;
+
 use strict;
+use warnings;
+
+# Internal modules
+use LJ::Lang;
+use LJ::Request;
 
 # Returns a new HTML::Template object
 # with some redefined default values.
@@ -125,6 +131,12 @@ sub new {
                                     # Defaults to 1.
             loop_context_vars => 1, # special loop variables: __first__, __last__, __odd__, __inner__, __counter__
             path => $ENV{'LJHOME'},
+            filter => [
+                {
+                    sub    => \&_filter_ml_for_ml_preload,
+                    format => 'scalar'
+                }
+            ],
             @_
         );
 
@@ -144,6 +156,12 @@ sub new {
                                     # if 'param_name' doesn't exist in the template body.
                                     # Defaults to 1.
             path => $ENV{'LJHOME'},
+            filter => [
+                {
+                    sub    => \&_filter_ml_for_ml_preload,
+                    format => 'scalar'
+                }
+            ],
             @_
         );
 
@@ -153,5 +171,19 @@ sub new {
     }
 }
 
+# Template filters
+
+sub _filter_ml_for_ml_preload {
+    if (LJ::Request->get_param('tmplfilter')) {
+        my $tmplref = shift || '';
+        my @langmls = ($$tmplref =~ /ml\(\'([\w\.]+)\'\)/ogi);
+
+        if (@langmls) {
+            LJ::Lang::get_text_multi(
+                LJ::Lang::current_language(), undef, [@langmls]
+            );
+        }
+    }
+}
 
 1;
