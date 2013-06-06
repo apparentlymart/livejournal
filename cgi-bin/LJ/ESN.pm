@@ -195,6 +195,11 @@ sub retry_delay {
 package LJ::Worker::FiredMass;
 use base 'TheSchwartz::Worker';
 
+use Readonly;
+
+Readonly my $NOCLUSTER_MIN_DELAY => 3600;
+Readonly my $NOCLUSTER_MAX_DELAY => 3600 * 6;
+
 # LJ::Worker::FiredMass: a worker to process the "mass" subscriptions,
 # including the OfficialPost ones. these need special handling, because handling
 # them the usual way can get us to the system swap quickly, which is a bad
@@ -267,8 +272,23 @@ sub work {
     # that the (`etypeid`,`journalid`,`userid`) key is being used.
     my (@process_batch, @buffer, $lastuid);
 
-    my $dbh = LJ::get_cluster_reader($cid) ||
-        die "cannot get cluster reader for cluster $cid";
+    my $dbh = LJ::get_cluster_reader($cid);
+
+    if ( !$dbh ) {
+        my $delay_for = $NOCLUSTER_MIN_DELAY +
+            int( rand( $NOCLUSTER_MAX_DELAY - $NOCLUSTER_MIN_DELAY ) );
+
+        warn "esn-fired-mass: couldn't connect to the cluster (#$cid), " . 
+            "delaying for $delay_for seconds";
+
+        my $newjob = TheSchwartz::Job->new(
+            'funcname'  => $job->funcname,
+            'arg'       => $a,
+            'run_after' => time + $delay_for,
+        );
+
+        return $job->replace_with($newjob);
+    }
 
     # FIRST QUERY: get $limit rows, ordered by userid
     my $res = $dbh->selectall_arrayref(qq{
@@ -357,14 +377,34 @@ sub work {
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
 
+use Readonly;
+
+Readonly my $NOCLUSTER_MIN_DELAY => 3600;
+Readonly my $NOCLUSTER_MAX_DELAY => 3600 * 6;
+
 sub do_work {
     my ($class, $job) = @_;
     my $a = $job->arg;
     my ($cid, $e_params) = (ref $a eq 'HASH') ? ($a->{'cid'}, $a->{'e_params'}) : @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
-    my $dbch = LJ::get_cluster_master($cid) or
-        die "Couldn't connect to cluster \#cid $cid";
+    my $dbch = LJ::get_cluster_master($cid);
+
+    if ( !$dbch ) {
+        my $delay_for = $NOCLUSTER_MIN_DELAY +
+            int( rand( $NOCLUSTER_MAX_DELAY - $NOCLUSTER_MIN_DELAY ) );
+
+        warn "esn-cluster-subs: couldn't connect to the cluster (#$cid), " . 
+            "delaying for $delay_for seconds";
+
+        my $newjob = TheSchwartz::Job->new(
+            'funcname'  => $job->funcname,
+            'arg'       => $a,
+            'run_after' => time + $delay_for,
+        );
+
+        return $job->replace_with($newjob);
+    }
 
     my @subs = $evt->subscriptions(cluster => $cid);
 
@@ -449,6 +489,10 @@ sub do_work {
 
 sub work {
     my ($class, $job) = @_;
+
+    unless ( LJ::is_enabled('esn_cluster_subs_fork') ) {
+        return $class->do_work($job);
+    }
 
     my $pid = fork;
     
