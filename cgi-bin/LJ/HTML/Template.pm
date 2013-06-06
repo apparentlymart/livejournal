@@ -5,7 +5,6 @@ use warnings;
 
 # Internal modules
 use LJ::Lang;
-use LJ::Request;
 
 # Returns a new HTML::Template object
 # with some redefined default values.
@@ -174,17 +173,13 @@ sub new {
 # Template filters
 
 sub _filter_ml_for_ml_preload {
-    if (LJ::is_web_context()) {
-        if (LJ::Request->get_param('tmplfilter')) {
-            my $tmplref = shift || '';
-            my @langmls = ($$tmplref =~ /ml\(\'([\w\.]+)\'\)/ogi);
+    my $tmplref = shift || '';
+    my @langmls = ($$tmplref =~ /ml\(\'([\w\.]+)\'\)/ogi);
 
-            if (@langmls) {
-                LJ::Lang::get_text_multi(
-                    LJ::Lang::current_language(), undef, [@langmls]
-                );
-            }
-        }
+    if (@langmls) {
+        LJ::Lang::get_text_multi(
+            LJ::Lang::current_language(), undef, [@langmls]
+        );
     }
 }
 
