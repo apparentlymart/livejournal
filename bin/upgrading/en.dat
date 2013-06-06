@@ -9721,6 +9721,21 @@ web.users.add.addtogroups.title=Add to groups
 web.users.add.addtogroups.comment|staleness=1
 web.users.add.addtogroups.comment=<i>Optional:</i> Include in one or more custom friends groups.
 
+web.account.settings.title|staleness=1
+web.account.settings.title=Account Settings
+
+web.account.settings.tab.title.tags|staleness=1
+web.account.settings.tab.title.tags=Tags
+
+web.account.settings.tab.title.users|staleness=1
+web.account.settings.tab.title.users=Groups & Filters
+
+web.account.settings.tab.title.users.groups|staleness=1
+web.account.settings.tab.title.users.groups=Groups
+
+web.account.settings.tab.title.users.filters|staleness=1
+web.account.settings.tab.title.users.filters=Filters
+
 we_like_this_title|staleness=1
 we_like_this_title=View people who like it
 
