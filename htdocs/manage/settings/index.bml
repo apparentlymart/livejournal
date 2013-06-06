@@ -178,8 +178,8 @@ body<=
         },
         ljart => {
             name        => LJ::Lang::ml('.cat.ljart'),
-            visible     => LJ::is_enabled('lj_art'),
-            disabled    => !$u || !LJ::LJArt::Artist->is_artist(userid => $u->userid), 
+            visible     => LJ::is_enabled('lj_art') && LJ::LJArt::Artist->is_artist(userid => $u->userid),
+            disabled    => !$u || $u->is_community ? 1 : 0, 
             form        => 1,
             desc        => LJ::Lang::ml('.cat.ljart.desc'),
             need_ssl    => 0,
