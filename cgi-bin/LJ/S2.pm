@@ -2451,6 +2451,8 @@ sub Person
         $o->{"person_$field"} = $row->{$field};    
     }
 
+    $o->{'person_ml_specialization'} = LJ::Lang::ml('ljart.create.artist.spec.' . $row->{'specialization'});
+
     return $o;
 }    
 

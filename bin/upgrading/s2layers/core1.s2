@@ -522,6 +522,7 @@ class Person extends UserLite
     var readonly string person_name "Person name";
     var readonly string person_town "Person town";
     var readonly string person_specialization "Person specialization";    
+    var readonly string person_ml_specialization "Person specialization ml variable";    
     var readonly string person_photo "Person photo";
 
     function builtin get_events() : Event[] "Return list of communities, where user is member and community is ljart event";
