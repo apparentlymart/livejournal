@@ -1,12 +1,17 @@
 package LJ::ESN;
 use strict;
+
 use Carp qw(croak);
+use Data::Dumper;
+use Readonly;
+use Sys::Hostname qw( hostname );
+
 use LJ::Event;
 use LJ::Subscription;
-use Sys::Hostname qw/hostname/;
-use Data::Dumper;
 
-our $MAX_FILTER_SET = 5_000;
+Readonly our $MAX_FILTER_SET      => 5_000;
+Readonly our $NOCLUSTER_MIN_DELAY => 3600;
+Readonly our $NOCLUSTER_MAX_DELAY => 3600 * 6;
 
 sub schwartz_capabilities {
     return (
@@ -195,11 +200,6 @@ sub retry_delay {
 package LJ::Worker::FiredMass;
 use base 'TheSchwartz::Worker';
 
-use Readonly;
-
-Readonly my $NOCLUSTER_MIN_DELAY => 3600;
-Readonly my $NOCLUSTER_MAX_DELAY => 3600 * 6;
-
 # LJ::Worker::FiredMass: a worker to process the "mass" subscriptions,
 # including the OfficialPost ones. these need special handling, because handling
 # them the usual way can get us to the system swap quickly, which is a bad
@@ -376,11 +376,6 @@ sub work {
 # this is phase2 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
-
-use Readonly;
-
-Readonly my $NOCLUSTER_MIN_DELAY => 3600;
-Readonly my $NOCLUSTER_MAX_DELAY => 3600 * 6;
 
 sub do_work {
     my ($class, $job) = @_;
