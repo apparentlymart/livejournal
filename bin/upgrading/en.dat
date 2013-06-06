@@ -63,6 +63,8 @@ admin.homepage.cat.help=help text
 
 admin.homepage.cat.name=Category name:
 
+admin.homepage.cat.pretty_name=Name in URL:
+
 admin.homepage.cat.twitter=Twitter:
 
 admin.homepage.cat.user=LJ User:
