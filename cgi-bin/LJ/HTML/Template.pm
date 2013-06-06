@@ -174,7 +174,7 @@ sub new {
 # Template filters
 
 sub _filter_ml_for_ml_preload {
-    if (LJ::is_web_context) {
+    if (LJ::is_web_context()) {
         if (LJ::Request->get_param('tmplfilter')) {
             my $tmplref = shift || '';
             my @langmls = ($$tmplref =~ /ml\(\'([\w\.]+)\'\)/ogi);
