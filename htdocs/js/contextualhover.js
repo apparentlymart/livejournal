@@ -516,6 +516,22 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
         currentElement : null,
         hourglass      : null,
 
+        /*
+         * Init a live handler for contextual popups
+         * This way jQuery.fn.ljAddContextualPopup is not needed
+         */
+        setupLive: function() {
+            $(document.body)
+                // remove standart listeners from setup
+                .off('mouseover', ContextualPopup.mouseover)
+                .off('click', ContextualPopup.touchStart)
+
+                // use live listener
+                .on('mouseover ' + (LJ.Support.touch ? 'click' : ''), '.ljuser', function(event) {
+                    ContextualPopup.activate(event, true);
+                });
+        },
+
         setup: function() {
             var body;
 
@@ -579,7 +595,11 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             }
         },
 
-        activate: function(e) {
+        activate: function(e, useLive) {
+            if (useLive && !(e.target.username || e.target.userid || e.target.up_url)) {
+                ContextualPopup.searchAndAdd($(e.currentTarget).parent().get(0));
+            };
+                
             var target = e.target,
                 ctxPopupId = target.username || target.userid || target.up_url,
                 t = ContextualPopup;
