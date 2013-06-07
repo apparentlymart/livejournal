@@ -1988,6 +1988,15 @@ sub Entry
         $e->{$_} = $arg->{$_};
     }
 
+    foreach (qw(event event_town event_location event_paid 
+                event_price event_type event_image event_desc 
+                portfolio portfolio_thumbnail)) {
+        $e->{$_} = LJ::ehtml($arg->{'props'}->{"ljart_$_"});
+    }
+
+    ($e->{'event_date_from'}, $e->{'event_date_to'}) = $arg->{'props'}->{'ljart_event_date'} =~ m/^(.*?)(?:-(.*?))?$/;
+    ($e->{'event_time_from'}, $e->{'event_time_to'}) = $arg->{'props'}->{'ljart_event_time'} =~ m/^(.*?)(?:-(.*?))?$/;
+
     my $remote = LJ::get_remote();
     my $poster = $e->{poster}->{_u};
 
@@ -2136,12 +2145,6 @@ sub Entry
             $e->{'tags'}     = [];
         }
 
-        $e->{$_} = LJ::ehtml($entry->prop("ljart_$_"))
-            for (qw{event event_town event_location event_paid event_price event_type event_image event_desc portfolio portfolio_thumbnail});
-
-        ($e->{event_date_from}, $e->{event_date_to}) = $entry->prop('ljart_event_date') =~ m/^(.*?)(?:-(.*?))?$/;
-        ($e->{event_time_from}, $e->{event_time_to}) = $entry->prop('ljart_event_time') =~ m/^(.*?)(?:-(.*?))?$/;
-
      } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
                                                        $e->{delayedid} );
@@ -2152,10 +2155,6 @@ sub Entry
         }
         $e->{'delayed'} = 1;
         $e->{'delayed_icon'} = Image_std("delayed-entry");
-
-        $e->{$_} = $entry->prop("ljart_$_")
-            for (qw{event event_town event_location event_paid event_price event_type event_image event_desc});
-
     }
     $e->{'_preview'} = $arg->{'_preview'};
     return $e;
