@@ -39,7 +39,7 @@ body<=
             my $deleted = 0;
             foreach my $id (split /\0/, $POST{tags}) {
                 $id =~ s/_.*//;
-                my $res = LJ::Tags::delete_usertag( $u, 'id', $id );
+                my $res = LJ::Tags::delete_usertags( $u, 'id', $id );
                 $deleted += $res if defined $res;
             }
             if ($deleted > 0) {
