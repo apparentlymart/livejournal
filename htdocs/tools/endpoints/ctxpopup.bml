@@ -116,38 +116,45 @@
         $ret{userpic_h} = 100;
     }
 
-    if ($u && (!$u->prop('ratings') || $u->prop('ratings') eq 'Y' || LJ::check_priv($remote, 'siteadmin', 'selfpromo'))) {
-        my ($position, $first, $soc_capital, %filter);
+    my $prop_ratings = $u->prop('ratings');
+    my $ratings      = $prop_ratings ? $prop_ratings eq 'Y' : LJ::PersonalStats::AccessControl::default_ratings($u);
 
-        if ( LJ::is_enabled('new_homepage_noncyr_sc') || $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u)) {
+    my $show_ratings;
+    if (LJ::is_enabled('new_homepage_noncyr_sc')) {
+        $show_ratings = $ratings || LJ::check_priv($remote, 'siteadmin', 'selfpromo');
+    } else {
+        $show_ratings = $u->journaltype eq 'C' || LJ::SUP->is_sup_enabled($u);
+    }
 
-            my $country = LJ::GeoLocation->get_country_info_by_ip;
-            $country = $u->prop('country') if $u && $country ne 'UA';
-            if ($country eq 'UA') {
-                $filter{filter} = 'UA';
-            }
+    if ( $show_ratings ) { 
+        my ($first, %filter);
 
-            $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
-                func => 'get_value',
-                what => $u->journaltype eq 'C' ? 'communities' : 'users',
-                journal_id => $u->userid,
-                by => 'friends_weight',
-                type => 0,
-                sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
-                %filter,
-            });
+        my $country = LJ::GeoLocation->get_country_info_by_ip || '';
+        if ($country eq 'UA') {
+            $filter{filter} = 'UA';
+        } else {
+            $country = $u->prop('country');
+        }
 
-            $soc_capital = LJ::User::display_soccap($u->get_social_capital()); 
+        my $position = LJ::PersonalStats::DB->fetch_raw('ratings', {
+            func => 'get_value',
+            what => $u->journaltype eq 'C' ? 'communities' : 'users',
+            journal_id => $u->userid,
+            by => 'friends_weight',
+            type => 0,
+            sup =>  LJ::SUP->is_sup_enabled($u) ? 1 : 0,
+            %filter,
+        });
 
-            if (ref $position eq 'HASH') {
-                $first = $position->{result}->{position}!=0 ? 0 : 1;
-            }
+        my $soc_capital = LJ::User::display_soccap($u->get_social_capital()); 
 
+        if (ref $position eq 'HASH') {
+            $first = $position->{result}->{position}!=0 ? 0 : 1;
         }
 
         $ret{first}  = $first; 
         $ret{value}  = $soc_capital;
-        
+    
     }
 
     if ($remote) {
