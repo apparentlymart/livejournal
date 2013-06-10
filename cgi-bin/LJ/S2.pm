@@ -5154,6 +5154,89 @@ sub Page__get_last_entries {
 }
 
 # the whole procedure assumes there is no remote
+# lite version of method 'get_entries_by_tags'
+# used only one tag
+# make LJ::S2::Entry with minimum parameters
+sub Page__get_entries_by_tag_lite {
+    my ( $ctx, $this, $tag, $count, $preload_text ) = @_;
+
+    my $journal = $this->{'_u'};
+
+    return [] unless $journal;
+
+    my $tags = LJ::Tags::get_usertags( $journal, { 'remote' => undef } ) || {};
+    my $tagid;
+    for ( keys %$tags ) {
+        if ( $tags->{$_}->{'name'} eq $tag ) {
+            $tagid = $_;
+        }
+    }
+
+    return [] unless $tagid;
+
+    my $dbc = LJ::get_cluster_master($journal);
+
+    return [] unless $dbc;
+
+    my $journalid = $journal->userid;
+
+    my $itemids = $dbc->selectcol_arrayref('
+        SELECT 
+            jitemid
+        FROM 
+            logtagsrecent
+        WHERE
+            kwid=? 
+        AND 
+            journalid=? 
+        LIMIT ?', 
+    undef, $tagid, $journalid, $count);
+
+    my %logprops = ();
+    LJ::load_log_props2($journalid, $itemids, \%logprops);
+
+    my $tags  = LJ::Tags::get_logtagsmulti( { $journal->clusterid => [ map { [ $journalid, $_ ] } @$itemids ] } );
+
+    my $texts = $preload_text && LJ::get_logtext2($journal, @$itemids);
+
+    my $journal_userlite = LJ::S2::UserLite($journal);
+
+    my @ret;
+    for my $itemid (@$itemids) {
+
+        my $entry = LJ::Entry->new($journalid, jitemid  => $itemid);
+
+        next unless $entry && $entry->valid && $entry->is_public;
+
+        $entry->handle_prefetched_props($logprops{$itemid});
+        $entry->handle_prefetched_tags($tags->{ $journalid.' '.$itemid });
+        
+        if ($preload_text) {
+            $entry->handle_prefetched_text( $texts->{ $entry->{jitemid} }->[0], $texts->{ $entry->{jitemid} }->[1] );
+        }
+
+        push @ret, LJ::S2::Entry( $journal, {
+            'subject'          => clear_entry_subject($entry),
+            'text'             => $preload_text ? clear_entry_text( $entry ) : '',
+            'security'         => $entry->security,
+            'allowmask'        => $entry->allowmask,
+            'props'            => $entry->{'props'},,
+            'itemid'           => $entry->ditemid,
+            'journal'          => $journal_userlite,
+            'comments'         => get_comments_info($entry),
+
+            'tags'             => get_sorted_tags($entry),
+            'permalink_url'    => $entry->permalink_url,
+
+            'new_day'          => 0,
+            'end_day'          => 0,
+        } );
+    }
+
+    return \@ret;
+}
+
+# the whole procedure assumes there is no remote
 sub Page__get_entries_by_tags {
     my ( $ctx, $this, $taglist, $mode, $count ) = @_;
 
