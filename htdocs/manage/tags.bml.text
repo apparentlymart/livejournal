@@ -40,11 +40,15 @@
 
 .setting.desc.control=Who can create new tags and add/remove tags from entries?
 
+.setting.desc.merge=Who can merge and rename tags
+
 .setting.friends=Friends only
 
 .setting.maintainers=Maintainers only
 
 .setting.members=Members only
+
+.setting.owner=Owner only
 
 .setting.moderators|staleness=1
 .setting.moderators=Maintainers and moderators
