@@ -850,7 +850,8 @@ CREATE TABLE `invitesent` (
   `recvtime` int(10) unsigned NOT NULL,
   `status` enum('accepted','rejected','outstanding') NOT NULL,
   `args` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`commid`,`userid`)
+  PRIMARY KEY (`commid`,`userid`),
+  KEY `userid` (`userid`)
 )
 EOC
 
@@ -4559,6 +4560,10 @@ register_alter(sub {
         do_alter("delayedlog2",
                  "ALTER TABLE delayedlog2 " .
                  "ADD is_sticky BOOLEAN NOT NULL");
+    }
+
+    unless ( index_name( 'invitesent', 'INDEX:userid' ) ) {
+        do_alter( 'invitesent', 'ALTER TABLE invitesent ADD INDEX (userid)' );
     }
 
 });
