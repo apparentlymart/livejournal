@@ -929,7 +929,7 @@ function plural_form_is(count) {
 		if (Site.ml_text.hasOwnProperty(key)) {
 			str = Site.ml_text[key];
 
-			str = str.replace( /\[\[\?([\w-]+)\|(.*)\]\]/g, function(str, numstr, forms) {
+			str = str.replace( /\[\[\?([\w-]+)\|(.*?)\]\]/g, function(str, numstr, forms) {
 				if (!dict.hasOwnProperty(numstr)) { return str; }
 
 				var num = parseInt(dict[numstr], 10);
