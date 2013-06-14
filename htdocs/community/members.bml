@@ -464,20 +464,13 @@ body<=
                 LJ::run_hooks('send_invite', $event);
             }
         }
-        
-        foreach my $uid (keys %{$add{moderate} || {}}) {
-            my $u = LJ::load_userid($uid);
-            unless( LJ::RelationService->is_relation_to($c, $u, 'A') ){
-                $u->subscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
-            }
-        }
 
         foreach my $uid (keys %{$add{admin} || {}}) {
-            # log maintainer additions
+            #subscribe mantainer to notification
             my $u = LJ::load_userid($uid);
-            unless( LJ::RelationService->is_relation_to($c, $u, 'M') ){
-                $u->subscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
-            }
+            $u->subscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
+
+            # log maintainer additions
             LJ::User::UserlogRecord::MaintainerAdd->create( $c,
                 'maintid' => $uid, 'remote' => $remote );
 
@@ -524,20 +517,10 @@ body<=
                            (map { [$cid, $_, 'N'] } keys %{$add{preapprove} || {}}),
                            );
                            
-        #if delete moderator and admin permissions need to unsubscribe user from CommunityMantioned
-        foreach my $uid (keys %{$delete{moderate} || {}}) {
-            my $u = LJ::load_userid($uid);
-
-            unless( LJ::RelationService->is_relation_to($c, $u, 'A') || LJ::RelationService->is_relation_to($c, $u, 'M') ) {
-                $u->unsubscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
-            }
-        }
+        #if delete admin permissions need to unsubscribe user from CommunityMantioned
         foreach my $uid (keys %{$delete{admin} || {}}) {
             my $u = LJ::load_userid($uid);
-
-            unless( LJ::RelationService->is_relation_to($c, $u, 'A') || LJ::RelationService->is_relation_to($c, $u, 'M') ) {
-                $u->unsubscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
-            }
+            $u->unsubscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
         }
 
         # delete reluser memcache key
