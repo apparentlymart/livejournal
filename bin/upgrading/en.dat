@@ -1856,6 +1856,8 @@ entryunit.badge.fridayvideo=Friday Video
 
 entryunit.comments=[[reply_count]] [[?reply_count|comment|comments]]
 
+entryunit.comments.none=Leave a comment
+
 entryunit.expromo=This entry has been promoted
 
 entryunit.hide=Hide author
