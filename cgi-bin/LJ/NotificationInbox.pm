@@ -11,7 +11,7 @@ use Class::Autouse qw{
 };
 
 # Internal modules
-use LJ::SpamFilter;
+use LJ::AntiSpam;
 use LJ::NotificationItem;
 
 my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
@@ -380,16 +380,16 @@ sub enqueue {
 
             last unless $journal;
 
-            if (LJ::SpamFilter->need_spam_check_inbox($journal, $sender)) {
+            if (LJ::AntiSpam->need_spam_check_inbox($journal, $sender)) {
                 my $body    = $msg->body_raw || '';
                 my $subject = $msg->subject_raw || '';
 
-                $spam = LJ::SpamFilter->is_spam_inbox_message(
+                $spam = LJ::AntiSpam->is_spam_inbox_message(
                     $journal, $sender, $subject
                 );
 
                 unless ($spam) {
-                    $spam = LJ::SpamFilter->is_spam_inbox_message(
+                    $spam = LJ::AntiSpam->is_spam_inbox_message(
                         $journal, $sender, $body
                     );
                 }

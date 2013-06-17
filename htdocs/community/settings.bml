@@ -22,6 +22,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    use LJ::AntiSpam;
+
     my $ret; 
     my %errors;
 
@@ -244,8 +246,8 @@ body<=
             $cu->set_prop({ 'nonmember_posting' => $nonmember_posting,
                             'moderated'         => $moderated, });
             if ($moderated eq 'F') {
-                my $userlist = LJ::SpamFilter->get_only_user_list($cu);
-                LJ::SpamFilter->set_default_user_list($cu) unless scalar @$userlist;
+                my $userlist = LJ::AntiSpam->get_only_user_list($cu);
+                LJ::AntiSpam->set_default_user_list($cu) unless scalar @$userlist;
             }
 
             if (LJ::is_enabled("content_flag")) {

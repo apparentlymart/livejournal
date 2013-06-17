@@ -5,7 +5,7 @@ use warnings;
 use Encode;
 
 # Internal modules
-use LJ::SpamFilter;
+use LJ::AntiSpam;
 use LJ::Admin::Spam::Urls;
 use LJ::EventLogRecord::NewComment;
 
@@ -525,11 +525,11 @@ sub init {
         $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
     }
 
-    my $parsed_comment  = LJ::SpamFilter::Utils::parse_text($form->{body});
+    my $parsed_comment  = LJ::AntiSpam::Utils::parse_text($form->{body});
     my $can_mark_spam   = LJ::Talk::can_mark_spam($up, $journalu, $init->{entryu}, $init->{entryu}{user});
-    my $need_spam_check = LJ::SpamFilter->need_spam_check_comment($journalu, $up, $state);
+    my $need_spam_check = LJ::AntiSpam->need_spam_check_comment($journalu, $up, $state);
     if ($need_spam_check && !$can_mark_spam) {
-        if (LJ::SpamFilter->is_spam_comment($journalu, $up, $parsed_comment)) {
+        if (LJ::AntiSpam->is_spam_comment($journalu, $up, $parsed_comment)) {
             $state = 'B';
         }
     }

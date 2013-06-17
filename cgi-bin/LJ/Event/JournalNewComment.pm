@@ -4,7 +4,7 @@ use Scalar::Util qw(blessed);
 use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use LJ::Client::BitLy;
-use LJ::SpamFilter;
+use LJ::AntiSpam;
 use base 'LJ::Event';
 
 # we don't allow subscriptions to comments on friends' journals, so
@@ -856,7 +856,7 @@ sub subscriptions {
         return if $friend_ofs_count <= $LJ::SPAM_MAX_FRIEND_OFS &&
                     (time() - $comment_author->timecreate) / 86400 <= $LJ::SPAM_MAX_DAYS_CREATED;
 
-        return if LJ::SpamFilter->is_spam_in_friends_journals($entry_journal, $comment_author);
+        return if LJ::AntiSpam->is_spam_in_friends_journals($entry_journal, $comment_author);
     }
 
     my $acquire_sub_slot = sub {
