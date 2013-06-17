@@ -467,10 +467,12 @@ LiveJournal.parseLikeButtons = (function () {
      * @param  {Object} $node jQuery .lj-like node
      */
     function parse($node) {
+        /**
+         * Notice: tumblr button works through entry sharing
+         */
         parseFacebook($node);
         parseGoogle($node);
         parseTwitter($node);
-        parseTumblr($node);
         parseSurfingbird($node);
         parseRepost($node);
     }
@@ -603,31 +605,6 @@ LiveJournal.parseLikeButtons = (function () {
         });
 
         link.replaceWith(iframe);
-    }
-
-    /**
-     * Parse tumblr share button
-     * @param  {jQuery} $node jQuery .lj-like node
-     */
-    function parseTumblr($node) {
-        var item = $node.find( selectors.tumblr ),
-            link = null,
-            params = null,
-            href;
-
-        if (item.length === 0) {
-            return;
-        }
-
-        link = item.find('.tumblr-share-button'),
-        href = link.attr('href'),
-        params = {
-            url: link.data('url'),
-            name: link.data('title'),
-            description: link.data('text')
-        };
-
-        link.attr('href', LiveJournal.constructUrl(href, params));
     }
 
     /**
