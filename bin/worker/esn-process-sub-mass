@@ -12,4 +12,9 @@ package LJ::NewWorker::TheSchwartz::ProcessSubMass;
 use base 'LJ::NewWorker::TheSchwartz';
 sub capabilities { "LJ::Worker::ProcessSubMass" }
 
+## make the worker very sleepy for the period between releases.
+sub on_idle { 
+    sleep 300;
+}
+
 1;
