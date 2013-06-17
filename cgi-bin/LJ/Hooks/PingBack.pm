@@ -154,13 +154,14 @@ LJ::register_hook('new_comment2', sub {
 
     return if $entry->{security} ne "public";
 
-    my $prop_pingback = ($u && $u->prop('pingback')) ? $u->prop('pingback') : 'O';
+    my $prop_pingback = ($u && $u->prop('pingback')) ? $u->prop('pingback') : 'U';
     $prop_pingback = 'U' if $prop_pingback eq 'O'; #not notify about entries link
-    
+    $prop_pingback = 'D' if $prop_pingback eq 'E'; #not notify about entries link
+
     LJ::PingBack->notify(
-        uri  => $entry->url,
-        mode => $prop_pingback,
-        comment => $comment,
+        uri          => $entry->url,
+        mode         => $prop_pingback,
+        comment      => $comment,
         comment_data => $data,
     );
 });

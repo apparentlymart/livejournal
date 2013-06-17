@@ -33,15 +33,20 @@ sub send_ping {
     my $source_entry = LJ::Entry->new_from_url($source_uri);
     return unless $source_entry;
 
-    my @links = ExtractLinksWithContext->do_parse($source_entry->event_raw) if $mode =~ m/^[LOE]$/;
+    my @links;
+
+    # Don't send pingback to entry from comment
+    unless ( $comment ) {
+        @links = ExtractLinksWithContext->do_parse($source_entry->event_raw) if $mode =~ m/^[LOE]$/;
+    }
+
     my @users;
 
     if ( $mode =~ m/^[LOU]$/ ) {
         my $contents = $comment ? $comment_data->{body} : $source_entry->event_raw;
         @users = ExtractLinksWithContext->find_userlink($contents);
     }
-    # use Data::Dumper;
-    # warn "Links: " . Dumper(\@users);
+
     return unless (@links || @users);
 
     foreach my $link ( @links ) {
