@@ -6362,24 +6362,9 @@ sub promo_announce_disabled {
     return $u->prop('promo_announce_disabled') || 0;
 }
 
-sub incr_spam_counter {
-    my ($u, $value) = @_;
-
-    unless ($value) {
-        return;
-    }
-
-    unless ($value =~ /^\d+$/) {
-        return;
-    }
-
-    my $spam_counter = ($u->prop('spam_counter') || 0) + $value;
-
-    $u->set_prop('spam_counter', $spam_counter);
-
-    LJ::run_hooks('user_spam_counter_incr', $u, $spam_counter);
-
-    return $spam_counter;
+sub spam_counter {
+    my $u = shift;
+    return $u->prop('spam_counter') || 0;
 }
 
 sub clear_spam_counter {
