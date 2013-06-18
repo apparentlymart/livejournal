@@ -33,7 +33,7 @@ sub load_usertags {
     my $rv = $u->do("SELECT GET_LOCK(?, 10)", undef, "loadtags:$u->{userid}");
     return "ERR:nolock" unless $rv;
 
-    my $val = LJ::MemCache::get([ $u->{userid}, "tags2:$u->{userid}" ]);
+    my $val = LJ::MemCache::get([ $u->{userid}, "tags3:$u->{userid}" ]);
     return $ret->($val) if $val;
 
     my $res = LJ::Tags::get_usertagsmulti({ no_gearman => 1 }, $u);
