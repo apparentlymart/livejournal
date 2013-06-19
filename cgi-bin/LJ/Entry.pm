@@ -2848,6 +2848,11 @@ sub delete_entry
     my $u = ref $uuserid ? $uuserid : LJ::load_userid($jid);
     $jitemid += 0;
 
+    # TODO: change this to throw an exception
+    unless ( defined $anum ) {
+        Carp::carp('anum not defined for LJ::delete_entry');
+    }
+
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
