@@ -8996,108 +8996,6 @@ sub get_friendofs {
 }
 
 # <LJFUNC>
-# name: LJ::get_friend_group
-# des: Returns friendgroup row(s) for a given user.
-# args: uuserid, opt?
-# des-uuserid: a userid or u object
-# des-opt: a hashref with keys: 'bit' => bit number of group to return
-#                               'name' => name of group to return
-# returns: hashref; if bit/name are specified, returns hashref with keys being
-#                   friendgroup rows, or undef if the group wasn't found.
-#                   otherwise, returns hashref of all group rows with keys being
-#                   group bit numbers and values being row col => val hashrefs
-# </LJFUNC>
-sub get_friend_group {
-    my ($uuid, $opt) = @_;
-    my $u = LJ::want_user($uuid);
-    return undef unless $u;
-    my $uid = $u->{userid};
-
-    # data version number
-    my $ver = 1;
-
-    # sanity check bitnum
-    delete $opt->{'bit'} if
-        $opt->{'bit'} > 31 || $opt->{'bit'} < 0;
-
-    my $fg;
-    my $find_grp = sub {
-
-        # $fg format:
-        # [ version, [userid, bitnum, name, sortorder, public], [...], ... ]
-
-        my $memver = shift @$fg;
-        return undef unless $memver == $ver;
-
-        # bit number was specified
-        if ($opt->{'bit'}) {
-            foreach (@$fg) {
-                return LJ::MemCache::array_to_hash("fgrp", [$memver, @$_])
-                    if $_->[1] == $opt->{'bit'};
-            }
-            return undef;
-        }
-
-        # group name was specified
-        if ($opt->{'name'}) {
-            foreach (@$fg) {
-                return LJ::MemCache::array_to_hash("fgrp", [$memver, @$_])
-                    if lc($_->[2]) eq lc($opt->{'name'});
-            }
-            return undef;
-        }
-
-        # no arg, return entire object
-        return { map { $_->[1] => LJ::MemCache::array_to_hash("fgrp", [$memver, @$_]) } @$fg };
-    };
-
-    # check memcache
-    my $memkey = [$uid, "fgrp:$uid"];
-    $fg = LJ::MemCache::get($memkey);
-    return $find_grp->() if $fg;
-
-    # check database
-    $fg = [$ver];
-    my ($db, $fgtable) = $u->{dversion} > 5 ?
-                         (LJ::get_cluster_def_reader($u), 'friendgroup2') : # if dversion is 6+, use definitive reader
-                         (LJ::get_db_writer(), 'friendgroup');              # else, use regular db writer
-    return undef unless $db;
-
-    my $sth = $db->prepare("SELECT userid, groupnum, groupname, sortorder, is_public " .
-                           "FROM $fgtable WHERE userid=?");
-    $sth->execute($uid);
-    return LJ::error($db) if $db->err;
-
-    my @row;
-    push @$fg, [ @row ] while @row = $sth->fetchrow_array;
-
-    # set in memcache
-    LJ::MemCache::set($memkey, $fg);
-
-    return $find_grp->();
-}
-
-sub get_friend_group_sorted {
-    my ($u, %args) = @_;
-
-    my $friendgroups = LJ::get_friend_group($u);
-    
-    my @res = map +{
-        id => $_->{groupnum},
-        name => $_->{groupname},
-        public => $_->{is_public},
-        sortorder => $_->{sortorder},
-    }, sort { $a->{sortorder} <=> $b->{sortorder} } values( %$friendgroups);
-
-    unless ($args{no_unicode}) {
-        LJ::text_out(\$_->{name}) for @res;
-    }
-
-    return \@res;
-}
-
-
-# <LJFUNC>
 # name: LJ::fill_groups_xmlrpc
 # des: Fills a hashref (presumably to be sent to an XML-RPC client, e.g. FotoBilder)
 #      with user friend group information
@@ -9191,22 +9089,6 @@ sub mark_dirty {
     $LJ::REQ_CACHE_DIRTY{$what}->{$userid}++;
 
     return 1;
-}
-
-# <LJFUNC>
-# name: LJ::memcache_kill
-# des: Kills a memcache entry, given a userid and type.
-# args: uuserid, type
-# des-uuserid: a userid or u object
-# des-type: memcached key type, will be used as "$type:$userid"
-# returns: results of LJ::MemCache::delete
-# </LJFUNC>
-sub memcache_kill {
-    my ($uuid, $type) = @_;
-    my $userid = want_userid($uuid);
-    return undef unless $userid && $type;
-
-    return LJ::MemCache::delete([$userid, "$type:$userid"]);
 }
 
 # <LJFUNC>
@@ -10167,21 +10049,6 @@ sub get_userid_multi {
     }
 
     return @res;
-}
-
-# <LJFUNC>
-# name: LJ::want_userid
-# des: Returns userid when passed either userid or the user hash. Useful to functions that
-#      want to accept either. Forces its return value to be a number (for safety).
-# args: userid
-# des-userid: Either a userid, or a user hash with the userid in its 'userid' key.
-# returns: The userid, guaranteed to be a numeric value.
-# </LJFUNC>
-sub want_userid
-{
-    my $uuserid = shift;
-    return ($uuserid->{'userid'} + 0) if ref $uuserid;
-    return ($uuserid + 0);
 }
 
 # <LJFUNC>

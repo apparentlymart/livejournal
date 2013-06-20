@@ -5130,7 +5130,11 @@ sub editfriendgroups
             LJ::MemCache::delete([$userid, "log2lt:$userid"]);
         }
         LJ::Tags::deleted_friend_group($u, $bit);
-        LJ::run_hooks('delete_friend_group', $u, $bit);
+
+        LJ::load_user_props($u, 'pp_transallow');
+
+        $u->set_prop( 'pp_transallow' => -1 )
+            if $bit == $u->{pp_transallow};
 
         # remove the friend group, unless we just added it this transaction
         unless ($added{$bit}) {
