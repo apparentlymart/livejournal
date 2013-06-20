@@ -45,7 +45,7 @@ body<=
         $u = LJ::get_authas_user($authas);
         
         # LJSUP-15473: Ability to view user's settings
-        if ( LJ::can_view("/manage/settings/?cat=$given_cat", $remote) && !(defined $u) ) {
+        if ( LJ::priv_can_view("/manage/settings/?cat=$given_cat", $remote) && !(defined $u) ) {
             $u = LJ::load_user($authas);
             LJ::Setting::start_viewonly();
             $submit_msg .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />"

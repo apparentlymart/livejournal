@@ -9200,7 +9200,7 @@ sub create_extuser
     return $uid;
 }
 
-sub can_view
+sub priv_can_view
 {
     my ($url, $remote) = @_;
 
