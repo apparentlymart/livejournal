@@ -9200,6 +9200,19 @@ sub create_extuser
     return $uid;
 }
 
+sub can_view
+{
+    my ($url, $remote) = @_;
+
+    return 0 unless $LJ::PAGE_PRIVILEGES{$url};
+
+    my $priv = $LJ::PAGE_PRIVILEGES{$url}{'priv'};
+    my $arg = $LJ::PAGE_PRIVILEGES{$url}{'arg'};
+    if ( LJ::check_priv($remote, $priv, $arg) ) {
+        return 1;
+    }
+}
+
 # given an extuserid or extuser, return the LJ uid.
 # return undef if there is no mapping.
 sub get_extuser_uid

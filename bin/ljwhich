@@ -1,3 +1,5 @@
 #!/bin/sh
+export LJHOME='/home/lj'
+export FBHOME='/home/lj/fb'
 
 $LJHOME/bin/cvsreport.pl --which $1

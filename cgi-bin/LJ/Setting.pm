@@ -12,6 +12,7 @@ use LJ::Setting::WebmasterTools::Yandex;
 # ----------------------------------------------------------------------------
 
 my $is_savebutton_hide = 0;
+my $veiwonly_mode = 0;
 
 sub should_render { 1 }
 sub disabled { 0 }
@@ -26,6 +27,17 @@ sub htmlcontrol_label { "" }
 sub raw_html          { "" }
 sub is_savebutton_hide { return $is_savebutton_hide; }
 sub hide_savebutton { $is_savebutton_hide = 1; }
+sub show_savebutton { $is_savebutton_hide = 0; }
+sub is_viewonly_mode { return $veiwonly_mode; }
+sub start_viewonly {
+    $veiwonly_mode = 1;
+    hide_savebutton();
+}
+sub cansel_viewonly {
+    $veiwonly_mode = 0;
+    show_savebutton();
+}
+
 
 sub handle_post {
     my ( $class, $params, $widget ) = @_;

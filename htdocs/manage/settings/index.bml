@@ -13,9 +13,9 @@ body<=
     BML::set_language_scope('/manage/settings/index.bml');
 
     LJ::need_res("stc/settings.css",
-	 "stc/identity/identity.css",
-     "js/settings.js",
-      "js/jquery/jquery.lj.trava.js");
+        "stc/identity/identity.css",
+        "js/settings.js",
+        "js/jquery/jquery.lj.trava.js");
 
     LJ::set_active_crumb('manage');
 
@@ -35,9 +35,22 @@ body<=
         }
     }
 
+    my $given_cat = $GET{cat} || '';
+
+    my $submit_msg = '';
+    
+    LJ::Setting::cansel_viewonly();
     if ($remote) {
         $authas = $GET{authas} || $remote->user;
         $u = LJ::get_authas_user($authas);
+        
+        # LJSUP-15473: Ability to view user's settings
+        if ( LJ::can_view("/manage/settings/?cat=$given_cat", $remote) && !(defined $u) ) {
+            $u = LJ::load_user($authas);
+            LJ::Setting::start_viewonly();
+            $submit_msg .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />"
+        }
+        
         return LJ::bad_input($ML{'error.invalidauth'})
             unless $u;
     }
@@ -193,7 +206,6 @@ body<=
     LJ::run_hooks("settings_extra_cats", \%cats_with_settings, user => $u);
 
     # Active tab
-    my $given_cat = $GET{cat} || '';
     my $selfuri = "/manage/settings/?cat=$given_cat";
 
     if ($u) {
@@ -241,10 +253,12 @@ body<=
     }
 
     my $save_rv;
-    my $submit_msg = '';
+
     if (LJ::did_post() && $given_cat ne 'notifications') {
         return LJ::bad_input($ML{'error.invalidform'})
             unless LJ::check_form_auth() || $given_cat eq 'notifications';
+            
+        return LJ::bad_input($ML{'error.invalidauth'}) if LJ::Setting::is_viewonly_mode();
 
         $save_rv = LJ::Setting->save_all($u, \%POST, \@settings);
 
@@ -285,6 +299,8 @@ body<=
         }
 
         if (LJ::did_post()) {
+            return LJ::bad_input($ML{'error.invalidauth'}) if LJ::Setting::is_viewonly_mode();
+        
             my @ntypes = @LJ::NOTIFY_TYPES;
 
             my %ntypeids = map { $_ => $_->ntypeid } @ntypes;
@@ -536,7 +552,7 @@ body<=
     $ret .= "</div>";
 
     $ret .= "<div id='settings_save'>";
-    $ret .= $cats_with_settings{$given_cat}->{form} && !LJ::Setting->is_savebutton_hide() ? LJ::html_submit($ML{'.btn.save'}) : "&nbsp;";
+    $ret .= $cats_with_settings{$given_cat}->{form} && !LJ::Setting::is_savebutton_hide() ? LJ::html_submit($ML{'.btn.save'}) : "&nbsp;";
     $ret .= "</div>";
     $ret .= "</form>" if $cats_with_settings{$given_cat}->{form};
 
