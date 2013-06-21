@@ -2985,7 +2985,8 @@ sub postevent {
     my $ip = LJ::get_remote_ip();
     my $uniq = LJ::UniqCookie->current_uniq();
 
-    $u->do('INSERT INTO logleft VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef, 
+    $u->do('INSERT INTO logleft(userid, posttime, journalid, ditemid, ip, uniq, publicitem)
+                     VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef, 
         $posterid, 
         $ownerid, 
         $ditemid, 
