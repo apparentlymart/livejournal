@@ -22,8 +22,20 @@ body<=
         $ret .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />";
     }
     
-    return LJ::bad_input($ML{'error.invalidauth'})
-        unless $u;
+    unless ( $u ) {
+        my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+        $u = LJ::load_user($authas);
+        my $error_mes = LJ::Lang::get_text(
+            $lang,
+            (LJ::priv_for_page("/customize/options.bml") ? 'error.no_permission' : 'error.invalidauth'),
+            undef,
+            {
+                    username   => $u->ljuser_display,
+                    priv       => LJ::priv_for_page("/customize/options.bml"),
+            }
+        );
+        return LJ::bad_input($error_mes);
+    }
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->user ? "?authas=$authas" : "";

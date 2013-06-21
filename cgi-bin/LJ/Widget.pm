@@ -44,9 +44,9 @@ sub start_viewonly {
 	croak "call object method 'start_viewonly' from class" unless ref $self; 
     $self->{"VIEW_ONLY"} = 1;
 }
-sub cansel_viewonly {
+sub cancel_viewonly {
 	my $self = shift;
-	croak "call object method 'cansel_viewonly' from class" unless ref $self; 
+	croak "call object method 'cancel_viewonly' from class" unless ref $self; 
     $self->{"VIEW_ONLY"} = 0;
 }
 
