@@ -1682,10 +1682,11 @@
         my $res = '';
 
         if ( $playlist_id > -1 ) {
-            $res .= qq~<object width="450" height="158" data="http://trava.ru/swfs/TravaPlaylistWidget.swf" type="application/x-shockwave-flash">
-                <param name="movie" value="http://trava.ru/swfs/TravaPlaylistWidget.swf" />
+            my $key = $LJ::TRAVA_API_KEY;
+            $res .= qq~<object width="450" height="158" data="http://trava.ru/swfs/TravaPlaylistWidget2.swf" type="application/x-shockwave-flash">
+                <param name="movie" value="http://trava.ru/swfs/TravaPlaylistWidget2.swf" />
                 <param value="transparent" name="wmode">
-                <param name="FlashVars" value="playlistId=$playlist_id">
+                <param name="FlashVars" value="playlistId=$playlist_id&partnerKey=$key">
                 <param value="true" name="allowfullscreen">
             </object>~
         }
