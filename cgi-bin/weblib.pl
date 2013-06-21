@@ -2694,4 +2694,13 @@ sub set_remote_language {
     return;
 }
 
+sub priv_for_page {
+    my $url = shift;
+    return undef unless $url;
+    return undef unless $LJ::PAGE_PRIVILEGES{$url};
+    my $priv = $LJ::PAGE_PRIVILEGES{$url}{'priv'};
+    my $arg = $LJ::PAGE_PRIVILEGES{$url}{'arg'};
+    return "$priv:$arg";
+}
+
 1;

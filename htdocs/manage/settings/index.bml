@@ -39,20 +39,33 @@ body<=
 
     my $submit_msg = '';
     
-    LJ::Setting::cansel_viewonly();
+    LJ::Setting::cancel_viewonly();
     if ($remote) {
         $authas = $GET{authas} || $remote->user;
         $u = LJ::get_authas_user($authas);
         
         # LJSUP-15473: Ability to view user's settings
-        if ( LJ::priv_can_view("/manage/settings/?cat=$given_cat", $remote) && !(defined $u) ) {
+        my $add_url = $given_cat ? "?cat=$given_cat" : '';
+        if ( LJ::priv_can_view("/manage/settings/$add_url", $remote) && !(defined $u) ) {
             $u = LJ::load_user($authas);
             LJ::Setting::start_viewonly();
             $submit_msg .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />"
         }
         
-        return LJ::bad_input($ML{'error.invalidauth'})
-            unless $u;
+        unless ( $u ) {
+            my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+            $u = LJ::load_user($authas);
+            my $error_mes = LJ::Lang::get_text(
+                $lang,
+                (LJ::priv_for_page("/manage/settings/$add_url") ? 'error.no_permission' : 'error.invalidauth'),
+                undef,
+                {
+                        username   => $u->ljuser_display,
+                        priv       => LJ::priv_for_page("/manage/settings/$add_url"),
+                }
+            );
+            return LJ::bad_input($error_mes);
+        }
     }
 
     # the different navigation categories and their settings

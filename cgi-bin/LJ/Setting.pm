@@ -30,10 +30,11 @@ sub hide_savebutton { $is_savebutton_hide = 1; }
 sub show_savebutton { $is_savebutton_hide = 0; }
 sub is_viewonly_mode { return $veiwonly_mode; }
 sub start_viewonly {
+    LJ::need_var(no_submit_window => 1);
     $veiwonly_mode = 1;
     hide_savebutton();
 }
-sub cansel_viewonly {
+sub cancel_viewonly {
     $veiwonly_mode = 0;
     show_savebutton();
 }
