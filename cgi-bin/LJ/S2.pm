@@ -2403,8 +2403,8 @@ sub UserExtended
     $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
     $o->{'timecreate'} = DateTime_unix( $u->timecreate );
     $o->{'last_entry_time'} = DateTime_unix( $u->last_public_entry_time );
-    $o->{'friends_count'} = LJ::API::Friend->friends_personal_count($u);
-    $o->{'friendof_count'} = LJ::API::Friend->friendof_count($u);
+    $o->{'friends_count'} = $u->friends_personal_count;
+    $o->{'friendof_count'} = $u->friendof_count;
     $o->{'social_capital'} = $u->get_social_capital;
     return $o;
 }
