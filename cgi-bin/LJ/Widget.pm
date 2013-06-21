@@ -17,7 +17,9 @@ sub new {
     my %opts = @_;
 
     my $id = $opts{id} ? $opts{id} : $currentId++;
-    return bless {id => $id}, $class;
+    $class = bless {id => $id}, $class;
+    $class->start_viewonly if $opts{view_only};
+    return $class;
 }
 
 sub need_res {
@@ -31,6 +33,22 @@ sub render_body {
 sub collapsable { } ## true for collapsable widget
 
 sub need_form_auth { 1 }
+
+sub is_viewonly_mode {
+    my $self = shift;
+    return 1 unless ref $self;   
+    return $self->{"VIEW_ONLY"} ? 1 : 0;
+}
+sub start_viewonly {
+	my $self = shift;
+	croak "call object method 'start_viewonly' from class" unless ref $self; 
+    $self->{"VIEW_ONLY"} = 1;
+}
+sub cansel_viewonly {
+	my $self = shift;
+	croak "call object method 'cansel_viewonly' from class" unless ref $self; 
+    $self->{"VIEW_ONLY"} = 0;
+}
 
 sub start_form {
     my $class = shift;
@@ -258,7 +276,13 @@ sub get_effective_remote {
     my $class = shift;
 
     if ($class->authas) {
-        return LJ::get_effective_remote();
+        if ( $class->is_viewonly_mode ) {
+            my $authas = $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
+            my $u = LJ::load_user($authas);
+            return $u;
+        } else {
+            return LJ::get_effective_remote();
+        }
     }
 
     return LJ::get_remote();

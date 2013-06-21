@@ -13,6 +13,15 @@ body<=
 
     my $authas = $GET{authas} || $remote->user;
     my $u = LJ::get_authas_user($authas);
+    my $ret;
+
+    my $view_only = 0;
+    if ( LJ::priv_can_view('/customize/options.bml', $remote) && !(defined $u) ) {
+        $u = LJ::load_user($authas);
+        $view_only = 1;
+        $ret .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />";
+    }
+    
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
@@ -49,9 +58,8 @@ body<=
     # lazy migration of style name
     LJ::Customize->migrate_current_style($u);
 
-    my $ret;
-
     if (LJ::did_post()) {
+        return LJ::bad_input($ML{'error.invalidauth'}) if $view_only;
         my @errors = LJ::Widget->handle_post(\%POST, qw(CustomizeTheme JournalTitles MoodThemeChooser NavStripChooser S2PropGroup LinksList));
         $ret .= LJ::bad_input(@errors) if @errors;
     }
@@ -65,20 +73,20 @@ body<=
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, label => $ML{'.switcher.label'}, button => $ML{'.switcher.btn'} });
     $ret .= "</form>";
 
-    my $current_theme = LJ::Widget::CurrentTheme->new;
+    my $current_theme = LJ::Widget::CurrentTheme->new( view_only => $view_only );
     $headextra .= $current_theme->wrapped_js( page_js_obj => "Customize" );
     $ret .= "<div class='theme-current pkg'>";
     $ret .= $current_theme->render( no_theme_chooser => 1 );
     $ret .= "</div><!-- end .theme-current -->";
 
-    my $journal_titles = LJ::Widget::JournalTitles->new;
+    my $journal_titles = LJ::Widget::JournalTitles->new( view_only => $view_only );
     $headextra .= $journal_titles->wrapped_js;
     $ret .= "<div class='theme-titles pkg'>";
     $ret .= $journal_titles->render( no_theme_chooser => 1 );
     $ret .= "</div><!-- end .theme-titles -->";
     $ret .= "<br />";
 
-    my $customize_theme = LJ::Widget::CustomizeTheme->new;
+    my $customize_theme = LJ::Widget::CustomizeTheme->new( view_only => $view_only );
     $headextra .= $customize_theme->wrapped_js( page_js_obj => "Customize" );
     $ret .= "<div class='customize-wrapper one-percent'>";
     $ret .= $customize_theme->render(

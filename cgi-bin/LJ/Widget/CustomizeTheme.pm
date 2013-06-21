@@ -120,19 +120,21 @@ sub render_body {
 
     $ret .= "<div class='customize-content'>";
 
-    $ret .= "<div class='customize-buttons'>";
-    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_top'" } );
-    $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
-    $ret .= "</div>";
+    unless ( $class->is_viewonly_mode ) {
+        $ret .= "<div class='customize-buttons'>";
+        $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_top'" } );
+        $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
+        $ret .= "</div>";
+    }
 
     # Display Group
     if ($group eq "display") {
         $ret .= "<div id='display-group' class='customize-group'>";
 
-        my $mood_theme_chooser = LJ::Widget::MoodThemeChooser->new;
+        my $mood_theme_chooser = LJ::Widget::MoodThemeChooser->new( view_only => $class->is_viewonly_mode );
         $$headextra .= $mood_theme_chooser->wrapped_js( page_js_obj => "Customize" );
 
-        my $nav_strip_chooser = LJ::Widget::NavStripChooser->new;
+        my $nav_strip_chooser = LJ::Widget::NavStripChooser->new( view_only => $class->is_viewonly_mode );
         $$headextra .= $nav_strip_chooser->wrapped_js( page_js_obj => "Customize" );
 
         $ret .= "<div class='pkg'>";
@@ -143,7 +145,7 @@ sub render_body {
         $ret .= $nav_strip_chooser->render;
         $ret .= "</div>";
 
-        my $s2_propgroup = LJ::Widget::S2PropGroup->new;
+        my $s2_propgroup = LJ::Widget::S2PropGroup->new( view_only => $class->is_viewonly_mode );
         $$headextra .= $s2_propgroup->wrapped_js( page_js_obj => "Customize" );
 
         $ret .= "<div class='pkg'>";
@@ -163,7 +165,7 @@ sub render_body {
         $ret .= "<div id='style-group' class='customize-group'>";
 
         foreach my $propgroup (@style_groups_order) {
-            my $s2_propgroup = LJ::Widget::S2PropGroup->new;
+            my $s2_propgroup = LJ::Widget::S2PropGroup->new( view_only => $class->is_viewonly_mode );
             $$headextra .= $s2_propgroup->wrapped_js( page_js_obj => "Customize" );
 
             $ret .= "<div class='pkg'>";
@@ -187,7 +189,7 @@ sub render_body {
 
     # Custom CSS Group
     elsif ($group eq "customcss") {
-        my $s2_propgroup = LJ::Widget::S2PropGroup->new;
+        my $s2_propgroup = LJ::Widget::S2PropGroup->new( view_only => $class->is_viewonly_mode );
         $$headextra .= $s2_propgroup->wrapped_js( page_js_obj => "Customize" );
 
         $ret .= "<div id='customcss-group' class='customize-group pkg'>";
@@ -201,7 +203,7 @@ sub render_body {
 
     # Other Groups
     else {
-        my $s2_propgroup = LJ::Widget::S2PropGroup->new;
+        my $s2_propgroup = LJ::Widget::S2PropGroup->new( view_only => $class->is_viewonly_mode );
         $$headextra .= $s2_propgroup->wrapped_js( page_js_obj => "Customize" );
 
         $ret .= "<div id='$group-group' class='customize-group pkg'>";
@@ -213,10 +215,12 @@ sub render_body {
         $ret .= "</div>";
     }
 
-    $ret .= "<div class='customize-buttons'>";
-    $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_bottom'" } );
-    $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
-    $ret .= "</div>";
+    unless ( $class->is_viewonly_mode ) {
+        $ret .= "<div class='customize-buttons'>";
+        $ret .= $class->html_submit( reset => $class->ml('widget.customizetheme.btn.reset'), { raw => "class='customize-button customize-button-default' id='reset_btn_bottom'" } );
+        $ret .= $class->html_submit( save => $class->ml('widget.customizetheme.btn.save'), { raw => "class='customize-button'" } ) . " ";
+        $ret .= "</div>";
+    }
 
     $ret .= "</div><!-- end .customize-content -->";
     $ret .= "</div><!-- end .customize-inner-wrapper -->";
