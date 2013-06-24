@@ -2255,6 +2255,17 @@ CREATE TABLE `schools_stats` (
 )
 EOC
 
+register_tablecreate('seconddomains', <<'EOC');
+CREATE TABLE `seconddomains` (
+  `userid` int(10) unsigned NOT NULL,
+  `domainid` int(10) unsigned NOT NULL,
+  `until` datetime DEFAULT NULL,
+  `lastmailed` DEFAULT NULL,
+  PRIMARY KEY  (`userid`),
+  KEY `domainid` (`domainid`)
+)
+EOC
+
 # rotating site secret values
 register_tablecreate('secrets', <<'EOC');
 CREATE TABLE `secrets` (

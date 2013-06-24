@@ -1441,7 +1441,7 @@ sub layer_compile
     }
 
     my $is_system = $layer->{'userid'} == LJ::get_userid("system");
-    my $untrusted = ! $LJ::S2_TRUSTED{$layer->{'userid'}} && ! $is_system;
+    my $untrusted = ! $LJ::S2_TRUSTED{$layer->{'userid'}} && ! $is_system && !(LJ::load_userid($layer->{'userid'})->prop('second_domain') && LJ::get_cap(LJ::load_userid($layer->{'userid'}), 'paid'));
 
     # system writes go to global.  otherwise to user clusters.
     my $dbcm;
