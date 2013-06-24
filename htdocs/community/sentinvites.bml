@@ -50,13 +50,40 @@ body<=
     }
 
     my $cid = $c->{'userid'};
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
     # is $remote an admin?
+    my $view_only_mode = 0;
     unless (LJ::can_manage_other($remote, $c)) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
-        $ret .= BML::ml('/community/members.bml.error.noaccess', 
-                        { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
-        $ret .= " p?>";
-        return $ret;
+        if ( LJ::priv_can_view("/community/sentinvites.bml", $remote) ) {
+        	return LJ::bad_input($ML{'error.invalidauth'}) if LJ::did_post();
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $c->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/community/sentinvites.bml");
+            if ( $privs ) {
+            	$ret .= LJ::Lang::get_text(
+		            $lang,
+		            'error.no_permission',
+		            undef,
+		            {
+		                username   => $c->ljuser_display,
+		                priv       => $privs,
+		            }
+		        );
+            } else {
+	            $ret .= BML::ml('/community/members.bml.error.noaccess', 
+	                        { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
+            }
+            $ret .= " p?>";
+            return $ret;
+        }
     }
 
     $ret .= LJ::maintainer_linkbar($c, "invites");
@@ -250,7 +277,7 @@ END
 
     $ret .= "</table>\n";
     $ret .= "<p>" . LJ::html_submit( 'action:revoke', $ML{'.cancel'}) .  "</p>"
-        if $can_revoke;
+        if $can_revoke && !$view_only_mode;
     $ret .= "</form>";
 
     $ret .= "<br /><a href='/community/members.bml?authas=$c->{user}'>$ML{'.send'}</a>";

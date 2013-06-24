@@ -54,13 +54,41 @@ body<=
     }
 
     my $cid = $c->{'userid'};
+    
+    my $view_only_mode = 0;
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
     # is $remote an admin?
     unless (LJ::can_manage_other($remote, $c)) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
-        $ret .= BML::ml('.error.noaccess',
-                        { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
-        $ret .= " p?>";
-        return $print_with_ad->($ret);
+        if ( LJ::priv_can_view("/community/members.bml", $remote) ) {
+            return LJ::bad_input($ML{'error.invalidauth'}) if LJ::did_post();
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $c->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/community/sentinvites.bml");
+            if ( $privs ) {
+                $ret .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $c->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+                $ret .= BML::ml('.error.noaccess',
+                                { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
+            }
+            $ret .= " p?>";
+            return $print_with_ad->($ret);
+        }
     }
 
     $ret .= LJ::maintainer_linkbar($c, "members");
@@ -820,7 +848,7 @@ body<=
                             'attribs', join(',', @attribs),
                             'was', join(';', @wstrs)) . "\n";
 
-    $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n";
+    $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n" if !$view_only_mode;
     $ret .= "</div></form>\n\n";
 
     $ret .= $navbar;

@@ -302,10 +302,38 @@ body<=
     }
     my $dbcr = LJ::get_cluster_def_reader($c);
 
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $view_only_mode = 0;
     unless ($remote->can_moderate($c) || $remote->can_manage($c) || $remote->can_super_manage($c)) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p " .
-            BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
-        return $ret;
+    	if ( LJ::priv_can_view("/community/moderate.bml", $remote) ) {
+            return LJ::bad_input($ML{'error.invalidauth'}) if LJ::did_post();
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $c->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+	        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+	        my $privs = LJ::priv_for_page("/community/moderate.bml");
+            if ( $privs ) {
+                $ret .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $c->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+	           $ret .= BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $comm ljcomm?>"});
+            }
+	        $ret .= " p?>";
+	        return $ret;
+        }
     }
 
     $ret .= LJ::maintainer_linkbar($c) unless LJ::did_post() && ($mode eq 'approve_do' || $mode eq 'reject_do');
