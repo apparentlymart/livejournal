@@ -4595,6 +4595,99 @@ register_alter(sub {
 
 });
 
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
 
+    unless (column_type("userlog", "backup_id")) {
+        do_alter( "userlog",
+                  "ALTER TABLE userlog " . 
+                  "ADD `backup_id` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("links", "linkid")) {
+        do_alter( "links",
+                  "ALTER TABLE links " .
+                  "ADD `linkid` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("loginlog", "loginid")) {
+        do_alter( "loginlog",
+                  "ALTER TABLE loginlog " .
+                  "ADD `loginid` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");             
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (primary_key("logleft")) {
+        do_alter( "logleft",
+                  "ALTER TABLE logleft " . 
+                  "ADD PRIMARY KEY(journalid,ditemid)");  
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("logprop_history", "logid")) {
+        do_alter( "logprop_history",
+                  "ALTER TABLE logprop_history " .  
+                  "ADD `logid` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("recentactions", "actionid")) {
+        do_alter( "recentactions",
+                  "ALTER TABLE recentactions " . 
+                  "ADD `actionid` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("recentactions", "actionid")) {
+        do_alter( "recentactions",
+                  "ALTER TABLE sms_msgack " . 
+                  "ADD `messageid` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+});
+
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (primary_key("talkleft")) {
+        do_alter( "talkleft",
+                   "ALTER TABLE talkleft " . 
+                   "ADD PRIMARY KEY(journalid,jtalkid)");
+    }
+});
 
 1; # return true
