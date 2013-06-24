@@ -278,7 +278,7 @@ sub get_effective_remote {
     if ($class->authas) {
         if ( $class->is_viewonly_mode ) {
             my $authas = $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
-            my $u = LJ::load_user($authas);
+            my $u = ( $authas ? LJ::load_user($authas) : LJ::get_effective_remote() );
             return $u;
         } else {
             return LJ::get_effective_remote();
