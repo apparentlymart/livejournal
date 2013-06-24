@@ -1,14 +1,17 @@
 <?_code
 {
     use strict;
+    use Digest::SHA qw/sha1_base64/;
+
     our %GET;
     my $remote = LJ::get_remote;
 
     my $ret = '';
 
     if( $remote ) {
+        my $hash_userid = sha1_base64($remote->{_session}->{userid} . $LJ::DOMAIN_JOURNALS_SECRET_KEY);
         $ret .= qq|
-        lj_master_user = $remote->{_session}->{userid};
+        lj_master_user = '$hash_userid';
         |;
     }
     else {

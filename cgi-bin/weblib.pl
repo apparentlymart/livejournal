@@ -26,6 +26,7 @@ use LJ::Pics::Album;
 use LJ::URI::Shortener;
 use Apache::WURFL;
 use Encode;
+use Digest::SHA qw/sha1_base64/;
 
 # <LJFUNC>
 # name: LJ::img
@@ -1717,9 +1718,11 @@ sub res_includes {
 
         #first part of cross-domain auth
         if ( $remote ) {
+
+            my $hash_userid = sha1_base64($remote->{_session}->{userid} . $LJ::DOMAIN_JOURNALS_SECRET_KEY);
             $ret_js .= qq|
                 <script type="text/javascript">
-                    lj_user = $remote->{_session}->{userid};
+                    lj_user = '$hash_userid';
                 </script>
             |;
         }
