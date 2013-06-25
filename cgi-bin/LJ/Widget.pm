@@ -36,7 +36,7 @@ sub need_form_auth { 1 }
 
 sub is_viewonly_mode {
     my $self = shift;
-    return 1 unless ref $self;   
+    return 1 unless ref $self;
     return $self->{"VIEW_ONLY"} ? 1 : 0;
 }
 sub start_viewonly {
