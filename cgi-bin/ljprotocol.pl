@@ -3841,11 +3841,11 @@ sub getevents {
     my $dbr = LJ::get_db_reader();
     my $sth;
 
-    my $dbcr =  LJ::get_cluster_reader($uowner);
-    return fail($err, 502) unless $dbcr && $dbr;
-
     # can't pull events from deleted/suspended journal
     return fail($err, 307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
+
+    my $dbcr =  LJ::get_cluster_reader($uowner);
+    return fail($err, 502) unless $dbcr && $dbr;
 
     my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
 
