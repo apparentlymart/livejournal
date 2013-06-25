@@ -37,10 +37,43 @@ body<=
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
-        unless $u;
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $authas = $GET{authas};
+    my $ret = '';
+    my $view_only_mode = 0;
+    my $u = LJ::get_effective_remote;
+    if ( $authas && !$u ) {
+        $u = LJ::load_user($authas);
+        if ( LJ::priv_can_view("/manage/profile/", $remote) ) {
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $u->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/manage/profile/");
+            if ( $privs ) {
+                $ret .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $u->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+                return LJ::bad_input($ML{'error.invalidauth'});
+            }
+            $ret .= " p?>";
+            return $ret;
+        }
+    }
+    return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
 
     return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
@@ -104,8 +137,6 @@ body<=
     ### no post, show edit form
     ###
     unless (LJ::did_post()) {
-
-        my $ret;
 
         $ret .= "<div>";
         # user switcher
@@ -722,7 +753,7 @@ body<=
         $ret .= LJ::run_hook("profile_settings_extra", $u);
 
         # ending submit block
-        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.save_button'}) . " standout?>\n";
+        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.save_button'}) . " standout?>\n" unless $view_only_mode;
         $ret .= "</form>\n";
 
         return $print_with_ad->($ret);
@@ -734,6 +765,7 @@ body<=
     ###
 
     if (LJ::did_post()) {
+    	return LJ::bad_input($ML{'error.invalidauth'}) if $view_only_mode;
         return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>") unless LJ::check_form_auth();
 
         return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);

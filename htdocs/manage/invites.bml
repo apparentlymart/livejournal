@@ -16,25 +16,60 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>"
         unless $remote;
+        
+    # always have links at top
+    my $ret;
 
     LJ::need_res('stc/invites.css');
-    
-    # for now, assume we're operating on $remote.  maybe in the future we'll be able to
-    # manage other P type accounts, but we can't yet
-    my $u = $remote;
+
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $authas = $GET{authas};
+    my $view_only_mode = 0;
+    my $u = LJ::get_effective_remote;
+    if ( $authas && !$u ) {
+    	$u = LJ::load_user($authas);
+        if ( LJ::priv_can_view("/manage/invites.bml", $remote) ) {
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $u->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/manage/invites.bml");
+            if ( $privs ) {
+                $ret .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $u->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+                return LJ::bad_input($ML{'error.invalidauth'});
+            }
+            $ret .= " p?>";
+            return $ret;
+        }
+    }
+    return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
     
     return $LJ::MSG_READONLY_USER
         if LJ::get_cap($u, "readonly");
-
-    # always have links at top
-    my $ret;
 
     # get pending invites
     my $pending = LJ::get_pending_invites($u) || [];
 
     # short out?
-    return "<?h1 $ML{'.none.title'} h1?><?p $ML{'.none.body'} p?>"
-        unless @$pending;
+    unless (@$pending) {
+    	$ret .= "<?h1 $ML{'.none.title'} h1?><?p $ML{'.none.body'} p?>";
+        return $ret;
+    }
 
     # load communities and maintainers
     my @ids;
@@ -46,6 +81,7 @@ body<=
 
     # see if they posted and if we should take actions
     if (LJ::did_post()) {
+    	return LJ::bad_input($ML{'error.invalidauth'}) if $view_only_mode;
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
         

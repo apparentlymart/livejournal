@@ -38,10 +38,43 @@
         return;
     }
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return $print_with_ad->($err->($ML{'error.invalidauth'}))
-        unless $u;
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $authas = $GET{authas};
+    my $view_only_mode = 0;
+    my $u = LJ::get_effective_remote;
+    if ( $authas && !$u ) {
+        $u = LJ::load_user($authas);
+        if ( LJ::priv_can_view("/friends/editgroups.bml", $remote) ) {
+            return LJ::bad_input($ML{'error.invalidauth'}) if LJ::did_post();
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $u->ljuser_display, }
+            );
+            $body .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $body .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/friends/editgroups.bml");
+            if ( $privs ) {
+                $body .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $u->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+                return LJ::bad_input($ML{'error.invalidauth'});
+            }
+            $body .= " p?>";
+            return $body;
+        }
+    }
+    return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
@@ -190,8 +223,10 @@
 
     $body .= "</tr></table>";
 
-    $body .= "<?h1 $ML{'.done.header'} h1?><?p $ML{'.done.text'} p?>";
-    $body .= "<?p <input type='submit' value='$ML{'.done.btn'}' /> p?>";
+    unless ( $view_only_mode ) {
+        $body .= "<?h1 $ML{'.done.header'} h1?><?p $ML{'.done.text'} p?>";
+        $body .= "<?p <input type='submit' value='$ML{'.done.btn'}' /> p?>";
+    }
     $body .= "</form>";
 
     $body = $print_with_ad->($body);

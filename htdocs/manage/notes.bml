@@ -13,12 +13,50 @@ body<=
 
     LJ::set_active_crumb('aliases');
 
-    my $u = LJ::get_remote();
+    my $remote = LJ::get_remote(); 
+    my $ret = '';
+    my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+    my $authas = $GET{authas};
+    my $view_only_mode = 0;
+
+    my $u = LJ::get_effective_remote;
+    if ( $authas && !$u ) {
+        $u = LJ::load_user($authas);
+        if ( LJ::priv_can_view("/manage/notes.bml", $remote) ) {
+            my $warn_foreign = LJ::Lang::get_text(
+                $lang,
+                'error.warn_foreing',
+                undef,
+                { username   => $u->ljuser_display, }
+            );
+            $ret .= "<?warningbar $warn_foreign warningbar?><br />";
+            $view_only_mode = 1;
+        } else {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+            my $privs = LJ::priv_for_page("/manage/notes.bml");
+            if ( $privs ) {
+                $ret .= LJ::Lang::get_text(
+                    $lang,
+                    'error.no_permission',
+                    undef,
+                    {
+                        username   => $u->ljuser_display,
+                        priv       => $privs,
+                    }
+                );
+            } else {
+                return LJ::bad_input($ML{'error.invalidauth'});
+            }
+            $ret .= " p?>";
+            return $ret;
+        }
+    }
+    return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
+    
     return "<?needlogin?>" unless $u;
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
     return "<?h1 " . BML::ml('.not.allowed', { aopts => "href='$LJ::SITEROOT/paidaccounts/'" } ) . " h1?>" unless $u->get_cap('aliases');
 
-    my $ret = '';
     my @aliases;
     ### user is now authenticated ###
     
@@ -26,6 +64,7 @@ body<=
 
     # if a POST, update their info
     if (LJ::did_post()) {
+    	return LJ::bad_input($ML{'error.invalidauth'}) if $view_only_mode;
         my $new_user = delete $POST{$key."new_user"};
         my $new_alias = delete $POST{$key."new_alias"};
         return "<?badinput?>" unless LJ::text_in(\%POST);
@@ -107,29 +146,33 @@ body<=
                 ."</td></tr>\n";
         push @userid_list, $userid;
     }
-    $ret .= q|<tr class="newalias"><td colspan="2"><label for="alias-new-user">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
-    $ret .= '<tr id="new_alias_tr"><td>';
-    $ret .= LJ::html_text({
-                name  => "${key}new_user",
-                class => 'type-text',
-                id    => 'alias-new-user',
-                value => "$ML{'.alias.enterusername'}"
-             });
-    $ret .= '</td><td class="user_alias">';
-    $ret .= LJ::html_text({
-                name  => "${key}new_alias",
-                class => 'type-text',
-                id    => 'alias-new-alias',
-                maxlenght => $max_alias_length,
-                size  => 50,
-                value => "$ML{'.alias.enternote'}"
-             });
-    $ret .= "<span class=\"user_alias_error\"></span></td></tr>\n";
-    $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|"/>|."\n";
-    $ret .= q|<tr><td colspan="2" class="more"><a href="#" id="adding-more-alias" onclick="return addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
+    
+    if ( !$view_only_mode ) {
+	    $ret .= q|<tr class="newalias"><td colspan="2"><label for="alias-new-user">|. $ML{'.alias.header.newalias'} .q|</label></td></tr>|."\n";
+	    $ret .= '<tr id="new_alias_tr"><td>';
+	    $ret .= LJ::html_text({
+	                name  => "${key}new_user",
+	                class => 'type-text',
+	                id    => 'alias-new-user',
+	                value => "$ML{'.alias.enterusername'}"
+	             });
+	    $ret .= '</td><td class="user_alias">';
+	    $ret .= LJ::html_text({
+	                name  => "${key}new_alias",
+	                class => 'type-text',
+	                id    => 'alias-new-alias',
+	                maxlenght => $max_alias_length,
+	                size  => 50,
+	                value => "$ML{'.alias.enternote'}"
+	             });
+	    $ret .= "<span class=\"user_alias_error\"></span></td></tr>\n";
+	    $ret .= q|<input type="hidden" name="|.${key}.q|_user_list" value="|.join('|', @userid_list).q|"/>|."\n";
+	    $ret .= q|<tr><td colspan="2" class="more"><a href="#" id="adding-more-alias" onclick="return addAliasLine()">|. $ML{'.alias.aliaslist.more'} .q|</a></td></tr>|;
+    }
+
     $ret .= q|<tr><th>|. $ML{'.alias.header.username'} .q|</th><th>|.$ML{'.alias.header.alias'} .q|</th></tr>|."\n";
     $ret .= $users_list_html;
-    $ret .= q|<tr><td colspan="2" class="notedel"><input type="button" name="delete_btn" onclick="this.form.save_btn.name='delete_btn';this.form.save_btn.click()" value="|.$ML{'.done.btn.delete'}.q|"/></td></tr>|;
+    $ret .= q|<tr><td colspan="2" class="notedel"><input type="button" name="delete_btn" onclick="this.form.save_btn.name='delete_btn';this.form.save_btn.click()" value="|.$ML{'.done.btn.delete'}.q|"/></td></tr>| if !$view_only_mode;
     $ret .= q|</table>|."\n";
 
     $ret .=qq|<script type="text/javascript">
@@ -202,7 +245,7 @@ body<=
         </script>|;
 
     ### ending submit block
-    $ret .= "<?standout " . LJ::html_submit("save_btn", $ML{'.done.btn.savechanges'}) . " standout?>\n";
+    $ret .= "<?standout " . LJ::html_submit("save_btn", $ML{'.done.btn.savechanges'}) . " standout?>\n" if !$view_only_mode;
     $ret .= "</form>\n";
 
     return $ret;
