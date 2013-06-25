@@ -9200,8 +9200,7 @@ sub create_extuser
     return $uid;
 }
 
-sub priv_can_view
-{
+sub priv_can_view {
     my ($url, $remote) = @_;
 
     return 0 unless $LJ::PAGE_PRIVILEGES{$url};
@@ -9209,6 +9208,13 @@ sub priv_can_view
     my $priv = $LJ::PAGE_PRIVILEGES{$url}{'priv'};
     my $arg = $LJ::PAGE_PRIVILEGES{$url}{'arg'};
     if ( LJ::check_priv($remote, $priv, $arg) ) {
+    	my $uri = LJ::Request->uri;
+	    my $args = LJ::Request->args;
+	    my $current_url = "$uri?$args";
+	    my $authas = $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
+	    my $u = LJ::load_user($authas);
+	    LJ::statushistory_add($u, $remote, "view_settings", "$current_url" );
+    	
         return 1;
     }
 }
