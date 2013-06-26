@@ -9203,15 +9203,17 @@ sub create_extuser
 sub priv_can_view {
     my ($url, $remote) = @_;
 
-    return 0 unless $LJ::PAGE_PRIVILEGES{$url};
+    my $privilege = $LJ::PAGE_PRIVILEGES{$url} || $LJ::PAGE_PRIVILEGES{"$url/"};
+    
+    return 0 unless $privilege;
 
-    my $priv = $LJ::PAGE_PRIVILEGES{$url}{'priv'};
-    my $arg = $LJ::PAGE_PRIVILEGES{$url}{'arg'};
+    my $priv = $privilege->{'priv'};
+    my $arg  = $privilege->{'arg'};
     if ( LJ::check_priv($remote, $priv, $arg) ) {
     	my $uri = LJ::Request->uri;
 	    my $args = LJ::Request->args;
 	    my $current_url = "$uri?$args";
-	    my $authas = $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
+            my $authas = LJ::Request->get_param('authas') || LJ::Request->post_param('authas');
 	    my $u = LJ::load_user($authas);
 	    LJ::statushistory_add($u, $remote, "view_settings", "$current_url" );
     	
