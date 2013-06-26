@@ -2357,6 +2357,8 @@ sub __clean_singletons {
 # </LJFUNC>
 sub start_request
 {
+    LJ::RequestStatistics->start_profile();
+
     handle_caches();
     # TODO: check process growth size
 
@@ -2398,6 +2400,8 @@ sub end_request
     LJ::run_hooks("end_request");
 
     __clean_singletons();
+
+    LJ::RequestStatistics->finish_profile();
 }
 
 # <LJFUNC>

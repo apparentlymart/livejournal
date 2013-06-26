@@ -161,6 +161,8 @@ use Carp qw();
 use Data::Dumper qw();
 use IO::Handle qw();
 
+use LJ::RequestStatistics;
+
 ### VARIABLES ###
 
 my @handlers = qw(
@@ -357,6 +359,9 @@ sub get {
 
     my $res = $conn->get( $key, @params );
 
+    LJ::RequestStatistics->inc('memcache_get');
+    LJ::RequestStatistics->add('memcache_get_key', $key);
+
     _profile( 'get', $key, $res ) if $enable_profiling;
 
     return $res;
@@ -411,6 +416,12 @@ sub get_multi {
     foreach my $conn (@connections) {
         my $cid = int $conn;
         my $conn_ret = $conn->get_multi( @{ $keys_map{$cid} } );
+
+        LJ::RequestStatistics->inc('memcache_get_multi');
+        foreach my $key (@{ $keys_map{$cid} }) {
+            LJ::RequestStatistics->inc('memcache_get_multi_keys');
+            LJ::RequestStatistics->add('memcache_get_multi_key', $key);
+        }
 
         %ret = ( %ret, %$conn_ret );
     }
@@ -484,6 +495,9 @@ sub set {
 
     $key = $key->[1]
         if ref $key eq 'ARRAY';
+
+    LJ::RequestStatistics->inc('memcache_set');
+    LJ::RequestStatistics->add('memcache_add_key', $key);
 
     _profile( 'set', $key ) if $enable_profiling;
 
