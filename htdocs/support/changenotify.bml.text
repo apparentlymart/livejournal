@@ -1,9 +1,15 @@
 ;; -*- coding: utf-8 -*-
+.available_subs|staleness=1
+.available_subs=Available support notifications
+
 .chagenotify.text|staleness=1
 .chagenotify.text=Here you may select what categories of support requests you'd like to be notified about.  Choices are <b>off</b> (the default), <b>new</b> (you'll get notifications when a new support request in that category is posted) or <b>all</b> (you'll get notifications and then a copy of each comment/solution posted).
 
 .chagenotify.title|staleness=1
 .chagenotify.title=Change Notification Settings
+
+.current_tracks|staleness=1
+.current_tracks=Currently tracking support notifications
 
 .done.text|staleness=1
 .done.text=When done, press the "Save Changes" button below...
@@ -11,8 +17,35 @@
 .done.title|staleness=1
 .done.title=Done?
 
+.error.no_privs_for_cat|staleness=1
+.error.no_privs_for_cat=You don't have enough privileges for <b>[[catname]]</b> category.
+
+.error.no_privs_for_request|staleness=1
+.error.no_privs_for_request=You are not privileged to subscribe to <b>#[[spid]]</b>.
+
+.error.tag_do_not_esists_in_cat|staleness=1
+.error.tag_do_not_esists_in_cat=Tag <b>[[tag]]</b> does not exist in <b>[[catname]]</b> category.
+
+.error.unknown_cat|staleness=1
+.error.unknown_cat=Unknown category.
+
+.error.unknown_request|staleness=1
+.error.unknown_request=Sorry, you are trying to subscribe to unknown request.
+
+.error.unknown_tag|staleness=1
+.error.unknown_tag=Tag you are trying to subscribe doesn't not exist in that category.
+
+.event.support_request|staleness=1
+.event.support_request=New support request has been submitted to the board
+
+.event.support_request.cat|staleness=1
+.event.support_request.cat=New support request has been submitted to <b>[[cat]]</b> category
+
 .mustlogin|staleness=1
 .mustlogin=You must first <a href=[[login]]>login</a>.
+
+.not_enough_privs_to_be_notified|staleness=1
+.not_enough_privs_to_be_notified=You don't have the necessary privilege to be notified about this event.
 
 .option.all|staleness=1
 .option.all=All
@@ -37,22 +70,4 @@
 
 .unknow.mode|staleness=1
 .unknow.mode=Unknown mode.
-
-.available_subs=Available support notifications
-
-.current_tracks=Currently tracking support notifications
-
-.not_enough_privs_to_be_notified=You don't have the necessary privilege to be notified about this event.
-
-.error.tag_do_not_esists_in_cat=Tag <b>[[tag]]</b> does not exist in <b>[[catname]]</b> category.
-
-.error.no_privs_for_cat=You don't have enough privileges for <b>[[catname]]</b> category.
-
-.error.no_privs_for_request=You are not privileged to subscribe to <b>#[[spid]]</b>.
-
-.error.unknown_cat=Unknown category.
-
-.error.unknown_request=Sorry, you are trying to subscribe to unknown request.
-
-.error.unknown_tag=Tag you are trying to subscribe doesn't not exist in that category.
 

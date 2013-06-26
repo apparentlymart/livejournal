@@ -1,105 +1,153 @@
 ;; -*- coding: utf-8 -*-
+.error.user_not_exist=User  does not exist
+
 Actionlink=[[[link]]]
 
-Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
-
-adv_page.title=Advertising on the site
-
-adv_page.title.newsblock=News
-
-adv_page.title.supcontacts=SUP Media
-
-adv_page.title.advertfeatures=Advertising possibilities
-
-adv_page.title.specprojects=Project examples
-
-adv_page.link.allnews=All news
-
-admin.backup.recovery.label.account=Account name:
-
-admin.backup.recovery.label.from=From date/time:
-
-admin.backup.recovery.label.to=To date/time:
-
-admin.backup.recovery.hint.to=(optional -- current date/time used if not specified)
-
-admin.backup.recovery.label.action=Action
-
-admin.backup.recovery.label.restore=<b>Restore</b> entries that were deleted in the specified time period
-
-admin.backup.recovery.label.delete=<b>Delete</b> entries that were posted in the specified time period
-
-admin.backup.recovery.label.send=Send status updates to:
-
-admin.backup.recovery.hint.send=(optional)
-
+admin.backup.recovery.button.add|staleness=1
 admin.backup.recovery.button.add=Add
 
-admin.backup.recovery.link.queue.restore=Restore Queue
+admin.backup.recovery.hint.send|staleness=1
+admin.backup.recovery.hint.send=(optional)
 
+admin.backup.recovery.hint.to|staleness=1
+admin.backup.recovery.hint.to=(optional -- current date/time used if not specified)
+
+admin.backup.recovery.label.account|staleness=1
+admin.backup.recovery.label.account=Account name:
+
+admin.backup.recovery.label.action|staleness=1
+admin.backup.recovery.label.action=Action
+
+admin.backup.recovery.label.delete|staleness=1
+admin.backup.recovery.label.delete=<b>Delete</b> entries that were posted in the specified time period
+
+admin.backup.recovery.label.from|staleness=1
+admin.backup.recovery.label.from=From date/time:
+
+admin.backup.recovery.label.restore|staleness=1
+admin.backup.recovery.label.restore=<b>Restore</b> entries that were deleted in the specified time period
+
+admin.backup.recovery.label.send|staleness=1
+admin.backup.recovery.label.send=Send status updates to:
+
+admin.backup.recovery.label.to|staleness=1
+admin.backup.recovery.label.to=To date/time:
+
+admin.backup.recovery.link.queue.delete|staleness=1
 admin.backup.recovery.link.queue.delete=Delete Queue
 
-admin.backup.recovery.title.queue.restore=Restore Queue
+admin.backup.recovery.link.queue.restore|staleness=1
+admin.backup.recovery.link.queue.restore=Restore Queue
 
-admin.backup.recovery.title.queue.delete=Delete Queue
-
+admin.backup.recovery.th.account|staleness=1
 admin.backup.recovery.th.account=Account
 
-admin.backup.recovery.th.date=Date/time
-
-admin.backup.recovery.th.requested=Requested by
-
+admin.backup.recovery.th.added|staleness=1
 admin.backup.recovery.th.added=Added
 
+admin.backup.recovery.th.date|staleness=1
+admin.backup.recovery.th.date=Date/time
+
+admin.backup.recovery.th.requested|staleness=1
+admin.backup.recovery.th.requested=Requested by
+
+admin.backup.recovery.th.status|staleness=1
 admin.backup.recovery.th.status=Status
 
-admin.homepage.not.show.media=do not show media
+admin.backup.recovery.title.queue.delete|staleness=1
+admin.backup.recovery.title.queue.delete=Delete Queue
 
+admin.backup.recovery.title.queue.restore|staleness=1
+admin.backup.recovery.title.queue.restore=Restore Queue
+
+admin.homepage.cancel|staleness=1
 admin.homepage.cancel=Cancel
 
+admin.homepage.cat.facebook|staleness=1
 admin.homepage.cat.facebook=Facebook:
 
+admin.homepage.cat.help|staleness=1
 admin.homepage.cat.help=help text
 
+admin.homepage.cat.name|staleness=1
 admin.homepage.cat.name=Category name:
 
+admin.homepage.cat.pretty_name|staleness=1
 admin.homepage.cat.pretty_name=Name in URL:
 
+admin.homepage.cat.twitter|staleness=1
 admin.homepage.cat.twitter=Twitter:
 
+admin.homepage.cat.user|staleness=1
 admin.homepage.cat.user=LJ User:
 
+admin.homepage.cat.visible|staleness=1
 admin.homepage.cat.visible=Visible on site
 
+admin.homepage.cat.vk|staleness=1
 admin.homepage.cat.vk=Vkontakte:
 
+admin.homepage.close|staleness=1
 admin.homepage.close=Close
 
+admin.homepage.confirm|staleness=1
 admin.homepage.confirm=Confirm
 
+admin.homepage.full|staleness=1
 admin.homepage.full=Full
 
+admin.homepage.header|staleness=1
 admin.homepage.header=Homepage admin panel
 
+admin.homepage.menu.archive|staleness=1
 admin.homepage.menu.archive=Archive
 
+admin.homepage.menu.cat|staleness=1
 admin.homepage.menu.cat=Categories
 
+admin.homepage.menu.new_posts|staleness=1
 admin.homepage.menu.new_posts=New posts
 
+admin.homepage.new.cat|staleness=1
 admin.homepage.new.cat=New category
 
+admin.homepage.not.show.media|staleness=1
+admin.homepage.not.show.media=do not show media
+
+admin.homepage.save|staleness=1
 admin.homepage.save=Save
 
+admin.homepage.select.page|staleness=1
 admin.homepage.select.page=Select page:
 
+admin.homepage.select.rating|staleness=1
 admin.homepage.select.rating=Please select rating:
 
+admin.homepage.time.left|staleness=1
 admin.homepage.time.left=Time left to update rating:
 
-adv_page.sup_about.text<<
-<p class="b-contact-address">127006, Россия, Москва, бизнес-центр "Школа журналистов",<br />ул. Малая Дмитровка, 20, 3 этаж</p> <dl class="b-contact-list"> <dt>Телефон:</dt> <dd>+7 (495) 980-80-68</dd> <dt>Факс:</dt> <dd>+7 (495) 662-38-57</dd> <dt>E-mail:</dt> <dd><a href="mailto:info@sup.com">info@sup.com</a></dd> <dt>Для прессы, проектов и сотрудничества:</dt> <dd>+7 (495) 980-80-68 доб. 1148,<br /><a href="mailto:pr@sup.com">pr@sup.com</a></dd> </dl> 
-.
+adv_page.link.allnews|staleness=1
+adv_page.link.allnews=All news
+
+adv_page.sup_about.text|staleness=1
+adv_page.sup_about.text=<p class="b-contact-address">127006, Россия, Москва, бизнес-центр "Школа журналистов",<br />ул. Малая Дмитровка, 20, 3 этаж</p> <dl class="b-contact-list"> <dt>Телефон:</dt> <dd>+7 (495) 980-80-68</dd> <dt>Факс:</dt> <dd>+7 (495) 662-38-57</dd> <dt>E-mail:</dt> <dd><a href="mailto:info@sup.com">info@sup.com</a></dd> <dt>Для прессы, проектов и сотрудничества:</dt> <dd>+7 (495) 980-80-68 доб. 1148,<br /><a href="mailto:pr@sup.com">pr@sup.com</a></dd> </dl> 
+
+adv_page.title|staleness=1
+adv_page.title=Advertising on the site
+
+adv_page.title.advertfeatures|staleness=1
+adv_page.title.advertfeatures=Advertising possibilities
+
+adv_page.title.newsblock|staleness=1
+adv_page.title.newsblock=News
+
+adv_page.title.specprojects|staleness=1
+adv_page.title.specprojects=Project examples
+
+adv_page.title.supcontacts|staleness=1
+adv_page.title.supcontacts=SUP Media
+
+Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
 
 birthday.link=birthdays
 
@@ -139,13 +187,17 @@ cleanhtml.suspend_msg=This is a suspended entry.
 cleanhtml.suspend_msg_with_supportid|staleness=1
 cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
 
-colorpicker.title.new=New
+colorpicker.title.choose|staleness=1
+colorpicker.title.choose=Сhoose
 
-colorpicker.title.current=Current
-
+colorpicker.title.code|staleness=1
 colorpicker.title.code=Code
 
-colorpicker.title.choose=Сhoose
+colorpicker.title.current|staleness=1
+colorpicker.title.current=Current
+
+colorpicker.title.new|staleness=1
+colorpicker.title.new=New
 
 comment.ban.user|staleness=1
 comment.ban.user=Ban %username% from commenting
@@ -730,8 +782,7 @@ cprod.userpic.text.v5=
 create.cap.desc|staleness=1
 create.cap.desc=Upload photo, use userheads, userpics.
 
-create.cap.head|staleness=1
-create.cap.head=Use all LiveJournal capabilities
+create.cap.head=Use all LiveJournal opportunities
 
 create.cap.tokens|staleness=1
 create.cap.tokens=10 000 tokens
@@ -742,13 +793,17 @@ create.cap.try=Try free
 create.cap.year|staleness=1
 create.cap.year=per year
 
-create.event.subhead=Header
-
-create.event.subhead.login=Header
-
+create.event.extracontent|staleness=1
 create.event.extracontent=Content content
 
+create.event.extracontent.login|staleness=1
 create.event.extracontent.login=Content content
+
+create.event.subhead|staleness=1
+create.event.subhead=Header
+
+create.event.subhead.login|staleness=1
+create.event.subhead.login=Header
 
 create.features.comments|staleness=1
 create.features.comments=Post comments
@@ -765,8 +820,7 @@ create.features.groups=Create custom groups of friends
 create.features.notifications|staleness=1
 create.features.notifications=Receive email notifications
 
-create.head|staleness=1
-create.head=Join LiveJournal
+create.head=Creating a New Journal
 
 create.identity|staleness=1
 create.identity=With an identity account you can:
@@ -783,6 +837,7 @@ create.login.google=Google
 create.login.head|staleness=1
 create.login.head=Login to LiveJournal
 
+create.login.login|staleness=1
 create.login.login=LiveJournal Login
 
 create.login.mailru|staleness=1
@@ -797,26 +852,35 @@ create.login.openid.button=Login
 create.login.openid.placeholder|staleness=1
 create.login.openid.placeholder=OpenID url
 
+create.login.secure|staleness=1
+create.login.secure=LiveJournal Secure Site
+
 create.login.twitter|staleness=1
 create.login.twitter=Twitter
 
 create.login.vkontakte=VKontakte
 
-create.nextsteps.communities=join <a href="[[communities]]">communities</a>
+create.nextsteps.communities|staleness=1
+create.nextsteps.communities=join communities
 
+create.nextsteps.customize|staleness=1
 create.nextsteps.customize=<a href="[[customize]]">customize</a> your journal
 
-create.nextsteps.email=an email has been sent to <strong>[[email]]</strong> containing further instructions (<a href="[[changeemail]]">change email</a>)
+create.nextsteps.email=an email has been sent to [[email]] containing further instructions (<a href="[[changeemail]]">change email</a>). Haven't received an email? <a href="http://www.livejournal.com/register.bml">Resend</a> it
 
-create.nextsteps.friends=find <a href="[[friends]]">friends</a>
+create.nextsteps.friends|staleness=1
+create.nextsteps.friends=find friends
 
+create.nextsteps.friendspage|staleness=1
 create.nextsteps.friendspage=check out your <a href="[[friendspage]]">friends page</a>
 
-create.nextsteps.pics=upload pictures in <a href="[[photoalbum]]">photo album</a>
+create.nextsteps.pics|staleness=1
+create.nextsteps.pics=upload pictures
 
-create.nextsteps.profile=fill your <a href="[[profile]]">profile</a>
-
+create.nextsteps.popular|staleness=1
 create.nextsteps.popular=check out the most <a href="[[popular]]">popular entries</a>
+
+create.nextsteps.profile=<a href="http://www.livejournal.com/manage/profile/">fill</a> your profile: add your interests or some infomation about you
 
 create.post|staleness=1
 create.post=Create First Post
@@ -832,6 +896,9 @@ create.reg.birthday.month=Month
 
 create.reg.birthday.year|staleness=1
 create.reg.birthday.year=Year
+
+create.reg.captcha.desc|staleness=1
+create.reg.captcha.desc=Prove you're human
 
 create.reg.create|staleness=1
 create.reg.create=Create account
@@ -854,15 +921,16 @@ create.reg.gender.unspecified=Unspecified
 create.reg.password|staleness=1
 create.reg.password=Password
 
-create.reg.password.hidden=Show Password
+create.reg.password.hidden|staleness=1
+create.reg.password.hidden=Password is hidden
 
-create.reg.password.shown=Hide Password
+create.reg.password.shown|staleness=1
+create.reg.password.shown=Password is shown
 
 create.reg.passwordconfirm|staleness=1
 create.reg.passwordconfirm=Password confirm
 
-create.reg.tos|staleness=1
-create.reg.tos=By creating an account on LiveJournal, you agree to our <a href="#">User Agreement</a> and <a href="#">Privacy Policy</a>.
+create.reg.tos=By&nbsp;creating an&nbsp;account on&nbsp;LiveJournal, you agree to&nbsp;our <a href="http://www.livejournal.com/legal/tos.bml">User Agreement</a> and <a href="http://www.livejournal.com/legal/privacy.bml">Privacy Policy</a>.
 
 create.reg.username|staleness=1
 create.reg.username=Username
@@ -870,28 +938,32 @@ create.reg.username=Username
 create.reg.username.desc|staleness=1
 create.reg.username.desc=Your name on LiveJournal
 
-create.reg.captcha.desc=Prove you're human
-
 create.steps.finish|staleness=1
 create.steps.finish=2. Finish
 
 create.steps.reg|staleness=1
 create.steps.reg=1. Registration
 
-create.welcome|staleness=1
-create.welcome=Welcome 
-
+create.underage.links|staleness=1
 create.underage.links=Use the links to access more options:
 
+create.underage.links.faq|staleness=1
 create.underage.links.faq=You can read about it in <a href="http://www.livejournal.com/support/faq/244.html">FAQ</a>;
 
+create.underage.links.home|staleness=1
 create.underage.links.home=Continue reading <a href="http://www.livejournal.com">Livejournal</a> anonymously.
 
+create.underage.links.verification|staleness=1
 create.underage.links.verification=If your account was incorrectly flagged as underage you can complete <a href="http://www.livejournal.com/agecheck/">the verification process</a>;
 
+create.underage.message|staleness=1
 create.underage.message=We no longer allow users under 13 to register for LiveJournal
 
+create.underage.title|staleness=1
 create.underage.title=Age Verification
+
+create.welcome|staleness=1
+create.welcome=Welcome 
 
 crumb.acctstatus=Account Status
 
@@ -993,7 +1065,7 @@ crumb.invitefriend=Invite a Friend
 
 crumb.joincomm=Join Community
 
-crumb.latestposts=Latest Posts
+crumb.latestposts=Latest Entries
 
 crumb.layerbrowse=Public Layer Browser
 
@@ -1167,6 +1239,7 @@ customize.cats.pattern=Pattern/Texture
 customize.cats.premium|staleness=1
 customize.cats.premium=Premium
 
+customize.cats.purchased|staleness=1
 customize.cats.purchased=Purchased
 
 customize.cats.special|staleness=1
@@ -1329,32 +1402,46 @@ date.day.wednesday.long=Wednesday
 
 date.day.wednesday.short=Wed
 
+date.format.inbox.left.full|staleness=1
 date.format.inbox.left.full=%B %D, %Y at %h:%m
 
+date.format.inbox.left.long|staleness=1
 date.format.inbox.left.long=%B %D, %Y
 
+date.format.inbox.left.short|staleness=1
 date.format.inbox.left.short=%B %D
 
+date.format.inbox.left.today|staleness=1
 date.format.inbox.left.today=%h:%m, today
 
+date.format.inbox.left.week|staleness=1
 date.format.inbox.left.week=%u
 
+date.format.inbox.left.year|staleness=1
 date.format.inbox.left.year=%B %D
 
+date.format.inbox.left.yesterday|staleness=1
 date.format.inbox.left.yesterday=yesterday
 
+date.format.inbox.right.full|staleness=1
 date.format.inbox.right.full=%B %D, %Y at %h:%m
 
+date.format.inbox.right.long|staleness=1
 date.format.inbox.right.long=%B %D, %Y, %h:%m
 
+date.format.inbox.right.short|staleness=1
 date.format.inbox.right.short=%B %D, %h:%m
 
+date.format.inbox.right.today|staleness=1
 date.format.inbox.right.today=%h:%m, today
 
+date.format.inbox.right.week|staleness=1
 date.format.inbox.right.week=%h:%m, %u
 
+date.format.inbox.right.year|staleness=1
 date.format.inbox.right.year=%h:%m, %B %D
 
+date.format.inbox.right.yesterday|staleness=1
 date.format.inbox.right.yesterday=%h:%m, yesterday
 
 date.format.long|staleness=1
@@ -1456,12 +1543,17 @@ date.next=Next month
 date.prev|staleness=1
 date.prev=Prev month
 
-dialogs.yes=OK
+dialog.confirm.antispam.no=Edit the new version
+
+dialog.confirm.antispam.text=You are viewing the version of the entry that is currently awaiting moderation, as with the last changes you added a suspicious link or picture. You can reset to the old version of the entry or continue editing (in that case the entry will be moderated). What do you want to do?
+
+dialog.confirm.antispam.yes=Return to the old version
+
+dialogs.no|staleness=1
 dialogs.no=Cancel
 
-dialog.confirm.antispam.text=You see on moderation entry version. You can reset to old version or continue editing
-dialog.confirm.antispam.yes=Back to old version
-dialog.confirm.antispam.no=Edit new version
+dialogs.yes|staleness=1
+dialogs.yes=OK
 
 Email=Email
 
@@ -1852,39 +1944,60 @@ entryform.userpics=User Picture Icon:
 entryform.view_thumbnails|staleness=1
 entryform.view_thumbnails=View Thumbnails
 
+entryunit.badge.fridayvideo|staleness=1
 entryunit.badge.fridayvideo=Friday Video
 
-entryunit.comments=[[reply_count]] [[?reply_count|comment|comments]]
+entryunit.comments=[[reply_count]] [[?reply_count|comment|comments|comments]]
 
+entryunit.comments.none|staleness=1
 entryunit.comments.none=Leave a comment
 
+entryunit.expromo|staleness=1
 entryunit.expromo=This entry has been promoted
 
+entryunit.hide|staleness=1
 entryunit.hide=Hide author
 
+entryunit.read|staleness=1
 entryunit.read=Mark entry as read
 
+entryunit.show|staleness=1
 entryunit.show=Bring author back
 
+entryunit.toggle.collapse|staleness=1
 entryunit.toggle.collapse=Collapse
 
+entryunit.toggle.expand|staleness=1
 entryunit.toggle.expand=Expand
 
+entryunit.unread|staleness=1
 entryunit.unread=Mark entry as unread
 
-entryunit.updown=This entry has changed its position in the rating
+entryunit.updown=This entry has changed its position on [[delta_abs]] [[?delta_abs|move|moves|moves]] in the rating 
 
+entryunits.empty|staleness=1
 entryunits.empty=Sorry, there is no available entries to display
 
+entryunits.more|staleness=1
 entryunits.more=Show more 25 entries
 
+entryunits.stat.hidehidden|staleness=1
 entryunits.stat.hidehidden=Hide all hidden entries back
 
-entryunits.stat.showhidden=Show all hidden entries
-
+entryunits.stat.settings|staleness=1
 entryunits.stat.settings=Settings
 
+entryunits.stat.showhidden|staleness=1
+entryunits.stat.showhidden=Show all hidden entries
+
+entryunits.stat.your|staleness=1
 entryunits.stat.your=<a href="[[href]]" class="[[class]]">[[entries_count]] [[?entries_count|entry|entries]]</a> from blocked users was hidden
+
+entryunits.toggle.collapse|staleness=1
+entryunits.toggle.collapse=Collapse
+
+entryunits.toggle.expand|staleness=1
+entryunits.toggle.expand=Expand
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
@@ -1942,7 +2055,7 @@ error.invalidauth=You could not be authenticated as the specified user.
 
 error.invalidform=Invalid form submission.  Please refresh and try again.
 
-error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.
+error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate. This ban will be removed automatically in about 20 minutes.
 
 error.malformeduser=Malformed username.
 
@@ -2636,6 +2749,29 @@ esn.manage_request_approve=[[openlink]]Approve[[closelink]] [[username]]'s reque
 esn.manage_request_reject|staleness=1
 esn.manage_request_reject=[[openlink]]Reject[[closelink]] [[username]]'s request to join
 
+esn.moderated_edited_submission.body<<
+Hi!
+
+There has been a new submission into the community [[community]] which you moderate. 
+
+Entry author [[user]] has updated the entry [[subject]] and added the following new links/images: 
+
+[[susp_list]] 
+
+We think that the updated entry may contain spam, so please  accept or reject the updated entry here: 
+[[moderateurl]]
+You can also view the entire moderation queue: [[viewurl]]
+
+
+
+Best regards,
+[[sitename]] Team
+[[siteroot]]
+.
+
+esn.moderated_edited_submission.subject|staleness=1
+esn.moderated_edited_submission.subject=Moderated submission notification
+
 esn.moderated_submission.body|staleness=1
 esn.moderated_submission.body<<
 There has been a new submission into the community '[[community]]'
@@ -2659,28 +2795,6 @@ Options:
 
 esn.moderated_submission.subject|staleness=1
 esn.moderated_submission.subject=Moderated submission notification
-
-esn.moderated_edited_submission.body<<
-There has been a new submission into the community '[[community]]'
-which you moderate.
-
-Entry author [[user]] have updated [[subject]] and added the following new links/images:
-
-[[susp_list]]
-
-Options:
-
-  - Accept or reject this submission
-    [[moderateurl]]
-  - View the entire moderation queue
-    [[viewurl]]
-
---
-[[sitename]] Team
-[[siteroot]]
-.
-
-esn.moderated_edited_submission.subject=Moderated submission notification
 
 esn.month.day_apr|staleness=1
 esn.month.day_apr=April [[day]]
@@ -2872,9 +2986,6 @@ esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 esn.supofficialpost.subscribtion.html|staleness=1
 esn.supofficialpost.subscribtion.html=[[sitename]] makes a new announcement
 
-esn.suspend.byantispam.usersbancounter.email.subject|staleness=1
-esn.suspend.byantispam.usersbancounter.email.subject=Your LiveJournal account [[username]] has been suspended
-
 esn.suspend.byantispam.usersbancounter.email.body.html|staleness=1
 esn.suspend.byantispam.usersbancounter.email.body.html<<
 Dear LiveJournal user [[username]],
@@ -2890,6 +3001,9 @@ Dear LiveJournal user [[username]],
 Your account has been automatically suspended because many people identified your account as posting spam.  If you believe this suspension is not justified, please see <a href="[[faq_link]]">FAQ</a> for information on how to contact the Abuse Prevention Team about your suspension.
 <br />
 .
+
+esn.suspend.byantispam.usersbancounter.email.subject|staleness=1
+esn.suspend.byantispam.usersbancounter.email.subject=Your LiveJournal account [[username]] has been suspended
 
 esn.tags|staleness=1
 esn.tags=The entry is tagged "[[tags]]"
@@ -3150,6 +3264,8 @@ eventrates.users_who_like_it=Users who like it
 eventrates.view_all|staleness=1
 eventrates.view_all=View all
 
+fckland.ljimage=Insert/Edit Image
+
 fcklang.cutcontents=Type your cut contents here.
 
 fcklang.cutprompt=Cut link text?
@@ -3252,11 +3368,11 @@ fcklang.ljmap=Insert map
 fcklang.ljpoll|staleness=1
 fcklang.ljpoll=Insert poll
 
-fcklang.ljspell|staleness=1
-fcklang.ljspell=Spellcheck
-
 fcklang.ljrepost|staleness=1
 fcklang.ljrepost=Repost
+
+fcklang.ljspell|staleness=1
+fcklang.ljspell=Spellcheck
 
 fcklang.ljspoiler=Spoiler
 
@@ -3941,28 +4057,40 @@ fotki.storage.used.numbers=from [[max]]
 fotki.storage.used.title|staleness=1
 fotki.storage.used.title=Used [[used]]
 
-friendsfeed.ads.control.edit=Edit
-
-friendsfeed.ads.control.disable=Disable
-
+friendsfeed.ads.control.delete|staleness=1
 friendsfeed.ads.control.delete=Delete
 
+friendsfeed.ads.control.disable|staleness=1
+friendsfeed.ads.control.disable=Disable
+
+friendsfeed.ads.control.edit|staleness=1
+friendsfeed.ads.control.edit=Edit
+
+friendsfeed.ads.new|staleness=1
 friendsfeed.ads.new=New ad
 
+friendsfeed.ads.timestamps|staleness=1
 friendsfeed.ads.timestamps=All timestamps are shown in
 
+friendsfeed.ads.timestamps.change|staleness=1
 friendsfeed.ads.timestamps.change=change this
 
+friendsfeed.ads.title.disabled|staleness=1
 friendsfeed.ads.title.disabled=Disabled
 
-friendsfeed.ads.title.entry=Entry
-
+friendsfeed.ads.title.edit|staleness=1
 friendsfeed.ads.title.edit=Edit
 
+friendsfeed.ads.title.entry|staleness=1
+friendsfeed.ads.title.entry=Entry
+
+friendsfeed.ads.title.id|staleness=1
 friendsfeed.ads.title.id=ID
 
+friendsfeed.ads.title.targeting|staleness=1
 friendsfeed.ads.title.targeting=Targeting
 
+friendsfeed.ads.title.time|staleness=1
 friendsfeed.ads.title.time=Time
 
 gender.female|staleness=1
@@ -4038,78 +4166,114 @@ img.track_thread_active=Track This
 
 img.xml=XML Source
 
+inbox.action.collapse|staleness=1
 inbox.action.collapse=Collapse
 
-inbox.action.delete=Delete
+inbox.action.delete=Delete message
 
+inbox.action.delete.conversation|staleness=1
 inbox.action.delete.conversation=Delete conversation
 
+inbox.action.mark|staleness=1
 inbox.action.mark=Mark
 
+inbox.action.mark.conversation|staleness=1
 inbox.action.mark.conversation=Mark all messages in conversation
 
+inbox.action.read|staleness=1
 inbox.action.read=Read
 
+inbox.action.spam|staleness=1
 inbox.action.spam=Mark as spam
 
+inbox.action.unmark|staleness=1
 inbox.action.unmark=Unmark
 
+inbox.action.unmark.conversation|staleness=1
 inbox.action.unmark.conversation=Unmark all messages in conversation
 
+inbox.action.unread|staleness=1
 inbox.action.unread=Unread
 
-inbox.button.delete=Delete message
+inbox.button.delete|staleness=1
+inbox.button.delete=Delete conversation
 
+inbox.button.delete.conversation|staleness=1
 inbox.button.delete.conversation=Delete all messages in conversation
 
+inbox.button.mark|staleness=1
 inbox.button.mark=Mark
 
+inbox.button.markasread|staleness=1
 inbox.button.markasread=Mark as read
 
+inbox.button.markasunread|staleness=1
 inbox.button.markasunread=Mark as unread
 
+inbox.button.spam|staleness=1
 inbox.button.spam=Mark as spam
 
+inbox.button.unmark|staleness=1
 inbox.button.unmark=Unmark
 
+inbox.checkall|staleness=1
 inbox.checkall=check all conversations
 
+inbox.compose.message|staleness=1
 inbox.compose.message=Message
 
+inbox.compose.send|staleness=1
 inbox.compose.send=Send
 
+inbox.compose.shortcut.mac|staleness=1
 inbox.compose.shortcut.mac=Cmd+Enter
 
+inbox.compose.shortcut.win|staleness=1
 inbox.compose.shortcut.win=Ctrl+Enter
 
+inbox.compose.to|staleness=1
 inbox.compose.to=To
 
+inbox.compose.userpic|staleness=1
 inbox.compose.userpic=Userpic
 
+inbox.confirm.cancel|staleness=1
 inbox.confirm.cancel=Cancel
 
+inbox.confirm.remove|staleness=1
 inbox.confirm.remove=Remove all messages from dialogue
 
-inbox.confirm.remove.users=Remove all messages from selected users
+inbox.confirm.remove.users|staleness=1
+inbox.confirm.remove.users=Remove all messages from [[user]]
 
+inbox.confirm.spam|staleness=1
 inbox.confirm.spam=Mark all messages as spam and ban user [[user]]
 
+inbox.confirm.spam.users|staleness=1
 inbox.confirm.spam.users=Mark all messages as spam and ban all selected users
 
+inbox.confirm.warn.all|staleness=1
 inbox.confirm.warn.all=[[amount]] [[?amount|message|messages]] will be deleted
 
+inbox.confirm.warn.marked|staleness=1
 inbox.confirm.warn.marked=[[marked]] of them are marked
 
+inbox.confirm.warn.unread|staleness=1
 inbox.confirm.warn.unread=[[unread]] of them are unread
 
+inbox.counter.amount|staleness=1
 inbox.counter.amount=10000
 
+inbox.counter.title|staleness=1
 inbox.counter.title=Characters left:
 
+inbox.draft.autosave|staleness=1
 inbox.draft.autosave=Draft autosaved
 
+inbox.draft.restore|staleness=1
 inbox.draft.restore=Restore draft?
 
+inbox.draft.restored|staleness=1
 inbox.draft.restored=Draft restored
 
 inbox.error.couldnt_retrieve_inbox|staleness=1
@@ -4157,50 +4321,57 @@ inbox.message=Message
 inbox.messages|staleness=1
 inbox.messages=Messages
 
+inbox.messages.loading|staleness=1
 inbox.messages.loading=Load Earlier Messages
 
-inbox.nav.conversations=Conversations
-
+inbox.nav.compose|staleness=1
 inbox.nav.compose=Compose message
 
+inbox.nav.conversations|staleness=1
+inbox.nav.conversations=Conversations
+
+inbox.nav.find|staleness=1
 inbox.nav.find=Find
 
+inbox.nav.marked|staleness=1
 inbox.nav.marked=Marked
 
+inbox.nav.notifications|staleness=1
 inbox.nav.notifications=Notifications
 
+inbox.nav.search|staleness=1
 inbox.nav.search=Start typing a username or a word
 
-inbox.nav.switch=Menu
-
+inbox.nav.suspicious|staleness=1
 inbox.nav.suspicious=Suspicious
 
+inbox.nav.switch|staleness=1
+inbox.nav.switch=Menu
+
+inbox.nav.ver|staleness=1
 inbox.nav.ver=Switch to old version
 
+inbox.noconversations.compose|staleness=1
 inbox.noconversations.compose=New Message
 
+inbox.noconversations.title|staleness=1
 inbox.noconversations.title=No Conversation Selected
 
+inbox.noconversations.unread|staleness=1
 inbox.noconversations.unread=Show Unread
 
 inbox.refresh|staleness=1
 inbox.refresh=Refresh
 
-inbox.ver=Switch to new version
-
+inbox.spellcheck|staleness=1
 inbox.spellcheck=Spellcheck
 
-index.lj_is|staleness=1
-index.lj_is=LiveJournal is your possiblity to express yourself, share your life events and connect with friends.
+inbox.ver|staleness=1
+inbox.ver=Switch to new version
 
-index.you_can|staleness=1
-index.you_can=You can use LiveJournal in diffirent ways: as personal diary, discussion forum, social network, etc.
+index.lj_is=<h1>LiveJournal</h1> is your possibility to express yourself, share your life events and connect with friends.
 
-/index.bml.lj_is|staleness=1
-/index.bml.lj_is=LiveJournal is your possiblity to express yourself, share your life events and connect with friends.
-
-/index.bml.you_can|staleness=1
-/index.bml.you_can=You can use LiveJournal in diffirent ways: as personal diary, discussion forum, social network, etc.
+index.you_can=<p>Use LiveJournal in diffirent ways: as personal diary, discussion forum, social network... Try it now!</p>
 
 i_like_this_title|staleness=1
 i_like_this_title=Please click Track this if you want to receive all comments to this entry
@@ -4269,6 +4440,7 @@ lanzelot.item.ljphoto=Scrapbook (beta)
 
 link.mobile=<a [[href]]>Go to mobile version</a>
 
+ljcut.collapse|staleness=1
 ljcut.collapse=Collapse
 
 ljfeedback.text=Like to vote?  Join [[journal]] where we post polls and surveys that help influence and improve LJ.
@@ -4304,284 +4476,427 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+main.banner.close|staleness=1
 main.banner.close=Close banner for today
 
+main.banner.title|staleness=1
 main.banner.title=Advertising
 
+main.editors.events|staleness=1
 main.editors.events=Events and Stories
 
+main.editors.hour|staleness=1
 main.editors.hour=Entry of the hour
 
-main.editors.recommends=LiveJournal Recommends
-
+main.editors.main|staleness=1
 main.editors.main=Main Entry
 
+main.editors.recommends|staleness=1
+main.editors.recommends=LiveJournal Recommends
+
+main.featured.ljmaps.title|staleness=1
 main.featured.ljmaps.title=LiveJournal Maps
 
+main.featured.title|staleness=1
 main.featured.title=Interesting Journal
 
+main.follow.facebook|staleness=1
 main.follow.facebook=Follow this rating on Facebook ([[facebook_name]])
 
+main.follow.livejournal|staleness=1
 main.follow.livejournal=Follow this rating on LiveJournal ([[ljuser_name]])
 
+main.follow.livejournal.undo|staleness=1
 main.follow.livejournal.undo=Unfollow this rating on LiveJournal ([[ljuser_name]])
 
+main.follow.twitter|staleness=1
 main.follow.twitter=Follow this rating on Twitter ([[twitter_name]])
 
+main.follow.vk|staleness=1
 main.follow.vk=Follow this rating on VK.com ([[vk_name]])
 
-main.gotop=Scroll to top
-
-main.intro.different.hide=Hide different posts from one user
-
-main.intro.different.hide.title=Hide two or three different posts from one user or community
-
-main.intro.different.show=Show different posts from one user
-
-main.intro.different.show.title=Show two or three different posts from one user or community
-
-main.intro.editors=Editors
-
-main.intro.follow=Follow
-
-main.intro.friends.hide=Hide friends posts in rating
-
-main.intro.friends.hide.title=Hide your friends or communities posts from rating
-
-main.intro.friends.show=Show friends posts in rating
-
-main.intro.friends.show.title=Show your friends or communities posts in rating
-
-main.intro.hidden.hide=Hide back hidden posts from rating
-
-main.intro.hidden.hide.anon=Hide back hidden posts from rating
-
-main.intro.hidden.hide.title=Hide back marked as read posts and posts from blocked users from rating
-
-main.intro.hidden.hide.title.anon=Hide back marked as read posts from rating
-
-main.intro.hidden.settings=Settings
-
-main.intro.hidden.show=Show hidden posts in rating
-
-main.intro.hidden.show.anon=Show hidden posts in rating
-
-main.intro.hidden.show.title=Show marked as read posts and posts from blocked users in rating
-
-main.intro.hidden.show.title.anon=Show marked as read posts in rating
-
-main.intro.length.full=Full Posts
-
-main.intro.length.short=Half Posts
-
-main.intro.ljtop=Top LJ
-
-main.intro.location=Rating
-
-main.intro.location.cyr=RU+UKR
-
-main.intro.location.int=International
-
-main.intro.location.ukr=UKR
-
-main.intro.mystat.close=Close
-
-main.intro.mystat.collapse=Hide my posts and communities positions
-
-main.intro.mystat.community=Your community [[my_community]] at [[my_comm_place]] place in the rating of communities
-
-main.intro.mystat.expand=Show my posts and communities positions
-
-main.intro.mystat.oncategory=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the <a href="[[category_url]]">[[category]]</a> category
-
-main.intro.mystat.ontop=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the common top
-
-main.intro.mystat.you=[[user_display]] you on [[position]] position on the users top
-
-main.intro.mystat.you.maybe=Turn on the ratings to see Your position on the users top
-
+main.goods.all|staleness=1
 main.goods.all=All goods
 
+main.goods.shuffle|staleness=1
 main.goods.shuffle=Shuffle Goods
 
+main.goods.title|staleness=1
 main.goods.title=LiveJournal Goods
 
+main.gotop|staleness=1
+main.gotop=Scroll to top
+
+main.intro.different.hide|staleness=1
+main.intro.different.hide=Hide different posts from one user
+
+main.intro.different.hide.title|staleness=1
+main.intro.different.hide.title=Hide two or three different posts from one user or community
+
+main.intro.different.show=Show multiple posts from the same account
+
+main.intro.different.show.title=Show multiple posts from the same journal or community in Top Entries.
+
+main.intro.editors|staleness=1
+main.intro.editors=Editors
+
+main.intro.follow|staleness=1
+main.intro.follow=Follow
+
+main.intro.friends.hide=Hide posts from friends
+
+main.intro.friends.hide.title=Hide your friends and community posts from Top Entries
+
+main.intro.friends.show|staleness=1
+main.intro.friends.show=Show friends posts in rating
+
+main.intro.friends.show.title|staleness=1
+main.intro.friends.show.title=Show your friends or communities posts in rating
+
+main.intro.friends.with|staleness=1
+main.intro.friends.with=With Friends
+
+main.intro.friends.without|staleness=1
+main.intro.friends.without=Without Friends
+
+main.intro.hidden.hide=Hide read posts & blocked users
+
+main.intro.hidden.hide.anon|staleness=1
+main.intro.hidden.hide.anon=Hide back hidden posts from rating
+
+main.intro.hidden.hide.title|staleness=1
+main.intro.hidden.hide.title=Hide back marked as read posts and posts from blocked users from rating
+
+main.intro.hidden.hide.title.anon|staleness=1
+main.intro.hidden.hide.title.anon=Hide back marked as read posts from rating
+
+main.intro.hidden.settings|staleness=1
+main.intro.hidden.settings=Settings
+
+main.intro.hidden.show=Show hidden posts
+
+main.intro.hidden.show.anon|staleness=1
+main.intro.hidden.show.anon=Show hidden posts in rating
+
+main.intro.hidden.show.title=Show blocked users and posts you have marked as read in Top Entries
+
+main.intro.hidden.show.title.anon|staleness=1
+main.intro.hidden.show.title.anon=Show marked as read posts in rating
+
+main.intro.length.full|staleness=1
+main.intro.length.full=Full Posts
+
+main.intro.length.short|staleness=1
+main.intro.length.short=Half Posts
+
+main.intro.ljtop|staleness=1
+main.intro.ljtop=Top LJ
+
+main.intro.location|staleness=1
+main.intro.location=Rating
+
+main.intro.location.cyr|staleness=1
+main.intro.location.cyr=RU+UKR
+
+main.intro.location.int|staleness=1
+main.intro.location.int=International
+
+main.intro.location.ukr|staleness=1
+main.intro.location.ukr=UKR
+
+main.intro.mystat.close|staleness=1
+main.intro.mystat.close=Close
+
+main.intro.mystat.collapse|staleness=1
+main.intro.mystat.collapse=Hide my posts and communities positions
+
+main.intro.mystat.community|staleness=1
+main.intro.mystat.community=Your community [[my_community]] at [[my_comm_place]] place in the rating of communities
+
+main.intro.mystat.expand|staleness=1
+main.intro.mystat.expand=Show my posts and communities positions
+
+main.intro.mystat.oncategory|staleness=1
+main.intro.mystat.oncategory=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the <a href="[[category_url]]">[[category]]</a> category
+
+main.intro.mystat.oncommunity|staleness=1
+main.intro.mystat.oncommunity=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the [[category]] category
+
+main.intro.mystat.ontop|staleness=1
+main.intro.mystat.ontop=Your post “<a href="[[entry_url]]">[[subject]]</a>” has won [[place]] place at the common top
+
+main.intro.mystat.toggle|staleness=1
+main.intro.mystat.toggle=My posts and communities positions
+
+main.intro.mystat.you=[[user_display]], your current position in the Top Journals is: [[position]]
+
+main.intro.mystat.you.maybe|staleness=1
+main.intro.mystat.you.maybe=Turn on the ratings to see Your position on the users top
+
+main.ljtoday.next|staleness=1
 main.ljtoday.next=Next journal
 
+main.ljtoday.prev|staleness=1
 main.ljtoday.prev=Previous journal
 
-main.promo.empty.calendarpromo=Promote your entry here for 5 000 tokens
-
-main.promo.empty.selfpromo=Promote your entry here for 2 000 tokens
-
-main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
-
-main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
-
-main.promo.head=Promo
-
-main.promo.more.calendarpromo=<a href="http://www.livejournal.com/shop/commpromo.bml">View</a> full calendar promo history
-
-main.promo.more.selfpromo=<a href="http://www.livejournal.com/shop/selfpromo/history">View</a> full selfpromo history
-
-main.promo.nav.next=Next Item
-
-main.promo.nav.prev=Previous Item
-
+main.menu.categories|staleness=1
 main.menu.categories=Categories
 
+main.menu.editors|staleness=1
 main.menu.editors=Editors
 
+main.menu.index|staleness=1
 main.menu.index=Home
 
+main.menu.switch|staleness=1
 main.menu.switch=Switch to old version
 
+main.mustread.head|staleness=1
 main.mustread.head=Recommended
 
+main.promo.empty.calendarpromo|staleness=1
+main.promo.empty.calendarpromo=Promote your entry here for 5 000 tokens
+
+main.promo.empty.selfpromo|staleness=1
+main.promo.empty.selfpromo=Promote your entry here for 2 000 tokens
+
+main.promo.footer.calendarpromo|staleness=1
+main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
+
+main.promo.footer.selfpromo|staleness=1
+main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
+
+main.promo.head|staleness=1
+main.promo.head=Promo
+
+main.promo.more.calendarpromo|staleness=1
+main.promo.more.calendarpromo=<a href="http://www.livejournal.com/shop/commpromo.bml">View</a> full calendar promo history
+
+main.promo.more.selfpromo|staleness=1
+main.promo.more.selfpromo=<a href="http://www.livejournal.com/shop/selfpromo/history">View</a> full selfpromo history
+
+main.promo.nav.next|staleness=1
+main.promo.nav.next=Next Item
+
+main.promo.nav.prev|staleness=1
+main.promo.nav.prev=Previous Item
+
+main.search.find|staleness=1
+main.search.find=Find
+
+main.search.placeholder=Search LiveJournal
+
+main.search.search|staleness=1
 main.search.search=Search
 
-main.search.placeholder=LiveJournal Search
-
+main.settings|staleness=1
 main.settings=Rating Settings
 
-main.top.aday=A Day
+main.top.aday=Today
 
+main.top.allcommunities|staleness=1
 main.top.allcommunities=All Communities
 
+main.top.alltime|staleness=1
 main.top.alltime=All Time
 
-main.top.allusers=All Users
+main.top.allusers=All Journals
 
-main.top.communities=Communities Top
+main.top.communities=Top Communities
 
+main.top.promo|staleness=1
 main.top.promo=Promo
 
-main.top.promo.empty.users=Promote your journal here for 100 tokens
+main.top.promo.empty.communities|staleness=1
+main.top.promo.empty.communities=Promote your community here for [[buyout]] [[?buyout|token|tokens]]
 
-main.top.promo.empty.communities=Promote your community here for 100 tokens
+main.top.promo.empty.users|staleness=1
+main.top.promo.empty.users=Promote your journal here for [[buyout]] [[?buyout|token|tokens]]
 
-main.top.promo.stat.users=This user will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
+main.top.promo.stat|staleness=1
+main.top.promo.stat=You can take this place for [[buyout]] [[?buyout|token|tokens]]
 
+main.top.promo.stat.communities|staleness=1
 main.top.promo.stat.communities=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
 
+main.top.promo.stat.users=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
+
+main.top.updown|staleness=1
 main.top.updown=This user has changed its position in the top
 
-main.top.users=Users Top
+main.top.users=Top Journals
 
+main.tour.feature0.text|staleness=1
 main.tour.feature0.text=Welcome
 
+main.tour.feature0.title|staleness=1
 main.tour.feature0.title=Take a Look at New Features of The Homepage
 
+main.tour.feature1.text|staleness=1
 main.tour.feature1.text=First column of the Infromation panel
 
+main.tour.feature1.title|staleness=1
 main.tour.feature1.title=Your Recent Common Events
 
+main.tour.feature2.text|staleness=1
 main.tour.feature2.text=Second column of the infromation panel
 
+main.tour.feature2.title|staleness=1
 main.tour.feature2.title=Recent Comments on Your Blog
 
+main.tour.feature3.text|staleness=1
 main.tour.feature3.text=Third column of the information panel
 
+main.tour.feature3.title|staleness=1
 main.tour.feature3.title=Updates on The Blogs That You Often Read
 
+main.tour.feature4.text|staleness=1
 main.tour.feature4.text="Subscription to TOP 15" in the title panel
 
+main.tour.feature4.title|staleness=1
 main.tour.feature4.title=Get the Latest Posts from Rating on Facebook or Twitter
 
+main.tour.feature5.text|staleness=1
 main.tour.feature5.text=The inscription about a user place in the TOP and the button "Rating of my entries and communities" under the title
 
+main.tour.feature5.text.position|staleness=1
 main.tour.feature5.text.position=The inscription about a user place in the TOP and the button "Rating of my entries and communities" under the title
 
+main.tour.feature5.title|staleness=1
 main.tour.feature5.title=Position of Your Profile, Posts and Community on Rating
 
+main.tour.feature5.title.position|staleness=1
 main.tour.feature5.title.position=True Position of Your Profile, Posts and Community on Rating
 
+main.tour.feature6.text|staleness=1
 main.tour.feature6.text=Filters in the title panel
 
+main.tour.feature6.title|staleness=1
 main.tour.feature6.title=Set Rating to Your Taste
 
-main.tour.feature7.text.ru=	Menu at the left side
-
-main.tour.feature7.title.ru=We Distributed Posts by Rubrics for You
-
+main.tour.feature7.text.en|staleness=1
 main.tour.feature7.text.en=Users TOP at the left sidebar. Communities + Users  entries rating
 
+main.tour.feature7.text.ru|staleness=1
+main.tour.feature7.text.ru=	Menu at the left side
+
+main.tour.feature7.title.en|staleness=1
 main.tour.feature7.title.en=Watch Users in The Rating
 
+main.tour.feature7.title.ru|staleness=1
+main.tour.feature7.title.ru=We Distributed Posts by Rubrics for You
+
+main.tour.nav.close|staleness=1
 main.tour.nav.close=Close tour
 
+main.tour.nav.finish|staleness=1
 main.tour.nav.finish=Start Using New Homepage
 
+main.tour.nav.next|staleness=1
 main.tour.nav.next=Next feature
 
+main.tour.nav.prev|staleness=1
 main.tour.nav.prev=Previous feature
 
+main.updates.comments|staleness=1
 main.updates.comments=[[comments_count]] <a href="[[comments_url]]">new [[?comments_count|comment|comments]]</a>
 
-main.updates.comments2=[[comments_count]] <a href="[[comments_url]]">new [[?count|comment|comments|comments]]</a>
-
+main.updates.comments.at|staleness=1
 main.updates.comments.at=at
 
+main.updates.comments.clear|staleness=1
 main.updates.comments.clear=Clear
 
+main.updates.comments.clear.title|staleness=1
 main.updates.comments.clear.title=Remove all messages about comments
 
+main.updates.comments.comments|staleness=1
 main.updates.comments.comments=[[comments_count]] [[?comments_count|comment|comments]]
 
-main.updates.comments.empty=Sorry, there is currently no comments to display
+main.updates.comments.empty=Sorry, there are currently no comments to display.
 
+main.updates.comments.empty.title|staleness=1
 main.updates.comments.empty.title=No new comments
 
+main.updates.comments.more|staleness=1
 main.updates.comments.more=[[comments_count]] more [[?comments_count|comment|comments]]
 
+main.updates.comments2|staleness=1
+main.updates.comments2=[[comments_count]] <a href="[[comments_url]]">new [[?count|comment|comments|comments]]</a>
+
+main.updates.common|staleness=1
 main.updates.common=[[items_count]] new [[?items_count|event|events]]
 
-main.updates.common2=[[items_count]] new [[?count|event|events|events]]
-
+main.updates.common.allbirthdays|staleness=1
 main.updates.common.allbirthdays=All birthdays
 
+main.updates.common.birthday|staleness=1
 main.updates.common.birthday=[[ljuser]] has a <a href="[[birthday_url]]">birthday</a> tomorrow
 
+main.updates.common.clear|staleness=1
 main.updates.common.clear=Clear
 
+main.updates.common.clear.title|staleness=1
 main.updates.common.clear.title=Remove all messages about new events
 
+main.updates.common.empty|staleness=1
 main.updates.common.empty=Sorry, there is currently no events to display
 
+main.updates.common.empty.title|staleness=1
 main.updates.common.empty.title=No new events
 
+main.updates.common.feed|staleness=1
 main.updates.common.feed=[[feed_count]] new [[?feed_count|post|posts]] on <a href="[[feed_url]]">friends feed</a>
 
+main.updates.common.friend|staleness=1
 main.updates.common.friend=[[ljuser]] added you as friend
 
+main.updates.common.gift|staleness=1
 main.updates.common.gift=[[ljuser]] sent you <a href="[[gift_url]]">a gift</a>
 
+main.updates.common.messages|staleness=1
 main.updates.common.messages=[[messages_count]] <a href="[[messages_url]]">unread [[?messages_count|message|messages]]</a>
 
+main.updates.common2|staleness=1
+main.updates.common2=[[items_count]] new [[?count|event|events|events]]
+
+main.updates.guests|staleness=1
 main.updates.guests=[[guests_count]] <a href="[[guests_url]]">new</a> [[?count|guest|guests|guests]]
 
+main.updates.guests.clear|staleness=1
 main.updates.guests.clear=Clear
 
+main.updates.guests.clear.title|staleness=1
 main.updates.guests.clear.title=Remove all messages about latest guests
 
+main.updates.guests.empty|staleness=1
 main.updates.guests.empty=Sorry, there is currently no guests to display
 
+main.updates.guests.empty.title|staleness=1
 main.updates.guests.empty.title=No guests
 
+main.updates.recent|staleness=1
 main.updates.recent=[[entries_count]] [[?entries_count|user|users]] you often read
 
+main.updates.recent.clear|staleness=1
 main.updates.recent.clear=Clear
 
+main.updates.recent.clear.title|staleness=1
 main.updates.recent.clear.title=Remove all messages about new posts
 
+main.updates.recent.empty|staleness=1
 main.updates.recent.empty=Sorry, there is currently no recent posts to display
 
+main.updates.recent.empty.title|staleness=1
 main.updates.recent.empty.title=No recent posts
 
+main.updates.remove|staleness=1
 main.updates.remove=Remove item from updates list
 
+main.updates.toggle.collapse|staleness=1
 main.updates.toggle.collapse=Collapse
 
+main.updates.toggle.expand|staleness=1
 main.updates.toggle.expand=Expand
 
 mediaplaceholder.link|staleness=1
@@ -5518,7 +5833,7 @@ poll.error.scalefromlessto=Scale 'from' value must be less than 'to' value.
 
 poll.error.scaleincrement=Scale increment must be at least 1.
 
-poll.error.scaletoobig=Your scale exceeds the limit of 20 selections (to-from)/by > 20.
+poll.error.scaletoobig=Your scale exceeds the limit of 20 selections (to-from)/by < 20.
 
 poll.error.tagnotopen=You cannot close an [[tag]] tag that's not open.
 
@@ -5544,126 +5859,113 @@ poll.error.whovote=whovote must be 'all' or 'friends'.
 poll.isclosed|staleness=1
 poll.isclosed=This poll is closed.
 
-poll.navalny.body=Navalny Intro
+poll.navalny.body<<
+You can take part in voting if you have registered on <a href="https://election.cvk2012.org/">Central Election Comission site</a> and <a href="http://www.cvk2012.org/electorial/verify/">verified</a> your account.   
+How to vote:  
+<ol><li>Get a password: enter your code and a mobile phone number and press "Get password".</li>  
+<li>Check the names of the candidates you want to vote for. If in any list you check no names this will mean that you vote against all candidates.</li>  
+<li>To vote in every list enter your code and mobile phone number and press "Submit poll". After that your vote will be counted and you' won't be able to change your choice.</li></ol>
+.
 
+poll.navalny.button.check.pass|staleness=1
 poll.navalny.button.check.pass=Check password
 
+poll.navalny.button.get.pass|staleness=1
 poll.navalny.button.get.pass=Get password
 
+poll.navalny.code|staleness=1
 poll.navalny.code=Code
 
-poll.navalny.error.internal.error=Internal error of service. Please try again later.
-poll.navalny.error.ticket.used=Ticket already used. The voter has already voted on this ticket, or the ticket was invalid.
+poll.navalny.error.internal.error=Internal service error has occurred. Please try again later.
+
+poll.navalny.error.ticket.limit|staleness=1
 poll.navalny.error.ticket.limit=Ticket request limit exceeded. Query limit is exceeded by ticket. Please try again later.
+
+poll.navalny.error.ticket.used|staleness=1
+poll.navalny.error.ticket.used=Ticket already used. The voter has already voted on this ticket, or the ticket was invalid.
+
+poll.navalny.error.validation.fail|staleness=1
 poll.navalny.error.validation.fail=Ticket validation failed. Ticket no exist or invalid password.
 
-poll.navalny.input.password=Input code and password
-poll.navalny.get.password=Get password by code on your phone, when you have no password
+poll.navalny.get.password=If you have no password, enter your code and phone number, and we'll send it to you
 
-poll.navalny.insert=Code to insert in the journal
-poll.navalny.insert.lj=Livejournal
+poll.navalny.input.password=Enter your code and password
+
+poll.navalny.insert=Code to add to your journal entry
+
+poll.navalny.insert.lj=LiveJournal
+
+poll.navalny.insert.other|staleness=1
 poll.navalny.insert.other=Other site
 
 poll.navalny.notification.code.incorrect<<
-Dear user!
+Dear user,
 
-We checked you data and let you know that it is incorrect.
-
-Please, try to vote one more time: http://www.livejournal.com/poll.bml?id =[[xxxxxx]]
-
-Best regards,
-
-Livejournal team
+We checked your data and let you know that it is incorrect. Please try to vote one more time: http://www.livejournal.com/cvk2012/poll
 .
 
 poll.navalny.notification.count.exceed<<
-Dear user!
+Dear user,
 
-Limit of count of candidates is exceeded. Please, try later again. 
-
-Best regards,
-
- 
-Livejournal team
+You've checked too many options, and the limit of candidates was exceeded. Please, try to vote later. 
 .
 
 poll.navalny.notification.everything.right<<
-Dear user!
+Dear user,
 
-We checked you data and let you know that your vote was counted
-
-Best regards,
-
- 
-Livejournal team
+Your vote has been counted. Thank you!
 .
 
 poll.navalny.notification.limit.exceed<<
-Dear user!
+Dear user,
 
-Limit of your ticket request is exceeded. Please, try later again. 
-
-Best regards,
-
- 
-Livejournal team
+Limit of your ticket request is exceeded. Please, try again later. 
 .
 
 poll.navalny.notification.not.verefied<<
-Dear user!
+Dear user,
 
-Your ticket is not verefied. You can vote only online.
+Your ticket is not verified, so you can't vote online.
 
-Best regards,
-
- 
-Livejournal team
 .
 
-
-
-poll.navalny.notification.system.error<<
-Dear user!
-
-Occurred internal error of service. Please, try again later.
-
-Best regards,
-
-Livejournal team
-.
-
+poll.navalny.notification.subject|staleness=1
 poll.navalny.notification.subject=Central Election Commission
 
-poll.navalny.notification.vote.twice<<
-Dear user!
+poll.navalny.notification.system.error<<
+Dear user,
 
-We checked you data and let you know that you had already voted the poll and it is forbidden to vote twice.
-
-Best regards,
-
- 
-Livejournal team
+The internal error of the service occurred and your request was not completed. Please try to vote again later. 
 .
 
+poll.navalny.notification.vote.twice<<
+Dear user,
+
+We checked your data and found out, that you had already voted in this poll, and it is forbidden to vote twice. 
+.
+
+poll.navalny.password|staleness=1
 poll.navalny.password=Password
 
-poll.navalny.password.sent=Password has been sent on your phone
+poll.navalny.password.sent=Password has been sent to your phone
 
-poll.navalny.password.warning=Password has not been sent on your phone because putin
+poll.navalny.password.warning=Password has not been sent to your phone. Please make sure that all fields are filled in correctly
 
-poll.navalny.phone=Phone
+poll.navalny.phone=Phone number
 
+poll.navalny.phone.hint|staleness=1
 poll.navalny.phone.hint=+79991112233
 
+poll.navalny.submit|staleness=1
 poll.navalny.submit=Submit a poll
 
-poll.navalny.submit.confirm.email=We will check you data, but we couldn't send you results because of your e-mail wasn't confirmed. Please confirm it.
+poll.navalny.submit.confirm.email=We will check you data, but we couldn't send you results because your e-mail wasn't confirmed. Please confirm it.
 
-poll.navalny.submit.confirm.vote=After submit, we will check an information results would be sent on your e-mail address soon.
+poll.navalny.submit.confirm.vote=We will check your data and send a confirmation to your e-mail address soon.
 
-poll.navalny.submit.send.email=We received your vote. After we will check an information results would be sent on your e-mail address soon.
+poll.navalny.submit.send.email=Thank you for your vote! We will check your data and send a confirmation to your e-mail address soon.
 
-poll.navalny.title=Navalny Title
+poll.navalny.title=Voting in the Coordination Council of the Russian Opposition
 
 poll.participants|staleness=1
 poll.participants=, participants: [[total]]
@@ -5841,20 +6143,24 @@ quote.left="
 quote.right|staleness=1
 quote.right="
 
-rating.timeswitcher.all|staleness=1
-rating.timeswitcher.all=All time
+rating.timeswitcher.all=Social capital
 
-rating.timeswitcher.day=Views in 24 hours
+rating.timeswitcher.day=Social capital (in 24 hours)
 
-relations.change.error.suspended=Suspended journals cannot add friends.
-
+relations.change.error.email_not_validated|staleness=1
 relations.change.error.email_not_validated=Sorry, you aren't allowed to add to friends until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="http://www.livejournal.com/register.bml">have it re-sent.</a>
 
-relations.change.error.reached_max_friends=You have reached your limit of [[count]] friends.
+relations.change.error.rate_limit|staleness=1
+relations.change.error.rate_limit=You are trying to add too many friends in too short a period of time.
 
+relations.change.error.reached_limit_ban|staleness=1
 relations.change.error.reached_limit_ban=Exceeded limit maximum of banned users
 
-relations.change.error.rate_limit=You are trying to add too many friends in too short a period of time.
+relations.change.error.reached_max_friends|staleness=1
+relations.change.error.reached_max_friends=You have reached your limit of [[count]] friends.
+
+relations.change.error.suspended|staleness=1
+relations.change.error.suspended=Suspended journals cannot add friends.
 
 repost.button.counter=Already reposted by...
 
@@ -5886,6 +6192,7 @@ s2theme.themename.default=(Unnamed - [[themeid]])
 s2theme.themename.notheme|staleness=1
 s2theme.themename.notheme=(Layout Default)
 
+send.a.gift|staleness=1
 send.a.gift=Send a Gift
 
 setting.adultcontent.error.invalid|staleness=1
@@ -6424,9 +6731,6 @@ setting.viewingadultcontent.label=Viewing Adult Content
 setting.viewingadultcontent.option|staleness=1
 setting.viewingadultcontent.option=Collapse
 
-setting.viewingadultcontent.option2|staleness=1
-setting.viewingadultcontent.option2=Collapse adult content
-
 setting.viewingadultcontent.option.select.concepts|staleness=1
 setting.viewingadultcontent.option.select.concepts=adult concepts and explicit adult content
 
@@ -6435,6 +6739,9 @@ setting.viewingadultcontent.option.select.explicit=explicit adult content only
 
 setting.viewingadultcontent.option.select.none|staleness=1
 setting.viewingadultcontent.option.select.none=nothing
+
+setting.viewingadultcontent.option2|staleness=1
+setting.viewingadultcontent.option2=Collapse adult content
 
 setting.webmastertools.error|staleness=1
 setting.webmastertools.error=This field can only accept characters: A-Z, 0-9, dashes, and underlines.
@@ -6528,23 +6835,23 @@ settings.option.select=(Please make a selection)
 settings.pingback|staleness=1
 settings.pingback=PingBacks
 
-settings.pingback.option.disabled|staleness=1
-settings.pingback.option.disabled=Disabled
-
 settings.pingback.option.blocked|staleness=1
 settings.pingback.option.blocked=Function blocked
 
+settings.pingback.option.disabled|staleness=1
+settings.pingback.option.disabled=Disabled
+
 settings.pingback.option.entries|staleness=1
 settings.pingback.option.entries=Only entries
-
-settings.pingback.option.usernames|staleness=1
-settings.pingback.option.usernames=Only usernames
 
 settings.pingback.option.lj_only|staleness=1
 settings.pingback.option.lj_only=LiveJournal.com only
 
 settings.pingback.option.open|staleness=1
-settings.pingback.option.open=Entries & usernames
+settings.pingback.option.open=Open
+
+settings.pingback.option.usernames|staleness=1
+settings.pingback.option.usernames=Only usernames
 
 settings.pingback.process|staleness=1
 settings.pingback.process=Allow sending/receiving link notifications from other journals
@@ -6552,11 +6859,11 @@ settings.pingback.process=Allow sending/receiving link notifications from other 
 settings.pingbackcomm|staleness=1
 settings.pingbackcomm=Allow send a notice if community mention
 
-settings.pingbackcomm.option.open|staleness=1
-settings.pingbackcomm.option.open=Open
-
 settings.pingbackcomm.option.disabled|staleness=1
 settings.pingbackcomm.option.disabled=Disabled
+
+settings.pingbackcomm.option.open|staleness=1
+settings.pingbackcomm.option.open=Open
 
 settings.pingbackcomm.process|staleness=1
 settings.pingbackcomm.process=Allow send a notice if community mention
@@ -6642,6 +6949,7 @@ sharing.service.twitter=Twitter
 
 sharing.service.vkontakte=VKontakte
 
+smartappbanner.view|staleness=1
 smartappbanner.view=View
 
 sms.communityentryreply.edit_reply_a_comment|staleness=1
@@ -6817,6 +7125,9 @@ talk.autoformat=disable autoformat
 
 talk.btn.preview=Preview
 
+talk.bulletedlist|staleness=1
+talk.bulletedlist=Insert/Remove Bulleted List
+
 talk.changecolor|staleness=1
 talk.changecolor=Change Color
 
@@ -6869,8 +7180,10 @@ talk.commentpost=Post a new comment
 talk.comments.counted|staleness=1
 talk.comments.counted=[[replycount]] [[?replycount|comment|comments]]
 
+talk.comments.disabled|staleness=1
 talk.comments.disabled=Comments for this post was disable by author
 
+talk.comments.lockedandzero|staleness=1
 talk.comments.lockedandzero=Comments for this post was locked by author
 
 talk.commentsread=Read comments
@@ -6956,13 +7269,14 @@ talk.editpic.height=Height
 talk.editpic.horizontal|staleness=1
 talk.editpic.horizontal=Horizontal
 
+talk.editpic.imagesize|staleness=1
+talk.editpic.imagesize=Image Size
+
 talk.editpic.left|staleness=1
 talk.editpic.left=&larr; Left
 
 talk.editpic.none|staleness=1
 talk.editpic.none=None
-
-talk.editpic.imagesize=Image Size
 
 talk.editpic.right|staleness=1
 talk.editpic.right=Right &rarr;
@@ -7101,8 +7415,7 @@ talk.error.poll.question=You need text explaining your question
 talk.error.poll.range|staleness=1
 talk.error.poll.range=Value not in range [[min]]-[[max]]
 
-talk.error.poll.steps|staleness=1
-talk.error.poll.steps=Limit of 20 selections (to-from)/by > 20
+talk.error.poll.steps=Limit of 20 selections (to-from)/by < 20
 
 talk.error.purged|staleness=1
 talk.error.purged=This journal has been deleted and purged.
@@ -7195,9 +7508,6 @@ talk.insertlink=Insert Link
 talk.insertmap|staleness=1
 talk.insertmap=Insert Map
 
-talk.maptext|staleness=1
-talk.maptext=Map
-
 talk.insertphoto|staleness=1
 talk.insertphoto=Insert Photo
 
@@ -7222,6 +7532,15 @@ talk.insertvideo=Insert Video
 talk.ipalert|staleness=1
 talk.ipalert=Your IP address will be recorded
 
+talk.justifycenter|staleness=1
+talk.justifycenter=Center
+
+talk.justifyleft|staleness=1
+talk.justifyleft=Align left
+
+talk.justifyright|staleness=1
+talk.justifyright=Align right
+
 talk.likes.insert|staleness=1
 talk.likes.insert=Insert
 
@@ -7237,6 +7556,7 @@ talk.link.button.delete=Delete
 talk.link.insert|staleness=1
 talk.link.insert=Insert
 
+talk.link.remove|staleness=1
 talk.link.remove=Remove all links in selection
 
 talk.ljlikes|staleness=1
@@ -7260,26 +7580,8 @@ talk.map.example=http://goo.gl/maps/1Zgq
 talk.map.main|staleness=1
 talk.map.main=Map
 
-talk.numberedlist|staleness=1
-talk.numberedlist=Insert/Remove Numbered List
-
-talk.bulletedlist|staleness=1
-talk.bulletedlist=Insert/Remove Bulleted List
-
-talk.justifyleft|staleness=1
-talk.justifyleft=Align left
-
-talk.justifycenter|staleness=1
-talk.justifycenter=Center
-
-talk.justifyright|staleness=1
-talk.justifyright=Align right
-
-talk.undo|staleness=1
-talk.undo=Undo
-
-talk.redo|staleness=1
-talk.redo=Redo
+talk.maptext|staleness=1
+talk.maptext=Map
 
 talk.memadd|staleness=1
 talk.memadd=Memorize
@@ -7304,6 +7606,9 @@ talk.nextshortcutmac=Alt →
 
 talk.no.default.userpic|staleness=1
 talk.no.default.userpic=no default
+
+talk.numberedlist|staleness=1
+talk.numberedlist=Insert/Remove Numbered List
 
 talk.parentlink=Parent
 
@@ -7379,6 +7684,7 @@ talk.poll.fields.more=More fields
 talk.poll.head|staleness=1
 talk.poll.head=Poll Creator
 
+talk.poll.htmlhint|staleness=1
 talk.poll.htmlhint=Allowed tags: &lt;a&gt;, &lt;b&gt;, &lt;i&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;u&gt;, &lt;img&gt;, &lt;lj user&gt;
 
 talk.poll.preview|staleness=1
@@ -7396,14 +7702,16 @@ talk.poll.question.from=From:
 talk.poll.question.maxlength|staleness=1
 talk.poll.question.maxlength=Maxlength:
 
-talk.poll.question.scaletoobig|staleness=1
-talk.poll.question.scaletoobig=Limit of 20 selections (to-from)/by > 20
+talk.poll.question.scaletoobig=Limit of 20 selections (to-from)/by < 20
 
 talk.poll.question.size|staleness=1
 talk.poll.question.size=Size:
 
 talk.poll.question.to|staleness=1
 talk.poll.question.to=To:
+
+talk.poll.reset|staleness=1
+talk.poll.reset=Reset poll fields to default
 
 talk.poll.settings.name|staleness=1
 talk.poll.settings.name=poll name (opt.)
@@ -7459,8 +7767,6 @@ talk.poll.type.submit=Add question
 talk.poll.type.text|staleness=1
 talk.poll.type.text=Text entry
 
-talk.poll.reset=Reset poll fields to default
-
 talk.post.adult|staleness=1
 talk.post.adult=Adult content
 
@@ -7476,6 +7782,7 @@ talk.post.adult.none=none
 talk.post.backdated|staleness=1
 talk.post.backdated=do not add to friends page and RSS
 
+talk.post.backdated.edit|staleness=1
 talk.post.backdated.edit=Remove this entry friends page and RSS
 
 talk.post.beta.about|staleness=1
@@ -7517,13 +7824,16 @@ talk.post.create.title=New entry
 talk.post.delete.confirm|staleness=1
 talk.post.delete.confirm=Are you sure you want to delete this entry?
 
+talk.post.deletespam.confirm|staleness=1
 talk.post.deletespam.confirm=Are you sure you want to delete this entry as spam?
-
-talk.post.draft.confirm=Do you want to restore the text from saved draft?
 
 talk.post.draft.autosave|staleness=1
 talk.post.draft.autosave=Draft autosaved
 
+talk.post.draft.confirm|staleness=1
+talk.post.draft.confirm=Do you want to restore the text from saved draft?
+
+talk.post.draft.no|staleness=1
 talk.post.draft.no=No, delete draft
 
 talk.post.draft.restore|staleness=1
@@ -7532,6 +7842,7 @@ talk.post.draft.restore=Restore draft?
 talk.post.draft.restored|staleness=1
 talk.post.draft.restored=Draft restored
 
+talk.post.draft.yes|staleness=1
 talk.post.draft.yes=Yes, restore draft
 
 talk.post.edit.title|staleness=1
@@ -7652,19 +7963,21 @@ talk.post.paidrepost.budget=Repost budget:
 talk.post.paidrepost.budget.add|staleness=1
 talk.post.paidrepost.budget.add=Add to budget
 
+talk.post.paidrepost.budget.min|staleness=1
 talk.post.paidrepost.budget.min=Minimum 200
 
-talk.post.paidrepost.current|staleness=1
 talk.post.paidrepost.current=Current budget is [[current]] tokens.
 
+talk.post.paidrepost.desc|staleness=1
 talk.post.paidrepost.desc=description
-
 
 talk.post.paidrepost.pay|staleness=1
 talk.post.paidrepost.pay=Pay for reposts of this entry
 
+talk.post.ratings|staleness=1
 talk.post.ratings=Do not show this entry in the ratings
 
+talk.post.ratings.edit|staleness=1
 talk.post.ratings.edit=Remove this entry from the ratings
 
 talk.post.repost.facebook|staleness=1
@@ -7739,6 +8052,7 @@ talk.post.submit.delete=Delete Entry
 talk.post.submit.post|staleness=1
 talk.post.submit.post=Post Entry
 
+talk.post.submit.post.queued|staleness=1
 talk.post.submit.post.queued=Post one more entry
 
 talk.post.submit.postto|staleness=1
@@ -7794,6 +8108,9 @@ talk.prevshortcutmac=← Alt
 
 talk.readsimilar=Read similar journal entries:
 
+talk.redo|staleness=1
+talk.redo=Redo
+
 talk.replycount|staleness=1
 talk.replycount=[[count]] replies
 
@@ -7826,20 +8143,16 @@ talk.result.links.view=View the entry
 talk.result.success|staleness=1
 talk.result.success=Update successful. You can view your updated journal <a [[aopts]]>here</a>.
 
-talk.result.success.create|staleness=1
-talk.result.success.create=Entry successfuly added. You can view your updated journal <a href="[[href]]">here</a>.
+talk.result.success.create=Update successful. You can view your updated journal <a href="[[href]]">here</a>.
 
-talk.result.success.create.delayed|staleness=1
-talk.result.success.create.delayed=Entry successfuly added. You can view your scheduled entries <a href="[[href]]">here</a>.
+talk.result.success.create.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>.
 
-talk.result.success.create.delayed.extra|staleness=1
-talk.result.success.create.delayed.extra=Tags added to entry
+talk.result.success.create.delayed.extra=Learn more about scheduled entries in <a href="http://www.livejournal.com/support/faq/354.html">FAQ</a>.
 
 talk.result.success.create.delayed.short|staleness=1
 talk.result.success.create.delayed.short=Entry added
 
-talk.result.success.create.extra|staleness=1
-talk.result.success.create.extra=Tags added to entry
+talk.result.success.create.extra=Learn more about scheduled entries in <a href="http://www.livejournal.com/support/faq/354.html">FAQ</a>.
 
 talk.result.success.create.short|staleness=1
 talk.result.success.create.short=Entry added
@@ -7847,8 +8160,7 @@ talk.result.success.create.short=Entry added
 talk.result.success.delete|staleness=1
 talk.result.success.delete=Delete successful. You can view your updated journal <a href="[[href]]">here</a>.
 
-talk.result.success.delete.extra|staleness=1
-talk.result.success.delete.extra=Entry can be available on google cache
+talk.result.success.delete.extra=&nbsp;
 
 talk.result.success.delete.short|staleness=1
 talk.result.success.delete.short=Delete successful
@@ -7856,12 +8168,12 @@ talk.result.success.delete.short=Delete successful
 talk.result.success.queue|staleness=1
 talk.result.success.queue=Entry successfuly added to moderation queue. You can view other entries <a href="[[href]]">here</a>
 
-talk.result.success.queue.extra|staleness=1
-talk.result.success.queue.extra=Tags added to entry. Moderator can remove some
+talk.result.success.queue.extra=Learn more about moderated communities in <a href="http://www.livejournal.com/support/faq/157.html">FAQ</a>.
 
 talk.result.success.queue.short|staleness=1
 talk.result.success.queue.short=Entry added
 
+talk.result.success.queue.title|staleness=1
 talk.result.success.queue.title=Post an Entry
 
 talk.result.success.tags|staleness=1
@@ -7873,14 +8185,12 @@ talk.result.success.update=Update successful. You can view your updated journal 
 talk.result.success.update.delayed|staleness=1
 talk.result.success.update.delayed=Update successful. You can view your scheduled entries <a href="[[href]]">here</a>.
 
-talk.result.success.update.delayed.extra|staleness=1
-talk.result.success.update.delayed.extra=Tags updated also
+talk.result.success.update.delayed.extra=Learn more about scheduled entries in <a href="http://www.livejournal.com/support/faq/354.html">FAQ</a>.
 
 talk.result.success.update.delayed.short|staleness=1
 talk.result.success.update.delayed.short=Update successful
 
-talk.result.success.update.extra|staleness=1
-talk.result.success.update.extra=Tags updated also
+talk.result.success.update.extra=Learn more about scheduled entries in <a href="http://www.livejournal.com/support/faq/354.html">FAQ</a>.
 
 talk.result.success.update.short|staleness=1
 talk.result.success.update.short=Update successful
@@ -7926,14 +8236,19 @@ talk.spoiler.main=Spoiler
 talk.suspendedpost|staleness=1
 talk.suspendedpost=Suspended post
 
+talk.switchview|staleness=1
 talk.switchview=Switch to Basic HTML view
 
+talk.tags|staleness=1
 talk.tags=Tags:
 
 talk.threadlink=Thread
 
 talk.track|staleness=1
 talk.track=Track
+
+talk.undo|staleness=1
+talk.undo=Undo
 
 talk.unfreeze|staleness=1
 talk.unfreeze=Unfreeze
@@ -7973,8 +8288,10 @@ talk.user.hint=tema
 talk.user.insert|staleness=1
 talk.user.insert=Insert user
 
+talk.user.save|staleness=1
 talk.user.save=Save user
 
+talk.user.title|staleness=1
 talk.user.title=User title
 
 talk.userhint.default|staleness=1
@@ -7995,6 +8312,7 @@ talk.video.hint=Hint
 talk.video.insert|staleness=1
 talk.video.insert=Insert
 
+talk.video.paste|staleness=1
 talk.video.paste=Paste a Video URL (embed, iframe, <a href="http://www.youtube.com/watch?v=-LMebrVm-uU" target="_blank">youtube</a> or <a href="http://vimeo.com/59545564" target="_blank">vimeo</a>)
 
 talk.willscreen|staleness=1
@@ -9360,6 +9678,21 @@ vgift.yulelog.anon=Someone sent you a Yule Log!
 
 vgift.yulelog.fromuser=[[user]] sent you a Yule Log!
 
+web.account.settings.tab.title.tags|staleness=1
+web.account.settings.tab.title.tags=Tags
+
+web.account.settings.tab.title.users|staleness=1
+web.account.settings.tab.title.users=Groups & Filters
+
+web.account.settings.tab.title.users.filters|staleness=1
+web.account.settings.tab.title.users.filters=Filters
+
+web.account.settings.tab.title.users.groups|staleness=1
+web.account.settings.tab.title.users.groups=Groups
+
+web.account.settings.title|staleness=1
+web.account.settings.title=Account Settings
+
 web.ads.advertisement|staleness=1
 web.ads.advertisement=<a [[aopts]]>Advertisement</a>
 
@@ -9405,7 +9738,6 @@ web.controlstrip.btn.view=View
 web.controlstrip.links.addfeed=Add it to your Friends Page
 
 web.controlstrip.links.addfriend=Add them as a friend
-web.controlstrip.links.removefriend=Delete from friend
 
 web.controlstrip.links.calendar|staleness=1
 web.controlstrip.links.calendar=Calendar
@@ -9496,6 +9828,9 @@ web.controlstrip.links.removecomm=Stop watching this community
 
 web.controlstrip.links.removefeed=Remove it from your Friends Page
 
+web.controlstrip.links.removefriend|staleness=1
+web.controlstrip.links.removefriend=Delete from friend
+
 web.controlstrip.links.rssonly|staleness=1
 web.controlstrip.links.rssonly=View feeds only
 
@@ -9510,6 +9845,12 @@ web.controlstrip.links.stylemystyle=View in my style
 
 web.controlstrip.links.styleorigstyle|staleness=1
 web.controlstrip.links.styleorigstyle=View in original style
+
+web.controlstrip.links.subscribe|staleness=1
+web.controlstrip.links.subscribe=Subscribe to a user
+
+web.controlstrip.links.unsubscribe|staleness=1
+web.controlstrip.links.unsubscribe=Unsubscribe
 
 web.controlstrip.links.upgrade|staleness=1
 web.controlstrip.links.upgrade=Upgrade Account
@@ -9535,12 +9876,6 @@ web.controlstrip.links.viewownstyle|staleness=1
 web.controlstrip.links.viewownstyle=View in own style
 
 web.controlstrip.links.watchcomm=Watch this community
-
-web.controlstrip.links.subscribe|staleness=1
-web.controlstrip.links.subscribe=Subscribe to a user
-
-web.controlstrip.links.unsubscribe|staleness=1
-web.controlstrip.links.unsubscribe=Unsubscribe
 
 web.controlstrip.login.forgot=Forgot your password?
 
@@ -9595,6 +9930,12 @@ web.controlstrip.status.personalfriendsfriendspage=You are viewing [[user]]'s Fr
 
 web.controlstrip.status.personalfriendspage=You are viewing [[user]]'s Friends Page
 
+web.controlstrip.status.subscribedon|staleness=1
+web.controlstrip.status.subscribedon=You subscribed on [[user]]
+
+web.controlstrip.status.subscriber|staleness=1
+web.controlstrip.status.subscriber=[[user]] subscribed on you
+
 web.controlstrip.status.syn=You are viewing the feed [[user]]
 
 web.controlstrip.status.watcher=You are watching [[user]]
@@ -9604,10 +9945,6 @@ web.controlstrip.status.yourfriendsfriendspage=You are viewing your Friends of F
 web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
 
 web.controlstrip.status.yourjournal=You are viewing your journal
-
-web.controlstrip.status.subscribedon=You subscribed on [[user]]
-
-web.controlstrip.status.subscriber=[[user]] subscribed on you
 
 web.controlstrip.userpic.alt=Userpic
 
@@ -9631,17 +9968,17 @@ web.controlstrip.view.calendar-t=T
 web.controlstrip.view.calendar-w|staleness=1
 web.controlstrip.view.calendar-w=W
 
-web.ctxpopup.status.mutualfriends|staleness=1
-web.ctxpopup.status.mutualfriends=[[username]] and you is mutual friends
-
 web.ctxpopup.status.friend|staleness=1
 web.ctxpopup.status.friend=[[username]] in your friendlist
 
-web.ctxpopup.status.subscribedon|staleness=1
-web.ctxpopup.status.subscribedon=You read [[username]]
-
 web.ctxpopup.status.friendof|staleness=1
 web.ctxpopup.status.friendof=You are in [[username]] friendlist
+
+web.ctxpopup.status.mutualfriends|staleness=1
+web.ctxpopup.status.mutualfriends=[[username]] and you is mutual friends
+
+web.ctxpopup.status.subscribedon|staleness=1
+web.ctxpopup.status.subscribedon=You read [[username]]
 
 web.ctxpopup.status.subscriber|staleness=1
 web.ctxpopup.status.subscriber=[[username]] read you
@@ -9653,6 +9990,30 @@ web.lj-replace.first_post.subject=Welcome to [[sitename]]
 web.postto.btn=Switch
 
 web.postto.label=Post to:
+
+web.users.add.addtofilters.comment|staleness=1
+web.users.add.addtofilters.comment=<i>Optional:</i> Include in one or more custom friends groups.
+
+web.users.add.addtofilters.title|staleness=1
+web.users.add.addtofilters.title=Add to filters
+
+web.users.add.addtogroups.comment|staleness=1
+web.users.add.addtogroups.comment=<i>Optional:</i> Include in one or more custom friends groups.
+
+web.users.add.addtogroups.title|staleness=1
+web.users.add.addtogroups.title=Add to groups
+
+web.users.add.editomode.friend.title|staleness=1
+web.users.add.editomode.friend.title=Edit you friend
+
+web.users.add.editomode.friend.windowtitle|staleness=1
+web.users.add.editomode.friend.windowtitle=Edit you friend
+
+web.users.add.editomode.subscr.title|staleness=1
+web.users.add.editomode.subscr.title=Edit you subscription
+
+web.users.add.editomode.subscr.windowtitle|staleness=1
+web.users.add.editomode.subscr.windowtitle=Edit you subscription
 
 web.users.add.radio.asfriend|staleness=1
 web.users.add.radio.asfriend=Add as friend
@@ -9666,41 +10027,17 @@ web.users.add.radio.assubscr=Subscribe to him
 web.users.add.radio.assubscr.note|staleness=1
 web.users.add.radio.assubscr.note=<b>note</b>: you can read his entrires on you feed
 
-web.users.add.title.subscronly|staleness=1
-web.users.add.title.subscronly=Subscribe to [[user]]
-
-web.users.add.title.friendandsubscr|staleness=1
-web.users.add.title.friendandsubscr=Add [[user]] as
-
-web.users.add.title.friendonly|staleness=1
-web.users.add.title.friendonly=Add [[user]] as friend
-
-web.users.add.windowtitle.subscronly|staleness=1
-web.users.add.windowtitle.subscronly=Subscribe to [[user]]
-
-web.users.add.windowtitle.friendonly|staleness=1
-web.users.add.windowtitle.friendonly=Add [[user]] as friend
-
-web.users.add.windowtitle.friendandsubscr|staleness=1
-web.users.add.windowtitle.friendandsubscr=Add [[user]] as
-
-web.users.add.editomode.friend.title|staleness=1
-web.users.add.editomode.friend.title=Edit you friend
-
-web.users.add.editomode.subscr.title|staleness=1
-web.users.add.editomode.subscr.title=Edit you subscription
-
-web.users.add.editomode.friend.windowtitle|staleness=1
-web.users.add.editomode.friend.windowtitle=Edit you friend
-
-web.users.add.editomode.subscr.windowtitle|staleness=1
-web.users.add.editomode.subscr.windowtitle=Edit you subscription
-
 web.users.add.status.asfriend.text|staleness=1
 web.users.add.status.asfriend.text=[[user]] is on your Friends list. You can modify the custom groups and filters you've chosen for him/her.
 
-web.users.add.status.subscribedon.text|staleness=1
-web.users.add.status.subscribedon.text=[[user]] is on your Subscriptions list. You can modify the custom filters you've chosen for him/her.
+web.users.add.status.default.community.text|staleness=1
+web.users.add.status.default.community.text=Adding a community allows you to read the community's public posts on your friends page. If you would like to post to the community and be listed as a member, you'll need to <a [[aopts]]>join the community</a>
+
+web.users.add.status.default.identity.text|staleness=1
+web.users.add.status.default.identity.text=Adding user as friend share you privacy content for him.
+
+web.users.add.status.default.news.text|staleness=1
+web.users.add.status.default.news.text=Adding user as subsription allows you to read new content from it on your friends page.
 
 web.users.add.status.default.other.text|staleness=1
 web.users.add.status.default.other.text=Anything else
@@ -9711,46 +10048,29 @@ Adding user as friend allows you to read new content from it on your friends pag
 Adding user as subsription allows you to read new content from it on your friends page.
 .
 
-web.users.add.status.default.identity.text|staleness=1
-web.users.add.status.default.identity.text=Adding user as friend share you privacy content for him.
-
 web.users.add.status.default.syndicated.text|staleness=1
 web.users.add.status.default.syndicated.text=Adding a feed allows you to read new content from the feed on your friends page.
 
-web.users.add.status.default.community.text|staleness=1
-web.users.add.status.default.community.text<<
-Adding a community allows you to read the community's public posts on your friends page. If you would like to post to the community and be listed as a member, you'll need to <a [[aopts]]>join the community</a>
-.
+web.users.add.status.subscribedon.text|staleness=1
+web.users.add.status.subscribedon.text=[[user]] is on your Subscriptions list. You can modify the custom filters you've chosen for him/her.
 
-web.users.add.status.default.news.text|staleness=1
-web.users.add.status.default.news.text=Adding user as subsription allows you to read new content from it on your friends page.
+web.users.add.title.friendandsubscr|staleness=1
+web.users.add.title.friendandsubscr=Add [[user]] as
 
-web.users.add.addtofilters.title|staleness=1
-web.users.add.addtofilters.title=Add to filters
+web.users.add.title.friendonly|staleness=1
+web.users.add.title.friendonly=Add [[user]] as friend
 
-web.users.add.addtofilters.comment|staleness=1
-web.users.add.addtofilters.comment=<i>Optional:</i> Include in one or more custom friends groups.
+web.users.add.title.subscronly|staleness=1
+web.users.add.title.subscronly=Subscribe to [[user]]
 
-web.users.add.addtogroups.title|staleness=1
-web.users.add.addtogroups.title=Add to groups
+web.users.add.windowtitle.friendandsubscr|staleness=1
+web.users.add.windowtitle.friendandsubscr=Add [[user]] as
 
-web.users.add.addtogroups.comment|staleness=1
-web.users.add.addtogroups.comment=<i>Optional:</i> Include in one or more custom friends groups.
+web.users.add.windowtitle.friendonly|staleness=1
+web.users.add.windowtitle.friendonly=Add [[user]] as friend
 
-web.account.settings.title|staleness=1
-web.account.settings.title=Account Settings
-
-web.account.settings.tab.title.tags|staleness=1
-web.account.settings.tab.title.tags=Tags
-
-web.account.settings.tab.title.users|staleness=1
-web.account.settings.tab.title.users=Groups & Filters
-
-web.account.settings.tab.title.users.groups|staleness=1
-web.account.settings.tab.title.users.groups=Groups
-
-web.account.settings.tab.title.users.filters|staleness=1
-web.account.settings.tab.title.users.filters=Filters
+web.users.add.windowtitle.subscronly|staleness=1
+web.users.add.windowtitle.subscronly=Subscribe to [[user]]
 
 we_like_this_title|staleness=1
 we_like_this_title=View people who like it
@@ -10869,6 +11189,7 @@ widget.themechooser.header.search=Search Results For: [[term]]
 widget.themechooser.layout_filter.label|staleness=1
 widget.themechooser.layout_filter.label=Only show themes in:
 
+widget.themechooser.no_paurchased_themes|staleness=1
 widget.themechooser.no_paurchased_themes=You have not purchased themes
 
 widget.themechooser.page|staleness=1

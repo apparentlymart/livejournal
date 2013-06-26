@@ -7,9 +7,10 @@
 
 .error.already.member=You are already a member of this community.
 
-.error.email.notvalid=You can't join to this community, because your e-mail not validated.
-
 .error.closed=This community is closed to new members.  If you wish to join, please contact one of the following maintainers: [[admins]]
+
+.error.email.notvalid|staleness=1
+.error.email.notvalid=You can't join to this community, because your e-mail not validated.
 
 .error.ischild|staleness=1
 .error.ischild=[[comm]] could contain adult concepts which may not be suitable for minors. You must be at least 14 years of age to join this community.

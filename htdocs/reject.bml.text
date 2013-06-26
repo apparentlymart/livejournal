@@ -14,9 +14,11 @@
 .error.invalidargument|staleness=1
 .error.invalidargument=Invalid argument given
 
+.error.nopermission|staleness=1
+.error.nopermission=You don't have permission for it.
+
 .error.rejecting|staleness=1
 .error.rejecting=There was an error rejecting this request to join.
-.error.nopermission=You don't have permission for it.
 
 .error.unknownactiontype|staleness=1
 .error.unknownactiontype=Unknown action type

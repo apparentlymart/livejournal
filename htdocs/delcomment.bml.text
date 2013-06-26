@@ -40,7 +40,7 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 .success.andban=The comment has been deleted, and user [[user]] has been banned from commenting in your journal.
 
-.success.head=Deleted
+.success.head=&nbsp;
 
 .success.noban=The comment has been deleted.
 

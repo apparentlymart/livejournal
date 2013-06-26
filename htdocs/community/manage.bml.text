@@ -23,6 +23,7 @@
 
 .commlist.header=Your communities
 
+.commlist.ljart|staleness=1
 .commlist.ljart=LJ Art
 
 .commlist.mailing2=Community Email
@@ -81,6 +82,7 @@
 
 .modemail.yes=Email me every time someone submits a post to the queue
 
+.modreject|staleness=1
 .modreject=Email me when submission has been rejected from the moderation queue
 
 .title=Community Management
@@ -88,5 +90,6 @@
 .title2|staleness=1
 .title2=Manage Communities
 
+.warning.edit_foreign|staleness=1
 .warning.edit_foreign=Here are the communities that manage or co-manage 
 

@@ -38,8 +38,7 @@
 .support.major.things|staleness=1
 .support.major.things=Here are the three major things you can do here in the support area.
 
-.title|staleness=1
-.title=<?sitename?> Support
+.title=LiveJournal Support
 
 .volunteer|staleness=1
 .volunteer=Help somebody out

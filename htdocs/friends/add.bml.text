@@ -11,6 +11,7 @@
 
 .add.text2=[[ljuser]] has been added to your friends list.
 
+.add.text3|staleness=1
 .add.text3=[[ljuser]] has been added to your subscriptions list.
 
 .add.title=Friend Added!
@@ -135,8 +136,7 @@
 .tags.including|staleness=1
 .tags.including=Including selected tags
 
-.tags.input.tag|staleness=1
-.tags.input.tag=Input tag
+.tags.input.tag=Type tags here
 
 .tags.read|staleness=1
 .tags.read=Read entries by tags

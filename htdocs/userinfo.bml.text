@@ -227,11 +227,9 @@
 
 .friends.comm=Members
 
-.friends.comm.mutual.friendof|staleness=1
-.friends.comm.mutual.friendof=Mutual Friends of
+.friends.comm.mutual.friendof=Your Friends amongst Them
 
-.friends.comm.mutual.friends|staleness=1
-.friends.comm.mutual.friends=Mutual Friends
+.friends.comm.mutual.friends=Your Friends amongst Them
 
 .friends.friendof|staleness=1
 .friends.friendof=Friend of
@@ -245,14 +243,14 @@
 .friends.mutual|staleness=1
 .friends.mutual=Mutual Friends
 
+.friends.mutual.cfriends|staleness=1
+.friends.mutual.cfriends=Mutual Cfriends
+
 .friends.mutual.friendof|staleness=1
 .friends.mutual.friendof=Mutual Friends of
 
 .friends.mutual.friends|staleness=1
 .friends.mutual.friends=Mutual Friends
-
-.friends.mutual.cfriends|staleness=1
-.friends.mutual.cfriends=Mutual Cfriends
 
 .friends.mutual.member|staleness=1
 .friends.mutual.member=Mutual Member
@@ -513,8 +511,10 @@
 .optionlinks.addfriend.title.self|staleness=1
 .optionlinks.addfriend.title.self=Add yourself as a friend
 
+.optionlinks.friendsfeed|staleness=1
 .optionlinks.friendsfeed=View friends feed
 
+.optionlinks.friendsfeed.title|staleness=1
 .optionlinks.friendsfeed.title=View friends feed
 
 .optionlinks.joincomm|staleness=1
@@ -610,35 +610,17 @@
 .optionlinks.subscribe.title|staleness=1
 .optionlinks.subscribe.title=Subscribe
 
-.optionlinks.unsubscribe|staleness=1
-.optionlinks.unsubscribe=Unsubscribe
-
-.optionlinks.unsubscribe.title|staleness=1
-.optionlinks.unsubscribe.title=Unsubscribe
-
-.optionlinks.subscribesyn|staleness=1
-.optionlinks.subscribesyn=Subscribe
-
-.optionlinks.subscribesyn.title|staleness=1
-.optionlinks.subscribesyn.title=Subscribe
-
-.optionlinks.unsubscribesyn|staleness=1
-.optionlinks.unsubscribesyn=Unsubscribe
-
-.optionlinks.unsubscribesyn.title|staleness=1
-.optionlinks.unsubscribesyn.title=Unsubscribe
-
 .optionlinks.subscribecomm|staleness=1
 .optionlinks.subscribecomm=Subscribe
 
 .optionlinks.subscribecomm.title|staleness=1
 .optionlinks.subscribecomm.title=Subscribe
 
-.optionlinks.unsubscribecomm|staleness=1
-.optionlinks.unsubscribecomm=Unsubscribe
+.optionlinks.subscribesyn|staleness=1
+.optionlinks.subscribesyn=Subscribe
 
-.optionlinks.unsubscribecomm.title|staleness=1
-.optionlinks.unsubscribecomm.title=Unsubscribe
+.optionlinks.subscribesyn.title|staleness=1
+.optionlinks.subscribesyn.title=Subscribe
 
 .optionlinks.track|staleness=1
 .optionlinks.track=Track
@@ -669,6 +651,24 @@
 
 .optionlinks.trackuser.title.loggedout|staleness=1
 .optionlinks.trackuser.title.loggedout=You must be logged in manage notifications
+
+.optionlinks.unsubscribe|staleness=1
+.optionlinks.unsubscribe=Unsubscribe
+
+.optionlinks.unsubscribe.title|staleness=1
+.optionlinks.unsubscribe.title=Unsubscribe
+
+.optionlinks.unsubscribecomm|staleness=1
+.optionlinks.unsubscribecomm=Unsubscribe
+
+.optionlinks.unsubscribecomm.title|staleness=1
+.optionlinks.unsubscribecomm.title=Unsubscribe
+
+.optionlinks.unsubscribesyn|staleness=1
+.optionlinks.unsubscribesyn=Unsubscribe
+
+.optionlinks.unsubscribesyn.title|staleness=1
+.optionlinks.unsubscribesyn.title=Unsubscribe
 
 .optionlinks.viewjournal|staleness=1
 .optionlinks.viewjournal=View Journal

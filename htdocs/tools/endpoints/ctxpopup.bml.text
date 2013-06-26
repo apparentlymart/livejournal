@@ -85,6 +85,9 @@
 .stop_community|staleness=1
 .stop_community=Stop watching
 
+.subscribe|staleness=1
+.subscribe=Subscribe
+
 .subscribe_feed|staleness=1
 .subscribe_feed=Subscribe to feed
 
@@ -96,6 +99,9 @@
 
 .unban_everywhere.title|staleness=1
 .unban_everywhere.title=Unban user everywhere
+
+.unsubscribe|staleness=1
+.unsubscribe=Unsubscribe
 
 .unsubscribe_feed|staleness=1
 .unsubscribe_feed=Unsubscribe
@@ -124,8 +130,3 @@
 .you_watching|staleness=1
 .you_watching=You are watching [[username]]
 
-.subscribe|staleness=1
-.subscribe=Subscribe
-
-.unsubscribe|staleness=1
-.unsubscribe=Unsubscribe

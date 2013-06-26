@@ -42,7 +42,7 @@
 
 .error.notfound=Community account not found.
 
-.is_edited_entry=This entry has been successfully posted and then changed.
+.is_edited_entry=Re-moderation: the entry has been successfully posted and then updated.
 
 .manage=Manage communities
 

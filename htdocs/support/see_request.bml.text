@@ -89,6 +89,12 @@
 .help.link|staleness=1
 .help.link=Back to the <a href="help.bml">list of open requests</a>.<br />
 
+.img.track_active|staleness=1
+.img.track_active=You are watching this request
+
+.img.track_inactive|staleness=1
+.img.track_inactive=You have no active subscriptions for this request
+
 .important.notes.text|staleness=1
 .important.notes.text<<
 <?standout <b>Important Notes:</b>
@@ -110,11 +116,8 @@ and correct, it will be sent to the user. p?>
 .ip_address|staleness=1
 .ip_address=IP Address
 
+.is_beta|staleness=1
 .is_beta=Request sent from Beta
-
-.img.track_active=You are watching this request
-
-.img.track_inactive=You have no active subscriptions for this request
 
 .language|staleness=1
 .language=language
