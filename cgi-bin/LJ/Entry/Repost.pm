@@ -71,7 +71,7 @@ sub __get_repost {
 sub __get_repost_full {
     my ($u, $jitemid, $reposterid) = @_;
     return 0 unless $u;
-    
+
     my $dbcr = LJ::get_cluster_master($u)
         or die "get cluster for journal failed";
 
@@ -97,7 +97,7 @@ sub __create_repost_record {
     my $blid             = $args{'blid'};
 
     # my ($u, $jitemid, $repost_journalid, $repost_itemid, $cost, $blid) = @_;
-   
+
     $cost ||= 0;
 
     my $current_count = __get_count($journalu, $jitemid);
@@ -110,7 +110,7 @@ sub __create_repost_record {
                                      'reposted_jitemid,' .
                                      'cost,' .
                                      'blid, ' .
-                                     'repost_time) VALUES(?,?,?,?,?,?,?)'; 
+                                     'repost_time) VALUES(?,?,?,?,?,?,?)';
 
     $journalu->do( $query,
             undef,
@@ -122,12 +122,12 @@ sub __create_repost_record {
             $blid,
             $time );
 
-    # 
+    #
     # remove last users list block from cache
-    # 
-    my $last_block_id = int( $current_count / REPOST_USERS_LIST_LIMIT );    
+    #
+    my $last_block_id = int( $current_count / REPOST_USERS_LIST_LIMIT );
     LJ::MemCache::delete("$memcache_ns:$journalid:$jitemid:$last_block_id");
-    
+
     #
     # remove prev block too
     #
@@ -135,12 +135,12 @@ sub __create_repost_record {
         $last_block_id--;
         LJ::MemCache::delete("$memcache_ns:$journalid:$jitemid:$last_block_id")
     }
-    
+
     #
     # inc or add reposters counter
     #
     my $memcache_key_count = "reposted_count:$journalid:$jitemid";
-    LJ::MemCache::incr($memcache_key_count, 1);       
+    LJ::MemCache::incr($memcache_key_count, 1);
 
     my $memcache_key_status = "reposted_item:$journalid:$jitemid:$repost_journalid";
     LJ::MemCache::set($memcache_key_status, (join ':', $repost_itemid, $cost), REPOST_KEYS_EXPIRING);
@@ -154,7 +154,7 @@ sub __delete_repost_record {
     # remove users list
     #
     __clean_reposters_list($u, $jitemid);
-    
+
     #
     # remove record from db
     #
@@ -165,10 +165,10 @@ sub __delete_repost_record {
             $reposterid,);
 
     #
-    # remove cached reposts count 
+    # remove cached reposts count
     #
     LJ::MemCache::delete("reposted_count:$journalid:$jitemid");
-        
+
     #
     # remove cached status
     #
@@ -195,7 +195,7 @@ sub __create_post {
     #
     # Needs to create new entry
     #
-    my %req = ( 
+    my %req = (
                 'ver'         => 4,
                 'username'    => $posteru->username,
                 'event'       => $event_text_stub,
@@ -205,11 +205,11 @@ sub __create_post {
               );
 
     #
-    # Sends request to create new 
+    # Sends request to create new
     #
-    my $res = LJ::Protocol::do_request("postevent", 
-                                        \%req, 
-                                        \$err, 
+    my $res = LJ::Protocol::do_request("postevent",
+                                        \%req,
+                                        \$err,
                                         $flags);
 
     if ($err) {
@@ -218,7 +218,7 @@ sub __create_post {
          return;
     }
 
-    return LJ::Entry->new(  $journalu, 
+    return LJ::Entry->new(  $journalu,
                             jitemid => $res->{'itemid'} );
 }
 
@@ -227,7 +227,7 @@ sub __create_repost {
 
     my $journalu     = $opts{'journalu'};
     my $posteru      = $opts{'posteru'};
-    my $source_entry = $opts{'source_entry'}; 
+    my $source_entry = $opts{'source_entry'};
     my $timezone     = $opts{'timezone'};
     my $cost         = $opts{'cost'} || 0;
     my $error        = $opts{'error'};
@@ -244,20 +244,25 @@ sub __create_repost {
     my $post_obj;
 
     my $offerid = $source_entry->repost_offer;
-    my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($source_entry->posterid, $offerid) if $offerid;
+
+    my $repost_offer;
+    if ($offerid) {
+        $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer(
+            $source_entry->posterid, $offerid );
+    }
 
     my $lock_name = $repost_offer
         ? 'repost:'.$source_journalid.":".$source_jitemid
         : 'repost:'.$source_journalid.":".$source_jitemid.":".$journalu->id;
-        
+
     my $get_lock = sub {
         LJ::get_lock( LJ::get_db_writer(), 'global', $lock_name );
     };
-    
+
     my $release_lock = sub {
         LJ::release_lock( LJ::get_db_writer(), 'global', $lock_name );
     };
-    
+
     my $fail = sub {
         $$error = shift;
         $release_lock->();
@@ -280,16 +285,16 @@ sub __create_repost {
         unless ($repost_offer && $repost_offer->budget) {
             return $fail->(LJ::API::Error->get_error('repost_notpaid'));
         }
-        
+
         ($reposter_cost, $total_cost) = $repost_offer->cost($posteru);
 
         if ($cost > $reposter_cost) {
             return $fail->(LJ::API::Error->get_error('repost_cost_error'));
         } elsif ($cost < $reposter_cost) {
             $total_cost = $repost_offer->total_cost($cost);
-        } 
+        }
     }
-    
+
     $post_obj = __create_post(
         'journalu' => $journalu,
         'posteru'  => $posteru,
@@ -306,7 +311,7 @@ sub __create_repost {
     my $mark = $source_journalid . ":" . $source_jitemid;
     $post_obj->convert_to_repost($mark);
     $post_obj->set_prop( 'repost' => 'e' );
-    
+
     my $blid = 0;
 
     if ($repost_offer) {
@@ -376,15 +381,15 @@ sub get_status {
 
         my $is_owner = ($entry_obj->posterid == $u->userid) ? 1 : 0;
 
-        my ($reposted, $cost) = __get_repost( $entry_obj->journal, 
-                                              $entry_obj->jitemid, 
+        my ($reposted, $cost) = __get_repost( $entry_obj->journal,
+                                              $entry_obj->jitemid,
                                               $u->userid );
         $reposted = (!!$reposted) || 0;
-        
-        my $paid = $reposted && !$is_owner ? 
+
+        my $paid = $reposted && !$is_owner ?
             (!!$cost || 0) :
             (!!$entry_obj->repost_offer || 0);
-               
+
         if ($paid && !$reposted) {
             my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $entry_obj->repost_offer);
 
@@ -396,12 +401,12 @@ sub get_status {
             $result->{budget} = LJ::delimited_number( $budget ) if $is_owner;
         }
 
-        $result->{reposted} = $reposted; 
+        $result->{reposted} = $reposted;
         $result->{paid}     = $paid;
         $result->{cost}     = LJ::delimited_number( $cost );
     }
 
-    return $result;    
+    return $result;
 }
 
 sub __reposters {
@@ -423,7 +428,7 @@ sub __clean_reposters_list {
 
     # get blocks count
     my $blocks_count = int(__get_count($u, $jitemid)/REPOST_USERS_LIST_LIMIT) + 1;
- 
+
     # construct memcache keys base
     my $journalid = $u->userid;
     my $key_base = "$memcache_ns:$journalid:$jitemid";
@@ -439,7 +444,7 @@ sub __put_reposters_list {
 
     my $subkey       = "$journalid:$jitemid";
     my $memcache_key = "$memcache_ns:$subkey:$lastrequest";
-    
+
     my $serialized = LJ::JSON->to_json( $data );
     LJ::MemCache::set( $memcache_key, $serialized, REPOST_KEYS_EXPIRING );
 }
@@ -488,7 +493,7 @@ sub __get_reposters {
 sub is_repost {
     my ($class, $u, $itemid) = @_;
     my $jitemid = int($itemid / 256);
-    
+
     my $props = {};
     LJ::load_log_props2($u, [ $jitemid ], $props);
     my $item_props = $props->{ $jitemid};
@@ -512,15 +517,15 @@ sub get_list {
     #
     # Try to get value from cache
     #
-    my $cached_reposters = __get_reposters_list($journalid, 
-                                                $jitemid, 
+    my $cached_reposters = __get_reposters_list($journalid,
+                                                $jitemid,
                                                 $lastrequest);
     if ($cached_reposters) {
-        $cached_reposters->{'count'}  = __get_count($entry->journal, 
+        $cached_reposters->{'count'}  = __get_count($entry->journal,
                                                     $entry->jitemid);
         return $cached_reposters;
     }
-    
+
 
     #
     # If there is no cache then get from db
@@ -551,8 +556,8 @@ sub get_list {
             'user'   => $u->user,
             'url'    => $u->journal_base,
         };
-    }  
- 
+    }
+
     $reposters_info->{'last'}   = $lastrequest + 1;
 
     #
@@ -560,16 +565,16 @@ sub get_list {
     #
     __put_reposters_list( $journalid,
                           $jitemid,
-                          $reposters_info, 
+                          $reposters_info,
                           $lastrequest );
 
     #
-    # no need to cache 'count' 
+    # no need to cache 'count'
     #
-    $reposters_info->{'count'}  = __get_count($entry->journal, 
+    $reposters_info->{'count'}  = __get_count($entry->journal,
                                               $entry->jitemid);
 
-    return $reposters_info; 
+    return $reposters_info;
 }
 
 sub get_reposts {
@@ -583,7 +588,7 @@ sub get_reposts {
     my $offset = REPOSTS_LIST_LIMIT * $lastrequest;
     my $where  = '';
 
-    $where .= "AND repost_time >= $opts{mintime} " if $opts{mintime};    
+    $where .= "AND repost_time >= $opts{mintime} " if $opts{mintime};
 
     my $reposts = $dbcr->selectall_arrayref( "SELECT reposterid, repost_time " .
                                              "FROM repost2 " .
@@ -628,10 +633,10 @@ sub delete {
     #
     # Get entry id to delete
     #
-    my ($repost_itemid, $cost, $blid, $repost_time) = __get_repost_full( $entry_obj->journal, 
-                                                                         $entry_obj->jitemid, 
+    my ($repost_itemid, $cost, $blid, $repost_time) = __get_repost_full( $entry_obj->journal,
+                                                                         $entry_obj->jitemid,
                                                                          $u->userid );
-    
+
     #
     # If repost offer
     #
@@ -643,7 +648,7 @@ sub delete {
             repost_time => $repost_time,
         );
     }
-    
+
     if ($blid) {
         my $blocking = LJ::Pay::Repost::Blocking->load($blid);
         die 'Cannot load blocking' unless $blocking;
@@ -651,36 +656,36 @@ sub delete {
     }
 
     #
-    # If entry exists in db 
+    # If entry exists in db
     #
-    if ($repost_itemid) {        
+    if ($repost_itemid) {
         LJ::set_remote($u);
 
         my $remote = LJ::get_remote();
         my $entry = LJ::Entry->new($u->userid, jitemid => $repost_itemid);
-       
+
         #
         # Try to delete entry
         #
-        my $result = LJ::API::Event->delete({ itemid => $repost_itemid, 
+        my $result = LJ::API::Event->delete({ itemid => $repost_itemid,
                                               journalid => $u->userid   } );
-    
+
         #
         # If entry doesnt't exists then it should be removed from db
         #
-        my $entry_not_found_code = LJ::API::Error->get_error_code('entry_not_found');        
+        my $entry_not_found_code = LJ::API::Error->get_error_code('entry_not_found');
         my $error = $result->{'error'};
-        
+
         #
-        # Error is deversed from 'entry not found'  
+        # Error is deversed from 'entry not found'
         #
-        if ($error && $error->{'error_code'} != $entry_not_found_code) { 
+        if ($error && $error->{'error_code'} != $entry_not_found_code) {
             return $result;
         }
-        
-        
-        __delete_repost_record( $entry_obj->journal, 
-                                $entry_obj->jitemid, 
+
+
+        __delete_repost_record( $entry_obj->journal,
+                                $entry_obj->jitemid,
                                 $u->userid);
 
         LJ::User::UserlogRecord::DeleteRepost->create( $remote,
@@ -690,7 +695,7 @@ sub delete {
         );
 
         my $status = $class->get_status($entry_obj, $u);
-        $status->{'delete'} = 'OK';  
+        $status->{'delete'} = 'OK';
         return $status;
     }
 
@@ -732,7 +737,7 @@ sub create {
     }
 
     if ( $journalu->equals( $source_journal ) ) {
-        return LJ::API::Error->get_error('same_user'); 
+        return LJ::API::Error->get_error('same_user');
     }
 
     unless ( $posteru->is_validated ) {
@@ -771,9 +776,9 @@ sub create {
 
     if ($reposted_obj) {
         my $count = __get_count( $source_journal, $source_jitemid );
-        
+
         $result->{'result'} = { 'count' => $count };
-        
+
         return $result;
     } else {
         unless ($error && $error->{'error'}) {
@@ -784,7 +789,7 @@ sub create {
             $class->get_status( $source_entry, $journalu );
 
         return $error;
-    } 
+    }
 }
 
 sub substitute_content {
@@ -797,21 +802,21 @@ sub substitute_content {
     my $original_entry_obj = $entry_obj->original_post;
 
     unless ($original_entry_obj) {
-        my $link = $entry_obj->prop('repost_link'); 
+        my $link = $entry_obj->prop('repost_link');
         if ($link) {
             my ($org_journalid, $org_jitemid) = split(/:/, $link);
             return 0 unless int($org_journalid);
 
-            my $journal = int($org_journalid) ? LJ::want_user($org_journalid) : 
+            my $journal = int($org_journalid) ? LJ::want_user($org_journalid) :
                                                 undef;
-            
+
             my $fake_entry = LJ::Entry->new( $journal, jitemid => $org_jitemid);
 
-            my $subject = LJ::Lang::get_text($lang, 'entry.reference.journal.delete.subject', $domain->{'dmid'} );   
+            my $subject = LJ::Lang::get_text($lang, 'entry.reference.journal.delete.subject', $domain->{'dmid'} );
             my $event   = LJ::Lang::ml($lang,
-                                        'entry.reference.journal.delete', 
-                                         $domain->{'dmid'}, 
-                                        'datetime'     => $entry_obj->eventtime_mysql, 
+                                        'entry.reference.journal.delete',
+                                         $domain->{'dmid'},
+                                        'datetime'     => $entry_obj->eventtime_mysql,
                                         'url'          => $fake_entry->url);
 
             if ($opts->{'original_post_obj'}) {
@@ -821,11 +826,11 @@ sub substitute_content {
             if ($opts->{'removed'}) {
                 ${$opts->{'removed'}} = 1;
             }
-           
+
             if ($opts->{'repost_obj'}) {
                 ${$opts->{'repost_obj'}} = $fake_entry;
             }
- 
+
             if ($opts->{'subject_repost'}) {
                 ${$opts->{'subject_repost'}} = $subject;
             }
@@ -833,7 +838,7 @@ sub substitute_content {
             if ($opts->{'subject'}) {
                 ${$opts->{'subject'}}  = $subject;
             }
- 
+
             if ($opts->{'event_raw'}) {
                 ${$opts->{'event_raw'}} = $event;
             }
@@ -842,7 +847,7 @@ sub substitute_content {
                 ${$opts->{'event'}} = $event;
             }
 
-            return 1;    
+            return 1;
         }
         return 0;
     }
@@ -858,7 +863,7 @@ sub substitute_content {
     if ($opts->{'cluster_id'}) {
         ${$opts->{'cluster_id'}} = $original_entry_obj->journal->clusterid;
     }
-    
+
     if ($opts->{'original_post_obj'}) {
         ${$opts->{'original_post_obj'}}= $original_entry_obj;
     }
@@ -903,11 +908,11 @@ sub substitute_content {
         my $event_text = $original_entry_obj->event_raw;
 
         if ($props->{use_repost_signature}) {
-            my $journal = $original_entry_obj->journal; 
+            my $journal = $original_entry_obj->journal;
 
             my $text_var;
             if ($journal->is_community) {
-                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.community.owner' : 
+                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.community.owner' :
                                                                         'entry.reference.journal.community.guest';
             } else {
                 $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' :
@@ -927,16 +932,16 @@ sub substitute_content {
             ${$opts->{'event'}} = $event_text;
         }
     }
-    
+
     if ($opts->{'head_mob'}) {
         my $event_text = $original_entry_obj->event_raw;
 
         if ($props->{use_repost_signature}) {
-            my $journal = $original_entry_obj->journal; 
+            my $journal = $original_entry_obj->journal;
 
             my $text_var;
             if ($journal->is_community) {
-                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.community.owner' : 
+                $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.community.owner' :
                                                                         'entry.reference.journal.community.guest';
             } else {
                 $text_var = LJ::u_equals($remote, $entry_obj->poster) ? 'entry.reference.journal.owner' :
@@ -944,7 +949,7 @@ sub substitute_content {
             }
 
             my $event =  LJ::Lang::ml(  $lang,
-                                        $text_var,  
+                                        $text_var,
                                         $domain->{'dmid'},
                                         { 'author'          => $original_entry_obj->poster->display_username,
                                           'reposter'        => $entry_obj->poster->display_username,
@@ -961,14 +966,14 @@ sub substitute_content {
 
         if ($props->{use_repost_signature}) {
             my $journal = $original_entry_obj->journal;
-            
+
             my $text_var = $journal->is_community ? 'entry.reference.friends.community' :
                                                     'entry.reference.friends.journal';
 
             $text_var .= LJ::u_equals($remote, $entry_obj->poster) ? '.owner' : '.guest';
-    
+
             my $event = LJ::Lang::ml(  $lang,
-                                       $text_var, 
+                                       $text_var,
                                        $domain->{'dmid'},
                                        { 'author'           => $original_entry_obj->poster->display_username,
                                          'communityname'    => $original_entry_obj->journal->display_username,
@@ -992,10 +997,10 @@ sub substitute_content {
         ${$opts->{'subject'}}  = $original_entry_obj->subject_html;
     }
 
-    if ($opts->{'reply_count'}) {    
+    if ($opts->{'reply_count'}) {
         ${$opts->{'reply_count'}} = $original_entry_obj->reply_count;
-    } 
-    
+    }
+
     return 1;
 }
 
