@@ -126,7 +126,7 @@ sub render {
         $data_remote->{url}->{inbox}               = "$LJ::SITEROOT/inbox/";
         $data_remote->{url}->{tokens}              = "$LJ::SITEROOT/shop/tokens.bml";
         $data_remote->{url}->{edit_pics}           = "$LJ::SITEROOT/editpics.bml";
-        $data_remote->{url}->{manage_tags}         = "$LJ::SITEROOT/manage/tags.bml";
+        $data_remote->{url}->{manage_tags}         = "$LJ::SITEROOT/account/settings/tags";
         $data_remote->{url}->{send_message}        = "$LJ::SITEROOT/inbox/compose.bml";
         $data_remote->{url}->{edit_profile}        = $remote->journal_base . "/profile/";
         $data_remote->{url}->{custom_groups}       = "$LJ::SITEROOT/friends/editgroups.bml";

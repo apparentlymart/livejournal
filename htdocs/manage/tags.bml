@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
+    return BML::redirect("$LJ::SITEROOT/account/settings/tags") if LJ::is_enabled('tags_merge');
+
     LJ::set_active_crumb('managetags');
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'/edittags.bml.disabled'} p?>"
