@@ -2140,7 +2140,7 @@ sub common_event_validation
             # Allow syn_links and syn_ids the full width of the prop, to avoid truncating long URLS
             if ($_ eq 'syn_link' || $_ eq 'syn_id') {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP);
-            } elsif ( $_ eq 'current_music' ) {
+            } elsif ( $_ eq 'current_music' || $_ eq 'current_location' ) {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::CMMAX_PROP);
             } else {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
