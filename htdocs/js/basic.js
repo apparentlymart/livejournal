@@ -152,7 +152,7 @@ LJ.require = function(path) {
  * @return {*} Returns a page variable or undefined if not found.
  */
 LJ.pageVar = function(name, global) {
-	var obj = global ? window.Site : window.Site.page;
+	var obj = global ? window.Site : window.Site && window.Site.page;
 
 	if (obj && obj.hasOwnProperty(name)) {
 		return obj[name];
