@@ -4420,7 +4420,7 @@ sub getevents {
              $evt->{'repost_anum'}    = $final_anum;
              $evt->{'repost_ditemid'} = $final_itemid * 256 + $final_anum;
              $evt->{'repost_props'}  = $entry->props;
-             $evt->{'original_entry_url'} = $entry->url,
+             $evt->{'original_entry_url'} = $entry->url;
              $evt->{'repostername'} = $repost_entry->poster->username;
              $evt->{'postername'} = $entry->poster->username;
 	     $evt->{'journalname'} = $entry->journal->username;
