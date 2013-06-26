@@ -2529,6 +2529,17 @@ CREATE TABLE `subsproplist` (
 )
 EOC
 
+# subscriptionfilter2 -- clustered subscription filter
+register_tablecreate('subscriptionfilter2', <<'EOC');
+CREATE TABLE `subscriptionfilter2` (
+  `userid` int(10) unsigned NOT NULL DEFAULT '0',
+  `num` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `name` varchar(90) NOT NULL DEFAULT '',
+  `public` enum('0','1') NOT NULL DEFAULT '0',
+  PRIMARY KEY (`userid`,`num`)
+)
+EOC
+
 register_tablecreate('support', <<'EOC');
 CREATE TABLE `support` (
   `spid` int(10) unsigned NOT NULL AUTO_INCREMENT,
