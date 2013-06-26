@@ -4709,10 +4709,11 @@ sub createrepost {
     return fail($err, 203, 'url') unless $entry && $entry->valid;
     return fail($err, 227) unless $entry->visible_to($u);
 
-    my $result = LJ::Entry::Repost->create(  $u, # destination journal
-                                             $entry, # entry to be reposted
-                                             $timezone, # timezone for repost
-                                             );
+    my $result = LJ::Entry::Repost->create(
+        'journalu'     => $u,
+        'source_entry' => $entry,
+        'timezone'     => $timezone,
+    );
 
     if ( my $error = $result->{error} ) {
         return fail($err, 228, $error->{error_message});

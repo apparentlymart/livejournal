@@ -87,13 +87,22 @@ sub __get_repost_full {
 
 
 sub __create_repost_record {
-    my ($u, $jitemid, $repost_journalid, $repost_itemid, $cost, $blid) = @_;
+    my (%args) = @_;
+
+    my $journalu         = $args{'journalu'};
+    my $jitemid          = $args{'jitemid'};
+    my $repost_journalid = $args{'repost_journalid'};
+    my $repost_itemid    = $args{'repost_itemid'};
+    my $cost             = $args{'cost'};
+    my $blid             = $args{'blid'};
+
+    # my ($u, $jitemid, $repost_journalid, $repost_itemid, $cost, $blid) = @_;
    
     $cost ||= 0;
 
-    my $current_count = __get_count($u, $jitemid);
+    my $current_count = __get_count($journalu, $jitemid);
 
-    my $journalid = $u->userid;
+    my $journalid = $journalu->userid;
     my $time  = time();
     my $query = 'INSERT INTO repost2 (journalid,' .
                                      'jitemid,' .
@@ -103,9 +112,9 @@ sub __create_repost_record {
                                      'blid, ' .
                                      'repost_time) VALUES(?,?,?,?,?,?,?)'; 
 
-    $u->do( $query,
+    $journalu->do( $query,
             undef,
-            $u->userid,
+            $journalid,
             $jitemid,
             $repost_journalid,
             $repost_itemid,
@@ -167,12 +176,18 @@ sub __delete_repost_record {
 }
 
 sub __create_post {
-    my ($u, $timezone, $url, $error) = @_;
+    my (%opts) = @_;
+
+    my $journalu = $opts{'journalu'};
+    my $posteru  = $opts{'posteru'};
+    my $timezone = $opts{'timezone'};
+    my $url      = $opts{'url'};
+    my $error    = $opts{'error'};
 
     my $err = 0;
     my $flags = { 'noauth'             => 1,
                   'use_custom_time'    => 0,
-                  'u'                  => $u,
+                  'u'                  => $posteru,
                   'entryrepost'        => 1, };
 
     my $event_text_stub = LJ::Lang::ml('entry.reference.event_text', { 'url' =>  $url});
@@ -182,10 +197,11 @@ sub __create_post {
     #
     my %req = ( 
                 'ver'         => 4,
-                'username'    => $u->user,
+                'username'    => $posteru->username,
                 'event'       => $event_text_stub,
                 'subject'     => '',
                 'tz'          => $timezone,
+                'usejournal'  => $journalu->username,
               );
 
     #
@@ -195,39 +211,44 @@ sub __create_post {
                                         \%req, 
                                         \$err, 
                                         $flags);
-                                        
+
     if ($err) {
          my ($code, $text) = split(/:/, $err);
          $$error = LJ::API::Error->make_error( $text, -$code );
          return;
     }
 
-    return LJ::Entry->new(  $u, 
+    return LJ::Entry->new(  $journalu, 
                             jitemid => $res->{'itemid'} );
 }
 
 sub __create_repost {
-    my ($opts) = @_;
+    my (%opts) = @_;
 
-    my $u         = $opts->{'u'};
-    my $entry_obj = $opts->{'entry_obj'}; 
-    my $timezone  = $opts->{'timezone'};
-    my $cost      = $opts->{'cost'} || 0;
-    my $error     = $opts->{'error'};
+    my $journalu     = $opts{'journalu'};
+    my $posteru      = $opts{'posteru'};
+    my $source_entry = $opts{'source_entry'}; 
+    my $timezone     = $opts{'timezone'};
+    my $cost         = $opts{'cost'} || 0;
+    my $error        = $opts{'error'};
 
-    if (!$entry_obj->visible_to($u)) {
+    if (!$source_entry->visible_to($posteru)) {
         $$error = LJ::API::Error->get_error('repost_access_denied');
         return;
     }
 
+    my $source_journalid = $source_entry->journalid;
+    my $source_journal   = $source_entry->journal;
+    my $source_jitemid   = $source_entry->jitemid;
+
     my $post_obj;
 
-    my $offerid = $entry_obj->repost_offer;
-    my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($entry_obj->posterid, $offerid) if $offerid;
+    my $offerid = $source_entry->repost_offer;
+    my $repost_offer = LJ::Pay::Repost::Offer->get_repost_offer($source_entry->posterid, $offerid) if $offerid;
 
     my $lock_name = $repost_offer
-        ? 'repost:'.$entry_obj->journalid.":".$entry_obj->jitemid
-        : 'repost:'.$entry_obj->journalid.":".$entry_obj->jitemid.":".$u->id;
+        ? 'repost:'.$source_journalid.":".$source_jitemid
+        : 'repost:'.$source_journalid.":".$source_jitemid.":".$journalu->id;
         
     my $get_lock = sub {
         LJ::get_lock( LJ::get_db_writer(), 'global', $lock_name );
@@ -240,15 +261,15 @@ sub __create_repost {
     my $fail = sub {
         $$error = shift;
         $release_lock->();
-        LJ::delete_entry($u->id, $post_obj->jitemid, undef, $post_obj->anum) if $post_obj;
+        LJ::delete_entry($journalu->userid, $post_obj->jitemid, undef, $post_obj->anum) if $post_obj;
         return;
     };
 
     $get_lock->() or return $fail->(LJ::API::Error->get_error('unknown_error'));
 
-    my ($repost_itemid) = __get_repost( $entry_obj->journal,
-                                        $entry_obj->jitemid,
-                                        $u->userid );
+    my ($repost_itemid) = __get_repost( $source_journal,
+                                        $source_jitemid,
+                                        $journalu->userid );
     if ($repost_itemid) {
         return $fail->(LJ::API::Error->get_error('repost_already_exist'));
     }
@@ -260,7 +281,7 @@ sub __create_repost {
             return $fail->(LJ::API::Error->get_error('repost_notpaid'));
         }
         
-        ($reposter_cost, $total_cost) = $repost_offer->cost($u);
+        ($reposter_cost, $total_cost) = $repost_offer->cost($posteru);
 
         if ($cost > $reposter_cost) {
             return $fail->(LJ::API::Error->get_error('repost_cost_error'));
@@ -269,23 +290,27 @@ sub __create_repost {
         } 
     }
     
-    $post_obj = __create_post($u, 
-                              $timezone, 
-                              $entry_obj->url, 
-                              $error);
+    $post_obj = __create_post(
+        'journalu' => $journalu,
+        'posteru'  => $posteru,
+        'timezone' => $timezone,
+        'url'      => $source_entry->url,
+        'error'    => $error,
+    );
+
     if (!$post_obj) {
         return $fail->(LJ::API::Error->get_error('unknown_error'));
     }
 
     my $ret = eval {
-    my $mark = $entry_obj->journalid . ":" . $entry_obj->jitemid;
+    my $mark = $source_journalid . ":" . $source_jitemid;
     $post_obj->convert_to_repost($mark);
     $post_obj->set_prop( 'repost' => 'e' );
     
     my $blid = 0;
 
     if ($repost_offer) {
-        $repost_offer->on_repost_create( reposterid => $u->userid,
+        $repost_offer->on_repost_create( reposterid => $posteru->userid,
                                          cost       => $total_cost );
     }
 
@@ -294,11 +319,11 @@ sub __create_repost {
 
         $blid = LJ::Pay::Repost::Blocking->create(\$err,
                                                   offerid          => $offerid,
-                                                  journalid        => $entry_obj->journalid,
-                                                  jitemid          => $entry_obj->jitemid,
-                                                  reposterid       => $u->id,
+                                                  journalid        => $source_journalid,
+                                                  jitemid          => $source_jitemid,
+                                                  reposterid       => $posteru->id,
                                                   reposted_jitemid => $post_obj->jitemid,
-                                                  posterid         => $entry_obj->posterid,
+                                                  posterid         => $source_entry->posterid,
                                                   qty              => $total_cost,
                                                   system_profit    => $total_cost - $cost,
                                                   );
@@ -311,15 +336,15 @@ sub __create_repost {
     # create record
     #
     my $repost_jitemid = $post_obj->jitemid;
-    my $jitemid   = $entry_obj->jitemid;
 
-    __create_repost_record($entry_obj->journal,
-                           $jitemid,
-                           $u->userid,
-                           $repost_jitemid,
-                           $cost,
-                           $blid,
-                           );
+    __create_repost_record(
+        'journalu'         => $source_journal,
+        'jitemid'          => $source_jitemid,
+        'repost_journalid' => $journalu->userid,
+        'repost_itemid'    => $repost_jitemid,
+        'cost'             => $cost,
+        'blid'             => $blid,
+    );
 
     return;
     }; # eval
@@ -680,65 +705,83 @@ sub render_delete_js {
 }
 
 sub create {
-    my ($class, $u, $entry_obj, $timezone, $cost) = @_;
-    my $result = {};
-   
-    if ($entry_obj->original_post) {
-        $entry_obj = $entry_obj->original_post;
+    my ( $class, %args ) = @_;
+
+    my $journalu     = $args{'journalu'};
+    my $posteru      = $args{'posteru'};
+    my $source_entry = $args{'source_entry'};
+    my $timezone     = $args{'timezone'} || 'guess';
+    my $cost         = $args{'cost'};
+
+    $posteru ||= $journalu;
+
+    # the code isn't ready for this use case, so block this path
+    # in case someone makes a coding error
+    if ( ! LJ::u_equals( $journalu, $posteru ) && $cost ) {
+        die 'Cannot create a paid repost in a community';
     }
 
-    if ($u->equals($entry_obj->journal)) {
+    my $source_journalid = $source_entry->journalid;
+    my $source_journal   = $source_entry->journal;
+    my $source_jitemid   = $source_entry->jitemid;
+
+    my $result = {};
+
+    if ($source_entry->original_post) {
+        $source_entry = $source_entry->original_post;
+    }
+
+    if ( $journalu->equals( $source_journal ) ) {
         return LJ::API::Error->get_error('same_user'); 
     }
 
-    unless ($u->is_validated) {
+    unless ( $posteru->is_validated ) {
         return LJ::API::Error->get_error('not_validated');
     }
 
-    if ($u->is_suspended) {
+    if ( $journalu->is_suspended || $posteru->is_suspended ) {
         return LJ::API::Error->get_error('user_suspended');
     }
 
-    if ($u->is_deleted) {
+    if ( $journalu->is_deleted || $posteru->is_deleted ) {
         return LJ::API::Error->get_error('user_deleted');
     }
 
-    unless ($u->is_visible) {
+    if ( ! $journalu->is_visible || ! $posteru->is_visible ) {
         return LJ::API::Error->get_error('invalid_user');
     }
 
-    my $journalid = $entry_obj->journalid;
-    my $jitemid   = $entry_obj->jitemid;
-
     my $error;
 
-    my $memcache_key = join ':', 'reposted_item', $entry_obj->journalid, $entry_obj->jitemid, $u->id;
+    my $memcache_key = join ':', 'reposted_item', $source_journalid, $source_jitemid, $journalu->id;
     if (LJ::MemCache::get($memcache_key)) {
         $error = LJ::API::Error->get_error('repost_already_exist');
-        $error->{'error'}->{'data'} = $class->get_status($entry_obj, $u);
+        $error->{'error'}->{'data'} = $class->get_status($source_entry, $journalu);
         return $error;
     }
 
-    my $reposted_obj = __create_repost( {'u'          => $u,
-                                         'entry_obj'  => $entry_obj,
-                                         'timezone'   => $timezone,
-                                         'cost'       => $cost,
-                                         'error'      => \$error } );
+    my $reposted_obj = __create_repost(
+        'journalu'     => $journalu,
+        'posteru'      => $posteru,
+        'source_entry' => $source_entry,
+        'timezone'     => $timezone,
+        'cost'         => $cost,
+        'error'        => \$error,
+    );
 
     if ($reposted_obj) {
-        my $count = __get_count($entry_obj->journal, 
-                                $entry_obj->jitemid);
+        my $count = __get_count( $source_journal, $source_jitemid );
         
         $result->{'result'} = { 'count' => $count };
         
         return $result;
-        
     } else {
         unless ($error && $error->{'error'}) {
             $error = LJ::API::Error->get_error('unknown_error');
         }
 
-        $error->{'error'}->{'data'} = $class->get_status($entry_obj, $u);
+        $error->{'error'}->{'data'} =
+            $class->get_status( $source_entry, $journalu );
 
         return $error;
     } 
@@ -772,7 +815,7 @@ sub substitute_content {
                                         'url'          => $fake_entry->url);
 
             if ($opts->{'original_post_obj'}) {
-                ${$opts->{'original_post_obj'}}= $fake_entry;
+                ${$opts->{'original_post_obj'}}= $entry_obj;
             }
 
             if ($opts->{'removed'}) {
@@ -780,7 +823,7 @@ sub substitute_content {
             }
            
             if ($opts->{'repost_obj'}) {
-                ${$opts->{'repost_obj'}} = $entry_obj;
+                ${$opts->{'repost_obj'}} = $fake_entry;
             }
  
             if ($opts->{'subject_repost'}) {
