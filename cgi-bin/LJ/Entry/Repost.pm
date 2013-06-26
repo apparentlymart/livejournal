@@ -772,7 +772,7 @@ sub substitute_content {
                                         'url'          => $fake_entry->url);
 
             if ($opts->{'original_post_obj'}) {
-                ${$opts->{'original_post_obj'}}= $entry_obj;
+                ${$opts->{'original_post_obj'}}= $fake_entry;
             }
 
             if ($opts->{'removed'}) {
@@ -780,7 +780,7 @@ sub substitute_content {
             }
            
             if ($opts->{'repost_obj'}) {
-                ${$opts->{'repost_obj'}} = $fake_entry;
+                ${$opts->{'repost_obj'}} = $entry_obj;
             }
  
             if ($opts->{'subject_repost'}) {
