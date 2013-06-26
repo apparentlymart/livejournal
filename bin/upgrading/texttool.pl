@@ -604,11 +604,6 @@ sub poptext {
                 my $text     = $ldf->value($code);
 
                 if ( $code =~ /^[.]/ ) {
-                    unless ($pfx) {
-                        die "Code in file $filename_short can't start "
-                            . "with a dot: $code";
-                    }
-
                     $code = "$pfx$code";
                 }
 
