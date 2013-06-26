@@ -4422,8 +4422,8 @@ sub getevents {
              $evt->{'repost_props'}  = $entry->props;
              $evt->{'original_entry_url'} = $entry->url;
              $evt->{'repostername'} = $repost_entry->poster->username;
-             $evt->{'postername'} = $entry->poster->username;
-	     $evt->{'journalname'} = $entry->journal->username;
+             $evt->{'postername'} = $entry->poster->username if $entry->poster;
+	     $evt->{'journalname'} = $entry->journal->username if $entry->journal;
 	     my $userpic = $entry->userpic;
 	     $evt->{'poster_userpic_url'} = $userpic && $userpic->url;
         }
