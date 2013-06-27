@@ -2502,6 +2502,22 @@ BODY div .b-helplink:active {
 		text-decoration: none;
 		cursor: default;
 		}
+	.b-reset .b-pager-strong A:link,
+	.b-reset .b-pager-strong A:visited {
+		color: #0051B7 !important;
+		}
+	.b-reset .b-pager-strong A:hover,
+	.b-reset .b-pager-strong A:active {
+		color: #C00 !important;
+		}
+		.b-reset .b-pager-strong .b-pager-page-active A:link,
+		.b-reset .b-pager-strong .b-pager-page-active A:visited,
+		.b-reset .b-pager-strong .b-pager-page-active A:hover,
+		.b-reset .b-pager-strong .b-pager-page-active A:active {
+			text-decoration: none;
+			color: #FFF !important;
+			}
+	
 .b-pager-prev {
 	margin-right: 10px;
 	text-align: right;
