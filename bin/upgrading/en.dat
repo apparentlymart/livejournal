@@ -4860,6 +4860,18 @@ main.updates.common.messages=[[messages_count]] <a href="[[messages_url]]">unrea
 main.updates.common2|staleness=1
 main.updates.common2=[[items_count]] new [[?count|event|events|events]]
 
+main.updates.entries=[[items_count]] new [[?count|entry|entries|entries]]
+
+main.updates.entries.item=[[ljuser]] - <a href="[[url]]">[[subject]]</a> [[date]]
+
+main.updates.entries.clear=Clear
+
+main.updates.entries.clear.title=Remove all messages about new entries
+
+main.updates.entries.empty=Sorry, there is currently no entries to display
+
+main.updates.entries.empty.title=No entries
+
 main.updates.guests|staleness=1
 main.updates.guests=[[guests_count]] <a href="[[guests_url]]">new</a> [[?count|guest|guests|guests]]
 

@@ -1098,7 +1098,7 @@ sub update_events_counter {
     my $comment   = $self->comment;
     my $journalu  = $self->event_journal;
 
-    return unless $comment;
+    return unless $comment && $comment->valid;
     return unless $journalu;
 
     return if $comment->is_deleted || $comment->is_spam;
@@ -1108,7 +1108,7 @@ sub update_events_counter {
     my $jtalkid   = $comment->jtalkid; 
     my $poster    = $comment->poster;
 
-    return unless $entry;
+    return unless $entry && $entry->valid;
 
     return if $poster && ($poster->is_suspended || $poster->is_expunged);
 
