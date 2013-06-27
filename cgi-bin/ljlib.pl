@@ -141,6 +141,8 @@ LJ::MemCache::init();
 # used uniformly by server code which uses the protocol.
 $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 
+my $__dynamic_enable = {};
+
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
 %LJ::viewinfo = (
@@ -2402,6 +2404,7 @@ sub end_request
     __clean_singletons();
 
     LJ::RequestStatistics->finish_profile();
+    $LJ::__dynamic_enable = {};
 }
 
 # <LJFUNC>
@@ -3560,6 +3563,21 @@ sub conf_test {
 
 sub is_enabled {
     my $conf = shift;
+    return ! LJ::conf_test($LJ::DISABLED{$conf}, @_);
+}
+
+sub is_enabled_dynamic {
+    my $conf = shift;
+    
+    my $redis = LJ::Redis->get_connection();
+    if ($redis && !$LJ::__dynamic_enable) {    
+        $LJ::__dynamic_enable = $redis->hgetall('lj:settings:disabled');
+    } 
+     
+    if ($LJ::__dynamic_enable && exists $LJ::__dynamic_enable->{$conf}) {
+        return $LJ::__dynamic_enable->{$conf}; 
+    }
+
     return ! LJ::conf_test($LJ::DISABLED{$conf}, @_);
 }
 
