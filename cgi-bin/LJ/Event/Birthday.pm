@@ -301,23 +301,5 @@ sub fire {
     return $h ? 1 : 0;
 }
 
-sub update_events_counter {
-    my $self = shift;
-
-    my $u = $self->u;
-    return unless $u;
-
-    my $etypeid = $self->etypeid;
-    return unless $etypeid;
-
-    my $bdayuser = $self->bdayuser;
-    return unless $bdayuser;
-
-    my $bdayuserid = $bdayuser->userid;
-    return unless $bdayuserid;
-
-    LJ::Widget::HomePage::UpdatesForUser->add_event($u, pack("nnN", int(rand(2**16)), $etypeid, $bdayuserid));
-}
-
 1;
 

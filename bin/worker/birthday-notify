@@ -149,6 +149,9 @@ sub work {
 
         LJ::Event::Birthday->new($u, $notify->epoch + $delay)->fire;
         $ct++;
+
+        # add data to widget at new home page title panel
+        LJ::Widget::HomePage::UpdatesForUser->birthday_notify($u);
     }
 
     if ($purge_is_needed) {
