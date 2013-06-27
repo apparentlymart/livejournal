@@ -2173,19 +2173,19 @@ sub large_journal_icon {
     return $wrap_img->($hook_img) if $hook_img;
 
     if ($u->is_comm) {
-        return $wrap_img->("community24x24.gif");
+        return $wrap_img->("community24x24.gif?v=6283");
     }
 
     if ($u->is_syndicated) {
-        return $wrap_img->("syndicated24x24.gif");
+        return $wrap_img->("syndicated24x24.gif?v=6283");
     }
 
     if ($u->is_identity) {
-        return $wrap_img->("openid24x24.gif");
+        return $wrap_img->("openid24x24.gif?v=6034");
     }
 
     # personal, news, or unknown fallthrough
-    return $wrap_img->("userinfo24x24.gif");
+    return $wrap_img->("userinfo24x24.gif?v=6283");
 }
 
 # <LJFUNC>
@@ -4137,7 +4137,7 @@ sub userhead {
 
     my $head_size = $opts->{head_size};
 
-    my $userhead   = 'userinfo.gif';
+    my $userhead   = 'userinfo.gif?v=17080';
     my $userhead_w = 16;
     my $userhead_h = undef;
 
@@ -4161,7 +4161,7 @@ sub userhead {
             $userhead = "comm_${head_size}.gif";
             $userhead_w = $head_size;
         } else {
-            $userhead = "community.gif";
+            $userhead = "community.gif?v=556";
             $userhead_w = 16;
         }
     } elsif ($u->is_syndicated) {
@@ -4169,7 +4169,7 @@ sub userhead {
             $userhead = "syn_${head_size}.gif";
             $userhead_w = $head_size;
         } else {
-            $userhead = "syndicated.gif";
+            $userhead = "syndicated.gif?v=6283";
             $userhead_w = 16;
         }
     } elsif ($u->is_news) {
@@ -4177,7 +4177,7 @@ sub userhead {
             $userhead = "news_${head_size}.gif";
             $userhead_w = $head_size;
         } else {
-            $userhead = "newsinfo.gif";
+            $userhead = "newsinfo.gif?v=2990";
             $userhead_w = 16;
         }
     } elsif ($u->is_identity) {
@@ -4191,7 +4191,7 @@ sub userhead {
             $userhead = "user_${head_size}.gif";
             $userhead_w = $head_size;
         } else {
-            $userhead = "userinfo.gif";
+            $userhead = "userinfo.gif?v=17080";
             $userhead_w = 16;
         }
     }
@@ -7690,7 +7690,7 @@ sub ljuser {
 
             $journal_url   = join('', $LJ::SITEROOT, '/userinfo.bml?user=', $username);
             $profile_url ||= $journal_url;
-            $userhead      = 'userinfo.gif';
+            $userhead      = 'userinfo.gif?v=17080';
         }
 
         LJ::run_hooks( 'override_display_name', $u, \$journal_name );
@@ -10396,7 +10396,7 @@ sub user_search_display {
         if (my $picid = $get_picid->($u)) {
             $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' alt='$u->{user} userpic' style='border: 1px solid #000;' />";
         } else {
-            $ret .= "<img src='$LJ::STATPREFIX/horizon/nouserpic.png' alt='no default userpic' style='border: 1px solid #000;' width='100' height='100' />";
+            $ret .= "<img src='$LJ::STATPREFIX/horizon/nouserpic.png?v=2621' alt='no default userpic' style='border: 1px solid #000;' width='100' height='100' />";
         }
         $ret .= "</a>";
 

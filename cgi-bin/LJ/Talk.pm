@@ -40,26 +40,26 @@ sub get_subjecticons
     my %subjecticon;
     $subjecticon{'types'} = [ 'sm', 'md' ];
     $subjecticon{'lists'}->{'md'} = [
-            { img => "md01_alien.gif",          w => 32,        h => 32 },
-            { img => "md02_skull.gif",          w => 32,        h => 32 },
-            { img => "md05_sick.gif",           w => 25,        h => 25 },
-            { img => "md06_radioactive.gif",    w => 20,        h => 20 },
-            { img => "md07_cool.gif",           w => 20,        h => 20 },
-            { img => "md08_bulb.gif",           w => 17,        h => 23 },
-            { img => "md09_thumbdown.gif",      w => 25,        h => 19 },
-            { img => "md10_thumbup.gif",        w => 25,        h => 19 }
+            { img => "md01_alien.gif?v=6803",          w => 32,        h => 32 },
+            { img => "md02_skull.gif?v=7017",          w => 32,        h => 32 },
+            { img => "md05_sick.gif?v=7017",           w => 25,        h => 25 },
+            { img => "md06_radioactive.gif?v=6803",    w => 20,        h => 20 },
+            { img => "md07_cool.gif?v=6803",           w => 20,        h => 20 },
+            { img => "md08_bulb.gif?v=6803",           w => 17,        h => 23 },
+            { img => "md09_thumbdown.gif?v=7017",      w => 25,        h => 19 },
+            { img => "md10_thumbup.gif?v=6803",        w => 25,        h => 19 }
     ];
     $subjecticon{'lists'}->{'sm'} = [
-            { img => "sm01_smiley.gif",         w => 15,        h => 15 },
-            { img => "sm02_wink.gif",           w => 15,        h => 15 },
-            { img => "sm03_blush.gif",          w => 15,        h => 15 },
-            { img => "sm04_shock.gif",          w => 15,        h => 15 },
-            { img => "sm05_sad.gif",            w => 15,        h => 15 },
-            { img => "sm06_angry.gif",          w => 15,        h => 15 },
-            { img => "sm07_check.gif",          w => 15,        h => 15 },
-            { img => "sm08_star.gif",           w => 20,        h => 18 },
-            { img => "sm09_mail.gif",           w => 14,        h => 10 },
-            { img => "sm10_eyes.gif",           w => 24,        h => 12 }
+            { img => "sm01_smiley.gif?v=6803",         w => 15,        h => 15 },
+            { img => "sm02_wink.gif?v=6803",           w => 15,        h => 15 },
+            { img => "sm03_blush.gif?v=6803",          w => 15,        h => 15 },
+            { img => "sm04_shock.gif?v=6803",          w => 15,        h => 15 },
+            { img => "sm05_sad.gif?v=7017",            w => 15,        h => 15 },
+            { img => "sm06_angry.gif?v=7017",          w => 15,        h => 15 },
+            { img => "sm07_check.gif?v=6803",          w => 15,        h => 15 },
+            { img => "sm08_star.gif?v=6803",           w => 20,        h => 18 },
+            { img => "sm09_mail.gif?v=7017",           w => 14,        h => 10 },
+            { img => "sm10_eyes.gif?v=6803",           w => 24,        h => 12 }
     ];
 
     # assemble ->{'id'} portion of hash.  the part of the imagename before the _
@@ -106,7 +106,7 @@ sub show_image
 sub show_none_image
 {
     my $extra = shift;
-    my $img = 'none.gif';
+    my $img = 'none.gif?v=2277';
     my $w = 15;
     my $h = 15;
     my $pfx = "$LJ::IMGPREFIX/talk";
@@ -2760,7 +2760,7 @@ sub get_thread_html
             my $width = $depth * 25;
 
             return "<div id='ljcmt$dtid'><a name='t$dtid'></a><table$table_style><tr>" .
-                   "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='$width'></td>" .
+                   "<td><img src='$LJ::IMGPREFIX/dot.gif?v=557' height='1' width='$width'></td>" .
                    "<td id='ljcmtxt$dtid' width='100%'>";
         };
 

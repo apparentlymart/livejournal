@@ -76,10 +76,10 @@ _info?><?_code
         my $newmode = "un$mode";
         $newmode =~ s/^unun//;
         my $stockimg = {
-            'screen' => "btn_scr.gif",
-            'unscreen' => "btn_unscr.gif",
-            'freeze' => "btn_freeze.gif",
-            'unfreeze' => "btn_unfreeze.gif",
+            'screen' => "btn_scr.gif?v=17312",
+            'unscreen' => "btn_unscr.gif?v=17312",
+            'freeze' => "btn_freeze.gif?v=17312",
+            'unfreeze' => "btn_unfreeze.gif?v=17312",
         };
 
         my $res = "rpcRes = {\n mode: \"$mode\", id: $dtalkid, \n" .

@@ -394,7 +394,7 @@ sub render_userpics_block {
         $out .= q{
             <div id='userpic'>
                 <p id='userpic_preview'>
-                    <img src='/img/userpic_loggedout.gif'
+                    <img src='/img/userpic_loggedout.gif?v=9533'
                         alt='selected userpic' id='userpic_preview_image'
                         class='userpic_loggedout'  />
                 </p>

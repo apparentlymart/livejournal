@@ -107,7 +107,7 @@
                 $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif?v=8313";
             }
         } elsif ( $u->is_comm ) {
-            $ret{url_userpic} = "$LJ::IMGPREFIX/profile_icons/comm.png?v=14273";
+            $ret{url_userpic} = "$LJ::IMGPREFIX/profile_icons/comm.png?v=24097";
         } else {
             $ret{url_userpic} = "$LJ::IMGPREFIX/ctxpopup-nopic.gif?v=8313";
         }

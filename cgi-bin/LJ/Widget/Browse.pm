@@ -582,7 +582,7 @@ sub render_body_old {
     $ret .= "<div style='clear: both;'></div>";
     $ret .= "<div class='browse-extras'>";
     $ret .= "<div class='browse-randomuser'>";
-    $ret .= "<img src='$LJ::IMGPREFIX/explore/randomuser.jpg' alt='' />";
+    $ret .= "<img src='$LJ::IMGPREFIX/explore/randomuser.jpg?v=13260' alt='' />";
     $ret .= "<p><a href='$LJ::SITEROOT/random.bml'><strong>" . $class->ml('widget.browse.extras.random') . "</strong></a><br />";
     $ret .= $class->ml('widget.browse.extras.random.desc') . "</p>";
     $ret .= "</div>";

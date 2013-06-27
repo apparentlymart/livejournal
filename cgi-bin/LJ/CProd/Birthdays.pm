@@ -12,7 +12,7 @@ sub render {
     my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
     my $icon = "<div style=\"float: left; padding-right: 5px;\">
-               <img border=\"1\" src=\"$LJ::SITEROOT/img/cake.jpg\" /></div>";
+               <img border=\"1\" src=\"$LJ::SITEROOT/img/cake.jpg?v=7202\" /></div>";
     my $link = $class->clickthru_link('cprod.birthday.link', $version);
 
     return "<p>$icon ". BML::ml($class->get_ml($version), { "user" => $user,

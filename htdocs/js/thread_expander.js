@@ -88,7 +88,7 @@ Expander.prototype.killDuplicate = function(comments){
 
 Expander.prototype.getS1width = function(canvas){
   //TODO:  may be we should should add somie ID to the spacer img instead of searching it
-  //yet, this works until we have not changed the spacers url = 'dot.gif');
+  //yet, this works until we have not changed the spacers url = 'dot.gif?v=557');
   var img, imgs;
   imgs = canvas.getElementsByTagName('img');
   for(var j=0;j<imgs.length;j++){

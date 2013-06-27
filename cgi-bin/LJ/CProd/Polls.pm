@@ -23,23 +23,23 @@ sub render {
     my $link = $class->clickthru_link('cprod.polls.link', $version);
     my $poll = "
 <div style='margin: 2px'><div>That's crazy!</div><div style='white-space: nowrap'>
-<img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' 
-height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' 
+<img src='$LJ::IMGPREFIX/poll/leftbar.gif?v=7017' style='vertical-align:middle' 
+height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif?v=7017' 
 style='vertical-align:middle' height='14' width='174' alt='' /><img 
-src='$LJ::IMGPREFIX/poll/rightbar.gif' style='vertical-align:middle' 
+src='$LJ::IMGPREFIX/poll/rightbar.gif?v=6803' style='vertical-align:middle' 
 height='14' width='7' alt='' /> <b>283</b> (58.0%)</div>
 <div>I can't wait to try.</div>
 <div style='white-space: nowrap'>
-<img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' 
-alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' 
-height='14' width='81' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif' 
+<img src='$LJ::IMGPREFIX/poll/leftbar.gif?v=7017' style='vertical-align:middle' height='14' 
+alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif?v=7017' style='vertical-align:middle' 
+height='14' width='81' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif?v=6803' 
 style='vertical-align:middle' height='14' width='7' alt='' /> 
 <b>132</b> (27.0%)</div>
 <div>What type of poll am I?</div>
 <div style='white-space: nowrap'>
-<img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' height='14' 
-alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' style='vertical-align:middle' 
-height='14' width='45' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif' 
+<img src='$LJ::IMGPREFIX/poll/leftbar.gif?v=7017' style='vertical-align:middle' height='14' 
+alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif?v=7017' style='vertical-align:middle' 
+height='14' width='45' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif?v=6803' 
 style='vertical-align:middle' height='14' width='7' alt='' /> <b>73</b> (15.0%)</div>
 </div>";
 

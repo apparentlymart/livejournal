@@ -269,11 +269,11 @@
             $body .= "<p>$ML{'.or.connect.using'}</p>\n";
             $body .= "<p class=\"b-loginpage-btns\">";
             $body .= "<a href=\"<?siteroot?>/identity/login.bml?type=openid$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/openid-32.gif?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.openid'}\" title=\"$ML{'.connect.openid'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.png?v=17127\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.png?v=18100\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=12457\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=facebook$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/facebook-32.png?v=29916\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.facebook'}\" title=\"$ML{'.connect.facebook'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=twitter$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/twitter-32.png?v=29994\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.twitter'}\" title=\"$ML{'.connect.twitter'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=google$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/google-32.png?v=29916\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.google'}\" title=\"$ML{'.connect.google'}\" /></a>";
             $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=mailru$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/mailru-32.gif?v=11791\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.mailru'}\" title=\"$ML{'.connect.mailru'}\" /></a>";
-            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.png?v=11792\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
+            $body .= " <a href=\"<?siteroot?>/identity/login.bml?type=vkontakte$forwhat\"><img src=\"$LJ::IMGPREFIX/icons/vkontakte-32.png?v=29994\" width=\"32\" height=\"32\" alt=\"$ML{'.connect.vkontakte'}\" title=\"$ML{'.connect.vkontakte'}\" /></a>";
             $body .= "</p>\n";
             $body .= "<ul>\n";
             $body .= "<li>$ML{'.createaccount.whylogin.benefit1'}</li>";

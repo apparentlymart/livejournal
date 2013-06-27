@@ -377,9 +377,9 @@ function _createInterface(p) {
             'img { border: 1px solid #000000; padding: 0; margin: 0; }\n'+
             '</style>');
     d.write('<table cellspacing="5" cellpadding="0" border="0">\n');
-    d.write('<tr><td><img src="' + colpic_imgprefix + '/colorpicker/spectrum.png" '+
+    d.write('<tr><td><img src="' + colpic_imgprefix + '/colorpicker/spectrum.png?v=1655" '+
             'ismap width="512" height="256" id="spectrum"></td>\n');
-    d.write('<td><img src="/palimg/colorpicker/longgrad.gif" '+
+    d.write('<td><img src="/palimg/colorpicker/longgrad.gif?v=1655" '+
             'ismap width="25" height="256" id="brightness"></td></tr></table>\n');
     d.write('<form action="about:blank" method="GET" onsubmit="return false;">\n');
     d.write('<center><table cellspacing="5" cellpadding="0" border="0" width="95%">\n');
@@ -398,8 +398,8 @@ function _createInterface(p) {
             '<button id="btnOK">OK</button> <button id="btnCancel">Cancel</button>'+
             '</div>');
     d.write('</form>\n');
-    d.write('<img style="position: absolute; display: none; border: 0; left: 0; top: 0;" id="crosshair" src="' + colpic_imgprefix + '/colorpicker/crosshair.gif">\n');
-    d.write('<img style="position: absolute; display: none; border: 0; left: 552px; top: 0;" id="pointer" src="' + colpic_imgprefix + '/colorpicker/pointer.gif">\n');
+    d.write('<img style="position: absolute; display: none; border: 0; left: 0; top: 0;" id="crosshair" src="' + colpic_imgprefix + '/colorpicker/crosshair.gif?v=1655">\n');
+    d.write('<img style="position: absolute; display: none; border: 0; left: 552px; top: 0;" id="pointer" src="' + colpic_imgprefix + '/colorpicker/pointer.gif?v=1655">\n');
 }
 function _writeControlRow(doc,caption,name) {
     doc.write('<td align="right" width="25%"><nobr><label accesskey="'+caption.substring(0,1)+'">'+caption+

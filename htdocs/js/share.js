@@ -50,7 +50,7 @@
         return options;
     }
 
-    [ '/popup-cls.gif', '/popup-arr.gif', '/icons/sharethis.png' ].forEach(preload);
+    [ '/popup-cls.gif?v=10883', '/popup-arr.gif?v=10883', '/icons/sharethis.png?v=29927' ].forEach(preload);
 
     function pollForWindowClose(w, service, link) {
         if (w.closed) {

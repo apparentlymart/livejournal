@@ -13,7 +13,7 @@ sub render {
     my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
 
-    my $icon = "<img border=\"0\" src=\"$LJ::SITEROOT/img/friendgroup.gif\" class='cprod-image'  />";
+    my $icon = "<img border=\"0\" src=\"$LJ::SITEROOT/img/friendgroup.gif?v=5744\" class='cprod-image'  />";
     my $link = $class->clickthru_link('cprod.friendsfriends.link2', $version);
 
     return "$icon ".BML::ml($class->get_ml($version), { "user" => $user, "link" => $link });

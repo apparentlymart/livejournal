@@ -153,7 +153,7 @@ sub render_body {
                       return qq {
                           <div class="standout-border standout-background $jsclass" style="cursor: pointer;"
                             lj_itemid="$id" lj_journalid="$journalid">
-                                <a href="$url"><img src="$LJ::IMGPREFIX/link.png" /></a>
+                                <a href="$url"><img src="$LJ::IMGPREFIX/link.png?v=12000" /></a>
                                 $text
                           </div>
                       };

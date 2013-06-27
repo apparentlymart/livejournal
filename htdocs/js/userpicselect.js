@@ -128,7 +128,7 @@ UserpicSelect = new Class (LJ_IPPU, {
 
             scaleBtn.style.width = scaleBtn.width = scaleBtn.style.height = scaleBtn.height = baseSize - scaleSize * 5;
 
-            scaleBtn.src = Site.imgprefix + "/imgscale.png";
+            scaleBtn.src = Site.imgprefix + "/imgscale.png?v=8122";
             DOM.addClassName(scaleBtn, "ups_scalebtn");
 
             self.scalingBtns.push(scaleBtn);

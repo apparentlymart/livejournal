@@ -259,10 +259,10 @@ sub ljuser_display_params {
     } elsif ($self->value =~ m/\.fanat\.ru(\/|$)/) {
         # Fanat.ru users have a distinct pic
         # TODO: move to a hook?
-        $ret->{'userhead'}   = 'openid_fanat-profile.gif';
+        $ret->{'userhead'}   = 'openid_fanat-profile.gif?v=15782';
         $ret->{'userhead_w'} = 16;
     } else {
-        $ret->{'userhead'}   = 'openid-profile.gif';
+        $ret->{'userhead'}   = 'openid-profile.gif?v=5044';
         $ret->{'userhead_w'} = 16;
     }
 

@@ -21,7 +21,7 @@ sub ljuser_display_params {
     return {
         'journal_url'  => $opts->{'journal_url'} || $self->url,
         'journal_name' => $u->display_name,
-        'userhead'     => 'userinfo.gif',
+        'userhead'     => 'userinfo.gif?v=17080',
         'userhead_w'   => 17,
     };
 }

@@ -811,5 +811,5 @@ head=><?_code return $_[0] ? $_[0]->{'head'} : $r_head _code?>
 bodyopts=><?_code return $_[0]->{'bodyopts'}; _code?>
 page?><?_c <LJDEP>
 link: htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
-img: htdocs/img/dot.gif, htdocs/img/delcomment.gif
+img: htdocs/img/dot.gif?v=557, htdocs/img/delcomment.gif?v=7017
 </LJDEP> _c?>

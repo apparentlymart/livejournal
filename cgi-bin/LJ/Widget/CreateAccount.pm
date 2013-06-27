@@ -98,7 +98,7 @@ sub render_body {
         raw => 'style="<?loginboxstyle?>"',
         value => $post->{user} || $get->{user},
     );
-    $ret .= " <img id='username_check' src='$LJ::IMGPREFIX/create/check.png' alt='" . $class->ml('widget.createaccount.field.username.available') . "' title='" . $class->ml('widget.createaccount.field.username.available') . "' />";
+    $ret .= " <img id='username_check' src='$LJ::IMGPREFIX/create/check.png?v=13637' alt='" . $class->ml('widget.createaccount.field.username.available') . "' title='" . $class->ml('widget.createaccount.field.username.available') . "' />";
     $ret .= $error_msg->('username', '<span id="username_error_main"><br /><span class="formitemFlag">', '</span></span>');
     $ret .= "<span id='username_error'><br /><span id='username_error_inner' class='formitemFlag'></span></span>";
     $ret .= "</td></tr>\n" unless $alt_layout;
