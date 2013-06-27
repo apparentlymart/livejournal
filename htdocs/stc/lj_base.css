@@ -2898,18 +2898,17 @@ HTML BODY .i-ljuser {
 		*zoom: 1;
 		}
 	.b-steps-step.active {
-		-moz-border-radius: 0.5em;
-		border-radius: 0.5em;
-		-moz-box-shadow: inset 0 0 6px #2B4C7B;
+		-webkit-border-radius: 0.5em;
+		   -moz-border-radius: 0.5em;
+		        border-radius: 0.5em;
 		-webkit-box-shadow: inset 0 0 6px #2B4C7B;
-		box-shadow: inset 0 0 6px #2B4C7B;
-		background: #369AFF;
-		background: #369AFF -moz-linear-gradient(top,  #3863A0 0%, #369AFF 100%);
-		background: #369AFF -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3863A0), color-stop(100%,#369AFF));
-		background: #369AFF -webkit-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #369AFF -o-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #369AFF -ms-linear-gradient(top,  #3863A0 0%,#369AFF 100%);
-		background: #369AFF linear-gradient(top,  #3863A0 0%,#369AFF 100%);
+		   -moz-box-shadow: inset 0 0 6px #2B4C7B;
+		        box-shadow: inset 0 0 6px #2B4C7B;
+		background-color: #369AFF;
+		background-image: -webkit-linear-gradient(top, #3863A0 0%, #369AFF 100%);
+		background-image:    -moz-linear-gradient(top, #3863A0 0%, #369AFF 100%);
+		background-image:      -o-linear-gradient(top, #3863A0 0%, #369AFF 100%);
+		background-image:   linear-gradient(to bottom, #3863A0 0%, #369AFF 100%);
 		color: #FFF;
 		}
 

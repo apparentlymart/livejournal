@@ -51,7 +51,7 @@ sub is_friend
     $ub = LJ::want_userid($ub);
 
     return 0 unless $ua && $ub;
-    return 1 if $ua == $ub;
+    # return 1 if $ua == $ub;
 
     # get group mask from the first argument to the second argument and
     # see if first bit is set.  if it is, they're a friend.  get_groupmask
