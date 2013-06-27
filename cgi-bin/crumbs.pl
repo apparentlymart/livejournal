@@ -61,7 +61,7 @@ use POSIX qw/ENOENT/;
                'managecommunities' => ['Manage Communities', '/community/manage.bml', 'manage'],
                'managefriends' => ['Manage Friends', '/friends/edit.bml', 'friends'],
                'managefriendgrps' => ['Manage Custom Friends Groups', '/friends/editgroups.bml', 'friends'],
-               'managetags' => ['Manage Tags', '/account/settings/tags', 'manage'],
+               'managetags' => ['Manage Tags', ($LJ::DISABLED{'tags_merge'} ? '/manage/tags.bml' : '/account/settings/tags'), 'manage'],
                'managelogins' => ['Manage Your Login Sessions', '/manage/logins.bml', 'manage'],
                'manageuserpics' => ['Manage Userpics', '/editpics.bml', 'manage'],
                'meme' => ['Meme Tracker', '/meme.bml', 'home'],
