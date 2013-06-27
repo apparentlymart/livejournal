@@ -2563,7 +2563,7 @@ sub needlogin_redirect_url {
     }
     $uri = LJ::eurl($uri);
 
-    return "$LJ::SITEROOT/?returnto=$uri";
+    return "$LJ::SITEROOT/login.bml?returnto=$uri";
 }
 
 sub needlogin_redirect {
