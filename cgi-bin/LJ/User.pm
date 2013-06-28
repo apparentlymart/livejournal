@@ -2924,7 +2924,7 @@ sub get_reader_weight {
 
     LJ::MemCache::set( $memkey, $reader_weight, 60);
 
-    return $reader_weight;
+    return $reader_weight || -1;
 }
 
 # <LJFUNC>

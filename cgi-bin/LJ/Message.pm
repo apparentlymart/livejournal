@@ -4,6 +4,7 @@ use Carp 'croak';
 
 use Class::Autouse qw(
                       LJ::Typemap
+                      LJ::AntiSpam
                       LJ::NotificationItem
                       );
 
@@ -88,7 +89,15 @@ sub _send_msg_event {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
     LJ::Event::UserMessageSent->new($ou, $msgid, $ru)->fire;
-    LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
+
+    if ($self->is_spam()) {
+        {
+            # Dont send notification if poster reader weight < MIN and comment is suspicious
+            last if $ou && $ou->get_reader_weight() < $LJ::MIN_READER_WEIGHT;
+
+            LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
+        }
+    }
 }
 
 # Write message data to tables while ensuring everything completes
@@ -454,6 +463,30 @@ sub rate_multiple {
 
     return 10 unless ($ru->has_friend($ou) || $self->{parent_msgid});
     return 1;
+}
+
+sub is_spam {
+    my $self = shift;
+    my $ou = $self->_orig_u;
+    my $ru = $self->_rcpt_u;
+
+    return unless $ou;
+    return unless $ru;
+
+    if (LJ::AntiSpam->need_spam_check_inbox($ru, $ou)) {
+        my $body    = $self->body_raw || '';
+        my $subject = $self->subject_raw || '';
+
+        return 1 if LJ::AntiSpam->is_spam_inbox_message(
+            $ru, $ou, $subject
+        );
+
+        return 1 if LJ::AntiSpam->is_spam_inbox_message(
+            $ru, $ou, $body
+        );
+    }
+
+    return;
 }
 
 ###################

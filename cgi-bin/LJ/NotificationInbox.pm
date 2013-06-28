@@ -361,38 +361,14 @@ sub enqueue {
     my $spam = 0;
 
     if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == LJ::Event::UserMessageRecvd->etypeid ) {
-        {
-            last unless $evt->arg1;
-            last unless $evt->userid;
-
+        if ($evt->arg1 && $evt->userid) {
             my $msg = LJ::Message->load({
                 msgid     => $evt->arg1,
                 journalid => $evt->userid
             });
 
-            last unless $msg;
-
-            my $sender = $msg->other_u;
-
-            last unless $sender;
-
-            my $journal = LJ::load_userid($evt->userid);
-
-            last unless $journal;
-
-            if (LJ::AntiSpam->need_spam_check_inbox($journal, $sender)) {
-                my $body    = $msg->body_raw || '';
-                my $subject = $msg->subject_raw || '';
-
-                $spam = LJ::AntiSpam->is_spam_inbox_message(
-                    $journal, $sender, $subject
-                );
-
-                unless ($spam) {
-                    $spam = LJ::AntiSpam->is_spam_inbox_message(
-                        $journal, $sender, $body
-                    );
-                }
+            if ($msg) {
+                $spam = $msg->is_spam();
             }
         }
     }
