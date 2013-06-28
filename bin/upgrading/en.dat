@@ -1958,11 +1958,15 @@ entryunit.expromo=This entry has been promoted
 entryunit.hide|staleness=1
 entryunit.hide=Hide author
 
+entryunit.hide.community=Hide community from rating
+
 entryunit.read|staleness=1
 entryunit.read=Mark entry as read
 
 entryunit.show|staleness=1
 entryunit.show=Bring author back
+
+entryunit.show.community=Bring community back to rating
 
 entryunit.toggle.collapse|staleness=1
 entryunit.toggle.collapse=Collapse
