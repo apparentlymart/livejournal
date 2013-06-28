@@ -1755,7 +1755,7 @@ sub res_includes {
         <script type="text/javascript">
             if( lj_user !== 0 && lj_master_user === 0 ) {
                 window.location = "http://$domain/misc/clear_domain_session.bml?return=$curl";
-            } else if ( lj_master_user > 0 && lj_master_user !== lj_user ) {
+            } else if ( lj_master_user !== 0 && lj_master_user !== lj_user ) {
                 window.location = "${LJ::SITEROOT}/misc/get_domain_session.bml?return=$curl&sign=$curl_sign&t=$sign_time";
             }
         </script>\n|;
