@@ -34,23 +34,23 @@ body<=
         $ret .= "<?h1 $ML{'.lostpassword.title'} h1?>\n";
         $ret .= "<?p $ML{'.lostpassword.text'} p?>\n";
 
-        $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
+        $ret .= "<div class='form-basic form-fix'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_username'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'user', 'id' => 'userlost', 'size' => 30, 'maxlength' => 15 }) . "</fieldset>\n";
         $ret .= "<fieldset><label>$ML{'.enter_email_optional'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'email_p', 'size' => 30, 'maxlength' => 50 }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
         $ret .= LJ::html_submit('lostpass', $ML{'.btn.proceed'}, { id => 'lostpass' }) . "</div>\n";
-        $ret .= "</div></div></div></div></div>\n";
+        $ret .= "</div>\n";
 
         $ret .= "<?h1 $ML{'.lostusername.title'} h1?>\n";
         $ret .= "<?p $ML{'.lostusername.text'} p?>\n";
-        $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
+        $ret .= "<div class='form-basic form-fix'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_email'}</label>\n";
         $ret .= LJ::html_text({ 'name' => 'email_u', 'id' => 'email_u', 'size' => 30, 'maxlength' => 50 }) . "</fieldset>\n";
         $ret .= "<div class='btn-set'>\n";
         $ret .= LJ::html_submit('lostuser', $ML{'.btn.proceed'}, { id => 'lostuser' }) . "</div>\n";
-        $ret .= "</div></div></div></div></div>\n";
+        $ret .= "</div>\n";
 
         $ret .= "</form>\n";
 
