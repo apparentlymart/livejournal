@@ -324,6 +324,26 @@ sub country_options {
     return $options;
 }
 
+sub country_options_array {
+    my $class = shift;
+    my $opts  = shift;
+
+    my $country = $opts->{country} || '';
+
+    my %countries;
+    # load country codes
+    LJ::load_codes({ "country" => \%countries});
+
+    my @options = ( { code     => '',
+                      name     => '',
+                      selected => !$country ? 1 : 0 },
+                    map { { code     => $_,
+                            name     => $countries{$_},
+                            selected => $country eq $_ ? 1 : 0 } }
+                    sort { $countries{$a} cmp $countries{$b} } keys %countries );
+    return \@options;
+}
+
 sub region_options {
     my $class = shift;
     my $country_region_cfg = shift;
@@ -334,6 +354,32 @@ sub region_options {
     my $options = ['' => $class->ml('states.head.defined'),
                    map { $_ , $states{$_} } sort keys %states];
     return $options;
+}
+
+sub all_region_options_array {
+    my $class = shift;
+    my $opts  = shift;
+
+    my $region = $opts->{region} || '';
+
+    my @all_options;
+
+    while (my ($country, $conf) = each %LJ::COUNTRIES_WITH_REGIONS) {
+        my %states = ();
+        LJ::load_codes ({$conf->{'type'} => \%states});
+
+        my @options = ( { code     => '',
+                          name     => '',
+                          selected => !$region ? 1 : 0 },
+                        map { { code     => $_,
+                                name     => $states{$_},
+                                selected => $region eq $_ ? 1 : 0 } }
+                        sort keys %states );
+
+        push @all_options, \@options;
+    }
+
+    return \@all_options;
 }
 
 1;

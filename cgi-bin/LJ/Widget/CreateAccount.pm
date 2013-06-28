@@ -660,4 +660,22 @@ sub handle_post {
 
 sub need_form_auth { 0 }
 
+
+sub gender_options_array {
+    my $class = shift;
+    my $opts  = shift;
+
+    my $gender = $opts->{gender} || '';
+
+    my @options = ( { code => '',  name => '', selected => (!$gender ? 1 : 0) },
+                    { code => 'M', name => LJ::Lang::ml("/manage/profile/index.bml.gender.male") },
+                    { code => 'F', name => LJ::Lang::ml("/manage/profile/index.bml.gender.female") },
+                    { code => 'U', name => LJ::Lang::ml("/manage/profile/index.bml.gender.unspecified") } );
+
+    map { $_->{selected} = ($_->{code} eq $gender ? 1 : 0) } @options;
+
+    return \@options;
+}
+
+
 1;
