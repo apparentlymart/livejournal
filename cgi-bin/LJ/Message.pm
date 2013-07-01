@@ -89,15 +89,7 @@ sub _send_msg_event {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
     LJ::Event::UserMessageSent->new($ou, $msgid, $ru)->fire;
-
-    if ($self->is_spam()) {
-        {
-            # Dont send notification if poster reader weight < MIN and comment is suspicious
-            last if $ou && $ou->get_reader_weight() < $LJ::MIN_READER_WEIGHT;
-
-            LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
-        }
-    }
+    LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
 }
 
 # Write message data to tables while ensuring everything completes
@@ -473,7 +465,7 @@ sub is_spam {
     return unless $ou;
     return unless $ru;
 
-    if (LJ::AntiSpam->need_spam_check_inbox($ru, $ou)) {
+    if (LJ::AntiSpam->need_spam_check_inbox($ou, $ru)) {
         my $body    = $self->body_raw || '';
         my $subject = $self->subject_raw || '';
 
