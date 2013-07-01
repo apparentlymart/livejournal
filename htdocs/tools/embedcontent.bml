@@ -32,6 +32,44 @@
         </div>
         |;
 
+    } elsif ($mode eq 'aviasales'){
+
+        my $api     = $GET{api};
+        $api = '' unless $api =~ /^[A-Za-z0-9]+$/;
+        return <<EOJS;
+<script charset="UTF-8" type="text/javascript"> 
+  SETTINGS_HOST = "//www.travelpayouts.com"; 
+  window.TP_FORM_SETTINGS = window.TP_FORM_SETTINGS || {}; 
+  window.TP_FORM_SETTINGS["$api"] = { 
+"id": "512d9fdec7f1422fed000016" 
+}; 
+  (function(){ 
+    var code = ['<div class="aviasales_inlineable">', 
+      '<div style="visibility: hidden;" data-widget-id= "$api" data-widgets-forms-inlineable=\'{"link":"/widgets/$api.json?locale=ru","forms":["search","hotels"],"widget_id":"$api"}\'>', 
+      '<div class="nano_form_tabs_wp ultra_narrow_tabs">', 
+      '<div class="nano_form_tabs" data-widgets-forms-inlineable-tabs="">', 
+      '</div></div></div></div>'], 
+        loader_url = SETTINGS_HOST + '/assets/nano_ui/widgets/partners/loader_ru.js?v=2&no_cache=' + (+new Date()); 
+      if(!window.NANO){ 
+        code.push('<' + 'script src="' + loader_url + '">' + '<' +'/script>'); 
+      } 
+    document.write(code.join('')); 
+  })(); 
+</script> 
+EOJS
+
+    } elsif ($mode eq 'cherehapa'){
+        my $api     = int $GET{api};
+
+        return <<EOJS;
+<script id="cheFullScrpt" type="text/javascript"> var che = che || {};che.options = {"partner": $api,"colors":{}};(function() { var s = document.createElement("script"); s.type = "text/javascript"; s.async = true; s.src = "//partners.cherehapa.ru/js/forms/full.js"; var ss = document.getElementsByTagName("script")[0]; ss.parentNode.insertBefore(s, ss); })(); </script> 
+EOJS
+        
+    } elsif ($mode eq 'cherehapa_short'){
+        my $api     = int $GET{api};
+        return <<EOJS;
+<script id="chscrpt" type="text/javascript"> var _chdata = _chdata || [];_chdata.push(['partner', '$api']); _chdata.push(['width', '310']); (function() { var s = document.createElement("script"); s.type = "text/javascript"; s.async = true; s.src = "//partners.cherehapa.ru/js/forms/short.js"; var ss = document.getElementsByTagName("script")[0]; ss.parentNode.insertBefore(s, ss); })(); </script> 
+EOJS
 
     } elsif ($mode eq 'lj-embed') {
         # we should have three GET params: journalid, moduleid, auth_token
