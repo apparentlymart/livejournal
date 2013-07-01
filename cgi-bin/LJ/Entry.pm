@@ -2859,6 +2859,7 @@ sub delete_entry
     LJ::run_hooks("deletepost", $jid, $jitemid, $anum);
 
     # delete tags
+    LJ::run_hooks('report_logtags_delete', $u->{'userid'}, $jitemid);
     LJ::Tags::delete_logtags($u, $jitemid);
 
     LJ::run_hooks('report_entry_delete', $u->{'userid'}, $jitemid);

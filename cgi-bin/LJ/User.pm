@@ -10086,7 +10086,7 @@ sub want_user
     return undef unless $uuid;
     return $uuid if ref $uuid;
     return LJ::load_userid($uuid) if $uuid =~ /^\d+$/;
-    Carp::croak("Bogus caller of LJ::want_user with non-ref/non-numeric parameter");
+    Carp::croak("Bogus caller of LJ::want_user with non-ref/non-numeric parameter: $uuid");
 }
 
 # <LJFUNC>
