@@ -2482,7 +2482,11 @@ sub postevent {
             {repost_budget => $req->{'repost_budget'},
              limit_sc      => $req->{'repost_limit_sc'},
              journalid     => $ownerid,
-             userid        => $posterid}, 
+             userid        => $posterid,
+             targeting_gender  => $req->{'repost_targeting_gender'},
+             targeting_age     => $req->{'repost_targeting_age'},
+             targeting_country => $req->{'repost_targeting_country'},
+             targeting_state   => $req->{'repost_targeting_state'}}, 
             \$error
         );
 
@@ -3522,6 +3526,10 @@ sub editevent {
                 budget      => $req->{repost_budget},
                 limit_sc    => $req->{repost_limit_sc},
                 revoke      => !$req->{paid_repost_on},
+                targeting_gender  => $req->{repost_targeting_gender},
+                targeting_age     => $req->{repost_targeting_age},
+                targeting_country => $req->{repost_targeting_country},
+                targeting_state   => $req->{repost_targeting_state}
             },
             \$error,
         );
