@@ -2241,9 +2241,14 @@ BODY div .b-helplink:active {
 	}
 .b-massaction-fixed {
 	position: fixed;
-	bottom: 24px;
+	bottom: 0;
 	width: 100%;
 	}
+.b-singlepost .b-massaction-fixed,
+.p-ljtimes .b-massaction-fixed {
+	bottom: 24px;	
+	}
+
 .s-horizon.p-footer-lite .b-massaction-fixed {
 	margin-bottom: 0;
 	}	
