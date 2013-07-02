@@ -6,6 +6,7 @@ use Encode;
 
 # Internal modules
 use LJ::AntiSpam;
+use LJ::AntiSpam::Utils;
 use LJ::Admin::Spam::Urls;
 use LJ::AntiSpam::Suspender;
 use LJ::EventLogRecord::NewComment;
