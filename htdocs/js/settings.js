@@ -10,7 +10,7 @@ LiveJournal.register_hook('init_settings', function ($) {
 		form_changed: false,
 		navclickSave: function(e) {
 			
-			if ( Settings.form_changed  && confirm(Settings.confirm_msg) ) {
+			if ( Settings.form_changed && !Boolean(LJ.pageVar('no_submit_window'))  && confirm(Settings.confirm_msg) ) {
 				
 				e.preventDefault();
 				
