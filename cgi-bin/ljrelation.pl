@@ -1,6 +1,9 @@
 package LJ;
-use strict;
 
+use strict;
+use warnings;
+
+# Internal modules
 use LJ::RelationService;
 
 #########################
@@ -41,8 +44,7 @@ sub get_relation_types {
 # des-usera: Source user hashref or userid.
 # des-userb: Destination user hashref or userid. (can be undef)
 # </LJFUNC>
-sub is_friend
-{
+sub is_friend {
     &nodb;
 
     my ($ua, $ub) = @_[0, 1];
@@ -51,7 +53,6 @@ sub is_friend
     $ub = LJ::want_userid($ub);
 
     return 0 unless $ua && $ub;
-    # return 1 if $ua == $ub;
 
     # get group mask from the first argument to the second argument and
     # see if first bit is set.  if it is, they're a friend.  get_groupmask
@@ -67,8 +68,7 @@ sub is_friend
 # des-user: User hashref or userid.
 # des-journal: Journal hashref or userid.
 # </LJFUNC>
-sub is_banned
-{
+sub is_banned {
     &nodb;
 
     # get user and journal ids
@@ -84,12 +84,18 @@ sub is_banned
     return LJ::check_rel($jid, $uid, 'B');
 }
 
-sub get_groupmask
-{
+sub get_groupmask {
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
 
     return LJ::RelationService->get_groupmask($journal, $remote);
+}
+
+sub get_filtermask {
+    my ($journal, $remote) = @_;
+    return 0 unless $journal && $remote;
+
+    return LJ::RelationService->get_filtermask($journal, $remote);
 }
 
 
