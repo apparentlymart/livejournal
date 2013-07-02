@@ -173,8 +173,8 @@ sub create_multi {
     
     my $dbh = LJ::get_cluster_master($u);
     $dbh->do(
-        'INSERT INTO userlog (userid, logtime, action, actiontarget, remoteid, ip, uniq, extra)' .
-        'VALUES $values',
+        "INSERT INTO userlog (userid, logtime, action, actiontarget, remoteid, ip, uniq, extra)" .
+        "VALUES $values",
         undef,
         @values
     );
