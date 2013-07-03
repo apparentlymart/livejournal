@@ -14,6 +14,7 @@ body<=
     LJ::set_active_crumb('aliases');
 
     my $remote = LJ::get_remote(); 
+    return "<?needlogin?>" unless $remote;
     my $ret = '';
     my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
     my $authas = $GET{authas};
@@ -22,6 +23,7 @@ body<=
     my $u = LJ::get_effective_remote;
     if ( $authas && !$u ) {
         $u = LJ::load_user($authas);
+        return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
         if ( LJ::priv_can_view("/manage/notes.bml", $remote) ) {
             my $warn_foreign = LJ::Lang::get_text(
                 $lang,
@@ -52,8 +54,7 @@ body<=
         }
     }
     return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
-    
-    return "<?needlogin?>" unless $u;
+
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
     return "<?h1 " . BML::ml('.not.allowed', { aopts => "href='$LJ::SITEROOT/paidaccounts/'" } ) . " h1?>" unless $u->get_cap('aliases');
 
