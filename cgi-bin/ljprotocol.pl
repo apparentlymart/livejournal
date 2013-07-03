@@ -3712,9 +3712,10 @@ sub editevent {
                 fail(\$warning,160,$error);
                         
         } elsif($repost_offer_action eq 'edit') {
-            $repost_offer->edit(\$error, 
-                                add_budget => $repost_offer->{add_budget},
-                                limit_sc   => $repost_offer->{limit_sc},
+            $repost_offer->edit(\$error,
+                                add_budget    => $repost_offer->{add_budget},
+                                limit_sc      => $repost_offer->{limit_sc},
+                                targeting_opt => $repost_offer->{targeting_opt},
                                 ) or fail(\$warning,160,$error);
        
         } elsif($repost_offer_action eq 'revoke') {
