@@ -4725,7 +4725,11 @@ main.top.promo.stat=You can take this place for [[buyout]] [[?buyout|token|token
 main.top.promo.stat.communities|staleness=1
 main.top.promo.stat.communities=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
 
+main.top.promo.stat.communities.ua=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
+
 main.top.promo.stat.users=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
+
+main.top.promo.stat.users.ua=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
 
 main.top.updown|staleness=1
 main.top.updown=This user has changed its position in the top
