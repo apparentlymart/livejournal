@@ -125,7 +125,7 @@ body<=
     $ret .= q|<table class="aliaslist-table b-form-changelist">|;
     
     my @userid_list = ();
-    my %all_aliases = LJ::get_all_aliases();
+    my %all_aliases = LJ::get_all_aliases($u);
     my $us = LJ::load_userids(keys %all_aliases);
     foreach my $userid (keys %all_aliases) {
         delete $all_aliases{$userid} unless $us->{$userid}; # need safe sort below

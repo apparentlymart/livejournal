@@ -7602,7 +7602,7 @@ sub get_all_aliases {
 
     return if $LJ::DISABLED{'aliases'};
 
-    my $remote = LJ::get_remote();
+    my $remote = shift || LJ::get_remote();
     return unless $remote and $remote->get_cap('aliases');
 
     if (!$remote->{_aliases}) {
