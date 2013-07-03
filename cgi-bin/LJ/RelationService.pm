@@ -33,7 +33,7 @@ sub _load_rs_api {
         $singletons{'__lj11_params_value'} = $values;
     }
     
-    if ($type eq 'F') {
+    if ($type && $type eq 'F') {
         return 0 unless $values->{rs_enable_type_f};
     } else {
         return 0 unless $values->{rs_enable_type_other};
