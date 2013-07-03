@@ -7526,7 +7526,8 @@ sub ljuser_alias {
     return if $LJ::DISABLED{'aliases'};
 
     my $user = shift;
-    my $remote = shift || LJ::get_remote();
+    my $remote = shift;
+    $remote = LJ::get_remote() unless isu($remote);
 
     return unless $remote;
     return unless $remote->get_cap('aliases');
