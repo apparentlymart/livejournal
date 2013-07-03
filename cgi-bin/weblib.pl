@@ -1835,6 +1835,10 @@ sub res_includes {
         return if $opts->{only_js}
                 and $template =~ /^<link/;
 
+        my $minify_js = (LJ::Request->get_param("minify_js") eq 0 and $template =~ /^<script/)
+                        ? '&minify_js=0'
+                        : "";
+
         foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
             foreach my $args (sort {length($a) <=> length($b)} keys %{ $list{$type}{$cond} }) {
                 my $list = $list{$type}{$cond}{$args};
@@ -1857,6 +1861,9 @@ sub res_includes {
                     $mtime = $mtime_base if $mtime_base > $mtime;
 
                     $csep .= "?v=" . $mtime;
+                    if ($minify_js){
+                        $csep .= $minify_js;
+                    }
                     my $inc = $template;
                     $inc =~ s/__+/??$csep/;
                     $inc =~ s/##/$args/;
