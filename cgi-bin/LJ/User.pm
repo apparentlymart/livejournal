@@ -7522,11 +7522,12 @@ sub get_shared_journals
 ## my $text = LJ::ljuser_alias($u)
 ## returns note text (former 'alias') for current remote user
 sub ljuser_alias {
-    my $user = shift;
 
     return if $LJ::DISABLED{'aliases'};
 
-    my $remote = LJ::get_remote();
+    my $user = shift;
+    my $remote = shift || LJ::get_remote();
+
     return unless $remote;
     return unless $remote->get_cap('aliases');
 

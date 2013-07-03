@@ -132,17 +132,18 @@ body<=
     }
     my $users_list_html = '';
     foreach my $userid (sort { $us->{$a}->display_name cmp $us->{$b}->display_name } keys %all_aliases) {
-        my $u = $us->{$userid};
+        my $usr = $us->{$userid};
+
         $users_list_html .= q|<tr><td>|
                                 .LJ::html_check({ 'type' => 'check',
                                   'name' => "check".$userid,
                                   'id' => "check".$userid,
                                   'class' => "user_check",
                                   'value' => 'on' }) . q| |.
-        LJ::ljuser($u->{user}).
+        LJ::ljuser($usr->{user}).
         
         q|</td><td class="user_alias"><input type="text" class="type-text" name="|.$key.$userid.q|" value="|
-                .LJ::ehtml(LJ::ljuser_alias($u->{user})).qq|" size="50" maxlength="$max_alias_length" onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"/>|
+                .LJ::ehtml(LJ::ljuser_alias($usr->{user}, $u)).qq|" size="50" maxlength="$max_alias_length" onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"/>|
                 ."</td></tr>\n";
         push @userid_list, $userid;
     }
