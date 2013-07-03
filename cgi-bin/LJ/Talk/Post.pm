@@ -107,7 +107,7 @@ sub enter_comment {
             $db = LJ::get_db_writer();
             $table = "talkleft_xfp";
         }
-        my $pub  = $item->{'security'} eq "public" ? 1 : 0;
+        my $pub  = $item->{'security'} && $item->{'security'} eq "public" ? 1 : 0;
         if ($db) {
             $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
                     "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
@@ -751,7 +751,7 @@ sub post_comment {
         $comment->{pic} = $pic;
 
         # put the post in the database
-        my $ditemid = $item->{itemid}*256 + $item->{anum};
+        my $ditemid = $item->{itemid}*256 + ($item->{anum} || 0);
         $jtalkid = enter_comment($journalu, $parent, $item, $comment, $errref);
         return 0 unless $jtalkid;
 
