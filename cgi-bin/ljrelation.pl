@@ -196,7 +196,7 @@ sub load_rel_target
 
     return undef unless $u and $type;
 
-    my $limit = int(delete $args{limit}) || 50000;
+    my $limit = int(delete $args{limit} || 50000);
 
     my @uids = LJ::RelationService->find_relation_sources($u, $type, limit => $limit, db => $db, %args);
     return \@uids;
