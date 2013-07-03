@@ -4648,6 +4648,11 @@ sub caps {
     return $u->{caps};
 }
 
+sub is_sup {
+    my $u = shift;
+    return $u->in_class('sup_user') && !$u->in_class('sup_optout');
+}
+
 *get_post_count = \&number_of_posts;
 sub number_of_posts {
     my ($u, %opts) = @_;
