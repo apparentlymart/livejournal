@@ -1247,7 +1247,7 @@ sub entry_form_decode
     }
 
     # nuke taglists that are just blank
-    $req->{'prop_taglist'} = "" unless $req->{'prop_taglist'} && $req->{'prop_taglist'} =~ /\S/;
+    $req->{'prop_taglist'} = "" unless defined $req->{'prop_taglist'} && $req->{'prop_taglist'} =~ /\S/;
 
     # Convert the rich text editor output back to parsable lj tags.
     my $event = $POST->{'event'};

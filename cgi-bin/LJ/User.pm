@@ -9695,7 +9695,7 @@ sub make_journal {
     if (exists $opts->{getargs}->{tag}) {
         my $tagfilter = $opts->{getargs}->{tag};
         return $error->("You must provide tags to filter by.", "404 Not Found")
-            unless $tagfilter;
+            unless defined $tagfilter;
 
         # error if disabled
         return $error->("Sorry, the tag system is currently disabled.", "404 Not Found")

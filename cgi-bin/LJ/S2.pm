@@ -1938,7 +1938,7 @@ sub DateTime_parts
 sub Tag
 {
     my ($u, $kwid, $kw) = @_;
-    return undef unless $u && $kwid && $kw;
+    return undef unless $u && $kwid && defined $kw;
     
     my $t = {
         _type => 'Tag',

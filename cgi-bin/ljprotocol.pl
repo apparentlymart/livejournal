@@ -2362,7 +2362,7 @@ sub postevent {
 
     # confirm we can add tags, at least
     return fail($err, 312)
-        if $req->{props} && $req->{props}->{taglist} &&
+        if $req->{props} && defined $req->{props}->{taglist} &&
            ! LJ::Tags::can_add_tags($uowner, $u);
 
     my $event = $req->{'event'};
@@ -2864,6 +2864,7 @@ sub postevent {
     
     # Entry tags
     if ($req->{props} && defined $req->{props}->{taglist}) {
+
         # slightly misnamed, the taglist is/was normally a string, but now can also be an arrayref.
         my $taginput = $req->{props}->{taglist};
 
