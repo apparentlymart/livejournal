@@ -6383,6 +6383,23 @@ sub is_migrated_to_friends_and_subscriptions {
     return $u->prop('migrated_to_friends_and_subscriptions');
 }
 
+sub admin_api_access {
+    my ($u, $method) = @_;
+
+    return unless LJ::isu($u) && $method;
+
+    my $privilege = $LJ::API_PRIVILEGES{$method};
+
+    my $priv = $privilege->{'priv'};
+    my $arg  = $privilege->{'arg'};
+
+    if ( LJ::check_priv($u, $priv, $arg) ) {
+        return 1;
+    }
+
+    return 0;
+}
+
 package LJ;
 
 use Carp;
@@ -9228,7 +9245,6 @@ sub priv_can_view {
         return 1;
     }
 }
-
 # given an extuserid or extuser, return the LJ uid.
 # return undef if there is no mapping.
 sub get_extuser_uid
