@@ -1761,6 +1761,8 @@ sub res_includes {
         </script>\n|;
     }
 
+    my $minify_js_flag = LJ::Request->get_param("minify_js") eq 0;
+
     my %list;   # type -> condition -> args -> [list of files];
     my %oldest; # type -> condition -> args -> $oldest
     my $add = sub {
@@ -1776,7 +1778,10 @@ sub res_includes {
         # in the concat-res case, we don't directly append the URL w/
         # the modtime, but rather do one global max modtime at the
         # end, which is done later in the tags function.
-        $what .= "?v=$modtime" unless $do_concat;
+        unless ($do_concat){
+            $what .= "?v=$modtime";
+            $what .= "&minify_js=0" if $minify_js_flag and $type =~ /^js/;
+        }
 
         push @{$list{$type}{$condition}{$args} ||= []}, $what;
         $oldest{$type}{$condition}{$args} = $modtime if $modtime > $oldest{$type}{$condition}{$args};
@@ -1835,9 +1840,8 @@ sub res_includes {
         return if $opts->{only_js}
                 and $template =~ /^<link/;
 
-        my $minify_js = (LJ::Request->get_param("minify_js") eq 0 and $template =~ /^<script/)
-                        ? '&minify_js=0'
-                        : "";
+        my $minify_js = ($minify_js_flag and $template =~ /^<script/)
+                        ? '&minify_js=0' : "";
 
         foreach my $cond (sort {length($a) <=> length($b)} keys %{ $list{$type} }) {
             foreach my $args (sort {length($a) <=> length($b)} keys %{ $list{$type}{$cond} }) {
