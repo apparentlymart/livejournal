@@ -4667,8 +4667,7 @@ main.promo.empty.selfpromo=Promote your entry here for 2 000 tokens
 main.promo.footer.calendarpromo|staleness=1
 main.promo.footer.calendarpromo=Promote your entry at calendar promo for [[overbet]] [[?overbet|token|tokens]]
 
-main.promo.footer.selfpromo|staleness=1
-main.promo.footer.selfpromo=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
+main.promo.footer.selfpromo.cyr=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
 
 main.promo.footer.selfpromo.ua=This etnry will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[overbet]] [[?overbet|token|tokens]]
 
@@ -4722,12 +4721,11 @@ main.top.promo.empty.users=Promote your journal here for [[buyout]] [[?buyout|to
 main.top.promo.stat|staleness=1
 main.top.promo.stat=You can take this place for [[buyout]] [[?buyout|token|tokens]]
 
-main.top.promo.stat.communities|staleness=1
-main.top.promo.stat.communities=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
+main.top.promo.stat.communities.cyr=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
 
 main.top.promo.stat.communities.ua=This community will be at promo for another [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], take for [[buyout]] [[?buyout|token|tokens]]
 
-main.top.promo.stat.users=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
+main.top.promo.stat.users.cyr=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
 
 main.top.promo.stat.users.ua=This user will be at promo for [[timeleft_hours]] [[?timeleft_hours|hour|hours]] and [[timeleft_minutes]] [[?timeleft_minutes|minute|minutes]], <a href="http://www.livejournal.com/shop/selfpromo.bml?type=journal" target="_blank">take </a> for [[buyout]] [[?buyout|token|tokens]]
 
