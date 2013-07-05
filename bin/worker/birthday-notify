@@ -152,6 +152,9 @@ sub work {
 
         # add data to widget at new home page title panel
         LJ::Widget::HomePage::UpdatesForUser->birthday_notify($u);
+
+        # add data to widget at new home page title panel (today case)
+        LJ::Widget::HomePage::UpdatesForUser->birthday_notify($u, $notify->epoch + $delay);
     }
 
     if ($purge_is_needed) {
