@@ -204,7 +204,7 @@ sub work {
     my $to;
     my $toarg;
     foreach my $a ( Mail::Address->parse( $head->get('To') ), Mail::Address->parse( $head->get('Cc') ) ) {
-        my $address = $a->address;
+        my $address = lc $a->address;
         my $arg;
         if ( $address =~ /^(.+)\+(.*)\@(.+)$/ ) {
             ( $address, $arg ) = ( "$1\@$3", $2 );
