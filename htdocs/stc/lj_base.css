@@ -2503,6 +2503,20 @@ BODY div .b-helplink:active {
 			text-decoration: none;
 			color: #FFF !important;
 			}
+	.b-reset .b-pager-strong.b-pager-first .b-pager-prev A,
+	.b-reset .b-pager-strong.b-pager-first .b-pager-prev A:link,
+	.b-reset .b-pager-strong.b-pager-first .b-pager-prev A:visited,
+	.b-reset .b-pager-strong.b-pager-first .b-pager-prev A:hover,
+	.b-reset .b-pager-strong.b-pager-first .b-pager-prev A:active,
+	.b-reset .b-pager-strong.b-pager-last .b-pager-next A,
+	.b-reset .b-pager-strong.b-pager-last .b-pager-next A:link,
+	.b-reset .b-pager-strong.b-pager-last .b-pager-next A:visited,
+	.b-reset .b-pager-strong.b-pager-last .b-pager-next A:hover,
+	.b-reset .b-pager-strong.b-pager-last .b-pager-next A:active {
+			color: #777 !important;
+			text-decoration: none;
+			cursor: default;
+			}
 	
 .b-pager-prev {
 	margin-right: 10px;
