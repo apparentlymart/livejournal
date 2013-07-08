@@ -2313,6 +2313,7 @@ sub journal_js_inject
                     templates/CleanHtml/Repost.tmpl
                     templates/CleanHtml/PaidRepost.tmpl
                     js/s2.js
+                    js/esn.js
                     js/jquery/jquery.lj.confirmbubble.js
                     templates/Widgets/popupcontent.tmpl
                     js/jquery/jquery.lj.ljcut.js
