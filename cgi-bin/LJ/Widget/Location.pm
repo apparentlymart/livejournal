@@ -360,9 +360,10 @@ sub all_region_options_array {
     my $class = shift;
     my $opts  = shift;
 
-    my $region = $opts->{region} || '';
+    my $selected_region  = $opts->{region} || '';
+    my $selected_country = $opts->{country};
 
-    my @all_options;
+    my $all_options;
 
     while (my ($country, $conf) = each %LJ::COUNTRIES_WITH_REGIONS) {
         my %states = ();
@@ -370,16 +371,16 @@ sub all_region_options_array {
 
         my @options = ( { code     => '',
                           name     => '',
-                          selected => !$region ? 1 : 0 },
+                          selected => !$selected_region ? 1 : 0 },
                         map { { code     => $_,
                                 name     => $states{$_},
-                                selected => $region eq $_ ? 1 : 0 } }
+                                selected => ($selected_country eq $country) && ($selected_region eq $_) ? 1 : 0 } }
                         sort keys %states );
 
-        push @all_options, \@options;
+        $all_options->{$country} = \@options;
     }
 
-    return \@all_options;
+    return $all_options;
 }
 
 1;
