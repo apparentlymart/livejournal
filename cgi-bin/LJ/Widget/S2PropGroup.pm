@@ -271,11 +271,13 @@ sub output_prop {
         $ret .= "</td>";
     } elsif ($type eq "int") {
         $ret .= "<td class='prop-input'>";
+        my $length = 5;
+        $length = 2 if $prop_name eq 'page_recent_items' || $prop_name eq 'page_friends_items';
         $ret .= $class->html_text(
             name => $name,
             disabled => ! $can_use,
             value => $override,
-            maxlength => 5,
+            maxlength => $length,
             size => 7,
         );
         $ret .= "</td>";
@@ -374,10 +376,10 @@ sub handle_post {
         delete $override{$layout_prop};
         delete $override{$show_sidebar_prop};
 
-        LJ::Customize->save_s2_props($u, $style, \%override, reset => 1);
+        LJ::Customize->save_s2_props($u, $style, \%override, reset => 1, check_params => 1);
         LJ::Customize->save_language($u, $post->{langcode}, reset => 1) if defined $post->{langcode};
     } else {
-        LJ::Customize->save_s2_props($u, $style, $post);
+        LJ::Customize->save_s2_props($u, $style, $post, check_params => 1);
         LJ::Customize->save_language($u, $post->{langcode}) if defined $post->{langcode};
     }
 

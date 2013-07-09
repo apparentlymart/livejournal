@@ -481,6 +481,19 @@ sub save_s2_props {
             $prop_value = defined $post->{$name} ? $post->{$name} : $prop_values{override};
         }
         next if $prop_value eq $prop_values{existing};
+        if ($opts{check_params}) {
+	       my $v = { %{$prop}, val => $prop_value };
+	       if ( $v->{type} eq 'int' ) {
+	           if ($v->{min} =~ /^\d+$/ && $v->{val} < $v->{min}) {
+	               push @BMLCodeBlock::errors, "Minimum \"$v->{des}\" field value is $v->{min}";
+	               next;
+	           }
+	           if ($v->{max} =~ /^\d+$/ && $v->{val} > $v->{max}) {
+	               push @BMLCodeBlock::errors, "Maximum \"$v->{des}\" field value is $v->{max}";
+	               next;
+	           }
+	       }
+	    }
         $override{$name} = [ $prop, $prop_value ];
     }
 
