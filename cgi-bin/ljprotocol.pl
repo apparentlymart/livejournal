@@ -2362,8 +2362,10 @@ sub postevent {
 
     # confirm we can add tags, at least
     return fail($err, 312)
-        if $req->{props} && defined $req->{props}->{taglist} &&
-           ! LJ::Tags::can_add_tags($uowner, $u);
+        if $req->{props} && 
+        defined $req->{props}->{taglist} &&
+        $req->{props}->{taglist} ne '' &&
+        ! LJ::Tags::can_add_tags($uowner, $u);
 
     my $event = $req->{'event'};
 
