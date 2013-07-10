@@ -140,12 +140,17 @@ sub common_template_params {
         $remote_username = $remote->username;
     }
 
+    my $lj_home = $LJ::SITEROOT;
+
     my $favicon = '';
     if ( my $journal = LJ::get_active_journal() ) {
         if ( $journal->is_personal ) {
             ($favicon) = $journal->userhead;
             $favicon   = $LJ::IMGPREFIX . "/" . $favicon
                 unless $favicon =~ m{^http://};
+        }
+        if ( $journal->username() eq 'lj_singapore') {
+            $lj_home = 'http://www.livejournal.sg';
         }
     }
 
@@ -486,6 +491,8 @@ sub common_template_params {
         'branding'            => $branding,
         'lentaru_branding'    => lentaru_branding() || undef,
         'random_value'        => int(rand(999999999)),
+        
+        'lj_home'             => $lj_home,
     };
 }
 
