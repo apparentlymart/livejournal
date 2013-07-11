@@ -6,6 +6,7 @@ use Class::Autouse qw (
                        LJ::Auth
                        HTML::TokeParser
                        );
+use WWW::Curl::Easy;
 use Encode;
 
 # states for a finite-state machine we use in parse()
@@ -61,6 +62,8 @@ sub save_module {
 
         $old_content =~ s/\s//sg;
         $new_content =~ s/\s//sg;
+        
+        warn("content: $contents \n old_content: $old_content \n new_content: $new_content");
 
         $need_new_id = 1 unless $old_content eq $new_content;
     }
@@ -354,7 +357,16 @@ sub parse_module_embed {
                 # </lj-embed> - that's the end of explicit embed block, switch to REGULAR
                 $newstate = REGULAR;
             } else {
-                # continue appending cwontents to embed buffer
+                # continue appending contents to embed buffer
+
+                #LJSUP-15251: Adjust rutube URL to embed code conversion
+                if ($reconstructed =~ qr{http://rutube\.ru/video/(private/)?(.*)/}) {
+                    my $curl = `curl http://rutube.ru/api/video/$2/`;
+                    $curl =~ /"html": "(.*?)",/;
+                    $reconstructed = $1;
+                    $reconstructed =~ s/\\"/"/g;
+                }
+
                 $embed .= $reconstructed;
             }
         } else {
