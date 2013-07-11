@@ -4686,6 +4686,10 @@ main.promo.nav.next=Next Item
 main.promo.nav.prev|staleness=1
 main.promo.nav.prev=Previous Item
 
+main.promomenu.fastcult=Fastcult
+
+main.promomenu.kanobu=Kanobu
+
 main.search.find|staleness=1
 main.search.find=Find
 
