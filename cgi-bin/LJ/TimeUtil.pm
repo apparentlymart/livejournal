@@ -387,10 +387,11 @@ sub fancy_time_format {
 
     if ($opts->{mount_short}) {
         my $month_code = LJ::Lang::month_short_langcode($dt->month);
-        $day_month  = $dt->day . " " . LJ::Lang::ml($month_code);
+        $day_month  = $dt->day . " " . LJ::Lang::get_text($opts->{lang}, $month_code);
     } else { 
         my $month_code = lc LJ::Lang::month_short( $dt->month );
-        $day_month  = LJ::Lang::ml( 'esn.month.day_' . $month_code,
+        $day_month  = LJ::Lang::get_text($opts->{lang}, 'esn.month.day_' . $month_code,
+                         undef,
                          { 'day' => $dt->day } );
     }
 

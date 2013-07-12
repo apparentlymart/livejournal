@@ -1,6 +1,6 @@
 package LJ::Event::OfficialPost;
 use strict;
-use Class::Autouse qw(LJ::Entry);
+use Class::Autouse qw(LJ::Entry LJ::HTML::Template LJ::TimeUtil);
 use Carp qw(croak);
 use base 'LJ::Event';
 
@@ -20,7 +20,7 @@ sub entry {
 sub content {
     my $self = shift;
     my $entry = $self->entry;
-    return $entry->event_html( {cuturl => $entry->url} );
+    return $entry->event_html( {cuturl => $entry->url, no_ljcut_collapse => 1} );
 }
 
 sub is_common { 1 }
@@ -64,9 +64,30 @@ sub as_email_html {
     my $self = shift;
     my $u = shift;
 
-    return sprintf "%s<br />
-<br />
-%s", $self->as_html($u), $self->content;
+    unless  ( LJ::is_enabled('news_mail_redisign') ) {
+        return sprintf "%s<br />\n<br />\n%s", $self->as_html($u), $self->content;
+    } else {
+        
+        my $entry = $self->entry or return "(Invalid entry)";
+
+        my $template = LJ::HTML::Template->new(
+            { use_expr => 1 },
+            filename => "$ENV{'LJHOME'}" . '/templates/ESN/OfficialPost/email_html.tmpl',
+            die_on_bad_params => 0,
+        );
+
+        my $lang = $u->prop("browselang");
+
+        $template->param({
+            date    => LJ::TimeUtil->fancy_time_format($entry->logtime_unix, 'day', $u->prop('timezone'), {lang => $lang}),
+            content => $self->content,
+            subject => $self->entry->subject_text || '',
+            url     => $entry->url,
+            lang    => $lang,
+        });
+
+        return $template->output();
+    }
 }
 
 sub as_email_string {
