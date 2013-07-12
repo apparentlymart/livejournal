@@ -385,6 +385,8 @@ sub fancy_time_format {
 
     my $day_month;
 
+    $opts->{lang} ||= LJ::Lang::current_language();
+
     if ($opts->{mount_short}) {
         my $month_code = LJ::Lang::month_short_langcode($dt->month);
         $day_month  = $dt->day . " " . LJ::Lang::get_text($opts->{lang}, $month_code);
