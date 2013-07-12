@@ -333,7 +333,7 @@ sub output_prop {
     elsif ($type eq "OptionsDelimeter") {
         $ret .= "<td class='prop-delimeter' colspan='2'>";
         if($prop->{des}){
-            $ret .= "<fieldset><legend>" . $prop->{des} . "</legend></fieldset>";
+            $ret .= "<fieldset><legend>" . LJ::eall($des) . "</legend></fieldset>";
             }
         else {
             $ret .= "<hr/>";   
