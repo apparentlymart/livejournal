@@ -43,6 +43,7 @@ body<=
     if ($remote) {
         $authas = $GET{authas} || $remote->user;
         $u = LJ::get_authas_user($authas);
+        return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
         
         # LJSUP-15473: Ability to view user's settings
         my $add_url = $given_cat ? "?cat=$given_cat" : '';
