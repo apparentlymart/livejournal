@@ -874,13 +874,15 @@ LiveJournal.parseMedia = (function() {
         var link = {
             'youtube': 'http://youtube.com/watch?v={id}',
             'vimeo': 'http://vimeo.com/{id}',
-            'vine': 'http://vine.co/v/{id}'
+            'vine': 'http://vine.co/v/{id}',
+            'instagram': 'http://instagram.com/p/{id}/'
         };
 
         var embed = {
             'youtube': '<iframe src="http://www.youtube.com/embed/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.youtube}),
             'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo}),
-            'vine'   : '<iframe src="http://vine.co/v/{id}/card" width="380" height="380" frameborder="0" data-link="{link}"></iframe>'.supplant({link: link.vine})
+            'vine'   : '<iframe src="http://vine.co/v/{id}/card" width="380" height="380" frameborder="0" data-link="{link}"></iframe>'.supplant({link: link.vine}),
+            'instagram' : '<iframe src="//instagram.com/p/{id}/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"  data-link="{link}"></iframe>'.supplant({link: link.instagram})
         };
 
         var provider = {
@@ -920,6 +922,15 @@ LiveJournal.parseMedia = (function() {
                     }
 
                     return (match && match[7]) || null;
+                }
+            },
+
+            'instagram': {
+                parse: function(input) {
+                    var matcher = /.*(?:instagram\.\w*|instagr\.am)\/p\/([^\/]+).*/,
+                        match = input.match(matcher);
+
+                    return (match && match[1]) || null;
                 }
             }
         };
