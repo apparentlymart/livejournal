@@ -43,12 +43,12 @@ body<=
     if ($remote) {
         $authas = $GET{authas} || $remote->user;
         $u = LJ::get_authas_user($authas);
-        return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
         
         # LJSUP-15473: Ability to view user's settings
         my $add_url = $given_cat ? "?cat=$given_cat" : '';
         if ( LJ::priv_can_view("/manage/settings/$add_url", $remote) && !(defined $u) ) {
             $u = LJ::load_user($authas);
+            return LJ::bad_input($ML{'error.invalidauth'}) unless $u;
             LJ::Setting::start_viewonly();
             $submit_msg .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />"
         }
