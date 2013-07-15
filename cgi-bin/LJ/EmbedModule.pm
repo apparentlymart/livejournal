@@ -62,8 +62,6 @@ sub save_module {
 
         $old_content =~ s/\s//sg;
         $new_content =~ s/\s//sg;
-        
-        warn("content: $contents \n old_content: $old_content \n new_content: $new_content");
 
         $need_new_id = 1 unless $old_content eq $new_content;
     }
@@ -360,7 +358,7 @@ sub parse_module_embed {
                 # continue appending contents to embed buffer
 
                 #LJSUP-15251: Adjust rutube URL to embed code conversion
-                if ($reconstructed =~ qr{http://rutube\.ru/video/(private/)?(.*)/}) {
+                if ($reconstructed =~ qr{http://rutube\.ru/video/(private/)?(\w*)}) {
                     my $curl = `curl http://rutube.ru/api/video/$2/`;
                     $curl =~ /"html": "(.*?)",/;
                     $reconstructed = $1;
