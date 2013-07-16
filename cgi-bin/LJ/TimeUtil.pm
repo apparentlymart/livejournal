@@ -477,4 +477,20 @@ sub format_rtime {
     };
 } # format_rtime
 
+#it returns -1 if $time1 < $time2, 0 if $time1 == $time2, 1 if $time1 > $time2.
+sub day_compare {
+	my ($time1, $time2, $zone) = @_;
+
+	return 0 unless $time1;
+	$time2 ||= time();
+	$zone ||= 'Europe/Moscow';
+
+	$time1 = DateTime->from_epoch( epoch => $time1, time_zone => $zone );
+	$time2 = DateTime->from_epoch( epoch => $time2, time_zone => $zone );
+	$time1->truncate( to => 'day');
+	$time2->truncate( to => 'day');
+
+	return DateTime->compare($time1, $time2);
+}
+
 1;
