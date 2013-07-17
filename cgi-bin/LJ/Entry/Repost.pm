@@ -398,7 +398,7 @@ sub get_status {
 
             $paid = 0 if ($cost == 0 && !$is_owner) || !$budget;
 
-            $result->{budget} = LJ::delimited_number( $repost_offer->actual_budget ) if $is_owner;
+            $result->{budget} = LJ::delimited_number( $repost_offer->budget ) if $is_owner;
         }
 
         $result->{reposted} = $reposted;
