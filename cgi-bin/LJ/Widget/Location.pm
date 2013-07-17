@@ -335,7 +335,7 @@ sub country_options_array {
     LJ::load_codes({ "country" => \%countries});
 
     my @options = ( { code     => '',
-                      name     => '',
+                      name     => $class->ml('widget.location.country.select'),
                       selected => !$country ? 1 : 0 },
                     map { { code     => $_,
                             name     => $countries{$_},
@@ -370,7 +370,7 @@ sub all_region_options_array {
         LJ::load_codes ({$conf->{'type'} => \%states});
 
         my @options = ( { code     => '',
-                          name     => '',
+                          name     => $class->ml('widget.location.region.select'),
                           selected => !$selected_region ? 1 : 0 },
                         map { { code     => $_,
                                 name     => $states{$_},
