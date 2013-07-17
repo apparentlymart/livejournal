@@ -20,6 +20,9 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning commenturl.\n";
     $dbh->do("DELETE FROM commenturls WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
     $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    
+    print "-I- Cleaning entry url.\n";
+    $dbh->do("DELETE FROM entryurlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
 
     print "-I- Cleaning syslog table.\n";
     $dbh->do("DELETE FROM syslog WHERE log_time < UNIX_TIMESTAMP() - 86400 * 30 * 2");  ## 2 months
