@@ -6,7 +6,7 @@ use LJ::NewWorker::TheSchwartz;
 
 ############################################################################
 
-package LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends;
+package LJ::NewWorker::TheSchwartz::UpdateFotobilderFriendsRunner;
 use base 'LJ::NewWorker::TheSchwartz';
 
 sub capabilities {
@@ -18,6 +18,9 @@ sub capabilities {
 }
 
 __PACKAGE__->start();
+
+package LJ::NewWorker::TheSchwartz::UpdateFotobilderFriends;
+use base qw( TheSchwartz::Worker );
 
 sub work {
     my ($class, $job) = @_;
