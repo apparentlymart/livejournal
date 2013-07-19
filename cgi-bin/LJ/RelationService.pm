@@ -115,6 +115,8 @@ sub load_relation_destinations {
     my %opts  = @_;
 
     $u = LJ::want_user($u);
+    return undef unless $u;
+
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
