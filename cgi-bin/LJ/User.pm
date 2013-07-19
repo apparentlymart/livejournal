@@ -8760,9 +8760,6 @@ sub _friends_do {
 
     LJ::memcache_kill($uid, "friends");
 
-    # pass $uuid in case it's a $u object which mark_dirty wants
-    LJ::mark_dirty($uuid, "friends");
-
     return 1;
 }
 
@@ -9072,46 +9069,6 @@ sub fill_groups_xmlrpc {
         $ret->{"grpu:$fid:$fname"} =
             $str->(join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30));
     }
-
-    return 1;
-}
-
-# <LJFUNC>
-# name: LJ::mark_dirty
-# des: Marks a given user as being $what type of dirty.
-# args: u, what
-# des-what: type of dirty being marked (e.g. 'friends')
-# returns: 1
-# </LJFUNC>
-sub mark_dirty {
-    my ($uuserid, $what) = @_;
-
-    my $userid = LJ::want_userid($uuserid);
-    return 1 if $LJ::REQ_CACHE_DIRTY{$what}->{$userid};
-
-    my $u = LJ::want_user($userid);
-
-    # friends dirtiness is only necessary to track
-    # if we're exchange XMLRPC with fotobilder
-    if ($what eq 'friends') {
-        return 1 unless $LJ::FB_SITEROOT;
-        my $sclient = LJ::theschwartz();
-
-        push @LJ::CLEANUP_HANDLERS, sub {
-            if ($sclient) {
-                my $job = TheSchwartz::Job->new(
-                                                funcname => "LJ::Worker::UpdateFotobilderFriends",
-                                                coalesce => "uid:$u->{userid}",
-                                                arg      => $u->{userid},
-                                                );
-                $sclient->insert($job);
-            } else {
-                die "No schwartz client found";
-            }
-        };
-    }
-
-    $LJ::REQ_CACHE_DIRTY{$what}->{$userid}++;
 
     return 1;
 }

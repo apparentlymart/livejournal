@@ -4855,7 +4855,6 @@ sub editfriends
     my $friends_added = 0;
     my $fail = sub {
         LJ::memcache_kill($userid, "friends");
-        LJ::mark_dirty($userid, "friends");
         return fail($err, $_[0], $_[1]);
     };
 
@@ -5005,7 +5004,6 @@ sub editfriends
     # invalidate memcache of friends
     LJ::memcache_kill($userid, "friends");
     LJ::memcache_kill($userid, "friends2");
-    LJ::mark_dirty($userid, "friends");
 
     LJ::run_hooks('friends_changed', LJ::load_userid($userid)) if $friends_changed;
 
@@ -5184,7 +5182,6 @@ sub editfriendgroups
     # invalidate memcache of friends/groups
     LJ::memcache_kill($userid, "friends");
     LJ::memcache_kill($userid, "fgrp");
-    LJ::mark_dirty($u, "friends");
 
     # return value for this is nothing.
     return {

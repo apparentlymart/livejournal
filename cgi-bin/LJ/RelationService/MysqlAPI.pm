@@ -236,7 +236,6 @@ sub _create_relation_to_type_f {
     # invalidate memcache of friends
     LJ::memcache_kill($u->userid, "friends");
     LJ::memcache_kill($u->userid, "friends2");
-    LJ::mark_dirty($u->userid, "friends");
 
     LJ::run_hooks('befriended', $u, $friend);
     LJ::User->increase_friendsof_counter($friend->userid);
