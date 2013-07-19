@@ -324,7 +324,7 @@ sub country_options {
     return $options;
 }
 
-sub country_options_array {
+sub country_options_hash {
     my $class = shift;
     my $opts  = shift;
 
@@ -334,14 +334,15 @@ sub country_options_array {
     # load country codes
     LJ::load_codes({ "country" => \%countries});
 
-    my @options = ( { code     => '',
-                      name     => $class->ml('widget.location.country.select'),
-                      selected => !$country ? 1 : 0 },
-                    map { { code     => $_,
-                            name     => $countries{$_},
-                            selected => $country eq $_ ? 1 : 0 } }
-                    sort { $countries{$a} cmp $countries{$b} } keys %countries );
-    return \@options;
+    my %options = ( '' => { code     => '',
+                            name     => $class->ml('widget.location.country.select'),
+                            selected => !$country ? 1 : 0 },
+                    map { 
+                        $_ => { code     => $_,
+                                name     => $countries{$_},
+                                selected => $country eq $_ ? 1 : 0 } 
+                    } keys %countries );
+    return \%options;
 }
 
 sub region_options {
