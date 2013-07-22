@@ -45,7 +45,7 @@
 }; 
   (function(){ 
     var code = ['<div class="aviasales_inlineable">', 
-      '<div style="visibility: hidden;" data-widget-id= "$api" data-widgets-forms-inlineable=\'{"link":"/widgets/$api.json?locale=ru","forms":["search","hotels"],"widget_id":"$api"}\'>', 
+      '<div style="visibility: hidden;" data-widget-id= "$api" data-widgets-forms-inlineable=\\'{"link":"/widgets/$api.json?locale=ru","forms":["search","hotels"],"widget_id":"$api"}\\'>', 
       '<div class="nano_form_tabs_wp ultra_narrow_tabs">', 
       '<div class="nano_form_tabs" data-widgets-forms-inlineable-tabs="">', 
       '</div></div></div></div>'], 
