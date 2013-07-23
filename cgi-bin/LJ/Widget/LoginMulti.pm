@@ -81,6 +81,11 @@ sub render_body {
            $template->param( 'type_' . $type => [ $type_display ] );
         }
         push @types, $type_display;
+
+        if ( $type eq 'google' ) {
+            $template->param( 'google_client_id' => $LJ::GOOGLE_OAUTH_CONF->{'client_id'}, );
+            LJ::need_res("js/google_auth.js");
+        }
     }
 
     $template->param(
