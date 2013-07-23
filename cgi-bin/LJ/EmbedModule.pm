@@ -6,7 +6,6 @@ use Class::Autouse qw (
                        LJ::Auth
                        HTML::TokeParser
                        );
-use WWW::Curl::Easy;
 use Encode;
 
 # states for a finite-state machine we use in parse()
