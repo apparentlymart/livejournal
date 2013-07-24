@@ -147,7 +147,7 @@ sub embed_video_info {
     my %params = ();
 
     # LJSUP-8992
-    if ($code =~ m!src=["']?(https?:)?//www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)['"]?!) {
+    if ($code =~ m!src=["']?(?:https?:)?//www\.youtube\.com/(?:v|embed)/([\w\d\_\-]+)[?'"]?!) {
         $params{vid} = $1;
         $params{source} = 'youtube';
 
