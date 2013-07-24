@@ -257,6 +257,7 @@ sub truncate_to_word_with_ellipsis {
     my $punct_space = delete $opts{'punct_space'} ? 1 : 0;
     my $strip_html = delete $opts{'strip_html'} ? 1 : 0;
     my $noparse_tags = delete $opts{'noparse_tags'} || [];
+    my $expand_lj_user_tag = delete $opts{'expand_lj_user_tag'} || 0;
 
     my $force_ellipsis;
 
@@ -267,8 +268,8 @@ sub truncate_to_word_with_ellipsis {
         unless $bytes || $chars;
 
     if($strip_html) {
-        $force_ellipsis = ($str =~ /<(img|embed|object|iframe|lj\-embed)/i) ? 1 : 0;
-        $str = LJ::strip_html($str, { use_space => 1, noparse_tags => $noparse_tags });
+        $force_ellipsis = ($str =~ /<(img|embed|object|iframe|lj\-embed|lj\-user)/i) ? 1 : 0;
+        $str = LJ::strip_html($str, { use_space => 1, noparse_tags => $noparse_tags, expand_lj_user_tag => $expand_lj_user_tag });
     }
 
     my $remove_last_word = sub {

@@ -167,6 +167,8 @@ sub clean {
     my $target = $opts->{'target'} || '';
     my $ljrepost_allowed = ($opts->{ljrepost_allowed} && ! $opts->{'textonly'}) || 0;
     my $cut_retrieve     =  $opts->{cut_retrieve} || 0;
+    my $expand_lj_user_tag = $opts->{'expand_lj_user_tag'} || 0;
+    my $skip_lj_user_tag = $opts->{'skip_lj_user_tag'} || 0;
 
     my $enable_dynamic_elements = $EnableDynamicElements;
     unless ( defined $enable_dynamic_elements ) {
@@ -822,7 +824,7 @@ sub clean {
                 $newdata .= Encode::decode_utf8($app->ljapp_display(viewer => LJ::get_remote(), owner => $poster, attrs => \%app_attr, context => \%context), Encode::FB_QUIET);
                 next TOKEN;
             }
-            elsif ($tag eq "lj")
+            elsif ($tag eq "lj" && !$skip_lj_user_tag)
             {
                 # keep <lj comm> working for backwards compatibility, but pretend
                 # it was <lj user> so we don't have to account for it below.
@@ -835,7 +837,7 @@ sub clean {
                     if ($s1var) {
                         $newdata .= "%%ljuser:$1%%" if $attr->{'user'} =~ /^\%\%([\w\-\']+)\%\%$/;
                     } elsif (length $user) {
-                        if ($opts->{'textonly'}) {
+                        if ($opts->{'textonly'} && !$expand_lj_user_tag) {
                             $newdata .= $user;
                         } else {
                             my $title = Encode::encode_utf8($attr->{title});

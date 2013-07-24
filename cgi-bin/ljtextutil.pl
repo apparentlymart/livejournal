@@ -257,6 +257,7 @@ sub strip_html {
     }
     return $str;
 =cut
+
     my $p = HTML::Parser->new(api_version => 3,
                 handlers => {
                     text  => [sub { $_[0]->{res} .= $_[1] }, 'self, text'], # concat plain text
@@ -264,7 +265,11 @@ sub strip_html {
                     start => [sub { 
                                     my ($self, $tag, $attrs, $origtext) = @_;
                                     if ($tag =~ /lj/i){
-                                        $self->{res} .= $attrs->{user} || $attrs->{comm};  # <lj user="username" title=".."> -> username
+                                        if ($opts->{'expand_lj_user_tag'}) {
+                                            $self->{res} .= $origtext;
+                                        } else {
+                                            $self->{res} .= $attrs->{user} || $attrs->{comm};  # <lj user="username" title=".."> -> username
+                                        }
                                     } else {
                                         $self->{res} .= ' ' if $opts->{use_space}; # for other tags add spaces if needed.
                                     }

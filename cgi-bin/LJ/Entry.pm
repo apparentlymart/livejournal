@@ -1084,13 +1084,20 @@ sub event_html_summary {
 sub event_text
 {
     my $self = shift;
+    my %args = @_;
+
+    my $expand_lj_user_tag = $args{'expand_lj_user_tag'} || 0;
+    my $skip_lj_user_tag   = $args{'skip_lj_user_tag'} || 0;
+
     my $event = $self->event_raw;
     if ( $event ) {
         LJ::CleanHTML::clean_event( \$event, {
-            'textonly'  => 1,
-            'journalid' => $self->journalid,
-            'posterid'  => $self->posterid,
-            'entry_url' => $self->url,
+            'textonly'              => 1,
+            'journalid'             => $self->journalid,
+            'posterid'              => $self->posterid,
+            'entry_url'             => $self->url,
+            'expand_lj_user_tag'    => $expand_lj_user_tag,
+            'skip_lj_user_tag'      => $skip_lj_user_tag,
         } );
     }
     return $event;
