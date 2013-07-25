@@ -78,4 +78,41 @@ sub prefetch_image {
     return \$res->content;
 }
 
+sub get_image_content {
+    my $class   = shift;
+    my $img_src = shift;
+
+    ## varlamov.me request the real useragent. it set the speed to 200b/s on default 'user-agent'
+    my $ua = LWPx::ParanoidAgent->new (
+        agent   => 'Mozilla/5.0',
+    );
+
+    ## Allow request to local network (ic.pics.lj.com)
+    $ua->whitelisted_hosts (
+        qr/^172\./,
+    );
+    $ua->timeout (30);
+
+    my $status_code = 0;
+    my $result;
+    my $iter = 2;
+    while (1) {
+        $result = eval { $ua->get($img_src) };
+        if ($@) {
+            return undef;
+        }
+        if ($img_src =~ /^http:\/\/ic?\.pics\.livejournal\.com/) {
+            my $new_url = $result->header ('X-Mog-Pth');
+            $img_src = $new_url if $new_url;
+            last unless $iter--;
+        } elsif (($status_code = $result->code) =~ /302|301/) {
+            $img_src = $result->header ('Location');
+        } else {
+            last;
+        }
+    }
+
+    return $result->content;
+}
+
 1;
