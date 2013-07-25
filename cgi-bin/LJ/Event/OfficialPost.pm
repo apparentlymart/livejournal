@@ -8,7 +8,20 @@ sub new {
     my ($class, $entry) = @_;
     croak "No entry" unless $entry;
 
+    $class->clear_memcache($entry);
+
     return $class->SUPER::new($entry->journal, $entry->ditemid);
+}
+
+sub memkey {
+    my ($class, $entry) = @_;
+    return join '.', "esn.news.post.html" , $entry->journalid, $entry->ditemid;
+}
+
+sub clear_memcache {
+    my ($class, $entry) = @_;
+
+    LJ::MemCache::delete( $class->memkey($entry) );
 }
 
 sub entry {
@@ -70,6 +83,12 @@ sub as_email_html {
         
         my $entry = $self->entry or return "(Invalid entry)";
 
+        my $memkey = $self->memkey($entry);
+
+        my $from_cache = LJ::MemCache::get($memkey);
+
+        return $from_cache if $from_cache;
+
         my $template = LJ::HTML::Template->new(
             { use_expr => 1 },
             filename => "$ENV{'LJHOME'}" . '/templates/ESN/OfficialPost/email_html.tmpl',
@@ -86,7 +105,11 @@ sub as_email_html {
             lang    => $lang,
         });
 
-        return $template->output();
+        my $result = $template->output();
+        
+        LJ::MemCache::set($memkey, $result);
+
+        return $result;
     }
 }
 
