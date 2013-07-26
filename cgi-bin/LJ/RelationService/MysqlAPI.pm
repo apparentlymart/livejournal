@@ -392,6 +392,8 @@ sub _remove_relation_to_type_other {
     foreach my $uid (@rels) {
         LJ::MemCacheProxy::delete("$cache_base:$uid");
     }   
+
+    return 1;
 }
 
 
