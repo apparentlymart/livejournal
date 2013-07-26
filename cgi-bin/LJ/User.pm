@@ -3900,6 +3900,8 @@ sub last_public_entry_time {
         return $lastpublic;
     }
 
+    return $lastpublic if $opts{from_redis};
+
     my $err;
 
     my $is_person = $u->is_person;
