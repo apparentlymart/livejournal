@@ -461,4 +461,21 @@ register_setter("suspicious_trusted_isp_num", sub {
     return 1;
 });
 
+register_setter("custom_posting_access", sub {
+    my ($u, $key, $value, $err) = @_;
+
+    my $remote = LJ::get_remote();
+    unless ($remote && LJ::check_priv($remote, 'siteadmin', 'sharedjournal')) {
+        $$err = "You do not have privileges to set this property.";
+        return 0;
+    }
+
+    unless ($value =~ /^(0|1)$/) {
+        $$err = "Illegal value. Must be '0' or '1'";
+        return 0;
+    }
+    $u->set_prop("custom_posting_access", $value);
+    return 1;
+});
+
 1;
