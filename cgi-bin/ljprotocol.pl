@@ -287,6 +287,7 @@ sub do_request
     LJ::Lang::current_language($lang) unless $lang eq $current_lang;
 
     $flags ||= {};
+    $req->{'method'} = $method;
     my @args = ($req, $err, $flags);
 
     LJ::Request->notes("codepath" => "protocol.$method")
@@ -1681,6 +1682,8 @@ sub login
 
     my $u = $flags->{'u'};
     my $uowner = $flags->{'u_owner'} || $u;
+
+    my $auth_meth = $req->{'auth_method'} || "clear";
 
     my $res = {
         xc3 => {
@@ -5700,6 +5703,10 @@ sub authenticate
 
     my $u;
 
+    my $api_suspicious = sub {
+        LJ::run_hook('api_auth', $u, $req->{'props'}->{'interface'}, $req->{'auth_method'}, $req->{'method'});
+    };
+
     my $auth_meth = $req->{'auth_method'} || "clear";
     my $username  = $req->{'username'} || '';
 
@@ -5715,6 +5722,7 @@ sub authenticate
         # add flag to avoid authentication
         if (!$username && $flags->{'allow_anonymous'}) {
             undef $flags->{'u'};
+            $api_suspicious->();
             return 1;
         }
 
@@ -5797,7 +5805,10 @@ sub authenticate
         return fail($err,101);
     }
 
-    return 1 if ($flags->{'allow_anonymous'} && !$u);
+    if ($flags->{'allow_anonymous'} && !$u) { 
+        $api_suspicious->();
+        return 1;
+    }
 
     # if there is a require TOS revision, check for it now
     return fail($err, 156) unless $u->tosagree_verify;
@@ -5810,6 +5821,7 @@ sub authenticate
         LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
     }
 
+    $api_suspicious->();
     return 1;
 }
 

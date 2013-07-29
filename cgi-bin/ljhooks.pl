@@ -445,4 +445,20 @@ register_setter("s2privs", sub {
     return 1;
 });
 
+register_setter("suspicious_trusted_isp_num", sub {
+    my ($u, $key, $value, $err) = @_;
+    
+    my $remote = LJ::get_remote();
+    unless ($remote && LJ::check_priv($remote, 'siteadmin', 'propedit')) {
+        $$err = "You do not have privileges to set this property.";
+        return 0;
+    }
+    if ( $value < 1 || $value > 256 ) {
+        $$err = "Value must be from 1 to 256";
+        return 0;
+    }
+    $u->set_prop("suspicious_trusted_isp_num", $value);
+    return 1;
+});
+
 1;
