@@ -1985,6 +1985,10 @@ entryunits.empty=Sorry, there is no available entries to display
 entryunits.more|staleness=1
 entryunits.more=Show more 25 entries
 
+entryunits.pages.next=Next page
+
+entryunits.pages.prev=Previous page
+
 entryunits.stat.hidehidden|staleness=1
 entryunits.stat.hidehidden=Hide all hidden entries back
 
