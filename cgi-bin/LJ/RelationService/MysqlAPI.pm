@@ -336,19 +336,22 @@ sub _remove_relation_to_type_other {
     my $userid = ref($u) ? $u->userid : $u;
     my $friendid = ref($friend) ? $friend->userid : $friend;
 
-    my $cache_base = '';
+    my @caches_to_delete = ();
     my @rels = ($friendid);
 
     my $eff_type = $typeid ? $typeid : $type;
     if ($friendid eq '*') {
         @rels = $class->_find_relation_destinations_type_other($u, $type, dont_set_cache => 1);
-        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $userid);
-        $cache_base = "rlist:src:$eff_type";
+        push @caches_to_delete, map {"rlist:src:$eff_type:$_"} @rels;
+        push @caches_to_delete, "rlist:dst:$eff_type:$userid";
 
     } elsif ($userid eq '*') {
         @rels = $class->_find_relation_sources_type_other($friend, $type, dont_set_cache => 1);
-        LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $friendid);
-        $cache_base = "rlist:dst:$eff_type";
+        push @caches_to_delete, map {"rlist:dst:$eff_type:$_"} @rels;
+        push @caches_to_delete, "rlist:src:$eff_type:$friendid";
+    } else {
+        push @caches_to_delete, "rlist:dst:$eff_type:$userid";
+        push @caches_to_delete, "rlist:src:$eff_type:$friendid";
     }
 
     if ($typeid) {
@@ -389,8 +392,8 @@ sub _remove_relation_to_type_other {
     }    
 
     # drop list rel lists
-    foreach my $uid (@rels) {
-        LJ::MemCacheProxy::delete("$cache_base:$uid");
+    foreach my $key (@caches_to_delete) {
+        LJ::MemCacheProxy::delete($key);
     }   
 
     return 1;
