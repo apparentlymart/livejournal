@@ -69,7 +69,7 @@ sub execute {
     return $self->error("Unknown property '$key'")
         unless ref $LJ::SETTER{$key} eq "CODE";
 
-    my $old = $journal->prop('pingback') || 'O';
+    my $old = eval{$journal->prop($key)} || '';
     $rv = $LJ::SETTER{$key}->($journal, $key, $value, \$errmsg);
     return $self->error("Error setting property: $errmsg")
         unless $rv;
