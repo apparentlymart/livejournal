@@ -1708,10 +1708,10 @@ sub metadata_html {
         'twitter:site'   => '@livejournal',
 
         'twitter:app:name:iphone' => 'LiveJournal',
-        "twitter:app:id:iphone"   => "383091547",
+        "twitter:app:id:iphone"   => '383091547',
         "twitter:app:url:iphone"  => $iosScheme,
-        "twitter:app:name:ipad"   => "LiveJournal",
-        "twitter:app:id:ipad"     => "383091547",
+        "twitter:app:name:ipad"   => 'LiveJournal',
+        "twitter:app:id:ipad"     => '383091547',
         "twitter:app:url:ipad"    => $iosScheme
     );
 
