@@ -667,7 +667,7 @@ sub gender_options_array {
 
     my $gender = $opts->{gender} || '';
 
-    my @options = ( { code => '',  name => '', selected => (!$gender ? 1 : 0) },
+    my @options = ( { code => '',  name => LJ::Lang::ml("/manage/profile/index.bml.gender.empty"), selected => (!$gender ? 1 : 0) },
                     { code => 'M', name => LJ::Lang::ml("/manage/profile/index.bml.gender.male") },
                     { code => 'F', name => LJ::Lang::ml("/manage/profile/index.bml.gender.female") },
                     $opts->{no_undef} ? () : { code => 'U', name => LJ::Lang::ml("/manage/profile/index.bml.gender.unspecified") },
