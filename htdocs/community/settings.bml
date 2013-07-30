@@ -380,7 +380,7 @@ body<=
         $ret .= "<p class='input-wrapper'>";
         $ret .= LJ::html_check({
             type => 'radio', id => 'adultnone', name => 'adult_content',
-            value => 'none', selected => $adult_content eq "none" ? 1 : 0,
+            value => 'none', selected => $adult_content =~ /^(?:none|concepts)$/ ? 1 : 0,
         });
         $ret .= " <label for='adultnone'>$ML{'.label.adultcontentnone2'}</label></p>";
 
