@@ -301,5 +301,14 @@ sub fire {
     return $h ? 1 : 0;
 }
 
+sub update_events_counter {
+    my $self = shift;
+
+    my $u = $self->bdayuser;
+    return unless $u;
+
+    LJ::Widget::HomePage::UpdatesForUser->birthday_notify($u);
+}
+
 1;
 
