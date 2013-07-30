@@ -1695,6 +1695,9 @@ sub metadata_html {
     my $meta = eval { $self->extract_metadata };
     return '' unless $meta;
 
+    # https://dev.twitter.com/docs/cards/app-installs-and-deep-linking
+    (my $iosScheme .= $self->url) =~ s/^(http)/lj/;
+
     my %tags = (
         'og:title'       => $meta->{'title'}       || '(no title)',
         'og:description' => $meta->{'description'} || '',
@@ -1703,6 +1706,13 @@ sub metadata_html {
         'og:url'         => $self->url || $LJ::SITEROOT,
         'twitter:card'   => 'summary',
         'twitter:site'   => '@livejournal',
+
+        'twitter:app:name:iphone' => 'LiveJournal',
+        "twitter:app:id:iphone"   => "383091547",
+        "twitter:app:url:iphone"  => $iosScheme,
+        "twitter:app:name:ipad"   => "LiveJournal",
+        "twitter:app:id:ipad"     => "383091547",
+        "twitter:app:url:ipad"    => $iosScheme
     );
 
     my $html = '';
