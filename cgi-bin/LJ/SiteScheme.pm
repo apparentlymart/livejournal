@@ -374,7 +374,7 @@ sub common_template_params {
         { 'sitenameabbrev' => $LJ::SITENAMEABBREV },
     );
 
-    my $version_html        = LJ::run_hook('current_version_html');
+    my $version = LJ::run_hook('current_version_html');
     my $ml_copyright_header = ml(
         'horizon.footer.copyright.header_current',
         { 'current_year' => $LJ::CURRENT_YEAR },
@@ -485,7 +485,7 @@ sub common_template_params {
         'ml_ljlabs_header'    => $ml_ljlabs_header,
         'ml_ljlabs_aqua'      => $ml_ljlabs_aqua,
         'ml_ljlabs_dashboard' => $ml_ljlabs_dashboard,
-        'version_html'        => $version_html,
+        'version'             => $version,
         'ml_copyright_header' => $ml_copyright_header,
 
         'branding'            => $branding,
