@@ -44,23 +44,23 @@
 <p>
     [
 
-    <a href='<TMPL_VAR lj_siteroot>/?r=h'><TMPL_VAR expr="ml('lynx.nav.home')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/'><TMPL_VAR expr="ml('lynx.nav.home')"></a> |
 
     <TMPL_IF remote_logged_in>
         <TMPL_IF remote_personal>
-            <a href='<TMPL_VAR lj_siteroot>/update.bml?r=h'><TMPL_VAR expr="ml('lynx.nav.update')"></a> |
-            <a href='<TMPL_VAR remote_recent_url>?r=h'><TMPL_VAR expr="ml('lynx.nav.recent')"></a> |
+            <a href='<TMPL_VAR lj_siteroot>/update.bml'><TMPL_VAR expr="ml('lynx.nav.update')"></a> |
+            <a href='<TMPL_VAR remote_recent_url>'><TMPL_VAR expr="ml('lynx.nav.recent')"></a> |
         </TMPL_IF>
 
-        <a href='<TMPL_VAR remote_friends_url>?r=h'><TMPL_VAR expr="ml('lynx.nav.friends')"></a> |
+        <a href='<TMPL_VAR remote_friends_url>'><TMPL_VAR expr="ml('lynx.nav.friends')"></a> |
     </TMPL_IF>
 
-    <a href='<TMPL_VAR lj_siteroot>/login.bml?r=h'><TMPL_VAR expr="ml('lynx.nav.login')"></a> /
-    <a href='<TMPL_VAR lj_siteroot>/logout.bml?r=h'><TMPL_VAR expr="ml('lynx.nav.logout')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/login.bml'><TMPL_VAR expr="ml('lynx.nav.login')"></a> /
+    <a href='<TMPL_VAR lj_siteroot>/logout.bml'><TMPL_VAR expr="ml('lynx.nav.logout')"></a> |
 
-    <a href='<TMPL_VAR lj_siteroot>/site/search.bml?r=h'><TMPL_VAR expr="ml('lynx.nav.search')"></a> |
-    <a href='<TMPL_VAR lj_siteroot>/manage/settings/?cat=account&r=h'><TMPL_VAR expr="ml('lynx.nav.siteopts')"></a> |
-    <a href='<TMPL_VAR lj_siteroot>/site/?r=h'><TMPL_VAR expr="ml('lynx.nav.sitemap')"></a>
+    <a href='<TMPL_VAR lj_siteroot>/site/search.bml'><TMPL_VAR expr="ml('lynx.nav.search')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/manage/settings/?cat=account'><TMPL_VAR expr="ml('lynx.nav.siteopts')"></a> |
+    <a href='<TMPL_VAR lj_siteroot>/site/'><TMPL_VAR expr="ml('lynx.nav.sitemap')"></a>
 
     ]
 </p>
