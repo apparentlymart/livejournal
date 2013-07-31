@@ -543,7 +543,7 @@ sub _load_friend_friendof_uids_from_db {
     my $mode  = shift;
     my $limit = shift;
 
-    $limit = " LIMIT $limit" if $limit;
+    $limit = $limit ? " LIMIT $limit" : '';
 
     my $sql = '';
     if ($mode eq 'friends'){
