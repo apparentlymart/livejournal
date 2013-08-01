@@ -1937,7 +1937,7 @@ sub create_view_friends {
 
                 # mark as repost
                 $logprops{$datakey}->{'repost'}         = 'e';
-                $logprops{$datakey}->{'repost_author'}  = $entry_obj->poster->user;
+                $logprops{$datakey}->{'repost_author'}  = $pu && $pu->user;
                 $logprops{$datakey}->{'repost_subject'} = $entry_obj->subject_html;
                 $logprops{$datakey}->{'repost_url'}     = $entry_obj->url;
             }
@@ -1973,7 +1973,7 @@ sub create_view_friends {
 
         my ($friend, $poster);
         $friend = $poster = $friends{$friendid}->user;
-        $poster = $pu->user;
+        $poster = $pu && $pu->user;
 
         my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
 
