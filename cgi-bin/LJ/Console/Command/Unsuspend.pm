@@ -173,9 +173,6 @@ sub execute {
 
         unless ($flag_unmark) {
             LJ::statushistory_add($u, $remote, "unsuspend", $reason);
-            eval { $u->fb_push };
-            warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
-
             $self->print("User '$username' unsuspended.");
         } else {
             $self->print("Unmark job put for '$username' user.");

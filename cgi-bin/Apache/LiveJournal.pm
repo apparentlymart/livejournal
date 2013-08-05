@@ -43,9 +43,6 @@ BEGIN {
 
     require 'ljviews.pl';
     require 'ljprotocol.pl';
-    if (%LJ::FOTOBILDER_IP) {
-        use Apache::LiveJournal::Interface::FotoBilder;
-    }
     $SIG{__WARN__} = sub { LJ::Handlers::warn_handler(@_) };
 }
 
@@ -1331,15 +1328,6 @@ sub trans {
     if ($uri =~ m!^/(?:interface/(\w+))|cgi-bin/log\.cgi!) {
         my $int = $1 || "flat";
         LJ::Request->handler("perl-script");
-        if ($int eq "fotobilder") {
-            unless ($LJ::FOTOBILDER_IP{LJ::Request->remote_ip}) {
-                LJ::Request->pnotes ('error' => 'baduser');
-                LJ::Request->pnotes ('remote' => LJ::get_remote());
-                return LJ::Request::FORBIDDEN;
-            }
-            LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
-            return LJ::Request::OK
-        }
         if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;

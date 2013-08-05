@@ -4498,8 +4498,6 @@ sub set_statusvis {
 
     LJ::run_hooks("props_changed", $u, {statusvis => $statusvis});
 
-    $u->fb_push;
-
     return $ret;
 }
 
@@ -4801,17 +4799,6 @@ sub set_password {
 sub set_email {
     my ($u, $email) = @_;
     return LJ::set_email($u->id, $email);
-}
-
-sub fb_push {
-    my $u = shift;
-    eval {
-        if ($u) {
-            require LJ::FBInterface;
-            LJ::FBInterface->push_user_info( $u->id );
-        }
-    };
-    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 }
 
 sub grant_priv {
