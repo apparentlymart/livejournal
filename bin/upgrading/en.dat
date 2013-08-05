@@ -4653,6 +4653,8 @@ main.menu.categories=Categories
 main.menu.editors|staleness=1
 main.menu.editors=Editors
 
+main.menu.latest=Latest
+
 main.menu.index|staleness=1
 main.menu.index=Home
 
