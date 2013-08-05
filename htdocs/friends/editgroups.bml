@@ -124,7 +124,7 @@
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $body .= "</form>\n\n";
 
-    $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
+    $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?>";
     $body .= "<form method='post' name='fg' action='editgroups.bml$getextra' class='lj-widget' data-widget='friendseditgroups'>";
     $body .= LJ::form_auth();
     $body .= "<input type='hidden' name='mode' value='save' />";
