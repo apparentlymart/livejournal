@@ -145,7 +145,7 @@ var Poll = (function(){
 					html += '<table><tbody><tr align="center" valign="top">';
 
 					for (j = from; j <= to; j = j + by) {
-						html += '<td><input type="radio" id=' + RTEPollScaleRadio + 'j/><br /><label for=RTEPollScaleRadio' + j + '>' + j + '</label></td>';
+						html += '<td><input type="radio" id=RTEPollScaleRadio' + j + '/><br /><label for=RTEPollScaleRadio' + j + '>' + j + '</label></td>';
 					}
 
 					html += '</tr></tbody></table>';
