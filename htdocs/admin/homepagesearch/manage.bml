@@ -9,10 +9,13 @@
         $body = "access denied";
         return;
     }
+    
+    LJ::need_res('stc/admin/general.css');
 
     $body = '';
 
-    $body .= '<div style="float:left;"><form method="POST" action="">';
+    $body .= '<div class="b-adminpage b-adminpage-wide b-adminpage-max">';
+    $body .= '<div class="b-adminpage-side"><form class="b-adminpage-form" method="POST" action="">';
 
     my $system = LJ::load_user('system') or die "No 'system' user in DB";
     my $stored_words = $system->prop('search_admin');

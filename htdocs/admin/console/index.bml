@@ -1,6 +1,5 @@
-<html>
-<head><title>Admin Console</title></head>
-<body>
+<?page
+body<=
 <?_code
 
  use strict;
@@ -31,7 +30,8 @@
      return $ret;
 
  } else {
-     $ret .= "[ console | <A HREF=\"reference.bml\">reference</A> ]<P>";
+     $ret .= "<p>[ console | <A HREF=\"reference.bml\">reference</A> ]</p>";
+     $ret .= "<h1>Console</h1>";
 
      $ret .= "<FORM METHOD=POST>";
      $ret .= LJ::form_auth();
@@ -48,5 +48,5 @@
  }
 
 _code?>
-</body>
-</html>
+<=body
+page?>

@@ -7,6 +7,8 @@ body<=
 
     use POSIX qw/strftime/;
 
+    LJ::need_res('stc/admin/general.css');
+
     my $remote = LJ::get_remote();
 
     return "<?needlogin?>"
@@ -18,14 +20,16 @@ body<=
     my $ret = "";
     $title = 'Supermaintainer elections';
 
+
+    $ret .= "<div class='b-adminpage b-adminpage-padding'>";
     $ret .= "<form method='POST'>\n";
     $ret .= LJ::form_auth();
 
-    $ret .= "<p><label for='comm_name'><strong>Find election:</strong></label>&nbsp;";
+    $ret .= "<div><label for='comm_name'><strong>Find election:</strong></label>&nbsp;";
     my $comm_name = $POST{'comm_name'} ? $POST{'comm_name'} : '';
     $ret .= "<input type='text' id='comm_name' name='comm_name' value='$comm_name'/>";
 
-    $ret .= "&nbsp;" . LJ::html_submit('search', 'Search') . "</p>";
+    $ret .= "&nbsp;" . LJ::html_submit('search', 'Search') . "</div>";
 
     $ret .= "</form>";
 
@@ -133,6 +137,8 @@ body<=
                     $ret .= "<b>The owner was not set.</b>";
                 }
             }
+
+            $ret .= "</div>";
 
             next if @errors;
         }
