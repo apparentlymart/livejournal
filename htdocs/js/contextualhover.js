@@ -116,6 +116,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 (function($) {
     'use strict';
 
+    var rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/;
+
     /**
      * Object contains methods to build and display user popup.
      */
@@ -520,37 +522,32 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
         hourglass      : null,
 
         /*
-         * Init a live handler for contextual popups
+         * Init live handler for contextual popups
          * This way jQuery.fn.ljAddContextualPopup is not needed
          */
         setupLive: function() {
+            popup.init();
+
             $(document.body)
                 // remove standart listeners from setup
                 .off('mouseover', ContextualPopup.mouseover)
                 .off('click', ContextualPopup.touchStart)
 
                 // use live listener
-                .on('mouseover ' + (LJ.Support.touch ? 'click' : ''), '.ljuser', function(event) {
+                .on('mouseover ' + (LJ.Support.touch ? 'click' : ''), '.ljuser, img', function(event) {
+
+                    // handle <img> with link to userpic
+                    if (this.tagName.toLowerCase() === 'img' && !$(this).attr('src').match(rex_userpic)) {
+                        return;
+                    }
+
                     ContextualPopup.activate(event, true);
                 });
         },
 
         setup: function() {
-            var body;
-
-            // don't do anything if no remote
-            if (!Site.ctx_popup) { return; }
-
-            popup.init();
-            body = $(document.body);
-
-            body
-                .on('mouseover', ContextualPopup.mouseOver)
-                .ljAddContextualPopup();
-
-            if (LJ.Support.touch) {
-                body.on('click', ContextualPopup.touchStart);
-            }
+            /* this method is no longed needed, because of ContextualPopup.setupLive */
+            return this;
         },
 
         /**
@@ -561,7 +558,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
             // attach to all ljuser head icons
             var rex_userid = /\?userid=(\d+)/,
-                rex_userpic = /(userpic\..+\/\d+\/\d+)|(\/userpic\/\d+\/\d+)/,
                 class_nopopup = 'noctxpopup',
                 ljusers = jQuery('span.ljuser:not(.' + class_nopopup + ')>a>img', node),
                 i = -1, userid, ljuser, parent;
@@ -861,6 +857,3 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
     }
 
 }(jQuery));
-
-// when page loads, set up contextual popups
-jQuery(ContextualPopup.setup);

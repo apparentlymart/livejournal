@@ -85,6 +85,9 @@ LiveJournal.initPage = function () {
         return;
     }
 
+    // when page loads, set up contextual popups
+    jQuery(ContextualPopup.setupLive);
+
     if (LJ.Api) {
         LJ.Api.init({ auth_token: Site.auth_token });
     }

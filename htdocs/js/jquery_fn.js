@@ -7,11 +7,8 @@ jQuery.ajaxSetup({
 });
 
 jQuery.fn.ljAddContextualPopup = function(){
-	if(!window.ContextualPopup) return this;
-
-	return this.each(function(){
-		ContextualPopup.searchAndAdd(this);
-	});
+	/* this method is no longed needed, because of ContextualPopup.setupLive */
+	return this;
 };
 
 /**
