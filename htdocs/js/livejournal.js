@@ -1,3 +1,7 @@
+//= require js/core/template.js
+//= require js/core/track.js
+//= require js/core/widget.js
+
 // This file contains general-purpose LJ code
 var LiveJournal = {};
 

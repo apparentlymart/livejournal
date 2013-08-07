@@ -1,3 +1,5 @@
+//= require js/hourglass.js
+
 UserpicSelect = new Class (LJ_IPPU, {
   init: function () {
     UserpicSelect.superClass.init.apply(this, ["Choose Userpic"]);

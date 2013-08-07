@@ -1,3 +1,5 @@
+//= require js/hourglass.js
+
 /*global Hourglass */
 
 jQuery.ajaxSetup({

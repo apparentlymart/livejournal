@@ -1,3 +1,6 @@
+//= require js/hourglass.js
+//= require js/relations.js
+
 /*global ContextualPopup, Hourglass */
 
 /**

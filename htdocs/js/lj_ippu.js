@@ -1,3 +1,5 @@
+//= require js/ippu.js
+
 LJ_IPPU = new Class ( IPPU, {
   init: function(title) {
     if (!title)

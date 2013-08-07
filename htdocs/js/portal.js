@@ -1,3 +1,5 @@
+//= require js/hourglass.js
+
 var portalAnimating = {};
 var portalFading = {};
 var box_reloading = {};
