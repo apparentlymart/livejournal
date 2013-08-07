@@ -20,6 +20,9 @@ body<=
 
     use strict;
     use vars qw(%GET %POST);
+    
+    LJ::need_res('stc/admin/general.css');
+    
     BML::decl_params(pollid => 'digits',
                      lj_form_auth => qr/./,
                      );
@@ -32,6 +35,7 @@ body<=
 
     my $body = '';
 
+    $body .= '<div class="b-adminpage b-adminpage-padding">';
     $body .= '<form action="runoffpoll.bml" method="POST">';
     $body .= LJ::form_auth();
     $body .= "Enter the poll ID: ";
@@ -263,6 +267,8 @@ body<=
 </lj-poll></xmp></p>
         };
     }
+
+    $body .= "</div>";
 
     return $body;
 }
