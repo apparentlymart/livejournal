@@ -250,18 +250,18 @@ body<=
 
             # $newcat, $cats defined above
             $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
-            
+
             my $requser = LJ::load_userid($sp->{requserid});
             LJ::Event::SupportRequest->new($requser, $spid, $sp->{'spcatid'})->fire;
 
             $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
-    
+
             $props{'moved_from'} = $sp->{'spcatid'};
             $props{'moved_to'}   = $newcat;
             $sp->{'spcatid'}     = $newcat; # update category so IC e-mail goes to right place
-    
+
             LJ::run_hook("support_changecat_extra_actions", spid => $spid, catkey => $cats->{$newcat}->{catkey});
-        } 
+        }
         else {
             $status .= "Moving to the same category has been skipped\n\n";
         }

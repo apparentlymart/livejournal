@@ -51,7 +51,8 @@ body<=
         # return redirection back? or success message otherwise
         return BML::redirect(sprintf($POST{ret}, '')) if $POST{ret};
         return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.specified'} p?>";
-    } elsif ($POST{'action:closewithpoints'}) {
+    }
+    elsif ($POST{'action:closewithpoints'}) {
         my $can_close = 0;
         $can_close = 1 if LJ::check_priv($remote, 'supportclose', $cat->{catkey});
         $can_close = 1 if $cat->{public_read} && LJ::check_priv($remote, 'supportclose', '');
@@ -70,7 +71,8 @@ body<=
         return BML::redirect(sprintf($POST{ret}, '&mark='.join(',', @ids)))
             if $POST{ret};
         return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.specified'} p?>";
-    } elsif ($POST{'action:move'}) {
+    }
+    elsif ($POST{'action:move'}) {
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.move.request'} p?>"
             unless LJ::Support::can_perform_actions($cat, $remote);
 
@@ -97,6 +99,38 @@ body<=
         # done now
         return BML::redirect(sprintf($POST{ret}, '')) if $POST{ret};
         return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.moved'} p?>";
+    }
+    elsif ( $POST{'action:m_reply'} ) {
+        my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp") ? 1 : 0;
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.move.request'} p?>" unless $can_mass_reply;
+
+        my $text = $POST{'mass_reply'};
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.empty.response'} p?>" unless $text;
+
+        @ids = splice(@ids, 0, 300) if scalar(@ids) > 300;
+        my $type = 'comment';
+        my $dbh = LJ::get_db_reader();
+
+        for my $spid ( @ids ) {
+            my $sp = LJ::Support::load_request($spid);
+            my $splid = LJ::Support::append_request($sp, {
+                'body'   => $FORM{'mass_reply'},
+                'type'   => $type,
+                'faqid'  => 0,
+                'uniq'   => LJ::Request->notes('uniq'),
+                'remote' => $remote,
+            });
+
+            my ($email) = $dbh->selectrow_array("SELECT reqemail FROM support WHERE spid = ?", undef, $spid);
+
+            LJ::send_mail({
+                'to'       => $email,
+                'from'     => 'LJ Support',
+                'fromname' => 'LJ Support',
+                'subject'  => "RE: $sp->{'subject'} (support request #$sp->{'spid'})",
+                'body'     => "$FORM{'mass_reply'}\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
+            });
+        }
     }
 }
 _code?>

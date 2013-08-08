@@ -92,16 +92,21 @@ body<=
      $can_close = 1 if $fcat->{public_read} && LJ::check_priv($remote, 'supportclose', ''); # public cats
  }
 
+ my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp") ? 1 : 0;
+
  my $append;
+
  if ($state eq "closed") {
      $ret .= "<?h1 $ML{'.state.closed.title'} h1?>";
      $ret .= "<?p ". BML::ml(".state.closed.text", {"clickurl"=>"$LJ::SITEROOT/support/help.bml?cat=$filtercat"} ) ." p?>";
- } elsif ($state eq "youreplied") {
+ }
+ elsif ($state eq "youreplied") {
      return "<?h1 $ML{'.state.youreplied.rem.title'} h1?>  <?p $ML{'.state.youreplied.rem.text'} p?>"
         unless $remote;
      $ret .= "<?h1 $ML{'.state.youreplied.title'} h1?>";
      $ret .= "<?p $ML{'.state.youreplied.text'} p?>";
- } else {
+ }
+ else {
      $ret .= "<?h1 $ML{'.state.else.title'} h1?>";
      $ret .=  BML::ml('.state.else.text', {'statelink'=>"href=\"$LJ::SITEROOT/support/help.bml?state=closed&amp;cat=$filtercat\""}) ;
      $append = 1;
@@ -265,7 +270,7 @@ body<=
 
  if ($can_see_tags) {
      $ret .= ' ' . $ML{'.requests.tags'} . ' <select name="tags">';
-     
+
      my $render_option = sub {
         my ($value, $name, $selected) = @_;
 
@@ -275,7 +280,7 @@ body<=
             LJ::ehtml($name).
             '</option>';
      };
-     
+
      $ret .= $render_option->($filtertags, $filtertags, 1)
         if ($filtertags =~ /,/);
      $ret .= $render_option->('', $ML{'.tags.all'});
@@ -285,7 +290,7 @@ body<=
 
      $ret .= '</select>';
  }
- 
+
  $ret .= "<input type=submit value=\"$ML{'.button.filter'}\" /></form>";
  # /filter line
 
@@ -293,14 +298,16 @@ body<=
  $ret .= "<form method='post' action='/support/actmulti.bml'>" . LJ::form_auth() if $can_close && $rct;
 
  # start the rest of the table
- 
+
  my %marked = map { $_ => 1 } split(',', $GET{'mark'});
  my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state&tags=$filtertags";
  $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
+
  if ($can_close) {
     my $link = $uri . '&sort='.$sort . '&closeall=' . ($GET{'closeall'} ? 0 : 1);
     $ret .= "<td>&nbsp;<b><a href='$link'>X</a></b></td>\n";
  }
+
  my @headers = ( id => "ID#", summary => $ML{'.th.summary'}, area => $ML{'.th.problemarea'}, date => $ML{'.th.posted'} );
  push @headers, recent => $ML{'.th.recent'} if $can_see_tags;
 
@@ -311,6 +318,7 @@ body<=
          $ret .= "<td><b><a href='$uri&sort=$sorttype'>$desc</a></b></td>\n";
      }
  }
+
  $ret .= "<td><b>$ML{'.th.status'}</b></td>\n";
  $ret .= "</tr>";
 
@@ -320,8 +328,8 @@ body<=
 
  $tags = LJ::Support::Request::Tag::get_requests_tags(@spids)
     if $can_see_tags;
- foreach my $sp (@support_log)
- {
+
+ foreach my $sp (@support_log) {
      LJ::Support::fill_request_with_cat($sp, $cats);
      next unless (LJ::Support::can_read($sp, $remote));
 
@@ -338,6 +346,7 @@ body<=
 
      my $status = "open";
      my $barbg = "green";
+
      if ($sp->{'timeclosed'}) {
          $status = "closed";
          $barbg = "red";
@@ -350,6 +359,7 @@ body<=
          $status = "answered<br /><b>still needs help</b>";
          $barbg = "green";
      }
+
      my $original_barbg = $barbg;
      $barbg = 'clicked' if ($GET{closeall} && $original_barbg eq 'yellow') || $marked{$sp->{'spid'}};
 
@@ -361,10 +371,12 @@ body<=
              my @subj_data;
              require MIME::Words;
              @subj_data = MIME::Words::decode_mimewords($sp->{'subject'});
+
              if (scalar(@subj_data)) {
                  if (!$1) {
                      $sp->{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0], -charset=>$subj_data[0][1]});
-                 } else {
+                 }
+                 else {
                      $sp->{'subject'} = $subj_data[0][0];
                  }
              }
@@ -373,16 +385,20 @@ body<=
 
      # fix up the message if we have one
      my $temp = LJ::text_trim($sp->{message}, 0, 100); # 100 character max
+
      if ($temp ne $sp->{message}) {
          $sp->{message} = LJ::ehtml($temp) . " ...";
-     } else {
+     }
+     else {
          $sp->{message} = LJ::ehtml($sp->{message}) . " <b>&#x00b6;</b>";
      }
+
      my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
      my $tags_line;
+
      if ($can_see_tags && scalar(@tagids)) {
         my @links = map {
-            '<a href="' . $LJ::SITEROOT. 
+            '<a href="' . $LJ::SITEROOT .
             "/support/help.bml?cat=$filtercat&state=$state&tags=" . $_ . '">'.
             $_ . '</a>';
         } @tagnames;
@@ -391,33 +407,42 @@ body<=
      }
 
      # other content for this request
-     my $summary = LJ::ehtml($sp->{'subject'});
-     my $secold = time() - $sp->{'timecreate'};
+     my $summary      = LJ::ehtml($sp->{'subject'});
+     my $secold       = time() - $sp->{'timecreate'};
      my $sec_untoched = time() - $sp->{'timetouched'};
-     my $age = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timecreate'}) : LJ::TimeUtil->ago_text($secold);
-     my $untoched = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timetouched'}) : LJ::TimeUtil->ago_text($sec_untoched); 
-     my $probarea = $sp->{_cat}->{'catname'};
-     my $points = LJ::Support::calc_points($sp, $secold);
+     my $age          = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timecreate'}) : LJ::TimeUtil->ago_text($secold);
+     my $untoched     = $GET{rawdates} ? LJ::TimeUtil->mysql_time($sp->{'timetouched'}) : LJ::TimeUtil->ago_text($sec_untoched); 
+     my $probarea     = $sp->{_cat}->{'catname'};
+     my $points       = LJ::Support::calc_points($sp, $secold);
 
      unless ($status eq "closed") {
          $status .= "<br />($points point";
+
          if ($points > 1) { $status .= "s"; }
          $status .= ")";
      }
 
      my ($style, $js) = ("class='$barbg'", '');
+
      if ($can_close) {
         $js = "id='r$sp->{spid}' onclick='doClick($sp->{spid});'";
      }
 
      # generate the HTML for this row
      $ret .= "<tr valign='top' $style $js>\n";
-     if ($can_close) {
-         $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
-                                           onclick => "doClick($sp->{spid});", selected => $barbg eq 'clicked', }) .
-                 "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$original_barbg' /></td>\n";
+
+     if ( $can_close || $can_mass_reply ) {
+         $ret .= "<td>" .
+            LJ::html_check({
+                name     => "check_$sp->{spid}",
+                id       => "check_$sp->{spid}",
+                onclick  => "doClick($sp->{spid});",
+                selected => $barbg eq 'clicked',
+            }) .
+            "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$original_barbg' /></td>\n";
          $js = "onclick='return doClick($sp->{spid});'";
      }
+
      $ret .= "<td><b><a href=\"$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}\" $js>$sp->{'spid'}</a></b></td>";
      $ret .= "<td><b>$summary</b>$des$tags_line</td>\n";
      $ret .= "<td>$probarea</td>\n";
@@ -427,6 +452,7 @@ body<=
      $ret .= "</tr>";
 
  }
+
  $ret .= "</table>\n";
 
  # mass close button
@@ -436,6 +462,24 @@ body<=
                              'spcatid', $fcat->{spcatid},
                              'ret', "/support/help.bml?state=$state&cat=$filtercat&time=$time%s");
      $ret .= "<br />";
+
+     # mass reply button
+     if ( $can_mass_reply ) {
+        $ret .= '<h3>Mass Reply:</h3><br />';
+        $ret .= LJ::html_textarea({
+            'name'  => 'mass_reply',
+#            'style' => 'width: 100%',
+            'cols'  => 100,
+            'rows'  => 8,
+            'wrap'  => 'on',
+            'value' => '',
+        }) . '<br />';
+
+        $ret .= LJ::html_submit('action:m_reply', 'Mass Reply');
+        $ret .= '<br /><hr>';
+     }
+
+
      $ret .= LJ::html_submit('action:move', 'Move Marked Requests');
      $ret .= " to ";
      $ret .= LJ::html_select({ 'name' => 'changecat', selected => '' },

@@ -6,6 +6,9 @@
 .category.invalid=Category invalid.
 
 .error|staleness=1
+.empty.response=Empty response
+
+.error|staleness=1
 .error=Error
 
 .no.request|staleness=1
