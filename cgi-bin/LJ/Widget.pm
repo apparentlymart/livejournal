@@ -156,7 +156,9 @@ sub render {
         return '';
     } elsif (ref $class && $class->{'no_container_div'}) {
         return $rv;
-    } else { 
+    } else {
+        my $widget_content_id = $ret_opts->{widget_content_id};
+        
         return 
             "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id' data-cid='$widget_content_id'>\n" .
             $rv .
