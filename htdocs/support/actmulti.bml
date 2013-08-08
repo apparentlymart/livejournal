@@ -101,14 +101,14 @@ body<=
         return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.moved'} p?>";
     }
     elsif ( $POST{'action:m_reply'} ) {
-        my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp") ? 1 : 0;
+        my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp", '*') ? 1 : 0;
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.move.request'} p?>" unless $can_mass_reply;
 
         my $text = $POST{'mass_reply'};
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.empty.response'} p?>" unless $text;
 
         @ids = splice(@ids, 0, 300) if scalar(@ids) > 300;
-        my $type = 'comment';
+        my $type = 'answer';
         my $dbh = LJ::get_db_reader();
 
         for my $spid ( @ids ) {
@@ -121,15 +121,7 @@ body<=
                 'remote' => $remote,
             });
 
-            my ($email) = $dbh->selectrow_array("SELECT reqemail FROM support WHERE spid = ?", undef, $spid);
-
-            LJ::send_mail({
-                'to'       => $email,
-                'from'     => 'LJ Support',
-                'fromname' => 'LJ Support',
-                'subject'  => "RE: $sp->{'subject'} (support request #$sp->{'spid'})",
-                'body'     => "$FORM{'mass_reply'}\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
-            });
+            LJ::Event::SupportResponse->new($remote, $spid, $splid)->fire;
         }
     }
 }
