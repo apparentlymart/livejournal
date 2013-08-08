@@ -330,10 +330,6 @@ LJ.threshold = function (f, delay, preserve) {
 	return threshold;
 };
 
-if (typeof console !== 'undefined') {
-	LJ.console = console;
-}
-
 LJ._const = {};
 
 /**
