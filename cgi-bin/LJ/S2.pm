@@ -4615,6 +4615,8 @@ sub Entry__is_eventrate_enable
         $pr->{'text_'.$prop} = LJ::Lang::get_text($lang, $prop.'_title');
     }
 
+    LJ::need_res('js/deprecated/ILikeThis.js');
+
     return 1;
 }
 
