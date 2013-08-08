@@ -120,8 +120,6 @@ body<=
                 'uniq'   => LJ::Request->notes('uniq'),
                 'remote' => $remote,
             });
-
-            LJ::Event::SupportResponse->new($remote, $spid, $splid)->fire;
         }
     }
 }
