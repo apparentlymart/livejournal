@@ -153,11 +153,6 @@ DirectorySearchResults = new Class(Object, {
             this.resultsView.innerHTML = '';
             this.resultsView.appendChild(content);
         }
-
-        // since a bunch of userpics and ljusers were created
-        // we should reload contextualpopup so it can attach to them
-        if (window.ContextualPopup)
-            ContextualPopup.setup();
     },
 
     renderUser: function (user) {

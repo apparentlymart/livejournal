@@ -85,8 +85,7 @@
                     }
 
                     status
-                        .html(data.controlstrip_status)
-                        .ljAddContextualPopup();
+                        .html(data.controlstrip_status);
                 }
             });
         }
@@ -101,7 +100,7 @@
                 LiveJournal.getAjaxUrl('controlstrip'),
                 { user: Site.currentJournal },
                 function (data) {
-                    $(data).appendTo(document.body).ljAddContextualPopup();
+                    $(data).appendTo(document.body);
                     init();
                 }
             );

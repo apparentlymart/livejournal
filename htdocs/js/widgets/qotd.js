@@ -101,8 +101,7 @@ QotD.prototype =
 		this.content_node.hide();
 		if (typeof data.text === 'string') {
 			data.text = jQuery('<div/>', {'class': 'b-qotd-question', html: data.text})
-				.insertAfter(this.content_node)
-				.ljAddContextualPopup();
+				.insertAfter(this.content_node);
 		}
 		
 		data.text.show();

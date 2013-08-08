@@ -523,7 +523,6 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
         /*
          * Init live handler for contextual popups
-         * This way jQuery.fn.ljAddContextualPopup is not needed
          */
         setupLive: function() {
             popup.init();

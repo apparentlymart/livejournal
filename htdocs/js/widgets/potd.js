@@ -51,8 +51,7 @@ PotD =
 	{
 		if (typeof html === 'string') {
 			html = jQuery('<div/>', {html: html})
-				.prependTo(node)
-				.ljAddContextualPopup();
+				.prependTo(node);
 			// save DOM link for generated content, eg advertising.
 			this.cache[skip] = html;
 		}

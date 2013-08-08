@@ -11,7 +11,7 @@ CProd =
 			jQuery.extend({content: 'framed'}, data),
 			function(res)
 			{
-				jQuery(res.content).replaceAll('#CProd_box').ljAddContextualPopup();
+				jQuery(res.content).replaceAll('#CProd_box');
 			}
 		);
 		

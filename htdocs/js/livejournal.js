@@ -343,8 +343,7 @@ LiveJournal.pollAnswersReceived = function(answers) {
         .remove()
         .end()
         .prepend(html)
-        .find('.lj_pollanswer')
-        .ljAddContextualPopup();
+        .find('.lj_pollanswer');
 };
 
 // gets a url for doing ajax requests

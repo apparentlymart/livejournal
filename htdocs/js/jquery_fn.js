@@ -6,11 +6,6 @@ jQuery.ajaxSetup({
 	cache: false
 });
 
-jQuery.fn.ljAddContextualPopup = function(){
-	/* this method is no longed needed, because of ContextualPopup.setupLive */
-	return this;
-};
-
 /**
  * jQuery plugin that works with caret (it uses LJ.DOM.* methods and added for convenience only)
  * - if two arguments have been provided: setting selection from startPos to endPos

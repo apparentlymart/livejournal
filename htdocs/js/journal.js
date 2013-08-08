@@ -87,7 +87,7 @@ ILikeThis = {
 										+data.ml_view_all
 									+'</a></p>' : ''
 								+'</div>')
-					}).ljAddContextualPopup();
+					});
 
 					ILikeThis.dialog.appendTo(document.body);
 
