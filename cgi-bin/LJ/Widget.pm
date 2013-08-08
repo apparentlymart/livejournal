@@ -30,8 +30,6 @@ sub render_body {
     return "";
 }
 
-sub collapsable { } ## true for collapsable widget
-
 sub need_form_auth { 1 }
 
 sub is_viewonly_mode {
@@ -158,34 +156,9 @@ sub render {
         return '';
     } elsif (ref $class && $class->{'no_container_div'}) {
         return $rv;
-    } else {
-
-        ## do not collapse widgets with changed content id
-        my $widget_content_id = $ret_opts->{widget_content_id};
-
-        ## handle collapsable widgets
-        my $is_collapsed = 0;
-        if ($class->collapsable){
-
-            ## read widget's state from the cookie
-            $is_collapsed = eval {
-                return 0 unless LJ::is_web_context();
-
-                my $clpsd = LJ::Request->cookie('clpsd');
-                return 0 unless $clpsd;
-                
-                my $widget_content_id_re = $widget_content_id ? "-$widget_content_id" : "";
-                ## cookie: clpsd=css_subclass-content_id:css_subclass-content_id:...
-                return 1 if $clpsd =~ /(^|:)$css_subclass$widget_content_id_re(:|$)/; ## collapsed
-                return 0;
-            };
-
-        }
-
-        my $collapsable_class = $class->collapsable ? 'appwidget-prop-collapsable' : '';
-        my $collapsed_class   = ($class->collapsable and $is_collapsed) ? ' appwidget-prop-collapsed' : ''; 
+    } else { 
         return 
-            "<div class='appwidget appwidget-$css_subclass $collapsable_class $collapsed_class' id='$widget_ele_id' data-cid='$widget_content_id'>\n" .
+            "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id' data-cid='$widget_content_id'>\n" .
             $rv .
             "</div><!-- end .appwidget-$css_subclass -->\n";
     }

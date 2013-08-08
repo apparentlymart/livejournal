@@ -355,54 +355,6 @@ jQuery(document).click(function(e)
 })();
 
 /**
- * this code initializes common properies for all widgets.
- * If it will become too large, it should be moved to the separate file
- */
-(function() {
-	widgets = [
-		{
-			type: 'collapsable',
-			handler: function() {
-				jQuery(document).on('click', '.appwidget-prop-collapsable', function(ev) {
-					if (ev.target.className.indexOf('w-head-status-switch') !== -1) {
-						var videoCollapes = ev.target.className.indexOf('collapse') !== -1,
-							//widget will have class like appwidget-videoforhomepage where videoforhomepage is the widget id
-							id = this.className.replace(/(?:.*?)appwidget-(\S+).*/, '$1-'),
-							fullid = id + this.getAttribute('data-cid'),
-							cookie = decodeURIComponent(Cookie('clpsd') || ''),
-							cookie_ids = cookie ? cookie.split(':') : [];
-
-						jQuery(this).toggleClass('appwidget-prop-collapsed', videoCollapes);
-
-						var found = false;
-						for (var i = 0; i < cookie_ids.length; ++i) {
-							if (cookie_ids[i].indexOf(id) !== -1) {
-								found = true;
-								if (videoCollapes) {
-									cookie_ids[i] = fullid;
-								} else {
-									cookie_ids.splice(i, 1);
-								}
-								break;
-							}
-						}
-
-						if (!found && videoCollapes) {
-							cookie_ids.push(fullid);
-						}
-
-						Cookie('clpsd', cookie_ids.length > 0 ? cookie_ids.join(':') : null, { domain: location.host, expires: 30 });
-					}
-				});
-			}
-		}
-	];
-
-	widgets.forEach(function(prop) { prop.handler(); });
-})();
-
-
-/**
  * Delayed like buttons loader
  */
 LiveJournal.register_hook('page_load', function () {
