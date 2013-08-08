@@ -125,6 +125,25 @@ sub handler
         return LJ::Request::OK;
     }
 
+    my $method   = LJ::Request->method;
+    my $hostname = LJ::Request->hostname;
+
+    # let foo.com still work, but redirect to www.foo.com
+    {
+        last unless $LJ::DOMAIN_WEB;
+        last unless $LJ::DOMAIN eq $hostname;
+        last unless $LJ::DOMAIN ne $LJ::DOMAIN_WEB;
+
+        my $uri  = LJ::Request->uri;
+        my $args = LJ::Request->args;
+
+        if ($method eq 'GET') {
+            return redir("$LJ::SITEROOT$uri" . ($args ? "?$args" : ''));
+        }
+
+        # Maybe will need to do something with request with another methods
+    }
+
     # only perform this once in case of internal redirects
     if (LJ::Request->is_initial_req) {
         LJ::Request->set_handlers(PerlCleanupHandler => [
@@ -606,15 +625,6 @@ sub trans {
         else {
             return LJ::Request::FORBIDDEN;
         }
-    }
-
-    # let foo.com still work, but redirect to www.foo.com
-    if ($LJ::DOMAIN_WEB && LJ::Request->method eq "GET" &&
-        $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN)
-    {
-        my $url = "$LJ::SITEROOT$uri";
-        $url .= "?" . $args if $args;
-        return redir($url);
     }
 
     # show mobile.look if in POST-request is 'mobile_domain' argument
