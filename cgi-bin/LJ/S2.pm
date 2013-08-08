@@ -2145,6 +2145,13 @@ sub Entry
             $e->{'tags'}     = [];
         }
 
+        LJ::run_hooks( 'blocked_entry_content', $entry, {
+            text     => \$e->{'text'}, 
+            subject  => \$e->{'subject'},
+            tags     => \$e->{'tags'},
+            metadata => \$e->{'metadata'},
+        });
+
      } else {
         my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
                                                        $e->{delayedid} );

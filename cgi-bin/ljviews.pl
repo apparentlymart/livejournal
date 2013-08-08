@@ -1501,6 +1501,13 @@ sub create_view_lastn
             delete $lastn_event{'Music'};
         }
 
+        LJ::run_hooks( 'blocked_entry_content', $entry_obj,
+            {
+                'text'             => \$lastn_event{'event'},
+                'subject'          => \$lastn_event{'subject'},
+            },
+        );
+
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
@@ -2178,6 +2185,13 @@ sub create_view_friends {
             delete $friends_event{'Mood'};
             delete $friends_event{'Music'};
         }
+
+        LJ::run_hooks( 'blocked_entry_content', $entry_obj,
+            {
+                'text'             => \$friends_event{'event'},
+                'subject'          => \$friends_event{'subject'},
+            },
+        );
 
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
@@ -2928,6 +2942,13 @@ sub create_view_day
             delete $day_event{'Mood'};
             delete $day_event{'Music'};
         }
+
+        LJ::run_hooks( 'blocked_entry_content', $entry_obj,
+            {
+                'text'             => \$day_event{'event'},
+                'subject'          => \$day_event{'subject'},
+            },
+        );
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
 

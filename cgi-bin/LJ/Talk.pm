@@ -1782,6 +1782,11 @@ sub load_comments
             LJ::load_userpics($opts->{'userpicref'}, \@load_pic);
         }
     }
+
+    for my $post (values %$posts) {
+        LJ::run_hook('blocked_comment_content', $post );
+    }
+
     return map { $posts->{$_} } @$top_replies;
 }
 

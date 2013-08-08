@@ -1550,6 +1550,11 @@ userproplist.zip:
   multihomed: 0
   prettyname: ZIP code
 
+talkproplist.blocked_content:
+  datatype: bool
+  des: 1 if comment blocked in Russian Federation due to Roskomnadzor requirements 
+  prettyname: Blocked content
+
 talkproplist.deleted_poster:
   datatype: char
   des: If the comment poster's account is deleted, this field gets added to all of their posts, so the UI can show something besides 'anonymous' when posterid gets set to 0
@@ -1631,6 +1636,12 @@ logproplist.adult_content:
   des: Sets the entry as containing adult content (none, explicit, concepts)
   prettyname: Adult Content Flag
   sortorder: 105
+
+logproplist.blocked_content:
+  datatype: bool
+  des: 1 if entry blocked in Russian Federation due to Roskomnadzor requirements 
+  prettyname: Blocked content
+  sortorder: 
 
 logproplist.commentalter:
   datatype: num
