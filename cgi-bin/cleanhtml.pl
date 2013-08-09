@@ -2153,7 +2153,7 @@ sub clean_comment
         'allow'              => \@comment_all,
         'autoclose'          => \@comment_close,
         'cleancss'           => 1,
-        'strongcleancss'     => 1,
+        'strongcleancss'     => $opts->{'blocked_content'} ? 0 : 1,
         'extractlinks'       => $opts->{'anon_comment'},
         'extractimages'      => $opts->{'anon_comment'},
         'noearlyclose'       => 1,

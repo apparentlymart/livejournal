@@ -190,6 +190,7 @@ sub EntryPage
                 'remove_img_sizes'   => $replace_images_in_comments,
                 'remove_video_sizes' => $replace_video_in_comments,
                 'no_encode'          => 1,
+                'blocked_content'    => $com->{'props'}->{'blocked_content'},
             });
 
             # local time in mysql format to gmtime

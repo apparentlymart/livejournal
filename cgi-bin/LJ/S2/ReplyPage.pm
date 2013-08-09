@@ -148,8 +148,6 @@ sub ReplyPage
         $parpost->{'props'} =
             LJ::load_talk_props2($u, [ $re_talkid ])->{$re_talkid} || {};
 
-        LJ::run_hook('blocked_comment_content', $parpost);
-
         if($LJ::UNICODE && $parpost->{'props'}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
@@ -173,6 +171,7 @@ sub ReplyPage
                                          'anon_comment' => !$parpost->{posterid} || $pu->{'journaltype'} eq 'I',
                                      });
 
+        LJ::run_hook('blocked_comment_content', $parpost);
 
         my $dtalkid = $re_talkid * 256 + $entry->anum;
         $replyto = {
