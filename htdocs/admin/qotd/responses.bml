@@ -20,6 +20,7 @@ body<=
 
     my $ret = "";
 
+    $ret .= "<div class='b-adminpage b-adminpage-wide b-adminpage-max'";
     $ret .= "<form>";
     $ret .= "Writer's Block QID <input name='qid' value='$qid' /> ";
     $ret .= "<input type=submit value='Submit' /></form>";
@@ -33,6 +34,8 @@ body<=
     my @responses = $queue->get();
 
     $ret .= "<p>No responses found.</p>" unless @responses;
+    $ret .= "</div>";
+
 
     my $delim = ",";
     my $out = join($delim, ( "Username", "Age", "Gender", "#Comments", "Entry URL", "Answer"));
