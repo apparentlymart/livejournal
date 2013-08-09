@@ -881,14 +881,16 @@ LiveJournal.parseMedia = (function() {
             'youtube': 'http://youtube.com/watch?v={id}',
             'vimeo': 'http://vimeo.com/{id}',
             'vine': 'http://vine.co/v/{id}',
-            'instagram': 'http://instagram.com/p/{id}/'
+            'instagram': 'http://instagram.com/p/{id}/',
+            'gist' : 'https://gist.github.com/{id}'
         };
 
         var embed = {
             'youtube': '<iframe src="http://www.youtube.com/embed/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.youtube}),
             'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo}),
             'vine'   : '<iframe src="http://vine.co/v/{id}/card" width="380" height="380" frameborder="0" data-link="{link}"></iframe>'.supplant({link: link.vine}),
-            'instagram' : '<iframe src="//instagram.com/p/{id}/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"  data-link="{link}"></iframe>'.supplant({link: link.instagram})
+            'instagram' : '<iframe src="//instagram.com/p/{id}/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"  data-link="{link}"></iframe>'.supplant({link: link.instagram}),
+            'gist' : '<a data-embed="collapsed" href="https://gist.github.com/{id}">gist.github.com/{id}</a>'.supplant({link: link.gist})
         };
 
         var provider = {
@@ -934,6 +936,15 @@ LiveJournal.parseMedia = (function() {
             'instagram': {
                 parse: function(input) {
                     var matcher = /.*(?:instagram\.\w*|instagr\.am)\/p\/([^\/]+).*/,
+                        match = input.match(matcher);
+
+                    return (match && match[1]) || null;
+                }
+            },
+
+            'gist': {
+                parse: function(input) {
+                    var matcher = /.*(?:gist\.github\.com\/)([^\/]+\/{1}[^\/]+)\/{0,1}$/,
                         match = input.match(matcher);
 
                     return (match && match[1]) || null;

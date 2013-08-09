@@ -239,59 +239,91 @@ LiveJournal.register_hook('page_load', function () {
  * '<a href="https://gist.github.com/fcd584d3a351c3e9728b"></a>'
  */
 (function($) {
-	'use strict';
+    'use strict';
 
-	var gistBase = '://gist.github.com/',
-		gistCss  = {
-			'clear'       : 'both',
-			'display'     : 'block',
-			'padding-top' : '10px'
-		};
+    var gistBase = '://gist.github.com/',
 
-	$(function() {
-		var gist = $('a[href*="' + gistBase + '"]'),
-			head = $('head');
+    showGist = function (link)  {
 
-		gist.each(function(_, element) {
-			var link  = $(element),
-				href  = link.attr('href'),
-				match = href  && href.match(/gist.github.com(.*)\/([a-zA-Z0-9]+)/),
-				id    = match && match.pop();
+            var href  = link.attr('href'),
+                head = $('head'),
+                match = href  && href.match(/gist.github.com(.*)\/([a-zA-Z0-9]+)/),
+                id    = match && match.pop();
 
-			if (!id) {
-				console.error('Bad GitHub id');
-				return;
-			}
+            if (!id) {
+                console.error('Bad GitHub id');
+                return;
+            }
 
-			link
-				.attr('target', '_blank')
-				.css(gistCss)
-				.html('Loading the gist...');
+            link
+                .html('Loading the gist...');
 
-			$.ajax({
-			    url: 'https' + gistBase + id + '.json',
-			    dataType: 'jsonp',
-			    timeout: 10000
-			}).done(function(result) {
-				if (!result.div || !result.stylesheet) {
-					console.error('Data error', result);
-				}
+            $.ajax({
+                url: 'https' + gistBase + id + '.json',
+                dataType: 'jsonp',
+                timeout: 10000
+            }).done(function(result) {
+                if (!result.div || !result.stylesheet) {
+                    console.error('Data error', result);
+                }
 
-				head.append(
-					'<link rel="stylesheet" href="' + result.stylesheet + '">'
-				);
+                head.append(
+                    '<link rel="stylesheet" href="https' + gistBase + result.stylesheet + '">'
+                );
 
-				var div = $(result.div).css(gistCss);
+                var div = $(result.div);
+                div.find('a').attr('target', '_blank');
+                link.replaceWith(div);
+            })
+            .fail(function(error) {
+                link.html('Gist loading error');
+            });
+    },
 
-				div.find('a').attr('target', '_blank');
+    convertGists = function (node, isLjCut){
+        // Convert all gist links in node
+        node = node || $('body');
+        isLjCut = isLjCut || false;
 
-				link.replaceWith(div);
-			})
-			.fail(function(error) {
-				link.html('Gist loading error');
-			});
-		});
+        var gists = $('a[href*="' + gistBase + '"]', node);
 
-	});
+        gists.each(function(_, element) {
+            var link  = $(element),
+                isFeed,
+                expandLink,
+                needAutoExpand;
+
+            link.attr('target', '_blank');
+            // Insert original content from github if 'data-embed' is defined
+            if ( link.attr('data-embed') ) {
+                isFeed = /feed|friends/.test(window.location.pathname);
+                needAutoExpand = (isLjCut && isFeed) || ( link.attr('data-embed') === 'true' && !isFeed );
+
+                // Add either gist or collapsed gist
+                if (needAutoExpand) {
+                    // Add full gist content
+                    showGist(link);
+                } else {
+                    // Add collapsed gist
+                    expandLink = $( '<a href="#">&nbsp;[Expand]</a>' );
+                    expandLink.on('click', function(e) {
+                        e.preventDefault();
+                        showGist(link);
+                        $(this).remove();
+                    });
+                    link.after(expandLink);
+                }
+            }
+
+        });
+    };
+
+    $(function() {
+        var body = $('body');
+        convertGists( body );
+        body.on( 'ljcutshow', function( event, ui ) {
+                convertGists( $(event.target).next(), true );
+        } );
+    });
 
 })(jQuery);
