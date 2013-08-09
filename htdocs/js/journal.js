@@ -293,10 +293,10 @@ LiveJournal.register_hook('page_load', function () {
                 needAutoExpand;
 
             link.attr('target', '_blank');
-            // Insert original content from github if 'data-embed' is defined
-            if ( link.attr('data-embed') ) {
+            // Insert original content from github if 'data-expand' is defined
+            if ( link.attr('data-expand') ) {
                 isFeed = /feed|friends/.test(window.location.pathname);
-                needAutoExpand = isFeed ? isLjCut : (link.attr('data-embed') === 'true');
+                needAutoExpand = isFeed ? isLjCut : (link.attr('data-expand') === 'true');
 
                 // Add either gist or collapsed gist
                 if (needAutoExpand) {

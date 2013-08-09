@@ -890,7 +890,7 @@ LiveJournal.parseMedia = (function() {
             'vimeo'  : '<iframe src="http://player.vimeo.com/video/{id}" width="560" height="315" frameborder="0" allowfullscreen data-link="{link}"></iframe>'.supplant({link: link.vimeo}),
             'vine'   : '<iframe src="http://vine.co/v/{id}/card" width="380" height="380" frameborder="0" data-link="{link}"></iframe>'.supplant({link: link.vine}),
             'instagram' : '<iframe src="//instagram.com/p/{id}/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"  data-link="{link}"></iframe>'.supplant({link: link.instagram}),
-            'gist' : '<a data-embed="collapsed" href="https://gist.github.com/{id}">gist.github.com/{id}</a>'.supplant({link: link.gist})
+            'gist' : '<a data-expand="false" href="https://gist.github.com/{id}">gist.github.com/{id}</a>'.supplant({link: link.gist})
         };
 
         var provider = {
