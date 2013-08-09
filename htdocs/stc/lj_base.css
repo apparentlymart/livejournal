@@ -234,38 +234,7 @@ IFRAME.lj_embedcontent {
 	cursor:pointer;
 	}
 
-/* Social links */
 
-.social-links DT,
-.social-links DD {
-	display: inline;
-	padding: 0 !important;
-	}
-	.social-links DT {
-		font-size: 11px !important;
-		vertical-align: top;
-		}
-	.social-links DD {
-		margin: 0 2px 0;
-		}
-	.social-links DD A {
-		display: inline-block;
-		width: 16px;
-		height: 16px;
-		border: 0 !important;
-		vertical-align: top;
-		outline: none;
-		background: url(/img/icons/sc.png?ver=1) no-repeat;
-		}
-	.social-links .social-fb {
-		background-position: 0 0;
-		}
-	.social-links .social-vk {
-		background-position: -17px 0;
-		}
-	.social-links .social-tw {
-		background-position: -34px 0;
-		}
 
 /* Adding/Editing a note for a user
 ------------------------------------------*/
