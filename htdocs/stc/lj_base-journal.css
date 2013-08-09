@@ -1857,7 +1857,8 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 /* UPD: LJSUP-16343 (LJSV-2616: Content placeholder)
 -----------------------------------------------*/
 .b-contentplaceholder {
-	position: relative !important;
+	position: static !important;
+	display: block !important;
 	width: 60% !important;
 	height: auto;
 	margin: 1em auto !important;
@@ -1882,6 +1883,14 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 		.b-contentplaceholder-text .b-helplink {
 			vertical-align: text-top;
 			}
+.b-contentplaceholder-comment {
+	display: inline-block !important;
+	width: auto !important;
+	margin: 0 !important;
+	padding: 0.5em 1em 0.5em 2em !important;
+	border-radius: 0.5em;
+	background: #EEE url(/img/icons/lock-16-gray.gif?v=1) no-repeat 0.6em 45% !important;
+	}
 
 
 
