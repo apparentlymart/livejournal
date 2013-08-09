@@ -4,6 +4,8 @@ body<=
 <?_code {
  use strict;
 
+ LJ::need_res('stc/admin/general.css');
+
  my $body = "";
  my $dbh = LJ::get_db_writer();
  my $sth;
@@ -34,7 +36,7 @@ body<=
          $table{$name} = { 'public' => $public, 'des' => $des };
      }
 
-     $body .= "<?h1 Tables h1?><?p Click a table for more information. p?><p><table cellpadding=4><tr bgcolor=<?emcolor?>><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+     $body .= "<div class='b-adminpage b-adminpage-wide b-adminpage-max'><?h1 Tables h1?><?p Click a table for more information. p?><p><table class='b-admin-table'><tr bgcolor=<?emcolor?>><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
      $sth = $dbh->prepare("SHOW TABLES");
      $sth->execute;
      while (my ($table) = $sth->fetchrow_array) {
@@ -47,6 +49,7 @@ body<=
          $body .= "</td><td>$des</td></tr>\n";
      }
      $body .= "</table>\n";
+     $body .= "</div>";
      return $body;
  }
 
@@ -85,7 +88,8 @@ body<=
 
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     $body .= "<table cellpadding=3><tr bgcolor=<?emcolor?>>";
+     $body .= "<div class='b-adminpage b-adminpage-wide b-adminpage-max'>";
+     $body .= "<table class='b-admin-table'><tr bgcolor=<?emcolor?>>";
      $body .= "<td><b>Key?</b></td>";
      $body .= "<td><b>Column</b></td>";
      $body .= "<td><b>Type</b></td>";
@@ -116,6 +120,7 @@ body<=
          $body .= "</tr>\n";
      }
      $body .= "</table>\n";
+     $body .= "</div>";
      return $body;
  }
 
@@ -134,7 +139,7 @@ body<=
 
      $sth = $dbh->prepare("SELECT * FROM $table LIMIT $MAX_ROWS");
      $sth->execute;
-     $body .= "<table cellpadding=3><tr bgcolor=<?emcolor?>>";
+     $body .= "<table class='b-admin-table'><tr bgcolor=<?emcolor?>>";
      foreach my $col (@{$sth->{'NAME'}}) {
          $body .= "<td><b>$col</b></td>\n";
      }
@@ -180,7 +185,7 @@ body<=
 
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     $body .= "<p><table cellpadding=3><tr bgcolor=<?emcolor?>>";
+     $body .= "<p><table class='b-admin-table'><tr bgcolor=<?emcolor?>>";
      $body .= "<td><b>Column</b></td>";
      $body .= "<td><b>Type</b></td>";
      $body .= "<td><b>Description</b></td>";

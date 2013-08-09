@@ -6,6 +6,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::Vertical LJ::VerticalEditorials );
 
+    LJ::need_res('stc/admin/general.css');
+
     $title = "Manage Vertical Editorial Content";
 
     my $remote = LJ::get_remote();
@@ -17,6 +19,8 @@ body<=
         unless LJ::check_priv($remote, "vertical") || $LJ::IS_DEV_SERVER;
 
     my $ret = "";
+
+    $ret .= "<div class='b-adminpage b-adminpage-wide b-adminpage-max'>";
 
     $ret .= "<?p (<a href='$LJ::SITEROOT/admin/verticals/editorials/add.bml'>Add editorial content</a>) ";
     $ret .= "(<a href='$LJ::SITEROOT/admin/verticals/'>Return to options list</a>) p?>";
@@ -34,6 +38,7 @@ body<=
     }
 
     $ret .= LJ::Widget::ManageVerticalEditorials->render( get => \%GET );
+    $ret .= "</div>";
 
     return $ret;
 }

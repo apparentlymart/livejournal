@@ -5,6 +5,8 @@ body<=
     use strict;
     use vars qw(%POST %GET $title);
 
+    LJ::need_res('stc/admin/general.css');
+
     $title = "Manage Vertical Content";
 
     my $remote = LJ::get_remote();
@@ -16,6 +18,8 @@ body<=
         unless LJ::check_priv($remote, "vertical") || $LJ::IS_DEV_SERVER;
 
     my $ret = "";
+    
+    $ret .= "<div class='b-adminpage b-adminpage-max b-adminpage-wide'>";
 
     if (LJ::did_post()) {
         my %post_ret = LJ::Widget->handle_post(\%POST, qw(VerticalContentControl));
@@ -45,6 +49,8 @@ body<=
     }
 
     $ret .= LJ::Widget::VerticalContentControl->render( get => \%GET, post => LJ::Widget::VerticalContentControl->post_fields(\%POST) );
+
+    $ret .= "</div>";
 
     return $ret;
 }

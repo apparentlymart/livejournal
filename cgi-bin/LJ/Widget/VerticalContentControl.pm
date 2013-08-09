@@ -21,11 +21,11 @@ sub render_body {
     return "You do not have access to any verticals." unless @verticals;
 
     if ($action eq "add" || $action eq "remove") {
-        $ret .= "<table><tr valign='top'><td>" if $action eq "add";
+        $ret .= "<table class='b-admin-table'><tr valign='top'><td>" if $action eq "add";
 
         $ret .= $class->start_form;
 
-        $ret .= "<table border='0'>";
+        $ret .= "<table class='b-admin-table'>";
         $ret .= "<tr><td valign='top'>";
         $ret .= $action eq "add" ? "Add entry to vertical(s):" : "Remove entry from vertical(s):";
         $ret .= "</td><td>";
@@ -104,7 +104,7 @@ sub render_body {
         }
 
         $ret .= "<p><strong>Example Rules for Whitelist:</strong></p>";
-        $ret .= "<table cellpadding='3' border='1'>";
+        $ret .= "<table class='b-admin-table'>";
         $ret .= "<tr><td><code>0.4 Life::Pets</code></td><td>entries with at least 40% certainty of the category Life::Pets will appear in this vertical</td></tr>";
         $ret .= "<tr><td><code>Lang::EN</code></td><td>entries written in English will appear in this vertical</td></tr>";
         $ret .= "<tr><td><code>WordCount::100</code></td><td>entries that are at least 100 words long will appear in this vertical (default is 50)</td></tr>";
