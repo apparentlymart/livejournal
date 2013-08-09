@@ -283,8 +283,7 @@ LiveJournal.register_hook('page_load', function () {
     convertGists = function (node, isLjCut){
         // Convert all gist links in node
         node = node || $('body');
-        isLjCut = isLjCut || false;
-
+        
         var gists = $('a[href*="' + gistBase + '"]', node);
 
         gists.each(function(_, element) {
@@ -297,7 +296,7 @@ LiveJournal.register_hook('page_load', function () {
             // Insert original content from github if 'data-embed' is defined
             if ( link.attr('data-embed') ) {
                 isFeed = /feed|friends/.test(window.location.pathname);
-                needAutoExpand = (isLjCut && isFeed) || ( link.attr('data-embed') === 'true' && !isFeed );
+                needAutoExpand = isFeed ? isLjCut : (link.attr('data-embed') === 'true');
 
                 // Add either gist or collapsed gist
                 if (needAutoExpand) {
@@ -321,9 +320,9 @@ LiveJournal.register_hook('page_load', function () {
     $(function() {
         var body = $('body');
         convertGists( body );
-        body.on( 'ljcutshow', function( event, ui ) {
-                convertGists( $(event.target).next(), true );
-        } );
+        body.on('ljcutshow', function(event, ui) {
+                convertGists($(event.target).next(), true );
+        });
     });
 
 })(jQuery);
