@@ -65,54 +65,12 @@ Event.prep = function(e){
 };
 
 /**
- * @namespace LJ LiveJournal utility objects
- */
-LJ = window.LJ || {};
-
-/**
- * Define a namespace.
- *
- * @param {string} path The String with namespace to be created.
- * @param {Object=} top An optional object. If set then the namespace will be built relative to it. Defaults to the window.
- */
-LJ.define = function(path, top) {
-	var ns = path.split('.'),
-		name;
-
-	top = top || window;
-
-	while (name = ns.shift()) {
-		top[name] = top[name] || {};
-		top = top[name];
-	}
-
-}
-
-/**
  * Mark the namespace as a dependency. The function does nothing now.
  *
  * @param {string} path Namespace name.
  */
 LJ.require = function(path) {
 	//fillme
-};
-
-/**
- * Get a variable, defined especially for this page in the Site.page.
- *
- * @param {string} name Variable name.
- * @param {boolean} global A flag to check, whether the variable is local to page or not.
- *
- * @return {*} Returns a page variable or undefined if not found.
- */
-LJ.pageVar = function(name, global) {
-	var obj = global ? window.Site : window.Site && window.Site.page;
-
-	if (obj && obj.hasOwnProperty(name)) {
-		return obj[name];
-	} else {
-		return void(0);
-	}
 };
 
 /**
@@ -1596,26 +1554,6 @@ HTTPReq = {
 		}
 		return enc.join("&");
 	}
-};
-
-LJ.define('LJ.Object');
-/**
- * Return a copy of the object only containing the whitelisted properties.
- * @param {Object} obj Object source
- * @param {String} keys* Keys which should be picked from source object
- * @return {Object} Copy of source object that contains only whitelisted keys
- */
-LJ.Object.pick = function(obj) {
-    var copy = {},
-    	keys = Array.prototype.concat.apply( [], Array.prototype.slice.call(arguments, 1) );
-
-    keys.forEach(function (key) {
-    	if (key in obj) {
-    		copy[key] = obj[key];
-    	}
-    });
-
-    return copy;
 };
 
 /**
