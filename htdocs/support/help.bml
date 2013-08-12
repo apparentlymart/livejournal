@@ -295,7 +295,7 @@ body<=
  # /filter line
 
  # mass closing table
- $ret .= "<form method='post' action='/support/actmulti.bml'>" . LJ::form_auth() if $can_close && $rct;
+ $ret .= "<form method='post' action='/support/actmulti.bml'>" . LJ::form_auth() if ($can_close && $rct) || $can_mass_reply;
 
  # start the rest of the table
 
@@ -424,7 +424,7 @@ body<=
 
      my ($style, $js) = ("class='$barbg'", '');
 
-     if ($can_close) {
+     if ($can_close || $can_mass_reply) {
         $js = "id='r$sp->{spid}' onclick='doClick($sp->{spid});'";
      }
 
