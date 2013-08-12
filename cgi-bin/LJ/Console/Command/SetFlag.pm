@@ -40,7 +40,7 @@ sub execute {
     } elsif (!$u && $entry) {
         $type = "Entry";
         $content_obj = $entry;
-        $for_u = $entry->journal;
+        $for_u = $entry->poster;
     } else {
         return $self->error("First argument must be either a username or the URL to an entry.");
     }
