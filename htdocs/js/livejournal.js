@@ -92,8 +92,6 @@ LiveJournal.initPage = function () {
         LJ.Api.init({ auth_token: Site.auth_token });
     }
 
-    LJ.UI.track();
-
     LJ.UI.bootstrap();
 
     //register system hooks
