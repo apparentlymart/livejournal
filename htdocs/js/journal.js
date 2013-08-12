@@ -1,3 +1,5 @@
+//= require js/pagescroller.js
+
 DonateButton = {
 	buyMore: function(node, ml_message, event) {
 		var bubble = jQuery(node).data("buyMoreCachedBubble");
