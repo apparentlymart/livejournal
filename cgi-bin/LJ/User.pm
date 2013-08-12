@@ -5,6 +5,7 @@ no warnings 'uninitialized';
 use lib "$ENV{LJHOME}/cgi-bin";
 
 use base qw/
+    LJ::User::Account::GetAndSet
     LJ::User::Relations::Friends
     LJ::User::Relations::Subscribers
 /;
@@ -2395,21 +2396,6 @@ sub email_for_feeds {
     return $u->email_visible($remote);
 }
 
-sub email_status {
-    my $u = shift;
-    return $u->{status};
-}
-
-sub is_validated {
-    my $u = shift;
-    return $u->email_status eq "A";
-}
-
-sub receives_html_emails {
-    my $u = shift;
-    return $u->{opt_htmlemail} eq 'Y';
-}
-
 sub update_email_alias {
     my $u = shift;
 
@@ -2924,7 +2910,11 @@ sub get_reader_weight {
 
     LJ::MemCache::set( $memkey, $reader_weight, 60);
 
-    return $reader_weight || -1;
+    unless (defined $reader_weight) {
+        $reader_weight = -1;
+    }
+
+    return $reader_weight;
 }
 
 # <LJFUNC>
@@ -3474,43 +3464,6 @@ sub subtract_sms_quota {
     return LJ::SMS->subtract_sms_quota($u, $qty, $type);
 }
 
-sub is_syndicated {
-    my $u = shift;
-    return $u->{journaltype} eq "Y";
-}
-
-sub is_community {
-    my $u = shift;
-    return $u->{journaltype} eq "C";
-}
-*is_comm = \&is_community;
-
-sub is_shared {
-    my $u = shift;
-    return $u->{journaltype} eq "S";
-}
-
-sub is_news {
-    my $u = shift;
-    return $u->{journaltype} eq "N";
-}
-
-sub is_person {
-    my $u = shift;
-    return $u->{journaltype} eq "P";
-}
-*is_personal = \&is_person;
-
-sub is_identity {
-    my $u = shift;
-    return $u->{journaltype} eq "I";
-}
-
-sub is_redirected {
-    my $u = shift;
-    return $u->{journaltype} eq "R";
-}
-
 ## We trust OpenID users if they are either from trusted OpenID provider or
 ## have e-mail validated. During e-mail validation, they answer CAPTCHA test.
 ## Trusted OpenID users are like registered user, untrusted are like anonymous
@@ -3540,21 +3493,6 @@ sub is_trusted_identity {
     }
 
     return;
-}
-
-# return the journal type as a name
-sub journaltype_readable {
-    my $u = shift;
-
-    return {
-        R => 'redirect',
-        I => 'identity',
-        P => 'personal',
-        S => 'shared',
-        Y => 'syndicated',
-        N => 'news',
-        C => 'community',
-    }->{$u->{journaltype}};
 }
 
 sub who_invited {
@@ -4046,13 +3984,6 @@ sub check_ajax_auth_token {
     return LJ::Auth->check_ajax_auth_token($u, @_);
 }
 
-# returns username
-*username = \&user;
-sub user {
-    my $u = shift;
-    return $u->{user};
-}
-
 sub user_url_arg {
     my $u = shift;
     return "I,$u->{userid}" if $u->{journaltype} eq "I";
@@ -4080,36 +4011,11 @@ sub display_username {
     return LJ::ehtml($username);
 }
 
-# returns the user-specified name of a journal exactly as entered
-sub name_orig {
-    my $u = shift;
-    return $u->{name};
-}
-
-# returns the user-specified name of a journal in valid UTF-8
-sub name_raw {
-    my $u = shift;
-    LJ::text_out(\$u->{name});
-    return $u->{name};
-}
-
 # returns the user-specified name of a journal in valid UTF-8
 # and with HTML escaped
 sub name_html {
     my $u = shift;
     return LJ::ehtml($u->name_raw);
-}
-
-# userid
-*userid = \&id;
-sub id {
-    my $u = shift;
-    return int($u->{userid});
-}
-
-sub clusterid {
-    my $u = shift;
-    return $u->{clusterid};
 }
 
 # class method, returns { clusterid => [ uid, uid ], ... }
@@ -4435,21 +4341,6 @@ sub rate_check {
     LJ::rate_check($u, $ratename, $count, $opts);
 }
 
-sub statusvis {
-    my $u = shift;
-    return $u->{statusvis};
-}
-
-sub statusvisdate {
-    my $u = shift;
-    return $u->{statusvisdate};
-}
-
-sub statusvisdate_unix {
-    my $u = shift;
-    return LJ::TimeUtil->mysqldate_to_time($u->{statusvisdate});
-}
-
 # returns list of all previous statuses of the journal
 # in order from newest to oldest
 sub get_previous_statusvis {
@@ -4464,188 +4355,6 @@ sub get_previous_statusvis {
     }
 
     return @statusvis;
-}
-
-# set_statusvis only change statusvis parameter, all accompanied actions are done in set_* methods
-sub set_statusvis {
-    my ($u, $statusvis) = @_;
-    
-    LJ::MemCache::delete('u:s:' . $u->userid);    
-
-    croak "Invalid statusvis: $statusvis"
-        unless $statusvis =~ /^(?:
-            V|       # visible
-            D|       # deleted
-            X|       # expunged
-            S|       # suspended
-            L|       # locked
-            M|       # memorial
-            O|       # read-only
-            R        # renamed
-                                )$/x;
-
-    # log the change to userlog, but only in case we have a valid clusterid;
-    # this check addresses the case when an expunged user gets suspended
-    if ( $u->clusterid ) {
-        # remote looked up by create()
-        LJ::User::UserlogRecord::AccountStatus->create( $u,
-            'old' => $u->statusvis, 'new' => $statusvis );
-    }
-
-    # do update
-    my $ret = LJ::update_user($u, { statusvis => $statusvis,
-                                 raw => 'statusvisdate=NOW()' });
-
-    LJ::run_hooks("props_changed", $u, {statusvis => $statusvis});
-
-    return $ret;
-}
-
-sub set_visible {
-    my $u = shift;
-
-    LJ::run_hooks("account_will_be_visible", $u);
-    return $u->set_statusvis('V');
-}
-
-sub set_deleted {
-    my $u = shift;
-    my $res = $u->set_statusvis('D');
-
-    # run any account cancellation hooks
-    LJ::run_hooks("account_delete", $u);
-    return $res;
-}
-
-sub set_expunged {
-    my $u = shift;
-    return $u->set_statusvis('X');
-}
-
-sub set_suspended {
-    my ($u, $who, $reason, $errref, $public_reason) = @_;
-    die "Not enough parameters for LJ::User::set_suspended call" unless $who and $reason;
-
-    my $res = $u->set_statusvis('S');
-    unless ($res) {
-        $$errref = "DB error while setting statusvis to 'S'" if ref $errref;
-        return $res;
-    }
-
-    LJ::statushistory_add($u, $who, "suspend", $reason);
-
-    # close all spamreports on this user
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("UPDATE spamreports SET state='closed' WHERE posterid = ? AND state='open'", undef, $u->userid);
-    
-    # close all botreports on this user
-    require LJ::BotReport;
-    LJ::BotReport->close_requests($u->userid);
-
-    #
-    LJ::run_hooks("account_cancel", $u);
-    LJ::run_hooks("account_suspend", $u);
-
-    if ($public_reason) {
-        LJ::statushistory_add($u, $who, "suspend_reason", $public_reason);
-        $u->set_prop('suspend_reason' => $public_reason);
-    }
-
-    if (my $err = LJ::run_hook("cdn_purge_userpics", $u)) {
-        $$errref = $err if ref $errref and $err;
-        return 0;
-    }
-
-    return $res; # success
-}
-
-# sets a user to visible, but also does all of the stuff necessary when a suspended account is unsuspended
-# this can only be run on a suspended account
-sub set_unsuspended {
-    my ($u, $who, $reason, $errref) = @_;
-    die "Not enough parameters for LJ::User::set_unsuspended call" unless $who and $reason;
-
-    unless ($u->is_suspended) {
-        $$errref = "User isn't suspended" if ref $errref;
-        return 0;
-    }
-
-    my $res = $u->set_statusvis('V');
-    unless ($res) {
-        $$errref = "DB error while setting statusvis to 'V'" if ref $errref;
-        return $res;
-    }
-
-    LJ::statushistory_add($u, $who, "unsuspend", $reason);
-    LJ::run_hooks("account_unsuspend", $u);
-
-    return $res; # success
-}
-
-sub set_locked {
-    my $u = shift;
-    return $u->set_statusvis('L');
-}
-
-sub set_memorial {
-    my $u = shift;
-    return $u->set_statusvis('M');
-}
-
-sub set_readonly {
-    my $u = shift;
-    return $u->set_statusvis('O');
-}
-
-sub set_renamed {
-    my $u = shift;
-    return $u->set_statusvis('R');
-}
-
-# returns if this user is considered visible
-sub is_visible {
-    my $u = shift;
-    return ($u->statusvis eq 'V' && $u->clusterid != 0);
-}
-
-sub is_deleted {
-    my $u = shift;
-    return $u->statusvis eq 'D';
-}
-
-sub is_expunged {
-    my $u = shift;
-    return $u->statusvis eq 'X' || $u->clusterid == 0;
-}
-
-sub is_suspended {
-    my $u = shift;
-    return $u->statusvis eq 'S';
-}
-
-sub is_locked {
-    my $u = shift;
-    return $u->statusvis eq 'L';
-}
-
-sub is_memorial {
-    my $u = shift;
-    return $u->statusvis eq 'M';
-}
-
-sub is_readonly {
-    my $u = shift;
-    return $u->statusvis eq 'O';
-}
-
-sub is_renamed {
-    my $u = shift;
-    return $u->statusvis eq 'R';
-}
-
-sub caps {
-    my $u = shift;
-    return $u->{caps};
 }
 
 sub is_sup {
@@ -4786,19 +4495,15 @@ sub password {
     return $u->{_password};
 }
 
-sub journaltype {
+sub fb_push {
     my $u = shift;
-    return $u->{journaltype};
-}
-
-sub set_password {
-    my ($u, $password) = @_;
-    return LJ::set_password($u->id, $password);
-}
-
-sub set_email {
-    my ($u, $email) = @_;
-    return LJ::set_email($u->id, $email);
+    eval {
+        if ($u) {
+            require LJ::FBInterface;
+            LJ::FBInterface->push_user_info( $u->id );
+        }
+    };
+    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 }
 
 sub grant_priv {
@@ -5163,17 +4868,6 @@ sub unban_user_multi {
     LJ::clear_rel_multi(map { [$u->id, $_, 'B'] } @unbanlist);
 
     return 1;
-}
-
-# returns if this user's polls are clustered
-sub polls_clustered {
-    my $u = shift;
-    return $u->dversion >= 8;
-}
-
-sub dversion {
-    my $u = shift;
-    return $u->{dversion};
 }
 
 # take a user on dversion 7 and upgrade them to dversion 8 (clustered polls)
@@ -6080,18 +5774,6 @@ sub subscriptions_count {
     my $count = $u->_subscriptions_count;
     LJ::MemCache::set('subscriptions_count:'.$u->id, $count);
     return $count;
-}
-
-sub packed_props {
-    my ($u) = @_;
-    return $u->{'packed_props'};
-}
-
-sub set_packed_props {
-    my ($u, $newprops) = @_;
-
-    LJ::update_user($u, { 'packed_props' => $newprops });
-    $u->{'packed_props'} = 1;
 }
 
 sub init_userprop_def {
@@ -7818,69 +7500,6 @@ sub set_password {
     LJ::MemCache::delete([$userid, "pw:$userid"]);
     my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
     $cache->{'_password'} = $password;
-}
-
-sub update_user
-{
-    my ($arg, $ref) = @_;
-    my @uid;
-
-    if (ref $arg eq "ARRAY") {
-        @uid = @$arg;
-    } else {
-        @uid = want_userid($arg);
-    }
-    @uid = grep { $_ } map { $_ + 0 } @uid;
-    return 0 unless @uid;
-
-    my @sets;
-    my @bindparams;
-    my $used_raw = 0;
-    while (my ($k, $v) = each %$ref) {
-        if ($k eq "raw") {
-            $used_raw = 1;
-            push @sets, $v;
-        } elsif ($k eq 'email') {
-            set_email($_, $v) foreach @uid;
-        } elsif ($k eq 'password') {
-            set_password($_, $v) foreach @uid;
-        } else {
-            push @sets, "$k=?";
-            push @bindparams, $v;
-        }
-    }
-    return 1 unless @sets;
-    my $dbh = LJ::get_db_writer();
-    return 0 unless $dbh;
-    {
-        local $" = ",";
-        my $where = @uid == 1 ? "userid=$uid[0]" : "userid IN (@uid)";
-        $dbh->do("UPDATE user SET @sets WHERE $where", undef,
-                 @bindparams);
-        return 0 if $dbh->err;
-    }
-    if (@LJ::MEMCACHE_SERVERS) {
-        LJ::memcache_kill($_, "userid") foreach @uid;
-    }
-
-    if ($used_raw) {
-        # for a load of userids from the master after update
-        # so we pick up the values set via the 'raw' option
-        require_master(sub { LJ::load_userids(@uid) });
-    } else {
-        foreach my $uid (@uid) {
-            while (my ($k, $v) = each %$ref) {
-                my $cache = $LJ::REQ_CACHE_USER_ID{$uid} or next;
-                $cache->{$k} = $v;
-            }
-        }
-    }
-
-    # log this updates
-    LJ::run_hooks("update_user", userid => $_, fields => $ref)
-        for @uid;
-
-    return 1;
 }
 
 # <LJFUNC>
