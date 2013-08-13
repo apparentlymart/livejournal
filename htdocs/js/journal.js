@@ -17,7 +17,7 @@ DonateButton = {
     if (event.stopPropagation) {
       event.stopPropagation();
     } else {
-       event.cancelBubble = true;
+      event.cancelBubble = true;
     }
 
     return false;
