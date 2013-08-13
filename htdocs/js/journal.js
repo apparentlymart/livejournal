@@ -52,50 +52,6 @@ DonateButton = {
 	}
 };
 
-// Share at some S2 styles
-jQuery(document).click(function(e)
-{
-	'use strict';
-
-	var a, href, args;
-
-	// exit if sharing widget is on the page
-	if (jQuery.fn.share) {
-		return;
-	}
-
-	a = e.target;
-	href = a.href;
-
-	if (href && !a.shareClickIgnore) {
-		if (href.indexOf('http://www.facebook.com/sharer.php') === 0) {
-			LJShare.entry({url: decodeURIComponent(LiveJournal.parseGetArgs(href).u)})
-				.attach(a, "facebook");
-			a.shareClickIgnore = true;
-			jQuery(a).click();
-			e.preventDefault();
-		} else if (href.indexOf("http://twitter.com/share") === 0) {
-			args = LiveJournal.parseGetArgs(href);
-			LJShare.entry({
-				url: decodeURIComponent(args.url),
-				title: decodeURIComponent(args.text)
-			}).attach(a, "twitter");
-			a.shareClickIgnore = true;
-			jQuery(a).click();
-			e.preventDefault();
-		} else if (href.indexOf("http://api.addthis.com/oexchange/0.8/forward/email") === 0) {
-			args = LiveJournal.parseGetArgs(href);
-			LJShare.entry({
-				url: decodeURIComponent(args.url),
-				title: decodeURIComponent(args.title)
-			}).attach(a, "email");
-			a.shareClickIgnore = true;
-			jQuery(a).click();
-			e.preventDefault();
-		}
-	}
-});
-
 (function() {
 	var options = {
 		blockSelector: '.yota-contest'
@@ -285,7 +241,7 @@ LiveJournal.register_hook('page_load', function () {
     convertGists = function (node, isLjCut){
         // Convert all gist links in node
         node = node || $('body');
-        
+
         var gists = $('a[href*="' + gistBase + '"]', node);
 
         gists.each(function(_, element) {
