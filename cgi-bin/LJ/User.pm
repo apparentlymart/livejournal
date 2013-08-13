@@ -276,6 +276,19 @@ sub get_syndicated {
     return $synd;
 }
 
+sub get_community_owner () {
+    my $self = shift;
+
+    return undef unless LJ::isu($self);
+    return undef unless $self->is_community();
+
+    my $challengers = LJ::load_rel_user($self, 'S');
+    my $supermaintainer = LJ::load_userid($challengers->[0]);
+    return undef unless LJ::isu($supermaintainer);
+
+    return $supermaintainer;
+}
+
 sub is_protected_username {
     my ($class, $username) = @_;
     foreach my $re (@LJ::PROTECTED_USERNAMES) {

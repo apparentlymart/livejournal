@@ -32,15 +32,22 @@ sub execute {
     # check to see if it's a user or an entry
     my $u = LJ::load_user($content);
     my $entry = LJ::Entry->new_from_url($content);
+    my $target;
     my ($type, $content_obj, $for_u);
     if ($u && !$entry) {
         $type = "Journal";
         $content_obj = $u;
         $for_u = $u;
+        $target = $u;
+        if ( $u->is_community() ) {
+            my $owner = $u->get_community_owner();
+            $for_u = $owner if LJ::isu($owner);
+        }
     } elsif (!$u && $entry) {
         $type = "Entry";
         $content_obj = $entry;
         $for_u = $entry->poster;
+        $target = $entry->poster;
     } else {
         return $self->error("First argument must be either a username or the URL to an entry.");
     }
@@ -96,9 +103,9 @@ sub execute {
 
     my $remote = LJ::get_remote();
     if ($type eq "Journal") {
-        LJ::statushistory_add($for_u, $remote, "set_flag", "journal flagged as $state: " . $reason);
+        LJ::statushistory_add($target, $remote, "set_flag", "journal flagged as $state: " . $reason);
     } else { # entry
-        LJ::statushistory_add($for_u, $remote, "set_flag", "$content flagged as $state: " . $reason);
+        LJ::statushistory_add($target, $remote, "set_flag", "$content flagged as $state: " . $reason);
     }
 
     return 1;
