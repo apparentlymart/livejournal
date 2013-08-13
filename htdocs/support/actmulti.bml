@@ -121,6 +121,10 @@ body<=
                 'remote' => $remote,
             });
         }
+
+        # done now
+        return BML::redirect(sprintf($POST{ret}, '')) if $POST{ret};
+        return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.moved'} p?>";
     }
 }
 _code?>

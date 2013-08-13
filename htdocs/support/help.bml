@@ -307,6 +307,9 @@ body<=
     my $link = $uri . '&sort='.$sort . '&closeall=' . ($GET{'closeall'} ? 0 : 1);
     $ret .= "<td>&nbsp;<b><a href='$link'>X</a></b></td>\n";
  }
+ elsif ( $can_mass_reply ) {
+    $ret .= "<td>&nbsp;</td>\n";
+ }
 
  my @headers = ( id => "ID#", summary => $ML{'.th.summary'}, area => $ML{'.th.problemarea'}, date => $ML{'.th.posted'} );
  push @headers, recent => $ML{'.th.recent'} if $can_see_tags;
