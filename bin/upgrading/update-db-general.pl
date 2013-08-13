@@ -4712,4 +4712,17 @@ register_alter(sub {
     }
 });
 
+register_alter(sub {
+    my $dbh = shift;
+    my $runsql = shift;
+
+    unless (column_type("ratelog", "rate_item_id")) {
+        do_alter( "ratelog",
+                  "ALTER TABLE ratelog " . 
+                  "ADD `rate_item_id` int(10) unsigned " . 
+                  "PRIMARY KEY AUTO_INCREMENT");
+    }
+
+});
+
 1; # return true
