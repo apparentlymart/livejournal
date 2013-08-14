@@ -4621,13 +4621,25 @@ register_alter(sub {
     my $dbh = shift;
     my $runsql = shift;
 
-    unless (column_type("userlog", "backup_id")) {
+    if (column_type('userlog', 'backup_id')) {
+        do_alter('userlog',
+            'ALTER TABLE userlog DROP PRIMARY KEY, DROP COLUMN backup_id');
+    }
+
+    unless (column_type("userlog", "logid")) {
         do_alter( "userlog",
                   "ALTER TABLE userlog " . 
-                  "ADD `backup_id` int(10) unsigned " . 
+                  "ADD `logid` int(10) unsigned " . 
                   "PRIMARY KEY AUTO_INCREMENT");
     }
 
+    if ( my $idxname = index_name( 'userlog', 'INDEX:userid' ) ) {
+        do_alter( 'userlog', "ALTER TABLE userlog DROP INDEX $idxname" );
+    }
+
+    unless ( index_name( 'userlog', 'INDEX:userid-logtime' ) ) {
+        do_alter( 'userlog', 'ALTER TABLE userlog ADD INDEX (userid, logtime)' );
+    }
 });
 
 register_alter(sub {
