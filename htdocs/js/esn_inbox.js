@@ -198,7 +198,7 @@ ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
 
     //selectableTable class has nontrivial logic about stopping events when click on a row,
     //so we make a hack to be sure that popup will be closed in this case
-    jQuery( '#all_Body tr' ).mousedown( function( ev ) {
+    jQuery( '#all_Table tr' ).mousedown( function( ev ) {
         if( window.ctrlPopup ) {
             ctrlPopup.bubble( 'hide' );
         }
