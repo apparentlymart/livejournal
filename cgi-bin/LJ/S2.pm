@@ -4381,7 +4381,7 @@ sub _Entry__get_link
 
         my $link_image = LJ::S2::Image( "$LJ::IMGPREFIX/btn_sharethis.gif?v=18499", 24, 24, '');
         my $link = LJ::S2::Link(
-            $attrs->{'data-url'} . '?title=' . $attrs->{'data-title'} . '&hashtags=' . $attrs->{'data-hashtags'} . "&text=" . $attrs->{'data-text'},
+            $entry->url() . '?title=' . $attrs->{'data-title'} . '&hashtags=' . $attrs->{'data-hashtags'} . "&text=" . $attrs->{'data-text'},
             $link_text,
             $link_image,
             %link_extra
