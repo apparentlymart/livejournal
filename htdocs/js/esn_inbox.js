@@ -203,7 +203,7 @@ ESN_Inbox.initInboxBtns = function (folder, cur_folder) {
             ctrlPopup.bubble( 'hide' );
         }
     } );
-    
+
     DOM.addEventListener($(folder + "_MarkAllRead"), "click", function(e) { ESN_Inbox.markAllRead(e, folder, cur_folder) });
     DOM.addEventListener($(folder + "_DeleteAll"), "click", function(e) { ESN_Inbox.deleteAll(e, folder, cur_folder) });
 };
@@ -217,7 +217,7 @@ ESN_Inbox.confirmSpam = function( target, applyCallback, deleteSuspicious ) {
                 applyCallback( window.ctrlPopup.find( '[name=ban]' ).is( ':checked' ) );
             });
     }
-    
+
     var html = '<div class="b-popup-group"><div class="b-popup-row b-popup-row-head"><strong>' + LiveJournal.getLocalizedStr( mlPrefix + 'title' )
                 + '</strong></div><div class="b-popup-row">' + LiveJournal.getLocalizedStr( mlPrefix + ( ( deleteSuspicious ) ? 'delete' : 'deleteban' ) ) + '</div>';
 
@@ -231,7 +231,7 @@ ESN_Inbox.confirmSpam = function( target, applyCallback, deleteSuspicious ) {
     window.ctrlPopup
         .html( html )
         .bubble( {
-            target: target,
+            target: jQuery(target),
             closeOnDocumentClick: true,
             closeOnContentClick: false
         } )
