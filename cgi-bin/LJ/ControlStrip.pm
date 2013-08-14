@@ -135,6 +135,7 @@ sub render {
         my $friend = LJ::is_friend($remote, $journal);
         my $friendof = LJ::is_friend($journal, $remote);
 
+        $data_remote->{is_member} = $friendof;
         $data_remote->{is_friend} = $friend;
         $data_remote->{is_friendof} = $friendof;
         $data_remote->{is_subscriber} = 0;
