@@ -567,6 +567,10 @@ sub file_request
     my $html;
     my $u;
 
+    my $fire_event = exists $o->{fire_event}
+        ? $o->{fire_event}
+        : 1;
+
     unless ($email) {
         if ($o->{'reqtype'} eq "user") {
             $u = LJ::load_userid($o->{'requserid'});
@@ -711,7 +715,7 @@ sub file_request
         LJ::ContentFlag->set_supportid($o->{flagid}, $spid);
     }
 
-    LJ::Event::SupportRequest->new($u, $spid)->fire;
+    LJ::Event::SupportRequest->new($u, $spid)->fire if $fire_event;
 
     # and we're done
     return $spid;
