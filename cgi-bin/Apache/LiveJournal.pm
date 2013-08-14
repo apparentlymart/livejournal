@@ -37,6 +37,7 @@ use LJ::S2;
 use LJ::TimeUtil;
 use LJ::URI;
 use LJ::Handlers;
+use LJ::SocialScripts;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
@@ -2171,6 +2172,7 @@ sub journal_content
     my $before_body_close = "";
 
     LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+    $before_body_close .=  LJ::SocialScripts::load_scripts();
     LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close);
     {
         my $journalu = LJ::load_user($user);
