@@ -1,6 +1,7 @@
 package LJ::PageStats;
 use strict;
 use LJ::Request;
+use Digest::MD5 qw/md5_base64/;
 
 # loads a page stat tracker
 sub new {
@@ -287,6 +288,195 @@ sub campaign_tracking {
     }
 
     return $output;
+}
+
+sub account_level {
+    my ($self, $u) = @_;
+    my $level;
+
+    if ($u) {
+        if ($u->identity) {
+            $level = 'plus';
+        } else { 
+            if (LJ::get_cap($u, 'paid')) {
+                if ($u->in_class('perm')) {
+                    $level = 'perm';
+                } elsif ($u->in_class('sponsored')) {
+                    $level = 'sponsored';
+                } else {
+                    $level = 'paid';
+                }
+            } elsif ($u->in_class('plus')) {
+                $level = 'plus';
+            } else {
+                $level = 'basic';
+            }
+        }
+    }
+
+    return $level;
+}
+
+sub style_system { 
+    my ($self, $journal) = @_;
+
+    return 'undef' unless $journal;
+    return LJ::Request->notes('codepath') =~ m/^([sS]\d)\./ ? lc($1) : 'undef';
+}
+
+sub style_layout {
+    my ($self, $journal) = @_;
+
+    return 'undef' unless $journal;
+
+    my $style_system = $self->style_system($journal); 
+    my $style_layout;
+    if ($style_system eq 's1') { 
+        $style_layout = $journal->{'_s1styleid'} && LJ::S1::get_style($journal->{'_s1styleid'})->{'styledes'} || 'own_style';
+    } elsif ($style_system eq 's2') {
+        $style_layout = 'own_style';
+            if ($journal->{'_s2styleid'}) {
+                my %style = LJ::S2::get_style($journal->{'_s2styleid'});
+                $style_layout = defined $style{'layout'} && S2::get_layer_info($style{'layout'}, 'name');
+                unless ($style_layout) { 
+                    LJ::S2::load_layers($style{'layout'}); 
+                    $style_layout = S2::get_layer_info($style{'layout'}, 'name') || 'own_style';
+                    S2::unregister_layer($style{'layout'}); 
+                }
+            } elsif (defined $journal->{'_s2styleid'}) { 
+                $style_layout = 'default';
+            }
+    } else {
+        $style_layout = 'undef';
+    } 
+
+    return $style_layout;
+}
+
+sub comments_style {
+    my ($self, $journal) = @_;
+
+    return 'undef' unless $journal;
+
+    my $remote    = LJ::get_remote();
+    my $style     = LJ::Request->get_param('style');
+    my $format    = LJ::Request->get_param('format') || '';
+    my $stylemine = ($style && $style eq 'mine') ? 1 : 0;
+    my $style_u   = $journal;
+
+    my $comments_style = 's1';
+
+    my ($ctx, $stylesys, $styleid);
+
+    if ($remote && ($stylemine || $remote->opt_stylealwaysmine || $remote->opt_commentsstylemine)) {
+        $style_u = $remote;
+    }
+
+    LJ::load_user_props($journal, ("stylesys", "s2_style"));
+
+    my $forceflag = 0;
+
+    LJ::run_hooks("force_s1", $journal, \$forceflag);
+
+    if ( not $forceflag and $journal->{'stylesys'} and $journal->{'stylesys'} == 2 ) {
+        $stylesys = 2;
+        $styleid  = $journal->{'s2_style'};
+    } else {
+        $stylesys = 1;
+        $styleid  = 0;
+    }
+
+    if ( $stylesys == 2 ) {
+        $ctx = LJ::S2::s2_context('UNUSED', $styleid);
+        $LJ::S2::CURR_CTX = $ctx;
+
+        $comments_style = 's2' if (not $ctx->[S2::PROPS()]->{'view_entry_disabled'} and
+                       LJ::get_cap($style_u, "s2viewentry")) || $LJ::JOURNALS_WITH_FIXED_STYLE{$journal->user};
+    }
+
+    if ( $format eq 'light' ) {
+        $comments_style = 's1';
+    }
+
+    return $comments_style;
+}
+
+sub homepage_category {
+    my ($self) = @_;
+
+    my $url = LJ::Request->current_page_url(); 
+
+    if (my ($cat_pretty_name) = $url =~ m{^$LJ::SITEROOT/category/(\w+)/?$}) {
+        for (@{LJ::HomePage::Category->get_all_categories}) {
+            return $cat_pretty_name
+                if  $cat_pretty_name eq $_->{'pretty_name'};
+        }
+    }
+
+    return 'undef';
+}
+
+sub homepage_flags {
+    my ($self) = @_;
+
+    my $remote = LJ::get_remote();
+
+    return {
+        geotargeting => LJ::PersonalStats::Ratings->get_rating_country() || 'undef',
+        unique_items => LJ::User::HomePage->homepage_flag ($remote, 'show_unique_items') ? 'show' : 'hide',
+        from_friends => LJ::User::HomePage->homepage_flag ($remote, 'show_from_friends') ? 'show' : 'hide',
+        hidden_items => LJ::User::HomePage->homepage_flag ($remote, 'show_hidden_items') ? 'show' : 'hide',
+    }
+}
+
+sub user_params {
+    my ($self, $u, $url) = @_;
+
+    my $host = LJ::Request->header_in("Host");
+    my $uri  = LJ::Request->uri();
+    my $args = LJ::Request->args();
+    
+    if ( $u ) {
+
+        my $journaltype  = $u->journaltype_readable;
+        my $journal_user = $u->user;
+
+        return {
+            userid          => $u->userid(),
+            stylealwaysmine => $u->opt_stylealwaysmine ? 'yes' : 'no',
+            login_service   => $u->identity ? $u->identity->short_code : 'lj',
+            sup_enabled     => LJ::SUP->is_sup_enabled($u) ? 'Cyr' : 'nonCyr',
+            premium_package => $u->get_cap('perm') ? 'perm' : $u->get_cap('paid') ? 'paid' : 'no',
+            account_level   => $self->account_level($u),
+            page_params     => "journal::$journaltype\:\:$journal_user\:\:$host$uri$args",
+            adult_content   => $u->adult_content_calculated,
+            early_adopter   => LJ::get_cap($u, 'early') ? 'yes' : 'no',
+            user_md5_base64 => md5_base64($u->user, 0, 8),
+            user            => $journal_user,
+            journaltype     => $journaltype,
+        }
+
+    } else {
+
+        my $ip_class = LJ::GeoLocation->ip_class();
+ 
+        return {
+            userid          => '',
+            stylealwaysmine => 'undef', 
+            login_service   => 'undef', 
+            sup_enabled     => LJ::SUP->is_sup_ip_class($ip_class) ? 'Cyr' : 'nonCyr', 
+            premium_package => 'undef', 
+            account_level   => 'undef', 
+            page_params     => "service::undef::undef::$host$uri$args",
+            adult_content   => 'undef',
+            early_adopter   => 'undef', 
+            user_md5_base64 => 'undef',
+            user            => 'undef',
+            journaltype     => 'undef', 
+        }
+
+    } 
+
 }
 
 1;
