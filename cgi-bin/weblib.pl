@@ -1701,6 +1701,7 @@ sub res_includes {
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
                 Site.page = $jsvar_out;
+                Site.page.template = {};
                 Site.timer = +(new Date());
                 (function(){
                     var p = $site_params, i;
