@@ -5,6 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::Request;
 use URI;
+use LJ::SocialScripts;
 
 sub need_res { return 'stc/widgets/login.css' }
 
@@ -83,6 +84,7 @@ sub render_body {
         push @types, $type_display;
 
         if ( $type eq 'google' ) {
+            $template->param( "page_javascript" => LJ::SocialScripts::load_scripts( { require_scripts => ["google"] } ) );
             $template->param( 'google_client_id' => $LJ::GOOGLE_OAUTH_CONF->{'client_id'}, );
             LJ::need_res("js/google_auth.js");
         }
