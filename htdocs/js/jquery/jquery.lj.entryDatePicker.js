@@ -1,3 +1,5 @@
+//= require js/jquery/jquery.lj.calendar.js
+
  /**
  * @author dmitry.petrov@sup.com (Dmitry Petrov)
  * @fileoverview LiveJournal post date widget for new post page.
