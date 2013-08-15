@@ -131,8 +131,10 @@ sub response {
              $error = $fatal;
         }
         
-        my %error_data = ( 'code'    => $error->{'error_code'},
-                           'message' => $error->{'error_message'}, );
+        my %error_data = (
+            'code'    => $error->{'error_code'} || $error->{'code'},
+            'message' => $error->{'error_message'} || $error->{'message'},
+        );
        
         if ($error->{'data'}) {
             $error_data{'data'} = $error->{'data'};
