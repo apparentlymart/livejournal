@@ -1,3 +1,6 @@
+//= require js/jquery/jquery.calendarEvents.js
+//= require js/jquery/jquery.lj.relations.js
+
 /*global ContextualPopup */
 /**
  * @author Valeriy Vasin (valeriy.vasin@sup.com)

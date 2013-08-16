@@ -1183,8 +1183,8 @@ sub entry_form_decode
                 prop_ljart_event_type prop_ljart_event_image
                 prop_ljart_event_desc prop_ljart_event
                 prop_ljart_portfolio_thumbnail prop_ljart_portfolio
-                repost_budget paid_repost_on repost_limit_sc 
-                repost_targeting_age repost_targeting_gender 
+                repost_budget paid_repost_on repost_limit_sc
+                repost_targeting_age repost_targeting_gender
                 repost_targeting_country repost_targeting_state
             )) {
         $req->{$_} = $POST->{$_};
@@ -1222,7 +1222,7 @@ sub entry_form_decode
     my $ljart_time_to   = $POST->{'prop_ljart_event_time_to'};
 
     $req->{'prop_ljart_event_date'} = $ljart_date_to ? "$ljart_date_from-$ljart_date_to" : $ljart_date_from;
-    $req->{'prop_ljart_event_time'} = $ljart_time_to ? "$ljart_time_from-$ljart_time_to" : $ljart_time_from; 
+    $req->{'prop_ljart_event_time'} = $ljart_time_to ? "$ljart_time_from-$ljart_time_to" : $ljart_time_from;
 
     $req->{'prop_copyright'} = $POST->{'prop_copyright'} ? 'P' : 'C' if LJ::is_enabled('default_copyright', LJ::get_remote())
                                     && $POST->{'defined_copyright'};
@@ -2292,13 +2292,7 @@ sub control_strip_js_inject
     my %opts = @_;
     my $user = delete $opts{user};
 
-    LJ::need_res(qw(
-                    js/livejournal.js
-                    js/jquery/jquery.lj.relations.js
-                    js/controlstrip.js
-                    js/jquery/jquery.calendarEvents.js
-                    js/jquery/jquery.lj.modal.js
-                    ));
+    LJ::need_res('js/controlstrip.js');
 }
 
 sub journal_js_inject
