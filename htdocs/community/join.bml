@@ -100,20 +100,14 @@ body<=
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
 
-        # can members join this community openly?
-        if ($ci->{membership} ne 'open') {
-            # hit up the maintainers to let them know a join was requested
-            LJ::comm_join_request($cu, $remote);
-            $ret = "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $ML{'.reqsubmitted.body'} p?> ";
+        my ($code, $message) = LJ::join_community($remote, $cu);
+
+        unless ($code) {
+            return "<?h1 $ML{'Error'} h1?><?p $message p?>";
+        } elsif ($message) {
+            $ret = "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $message p?> ";
             $ret .= $next_links;
             return $ret;
-          }
-
-        # join community
-        my $joined = LJ::join_community($remote, $cu);
-        unless ($joined) {
-            return "<?h1 $ML{'error'} h1?>"
-                   . "<?p " . LJ::last_error() . " p?>";
         }
 
         # add community as a friend if selected

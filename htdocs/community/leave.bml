@@ -35,24 +35,16 @@
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
 
-        # get current list of maintainers to make sure the last one doesn't leave
-        my $maintids = LJ::load_rel_user($cu->{userid}, 'A');
-        return $error->($ML{'error.nodb'}) unless ref $maintids eq 'ARRAY';
-
-        # error if we're a maintainer and there are no others
-        my $ismaint     = grep { $_ == $remote->{userid} } @$maintids;
-        if ($ismaint) {
-            my $othermaints = grep { $_ != $remote->{userid} } @$maintids;
-
-            return $error->($ML{'.label.lastmaintainer'}) unless $othermaints;
-
-            LJ::User::UserlogRecord::MaintainerRemove->create( $cu,
-                'maintid' => $remote->userid, 'remote' => $remote );
-        }
-
         # remove user from community's friends list
         unless ($watching && !$memberof) {
-            LJ::leave_community($remote, $cu, $FORM{removefriend});
+            my ($code, $error) = LJ::leave_community(
+                $remote, $cu, $FORM{removefriend}
+            );
+
+            unless ($code) {
+                $body = "<?h1 $ML{'Error'} h1?><?p $error p?>";
+                return;
+            }
         } else {
             $remote->remove_friend($cu);
         }

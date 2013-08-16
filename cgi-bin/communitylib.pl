@@ -3,12 +3,32 @@
 package LJ;
 
 use strict;
+use warnings;
+
 use Class::Autouse qw(
-                      LJ::Event::CommunityInvite
-                      LJ::Event::CommunityJoinRequest
-                      LJ::Event::CommunityJoinApprove
-                      LJ::Event::CommunityJoinReject
-                      );
+    LJ::Event::CommunityInvite
+    LJ::Event::CommunityJoinReject    
+    LJ::Event::CommunityJoinRequest
+    LJ::Event::CommunityJoinApprove
+);
+
+# External modules
+use Readonly;
+
+# Internal modules
+use LJ::MemCacheProxy;
+use LJ::RelationService;
+
+Readonly my $COMMUNITY_ROW_CACHE_KEY => 'community:';
+
+# Possible membership:
+#   - open
+#   - closed
+#   - moderated
+# Possible postlevel
+#   - all ?
+#   - select
+#   - members
 
 ## Create supermaintainer poll
 ## Args:
@@ -361,9 +381,12 @@ sub accept_comm_invite {
     # valid invite.  let's accept it as far as the community listing us goes.
     # 1, 0 means add comm to user's friends list, but don't auto-add P edge.
     if ($args->{'member'}) {
-        if (!LJ::join_community($u, $cu, 1, 0)) {
-            my $last_error = LJ::last_error();
-            return LJ::error("Can't call LJ::join_community($u->{user}, $cu->{user}): $last_error");
+        my ($code, $error) = LJ::join_community($u, $cu, 1, 0);
+
+        unless ($code) {
+            return LJ::error(
+                "Can't call LJ::join_community($u->{user}, $cu->{user}): $error"
+            );
         }
     }
 
@@ -535,31 +558,47 @@ sub revoke_invites {
 # des-uuserid: a userid or u object of the user doing the leaving.
 # des-ucommid: a userid or u object of the community being left.
 # des-defriend: remove comm from user's friends list.
-# returns: 1 if success, undef if error of some sort (ucommid not a comm, uuserid not in
-#          comm, db error, etc)
+# returns: 1 if success, 0 if error, and error/message if need
 # </LJFUNC>
 sub leave_community {
-    my ($uuid, $ucid, $defriend) = @_;
-    my $u = LJ::want_user($uuid);
-    my $cu = LJ::want_user($ucid);
-    $defriend = $defriend ? 1 : 0;
-    return LJ::error('comm_not_found') unless $u && $cu;
+    my ($uid, $cid, $defriend) = @_;
+    my $u = LJ::want_user($uid);
+    my $c = LJ::want_user($cid);
+
+    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
+    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
+
+    unless ($c->is_community) {
+        return (0, LJ::Lang::ml('error.code.comm_not_comm'));
+    }
+
+    if (LJ::is_maintainer($u, $c)) {
+        if (LJ::count_maintainers($c) <= 1) {
+            return (0, LJ::Lang::ml('/community/leave.bml.label.lastmaintainer'));
+        }
+    }
 
     # defriend comm -> user
-    return LJ::error('comm_not_comm') unless $cu->{journaltype} =~ /[CS]/;
-    my $ret = $cu->remove_friend($u);
-    return LJ::error('comm_not_member') unless $ret; # $ret = number of rows deleted, should be 1 if the user was in the comm
+    unless ($c->remove_friend($u)) {
+        return;
+    }
 
     # clear edges that effect this relationship
     foreach my $edge (qw(P N A M)) {
-        LJ::clear_rel($cu->{userid}, $u->{userid}, $edge);
+        LJ::clear_rel($c->id, $u->id, $edge);
     }
 
     # defriend user -> comm?
-    return 1 unless $defriend;
-    $u->remove_friend($cu);
+    if ($defriend) {
+        $u->remove_friend($c);
+        $c->clear_cache_friends($u);
+    }
 
-    $cu->clear_cache_friends($u);
+    if (LJ::is_maintainer($u, $c)) {
+        LJ::User::UserlogRecord::MaintainerRemove->create(
+            $c, maintid => $u->id,
+        );
+    }
 
     # don't care if we failed the removal of comm from user's friends list...
     return 1;
@@ -577,44 +616,229 @@ sub leave_community {
 #          comm, db error, etc)
 # </LJFUNC>
 sub join_community {
-    my ($uuid, $ucid, $friend, $canpost) = @_;
-    my $u = LJ::want_user($uuid);
-    my $cu = LJ::want_user($ucid);
-    $friend = $friend ? 1 : 0;
-    return LJ::error('comm_not_found') unless $u && $cu;
-    return LJ::error('comm_not_comm') unless $cu->{journaltype} eq 'C';
+    my ($uid, $cid, $friend, $canpost) = @_;
+    my $u = LJ::want_user($uid);
+    my $c = LJ::want_user($cid);
 
-    return LJ::error(qq|Sorry, you aren't allowed to join communities until your email address has been validated. If you've lost the confirmation email to do this, you can <a href="$LJ::SITEROOT/register.bml">have it re-sent.</a>|)
-        unless $u->is_validated;
+    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
+    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
+
+    unless ($c->is_community) {
+        return (0, LJ::Lang::ml('error.code.comm_not_comm'));
+    }
+
+    unless ($u->is_validated) {
+        return (0, qq|Sorry, you aren't allowed to join communities until your email address "
+            . "has been validated. If you've lost the confirmation email to do this, "
+            . "you can <a href="$LJ::SITEROOT/register.bml">have it re-sent.</a>|);
+    }
+
+    unless ($u->can_join_adult_comm(comm => $c)) {
+        return (0, LJ::Lang::ml(
+            '/community/join.bml.error.isminor', {
+                comm => $c->ljuser_display
+            }
+        ));
+    }
+
+    my $row = LJ::get_community_row($c);
+
+    unless ($row) {
+        warn "Cant load community row [" . $c->user . "]";
+    }
+
+    # Check mebership
+    {
+        last unless $row;
+        last unless $row->{membership};
+        last unless $row->{membership} ne 'open';
+
+         # get maintainers
+        my $maintainers = LJ::load_userids(@{
+            LJ::load_rel_user($c->id, 'A') || []
+        });
+
+        my $maints = join(', ', map {
+                LJ::ljuser($_)
+            } values %$maintainers
+        );
+
+        if ($row->{membership} eq 'closed') {
+            return (0, LJ::Lang::ml(
+                '/community/join.bml.error.closed', {
+                    admins => $maints
+                }
+            ));
+        }
+
+        if ($row->{membership} eq 'moderated') {
+            # submit request
+            if (LJ::comm_join_request($u, $c)) {
+                return (1, LJ::Lang::ml('/community/join.bml.reqsubmitted.body') . $maints);
+            } else {
+                return;
+            }
+        }
+
+        return;
+    }
 
     # friend comm -> user
-    LJ::add_friend($cu->{userid}, $u->{userid});
+    unless ($c->add_friend($u)) {
+        return;
+    }
 
     # add edges that effect this relationship... if the user sent a fourth
     # argument, use that as a bool.  else, load commrow and use the postlevel.
     my $addpostacc = 0;
+
     if (defined $canpost) {
         $addpostacc = $canpost ? 1 : 0;
-    } else {
-        my $crow = LJ::get_community_row($cu);
-        $addpostacc = $crow->{postlevel} eq 'members' ? 1 : 0;
+    } elsif ($row) {
+        if ($row->{postlevel}) {
+            if ($row->{postlevel} eq 'members') {
+                $addpostacc = 1;
+            }
+        }
     }
-    LJ::set_rel($cu->{userid}, $u->{userid}, 'P') if $addpostacc;
 
-    # friend user -> comm?
-    return 1 unless $friend;
+    if ($addpostacc) {
+        LJ::set_rel($c->id, $u->id, 'P');
+    }
 
-    # don't do the work if they already friended the comm
-    return 1 if $u->has_friend($cu);
+    # friend user -> comm
+    if ($friend) {
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            $u->subscribe_to_user($c)
+        } else {
+            # don't do the work if they already friended the comm
+            unless ($u->has_friend($c)) {
+                my $err = '';
 
-    my $err = "";
-    return LJ::error("You have joined the community, but it has not been added to ".
-                     "your Friends list. " . $err) unless $u->can_add_friends(\$err, { friend => $cu });
+                unless ($u->can_add_friends(\$err, { friend => $c })) {
+                    return (1, "You have joined the community, but it has not been added to "
+                        . "your Friends list. $err");
+                }
 
-    $u->friend_and_watch($cu);
+                $u->friend_and_watch($c);
+            }
+        }
+    }
 
     # done
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::comm_join_request
+# des: Registers an authaction to add a user to a
+#      community and sends an approval email to the maintainers
+# returns: Hashref; output of LJ::register_authaction()
+#          includes datecreate of old row if no new row was created
+# args: comm, u
+# des-comm: Community user object
+# des-u: User object to add to community
+# </LJFUNC>
+sub comm_join_request {
+    my ($u, $c) = @_;
+    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
+    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
+
+    my $dbh = LJ::get_db_writer();
+    my $arg = "targetid=" . $u->id;
+
+    return unless $dbh;
+
+    # check for duplicates within the same hour (to prevent spamming)
+    my $oldaa = $dbh->selectrow_hashref(qq[
+            SELECT
+                aaid, authcode, datecreate
+            FROM
+                authactions
+            WHERE
+                userid = ?
+            AND
+                arg1 = ? 
+            AND
+                action = 'comm_join_request'
+            AND
+                used = 'N'
+            AND
+                NOW() < datecreate + INTERVAL 1 HOUR
+            ORDER BY
+                1
+            DESC LIMIT
+                1
+        ],
+        undef,
+        $c->id,
+        $arg
+    );
+
+    return $oldaa if $oldaa;
+
+    # insert authactions row
+    my $aa = LJ::register_authaction(
+        $c->id, 'comm_join_request', $arg
+    );
+
+    return unless $aa;
+
+    # if there are older duplicates, invalidate any existing unused authactions of this type
+    $dbh->do(qq[
+            UPDATE
+                authactions
+            SET
+                used = 'Y'
+            WHERE
+                userid = ?
+            AND
+                aaid <> ?
+            AND
+                arg1 = ?
+            AND
+                action = 'comm_invite'
+            AND
+                used = 'N'
+        ],
+        undef,
+        $c->id,
+        $aa->{aaid},
+        $arg
+    );
+
+    # get maintainers of community
+    my $adminids = LJ::load_rel_user($c->id, 'A') || [];
+    my $admins = LJ::load_userids(@$adminids);
+
+    # now prepare the emails
+    foreach my $au (values %$admins) {
+        next unless $au && !$au->is_expunged;
+
+        # unless it's a hyphen, we need to migrate
+        my $prop = $au->prop("opt_communityjoinemail");
+
+        if ($prop && $prop ne "-") {
+            if ($prop ne "N") {
+                my %params = (
+                    event   => 'CommunityJoinRequest',
+                    journal => $au
+                );
+
+                unless ($au->has_subscription(%params)) {
+                    foreach (qw(Inbox Email)) {
+                        $au->subscribe(%params, method => $_);
+                    }
+                }
+            }
+
+            $au->set_prop("opt_communityjoinemail", "-");
+        }
+
+        LJ::Event::CommunityJoinRequest->new($au, $u, $c)->fire;
+    }
+
+    return $aa;
 }
 
 # <LJFUNC>
@@ -626,27 +850,58 @@ sub join_community {
 #          user and community tables; undef if error.
 # </LJFUNC>
 sub get_community_row {
-    my $ucid = shift;
-    my $cu = LJ::want_user($ucid);
-    return unless $cu;
+    my ($uid) = @_;
+    my $c = LJ::want_user($uid);
+
+    unless ($c) {
+        return;
+    }
 
     # hit up database
-    my $dbr = LJ::get_db_reader();
-    my ($membership, $postlevel) = 
-        $dbr->selectrow_array('SELECT membership, postlevel FROM community WHERE userid=?',
-                              undef, $cu->{userid});
-    return if $dbr->err;
-    return unless $membership && $postlevel;
+    my $cid = $c->id;
+    my $dbh = LJ::get_db_reader();
+
+    unless ($dbh) {
+        return;
+    }
+
+    my $row = LJ::MemCacheProxy::get(
+        [$uid, $COMMUNITY_ROW_CACHE_KEY . $uid]
+    );
+
+    unless ($row) {
+        $row =  $dbh->selectrow_hashref(qq[
+                SELECT
+                    membership, postlevel
+                FROM
+                    community
+                WHERE
+                    userid = ?
+            ],
+            undef,
+            $cid
+        );
+
+        if ($dbh->err) {
+            return;
+        }
+
+        unless ($row) {
+            return;
+        }
+
+        LJ::MemCacheProxy::set(
+            [$uid, $COMMUNITY_ROW_CACHE_KEY . $uid], $row, 86400
+        );
+    }
 
     # return result hashref
-    my $row = {
-        user => $cu->{user},
-        userid => $cu->{userid},
-        name => $cu->{name},
-        membership => $membership,
-        postlevel => $postlevel,
+    return {
+        %$row,
+        user   => $c->user,
+        name   => $c->name,
+        userid => $c->userid,
     };
-    return $row;
 }
 
 # <LJFUNC>
@@ -794,7 +1049,9 @@ sub approve_pending_member {
 
     # step 2, make user join the community
     # 1 means "add community to user's friends list"
-    return unless LJ::join_community($u->{userid}, $cu->{userid}, 1);
+    my ($code, $error) = LJ::join_community($u->{userid}, $cu->{userid}, 1);
+
+    return unless $code;
 
     # step 3, email the user
     my %params = (event => 'CommunityJoinApprove', journal => $u);
@@ -862,69 +1119,6 @@ sub reject_pending_member {
     }
 
     return 1;
-}
-
-# <LJFUNC>
-# name: LJ::comm_join_request
-# des: Registers an authaction to add a user to a
-#      community and sends an approval email to the maintainers
-# returns: Hashref; output of LJ::register_authaction()
-#          includes datecreate of old row if no new row was created
-# args: comm, u
-# des-comm: Community user object
-# des-u: User object to add to community
-# </LJFUNC>
-sub comm_join_request {
-    my ($comm, $u) = @_;
-    return undef unless ref $comm && ref $u;
-
-    my $arg = "targetid=" . $u->id;
-    my $dbh = LJ::get_db_writer();
-
-    # check for duplicates within the same hour (to prevent spamming)
-    my $oldaa = $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
-                                        "WHERE userid=? AND arg1=? " .
-                                        "AND action='comm_join_request' AND used='N' " .
-                                        "AND NOW() < datecreate + INTERVAL 1 HOUR " .
-                                        "ORDER BY 1 DESC LIMIT 1",
-                                        undef, $comm->id, $arg);
-
-    return $oldaa if $oldaa;
-
-    # insert authactions row
-    my $aa = LJ::register_authaction($comm->id, 'comm_join_request', $arg);
-    return undef unless $aa;
-
-    # if there are older duplicates, invalidate any existing unused authactions of this type
-    $dbh->do("UPDATE authactions SET used='Y' WHERE userid=? AND aaid<>? AND arg1=? " .
-             "AND action='comm_invite' AND used='N'",
-             undef, $comm->id, $aa->{'aaid'}, $arg);
-
-    # get maintainers of community
-    my $adminids = LJ::load_rel_user($comm->{userid}, 'A') || [];
-    my $admins = LJ::load_userids(@$adminids);
-
-    # now prepare the emails
-    foreach my $au (values %$admins) {
-        next unless $au && !$au->is_expunged;
-
-        # unless it's a hyphen, we need to migrate
-        my $prop = $au->prop("opt_communityjoinemail");
-        if ($prop ne "-") {
-            if ($prop ne "N") {
-                my %params = (event => 'CommunityJoinRequest', journal => $au);
-                unless ($au->has_subscription(%params)) {
-                    $au->subscribe(%params, method => $_) foreach qw(Inbox Email);
-                }
-            }
-
-            $au->set_prop("opt_communityjoinemail", "-");
-        }
-
-        LJ::Event::CommunityJoinRequest->new($au, $u, $comm)->fire;
-    }
-
-    return $aa;
 }
 
 sub maintainer_linkbar {
@@ -1022,6 +1216,23 @@ sub set_comm_settings {
     LJ::MemCache::delete($memkey);
 
     return;
+}
+
+sub is_maintainer {
+    my ($u, $c) = @_;
+    die 'Expected parameter $u in LJ::is_maintainer' unless $u;
+    die 'Expected parameter $c in LJ::is_maintainer' unless $c;
+
+    return LJ::RelationService->is_relation_to($c->id, $u->id, 'A');
+}
+
+sub count_maintainers {
+    my ($c) = @_;
+    my $ids = LJ::load_rel_user($c->id, 'A');
+
+    $ids ||= [];
+
+    return scalar @$ids;
 }
 
 1;

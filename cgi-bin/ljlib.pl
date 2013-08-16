@@ -3445,9 +3445,6 @@ sub last_error
     my $err = {
         'utf8' => "Encoding isn't valid UTF-8",
         'db' => "Database error",
-        'comm_not_found' => "Community not found",
-        'comm_not_comm' => "Account not a community",
-        'comm_not_member' => "User not a member of community",
         'comm_invite_limit' => "Outstanding invitation limit reached",
         'comm_user_has_banned' => "Unable to invite; user has banned community",
     };
