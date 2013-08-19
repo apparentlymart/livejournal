@@ -293,23 +293,21 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
                 // subscribe/unsubscribe
                 if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
-                    if ( !data.is_friend ) {
-                        buildObject.headLinks.push({
-                            selector: 'a[href=#subscription]',
-                            url: '#subscription',
-                            click: function (e) {
-                                ContextualPopup.changeRelation(
-                                    data,
-                                    ctxPopupId,
-                                    data.is_subscribedon ? 'unsubscribe' : 'subscribe',
-                                    e
-                                );
-                                e.preventDefault();
-                                e.stopPropagation();
-                            },
-                            text: data.is_subscribedon ? data.ml_unsubscribe : data.ml_subscribe
-                        });
-                    }
+                    buildObject.headLinks.push({
+                        selector: 'a[href=#subscription]',
+                        url: '#subscription',
+                        click: function (e) {
+                            ContextualPopup.changeRelation(
+                                data,
+                                ctxPopupId,
+                                data.is_subscribedon ? 'unsubscribe' : 'subscribe',
+                                e
+                            );
+                            e.preventDefault();
+                            e.stopPropagation();
+                        },
+                        text: data.is_subscribedon ? data.ml_unsubscribe : data.ml_subscribe
+                    });
                 }
 
                 if (data.is_friend && !data.is_identity) {
@@ -597,7 +595,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             if (useLive && !(e.target.username || e.target.userid || e.target.up_url)) {
                 ContextualPopup.searchAndAdd($(e.currentTarget).parent().get(0));
             };
-                
+
             var target = e.target,
                 ctxPopupId = target.username || target.userid || target.up_url,
                 t = ContextualPopup;

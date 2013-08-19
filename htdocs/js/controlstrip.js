@@ -72,7 +72,7 @@
         addLabledPlaceholders();
 
         if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
-            $('.w-cs-menu-friends-subscr').relations();
+            $('[data-relations]').relations();
 
             LiveJournal.register_hook('relations.changed', function (event) {
                 var data = event.data,
