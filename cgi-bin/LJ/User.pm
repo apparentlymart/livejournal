@@ -7818,6 +7818,30 @@ sub set_email {
     $cache->{'_email'} = $email;
 }
 
+sub get_email_raw_multi {
+    my $uids = shift;
+
+    my @memkeys = map {[$_, "email:$_"]} @$uids;
+    my $from_cache =  LJ::MemCache::get_multi(@memkeys);
+
+    my (@need, %result);
+
+    foreach my $uid (@$uids) {
+        my $cached = $from_cache->{$uid};
+        $cached ? $result{$uid} = $cached : push @need, $uid;
+    }
+
+    if (@need) {
+        my $dbh = LJ::get_db_reader() || return \%result;
+        my $bind = join ',', map {'?'} @need;
+        my $rows = $dbh->selectall_arrayref("SELECT userid, email FROM email WHERE userid in ($bind)", 
+                                            {Slice => {}}, @need) || return \%result;
+        $result{$_->{userid}} = $_->{email} foreach @$rows;
+    }
+
+    return \%result;
+}
+
 sub get_uids {
     my @friends_names = @_;
     my @ret;
