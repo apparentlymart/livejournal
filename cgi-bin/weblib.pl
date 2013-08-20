@@ -2586,6 +2586,7 @@ sub get_body_class_for_service_pages {
     my @classes;
     push @classes, @{ $opts{'classes'} } if $opts{'classes'};
     push @classes, (LJ::get_remote()) ? 'logged-in' : 'logged-out';
+    push @classes, 'p-ssl' if $LJ::IS_SSL;
 
     my $uri  = LJ::Request->uri;
     my $host = LJ::Request->header_in("Host");
