@@ -4,7 +4,6 @@ use Scalar::Util qw(blessed);
 use Carp qw(croak);
 use base 'LJ::Event';
 use LJ::Message;
-use LJ::AntiSpam;
 
 sub new {
     my ($class, $u, $msgid, $other_u) = @_;
@@ -391,19 +390,14 @@ sub update_events_counter {
 
     my $msg     = $self->load_message;
     return unless $msg;
+
+    if ($msg->is_spam) {
+        return;
+    }
     
     my $msgid   = $msg->msgid;
     my $sender  = $msg->other_u;
     return unless $sender;
-
-    if (LJ::AntiSpam->need_spam_check_inbox($u, $sender)) {
-
-        my $body    = $msg->body_raw    || '';
-        my $subject = $msg->subject_raw || '';
-
-        return if LJ::AntiSpam->is_spam_inbox_message( $u, $sender, $subject ) || 
-                  LJ::AntiSpam->is_spam_inbox_message( $u, $sender, $body );
-    }
 
     my $etypeid = $self->etypeid;
     return unless $etypeid;

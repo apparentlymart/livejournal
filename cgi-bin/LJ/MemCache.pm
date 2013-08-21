@@ -211,7 +211,7 @@ $GET_DISABLED = 0;
                              state ) ],
 
     'usermsg'       => [ qw( 1
-                             journalid parent_msgid otherid timesent type ) ],
+                             journalid parent_msgid otherid timesent type state ) ],
 
     'usermsgprop'   => [ qw( 1
                              userpic preformated ) ],

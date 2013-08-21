@@ -6,12 +6,12 @@ use warnings;
 # External modules
 use Carp 'croak';
 use Class::Autouse qw{
+    LJ::Event::JournalNewComment
+    LJ::Event::InboxUserMessageRecvd 
     LJ::Event LJ::NotificationArchive
-    LJ::Event::InboxUserMessageRecvd LJ::Event::JournalNewComment
 };
 
 # Internal modules
-use LJ::AntiSpam;
 use LJ::NotificationItem;
 
 my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
@@ -324,16 +324,16 @@ sub expire_cache {
 # Returns the enqueued item
 sub enqueue {
     my ($self, %opts) = @_;
-
-    my $evt = delete $opts{event};
+    my $evt     = delete $opts{event};
     my $archive = delete $opts{archive} || 1;
+
     croak "No event" unless $evt;
     croak "Extra args passed to enqueue" if %opts;
 
     my $u = &owner or die "No user";
 
     # if over the max, delete the oldest notification
-    my $max = $u->get_cap('inbox_max');
+    my $max  = $u->get_cap('inbox_max');
     my $skip = $max - 1; # number to skip to get to max
 
     if ($max && $self->count >= $max) {
@@ -356,19 +356,18 @@ sub enqueue {
     }
 
     # get a qid
-    my $qid = LJ::alloc_user_counter($u, 'Q')
-        or die "Could not alloc new queue ID";
+    my $qid  = LJ::alloc_user_counter($u, 'Q');
     my $spam = 0;
 
-    if ( LJ::is_enabled('spam_inbox') && $evt->etypeid == LJ::Event::UserMessageRecvd->etypeid ) {
-        if ($evt->arg1 && $evt->userid) {
-            my $msg = LJ::Message->load({
-                msgid     => $evt->arg1,
-                journalid => $evt->userid
-            });
+    unless ($qid) {
+        die "Could not alloc new queue ID";
+    }
 
-            if ($msg) {
-                $spam = $msg->is_spam();
+    # Check spam
+    if ($evt->etypeid == LJ::Event::UserMessageRecvd->etypeid) {
+        if (my $msg = $evt->load_message()) {
+            if ($msg->is_spam) {
+                $spam = 1;
             }
         }
     }
@@ -395,8 +394,8 @@ sub enqueue {
             or die $u->errstr;
     }
 
+    # send notification
     if ( LJ::Event::UserMessageRecvd->etypeid == $evt->etypeid ) {
-        # send notification
         $self->__send_notify({
             'u'         => $u,
             'journal_u' => LJ::want_user($evt->arg2),

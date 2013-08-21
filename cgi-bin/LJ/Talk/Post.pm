@@ -206,7 +206,7 @@ sub enter_comment {
     # If comment was marked as suspicios, then try to determine
     # is user is spamer or not and suspend it if need
     if ($comment->{state} eq 'B') {
-        LJ::AntiSpam::Suspender::do_for_comment($comment);
+        LJ::AntiSpam::Suspender::process($comment);
     }
 
     # update the "replycount" summary field of the log table

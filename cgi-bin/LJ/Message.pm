@@ -1,23 +1,35 @@
 package LJ::Message;
-use strict;
-use Carp 'croak';
 
+use strict;
+use warnings;
+
+# External modules
+use Carp 'croak';
 use Class::Autouse qw(
-                      LJ::Typemap
-                      LJ::AntiSpam
-                      LJ::NotificationItem
-                      );
+    LJ::Typemap
+    LJ::NotificationItem
+);
+
+# Internal modules
+use LJ::AntiSpam;
+use LJ::AntiSpam::Utils;
+use LJ::Admin::Spam::Urls;
+use LJ::AntiSpam::Suspender;
 
 my %singletons = (); # journalid-msgid
 
 my %fields = map { $_ => 1 } qw{
     msgid journalid otherid subject body type parent_msgid
-    timesent userpic preformatted
+    timesent userpic preformatted state
 };
 
 sub new {
     my ($class, $opts) = @_;
-    my $self = $singletons{$opts->{'journalid'}}->{$opts->{'msgid'}};
+    my $self = $singletons{$opts->{'journalid'}};
+
+    if ($self) {
+        $self = $self->{$opts->{'msgid'}};
+    }
 
     # Object exists
     return $self if $self;
@@ -59,8 +71,64 @@ sub send {
     # M is the designated character code for Messaging counter
     my $msgid = LJ::alloc_global_counter('M')
                 or croak("Unable to allocate global message id");
+
+    $self->set_state('A');
     $self->set_msgid($msgid);
     $self->set_timesent(time());
+
+     # Check spam
+    my $ou = $self->_orig_u;
+    my $ru = $self->_rcpt_u;
+
+    {
+        last unless $ou;
+        last unless $ru;
+        last unless LJ::AntiSpam->need_spam_check_inbox($ru, $ou);
+
+        my $spam           = 0;
+        my $parsed_body    = LJ::AntiSpam::Utils::parse_text($self->body_raw || '');
+        my $parsed_subject = LJ::AntiSpam::Utils::parse_text($self->subject_raw || '');
+
+        $spam = LJ::AntiSpam->is_spam_inbox_message(
+            $ru, $ou, $parsed_body
+        ) || LJ::AntiSpam->is_spam_inbox_message(
+            $ru, $ou, $parsed_subject
+        );
+
+        if (my $body_urls = $parsed_body->{urls}) {
+            LJ::Admin::Spam::Urls::insert(
+                $ou->id,
+                $ru->id,
+                0,
+                $spam ? 'S' : '',
+                @$body_urls
+            );
+        }
+
+        if (my $subject_urls = $parsed_subject->{urls}) {
+            LJ::Admin::Spam::Urls::insert(
+                $ou->id,
+                $ru->id,
+                0,
+                $spam ? 'S' : '',
+                @$subject_urls
+            );
+        }
+
+        if ($spam) {
+            $self->set_state('S');
+
+            LJ::AntiSpam::Suspender::process({
+                u      => $ou,
+                parsed => $parsed_body
+            })
+            ||
+            LJ::AntiSpam::Suspender::process({
+                u      => $ou,
+                parsed => $parsed_subject
+            });
+        }
+    }
 
     # Send message by writing to DB and triggering event
     if ($self->save_to_db) {
@@ -74,7 +142,7 @@ sub send {
         if ($self->parent_msgid) {
             my $nitem = LJ::NotificationItem->new($self->_orig_u, $self->parent_qid);
             $nitem->mark_read;
-        }
+        }       
 
         return 1;
     } else {
@@ -164,18 +232,22 @@ sub _save_db_message {
 sub _save_msg_row_to_db {
     my ($self, $u, $userid, $type, $otherid) = @_;
 
-    my $sql = "INSERT INTO usermsg (journalid, msgid, type, parent_msgid, " .
-              "otherid, timesent) VALUES (?,?,?,?,?,?)";
-
-    $u->do($sql,
-           undef,
-           $userid,
-           $self->msgid,
-           $type,
-           $self->parent_msgid,
-           $otherid,
-           $self->timesent,
-          );
+    $u->do(qq[
+            INSERT INTO usermsg (
+                journalid, msgid, type, parent_msgid, otherid, timesent, state
+            ) VALUES (
+                ?,?,?,?,?,?,?
+            )
+        ],
+        undef,
+        $userid,
+        $self->msgid,
+        $type,
+        $self->parent_msgid,
+        $otherid,
+        $self->timesent,
+        $self->state
+    );
 
     if ($u->err) {
         warn($u->errstr);
@@ -259,6 +331,10 @@ sub type {
     return $_[0]->{'type'} ||= $_[0]->_row_getter(type => 'msg');
 }
 
+sub state {
+    return $_[0]->{'state'} ||= $_[0]->_row_getter(state => 'msg');
+}
+
 sub parent_msgid {
     return $_[0]->_row_getter(parent_msgid => 'msg');
 }
@@ -323,13 +399,13 @@ sub qid {
 
 sub parent_qid {
     my $self = $_[0];
-    unless ($self->{qid}) {
+    unless ($self->{parent_qid}) {
         my $u = &_orig_u;
         my $sth = $u->prepare( "select qid from notifyqueue where userid=? and arg1=?" );
         $sth->execute( $self->journalid, $self->parent_msgid );
-        $self->{qid} = $sth->fetchrow_array();
+        $self->{parent_qid} = $sth->fetchrow_array();
     }
-    return $self->{qid};
+    return $self->{parent_qid};
 }
 
 #############
@@ -340,6 +416,12 @@ sub set_msgid {
     my ($self, $val) = @_;
 
     $self->{msgid} = $val;
+}
+
+sub set_state {
+    my ($self, $val) = @_;
+
+    $self->{state} = $val;
 }
 
 sub set_timesent {
@@ -459,26 +541,8 @@ sub rate_multiple {
 
 sub is_spam {
     my $self = shift;
-    my $ou = $self->_orig_u;
-    my $ru = $self->_rcpt_u;
 
-    return unless $ou;
-    return unless $ru;
-
-    if (LJ::AntiSpam->need_spam_check_inbox($ou, $ru)) {
-        my $body    = $self->body_raw || '';
-        my $subject = $self->subject_raw || '';
-
-        return 1 if LJ::AntiSpam->is_spam_inbox_message(
-            $ru, $ou, $subject
-        );
-
-        return 1 if LJ::AntiSpam->is_spam_inbox_message(
-            $ru, $ou, $body
-        );
-    }
-
-    return;
+    return $self->state eq 'S';
 }
 
 ###################
@@ -589,7 +653,7 @@ sub _get_msg_rows {
 
     my $where = join(" OR ", @where);
     my $sth = $u->prepare
-        ( "SELECT journalid, msgid, type, parent_msgid, otherid, timesent " .
+        ( "SELECT journalid, msgid, type, parent_msgid, otherid, timesent, state " .
           "FROM usermsg WHERE $where");
     $sth->execute(@vals);
 
