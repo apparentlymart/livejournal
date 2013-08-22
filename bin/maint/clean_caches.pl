@@ -195,6 +195,12 @@ $maint{'clean_caches'} = sub
     print "    deleted $count records\n\n";
 =cut
 
+    print "-I- Cleaning cc_usage\n";
+    $dbh->do("DELETE FROM cc_usage WHERE time < (UNIX_TIMESTAMP() - 86400*30) LIMIT 5000");
+
+    print "-I- Cleaning cc_lock\n";
+    $dbh->do("DELETE FROM cc_lock WHERE locktill < UNIX_TIMESTAMP()");
+
     print "-I- Remove outdated sessions.\n";
     LJ::disconnect_dbs();
     foreach my $c (@LJ::CLUSTERS) {
