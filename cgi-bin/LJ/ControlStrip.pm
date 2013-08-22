@@ -306,10 +306,10 @@ sub render {
     }
     
     my $daycounts = LJ::get_daycounts($journal, $remote);
+    my @early_date = @{$daycounts->[0]};
+    my @last_date  = @{$daycounts->[-1]};
 
     if (@$daycounts) {
-        my @early_date = @{$daycounts->[0]};
-        my @last_date  = @{$daycounts->[-1]};
         pop @early_date;
         pop @last_date;
 
@@ -339,8 +339,20 @@ sub render {
 
     # Need vars for js
     LJ::need_var({
-        remote => $data_remote
+        remote => $data_remote,
+        controlstrip => {
+            calendar => {
+                lastDate => join(',', @last_date),
+                earlyDate => join(',', @early_date),
+                journal_url_base => $data_journal->{url}->{base},
+                journal_view_friends => $data_journal->{view_friends},
+            }
+        }
     });
+
+    LJ::need_string(qw(
+        web.controlstrip.view.calendar
+    ));
 
     return $tmpl->output;    
 }
