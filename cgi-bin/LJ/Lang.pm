@@ -1186,6 +1186,8 @@ sub current_scope {
 sub ml {
     my ( $code, $vars ) = @_;
 
+    $code =~ s/ /_/g;
+
     if ( current_language() eq 'debug' ) {
         return $code;
     }
