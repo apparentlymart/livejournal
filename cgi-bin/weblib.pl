@@ -1284,7 +1284,6 @@ sub entry_form_decode
     if ($POST->{'prop_current_mood'}) {
         if (my $id = LJ::mood_id($POST->{'prop_current_mood'})) {
             $req->{'prop_current_moodid'} = $id;
-            $req->{'prop_current_mood'}   = '';
         } else {
             $req->{'prop_current_moodid'} = '';
         }

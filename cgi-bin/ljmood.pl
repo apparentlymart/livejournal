@@ -150,7 +150,7 @@ sub mood_id
     return undef unless $mood;
     LJ::load_moods() unless $LJ::CACHED_MOODS;
     foreach my $m (values %LJ::CACHE_MOODS) {
-        return $m->{'id'} if $mood eq $m->{'name'};
+        return $m->{'id'} if $mood eq LJ::Lang::ml("mood.$m->{'name'}");
     }
     return undef;
 }
