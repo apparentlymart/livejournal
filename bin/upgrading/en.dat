@@ -105,6 +105,8 @@ admin.homepage.menu.archive=Archive
 admin.homepage.menu.cat|staleness=1
 admin.homepage.menu.cat=Categories
 
+admin.homepage.menu.logs=Action logs
+
 admin.homepage.menu.new_posts|staleness=1
 admin.homepage.menu.new_posts=New posts
 
