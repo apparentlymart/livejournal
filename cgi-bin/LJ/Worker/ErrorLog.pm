@@ -13,7 +13,15 @@ use IO::Socket::INET;
 
 sub TIEHANDLE {
     my $class = shift;
-    my $dest_point = shift || "$LJ::WATCHLOG_BCASTADDR:$LJ::WATCHLOG_PORTNO";
+    my $dest_point = shift;
+    my $use_bcast  = 1; 
+
+    unless (defined $dest_point){
+        $use_bcast = defined $LJ::WATCHLOG_USE_BCAST ? $LJ::WATCHLOG_USE_BCAST : 1;
+        $dest_point = $use_bcast
+                ? "$LJ::WATCHLOG_BCASTADDR:$LJ::WATCHLOG_PORTNO"
+                : "$LJ::WATCHLOG_PROXY_HOST:$LJ::WATCHLOG_PORTNO";
+    }
 
     my $dest_proto = 'udp';
 
@@ -24,7 +32,7 @@ sub TIEHANDLE {
         $dest_point = join(':', $dest[1], $dest[2]);
     }
 
-    my $sock = IO::Socket::INET->new(PeerAddr => $dest_point, Proto => $dest_proto, Broadcast => 1, Timeout => 20)
+    my $sock = IO::Socket::INET->new(PeerAddr => $dest_point, Proto => $dest_proto, Broadcast => $use_bcast, Timeout => 20)
         or die "Socket error: $!";
 
     my $self = { handles => { sock => $sock } };
