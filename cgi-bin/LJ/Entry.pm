@@ -1780,7 +1780,9 @@ sub touch_commentalter {
 sub sharing_attributes {
     my ($self) = @_;
 
-    return {} if $self->prop('blocked_content') && lc LJ::country_of_remote_ip() eq 'ru';
+    return {} 
+        if LJ::RegionBlockedContent::blocked_entry_content($self) || 
+           LJ::RegionBlockedContent::region_block($self);
 
     my $hashtags     = $self->twitter_hashtags || ''; 
     my $text         = $self->event_text       || ''; 
