@@ -208,7 +208,7 @@
 	};
 
 	var CKLang = CKEDITOR.lang[CKEDITOR.lang.detect()] || {};
-	jQuery.extend(CKLang, LJ.pageVar('rtedata'));
+	jQuery.extend(CKLang, LJ.get('rtedata'));
 	window.CKLang = CKEDITOR.CKLang = CKLang;
 
 	// patch language
@@ -678,7 +678,7 @@
 
 				editor.dataProcessor.toDataFormat = function(html, fixForBody) {
 					html = CKEDITOR.htmlDataProcessor.prototype.toDataFormat.call(this, html, fixForBody);
-					
+
 					html = nbspFix(html);
 
 					html = html
