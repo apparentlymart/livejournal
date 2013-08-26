@@ -9,17 +9,17 @@ LiveJournal.register_hook('init_settings', function ($) {
 		confirm_msg: LiveJournal.getLocalizedStr('.form.confirm', null, 'Save your changes?'),
 		form_changed: false,
 		navclickSave: function(e) {
-			
-			if ( Settings.form_changed && !Boolean(LJ.pageVar('no_submit_window'))  && confirm(Settings.confirm_msg) ) {
-				
+
+			if ( Settings.form_changed && !Boolean(LJ.get('no_submit_window'))  && confirm(Settings.confirm_msg) ) {
+
 				e.preventDefault();
-				
+
 				var redirectVal = $(e.target).attr('href');
-				
+
 				if ( redirectVal ) {
 					Settings.$form.append('<input type="hidden" name="redirect_to" value="' + redirectVal + '">');
 				}
-				
+
 				Settings.$form.submit();
 			}
 		}

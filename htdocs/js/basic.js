@@ -325,7 +325,7 @@ LJ.getConst = function(name) {
 LJ.define('LJ.Util.Journal');
 
 (function() {
-  var base = (LJ.pageVar('siteroot', true) || 'http://www.livejournal.com')
+  var base = (LJ.get('siteroot') || 'http://www.livejournal.com')
             .replace('http://www', ''),
     journalReg  = new RegExp('^http:\\/\\/([\\w-]+)' + base.replace(/\./, '\\.') + '(?:\\/(?:([\\w-]+)\\/)?(?:(\\d+)\\.html)?)?$');
 
@@ -708,7 +708,7 @@ LJ.UI.mixin = function(name, module) {
 
 (function() {
 
-  var locale = (LJ.pageVar('locale', true) || 'en_LJ').substr(0, 2),
+  var locale = (LJ.get('locale') || 'en_LJ').substr(0, 2),
     //All handlers were directly copied from LJ::Lang code
     handlers = {
       be: plural_form_ru,
@@ -1587,7 +1587,7 @@ LJ.Stat = (function ($) {
 LJ.siteMessage = (function ($) {
   'use strict';
 
-  var scheme = LJ.pageVar('scheme'),
+  var scheme = LJ.get('scheme'),
     messageSelector = '.appwidget-sitemessages',
     selectors = {
       lanzelot: { selector: '#main_body', method: 'before' },

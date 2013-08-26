@@ -49,7 +49,7 @@
 		onChangeTime: function(evt) {
 			var self = evt.data || this,
 				newDate, dateAr;
-			
+
 			if (self._isOldDesign)  {
 				newDate = $(this).timeEntry('getTime');
 			} else {
@@ -143,7 +143,7 @@
 
 			this._initialUpdateDate = this.options.updateDate;
 
-			if (!this._isOldDesign && !LJ.pageVar('is_edit')) {
+			if (!this._isOldDesign && !LJ.get('is_edit')) {
 				this._el('timezone').val(- (new Date()).getTimezoneOffset()/0.6);
 			}
 
