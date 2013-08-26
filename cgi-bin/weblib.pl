@@ -1394,9 +1394,7 @@ sub need_res_group {
 }
 
 sub need_journal_res {
-    LJ::need_res(
-        @LJ::JOURNAL_RES_CSS,
-    );
+    LJ::need_res(@LJ::JOURNAL_RES_ALL);
 }
 
 ## Support for conditional file inclusion:
@@ -2300,24 +2298,21 @@ sub control_strip_js_inject
     LJ::need_res('js/controlstrip.js');
 }
 
-sub journal_js_inject
-{
+sub journal_js_inject {
+    LJ::need_journal_res();
+
     LJ::need_res(qw(
                     js/journal.js
                     js/jquery/jquery.calendarEvents.js
                     ));
 
-
-    LJ::need_res(qw{js/jquery/jquery.lj.repostbutton.js
-                    templates/CleanHtml/reposted.tmpl
-                    templates/CleanHtml/Repost.tmpl
-                    templates/CleanHtml/PaidRepost.tmpl
+    LJ::need_res(qw(
                     js/s2.js
                     js/esn.js
                     js/jquery/jquery.lj.confirmbubble.js
                     templates/Widgets/popupcontent.tmpl
                     js/jquery/jquery.lj.ljcut.js
-                   });
+                    ));
 
     LJ::run_hooks('extra_journal_js');
 }
