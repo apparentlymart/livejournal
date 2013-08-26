@@ -39,7 +39,7 @@ var s2edit = function() {
 		},
 
 		initSettings: function() {
-			var settings = jQuery.storage.getItem('s2edit') || {};
+			var settings = LJ.Storage.getItem('s2edit') || {};
 
 			s2settings = {
 				load: function(item) {

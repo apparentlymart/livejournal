@@ -122,7 +122,7 @@ DonateButton = {
 (function () {
   var storage = {
     init: function() {
-      this._store = jQuery.storage.getItem('placeholders') || {};
+      this._store = LJ.Storage.getItem('placeholders') || {};
     },
 
     inStorage: function(link) {
