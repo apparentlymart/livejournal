@@ -4933,7 +4933,9 @@ main.updates.toggle.collapse=Collapse
 main.updates.toggle.expand|staleness=1
 main.updates.toggle.expand=Expand
 
-main.uprating=Show Updated Rating
+main.uprating.latest=Show New Entries
+
+main.uprating.rating=Show Updated Rating
 
 mediaplaceholder.link|staleness=1
 mediaplaceholder.link=Link
