@@ -1393,6 +1393,12 @@ sub need_res_group {
     }
 }
 
+sub need_journal_res {
+    LJ::need_res(
+        @LJ::JOURNAL_RES_CSS,
+    );
+}
+
 ## Support for conditional file inclusion:
 ## e.g. LJ::need_res( {condition => 'IE'}, 'ie.css', 'myie.css') will result in
 ## <!--[if IE]><link rel="stylesheet" type="text/css" href="$statprefix/..." /><![endif]-->

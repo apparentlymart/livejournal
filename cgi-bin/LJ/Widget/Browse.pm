@@ -9,12 +9,13 @@ use vars qw(%GET %POST $headextra @errors @warnings);
 sub need_res {
     qw(
         stc/widgets/widget-layout.css
-        stc/lj_base-journal.css
         stc/widgets/search.css
         stc/widgets/add-community.css
         stc/widgets/featuredposts.css
         stc/widgets/featuredcomms.css
-    )
+    );
+
+    LJ::need_journal_res();
 }
 
 use LJ::Browse::Parser;
