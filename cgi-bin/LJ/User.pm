@@ -2926,6 +2926,10 @@ sub get_reader_weight {
 
     return $reader_weight if defined $reader_weight;
 
+    if ( $LJ::IS_DEV_SERVER && ( my $getter = $LJ::FAKE_USER_WEIGHT ) ) { 
+        return $getter->($u);
+    }
+
     my $resp = LJ::PersonalStats::DB->fetch_raw('ratings', {
         func => 'get_reader_weight',
         journal_id => $u->userid,
