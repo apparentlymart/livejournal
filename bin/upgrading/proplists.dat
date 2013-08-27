@@ -1590,6 +1590,11 @@ talkproplist.guest_url:
   des: Anonymous comments with a URL attached
   prettyname: Website of Guest Poster
 
+talkproplist.next_vote_explanation:
+  datatype: num
+  des: Id of the comment with the next explanation of user's vote in the related poll.
+  prettyname: Next Vote Explanation 
+  
 talkproplist.opt_preformatted:
   datatype: bool
   des: Turn on if post contains HTML and shouldn't be formatted
@@ -1928,12 +1933,18 @@ usermsgproplist.userpic:
 pollproplist2.createdate:
   des: The voter must have created their account by the date specified (Pacific time) in order to vote.  Must be in format YYYY-MM-DD, otherwise there will be no restriction.
 
+pollproplist2.explain_vote:
+  des: Specify should voter explain his choice. Could be "R" - required, "A" - allowed, "N" - not needed (default value). 
+  
 pollproplist2.supermaintainer:
   des: If set to !0, only maintainers can see, vote and view results for this poll. Has value as UserID - SuperMaintainer.
 
 pollproplist2.unique:
   des: If set to 1, then a person with a given email address can only vote once in the poll
 
+pollsubmissionproplist.jtalkid:
+  des: Id of the comment with the explanation of user's vote in the related poll.
+  
 ratelist.addfriend:
   des: Logged when a user adds someone to their Friends list
 

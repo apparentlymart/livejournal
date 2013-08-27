@@ -852,6 +852,7 @@ CREATE TABLE `invitesent` (
   `args` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`commid`,`userid`),
   KEY `userid` (`userid`)
+
 )
 EOC
 
@@ -1669,6 +1670,29 @@ CREATE TABLE `pollsubmission2` (
   `datesubmit` datetime NOT NULL,
   PRIMARY KEY (`journalid`,`pollid`,`userid`),
   KEY `userid` (`userid`)
+)
+EOC
+
+register_tablecreate('pollsubmissionprop2', <<'EOC');
+CREATE TABLE `pollsubmissionprop2` (
+  `journalid` int(10) unsigned NOT NULL,
+  `pollid` int(10) unsigned NOT NULL,
+  `userid` int(10) unsigned NOT NULL,
+  `propid` smallint(5) unsigned NOT NULL,
+  `propval` varchar(255) NOT NULL,
+  PRIMARY KEY (`journalid`,`pollid`,`userid`,`propid`),
+  KEY `userid` (`userid`)
+)
+EOC
+
+register_tablecreate('pollsubmissionproplist', <<'EOC');
+CREATE TABLE `pollsubmissionproplist` (
+  `propid` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `des` varchar(255) DEFAULT NULL,
+  `scope` enum('general','local') NOT NULL DEFAULT 'general',
+  PRIMARY KEY (`propid`),
+  UNIQUE KEY `name` (`name`)
 )
 EOC
 

@@ -718,23 +718,25 @@ sub populate_proplist_file {
     open (my $fh, $file) or die "Failed to open $file: $!";
 
     my %pk = (
-        'userproplist'     => 'name',
-        'logproplist'      => 'name',
-        'talkproplist'     => 'name',
-        'usermsgproplist'  => 'name',
-        'pollproplist2'    => 'name',
-        'categoryproplist' => 'name',
-        'ratelist'         => 'name',
+        'userproplist'           => 'name',
+        'logproplist'            => 'name',
+        'talkproplist'           => 'name',
+        'usermsgproplist'        => 'name',
+        'pollproplist2'          => 'name',
+        'pollsubmissionproplist' => 'name',
+        'categoryproplist'       => 'name',
+        'ratelist'               => 'name',
     );
 
     my %propid_field = (
-        'categoryproplist' => 'propid',
-        'logproplist'      => 'propid',
-        'pollproplist2'    => 'propid',
-        'ratelist'         => 'rlid',
-        'talkproplist'     => 'tpropid',
-        'usermsgproplist'  => 'propid',
-        'userproplist'     => 'upropid',
+        'categoryproplist'       => 'propid',
+        'logproplist'            => 'propid',
+        'pollproplist2'          => 'propid',
+        'pollsubmissionproplist' => 'propid',
+        'ratelist'               => 'rlid',
+        'talkproplist'           => 'tpropid',
+        'usermsgproplist'        => 'propid',
+        'userproplist'           => 'upropid',
     );
 
     my %noscope = (
