@@ -2,7 +2,7 @@ package LJ::Poll;
 use strict;
 use Carp qw (croak);
 use LJ::Comment;
-use LJ::SpamFilter;
+use LJ::AntiSpam;
 use LJ::Talk::Post;
 use LJ::Poll::Vote;
 use LJ::MemCache;
@@ -2242,10 +2242,10 @@ sub process_submission {
                 if ($comment_body ne $comment_to_edit->body_raw) {
                     my $state = $comment_to_edit->state;
                     
-                    my $need_spam_check = LJ::SpamFilter->need_spam_check_comment($journalu, $remote, $state);
+                    my $need_spam_check = LJ::AntiSpam->need_spam_check_comment($journalu, $remote, $state);
                     if ($need_spam_check) {
-                        my $parsed_comment  = LJ::SpamFilter::Utils::parse_text($comment_body);
-                        if (LJ::SpamFilter->is_spam_comment($journalu, $remote, $parsed_comment)) {
+                        my $parsed_comment  = LJ::AntiSpam::Utils::parse_text($comment_body);
+                        if (LJ::AntiSpam->is_spam_comment($journalu, $remote, $parsed_comment)) {
                             $state = 'B';
                         }
                     }
