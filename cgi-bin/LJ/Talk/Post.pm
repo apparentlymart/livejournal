@@ -76,7 +76,7 @@ sub enter_comment {
     # append new comment to memcached tree
     {
         my $memkey = [$journalu->{'userid'}, "talk2:$journalu->{'userid'}:L:$itemid"];
-        my $append = pack(LJ::Talk::PACK_FORMAT,
+        my $append = pack(LJ::Talk::PACK_FORMAT(),
                         $jtalkid,
                         $partid,
                         $posterid,
