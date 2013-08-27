@@ -2370,13 +2370,15 @@ EOC
 
 register_tablecreate('sms_msgack', <<'EOC');
 CREATE TABLE `sms_msgack` (
-  `userid` int(10) unsigned NOT NULL,
-  `msgid` mediumint(8) unsigned NOT NULL,
+  `messageid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userid` int(10) unsigned NOT NULL DEFAULT '0',
+  `msgid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `type` enum('gateway','smsc','handset','unknown') DEFAULT NULL,
-  `timerecv` int(10) unsigned NOT NULL,
+  `timerecv` int(10) unsigned NOT NULL DEFAULT '0',
   `status_flag` enum('success','error','unknown') DEFAULT NULL,
   `status_code` varchar(25) DEFAULT NULL,
-  `status_text` varchar(255) NOT NULL,
+  `status_text` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`messageid`),
   KEY `userid` (`userid`,`msgid`)
 )
 EOC
@@ -4759,6 +4761,15 @@ register_alter(sub {
                   "PRIMARY KEY AUTO_INCREMENT");
     }
 
+});
+
+register_alter(sub {
+    unless ( column_type( 'sms_msgack', 'messageid' ) ) {
+        do_alter( 'sms_msgack',
+            'ALTER TABLE sms_msgack ' .
+            'ADD COLUMN messageid int(10) unsigned primary KEY AUTO_INCREMENT'
+        );
+    }
 });
 
 1; # return true
