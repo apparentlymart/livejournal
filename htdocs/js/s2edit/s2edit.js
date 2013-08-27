@@ -51,7 +51,7 @@ var s2edit = function() {
 					if (settings.hasOwnProperty(item) && settings[item] === val) { return; }
 
 					settings[item] = val;
-					jQuery.storage.setItem('s2edit', settings);
+					LJ.Storage.setItem('s2edit', settings);
 				},
 
 				turboEnabled: function() {

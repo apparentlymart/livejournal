@@ -132,7 +132,7 @@ DonateButton = {
     addUrl: function(link) {
       if ( !this.inStorage(link) ) {
         this._store[link] = true;
-        jQuery.storage.setItem('placeholders', this._store);
+        LJ.Storage.setItem('placeholders', this._store);
       }
     }
   };
