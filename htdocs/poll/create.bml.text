@@ -19,6 +19,8 @@
 
 .error.allitemsblank=All items cannot be blank.
 
+.error.explain_vote=Unknown value for 'explain_vote' property. Must be '(R)eqired' or '(A)llowed' if specified.
+
 .error.notext=You need text explaining your question
 
 .error.parsing=Error parsing poll:

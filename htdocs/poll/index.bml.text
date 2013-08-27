@@ -8,6 +8,10 @@
 
 .error.postdeleted=Owning post deleted, so poll no longer accessible.
 
+.explain_vote.label=Please, explain your vote:
+
+.explain_vote.label.hint=(your explanation will be posted as a new comment to original entry)
+
 .filloutpoll=Fill out Poll
 
 .gotocreate2=This is the address to participate in a poll. You've stumbled onto an address which does nothing right now. If you'd like, you can <a [[aopts]]>create a new poll</a>.
