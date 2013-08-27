@@ -408,7 +408,7 @@ sub answers_as_html {
         
         
         
-        my $comment_url = '$value';
+        my $comment_url = $value;
         if ($jtalkid) {
             my $comment  = LJ::Comment->new($self->poll->journalid, jtalkid => $jtalkid);
             my $dtalkid  = $comment->dtalkid;
@@ -514,8 +514,6 @@ sub answers {
         }
     }
 
-    warn "answers: " . Dumper(\@res) . "\n\n";
-    
     return @res;
 }
 

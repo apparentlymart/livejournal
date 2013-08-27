@@ -1089,14 +1089,18 @@ sub get_related_jtalks {
                             $self->journalid,
                             $propid,
                           );
-    
-    foreach my $row (@$rows) {
-        $res->{ $row->{userid} } = $row->{propval};  # while (my ($userid, $jtalkid) = each %$res) {
-    }
 
-    LJ::MemCache::set('poll_related_jtalks:'.$self->pollid, $res);
-        
-    return %$res;
+    if (@$rows) {
+        foreach my $row (@$rows) {
+            $res->{ $row->{userid} } = $row->{propval};  # while (my ($userid, $jtalkid) = each %$res) {
+        }
+    
+        LJ::MemCache::set('poll_related_jtalks:'.$self->pollid, $res);
+            
+        return %$res;
+    }
+    
+    return ();
 }
 
 
