@@ -106,7 +106,6 @@ sub instance {
     $unloaded{$key} = $self;
     $unloaded_text{$key} = $self;
     $unloaded_prop{$key} = $self;
-
     return $self;
 }
 *new = \&instance;

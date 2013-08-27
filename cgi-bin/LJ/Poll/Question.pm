@@ -1,5 +1,6 @@
 package LJ::Poll::Question;
 use strict;
+use warnings;
 use Carp qw (croak);
 use Class::Autouse qw (
     LJ::Poll::Question::radio 
@@ -9,6 +10,7 @@ use Class::Autouse qw (
     LJ::Poll::Question::drop
 );
 
+use Data::Dumper;
 
 sub new {
     my ($class, $poll, $pollqid) = @_;
@@ -323,7 +325,11 @@ sub answers_pages {
     return $pages;
 }
 
-sub answers {
+#
+# this method is mysteriously duplicated below and should be removed, 
+# when someone will make sure there are no 'hidden bombs'
+#
+sub answers_deprecated {
     my $self = shift;
     my $jid = shift;
 
@@ -390,17 +396,37 @@ sub answers {
 
 sub answers_as_html {
     my $self = shift;
-    my $ret = '';
-
+    my $ret = "<table>";
+    my $entry_url = $self->poll->entry->url;
+    
     foreach my $res ($self->answers(@_)) {
-        my ($userid, $value) = ($res->{userid}, $res->{value}, $res->{pollqid});
+        my ($userid, $value, $jtalkid) = ($res->{userid}, $res->{value}, $res->{jtalkid});
 
         my $u = LJ::load_userid($userid) or die "Invalid userid $userid";
 
         LJ::Poll->clean_poll(\$value);
-        $ret .= "<div>" . $u->ljuser_display . " -- $value</div>\n";
+        
+        
+        
+        my $comment_url = '$value';
+        if ($jtalkid) {
+            my $comment  = LJ::Comment->new($self->poll->journalid, jtalkid => $jtalkid);
+            my $dtalkid  = $comment->dtalkid;
+            $comment_url = "&nbsp;&nbsp;&nbsp;<a href=\"" .
+                           $entry_url . 
+                           "?thread=" . 
+                           $dtalkid . 
+                           "#t" . 
+                           $dtalkid . 
+                           "\">" . 
+                           $value . 
+                           "</a>";
+        }
+        $ret .= "<tr><td>" . $u->ljuser_display . "</td><td>&nbsp;&nbsp;&nbsp;-- $comment_url </td></tr>\n";
     }
 
+    $ret .= "</table>";
+    
     return $ret;
 }
 
@@ -426,38 +452,70 @@ sub answers {
     my $self = shift;
 
     my $ret = '';
-    my $sth;
+    my $answers;
 
     if ($self->is_clustered) {
-        $sth = $self->poll->journal->prepare("SELECT userid, pollqid, value FROM pollresult2 " .
-                                             "WHERE pollid=? AND pollqid=?");
+        $answers = $self->poll->journal->selectall_hashref(
+                                            qq(
+                                                SELECT userid, 
+                                                       pollqid, 
+                                                       value 
+                                                FROM   pollresult2
+                                                WHERE  pollid=? 
+                                                AND    pollqid=?
+                                            ),
+                                            'userid',
+                                            undef,
+                                            $self->pollid,
+                                            $self->pollqid
+                                         );
     } else {
         my $dbr = LJ::get_db_reader();
-        $sth = $dbr->prepare("SELECT userid, pollqid, value FROM pollresult " .
-                             "WHERE pollid=? AND pollqid=?");
+        $answers = $dbr->selectall_hashref(
+                                            qq(
+                                                SELECT userid, 
+                                                       pollqid, 
+                                                       value 
+                                                FROM   pollresult
+                                                WHERE  pollid=? 
+                                                AND    pollqid=?
+                                            ),
+                                            'userid',
+                                            undef,
+                                            $self->pollid,
+                                            $self->pollqid
+                         );
     }
-    $sth->execute($self->pollid, $self->pollqid);
-    die $sth->errstr if $sth->err;
+
+    my @voterids = $self->poll->get_voters_by_datesubmit;
+    my %jtalks   = $self->poll->get_related_jtalks;
+    
+    my @items = $self->items;
+
+    # define real values 
+    my %it;
+    $it{$_->{pollitid}} = $_->{item}
+        foreach @items;
 
     my @res;
-    push @res, $_ while $_ = $sth->fetchrow_hashref;
 
-    foreach my $r (@res) {
-        my @items = $self->items;
-
-        # define real values 
-        my %it;
-        $it{$_->{pollitid}} = $_->{item}
-            foreach @items;
-
-        ## some question types need translation; type 'text' doesn't.
-        if ($self->type eq "radio" || $self->type eq "drop") {
-            $r->{value} = $it{$r->{value}};
-        } elsif ($self->type eq "check") {
-            $r->{value} = join(", ", map { $it{$_} } split(/,/, $r->{value}));
+    foreach my $voter (@voterids) {
+        my $answer = $answers->{$voter};
+        if ($answer) {
+            ## some question types need translation; type 'text' doesn't.
+            if ($self->type eq "radio" || $self->type eq "drop") {
+                $answer->{value} = $it{$answer->{value}};
+            } elsif ($self->type eq "check") {
+                $answer->{value} = join(", ", map { $it{$_} } split(/,/, $answer->{value}));
+            }
+            
+            $answer->{jtalkid} = $jtalks{$voter};
+            push @res, $answer;
         }
     }
 
+    warn "answers: " . Dumper(\@res) . "\n\n";
+    
     return @res;
 }
 

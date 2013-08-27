@@ -1,7 +1,14 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
+use LJ::Comment;
+use LJ::SpamFilter;
+use LJ::Talk::Post;
+use LJ::Poll::Vote;
+use LJ::MemCache;
 use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap LJ::Text LJ::Poll::Render);
+
+use Data::Dumper;
 
 ##
 ## Memcache routines
@@ -268,6 +275,16 @@ sub new_from_html {
                 if (LJ::run_hook("poll_createdate_prop_is_enabled", $journal)) {
                     $popts{props}->{createdate} = $opts->{createdate} || undef;
                 }
+                
+                if ($opts->{explain_vote}) {
+                    if ($opts->{explain_vote} =~ /^[RA]$/) {
+                        $popts{props}->{explain_vote} = $opts->{explain_vote};
+                    }
+                    else {
+                        return $err->('poll.error.explain_vote');
+                    }
+                }
+                
                 LJ::run_hook('get_more_options_from_poll', finalopts => \%popts, givenopts => $opts, journalu => $journal);
 
                 if ($popts{'whovote'} ne "all" &&
@@ -736,6 +753,12 @@ sub journal {
     return LJ::load_userid($self->journalid);
 }
 
+# do we need a vote explanation?
+sub explain_vote {
+    my $self = shift;
+    return $self->prop('explain_vote');
+}    
+
 sub is_clustered {
     my $self = shift;
     return $self->journal->polls_clustered;
@@ -1000,6 +1023,84 @@ sub get_time_user_submitted {
     return $time;
 }
 
+# return an array of userids ordered by date of their submissions
+sub get_voters_by_datesubmit {
+
+    my ($self) = @_;
+    
+    my $voterids = LJ::MemCache::get('poll_voters_by_datesubmit:'.$self->pollid);
+    
+    if ($voterids) {
+        return @$voterids
+    }
+
+    my $journal  = $self->journal;
+    my $dbcw     = LJ::get_cluster_master($journal);
+    $voterids = $dbcw->selectcol_arrayref(
+                            qq(
+                                SELECT   userid
+                                FROM     pollsubmission2
+                                WHERE    pollid=?
+                                AND      journalid=?
+                                ORDER BY datesubmit
+                            ),
+                            undef,
+                            $self->pollid,
+                            $self->journalid,
+                       );
+
+    LJ::MemCache::set('poll_voters_by_datesubmit:'.$self->pollid, $voterids);
+                       
+    return @$voterids;
+}
+
+
+# return a hash of pairs (userid, jtalkid)
+sub get_related_jtalks {
+
+    my ($self) = @_;
+    
+    my $res = LJ::MemCache::get('poll_related_jtalks:'.$self->pollid) || ();
+    
+    if ($res) {
+        return %$res;
+    }
+
+    my $tm = LJ::Typemap->new(
+                table       => 'pollsubmissionproplist',
+                classfield  => 'name',
+                idfield     => 'propid',
+             );
+    my $propid = $tm->class_to_typeid('jtalkid');
+
+    my $journal  = $self->journal;
+    my $dbcw     = LJ::get_cluster_master($journal);
+    my $rows     = $dbcw->selectall_arrayref(
+                            qq(
+                                SELECT   userid,
+                                         propval
+                                FROM     pollsubmissionprop2
+                                WHERE    pollid=?
+                                AND      journalid=?
+                                AND      propid=?
+                            ),
+                            { Slice => {} },
+                            $self->pollid,
+                            $self->journalid,
+                            $propid,
+                          );
+    
+    foreach my $row (@$rows) {
+        $res->{ $row->{userid} } = $row->{propval};  # while (my ($userid, $jtalkid) = each %$res) {
+    }
+
+    LJ::MemCache::set('poll_related_jtalks:'.$self->pollid, $res);
+        
+    return %$res;
+}
+
+
+
 # expects a fake poll object (doesn't have to have pollid) and
 # an arrayref of questions in the poll object
 sub preview {
@@ -1032,6 +1133,8 @@ sub preview {
 
     return $ret;
 }
+
+
 
 # get poll description as a xml
 sub get_poll_xml {
@@ -1184,7 +1287,7 @@ sub render {
         $ret .= "<div class='poll-main'>";
     }
 
-    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
+    $ret .= "<b>!!!<a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> "
             unless $opts{widget} || $is_super;
     $ret .= $opts{scroll_links} if $opts{widget};
     if ($self->name) {
@@ -1588,6 +1691,11 @@ sub render {
 
     if ($do_form) {
         unless ($is_super) {
+            if ($self->explain_vote) {
+                $ret .= "<textarea cols='60' rows='10' tabindex='50' autocomplete='off'></textarea>";
+            } 
+            else {
+            }
             $ret .= LJ::html_submit(
                                     'poll-submit',
                                     $is_super ? LJ::Lang::ml('poll.vote') : LJ::Lang::ml('poll.submit'),
@@ -1681,7 +1789,8 @@ sub participants {
 sub render_new {
     my ($self, %opts) = @_;
     my $remote = LJ::get_remote();
-
+    
+    my $remoteid  = $remote ? $remote->id : 0;
     my $ditemid   = $self->ditemid;
     my $pollid    = $self->pollid;
     my $journalid = $self->journalid;
@@ -1853,6 +1962,14 @@ sub render_new {
 
     my $method = $do_form ? 'show_form' : 'show_results';
 
+    my $explain_vote = $self->explain_vote;
+    my $comment_body = '';
+    if ($explain_vote) {
+        my $vote = LJ::Poll::Vote->new($self->journalid, $pollid, $remoteid);
+        my $comment = $vote->get_voter_comment;
+        $comment_body = $comment->body_raw if $comment;
+    }
+    
     my $submit_value = LJ::Lang::ml('poll.submit');
     $submit_value = LJ::Lang::ml('poll.vote')
         if $is_super && $remote && $remote->can_manage($is_super) && !LJ::u_equals($remote, $self->journal); 
@@ -1864,6 +1981,8 @@ sub render_new {
         pollid       => $pollid,
         whovote      => LJ::Lang::ml('poll.security.'.$self->whovote),
         whoview      => LJ::Lang::ml('poll.security.'.$whoview),
+        explain_vote => $explain_vote ? 1 : 0,
+        comment_body => $comment_body,
         submit_value => $submit_value,
         choice       => $choice,
         questions    => \@questions,
@@ -2042,6 +2161,7 @@ sub set_prop {
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
+use LJ::Comment;
 
 # takes a scalarref to entry text and expands lj-poll tags into the polls
 sub expand_entry {
@@ -2082,7 +2202,105 @@ sub process_submission {
     my $answers;
     map { if(/pollq\-(\d+)/) { $answers->{$1} = $form->{$_} } } keys %$form;
 
-    return $class->process_vote($remote, $pollid, $answers, $error, $warnings);
+    my $poll            = LJ::Poll->new($pollid);
+    my $explain_vote    = $poll->explain_vote;
+    my $comment_body    = $form->{explain_vote};
+    
+    # required comment couldn't be empty
+    if (!$comment_body && $explain_vote eq 'R') {
+        $$error = "Explanation of your vote is required in this poll!";  #LJ::Lang::ml('poll.error.no_explanation');
+        return 0;
+    }
+
+    my $is_vote_counted = $class->process_vote($remote, $pollid, $answers, $error, $warnings);
+    
+    if ($is_vote_counted) {
+    
+        LJ::MemCache::delete('poll_voters_by_datesubmit:'.$pollid);
+        LJ::MemCache::delete('poll_related_jtalks:'.$pollid);
+        
+        my $entry = $poll->entry;
+        unless ($entry) {
+            $$error = "Original entry has been mysteriously disappeared so there is nothing to comment";  #LJ::Lang::ml('poll.error.no_entry');
+            return 0;
+        }
+    
+        my $entryu   = $entry->journal;
+        my $ditemid  = $entry->ditemid,
+        my $jitemid  = $entry->jitemid,
+        my $journalu = $poll->journal,
+        my $edit_status; 
+        # at this point we know, that the vote has been counted successfully. 
+        # Let's proceed with comment if any
+        if ($explain_vote && $comment_body) {
+            my $err;
+            my $vote = LJ::Poll::Vote->new($journalu->id, $pollid, $remote->id);
+            my $comment_to_edit = $vote->get_voter_comment;
+            
+            # do we need to edit previous?
+            if ($comment_to_edit) {
+                if ($comment_body ne $comment_to_edit->body_raw) {
+                    my $state = $comment_to_edit->state;
+                    
+                    my $need_spam_check = LJ::SpamFilter->need_spam_check_comment($journalu, $remote, $state);
+                    if ($need_spam_check) {
+                        my $parsed_comment  = LJ::SpamFilter::Utils::parse_text($comment_body);
+                        if (LJ::SpamFilter->is_spam_comment($journalu, $remote, $parsed_comment)) {
+                            $state = 'B';
+                        }
+                    }
+                    
+                    my $comment_data = {
+                            u               => $remote,
+                            usertype        => 'user',
+                            subject         => '',
+                            body            => $comment_body,
+                            unknown8bit     => $comment_to_edit->prop('unknown8bit'),
+                            subjecticon     => $comment_to_edit->prop('subjecticon'),
+                            preformat       => $comment_to_edit->prop('preformat'),
+                            picture_keyword => $comment_to_edit->prop('picture_keyword'),
+                            state           => $state,
+                            editid          => $comment_to_edit->dtalkid,
+                    };
+                    $edit_status = LJ::Talk::Post::edit_comment(
+                                        $entryu, 
+                                        $journalu,
+                                        $comment_data,
+                                        undef,
+                                        {itemid => $jitemid},
+                                        \$err
+                                   );
+                }
+                else {
+                    $edit_status = 1;
+                }
+            }
+            
+            unless ($edit_status) { 
+                my $comment = LJ::Comment->create(
+                    journal => $journalu,
+                    ditemid => $ditemid,
+                    poster  => $remote,
+                    body    => $comment_body,
+                );
+
+                if ($comment) {
+                    $vote->set_prop('jtalkid',$comment->jtalkid);
+                } 
+                else {
+                    $$error = "Unknown error while trying to leave a comment. Please return back and try to vote again";  #LJ::Lang::ml('poll.error.comment_failed');
+                    return 0;
+                }
+                
+                if ($comment_to_edit) {
+                    $comment_to_edit->set_prop_raw( next_vote_explanation => $comment->jtalkid );
+                }
+            }
+        }
+    }
+    
+    return $is_vote_counted;    
+    
 }
 
 sub process_vote {
