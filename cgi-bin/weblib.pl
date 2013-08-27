@@ -2295,7 +2295,12 @@ sub control_strip_js_inject
     my %opts = @_;
     my $user = delete $opts{user};
 
-    LJ::need_res('js/controlstrip.js');
+    LJ::need_res(qw{
+        js/controlstrip.js
+        stc/widgets/filter-settings.css
+        stc/popup/popupus.css
+        stc/popup/popupus-blue.css
+    });
 }
 
 sub journal_js_inject {
