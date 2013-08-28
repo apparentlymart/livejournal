@@ -1898,3 +1898,16 @@ HTML#js BODY * .b-mediaplaceholder-external:focus {
 iframe[src="about:blank"] {
 	display: none;
 	}
+
+/* LJSUP-14684: [Journal, feed] Display GitHub gists. Replaceable link */
+.b-replaceable-link {
+	font-weight: bold;
+	}
+.b-replaceable-link:before {
+	display: inline;
+	content: '\28';
+	}
+.b-replaceable-link:after {
+	display: inline;
+	content: '\29';
+	}
