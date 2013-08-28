@@ -296,12 +296,19 @@ LiveJournal.register_hook('page_load', function () {
         } else {
 
           // Add collapsed gist
-          link.toggleClass('b-replaceable-link', true);
+
+          // Wrap link in span to display braces around it
+          var span = document.createElement('span');
+          link.after(span);
+          $(span).append(link)
+                 .toggleClass('b-replaceable-link', true);
           link.on('click', function(e) {
             if (event.ctrlKey || (event.metaKey && LJ.Support.isMac)) {
               return;
             }
             e.preventDefault();
+            $(span).after(link)
+                   .remove();
             showGist(link);
           });
         }
