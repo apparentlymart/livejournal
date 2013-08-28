@@ -19,6 +19,7 @@ use LJ::RelationService;
 # W - journal sweeper
 # C - do not receive mass mailing from community
 # J - ban in journalpromo
+# R - subscriber
 #########################
 
 sub get_relation_types {
@@ -32,7 +33,8 @@ sub get_relation_types {
             'D', # - spammer
             'W', # - journal sweeper
             'C', # - do not receive mass mailing from community
-            'J', #- ban in journalpromo
+            'J', # - ban in journalpromo
+            'R', # - subscriber
             );
 }
 
