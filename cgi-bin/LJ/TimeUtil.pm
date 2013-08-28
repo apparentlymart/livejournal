@@ -167,6 +167,20 @@ sub mysql_time {
                    $ltime[0]);
 }
 
+sub alldatepart {
+    my ( $class, $format, $time_mysql ) = @_;
+
+    if ( $format eq 'S1' ) {
+        return $class->alldatepart_s1($time_mysql);
+    }
+
+    if ( $format eq 'S2' ) {
+        return $class->alldatepart_s2($time_mysql);
+    }
+
+    die "Invalid format $format";
+}
+
 # <LJFUNC>
 # name: LJ::TimeUtil->alldatepart_s1
 # des: Gets date in MySQL format, produces s1dateformat.
