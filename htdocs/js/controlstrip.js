@@ -151,14 +151,18 @@ angular.module('Controlstrip',
         calendarLink
           .calendar({
             showOn: 'click',
-            dayRef: journalUrlBase + '/' + (journalViewFriends ? 'friends/' : '') + '%Y/%M/%D',
-            allRefs: journalViewFriends,
             closeControl: false,
-            startMonth: new Date( LJ.get('controlstrip.calendar.earlyDate') ),
-            endMonth: new Date( LJ.get('controlstrip.calendar.lastDate') ),
+
+            dayRef:  journalUrlBase + '/' + (journalViewFriends ? 'friends/' : '') + '%Y/%M/%D',
+            allRefs: journalViewFriends,
+
+            startMonth: parseDate( LJ.get('controlstrip.calendar.earlyDate') ),
+            endMonth:   parseDate( LJ.get('controlstrip.calendar.lastDate') ),
+
             classNames: {
               container: 'w-cs-calendar'
             },
+
             ml: {
               caption: LJ.ml('web.controlstrip.view.calendar')
             }
@@ -170,6 +174,16 @@ angular.module('Controlstrip',
           if ( !journalViewFriends ) {
             calendarLink.calendarEvents( { fetchOnFirstDisplay: true } );
           }
+      }
+
+      /**
+       * Convert string e.g. "2009,10,27" to Date object
+       * @return {Date} Parsed Date
+       */
+      function parseDate(str) {
+        var date = str.split(',').map(Number);
+
+        return new Date(date[0], date[1], date[2]);
       }
     }());
   }
