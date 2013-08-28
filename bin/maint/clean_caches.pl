@@ -18,7 +18,6 @@ $maint{'clean_caches'} = sub
     $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
     print "-I- Cleaning commenturl.\n";
-    $dbh->do("DELETE FROM commenturls WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
     $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
     
     print "-I- Cleaning entry url.\n";
