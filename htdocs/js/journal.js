@@ -227,7 +227,10 @@ LiveJournal.register_hook('page_load', function () {
 (function($) {
   'use strict';
 
-  var gistBase = '://gist.github.com/';
+  var gistBase = '://gist.github.com/',
+      gistCss = {
+        'clear': 'both'
+      };
 
   function showGist(link) {
     var href  = link.attr('href'),
@@ -258,6 +261,7 @@ LiveJournal.register_hook('page_load', function () {
 
       var div = $(result.div);
       div.find('a').attr('target', '_blank');
+      div.css(gistCss);
       link.replaceWith(div);
     })
     .fail(function(error) {
@@ -292,13 +296,14 @@ LiveJournal.register_hook('page_load', function () {
         } else {
 
           // Add collapsed gist
-          expandLink = $( '<a href="#">&nbsp;[Expand]</a>' );
-          expandLink.on('click', function(e) {
+          link.toggleClass('b-replaceable-link', true);
+          link.on('click', function(e) {
+            if (event.ctrlKey || (event.metaKey && LJ.Support.isMac)) {
+              return;
+            }
             e.preventDefault();
             showGist(link);
-            $(this).remove();
           });
-          link.after(expandLink);
         }
       }
 
