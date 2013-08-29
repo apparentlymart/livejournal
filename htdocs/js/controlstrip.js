@@ -20,7 +20,7 @@
  */
 
 angular.module('Controlstrip',
-  ['LJ.Templates', 'LJ.Bubble', 'GroupsAndFilters.Services.Filters'],
+  ['LJ.Templates', 'LJ.Bubble', 'GroupsAndFilters.Services.Filters', 'GroupsAndFilters.Services.Users'],
   ['$locationProvider', function ($locationProvider) {
     $locationProvider.html5Mode(true);
   }])
@@ -41,14 +41,37 @@ angular.module('Controlstrip',
       }
       $scope.$apply();
     });
-
-    // Bubble.current = 'friend';
   }])
-  .controller('FiltersCtrl', function ($scope, Filter) {
-    Filter.fetch()
-      .then(function (data) {
-        $scope.filters = data;
+  .controller('FiltersCtrl', function ($scope, $q, Filter, FilterUsers) {
+    var filtersPromise = Filter.fetch(),
+        usersPromise   = FilterUsers.fetch(),
+        username = LJ.get('current_journal.username'),
+        user;
+
+    $q.all({ filters: filtersPromise, users: usersPromise })
+      .then(function (result) {
+        var filters = result.filters;
+
+        user = FilterUsers.getUser(username);
+
+        // set filters state
+        filters.forEach(function (filter) {
+          filter.checked = FilterUsers.isUserInGroup(username, filter.id);
+        });
+
+        $scope.filters = filters;
       });
+
+    /**
+     * Toggle filter state
+     */
+    $scope.toggleFilter = function (id, state) {
+      if (state) {
+        FilterUsers.addToGroup(id, [username]);
+      } else {
+        FilterUsers.removeFromGroup(id, [username]);
+      }
+    };
   });
 
 ;(function ($) {
@@ -59,9 +82,9 @@ angular.module('Controlstrip',
    */
   function initFilter() {
     var bubble,
-      form,
-      input,
-      submit;
+        form,
+        input,
+        submit;
 
     // filter is available only for logged in users
     if ( !Site.remoteUser ) {
