@@ -69,7 +69,8 @@ sub _create_relation_to_type_f {
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
 
     LJ::User->increase_friendsof_counter($tid);
-    LJ::User::clear_cache_friends($u, $target);
+
+    $u->clear_cache_friends($target);
 
     LJ::run_hooks('befriended', $u, $target);
     
