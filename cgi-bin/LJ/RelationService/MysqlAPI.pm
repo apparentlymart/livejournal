@@ -68,6 +68,8 @@ sub _create_relation_to_type_f {
     LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
 
+    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid" ]);
+
     LJ::User->increase_friendsof_counter($tid);
 
     $u->clear_cache_friends($target);
