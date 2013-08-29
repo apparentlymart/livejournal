@@ -1926,6 +1926,7 @@ sub create_view_friends {
         my $repost_props = { 'use_repost_signature' => 1};
 
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
+            next ENTRY unless LJ::Entry::Repost->is_visible_in_friendsfeed($entry_obj, $u);
             $friendid = $journalu->userid;
             $logprops{$itemid} = $entry_obj->props;
             $friends{$friendid} = $journalu;

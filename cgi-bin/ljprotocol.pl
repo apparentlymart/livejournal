@@ -5805,10 +5805,7 @@ sub authenticate
         return fail($err,101);
     }
 
-    if ($flags->{'allow_anonymous'} && !$u) { 
-        $api_suspicious->();
-        return 1;
-    }
+    return 1 if ($flags->{'allow_anonymous'} && !$u);
 
     # if there is a require TOS revision, check for it now
     return fail($err, 156) unless $u->tosagree_verify;

@@ -310,7 +310,14 @@ sub __create_repost {
     my $ret = eval {
     my $mark = $source_journalid . ":" . $source_jitemid;
     $post_obj->convert_to_repost($mark);
-    $post_obj->set_prop( 'repost' => 'e' );
+    
+    my $props = { 'repost' => 'e' };
+    
+    if (my $targeting_opt = $repost_offer && $repost_offer->targeting_opt()) {
+        $props->{'repost_targeting_opt'} = $targeting_opt;
+    }
+
+    $post_obj->set_prop_multi( $props );
 
     my $blid = 0;
 
@@ -1003,5 +1010,16 @@ sub substitute_content {
 
     return 1;
 }
+
+sub is_visible_in_friendsfeed {
+    my ($class, $entry, $u) = @_;
+
+    if ( my $targeting_opt = $entry->prop('repost_targeting_opt') ) {
+        return 0 unless LJ::Pay::Repost::Offer->check_targeting_for_user($targeting_opt, $u);
+    }
+
+    return 1;
+}
+
 
 1;

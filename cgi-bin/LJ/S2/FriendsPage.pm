@@ -290,6 +290,7 @@ sub FriendsPage
         if (LJ::Entry::Repost->substitute_content( $entry_obj, $content, $repost_props )) {
             next ENTRY if $removed;
             next ENTRY unless $entry_obj->visible_to($remote);
+            next ENTRY unless LJ::Entry::Repost->is_visible_in_friendsfeed($entry_obj, $u);
 
             $friend   = $entry_obj->journal;
             $poster   = $entry_obj->poster;
