@@ -825,6 +825,11 @@ sub get_groupmask {
         $mask = $dbw->selectrow_array("SELECT groupmask FROM friends ".
                                       "WHERE userid=? AND friendid=?",
                                       undef, $jid, $fid);
+
+        unless (defined $mask) {
+            $mask = 0;
+        }
+
         LJ::MemCacheProxy::set($memkey, $mask+0, time()+60*15);
     }
 
