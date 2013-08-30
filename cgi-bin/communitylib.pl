@@ -381,7 +381,7 @@ sub accept_comm_invite {
     # valid invite.  let's accept it as far as the community listing us goes.
     # 1, 0 means add comm to user's friends list, but don't auto-add P edge.
     if ($args->{'member'}) {
-        my ($code, $error) = LJ::join_community($u, $cu, 1, 0);
+        my ($code, $error) = LJ::do_join_community($u, $cu, 1, 0);
 
         unless ($code) {
             return LJ::error(
@@ -681,6 +681,20 @@ sub join_community {
         }
 
         return;
+    }
+
+    return LJ::do_join_community($u, $c, $friend, $canpost);
+}
+
+sub do_join_community {
+    my ($u, $c, $friend, $canpost) = @_;
+    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
+    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
+
+    my $row = LJ::get_community_row($c);
+
+    unless ($row) {
+        warn "Cant load community row [" . $c->user . "]";
     }
 
     # friend comm -> user
@@ -1049,7 +1063,7 @@ sub approve_pending_member {
 
     # step 2, make user join the community
     # 1 means "add community to user's friends list"
-    my ($code, $error) = LJ::join_community($u->{userid}, $cu->{userid}, 1);
+    my ($code, $error) = LJ::do_join_community($u, $cu, 1);
 
     return unless $code;
 
@@ -1124,6 +1138,10 @@ sub reject_pending_member {
 sub maintainer_linkbar {
     my $comm = shift;
     my $page = shift;
+
+    unless ($page) {
+        $page = '';
+    }
 
     my $username = $comm->user;
     my @links;
