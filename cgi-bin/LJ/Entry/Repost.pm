@@ -701,6 +701,8 @@ sub delete {
             'journalid' => $u->userid,
         );
 
+        LJ::PackedLogSink::Hooks->repost(); # delete new repost: $cost > 0 => paid
+
         my $status = $class->get_status($entry_obj, $u);
         $status->{'delete'} = 'OK';
         return $status;
@@ -782,6 +784,8 @@ sub create {
     );
 
     if ($reposted_obj) {
+        LJ::PackedLogSink::Hooks->repost(); # create new repost: $cost > 0 => paid
+        
         my $count = __get_count( $source_journal, $source_jitemid );
 
         $result->{'result'} = { 'count' => $count };
