@@ -380,6 +380,12 @@ sub eventtime_mysql {
     return $self->{eventtime}; 
 }
 
+sub eventtime_unix {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    return LJ::TimeUtil->mysqldate_to_time($self->{eventtime}, 1);
+}
+
 sub logtime_mysql {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
