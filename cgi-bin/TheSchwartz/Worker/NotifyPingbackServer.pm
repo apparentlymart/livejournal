@@ -302,6 +302,7 @@ sub parse_lj {
     unless( my $found = grep $_ eq $user, @used_users ) {
         $orig =~ m/(.{0,50})$text(.{0,50})/;
         my $context = $1.$user.$2;
+        $context = LJ::etags($context);
         push @users => { user_name => $user, context => $context };
         push @used_users, $user;
     }
