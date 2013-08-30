@@ -1122,7 +1122,7 @@
 						fakeElement.attributes['class'] = 'lj-template-wrap';
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
-						fakeElement.attributes['lj-attributes'] = encodeURIComponent(LiveJournal.JSON.stringify(element.attributes));
+						fakeElement.attributes['lj-attributes'] = encodeURIComponent(JSON.stringify(element.attributes));
 
 						return fakeElement;
 					},
@@ -1275,7 +1275,7 @@
 							break;
 							case 'lj-template':
 								newElement = new CKEDITOR.htmlParser.element('lj-template');
-								newElement.attributes = LiveJournal.JSON.parse(encodeURIComponent(element.attributes['lj-attributes']));
+								newElement.attributes = JSON.parse(encodeURIComponent(element.attributes['lj-attributes']));
 								newElement.isOptionalClose = newElement.isEmpty = true;
 							break;
 							case 'lj-spoiler':
