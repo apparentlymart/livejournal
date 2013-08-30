@@ -176,6 +176,8 @@ my %connections;
 ## 'host:port' => pid
 my %connections_pid;
 
+my $DEFAULT_EXPIRE = 864000; # 10 days
+
 use vars qw( $GET_DISABLED );
 $GET_DISABLED = 0;
 
@@ -474,6 +476,7 @@ sub add {
     my ( $key, $value, $expire ) = @_;
 
     $value = '' unless defined $value;
+    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     my $conn = _get_connection($key);
 
@@ -490,6 +493,7 @@ sub set {
     my ( $key, $value, $expire ) = @_;
 
     $value = '' unless defined $value;
+    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     my $conn = _get_connection($key);
 
@@ -509,6 +513,7 @@ sub replace {
     my ( $key, $value, $expire ) = @_;
 
     $value = '' unless defined $value;
+    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     my $conn = _get_connection($key);
 
@@ -641,6 +646,7 @@ sub get_or_set {
     my ( $key, $code, $expire ) = @_;
 
     my $value = LJ::MemCache::get($key);
+    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     unless ( defined $value ) {
         $value = $code->();
