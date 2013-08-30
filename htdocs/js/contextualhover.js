@@ -390,7 +390,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             }
 
             // add site-specific content here
-            var extraContent = LiveJournal.run_hook('ctxpopup_extrainfo', data);
+            var extraContent = this.extraInfo(data);
             if (extraContent) {
                 linkGroup.push(extraContent);
             }
@@ -471,6 +471,22 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             }
 
             this.setPopupEvents(buildObject);
+        },
+
+        extraInfo: function(userdata) {
+            var content = '';
+            if (userdata.is_person) {
+                if (userdata.is_online !== null) {
+                    content = '<a href="' + Site.siteroot + '/chat/">' + userdata.ml_ljtalk + '</a>';
+                    if (userdata.is_online) {
+                        content += " " + userdata.ml_online;
+                    } else if (userdata.is_online == '0') {
+                        content += " " + userdata.ml_offline;
+                    }
+                }
+            }
+
+            return content;
         },
 
         /**

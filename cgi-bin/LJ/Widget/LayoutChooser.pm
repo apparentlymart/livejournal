@@ -146,7 +146,9 @@ sub js {
             Event.stop(evt);
         },
         onData: function (data) {
-            LiveJournal.run_hook("update_other_widgets", "LayoutChooser");
+            if (window.Customize && typeof window.Customize.AdLayout === 'function') {
+                window.Customize.AdLayout.updateContent();
+            }
         },
         onRefresh: function (data) {
             this.initWidget();
