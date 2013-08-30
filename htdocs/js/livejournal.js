@@ -722,8 +722,6 @@ LiveJournal.injectScript = function(url, params, parent) {
 
 LiveJournal.getLocalizedStr = LJ.ml;
 
-LiveJournal.JSON = JSON;
-
 /**
  * Check if site if browsed by mobile device
  *
