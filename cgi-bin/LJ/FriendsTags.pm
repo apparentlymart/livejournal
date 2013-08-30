@@ -74,8 +74,14 @@ sub save {
         unless ($journal) {
             delete $self->{_data}->{$journalid};
         } else {
-            unless ($self->{_u}->is_subscribedon($journal)) {
-                delete $self->{_data}->{$journalid};
+            if (LJ::is_enabled('new_friends_and_subscriptions')) {
+                unless ($self->{_u}->is_subscribedon($journal)) {
+                    delete $self->{_data}->{$journalid};
+                }
+            } else {
+                unless ($self->{_u}->is_friend($journal)) {
+                    delete $self->{_data}->{$journalid};
+                }
             }
         }
     }
