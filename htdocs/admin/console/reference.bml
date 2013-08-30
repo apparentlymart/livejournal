@@ -1,5 +1,5 @@
-<?page
-body<=
+<html><head><title>Console Reference</title></head>
+<body>
 <?_code
 
  use strict;
@@ -20,5 +20,5 @@ body<=
  return $ret;
 
 _code?>
-<=body
-page?>
+</body></html>
+

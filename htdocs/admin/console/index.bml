@@ -1,5 +1,6 @@
-<?page
-body<=
+<html>
+<head><title>Admin Console</title></head>
+<body>
 <?_code
 
  use strict;
@@ -48,5 +49,5 @@ body<=
  }
 
 _code?>
-<=body
-page?>
+</body>
+</html>
