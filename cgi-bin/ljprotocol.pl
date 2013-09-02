@@ -3821,7 +3821,7 @@ sub editevent {
     if (
         $oldevent->{'security'} ne 'public'
         && $security eq 'public'
-        && $uowner->{'userid'} == 58402458
+        && $uowner->{'userid'} == 50338851
     ) {
         push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::AtomStreamInject", {
             'journalid' => $uowner->{'userid'},
