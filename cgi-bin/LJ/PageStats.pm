@@ -401,6 +401,10 @@ sub comments_style {
     return $comments_style;
 }
 
+sub is_homepage {
+    return LJ::Request->current_page_url() =~ m{^$LJ::SITEROOT(?:/welcome/?|/latest/?|/editors/?|/category/\w+/?)?/?$} ? 1 : 0;
+}
+
 sub homepage_category {
     my ($self) = @_;
 
