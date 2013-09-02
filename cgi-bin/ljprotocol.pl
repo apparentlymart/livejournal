@@ -3816,19 +3816,7 @@ sub editevent {
 
     LJ::EventLogRecord::EditEntry->new($entry)->fire;
     my @jobs; # jobs to insert into TheSchwartz
-    LJ::run_hooks("editpost", $entry, \@jobs);
-
-    if (
-        $oldevent->{'security'} ne 'public'
-        && $security eq 'public'
-        && $uowner->{'userid'} == 50338851
-    ) {
-        push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::AtomStreamInject", {
-            'journalid' => $uowner->{'userid'},
-            'jitemid'   => $itemid,
-            'ip'        => LJ::get_remote_ip(),
-        });
-    }
+    LJ::run_hooks("editpost", $entry, $oldevent, \@jobs);
 
     # PubSubHubbub Support
     LJ::Feed::generate_hubbub_jobs($uowner, \@jobs) unless $uowner->is_syndicated;
