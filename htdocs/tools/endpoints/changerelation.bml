@@ -50,7 +50,7 @@
         unless ($code) {
             return $err->($message);
         } elsif($message) {
-            $ret{note} = $error;
+            $ret{note} = $message;
             $success = 1;
         }
     } elsif ($action eq 'leave') {
