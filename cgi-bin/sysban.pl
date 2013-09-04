@@ -338,17 +338,21 @@ sub sysban_create {
 
     my $dbh = LJ::get_db_writer();
 
-    my $banuntil = "NULL";
+    my $status = $opts{status} eq 'expired' ? 'expired' : 'active';
+
+    my $banuntil = $opts{banuntil} ? $dbh->quote($opts{banuntil}) : "NULL";
     if ($opts{'bandays'}) {
         $banuntil = "NOW() + INTERVAL " . $dbh->quote($opts{'bandays'}) . " DAY";
     }
+
+    my $bandate  = $opts{bandate} ? $dbh->quote($opts{bandate}) : 'NOW()';
 
     # strip out leading/trailing whitespace
     $opts{'value'} = LJ::trim($opts{'value'});
 
     # do insert
-    $dbh->do("INSERT INTO sysban (what, value, note, bandate, banuntil) VALUES (?, ?, ?, NOW(), $banuntil)",
-             undef, $opts{'what'}, $opts{'value'}, $opts{'note'});
+    $dbh->do("INSERT INTO sysban (status, what, value, note, bandate, banuntil) VALUES (?, ?, ?, $bandate, $banuntil)",
+             undef, $status, $opts{'what'}, $opts{'value'}, $opts{'note'});
     return $dbh->errstr if $dbh->err;
     my $banid = $dbh->{'mysql_insertid'};
 
@@ -377,7 +381,7 @@ sub sysban_create {
     my $remote = LJ::get_remote();
     $banuntil = $opts{'bandays'} ? LJ::TimeUtil->mysql_time($exptime) : "forever";
 
-    LJ::statushistory_add(0, $remote, 'sysban_add',
+    LJ::statushistory_add(0, $remote || 0, 'sysban_add',
                               "banid=$banid; status=active; " .
                               "bandate=" . LJ::TimeUtil->mysql_time() . "; banuntil=$banuntil; " .
                               "what=$opts{'what'}; value=$opts{'value'}; " .
