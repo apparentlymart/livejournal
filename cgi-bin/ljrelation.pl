@@ -20,6 +20,7 @@ use LJ::RelationService;
 # C - do not receive mass mailing from community
 # J - ban in journalpromo
 # R - subscriber
+# F - friend
 #########################
 
 sub get_relation_types {
@@ -34,7 +35,6 @@ sub get_relation_types {
             'W', # - journal sweeper
             'C', # - do not receive mass mailing from community
             'J', # - ban in journalpromo
-            'R', # - subscriber
             );
 }
 
