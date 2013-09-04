@@ -351,7 +351,7 @@ sub sysban_create {
     $opts{'value'} = LJ::trim($opts{'value'});
 
     # do insert
-    $dbh->do("INSERT INTO sysban (status, what, value, note, bandate, banuntil) VALUES (?, ?, ?, $bandate, $banuntil)",
+    $dbh->do("INSERT INTO sysban (status, what, value, note, bandate, banuntil) VALUES (?, ?, ?, ?, $bandate, $banuntil)",
              undef, $status, $opts{'what'}, $opts{'value'}, $opts{'note'});
     return $dbh->errstr if $dbh->err;
     my $banid = $dbh->{'mysql_insertid'};
