@@ -382,7 +382,7 @@ sub sysban_create {
     $banuntil = $opts{'bandays'} ? LJ::TimeUtil->mysql_time($exptime) : "forever";
 
     LJ::statushistory_add(0, $remote || 0, 'sysban_add',
-                              "banid=$banid; status=active; " .
+                              "banid=$banid; status=$status; " .
                               "bandate=" . LJ::TimeUtil->mysql_time() . "; banuntil=$banuntil; " .
                               "what=$opts{'what'}; value=$opts{'value'}; " .
                               "note=$opts{'note'};");
