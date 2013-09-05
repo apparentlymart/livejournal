@@ -5,7 +5,7 @@ use strict;
 use Getopt::Long;
 
 # parse input options
-my ($list, $add, $modify, $banid, $status, $bandate, $banuntil, $banlength, $what, $value, $note);
+my ($list, $add, $modify, $banid, $status, $bandate, $banuntil, $banlength, $what, $value, $note, $format);
 exit 1 unless GetOptions('list' => \$list,
                          'add' => \$add,
                          'modify' => \$modify,
@@ -17,6 +17,7 @@ exit 1 unless GetOptions('list' => \$list,
                          'what=s' => \$what,
                          'value=s' => \$value,
                          'note=s' => \$note,
+                         'format=s' => \$format,
                          );
 
 # did they give valid input?
@@ -73,16 +74,24 @@ if ($list) {
         $where = join(" AND ", @where);
     }
 
-    my $sth = $dbh->prepare("SELECT * FROM sysban WHERE $where ORDER BY bandate ASC");
+    my $sth = $dbh->prepare("SELECT *, UNIX_TIMESTAMP(bandate) as bandate_unix FROM sysban WHERE $where ORDER BY bandate ASC");
     $sth->execute;
     my $ct;
     while (my $ban = $sth->fetchrow_hashref) {
-        print "> banid: $ban->{'banid'}, status: $ban->{'status'}, ";
-        print "bandate: " . ($ban->{'bandate'} ? $ban->{'bandate'} : "BOT") . ", ";
-        print "banuntil: " . ($ban->{'banuntil'} ? $ban->{'banuntil'} : "EOT") . "\n";
-        print "> what: $ban->{'what'}, value: $ban->{'value'}\n";
-        print "> note: $ban->{'note'}\n" if $ban->{'note'};
-        print "\n";
+        if ($format){
+            print 
+                join "," => 
+                    map { $ban->{$_} } 
+                    split /,/ => $format;
+            print "\n";
+        } else {
+            print "> banid: $ban->{'banid'}, status: $ban->{'status'}, ";
+            print "bandate: " . ($ban->{'bandate'} ? $ban->{'bandate'} : "BOT") . ", ";
+            print "banuntil: " . ($ban->{'banuntil'} ? $ban->{'banuntil'} : "EOT") . "\n";
+            print "> what: $ban->{'what'}, value: $ban->{'value'}\n";
+            print "> note: $ban->{'note'}\n" if $ban->{'note'};
+            print "\n";
+        }
         $ct++;
     }
     print "\n\tNO MATCHES\n\n" unless $ct;
@@ -103,44 +112,26 @@ if ($banlength) {
 
 # add new ban
 if ($add) {
+
     my $err = LJ::sysban_validate($what, $value);
     die $err if $err;
 
     $status = ($status eq 'expired' ? 'expired' : 'active');
 
-    $dbh->do("INSERT INTO sysban (status, what, value, note, bandate, banuntil)" .
-             "VALUES (?, ?, ?, ?, " . 
-             ($bandate ? $dbh->quote($bandate) : 'NOW()') . ", " . 
-             ($banuntil ? $dbh->quote($banuntil) : 'NULL') . ")",
-             undef, $status, $what, $value, $note);
-    die $dbh->errstr if $dbh->err;
-    my $insertid = $dbh->{'mysql_insertid'};
+    ## on success LJ::sysban_create returns banid,
+    ## or error message as string on error.
+    my $res = LJ::sysban_create(
+        bandate  => defined $bandate  ? $bandate : undef,
+        banuntil => defined $banuntil ? $banuntil : undef,
+        status   => $status,
+        what     => $what,
+        value    => $value,
+        note     => $note,
+        );
+    die $res unless $res eq int $res;
 
-    if ($what eq 'ip') {
-        LJ::procnotify_add("ban_ip", { 'ip' => $value,
-                                       'exptime' => LJ::TimeUtil->mysqldate_to_time($banuntil) });
-        LJ::MemCache::delete("sysban:ip");
-    }
-    if ($what eq 'uniq') {
-        LJ::procnotify_add("ban_uniq", { 'uniq' => $value,
-                                         'exptime' => LJ::TimeUtil->mysqldate_to_time($banuntil) });
-        LJ::MemCache::delete("sysban:uniq");
-    }
-    if ($what eq 'contentflag') {
-        LJ::procnotify_add("ban_contentflag", { 'username' => $value,
-                                                'exptime' => LJ::TimeUtil->mysqldate_to_time($banuntil) });
-        LJ::MemCache::delete("sysban:contentflag");
-    }
-
-    # log in statushistory
-    LJ::statushistory_add(0, 0, 'sysban_add',
-                          "banid=$insertid; status=$status; " .
-                          "bandate=" . ($bandate || LJ::TimeUtil->mysql_time()) . "; " .
-                          "banuntil=" . ($banuntil || 'NULL') . "; " .
-                          "what=$what; value=$value; " .
-                          "note=$note;");
-
-    print "CREATED: banid=$insertid\n";
+    my $banid = $res;
+    print "CREATED: banid=$banid\n";
     exit;
 }
 
