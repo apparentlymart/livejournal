@@ -399,13 +399,6 @@ function print_stylesheet () {
     background-attachment: $*page_background_scrolling;
 }""";
     }
-
-"""
-body {
-    margin: 0;
-    }
-""";    
-
 """body, td {
 """;
 if ($*font_base != "" or $*font_fallback != "none") {
