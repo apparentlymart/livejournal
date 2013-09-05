@@ -400,6 +400,12 @@ function print_stylesheet () {
 }""";
     }
 
+"""
+body {
+    margin: 0;
+    }
+""";    
+
 """body, td {
 """;
 if ($*font_base != "" or $*font_fallback != "none") {
@@ -609,6 +615,9 @@ print safe """<title>$title</title>
 </head>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 """;
+if (viewer_sees_ad_box("s2.personal.top.test")) {
+    $this->print_ad_box("s2.personal.top.test");
+    }
 $this->print_control_strip();
 if (viewer_sees_vbox()) {
     if ($margin_top == "") {
