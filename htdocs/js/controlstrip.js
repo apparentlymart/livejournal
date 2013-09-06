@@ -20,11 +20,13 @@
  */
 
 angular.module('Controlstrip',
-  ['LJ.Templates', 'LJ.Bubble', 'GroupsAndFilters.Services.Filters', 'GroupsAndFilters.Services.Users'],
+  ['LJ.Templates', 'LJ.Bubble', 'LJ.Directives', 'GroupsAndFilters.Services.Filters', 'GroupsAndFilters.Services.Users'],
   ['$locationProvider', function ($locationProvider) {
     $locationProvider.html5Mode(true);
   }])
-  .controller('ControlstripCtrl', ['$scope', 'Bubble', function ($scope, Bubble) {
+  .controller('ControlstripCtrl', ['$scope', 'Bubble', '$timeout',
+                         function ( $scope,   Bubble,   $timeout ) {
+
     var isCommunity = Boolean( LJ.get('current_journal.is_comm') );
 
     LiveJournal.register_hook('relations.changed', function (event) {
@@ -42,22 +44,24 @@ angular.module('Controlstrip',
       $scope.$apply();
     });
   }])
-  .controller('FiltersCtrl', function ($scope, $q, Filter, FilterUsers) {
-    var filtersPromise = Filter.fetch(),
-        usersPromise   = FilterUsers.fetch(),
+  .controller('FiltersCtrl', ['$scope', '$q', 'Filter', 'FilterUsers',
+                    function ( $scope,   $q,   Filter,   FilterUsers) {
+
+    var filtersPromise = Filter.fetch({ cache: true }),
+        usersPromise   = FilterUsers.fetch({ cache: true }),
         username = LJ.get('current_journal.username'),
         user;
+
+    $scope.model = {
+      newFilter: '',
+      showCreateDialog: false
+    };
 
     $q.all({ filters: filtersPromise, users: usersPromise })
       .then(function (result) {
         var filters = result.filters;
 
         user = FilterUsers.getUser(username);
-
-        // set filters state
-        filters.forEach(function (filter) {
-          filter.checked = FilterUsers.isUserInGroup(username, filter.id);
-        });
 
         $scope.filters = filters;
       });
@@ -72,7 +76,32 @@ angular.module('Controlstrip',
         FilterUsers.removeFromGroup(id, [username]);
       }
     };
-  });
+
+    $scope.isActive = function (id) {
+      var isActive = FilterUsers.isUserInGroup(username, id);
+      return isActive;
+    };
+
+    $scope.createFilter = function () {
+      var name = $scope.model.newFilter.trim();
+
+      $scope.resetFilter();
+
+      if ( name.length !== 0 ) {
+        Filter.create(name)
+          .then(function (response) {
+            var filter = response.filter;
+
+            FilterUsers.addToGroup(filter.id, [username]);
+          });
+      }
+    };
+
+    $scope.resetFilter = function () {
+      $scope.model.newFilter = '';
+      $scope.model.showCreateDialog = false;
+    };
+  }]);
 
 ;(function ($) {
   'use strict';
