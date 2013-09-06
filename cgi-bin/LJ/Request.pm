@@ -311,12 +311,33 @@ sub redirected {
 sub current_page_url {
     my $class = shift;
 
-    my $proto   = ($LJ::IS_SSL) ? "https" : "http"; 
+    my $proto   = ($LJ::IS_SSL) ? "https" : "http";
     my $host    = $class->header_in("Host");
     my $uri     = $class->uri;
     my $args    = $class->args;
     my $querysep= ($args) ? "?" : "";
     return "$proto://$host$uri$querysep$args";
+}
+
+sub current_page_url_custom {
+    my ($class, $args) = @_;
+
+    my @del = $args->{'del'} ? @{$args->{'del'}} : ();
+    my %add = $args->{'add'} ? %{$args->{'add'}} : ();
+
+    my $proto   = ($LJ::IS_SSL) ? "https" : "http";
+    my $host    = $class->header_in("Host");
+    my $uri     = $class->uri;
+
+    my %get = $class->get_params;
+    %get = (%get, %add);
+    foreach (@del) {
+        delete $get{$_};
+    }
+    my @params = map { "$_=$get{$_}" } keys %get;
+    my $args = join("&", (@params));
+
+    return "$proto://$host$uri?$args";
 }
 
 =head2 Cleanup
