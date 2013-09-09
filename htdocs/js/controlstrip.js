@@ -54,7 +54,8 @@ angular.module('Controlstrip',
 
     $scope.model = {
       newFilter: '',
-      showCreateDialog: false
+      showCreateDialog: false,
+      loading: false
     };
 
     $q.all({ filters: filtersPromise, users: usersPromise })
