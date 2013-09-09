@@ -209,6 +209,7 @@ sub set_cookie {
     my ($class, $key, $value, %opts) = @_;
 
     $class->_parse_cookies;
+
     $opts{'path'}    ||= $LJ::COOKIE_PATH;
     $opts{'domain'}  ||= $LJ::COOKIE_DOMAIN;
     $opts{'expires'} ||= 0;
