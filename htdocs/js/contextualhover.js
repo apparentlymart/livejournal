@@ -1,6 +1,8 @@
 //= require js/hourglass.js
 //= require js/relations.js
 
+//= require_preprocessed_template Widgets/contextualhover.jqtmpl
+
 /*global ContextualPopup, Hourglass */
 
 /**

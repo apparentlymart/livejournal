@@ -1472,8 +1472,8 @@ sub res_template_includes {
         my $timestamp = int(time() / $LJ::TEMPLATES_UPDATE_TIME);
         foreach my $extension ('.tmpl', '.jqtmpl') {
             my $mtime = 0;
-            $ret .= join join(',',
-                map {
+
+            my @files_list = map {
                     local $_ = $_;
                     s{^} {../};
                     my $lmtime = _file_modtime($_, $time);
@@ -1482,8 +1482,13 @@ sub res_template_includes {
                     $_
                 } grep {
                     -1 != index $_, $extension
-                } @LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE
-            ), qq{<script type="text/javascript" src="$src}, qq{?v=$mtime&tm=$timestamp;uselang=$lang"></script>\n};
+                } @LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE;
+
+            $ret .= @files_list
+                ? join (join(',', @files_list),
+                    qq{<script type="text/javascript" src="$src},
+                    qq{?v=$mtime&tm=$timestamp;uselang=$lang"></script>\n})
+                : '';
         }
     } else {
         foreach my $template (@LJ::SITEWIDE_TEMPLATES, @LJ::INCLUDE_TEMPLATE) {
