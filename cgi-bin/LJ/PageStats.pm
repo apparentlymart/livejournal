@@ -439,7 +439,9 @@ sub user_params {
     my $host = LJ::Request->header_in("Host");
     my $uri  = LJ::Request->uri();
     my $args = LJ::Request->args();
-    
+
+    $args = "?$args" if $args;
+ 
     if ( $u ) {
 
         my $journaltype  = $u->journaltype_readable;
