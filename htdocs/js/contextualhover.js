@@ -610,7 +610,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
         activate: function(e, useLive) {
             if (useLive && !(e.target.username || e.target.userid || e.target.up_url)) {
                 ContextualPopup.searchAndAdd($(e.currentTarget).parent().get(0));
-            };
+            }
 
             var target = e.target,
                 ctxPopupId = target.username || target.userid || target.up_url,
