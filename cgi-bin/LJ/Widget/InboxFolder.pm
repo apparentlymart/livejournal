@@ -25,7 +25,6 @@ sub need_res {
             js/hourglass.js
             js/esn_inbox.js
             stc/esn.css
-            stc/lj_base.css
             );
 }
 

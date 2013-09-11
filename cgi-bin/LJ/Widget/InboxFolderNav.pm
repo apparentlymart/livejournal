@@ -11,7 +11,6 @@ sub need_res {
             js/dom.js
             js/hourglass.js
             stc/esn.css
-            stc/lj_base.css
             );
 }
 
