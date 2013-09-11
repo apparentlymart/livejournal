@@ -167,9 +167,14 @@ sub common_template_params {
     my $current_lang = LJ::Lang::current_language();
     my $html_lang    = $LJ::LANG_TO_HTML_LANG{$current_lang} || $current_lang;
 
-    my $error_list = '';
+    my @error_list = ();
     if ( my @errors = @BMLCodeBlock::errors ) {
-        $error_list = LJ::error_list(@errors);
+        @error_list = map {
+            my $err  = LJ::errobj($_);
+            $err->log;
+            my $errstr = $err->as_bullets;
+            { error => $errstr }
+        } grep { $_ } @errors;
     }
 
     my $warning_list = '';
@@ -417,7 +422,7 @@ sub common_template_params {
         'bodyopts'           => $args->{'bodyopts'},
         'body'               => $args->{'body'},
         'page_is_ssl'        => $LJ::IS_SSL ? 1 : 0,
-        'error_list'         => $error_list,
+        'error_list'         => \@error_list,
         'warning_list'       => $warning_list,
         'breadcrumbs'        => $class->template_param_breadcrumbs,
         'index_page'         => $args->{'index_page'},
