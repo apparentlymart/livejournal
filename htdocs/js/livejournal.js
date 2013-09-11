@@ -5,77 +5,13 @@
 // This file contains general-purpose LJ code
 var LiveJournal = {};
 
-// Hooks
-;(function ($) {
-    'use strict';
+/**
+* @deprecated Deprecated methods (for backward compatibility only)
+*/
+LiveJournal.register_hook = LJ.Event.on;
+LiveJournal.remove_hook   = LJ.Event.off;
+LiveJournal.run_hook      = LJ.Event.trigger;
 
-    LiveJournal.hooks = {}; // The hook mappings
-
-    /**
-     * Register handler for hook
-     * @param  {String} hook Hook name
-     * @param  {Function} func Hook handler
-     */
-    LiveJournal.register_hook = function (hook, func) {
-        if (typeof hook !== 'string' || typeof func !== 'function') {
-            throw new Error('Provide correct hook name or handler.');
-        }
-
-        if ( !LiveJournal.hooks[hook] ) {
-            LiveJournal.hooks[hook] = [];
-        }
-
-        LiveJournal.hooks[hook].push(func);
-    };
-
-    /**
-     * Run registered hooks
-     * @param  {String} hook Hook name
-     */
-    LiveJournal.run_hook = function (hook /**, args*/) {
-        var hookFuncs = LiveJournal.hooks[hook],
-            args = null,
-            result = null;
-
-        // nothing has been registered for this hook
-        if ( $.type(hookFuncs) !== 'array' || hookFuncs.length === 0 ) {
-            return;
-        }
-
-        // arguments to pass for the hook
-        args = Array.prototype.slice.call(arguments, 1);
-
-        hookFuncs.forEach(function (hookFunc) {
-            result = hookFunc.apply(null, args);
-        });
-
-        return result;
-    };
-
-    /**
-     * Remove hook functionality
-     * @param  {String} hook Hook name
-     * @param  {Function} [func] Hook function to remove
-     */
-    LiveJournal.remove_hook = function (hook, func) {
-        if (typeof hook !== 'string') {
-            throw new Error('Hook name should be provided.');
-        }
-
-        // if no hooks has been registered yet
-        if (!LiveJournal.hooks[hook]) {
-            return;
-        }
-
-        if (typeof func === 'function') {
-            LiveJournal.hooks[hook] = LiveJournal.hooks[hook].filter(function (hookFunc) {
-                return hookFunc !== func;
-            });
-        } else {
-            LiveJournal.hooks[hook] = [];
-        }
-    };
-}(jQuery));
 
 LiveJournal.initPage = function () {
     //LJRU-3137: The code relies on the Site global variable
