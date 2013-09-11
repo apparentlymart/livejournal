@@ -306,7 +306,7 @@ sub ago_text {
 
     # Today for anon users
     } elsif ( $noremote ) {
-    
+
         return $mlcache->{'today'} ||= LJ::Lang::ml('time.ago.today');
 
     # Hour
@@ -366,13 +366,13 @@ Format a UNIX timestamp so that it can be displayed to the user, taking care
 of i18n.
 
  my $timestamp = 1273215570;
- 
+
  print LJ::TimeUtil->fancy_time_format($timestamp, 'day');
     # => April 7 2010
- 
+
  print LJ::TimeUtil->fancy_time_format($timestamp, 'min');
     # => April 7 2010, 10:59
- 
+
  print LJ::TimeUtil->fancy_time_format($timestamp, 'sec');
     # or
  print LJ::TimeUtil->fancy_time_format($timestamp);
@@ -404,7 +404,7 @@ sub fancy_time_format {
     if ($opts->{mount_short}) {
         my $month_code = LJ::Lang::month_short_langcode($dt->month);
         $day_month  = $dt->day . " " . LJ::Lang::get_text($opts->{lang}, $month_code);
-    } else { 
+    } else {
         my $month_code = lc LJ::Lang::month_short( $dt->month );
         $day_month  = LJ::Lang::get_text($opts->{lang}, 'esn.month.day_' . $month_code,
                          undef,
@@ -483,7 +483,7 @@ sub format_rtime {
     }
 
     push @match, $input if $input;
-   
+
     return {
         map {
             ($_ => shift @match)
@@ -493,18 +493,18 @@ sub format_rtime {
 
 #it returns -1 if $time1 < $time2, 0 if $time1 == $time2, 1 if $time1 > $time2.
 sub day_compare {
-	my ($time1, $time2, $zone) = @_;
+    my ($time1, $time2, $zone) = @_;
 
-	return 0 unless $time1;
-	$time2 ||= time();
-	$zone ||= 'Europe/Moscow';
+    return 0 unless $time1;
+    $time2 ||= time();
+    $zone ||= 'Europe/Moscow';
 
-	$time1 = DateTime->from_epoch( epoch => $time1, time_zone => $zone );
-	$time2 = DateTime->from_epoch( epoch => $time2, time_zone => $zone );
-	$time1->truncate( to => 'day');
-	$time2->truncate( to => 'day');
+    $time1 = DateTime->from_epoch( epoch => $time1, time_zone => $zone );
+    $time2 = DateTime->from_epoch( epoch => $time2, time_zone => $zone );
+    $time1->truncate( to => 'day');
+    $time2->truncate( to => 'day');
 
-	return DateTime->compare($time1, $time2);
+    return DateTime->compare($time1, $time2);
 }
 
 1;
