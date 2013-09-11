@@ -12,7 +12,7 @@ use vars qw($gtop);
 our %known_parent;
 our $ppid;
 
-$LJ::SUICIDE_MAX_VIRTUAL_SIZE = 2 * 1024*1024*1024; ## 2 Gb 
+$LJ::SUICIDE_MAX_VIRTUAL_SIZE = 1.5 * 1024*1024*1024; ## 1.5 Gb 
 
 # oh btw, this is totally linux-specific.  gtop didn't work, so so much for portability.
 sub handler
