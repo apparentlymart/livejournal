@@ -25,7 +25,7 @@ LiveJournal.initPage = function () {
     jQuery(ContextualPopup.setupLive);
 
     if (LJ.Api) {
-        LJ.Api.init({ auth_token: Site.auth_token });
+        LJ.Api.init({ auth_token: LJ.get('auth_token') });
     }
 
     LJ.UI.bootstrap();
@@ -292,7 +292,7 @@ LiveJournal.getAjaxUrl = function(action, params) {
         action += (uselang ? '&' : '?') + jQuery.param(params);
     }
 
-    return Site.currentJournal ? '/' + Site.currentJournal + '/__rpc_' + action : '/__rpc_' + action;
+    return LJ.get('currentJournal') ? '/' + LJ.get('currentJournal') + '/__rpc_' + action : '/__rpc_' + action;
 };
 
 // generic handler for ajax errors
@@ -371,7 +371,7 @@ LiveJournal.generateLjUniq = function() {
 LiveJournal.checkLjUniq = function() {
     if (!Cookie('ljuniq')) {
         Cookie('ljuniq', LiveJournal.generateLjUniq(), {
-                domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
+                domain: LJ.get('siteroot').replace(/^https?:\/\/www\./, ''),
                 expires: 5000,
                 path: '/'
             });

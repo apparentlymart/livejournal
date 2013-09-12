@@ -54,7 +54,7 @@ LJ.LastFM = {
             data: {
                 method: 'user.getrecenttracks',
                 user: user,
-                api_key: Site.page.last_fm_api_key,
+                api_key: LJ.get('last_fm_api_key'),
                 format: 'json'
             }
         }).done(function(res) {
@@ -78,7 +78,7 @@ LJ.LastFM = {
 function lastfm_current(onInit) {
     'use strict';
 
-    var user = Site.page.last_fm_user,
+    var user = LJ.get('last_fm_user'),
         label = null,
         input = document.getElementById('prop_current_music'),
         spinner = 'b-updatepage-field-music-loading';
@@ -93,7 +93,7 @@ function lastfm_current(onInit) {
         return;
     }
 
-    if (Site.page.ljpost) {
+    if (LJ.get('ljpost')) {
         label = jQuery('.b-updatepage-field-music');
         label.toggleClass(spinner, true);
         input.value = '';
@@ -114,11 +114,11 @@ function lastfm_current(onInit) {
     });
 }
 
-if (Site.page.ljpost) {
+if (LJ.get('ljpost')) {
     jQuery(function() {
         'use strict';
 
-        if (Site.page.last_fm_user) {
+        if (LJ.get('last_fm_user')) {
             lastfm_current(true);
         }
     });
