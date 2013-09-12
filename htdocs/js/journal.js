@@ -1,3 +1,4 @@
+//= require js/entry/likes.js
 //= require js/pagescroller.js
 
 DonateButton = {
@@ -208,15 +209,6 @@ DonateButton = {
     });
   });
 })();
-
-/**
- * Delayed like buttons loader
- */
-LiveJournal.register_hook('page_load', function () {
-  'use strict';
-
-  jQuery(document.body).ljLikes();
-});
 
 /**
  * Embed gists from GitHub
