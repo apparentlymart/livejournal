@@ -6,30 +6,35 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 package LJ::Test;
-require Exporter;
+
 use strict;
+use warnings;
 
 use base 'Exporter';
 
-use Carp qw();
+use Class::Autouse qw(
+    LJ::OAuth::AccessToken
+);
+
+# External modules
 use DBI;
-
-use LJ::ModuleCheck;
-
+use Carp qw();
 use Data::Dumper;
 
-use Class::Autouse qw (
-                       LJ::OAuth::AccessToken
-                       LJ::Comment
-                       );
+# Internal modules
+use LJ::ModuleCheck;
+use LJ::Test::Mock::User;
+use LJ::Test::Mock::MemCache;
 
 # TODO: use EXPORT_OK instead, do not clutter the caller's namespace
 # unless asked to specifically
 our @EXPORT = qw(
     memcache_stress with_fake_memcache temp_user
-    temp_comm temp_feed alloc_sms_num fake_apache );
+    temp_comm temp_feed alloc_sms_num fake_apache
+);
 
 my @temp_userids;  # to be destroyed later
+
 END {
     return if $LJ::_T_NO_TEMP_USER_DESTROY;
     # clean up temporary usernames
@@ -119,7 +124,7 @@ sub create_user {
     my $u;
 
     if ( $journaltype eq 'P' ) {
-        $u = LJ::User->create_personal(%opts);
+        $u = LJ::Test::Mock::User->create_personal(%opts);
     } elsif ( $journaltype eq 'C' ) {
         unless ( defined $opts{'owner'} ) {
             $opts{'owner'} = $class->create_user(
@@ -127,7 +132,7 @@ sub create_user {
         }
         $opts{'membership'} ||= 'open';
         $opts{'postlevel'}  ||= 'members'; 
-        $u = LJ::User->create_community(%opts);
+        $u = LJ::Test::Mock::User->create_community(%opts);
     } elsif ( $journaltype eq 'Y' ) {
         unless ( defined $opts{'creator'} ) {
             $opts{'creator'} = $class->create_user(
@@ -137,7 +142,7 @@ sub create_user {
         $opts{'feedurl'} = "$LJ::SITEROOT/fakerss.xml#"
             unless defined $opts{'feedurl'};
 
-        $u = LJ::User->create_syndicated(%opts);
+        $u = LJ::Test::Mock::User->create_syndicated(%opts);
     } else {
         die "unknown journaltype $journaltype";
     }
@@ -159,7 +164,7 @@ sub create_user {
         push @temp_userids, $u->userid;
     }
 
-    return $u;
+    return bless { %$u }, 'LJ::Test::Mock::User';
 }
 
 
@@ -172,7 +177,12 @@ sub add_friend {
 }
 
 sub temp_user {
-    shift() if $_[0] eq __PACKAGE__;
+    if ($_[0]) {
+        if ($_[0] eq __PACKAGE__) {
+            shift();
+        }
+    }
+    
     my %args = @_;
     my $underscore  = delete $args{'underscore'};
     my $journaltype = delete $args{'journaltype'}  || 'P';
@@ -195,9 +205,8 @@ sub temp_feed {
     return __PACKAGE__->create_user( 'journaltype' => 'Y', 'temporary' => 1 );
 }
 
-
-
 my $fake_apache;
+
 sub fake_apache {
     return $fake_apache if $fake_apache;
     # TODO: load all the right libraries, if they haven't already been loaded before.
@@ -218,7 +227,8 @@ sub fake_apache {
 sub with_fake_memcache (&) {
     my $cb = shift;
     my $pre_mem = LJ::MemCache::get_memcache();
-    my $fake_memc = LJ::Test::FakeMemCache->new();
+    my $fake_memc = LJ::Test::Mock::MemCache->new();
+
     {
         local @LJ::MEMCACHE_SERVERS = ("fake");
         LJ::MemCache::set_memcache($fake_memc);
@@ -232,7 +242,7 @@ sub with_fake_memcache (&) {
 sub memcache_stress (&) {
     my $cb = shift;
     my $pre_mem = LJ::MemCache::get_memcache();
-    my $fake_memc = LJ::Test::FakeMemCache->new();
+    my $fake_memc = LJ::Test::Mock::MemCache->new();
 
     # run the callback once with no memcache server existing
     {
@@ -267,6 +277,27 @@ sub alloc_sms_num {
     die "Unable to allocate SMS number after 100 tries";
 }
 
+sub create_post {
+    my ( $class, %opts ) = @_;
+
+    my $userid = delete $opts{userid} or die "Can't create post without userid";
+
+    my $u = LJ::load_userid($userid) or die "Can't load user $userid";
+
+    $u = bless { %$u }, 'LJ::Test::Mock::User';
+
+    return $u->t_post_fake_entry(%opts);
+}
+
+sub create_comment {
+    my ( $class, %opts ) = @_;
+
+    my $entry = delete $opts{entry};
+
+    $entry = bless { %$entry }, 'LJ::Test::Mock::Entry';
+
+    return $entry->t_enter_comment(%opts);
+}
 
 sub create_application {
     my $class = shift;
@@ -306,24 +337,6 @@ sub create_application {
     return $app;
 }
 
-sub create_post {
-    my ( $class, %opts ) = @_;
-
-    my $userid = delete $opts{userid} or die "Can't create post without userid";
-
-    my $u = LJ::load_userid($userid) or die "Can't load user $userid";
-
-    return $u->t_post_fake_entry(%opts);
-}
-
-sub create_comment {
-    my ( $class, %opts ) = @_;
-
-    my $entry = delete $opts{entry};
-
-    return $entry->t_enter_comment(%opts);
-}
-
 sub get_access_token {
     my $class = shift;
     my %opts = @_;
@@ -338,248 +351,6 @@ sub get_access_token {
                                                   userid       => $opts{userid},
                                                   );
     return $token;
-}
-
-package LJ::Test::FakeMemCache;
-# duck-typing at its finest!
-# this is a fake Cache::Memcached object which implements the
-# memcached server locally in-process, for testing.  kinda,
-# except it has no LRU or expiration times.
-
-sub new {
-    my ($class) = @_;
-    return bless {
-        'data' => {},
-    }, $class;
-}
-
-sub add {
-    my ($self, $fkey, $val, $exptime) = @_;
-    my $key = _key($fkey);
-    return 0 if exists $self->{data}{$key};
-    $self->{data}{$key} = $val;
-    return 1;
-}
-
-sub replace {
-    my ($self, $fkey, $val, $exptime) = @_;
-    my $key = _key($fkey);
-    return 0 unless exists $self->{data}{$key};
-    $self->{data}{$key} = $val;
-    return 1;
-}
-
-sub incr {
-    my ($self, $fkey, $optval) = @_;
-    $optval ||= 1;
-    my $key = _key($fkey);
-    return 0 unless exists $self->{data}{$key};
-    $self->{data}{$key} += $optval;
-    return 1;
-}
-
-sub decr {
-    my ($self, $fkey, $optval) = @_;
-    $optval ||= 1;
-    my $key = _key($fkey);
-    return 0 unless exists $self->{data}{$key};
-    $self->{data}{$key} -= $optval;
-    return 1;
-}
-
-sub set {
-    my ($self, $fkey, $val, $exptime) = @_;
-    my $key = _key($fkey);
-    $self->{data}{$key} = $val;
-    return 1;
-}
-
-sub delete {
-    my ($self, $fkey) = @_;
-    my $key = _key($fkey);
-    delete $self->{data}{$key};
-    return 1;
-}
-
-sub get {
-    my ($self, $fkey) = @_;
-    my $key = _key($fkey);
-    return $self->{data}{$key};
-}
-
-sub get_multi {
-    my $self = shift;
-    my $ret = {};
-    foreach my $fkey (@_) {
-        my $key = _key($fkey);
-        $ret->{$key} = $self->{data}{$key} if exists $self->{data}{$key};
-    }
-    return $ret;
-}
-
-sub _key {
-    my $fkey = shift;
-    return $fkey->[1] if ref $fkey eq "ARRAY";
-    return $fkey;
-}
-
-# tell LJ::MemCache::reload_conf not to call 'weird' methods on us
-# that we don't simulate.
-sub doesnt_want_configuration {
-    1;
-}
-
-sub disconnect_all {}
-sub forget_dead_hosts {}
-
-
-package LJ::User;
-
-# set the user up for sms
-sub t_activate_sms {
-    my ($u) = @_;
-    $u->set_sms_number(
-                       LJ::Test::alloc_sms_num(),
-                       verified => 'Y'
-                       );
-}
-
-# pretend the user sent us an SMS
-sub t_receive_sms {
-    my ($u, $message) = @_;
-
-    my $msg = LJ::SMS::Message->new(
-                                    owner => $u,
-                                    from => $u,
-                                    body_text => $message,
-                                    );
-
-    LJ::SMS::MessageHandler->handle($msg);
-}
-
-# post a fake entry in a community journal
-sub t_post_fake_comm_entry {
-    my $u = shift;
-    my $comm = shift;
-    my %opts = @_;
-
-    # set the 'usejournal' and tell the protocol
-    # to not do any checks for posting access
-    $opts{usejournal} = $comm->{user};
-    $opts{usejournal_okay} = 1;
-
-    return $u->t_post_fake_entry(%opts);
-}
-
-# post a fake entry in this user's journal
-sub t_post_fake_entry {
-    my $u = shift;
-    my %opts = @_;
-
-    require 'ljprotocol.pl';
-
-    my $security = delete $opts{security} || 'public';
-    my $proto_sec = $security;
-    if ($security eq "friends") {
-        $proto_sec = "usemask";
-    }
-
-    my $subject = delete $opts{subject} || "test suite post.";
-    my $body    = delete $opts{body}    || "This is a test post from $$ at " . time() . "\n" . "with params:" . Dumper(\%opts);
-    my $props   = delete $opts{props} || {};
-
-    my %req = (
-               mode => 'postevent',
-               ver => $LJ::PROTOCOL_VER,
-               user => $u->{user},
-               password => '',
-               event => $body,
-               subject => $subject,
-               tz => 'guess',
-               security => $proto_sec,
-               props  => $props,
-               );
-
-    $req{allowmask} = 1 if $security eq 'friends';
-
-    my %res;
-    my $flags = { noauth => 1, nomod => 1 };
-
-    # pass-thru opts
-    $req{usejournal} = $opts{usejournal} if $opts{usejournal};
-
-    $flags->{usejournal_okay} = $opts{usejournal_okay} if $opts{usejournal_okay};
-
-    LJ::do_request(\%req, \%res, $flags);
-
-    die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";
-    my $jitemid = $res{itemid} or die "No itemid";
-
-    my $uowner = $opts{usejournal} ? LJ::load_user($opts{usejournal}) : $u;
-
-    return LJ::Entry->new($uowner, jitemid => $jitemid);
-}
-
-package LJ::Entry;
-
-# returns LJ::Comment object or dies on failure
-sub t_enter_comment {
-    my ($entry, %opts) = @_;
-    my $jitemid = $entry->jitemid;
-
-    require 'talklib.pl';
-
-    # entry journal/u
-    my $entryu = $entry->journal;
-
-    # poster u
-    my $u = delete $opts{u};
-    $u = 0 unless ref $u;
-
-    my $parent = delete $opts{parent};
-    my $parenttalkid = $parent ? $parent->jtalkid : 0;
-
-    # add some random stuff for dupe protection
-    my $rand = "t=" . time() . " r=" . rand();
-
-    my $subject = delete $opts{subject} || "comment subject [$rand]";
-    my $body    = delete $opts{body} || "comment body\n\n$rand";
-
-    my $err;
-
-    my $commentref = {
-        u => $u,
-        state => 'A',
-        subject => $subject,
-        body => $body,
-        %opts,
-        parenttalkid => $parenttalkid,
-    };
-
-    LJ::Talk::Post::post_comment(
-                                 $entry->poster,
-                                 $entry->journal,
-                                 $commentref,
-                                 {talkid => $parenttalkid, state => 'A'},
-                                 {itemid => $jitemid, state => 'A'},
-                                 \$err,
-                                 );
-
-    my $jtalkid = $commentref->{talkid};
-
-    die "Could not post comment: $err" unless $jtalkid;
-
-    return LJ::Comment->new($entryu, jtalkid => $jtalkid);
-}
-
-package LJ::Comment;
-
-# reply to a comment instance, takes same opts as LJ::Entry::t_enter_comment
-sub t_reply {
-    my ($comment, %opts) = @_;
-    my $entry = $comment->entry;
-    $opts{parent} = $comment;
-    return $entry->t_enter_comment(%opts);
 }
 
 1;
