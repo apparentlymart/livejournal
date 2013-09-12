@@ -1178,7 +1178,7 @@
 						fakeElement.attributes['frameBorder'] = 0;
 						fakeElement.attributes['allowTransparency'] = 'true';
 
-						var media = LiveJournal.parseMedia(decodeURIComponent(element.attributes.src));
+						var media = LJ.Media.parse(decodeURIComponent(element.attributes.src));
 						if (media && media.embed) {
 							fakeElement.attributes['lj-cmd'] = 'LJEmbedLink';
 							fakeElement.attributes['data-link'] = element.attributes['data-link'];
