@@ -565,6 +565,14 @@ sub trans {
         return LJ::Request::OK;
     }
 
+    my $suspicious_response;
+    LJ::run_hooks( 'suspicious_handler', \$suspicious_response );
+    if ($suspicious_response) {
+        LJ::Request->handler('perl-script');
+        LJ::Request->set_handlers( 'PerlHandler' => sub { eval { $suspicious_response->output } } );
+        return LJ::Request::OK;
+    }
+
     # process controller
     # if defined
     if ( my $controller = LJ::Request->notes('controller') ) {
