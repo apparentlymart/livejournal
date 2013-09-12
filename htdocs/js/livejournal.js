@@ -34,10 +34,6 @@ LiveJournal.initPage = function () {
     LiveJournal.register_hook('update_wallet_balance', LiveJournal.updateWalletBalance);
     LiveJournal.register_hook('xdr/message', LiveJournal.processXdr);
 
-    // set up various handlers for every page
-    LiveJournal.initInboxUpdate();
-
-    LiveJournal.initNotificationStream();
     LiveJournal.initSpoilers();
     LiveJournal.initResizeHelper();
 
@@ -86,52 +82,6 @@ LiveJournal.initSpoilers = function() {
 };
 
 /**
- * Init long-polling connection to the server.
- * Now function can be used for testing purposes and
- * should be modified for any real use. E.g. it could be
- * used as an adapter to the Socket.IO
- */
-LiveJournal.initNotificationStream = function(force) {
-    force = force || false;
-    var abortNotifications = false, seed = Site.notifySeed || 0;
-
-    if (Site.notifyDisabled || (!Cookie('ljnotify') && !force && (Math.random() > seed))) {
-        return;
-    }
-
-    if (!Cookie('ljnotify')) {
-        Cookie('ljnotify', '1', {
-            domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
-            expires: 5000,
-            path: '/'
-        });
-    }
-
-    LiveJournal.register_hook('notification.stop', function() {
-        abortNotifications = true;
-    });
-
-    function requestRound() {
-        if (abortNotifications) {
-            return;
-        }
-
-        jQuery.get(LiveJournal.getAjaxUrl('notifications'), 'json').success(
-            function(data) {
-                //if it's not a notification than it is a timeout answer
-                if (data.type === 'notification') {
-                    LiveJournal.run_hook(data.name, data.params || []);
-                }
-                requestRound();
-            }).error(function() {
-                requestRound()
-            });
-    }
-
-    requestRound();
-};
-
-/**
  * Translate message from xdreceiver. The function will eventually be run
  *      from xdreceiver.html helper frame to send messages between different domains.
  *
@@ -152,44 +102,6 @@ LiveJournal.processXdr = function(message) {
     }
 
     LiveJournal.run_hook(type, messageCopy);
-};
-
-// Set up a timer to keep the inbox count updated
-LiveJournal.initInboxUpdate = function () {
-    // Don't run if not logged in or this is disabled
-    if (! Site || ! Site.has_remote || ! Site.inbox_update_poll) {
-        return;
-    }
-
-    // Don't run if no inbox count
-    if (!$('LJ_Inbox_Unread_Count')) {
-        return;
-    }
-
-    // Update every five minutes
-    window.setInterval(LiveJournal.updateInbox, 1000 * 60 * 5);
-};
-
-// Do AJAX request to find the number of unread items in the inbox
-LiveJournal.updateInbox = function () {
-
-    jQuery.post(LiveJournal.getAjaxUrl('esn_inbox'), {
-        action: 'get_unread_items'
-    }, function(resp) {
-        if (! resp || resp.error) {
-            return;
-        }
-
-        var unread = $('LJ_Inbox_Unread_Count');
-        if (unread) {
-            unread.innerHTML = resp.unread_count ? '  (' + resp.unread_count + ')' : '';
-        } else {
-            unread = $('LJ_Inbox_Unread_Count_Controlstrip');
-            if (unread) {
-                unread.innerHTML = resp.unread_count ? resp.unread_count : '0';
-            }
-        }
-    }, 'json');
 };
 
 //refresh number of tokens in the header
