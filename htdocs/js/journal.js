@@ -71,55 +71,6 @@ DonateButton = {
   }
 };
 
-(function() {
-  var options = {
-    blockSelector: '.yota-contest'
-  };
-
-  function retrieveContestInfo( element ) {
-    var journal = element.attr( 'data-user' );
-    jQuery.getJSON(
-      LiveJournal.getAjaxUrl('yota_widget_post'),
-      { json: 1, journal: journal },
-      function (answer) {
-        var collected,
-            key,
-            i;
-
-        if ('collected' in answer) {
-          collected = answer.collected;
-          for (i = 0; i < collected.length; i += 2) {
-            element.find( '.' + collected[ i ] ).html( collected[ i + 1 ] );
-          }
-        }
-
-        if ('rating' in answer ) {
-          i = 5;
-
-          while( --i > 0) {
-            key = '' + i;
-            if( key in answer.rating ) {
-              element.find( '.c' + i ).html( answer.rating[ key ] );
-            }
-          }
-        }
-      }
-    );
-  }
-
-  function findElement() {
-    var element = jQuery( options.blockSelector );
-
-    if( element.length ) {
-      element.each(function() {
-        retrieveContestInfo( jQuery( this ) );
-      });
-    }
-  }
-
-  jQuery(findElement);
-}());
-
 (function () {
   var storage = {
     init: function() {
