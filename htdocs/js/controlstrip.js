@@ -12,10 +12,10 @@
 //= require_template angular/controlstrip/subscribe.ng.tmpl
 //= require_template angular/controlstrip/subscribeCommunity.ng.tmpl
 //= require_template angular/controlstrip/filters.ng.tmpl
-//
-//= require_template angular/controlstrip/controlstrip.ng.tmpl
 
+//= require_template angular/controlstrip/controlstrip.ng.tmpl
 //= require js/core/angular/ljUserDynamic.js
+
 
 /*global ContextualPopup, Hourglass */
 
@@ -31,7 +31,7 @@ angular.module('Controlstrip',
   ['$locationProvider', function ($locationProvider) {
     $locationProvider.html5Mode(true);
   }])
-  .controller('ControlstripCtrl', ['$scope', 'Bubble', '$timeout', '$q',
+  .controller('RelationsCtrl', ['$scope', 'Bubble', '$timeout', '$q',
                          function ( $scope,   Bubble,   $timeout,   $q ) {
 
     var nodes = {
@@ -43,7 +43,7 @@ angular.module('Controlstrip',
         unsubscribe:  $('.controlstrip-menu-unsubscribe'),
         watch:        $('.controlstrip-menu-subscribe'),
         unwatch:      $('.controlstrip-menu-unsubscribe'),
-        status:       $('.js-controlstrip-status')
+        status:       $('.w-cs-status')
       },
       username = LJ.get('current_journal.username'),
       _hourglass;
@@ -69,11 +69,11 @@ angular.module('Controlstrip',
       }
 
       $timeout(function () {
-       $scope.status = data.controlstrip_status;
+        $scope.status = data.controlstrip_status;
 
-       $scope.states.isFriend     = Boolean(data.is_friend);
-       $scope.states.isMember     = Boolean(data.is_member);
-       $scope.states.isSubscribed = Boolean(data.is_subscribedon);
+        $scope.states.isFriend     = Boolean(data.is_friend);
+        $scope.states.isMember     = Boolean(data.is_member);
+        $scope.states.isSubscribed = Boolean(data.is_subscribedon);
       });
     });
 
@@ -320,7 +320,7 @@ angular.module('Controlstrip',
       // init angular
       angular.bootstrap( $('[data-controlstrip]'), ['Controlstrip']);
     }
-return;
+
     // calendar
     (function () {
       var calendarLink = $('#lj_controlstrip_new .w-cs-i-calendar a'),
