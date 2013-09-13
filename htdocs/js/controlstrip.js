@@ -1,5 +1,5 @@
 //= require js/jquery/jquery.calendarEvents.js
-//= require js/jquery/jquery.lj.relations.js
+
 //= require js/lib/angular.min.js
 //= require js/core/angular/common.js
 //= require js/core/angular/bubble.js
@@ -12,37 +12,172 @@
 //= require_template angular/controlstrip/subscribe.ng.tmpl
 //= require_template angular/controlstrip/subscribeCommunity.ng.tmpl
 //= require_template angular/controlstrip/filters.ng.tmpl
+//
+//= require_template angular/controlstrip/controlstrip.ng.tmpl
 
-/*global ContextualPopup */
+//= require js/core/angular/ljUserDynamic.js
+
+/*global ContextualPopup, Hourglass */
+
 /**
  * @author Valeriy Vasin (valeriy.vasin@sup.com)
  * @description Control strip functionality
  */
 
+;(function ($) {
+
 angular.module('Controlstrip',
-  ['LJ.Templates', 'LJ.Bubble', 'LJ.Directives', 'GroupsAndFilters.Services.Filters', 'GroupsAndFilters.Services.Users'],
+  ['LJ.Templates', 'LJ.Bubble', 'LJ.Directives', 'LJ.User', 'GroupsAndFilters.Services.Filters', 'GroupsAndFilters.Services.Users'],
   ['$locationProvider', function ($locationProvider) {
     $locationProvider.html5Mode(true);
   }])
-  .controller('ControlstripCtrl', ['$scope', 'Bubble', '$timeout',
-                         function ( $scope,   Bubble,   $timeout ) {
+  .controller('ControlstripCtrl', ['$scope', 'Bubble', '$timeout', '$q',
+                         function ( $scope,   Bubble,   $timeout,   $q ) {
 
-    var isCommunity = Boolean( LJ.get('current_journal.is_comm') );
+    var nodes = {
+        addFriend:    $('.controlstrip-menu-addfriend'),
+        removeFriend: $('.controlstrip-menu-removefriend'),
+        join:         $('.controlstrip-menu-join'),
+        leave:        $('.controlstrip-menu-leave'),
+        subscribe:    $('.controlstrip-menu-subscribe'),
+        unsubscribe:  $('.controlstrip-menu-unsubscribe'),
+        watch:        $('.controlstrip-menu-subscribe'),
+        unwatch:      $('.controlstrip-menu-unsubscribe')
+      },
+      username = LJ.get('current_journal.username'),
+      _hourglass;
 
-    LiveJournal.register_hook('relations.changed', function (event) {
-      switch (event.action) {
-        case 'addFriend':
-          Bubble.open('friend');
-          break;
-        case 'subscribe':
-          Bubble.open(isCommunity ? 'subscribeCommunity' : 'subscribe');
-          break;
-        case 'join':
-          Bubble.open('join');
-          break;
-      }
-      $scope.$apply();
+    // need it in scope to show lj-user-dynamic
+    $scope.username = username;
+
+    // relation states
+    $scope.states = {
+      isFriend: Boolean( LJ.get('remote.is_friend') ),
+      isMember: Boolean( LJ.get('remote.is_member') ),
+      isSubscribed: Boolean( LJ.get('remote.is_subscribedon') )
+    };
+
+    // update states
+    LJ.Event.on('relations.changed', function (event) {
+       var data = event.data;
+
+        $timeout(function () {
+          $scope.states.isFriend     = Boolean(data.is_friend);
+          $scope.states.isMember     = Boolean(data.is_member);
+          $scope.states.isSubscribed = Boolean(data.is_subscribedon);
+        });
     });
+
+    function changeRelation(action, $event) {
+      var defer = $q.defer();
+
+      if ($event) {
+        showHourglass($event);
+      }
+
+      LJ.Event.trigger('relations.change', {
+        action: action,
+        username: username,
+        callback: function () {
+          hideHourglass();
+          $timeout(defer.resolve);
+        }
+      });
+
+      return defer.promise;
+    }
+
+    $scope.subscribe = function ($event) {
+      $event.preventDefault();
+      changeRelation('subscribe', $event)
+        .then(function () {
+          $scope.mode = 'subscribe';
+          Bubble.open('controlstrip', nodes.unsubscribe);
+        });
+    };
+
+    $scope.unsubscribe = function ($event) {
+      $event.preventDefault();
+      changeRelation('unsubscribe', $event);
+    };
+
+    $scope.addFriend = function ($event) {
+      $event.preventDefault();
+      changeRelation('addFriend', $event)
+        .then(function () {
+          $scope.mode = 'add';
+          Bubble.open('controlstrip', nodes.removeFriend);
+        });
+    };
+
+    $scope.removeFriend = function ($event) {
+      $event.preventDefault();
+      changeRelation('removeFriend', $event);
+    };
+
+    $scope.watch = function ($event) {
+      $event.preventDefault();
+      changeRelation('subscribe', $event)
+        .then(function () {
+          $scope.mode = 'watch';
+          Bubble.open('controlstrip', nodes.unsubscribe);
+        });
+    };
+
+    $scope.unwatch = function ($event) {
+      $event.preventDefault();
+      changeRelation('unsubscribe', $event);
+    };
+
+    $scope.join = function ($event) {
+      $event.preventDefault();
+      changeRelation('join', $event)
+        .then(function () {
+          $scope.mode = $scope.states.isSubscribed ? 'joinSubscribed' : 'join';
+          Bubble.open('controlstrip', nodes.leave);
+        });
+    };
+
+    $scope.leave = function ($event) {
+      $event.preventDefault();
+      changeRelation('leave', $event);
+    };
+
+    /**
+     * Subscribe to community updates in a bubble after join action
+     */
+    $scope.subscribeAfterJoin = function () {
+      $scope.loading = true;
+
+      changeRelation('subscribe')
+        .then(function () {
+          $scope.loading = false;
+          $scope.mode = 'watch';
+        });
+    };
+
+    /**
+     * Show hourglass for event
+     *
+     * @param  {jQuery.Event} event jQuery event (click)
+     */
+    function showHourglass(event) {
+      if (_hourglass) {
+        hideHourglass();
+      }
+
+      _hourglass = new Hourglass().setEvent(event).show();
+    }
+
+    /**
+     * Hide hourglass
+     */
+    function hideHourglass() {
+      if (_hourglass) {
+        _hourglass.remove();
+        _hourglass = null;
+      }
+    }
   }])
   .controller('FiltersCtrl', ['$scope', '$q', 'Filter', 'FilterUsers',
                     function ( $scope,   $q,   Filter,   FilterUsers) {
@@ -54,9 +189,10 @@ angular.module('Controlstrip',
 
     $scope.model = {
       newFilter: '',
-      showCreateDialog: false,
-      loading: false
+      showCreateDialog: false
     };
+
+    $scope.loading = false;
 
     $q.all({ filters: filtersPromise, users: usersPromise })
       .then(function (result) {
@@ -103,6 +239,8 @@ angular.module('Controlstrip',
       $scope.model.showCreateDialog = false;
     };
   }]);
+
+}(jQuery));
 
 ;(function ($) {
   'use strict';
@@ -170,9 +308,8 @@ angular.module('Controlstrip',
     addLabledPlaceholders();
 
     if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
-      $('[data-relations]').relations();
 
-      LiveJournal.register_hook('relations.changed', function (event) {
+      LJ.Event.on('relations.changed', function (event) {
         var data = event.data,
           status = null;
 
