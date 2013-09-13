@@ -42,7 +42,8 @@ angular.module('Controlstrip',
         subscribe:    $('.controlstrip-menu-subscribe'),
         unsubscribe:  $('.controlstrip-menu-unsubscribe'),
         watch:        $('.controlstrip-menu-subscribe'),
-        unwatch:      $('.controlstrip-menu-unsubscribe')
+        unwatch:      $('.controlstrip-menu-unsubscribe'),
+        status:       $('.js-controlstrip-status')
       },
       username = LJ.get('current_journal.username'),
       _hourglass;
@@ -56,16 +57,24 @@ angular.module('Controlstrip',
       isMember: Boolean( LJ.get('remote.is_member') ),
       isSubscribed: Boolean( LJ.get('remote.is_subscribedon') )
     };
+    $scope.status = LJ.get('remote.status');
 
     // update states
     LJ.Event.on('relations.changed', function (event) {
-       var data = event.data;
+      var data = event.data;
 
-        $timeout(function () {
-          $scope.states.isFriend     = Boolean(data.is_friend);
-          $scope.states.isMember     = Boolean(data.is_member);
-          $scope.states.isSubscribed = Boolean(data.is_subscribedon);
-        });
+      // Hide contextual popup if we are changing status from contextual popup in control strip
+      if ( ContextualPopup.currentElement === nodes.status.find('.ljuser img').get(0) ) {
+        ContextualPopup.hide();
+      }
+
+      $timeout(function () {
+       $scope.status = data.controlstrip_status;
+
+       $scope.states.isFriend     = Boolean(data.is_friend);
+       $scope.states.isMember     = Boolean(data.is_member);
+       $scope.states.isSubscribed = Boolean(data.is_subscribedon);
+      });
     });
 
     function changeRelation(action, $event) {
@@ -308,29 +317,10 @@ angular.module('Controlstrip',
     addLabledPlaceholders();
 
     if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
-
-      LJ.Event.on('relations.changed', function (event) {
-        var data = event.data,
-          status = null;
-
-        if (data.controlstrip_status) {
-          status = $('.js-controlstrip-status');
-
-          // Hide contextual popup before
-          // If you're trying to change status from contextual popup in control strip
-          if ( ContextualPopup.currentElement === status.find('.ljuser img').get(0) ) {
-            ContextualPopup.hide();
-          }
-
-          status
-            .html(data.controlstrip_status);
-        }
-      });
-
       // init angular
       angular.bootstrap( $('[data-controlstrip]'), ['Controlstrip']);
     }
-
+return;
     // calendar
     (function () {
       var calendarLink = $('#lj_controlstrip_new .w-cs-i-calendar a'),
