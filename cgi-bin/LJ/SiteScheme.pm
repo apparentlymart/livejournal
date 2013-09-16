@@ -35,6 +35,7 @@ sub render_page {
     my $params = $handler->template_params($args_normalized);
 
     if ( LJ::is_web_context() ) {
+        LJ::Request->notes ( using_site_scheme => 1 );
         $params->{'lj_res_in_bottom'}      = LJ::Request->get_param('res_bottom')? 1 : 0;
         $params->{'lj_res_includes'}       = LJ::res_includes();
         $params->{'lj_res_includes_basic'} = LJ::res_includes({ only_needed => 1 });
