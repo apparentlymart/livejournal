@@ -7,13 +7,9 @@
 //= require js/settings/services/filters/filters.js
 //= require js/settings/services/filters/users.js
 
-//= require_template angular/controlstrip/friend.ng.tmpl
-//= require_template angular/controlstrip/join.ng.tmpl
-//= require_template angular/controlstrip/subscribe.ng.tmpl
-//= require_template angular/controlstrip/subscribeCommunity.ng.tmpl
 //= require_template angular/controlstrip/filters.ng.tmpl
-
 //= require_template angular/controlstrip/controlstrip.ng.tmpl
+
 //= require js/core/angular/ljUserDynamic.js
 
 
@@ -32,7 +28,7 @@ angular.module('Controlstrip',
     $locationProvider.html5Mode(true);
   }])
   .controller('RelationsCtrl', ['$scope', 'Bubble', '$timeout', '$q',
-                         function ( $scope,   Bubble,   $timeout,   $q ) {
+                      function ( $scope,   Bubble,   $timeout,   $q ) {
 
     var status = $('.w-cs-status'),
         username = LJ.get('current_journal.username'),
@@ -120,7 +116,7 @@ angular.module('Controlstrip',
       changeRelation('subscribe', $event)
         .then(function () {
           $scope.mode = 'watch';
-          Bubble.open('controlstrip', 'unsubscribe');
+          Bubble.open('controlstrip', 'unwatch');
         });
     };
 
