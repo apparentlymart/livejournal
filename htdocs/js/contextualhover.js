@@ -1,5 +1,5 @@
 //= require js/hourglass.js
-//= require js/relations.js
+//= require js/relations/relations.js
 
 //= require_preprocessed_template Widgets/contextualhover.jqtmpl
 
