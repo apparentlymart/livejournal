@@ -34,19 +34,9 @@ angular.module('Controlstrip',
   .controller('RelationsCtrl', ['$scope', 'Bubble', '$timeout', '$q',
                          function ( $scope,   Bubble,   $timeout,   $q ) {
 
-    var nodes = {
-        addFriend:    $('.controlstrip-menu-addfriend'),
-        removeFriend: $('.controlstrip-menu-removefriend'),
-        join:         $('.controlstrip-menu-join'),
-        leave:        $('.controlstrip-menu-leave'),
-        subscribe:    $('.controlstrip-menu-subscribe'),
-        unsubscribe:  $('.controlstrip-menu-unsubscribe'),
-        watch:        $('.controlstrip-menu-subscribe'),
-        unwatch:      $('.controlstrip-menu-unsubscribe'),
-        status:       $('.w-cs-status')
-      },
-      username = LJ.get('current_journal.username'),
-      _hourglass;
+    var status = $('.w-cs-status'),
+        username = LJ.get('current_journal.username'),
+        _hourglass;
 
     // need it in scope to show lj-user-dynamic
     $scope.username = username;
@@ -63,8 +53,9 @@ angular.module('Controlstrip',
     LJ.Event.on('relations.changed', function (event) {
       var data = event.data;
 
-      // Hide contextual popup if we are changing status from contextual popup in control strip
-      if ( ContextualPopup.currentElement === nodes.status.find('.ljuser img').get(0) ) {
+      // Hide contextual popup if we are changing status from contextual popup
+      // in control strip.
+      if ( ContextualPopup.currentElement === status.find('.ljuser img').get(0) ) {
         ContextualPopup.hide();
       }
 
@@ -101,7 +92,7 @@ angular.module('Controlstrip',
       changeRelation('subscribe', $event)
         .then(function () {
           $scope.mode = 'subscribe';
-          Bubble.open('controlstrip', nodes.unsubscribe);
+          Bubble.open('controlstrip', 'unsubscribe');
         });
     };
 
@@ -115,7 +106,7 @@ angular.module('Controlstrip',
       changeRelation('addFriend', $event)
         .then(function () {
           $scope.mode = 'add';
-          Bubble.open('controlstrip', nodes.removeFriend);
+          Bubble.open('controlstrip', 'removeFriend');
         });
     };
 
@@ -129,7 +120,7 @@ angular.module('Controlstrip',
       changeRelation('subscribe', $event)
         .then(function () {
           $scope.mode = 'watch';
-          Bubble.open('controlstrip', nodes.unsubscribe);
+          Bubble.open('controlstrip', 'unsubscribe');
         });
     };
 
@@ -143,7 +134,7 @@ angular.module('Controlstrip',
       changeRelation('join', $event)
         .then(function () {
           $scope.mode = $scope.states.isSubscribed ? 'joinSubscribed' : 'join';
-          Bubble.open('controlstrip', nodes.leave);
+          Bubble.open('controlstrip', 'leave');
         });
     };
 
