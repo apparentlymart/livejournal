@@ -326,12 +326,12 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             if (data.is_logged_in && data.is_comm) {
                 linkGroup.push({
                     selector: 'a[href="{url}"]',
-                    url: data.is_friend_of ? data.url_leavecomm : data.url_joincomm,
-                    text: data.is_friend_of ? data.ml_leave : data.ml_join_community,
+                    url: data.is_member ? data.url_leavecomm : data.url_joincomm,
+                    text: data.is_member ? data.ml_leave : data.ml_join_community,
                     click: function(e)
                     {
                         e.preventDefault();
-                        ContextualPopup.changeRelation(data, ctxPopupId, data.is_friend_of ? 'leave' : 'join', e);
+                        ContextualPopup.changeRelation(data, ctxPopupId, data.is_member ? 'leave' : 'join', e);
                     }
                 });
             }
