@@ -833,12 +833,24 @@ sub create_view_foaf {
 
     # blog activity
     {
+
+        my $dbcr = LJ::get_cluster_reader($u);
+        my $num_comments_received = $u->num_comments_received( dbh => $dbcr ) || 0;
+        my $num_comments_posted   = $u->num_comments_posted( dbh => $dbcr ) || 0;
+
         my $count = $u->number_of_posts;
         $ret .= "    <ya:blogActivity>\n";
         $ret .= "      <ya:Posts>\n";
         $ret .= "        <ya:feed rdf:resource=\"" . LJ::journal_base($u) ."/data/rss\" dc:type=\"application/rss+xml\" />\n";
         $ret .= "        <ya:posted>$count</ya:posted>\n";
         $ret .= "      </ya:Posts>\n";
+        $ret .= "      <ya:Comments>\n";
+        ##### we are don't have rss feed for user's comments
+        ####  $ret .= "        <ya:feed rdf:resource=\"recent comments rss\" dc:type=\"application/rss+xml\"/>\n";
+        ###############
+        $ret .= "        <ya:posted>$num_comments_posted</ya:posted>\n";
+        $ret .= "        <ya:received>$num_comments_received</ya:received>\n";
+        $ret .= "      </ya:Comments>\n";
         $ret .= "    </ya:blogActivity>\n";
     }
 
