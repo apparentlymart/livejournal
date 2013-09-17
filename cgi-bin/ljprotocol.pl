@@ -5702,11 +5702,6 @@ sub authenticate
     my ($req, $err, $flags) = @_;
 
     my $u;
-
-    my $api_suspicious = sub {
-        LJ::run_hook('api_auth', $u, $req->{'props'}->{'interface'}, $req->{'auth_method'}, $req->{'method'});
-    };
-
     my $auth_meth = $req->{'auth_method'} || "clear";
     my $username  = $req->{'username'} || '';
 
@@ -5722,7 +5717,6 @@ sub authenticate
         # add flag to avoid authentication
         if (!$username && $flags->{'allow_anonymous'}) {
             undef $flags->{'u'};
-            $api_suspicious->();
             return 1;
         }
 
@@ -5818,7 +5812,8 @@ sub authenticate
         LJ::Request->notes("journalid" => $u->{'userid'}) unless LJ::Request->notes("journalid");
     }
 
-    $api_suspicious->();
+    #check on suspisious login from api (LJSUP-16353)
+    LJ::run_hook('api_auth', $u, $req->{'props'}->{'interface'}, $req->{'auth_method'}, $req->{'method'});
     return 1;
 }
 
