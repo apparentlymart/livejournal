@@ -2307,6 +2307,18 @@ sub control_strip_js_inject
         stc/popup/popupus.css
         stc/popup/popupus-blue.css
     });
+
+    LJ::need_string(qw{
+        filterset.title.subscribed.journal
+        filterset.title.addfriend.journal
+        filterset.subtitle.addfriend.journal
+        filterset.title.join
+        filterset.subtitle.join
+        filterset.submit.subscribe
+        filterset.subtitle.filters
+        filterset.title.subscribed.community
+        filterset.link.addnewfilter
+    });
 }
 
 sub journal_js_inject {
