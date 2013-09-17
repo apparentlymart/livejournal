@@ -928,9 +928,11 @@ sub clean {
                         next;
                     }
 
-                    if ($attr eq 'width' || $attr eq 'height' ) {
-                        if ($hash->{$attr} > 1024*2) {
-                            $hash->{$attr} = 1024*2;
+                    unless ($opts->{entry_url}) {
+                        if ($attr eq 'width' || $attr eq 'height' ) {
+                            if ($hash->{$attr} > 1024*2) {
+                                $hash->{$attr} = 1024*2;
+                            }
                         }
                     }
 
