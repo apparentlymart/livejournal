@@ -31,6 +31,8 @@ use LJ::Test::Mock::MemCache;
 our @EXPORT = qw(
     memcache_stress with_fake_memcache temp_user
     temp_comm temp_feed alloc_sms_num fake_apache
+
+    get_mock_user
 );
 
 my @temp_userids;  # to be destroyed later
@@ -351,6 +353,13 @@ sub get_access_token {
                                                   userid       => $opts{userid},
                                                   );
     return $token;
+}
+
+# Get Mock objects
+
+sub get_mock_user($) {
+    my ($args) = shift;
+    return bless $args || {}, 'LJ::Test::Mock::User';
 }
 
 1;
