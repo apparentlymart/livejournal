@@ -2637,6 +2637,8 @@ sub get_body_class_for_service_pages {
                  )
     ){
         push @classes, "p-friendstimes";
+    } elsif (LJ::Request->notes ("homepage_v2")) {
+        push @classes, "p-home";
     }
     if ($uri =~ m!^/(?:update|editjournal)\.bml!) {
         push @classes, "b-foto-branding"
