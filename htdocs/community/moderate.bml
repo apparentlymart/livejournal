@@ -85,6 +85,15 @@ body<=
         $req->{username} = $poster->user;
 
         if ($mode eq 'approve_do') {
+
+            my ($poster_tagstring, $moder_tagstring) = ('', '');
+
+            if ($req->{props} && $req->{props}{taglist}) {
+                $poster_tagstring = LJ::Tags::normalize_tagstring($req->{props}{taglist});
+                $poster_tagstring = LJ::Tags::filter_available_tags($c, $poster, $poster_tagstring, {is_poster => 1});
+                $req->{props}{taglist} = $poster_tagstring;
+            }
+
             my $method = $req->{itemid} ? 'editevent' : 'postevent';
             my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'           => 1,
                                                                             'noauth'          => 1,
@@ -101,13 +110,6 @@ body<=
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
                 $posturl = LJ::item_link($c, $res->{'itemid'}, $res->{'anum'}) . "\n\n";
-
-                my ($poster_tagstring, $moder_tagstring) = ('', '');
-
-                if ($req->{props} && $req->{props}{taglist}) {
-                    $poster_tagstring = LJ::Tags::normalize_tagstring($req->{props}{taglist});
-                    $poster_tagstring = LJ::Tags::filter_available_tags($c, $poster, $poster_tagstring, {is_poster => 1});
-                }
 
                 if ($POST{'prop_taglist'}) {
                     $moder_tagstring = LJ::Tags::normalize_tagstring($POST{'prop_taglist'});
