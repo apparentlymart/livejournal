@@ -84,23 +84,11 @@ body<=
         $req->{user} = $poster->user;
         $req->{username} = $poster->user;
 
-        # check poster's and moderator's tags manage permissions
-        # to define will we add tags within postevent or after
-        my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) ||
-                              LJ::Tags::can_add_tags($c,$remote);
-        my $p_can_control_tags = LJ::Tags::can_control_tags($c,$poster);
-        my $p_can_add_tags = LJ::Tags::can_add_tags($c,$poster);
-        # update taglist if poster could add them
-        if ($m_can_edit_tags &&
-            ($p_can_add_tags || $p_can_control_tags) &&
-            $POST{'prop_taglist'}) {
-                $req->{props}->{taglist} = $POST{'prop_taglist'};
-        }
         if ($mode eq 'approve_do') {
             my $method = $req->{itemid} ? 'editevent' : 'postevent';
-            my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'=>1,
-                                                                                'noauth'=>1,
-                                                                                'use_custom_time'=> 0, });
+            my $res = LJ::Protocol::do_request($method, $req, \$prot_err, { 'nomod'           => 1,
+                                                                            'noauth'          => 1,
+                                                                            'use_custom_time' => 0, });
             if ($res) { # succeeded
                 $success = 1;
                 my $approved_entry = LJ::Entry->new($c, jitemid => $res->{itemid});
@@ -113,6 +101,30 @@ body<=
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
                 $posturl = LJ::item_link($c, $res->{'itemid'}, $res->{'anum'}) . "\n\n";
+
+                my ($poster_tagstring, $moder_tagstring) = ('', '');
+
+                if ($req->{props} && $req->{props}{taglist}) {
+                    $poster_tagstring = LJ::Tags::normalize_tagstring($req->{props}{taglist});
+                    $poster_tagstring = LJ::Tags::filter_available_tags($c, $poster, $poster_tagstring, {is_poster => 1});
+                }
+
+                if ($POST{'prop_taglist'}) {
+                    $moder_tagstring = LJ::Tags::normalize_tagstring($POST{'prop_taglist'});
+                    $moder_tagstring = LJ::Tags::filter_available_tags($c, $remote, $moder_tagstring);
+                }
+
+                if ($poster_tagstring ne $moder_tagstring) {
+                    my ($rv, $tagerr, $skipped_tags);
+
+                    $rv = LJ::Tags::update_logtags($c, $res->{itemid}, {
+                        set_string => $moder_tagstring,
+                        remote => $remote,
+                        err_ref => \$tagerr,
+                        skipped_tags => $skipped_tags,
+                    });
+                }
+
             } else {
                 $prot_err = LJ::Protocol::error_message($prot_err) if $prot_err;
                 $ret .= "<?h1 $ML{'Error'} h1?><?p " .
@@ -584,20 +596,17 @@ body<=
             $current{'Music'} = LJ::Setting::Music::format_current_music_string($props->{'current_music'});
             LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
-        # tags manage permissions should be checked here too
-        # because we are in a different code block
+
         my $m_can_edit_tags = LJ::Tags::can_control_tags($c,$remote) ||
                               LJ::Tags::can_add_tags($c,$remote);
-        my $p_can_edit_tags = LJ::Tags::can_control_tags($c,$up) ||
-                              LJ::Tags::can_add_tags($c,$up);
-        if ($p_can_edit_tags) {
+        
+        if ($m_can_edit_tags) {
             if ($props->{'taglist'}) {
-                $current{'Tags'} = join(", ",
-                                        sort split(/\s*,\s*/,
-                                        $props->{'taglist'})
-                                       );
+                my $tagstring = LJ::Tags::normalize_tagstring($props->{'taglist'});
+                $tagstring    = LJ::Tags::filter_available_tags($c, $up, $tagstring, {is_poster => 1});
+                $current{'Tags'} = $tagstring;
             } else {
-                $current{'Tags'} = "" if $m_can_edit_tags;
+                $current{'Tags'} = "";
             }
         }
 
