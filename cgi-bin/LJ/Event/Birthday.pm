@@ -255,11 +255,7 @@ sub content {
 sub available_for_user  { 1 }
 sub is_subscription_visible_to  { 1 }
 
-sub is_tracking {
-    my ($self, $u) = @_;
-    return 0;
-    return $self->userid ? 1 : 0;
-}
+sub is_tracking { 0 }
 
 sub as_push {
     my $self = shift;
