@@ -81,8 +81,10 @@
     // calendar
     (function () {
       var calendarLink = $('#lj_controlstrip_new .w-cs-i-calendar a'),
-          journalViewFriends = Boolean( LJ.get('controlstrip.calendar.journal_view_friends') ),
-          journalUrlBase = LJ.get('controlstrip.calendar.journal_url_base');
+
+          // checks if we are on /friends page or not. There special calendar behavior is needed
+          journalViewFriends = /^\/friends\/?$/.test( location.pathname ),
+          journalUrlBase = LJ.get('current_journal.url_journal');
 
       if ( calendarLink.length ) {
         calendarLink
