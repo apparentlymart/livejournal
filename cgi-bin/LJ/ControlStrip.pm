@@ -45,13 +45,13 @@ sub render {
     $data_journal->{'is_' . $data_journal->{type}} = 1;
 
     $data_journal->{view} = LJ::Request->notes('view');
-    $data_journal->{view_friends} = $data_journal->{view} eq 'friends';
-    $data_journal->{view_friendsfriends} = $data_journal->{view} eq 'friendsfriends';
+    $data_journal->{display} = LJ::ljuser($journal);
     $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
-    $data_journal->{display} = LJ::ljuser($journal);
-    $data_journal->{has_friendspage_per_day} = ($journal->get_cap('friendspage_per_day') ? 1 : 0);
+    $data_journal->{view_friends} = $data_journal->{view} eq 'friends';
     $data_journal->{view_entry_is_valid} = 0;
+    $data_journal->{view_friendsfriends} = $data_journal->{view} eq 'friendsfriends';
+    $data_journal->{has_friendspage_per_day} = ($journal->get_cap('friendspage_per_day') ? 1 : 0);
 
     if ($data_journal->{view_entry}) {
         my $uri = LJ::Request->uri();
@@ -132,19 +132,11 @@ sub render {
         $data_remote->{url}->{custom_groups}       = "$LJ::SITEROOT/friends/editgroups.bml";
         $data_remote->{url}->{community_catalogue} = "$LJ::SITEROOT/community/directory.bml";
 
-        my $friend = LJ::is_friend($remote, $journal);
-        my $friendof = LJ::is_friend($journal, $remote);
-
-        $data_remote->{is_member} = $friendof;
-        $data_remote->{is_friend} = $friend;
-        $data_remote->{is_friendof} = $friendof;
-        $data_remote->{is_subscriber} = 0;
-        $data_remote->{is_subscribedon} = 0;
-
-        # Subscribe/Unscubscribe to/from user
-        if (LJ::is_enabled('new_friends_and_subscriptions')) {
-            $data_remote->{is_subscriber}   = $journal->is_subscribedon($remote);
-            $data_remote->{is_subscribedon} = $remote->is_subscribedon($journal);
+        if (my $relations_data = $class->relations_data($journal, $remote)) {
+            $data_remote = {
+                %$data_remote,
+                %$relations_data
+            };
         }
 
         if ($data_journal->{is_own}) {
@@ -304,60 +296,61 @@ sub render {
         my $url = LJ::eurl ($proto.$hostname.$uri.$args_wq);
         $mobile_link = LJ::Lang::ml('link.mobile', { href => "href='http://m.$LJ::DOMAIN/redirect?from=$url'" });
     }
-    
-    my $daycounts = LJ::get_daycounts($journal, $remote);
-    my @early_date = ();
-    my @last_date  = ();
 
-    if (@$daycounts) {
-        @early_date = @{$daycounts->[0]};
-        @last_date  = @{$daycounts->[-1]};
-
-        pop @early_date;
-        pop @last_date;
-
-        if ($last_date[1] != 0) {
-            $last_date[1] -= 1;
-        }
-
-        if ($early_date[1] != 0) {
-            $early_date[1] -= 1;
-        }
-
-        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-            gmtime();
-        if ( $last_date[0] < ($year + 1900) ||
-             $last_date[1] < $mon     ||
-             $last_date[2] < $mday )
-        {
-            @last_date = ($year + 1900, $mon, $mday);
-        }
-
-
-        $tmpl->param( 'EARLY_DATE' => join(',', @early_date),
-                      'LAST_DATE'  => join(',', @last_date));
+    if (my $calendar_data = $class->calendar_data($journal, $remote)) {
+        $tmpl->param(
+            LAST_DATE  => $calendar_data->{lastDate},
+            EARLY_DATE => $calendar_data->{earlyDate},
+        );
     }
 
-    $tmpl->param(flatten($data), link_mobile => $mobile_link );
-
-    # Need vars for js
-    LJ::need_var({
-        remote => $data_remote,
-        controlstrip => {
-            calendar => {
-                lastDate => join(',', @last_date),
-                earlyDate => join(',', @early_date),
-                journal_url_base => $data_journal->{url}->{base},
-                journal_view_friends => $data_journal->{view_friends},
-            }
-        }
-    });
-
-    LJ::need_string(qw(
-        web.controlstrip.view.calendar
-    ));
+    $tmpl->param(
+        flatten($data),
+        link_mobile => $mobile_link
+    );
 
     return $tmpl->output;    
+}
+
+sub need_res {
+    my ($class, %args) = @_;
+    my $user = $args{user};
+
+    LJ::need_res(qw{
+        js/controlstrip.js
+        stc/widgets/filter-settings.css
+        stc/popup/popupus.css
+        stc/popup/popupus-blue.css
+    });
+
+    LJ::need_string(qw{
+        web.controlstrip.view.calendar
+        filterset.title.subscribed.journal
+        filterset.title.addfriend.journal
+        filterset.subtitle.addfriend.journal
+        filterset.title.join
+        filterset.subtitle.join
+        filterset.submit.subscribe
+        filterset.subtitle.filters
+        filterset.title.subscribed.community
+        filterset.link.addnewfilter
+    });
+
+    my $remote  = LJ::get_remote();
+    my $journal = LJ::load_user($user);
+
+    return unless $journal;
+
+    my $calendar  = $class->calendar_data($journal, $remote) || {};
+    my $relations = $class->relations_data($journal, $remote) || {};
+
+    LJ::need_var({
+        remote => $relations,
+        controlstrip => {
+            status   => get_status($journal, {%$relations}),
+            calendar => $calendar,
+        }
+    });
 }
 
 # This metheod use in 'cgi-bin/LJ/API/ChangeRelation.pm' too.
@@ -387,6 +380,24 @@ sub get_status {
 
         unless (exists $args->{is_subscribedon}) {
             $args->{is_subscribedon} = $remote->is_subscribedon($journal);
+        }
+
+        $args->{journal} ||= {};
+
+        unless (exists $args->{journal}->{view_friends}) {
+            if (LJ::Request->notes('view') eq 'friends') {
+                $args->{journal}->{view_friends} = 1;
+            } else {
+                $args->{journal}->{view_friends} = 0;
+            }
+        }
+
+        unless (exists $args->{journal}->{view_friendsfriends}) {
+            if (LJ::Request->notes('view') eq 'friendsfriends') {
+                $args->{journal}->{view_friendsfriends} = 1;
+            } else {
+                $args->{journal}->{view_friendsfriends} = 0;
+            }
         }
     ### ]
 
@@ -466,6 +477,69 @@ sub get_status {
 
         return LJ::Lang::ml('web.controlstrip.status.other', {user => $journal_display});
     }
+}
+
+sub calendar_data {
+    my ($class, $journal, $remote) = @_;
+
+    return unless $journal;
+
+    my $daycounts = LJ::get_daycounts($journal, $remote);
+
+    return unless @$daycounts;
+
+    my @last_date  = @{$daycounts->[-1]};
+    my @early_date = @{$daycounts->[0]};
+
+    pop @last_date;
+    pop @early_date;
+
+    if ($last_date[1] != 0) {
+        $last_date[1] -= 1;
+    }
+
+    if ($early_date[1] != 0) {
+        $early_date[1] -= 1;
+    }
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime();
+
+    if ( $last_date[0] < ($year + 1900) ||
+         $last_date[1] < $mon     ||
+         $last_date[2] < $mday
+    ) {
+        @last_date = ($year + 1900, $mon, $mday);
+    }
+
+    return {
+        lastDate => join(',', @last_date),
+        earlyDate => join(',', @early_date),
+    };
+}
+
+sub relations_data {
+    my ($class, $journal, $remote) = @_;
+    my $data = {};
+
+    return unless $remote;
+    return unless $journal;
+
+    my $friend   = $remote->is_friend($journal);
+    my $friendof = $journal->is_friend($remote);
+
+    $data->{is_member}       = $friendof;
+    $data->{is_friend}       = $friend;
+    $data->{is_friendof}     = $friendof;
+    $data->{is_subscriber}   = 0;
+    $data->{is_subscribedon} = 0;
+
+    # Subscribe/Unscubscribe to/from user
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        $data->{is_subscriber}   = $journal->is_subscribedon($remote);
+        $data->{is_subscribedon} = $remote->is_subscribedon($journal);
+    }
+
+    return $data;
 }
 
 # Utils

@@ -2296,29 +2296,10 @@ sub control_strip {
     return LJ::ControlStrip->render($opts{user});
 }
 
-sub control_strip_js_inject
-{
+sub control_strip_js_inject {
     my %opts = @_;
-    my $user = delete $opts{user};
 
-    LJ::need_res(qw{
-        js/controlstrip.js
-        stc/widgets/filter-settings.css
-        stc/popup/popupus.css
-        stc/popup/popupus-blue.css
-    });
-
-    LJ::need_string(qw{
-        filterset.title.subscribed.journal
-        filterset.title.addfriend.journal
-        filterset.subtitle.addfriend.journal
-        filterset.title.join
-        filterset.subtitle.join
-        filterset.submit.subscribe
-        filterset.subtitle.filters
-        filterset.title.subscribed.community
-        filterset.link.addnewfilter
-    });
+    LJ::ControlStrip->need_res(%opts);
 }
 
 sub journal_js_inject {
