@@ -160,7 +160,7 @@ body<=
             grep { LJ::Support::can_read_cat($_, $remote) }
             values %$cats;
      }
-     
+
      @shown_cats = map { $_->{'spcatid'} } @shown_cats;
 
      $filterwhere = ' AND s.spcatid IN ('. join( ',', @shown_cats ) .')'
@@ -475,6 +475,7 @@ body<=
         $ret .= '<h3>Mass Reply:</h3><br />';
         $ret .= LJ::html_textarea({
             'name'  => 'mass_reply',
+            'id'    => 'mass_reply_text',
             'cols'  => 100,
             'rows'  => 8,
             'wrap'  => 'on',
@@ -482,6 +483,52 @@ body<=
         }) . '<br />';
 
         $ret .= LJ::html_submit('action:m_reply', 'Mass Reply');
+        $ret .= '&nbsp;|&nbsp;';
+
+        if ( $fcat ) {
+            my $stock_spcatid = $fcat->{spcatid};
+            my $rows = $dbr->selectall_arrayref('
+                SELECT subject,
+                       body
+                  FROM support_answers
+                 WHERE spcatid = ?
+              ORDER BY subject',
+                undef,
+                $stock_spcatid,
+            );
+
+            if ($rows && @$rows) {
+                $ret .= "<a href='$LJ::SITEROOT/support/stock_answers.bml?spcatid=$stock_spcatid'>Stock answers</a>:\n";
+                $ret .= "<script type='text/javascript'>\n";
+                $ret .= "var Iarr = new Array();\n";
+                my $i = 0;
+
+                foreach my $row (@$rows) {
+                    $ret .= "Iarr[$i] = '" . LJ::ejs($row->[1]) . "';\n";
+                    $i++;
+                }
+
+                $ret .= "function insertCanned(i) {\n";
+                $ret .= "    var obj = document.getElementById('mass_reply_text');\n";
+                $ret .= "    var canned = document.getElementById('canned');\n";
+                $ret .= "    if (canned && canned.value > -1 && obj) {\n";
+                $ret .= "        obj.value = obj.value + Iarr[canned.value];\n";
+                $ret .= "    }\n";
+                $ret .= "}\n";
+                $ret .= "</script>\n";
+                $ret .= "<select id='canned' onChange='insertCanned();'>\n";
+                $ret .= "<option value='-1' selected>( $ML{'.select.canned.to.insert'} )</option>\n";
+                $i = 0;
+
+                foreach my $row (@$rows) {
+                    $ret .= "<option value='$i'>" . LJ::ehtml($row->[0]) . "</option>\n";
+                    $i++;
+                }
+
+                $ret .= "</select>\n";
+            }
+        }
+
         $ret .= '<br /><hr>';
     }
 

@@ -16,6 +16,9 @@
 .requests.type|staleness=1
 .requests.type=requests of type
 
+.select.canned.to.insert|staleness=1
+.select.canned.to.insert=select canned to insert
+
 .showonlyhelp|staleness=1
 .showonlyhelp=Show only 
 
