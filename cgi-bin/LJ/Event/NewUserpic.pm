@@ -171,7 +171,7 @@ sub available_for_user  {
 
 sub is_tracking {
     my ($self, $u) = @_;
-
+    return 0;
     return $self->userid ? 1 : 0;
 }
 

@@ -257,7 +257,7 @@ sub is_subscription_visible_to  { 1 }
 
 sub is_tracking {
     my ($self, $u) = @_;
-
+    return 0;
     return $self->userid ? 1 : 0;
 }
 
