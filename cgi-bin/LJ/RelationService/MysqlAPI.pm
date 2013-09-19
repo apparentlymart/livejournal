@@ -41,7 +41,6 @@ sub _create_relation_to_type_f {
 
     my $uid = $u->id;
     my $tid = $target->id;
-    
     my $cnt = $dbh->do(qq[
             REPLACE INTO friends  (
                 userid, friendid, fgcolor, bgcolor, groupmask
@@ -84,6 +83,92 @@ sub _create_relation_to_type_r {
     my $u      = shift;
     my $target = shift;
     my %args   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    my $cidu = $u->clusterid;
+    my $cidt = $target->clusterid;
+
+    return unless $cidu;
+    return unless $cidt;
+
+    my $dbhu = LJ::get_cluster_master($u);
+    my $dbht = LJ::get_cluster_master($target);
+
+    return 0 unless $dbhu;
+    return 0 unless $dbht;
+
+    my $same_cluster = ($cidu == $cidt ? 1 : 0);
+
+    $dbhu->{AutoCommit} = 0;
+    $dbht->{AutoCommit} = 0;
+
+    if ($same_cluster) {
+        $dbhu->begin_work;
+    } else {
+        $dbhu->begin_work;
+        $dbht->begin_work;
+    }
+
+    my $cntu = $dbhu->do(qq[
+            REPLACE INTO subscribers2 (
+                userid, subscriptionid, filtermask
+            ) VALUES (
+                ?, ?, ?
+            )
+        ],
+        undef,
+        $uid,
+        $tid,
+        $args{filtermask}
+    );
+
+    my $cntt = $dbht->do(qq[
+            REPLACE INTO subscribersleft (
+                subscriptionid, userid
+            ) VALUES (
+                ?, ?
+            )
+        ],
+        undef,
+        $tid,
+        $uid
+    );
+
+    my $ok  = ($cntu && $cntt ? 1 : 0);
+    my $err = $dbhu->err || $dbht->err;
+
+    if ($err) {
+        $ok = 0;
+    }
+
+    if ($ok) {
+        if ($same_cluster) {
+            $dbhu->commit;
+        } else {
+            $dbhu->commit;
+            $dbht->commit;
+        }
+    } else {
+        if ($same_cluster) {
+            $dbhu->rollback;
+        } else {
+            $dbhu->rollback;
+            $dbht->rollback;
+        }
+    }
+
+    return 0 unless $ok;
+
+    # Invalidate user cache
+    LJ::MemCacheProxy::delete([$uid, "rels:R:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "rel:R:$uid:$tid"]);
+
+    return 1;
 }
 
 sub _create_relation_to_type_other {
@@ -130,13 +215,15 @@ sub _create_relation_to_type_other {
 sub remove_relation_to {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $type   = shift;
     
     if ( $type eq 'F' ) {
-        return $class->_remove_relation_to_type_f($u, $friend);
+        return $class->_remove_relation_to_type_f($u, $target);
+    } elsif ($type eq 'R') {
+        return $class->_remove_relation_to_type_r($u, $target);
     } else {
-        return $class->_remove_relation_to_type_other($u, $friend, $type);
+        return $class->_remove_relation_to_type_other($u, $target, $type);
     }
 }
 
@@ -167,6 +254,99 @@ sub _remove_relation_to_type_f {
     }
 
     return $cnt;
+}
+
+sub _remove_relation_to_type_r {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    my $cidu = $u->clusterid;
+    my $cidt = $target->clusterid;
+
+    return unless $cidu;
+    return unless $cidt;
+
+    my $dbhu = LJ::get_cluster_master($u);
+    my $dbht = LJ::get_cluster_master($target);
+
+    return 0 unless $dbhu;
+    return 0 unless $dbht;
+
+    my $same_cluster = ($cidu == $cidt ? 1 : 0);
+
+    $dbhu->{AutoCommit} = 0;
+    $dbht->{AutoCommit} = 0;
+
+    if ($same_cluster) {
+        $dbhu->begin_work;
+    } else {
+        $dbhu->begin_work;
+        $dbht->begin_work;
+    }
+
+    my $cntu = $dbhu->do(qq[
+            DELETE FROM
+                subscribers2
+            WHERE
+                userid = ?
+            AND
+                subscriptionid = ?
+        ],
+        undef,
+        $uid,
+        $tid
+    );
+
+    my $cntt = $dbht->do(qq[
+            DELETE FROM
+                subscribersleft
+            WHERE
+                subscriptionid = ?
+            AND
+                useid = ?
+        ],
+        undef,
+        $tid,
+        $uid
+    );
+
+    my $ok = ($cntu && $cntt ? 1 : 0);
+    my $err = $dbhu->err || $dbht->err;
+
+    unless ($err) {
+        $ok = 1;
+    }
+
+    if ($ok) {
+        if ($same_cluster) {
+            $dbhu->commit;
+        } else {
+            $dbhu->commit;
+            $dbht->commit;
+        }
+    } else {
+        if ($same_cluster) {
+            $dbhu->rollback;
+        } else {
+            $dbhu->rollback;
+            $dbht->rollback;
+        }
+    }
+
+    return 0 unless $ok;
+
+    # Invalidate user cache
+    LJ::MemCacheProxy::delete([$uid, "rels:R:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "rel:R:$uid:$tid"]);
+
+    return 1;
 }
 
 sub _remove_relation_to_type_other {
@@ -266,8 +446,7 @@ sub clear_rel_multi {
 #            type: type of the relationship.
 # returns: 1 if all updates succeeded, otherwise undef
 # </LJFUNC>
-sub _mod_rel_multi
-{
+sub _mod_rel_multi {
     my $opts = shift;
     return undef unless @{$opts->{edges}};
 
