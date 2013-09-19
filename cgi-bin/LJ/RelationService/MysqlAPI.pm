@@ -9,6 +9,9 @@ use Readonly;
 # Internal modules
 use LJ::MemCacheProxy;
 
+Readonly my $MEMCACHE_REL_KEY_PREFIX  => 'rel';
+Readonly my $MEMCACHE_RELS_KEY_PREFIX => 'rels';
+
 Readonly my $FRIEND_DATA_PACK_FORMAT  => "NH6H6NC";
 Readonly my $MAX_SIZE_FOR_PACK_STRUCT => 950 * 1024; # 950Kb
 
@@ -165,8 +168,8 @@ sub _create_relation_to_type_r {
     return 0 unless $ok;
 
     # Invalidate user cache
-    LJ::MemCacheProxy::delete([$uid, "rels:R:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "rel:R:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
 
     return 1;
 }
@@ -343,8 +346,8 @@ sub _remove_relation_to_type_r {
     return 0 unless $ok;
 
     # Invalidate user cache
-    LJ::MemCacheProxy::delete([$uid, "rels:R:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "rel:R:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
 
     return 1;
 }
@@ -559,6 +562,20 @@ sub _mod_rel_multi {
 }
 
 sub is_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    if ($type eq 'R') {
+        return $class->find_relation_attributes($u, $target, $type, %opts) ? 1 : 0;
+    } else {
+        return $class->_is_relation_to_other($u, $target, $type, %opts);
+    }
+}
+
+sub _is_relation_to_other {
     my $class  = shift;
     my $u      = shift;
     my $friend = shift;
@@ -1021,28 +1038,113 @@ sub get_groupmask {
 sub find_relation_attributes {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $type   = shift;
     my %opts   = @_;
 
-    return undef unless $type eq 'F';
+    return undef unless $u;
+    return undef unless $target;
 
-    return undef unless $u && $friend;
- 
-    my $jid = LJ::want_userid($u);
-    my $fid = LJ::want_userid($friend);
-    return undef unless $jid && $fid;
+    if ($type eq 'F') {
+        return $class->_find_relation_attributes_f($u, $target, %opts);
+    } elsif ($type eq 'R') {
+        return $class->_find_relation_attributes_r($u, $target, %opts);
+    }
 
-    my $dbr = LJ::get_db_reader();
-    die "No database reader available" unless $dbr;
+    return undef;
+}
 
-    my $fr = $dbr->selectrow_hashref("
-        SELECT groupmask, fgcolor, bgcolor 
-        FROM friends 
-        WHERE userid=? 
-          AND friendid=?
-    ", { Slice => {} }, $u->userid, $friend->userid);
-    return $fr;
+sub _find_relation_attributes_r {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
+
+    # Memcache key
+    my $key = [$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"];
+
+    # Check memcache
+    if (my $val = LJ::MemCacheProxy::get($key)) {
+        $val = unpack 'N', $val;
+
+        return {
+            filtermask => $val
+        };
+    }
+
+    # Try load from db
+    my $dbh = LJ::get_cluster_master($u);
+
+    return unless $dbh;
+
+    my $row = $dbh->selectrow_hashref(qq[
+            SELECT
+                filtermask
+            FROM
+                subscribers2
+            WHERE
+                userid = ?
+            AND
+                subscriptionid = ?
+        ],
+        {
+            Slice => {}
+        },
+        $uid,
+        $tid
+    );
+
+    return unless $row;
+
+    my $val = pack 'N', $row->{filtermask};
+
+    if ($val) {
+        LJ::MemCacheProxy::set($key, $val);
+    }
+
+    return $row;
+}
+
+sub _find_relation_attributes_f {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = LJ::want_userid($u);
+    my $tid = LJ::want_userid($target);
+
+    return undef unless $uid;
+    return undef unless $tid;
+
+    my $dbh = LJ::get_db_writer();
+
+    return undef unless $dbh;
+
+    my $row = $dbh->selectrow_hashref(qq[
+            SELECT
+                groupmask, fgcolor, bgcolor 
+            FROM
+                friends
+            WHERE
+                userid = ? 
+            AND
+                friendid = ?
+        ],
+        {
+            Slice => {}
+        },
+        $uid,
+        $tid
+    );
+
+    return $row;
 }
 
 sub delete_and_purge_completely {
