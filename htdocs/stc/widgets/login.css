@@ -35,3 +35,15 @@
     font-size: 85%;
     color: #777;
 }
+input.create-account {
+    font-size: 110%;
+    color: #fff;
+    margin: 0;
+    background: #559A40;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
+    }
+
+
+    
