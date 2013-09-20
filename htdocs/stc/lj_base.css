@@ -18,21 +18,6 @@ form {
 	white-space: nowrap;
 	}
 
-.lj_progresscontainer {
-	height: 25px;
-	width: 400px;
-	margin: 1em;
-	background: url(/img/progress/inactive.gif?v=6460) repeat;
-	}
-
-.lj_progressoverlay {
-	background: url(/img/progress/active.gif?v=6460) repeat;
-	}
-
-.lj_progressindefinite {
-	background-image: url(/img/progress/barber.gif?v=6460);
-	}
-
 .lj_hourglass {
 	z-index: 20000;
 	}
@@ -48,62 +33,6 @@ form {
 	background: #FFFFDD;
 	border: 1px solid #FFCC33;
 	padding: 8px;
-	}
-
-.helper {
-	font-size: 0.8em;
-	color: #666;
-	}
-
-/* Buttons
--------------------------------*/
-.b-btn {
-	overflow: visible;
-	padding: 10px 25px;
-	background: #6ED1FF;
-	background: -moz-linear-gradient(top, #6ED1FF 0%, #1BB5FD 3%, #158FC8 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6ED1FF), color-stop(3%,#1BB5FD), color-stop(100%,#158FC8));
-	background: -webkit-linear-gradient(top, #6ED1FF 0%,#1BB5FD 3%,#158FC8 100%);
-	background: -o-linear-gradient(top, #6ED1FF 0%,#1BB5FD 3%,#158FC8 100%);
-	background: -ms-linear-gradient(top, #6ED1FF 0%,#1BB5FD 3%,#158FC8 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6ED1FF', endColorstr='#158FC8',GradientType=0 );
-	background: linear-gradient(top, #6ED1FF 0%,#1BB5FD 3%,#158FC8 100%);
-	border: 1px solid #518593;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	text-transform: uppercase;
-	text-shadow: 1px 1px 1px #0B6294;
-	font-size: 14px;
-	font-weight: bold;
-	cursor: pointer;
-	color: #FFF;
-	}
-.b-btn-disabled {
-	background: #EAEAEA;
-	background: -moz-linear-gradient(top, #EAEAEA 0%, #CFCFCF 3%, #C5C5C5 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EAEAEA), color-stop(3%,#CFCFCF), color-stop(100%,#C5C5C5));
-	background: -webkit-linear-gradient(top, #EAEAEA 0%,#CFCFCF 3%,#C5C5C5 100%);
-	background: -o-linear-gradient(top, #EAEAEA 0%,#CFCFCF 3%,#C5C5C5 100%);
-	background: -ms-linear-gradient(top, #EAEAEA 0%,#CFCFCF 3%,#C5C5C5 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#EAEAEA', endColorstr='#C5C5C5',GradientType=0 );
-	background: linear-gradient(top, #EAEAEA 0%,#CFCFCF 3%,#C5C5C5 100%);
-	border-color: #C0C0C0;
-	text-shadow: 1px 1px 1px #999;
-	}
-.b-btn-tokens {
-	margin: 30px 0 0;
-	padding: 10px 6px 7px;
-	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
-	border-color: #025266;
-	background: -moz-linear-gradient(top, #6ed6e5 0%, #1bbbd2 14%, #1bb2c8 37%, #1ba4b8 66%, #1b9eb1 83%, #1495a7 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6ed6e5), color-stop(14%,#1bbbd2), color-stop(37%,#1bb2c8), color-stop(66%,#1ba4b8), color-stop(83%,#1b9eb1), color-stop(100%,#1495a7));
-	background: -webkit-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
-	background: -o-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
-	background: -ms-linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
-	background: linear-gradient(top, #6ed6e5 0%,#1bbbd2 14%,#1bb2c8 37%,#1ba4b8 66%,#1b9eb1 83%,#1495a7 100%);
-	background-color: #1495A7;
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6ed6e5', endColorstr='#1495a7',GradientType=0 );
 	}
 
 /* IPPU overlay
@@ -134,17 +63,6 @@ div.lj_ippu_titlebar {
 		opacity: 1;
 		}
 
-/* V Gift AdNectar
--------------------------------*/
-.vgift-img-l {
-	max-width: 220px;
-	max-height: 220px;
-	}
-.vgift-img-s {
-	max-width: 100px;
-	max-height: 100px;
-	}
-
 /* LJ Placeholder Container ()
 -------------------------------*/
 .LJ_Placeholder_Container {
@@ -174,44 +92,8 @@ IFRAME.lj_embedcontent {
 	vertical-align:top;
 	}
 
-/* LJ Hidden
--------------------------------*/
-.ljhidden {
-	display: block;
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 0;
-	height: 0;
-	margin: 0;
-	border: 0;
-	padding: 0;
-	font-size: 0.1px;
-	line-height: 0;
-	opacity: 0;
-	filter: alpha(opacity=0);
-	}
-
-.lj_pollanswer_loading {
-	color: #CCC;
-	border: 1px solid #EEE;
-	}
-
-.super {
-	vertical-align: super;
-	font-size: .7em;
-	}
-
-.notice {
-	color: #f00;
-	}
-
 .ljedittime {
 	font-size: smaller;
-	}
-
-.warning-background {
-	background-image: url(/img/message-warning.gif?v=4888);
 	}
 
 .lj_invisible {
@@ -417,133 +299,6 @@ Must be removed after implementation of Framework! */
 	text-align: center;
 	}
 
-
-/* Disabled block
---------------------------- */
-/* Must be removed after implementation of Framework! */
-.st-disabled {
-	position:relative;
-	}
-
-/* Blocking layer */
-.b-blocker {
-	position:absolute;
-	top:0;
-	left:0;
-	display:none;
-	width:100%;
-	height:100%;
-	}
-	.st-disabled .b-blocker {
-		display:block;
-		}
-	.b-blocker-over {
-		z-index:1000000000;
-		}
-	.b-blocker-white {
-		background:#FFF;
-		}
-	.b-blocker-gray {
-		background:#808080;
-		}
-	.b-blocker-gray,
-	.b-blocker-white {
-		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-		filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
-		opacity:.5;
-		}
-
-/* Block for adding HTML into headers.
-It must be invisible, use it only for reskining */
-.b-reskining-header {
-	display: none;
-	}
-
-/* List of [un]changed inputs
---------------------------- */
-/* Must be removed after implementation of Framework! */
-.b-form-changelist .type-text {
-	color:#808080;
-	}
-	.b-form-changelist .type-text:focus,
-	.b-form-changelist .type-text-focus,
-	.b-form-changelist .type-text-changed {
-		color:#000;
-		}
-
-/* Flexible banner */
-/* Must be removed after implementation of Framework! */
-.b-banner-flexible {
-	margin: 0 0 0;
-	font-size: 0;
-	line-height: 0;
-	width: 970px;
-	}
-	.b-banner-flexible:after {
-		content: " ";
-		display: block;
-		visibility: hidden;
-		clear: both;
-		height: 0;
-		font-size: 0;
-		line-height: 0;
-		}
-	.b-banner-flexible .b-banner-728 {
-		float: right;
-		width: 728px;
-		}
-	.b-banner-flexible .b-banner-236 {
-		float: left;
-		overflow: hidden;
-		width: 236px;
-		}
-	.b-banner-flexible A:link,
-	.b-banner-flexible A:visited,
-	.b-banner-flexible A:hover,
-	.b-banner-flexible A:active {
-		border:0;
-		}
-
-/* AdNEctar style for vgift */
-.i-vgift-details {
-	position: relative;
-	padding: 0;
-	margin: 0;
-	zoom:1;
-	}
-	.i-vgift-details A {
-		display: block;
-		position: relative;
-		border: 0 !important;
-		}
-		.i-vgift-details A:hover {
-			border: 0 !important;
-			}
-.adnectar-play {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	display: block;
-	width: 20px;
-	height: 15px;
-	background: url(/img/play-button.png?v=8454) no-repeat;
-	}
-.appwidget-friendbirthdays .adnectar-play {
-	display: none;	
-	}
-
-/* Button for ads */
-/* Must be removed after implementation of Framework! */
-.b-button-close {
-	width: 15px;
-	height: 15px;
-	background: url(/img/CloseButton2.gif?v=16083) no-repeat;
-	position: relative;
-	top: 0;
-	margin: -25px -25px 0 10px;
-	cursor: pointer;
-	}
-
 /* Width & Height for Moods */
 IMG.meta-mood-img {
 	max-width: 100px;
@@ -552,17 +307,6 @@ IMG.meta-mood-img {
 IMG#mood_image_preview {
 	max-width: 60px;
 	max-height: 60px;
-	}
-
-/* The indicator of something new  */
-/* Must be removed after implementation of Framework! */
-SUP.i-new {
-	position: relative;
-	bottom: 0.5em; 
-	padding: 0 1px;
-	vertical-align: middle;
-	font-size: 11px;
-	color: #C00;
 	}
 
 /* Styles for messagers,
@@ -690,72 +434,6 @@ HTML BODY.logged-out {
 	.mobile-msg #content {
 		top: 140px !important;
 		}
-
-
-/* Reject Users in Manage Community
---------------------------- */
-/* Must be removed after implementation of Framework! */
-.b-pending-users {
-	margin: 0 0 1em;
-	padding: 0;
-	list-style: none;
-	float:left;
-	}
-	.b-pending-users LI {
-		position: relative;
-		float: left;
-		padding: 0 5px 0 0;
-		}
-	.b-pending-users LI:hover,
-	.b-pending-users LI.hover {
-		z-index: 2;
-		}
-		.b-pending-users A {
-			border-bottom: 0 !important;
-			text-decoration: none !important;
-			}
-		.b-pending-users LI SPAN {
-			position: relative;
-			float: left;
-			margin: 0;
-			}
-			.b-pending-users LI SPAN I.i-pending-users-delim {
-				position: relative;
-				z-index: -1;
-				}
-		.b-pending-users LI:hover SPAN,
-		.b-pending-users LI.hover SPAN {
-			margin: -3px -18px -4px -8px;
-			padding: 2px 17px 3px 7px;
-			background: #F5F5F5;
-			border: 1px solid #CCC;
-			-webkit-border-radius: 5px;
-			-moz-border-radius: 5px;
-			border-radius: 5px;
-			}
-		.b-pending-users LI:hover SPAN .i-pending-close,
-		.b-pending-users LI.hover SPAN .i-pending-close {
-			display: block;
-			position: absolute;
-			top: 50%;
-			right:6px;
-			width: 6px;
-			height: 7px;
-			margin: -3px 0 0;
-			padding: 0;
-			background: url(/img/buttons/pending-close.gif?v=9474) no-repeat 0 0;
-			cursor: pointer;
-			}
-.b-pending-reason {
-	width: 99%;
-	margin: 0 0 1em;
-	clear: both;
-	}
-.i-pending-reject {
-	float: right;
-	margin: 0.5em 0 0;
-	}
-
 
 /* Placeholder
 --------------------------- */
