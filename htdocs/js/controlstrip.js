@@ -79,12 +79,15 @@
     }
 
     // calendar
-    (function () {
+    (function initCalendar() {
       var calendarLink = $('#lj_controlstrip_new .w-cs-i-calendar a'),
 
           // checks if we are on /friends page or not. There special calendar behavior is needed
           journalViewFriends = /^\/friends\/?$/.test( location.pathname ),
-          journalUrlBase = LJ.get('current_journal.url_journal');
+          journalUrlBase = LJ.get('current_journal.url_journal'),
+
+          earlyDate = LJ.get('controlstrip.calendar.earlyDate'),
+          lastDate  = LJ.get('controlstrip.calendar.lastDate');
 
       if ( calendarLink.length ) {
         calendarLink
@@ -95,8 +98,8 @@
             dayRef:  journalUrlBase + '/' + (journalViewFriends ? 'friends/' : '') + '%Y/%M/%D',
             allRefs: journalViewFriends,
 
-            startMonth: parseDate( LJ.get('controlstrip.calendar.earlyDate') ),
-            endMonth:   parseDate( LJ.get('controlstrip.calendar.lastDate') ),
+            startMonth: earlyDate ? parseDate( LJ.get('controlstrip.calendar.earlyDate') ) : new Date(),
+            endMonth:   lastDate  ? parseDate( LJ.get('controlstrip.calendar.lastDate') )  : new Date(),
 
             classNames: {
               container: 'w-cs-calendar'
@@ -106,7 +109,7 @@
               caption: LJ.ml('web.controlstrip.view.calendar')
             }
           })
-          .bind('daySelected', function (event) {
+          .on('daySelected', function (event) {
             event.preventDefault();
           });
 
@@ -128,9 +131,11 @@
   }
 
   $(function () {
+
     // load control strip if it's not available on document ready
     // Notice: some s2 users could turn off control strip for all users
     if (!document.getElementById('lj_controlstrip') && !document.getElementById('lj_controlstrip_new')) {
+
       // fetch control strip from server
       $.get(
         LiveJournal.getAjaxUrl('controlstrip'),
