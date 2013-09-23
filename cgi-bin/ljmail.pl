@@ -63,10 +63,9 @@ use MIME::Words qw//;
 #          case it is sent as-is.
 #          Raw mode: if hashref contains key 'raw_data', it considered as 
 #          full text of e-mail message (including headers) and is sent as-is.
-#          
+#
 # </LJFUNC>
-sub send_mail
-{
+sub send_mail {
     my $opt = shift;
     my $async_caller = shift;
 
@@ -74,7 +73,7 @@ sub send_mail
 
     my ($message_text, $from, @rcpts);
     my ($log_subject, $log_action);
-    
+
     if (ref $opt eq 'MIME::Lite') {
         # did they pass a MIME::Lite object already?
         $message_text = $opt->as_string;
@@ -85,7 +84,8 @@ sub send_mail
         }
         $log_subject = $opt->get('Subject');
         $log_action = 'email_send_mimelite';
-    } elsif ($opt->{raw_data}) {
+    }
+    elsif ($opt->{raw_data}) {
         $message_text = $opt->{raw_data};
         $from = (map { $_->address } Mail::Address->parse($opt->{from}))[0];
         foreach my $field (map { $opt->{$_} } qw(to tc bcc)) {
@@ -94,7 +94,8 @@ sub send_mail
         }
         $log_subject = "Unknown (raw message)";
         $log_action = 'email_send_raw';
-    } else {
+    }
+    else {
         my $clean_name = sub {
             my ($name, $email) = @_;
             return $email unless $name;
@@ -186,7 +187,7 @@ sub send_mail
                 $msg->add($tag, $value);
             }
         }
-        
+
         $message_text = $msg->as_string;
         $from = (map { $_->address } Mail::Address->parse($msg->get("From")))[0];
         foreach my $field (map { $msg->get($_) } qw(To Cc Bcc)) {
