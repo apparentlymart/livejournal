@@ -335,6 +335,7 @@ sub need_res {
         filterset.subtitle.filters
         filterset.title.subscribed.community
         filterset.link.addnewfilter
+        filterset.button.save
     });
 
     my $remote  = LJ::get_remote();
