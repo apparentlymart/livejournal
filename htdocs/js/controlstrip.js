@@ -21,7 +21,7 @@
         submit;
 
     // filter is available only for logged in users
-    if ( !Site.remoteUser ) {
+    if ( !LJ.get('remoteUser') ) {
       return;
     }
 
@@ -135,11 +135,10 @@
     // load control strip if it's not available on document ready
     // Notice: some s2 users could turn off control strip for all users
     if (!document.getElementById('lj_controlstrip') && !document.getElementById('lj_controlstrip_new')) {
-
       // fetch control strip from server
       $.get(
         LiveJournal.getAjaxUrl('controlstrip'),
-        { user: Site.currentJournal },
+        { user: LJ.get('currentJournal') },
         function (data) {
           $(data).appendTo(document.body);
           init();

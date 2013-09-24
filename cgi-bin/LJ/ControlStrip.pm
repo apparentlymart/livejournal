@@ -61,7 +61,7 @@ sub render {
 
             if ($entry and $entry->correct_anum) {
                 my $attrs = $entry->sharing_attributes();
-                                
+
                 $data_journal->{sharing_attributes}   = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
                 $data_journal->{view_entry_is_valid}  = 1;
                 $data_journal->{view_entry_is_public} = ($entry->is_public() ? 1 : 0);
@@ -76,7 +76,7 @@ sub render {
         $data_remote->{sessid}       = ($remote->session ? $remote->{_session}->{sessid} : undef);
         $data_remote->{is_sup}       = (LJ::SUP->is_sup_enabled($remote) ? 1 : 0);
         $data_remote->{is_paid}      = $remote->in_class('paid') || $remote->in_class('sponsored');
-        $data_remote->{is_personal}  = ($remote->is_personal() ? 1 : 0); 
+        $data_remote->{is_personal}  = ($remote->is_personal() ? 1 : 0);
         $data_remote->{is_identity}  = ($remote->is_identity() ? 1 : 0);
 
         if ($remote->{defaultpicid}) {
@@ -107,7 +107,7 @@ sub render {
                 title => LJ::Lang::ml('web.controlstrip.nouserpic.title'),
             };
         }
-        
+
         my $inbox = $remote->notification_inbox();
 
         $data_remote->{inbox} = {
@@ -220,7 +220,7 @@ sub render {
             $data_journal->{login_form}->{challenge} = LJ::challenge_generate(300);
         }
     }
-    
+
     $data_control_strip->{logo} = LJ::run_hook('control_strip_logo', $remote, $journal);
 
     if (LJ::Widget::SiteMessages->should_render) {
@@ -228,7 +228,7 @@ sub render {
     } else {
         $data_control_strip->{site_messages} = '';
     }
-    
+
     if ( $data_journal->{'view_friends'} ) {
         $data_control_strip->{'switch_friendsfeed'} =
             LJ::Widget::FriendsFeedBeta->render( 'placement' => 'legacy' );
@@ -243,7 +243,7 @@ sub render {
     {
         my $extra_cells;
         LJ::run_hooks('add_extra_cells_in_controlstrip', \$extra_cells);
-        
+
         $data_control_strip->{extra_cells} = $extra_cells || '';
     }
 
@@ -309,7 +309,7 @@ sub render {
         link_mobile => $mobile_link
     );
 
-    return $tmpl->output;    
+    return $tmpl->output;
 }
 
 sub need_res {
@@ -321,6 +321,7 @@ sub need_res {
         stc/widgets/filter-settings.css
         stc/popup/popupus.css
         stc/popup/popupus-blue.css
+        stc/msgsystem.css
     });
 
     LJ::need_string(qw{
