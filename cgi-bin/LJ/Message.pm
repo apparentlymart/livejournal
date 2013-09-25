@@ -609,7 +609,7 @@ sub _get_msg_rows {
             my ($uid, $msgid) = @$_;
 
             +{
-                %{ $have{$uid}->{$msgid} },
+                %{ $have{$uid}->{$msgid} || {} },
                 journalid => $uid,
                 msgid     => $msgid,
             }
@@ -699,7 +699,7 @@ sub _get_msgtext_rows {
             my ($uid, $msgid) = @$_;
 
             +{
-                %{ $have{$uid}->{$msgid} },
+                %{ $have{$uid}->{$msgid} || {} },
                 journalid => $uid,
                 msgid     => $msgid,
             }
@@ -787,7 +787,7 @@ sub _get_msgprop_rows {
             my ($uid, $msgid) = @$_;
 
             +{
-                %{ $have{$uid}->{$msgid} },
+                %{ $have{$uid}->{$msgid} || {} },
                 journalid => $uid,
                 msgid     => $msgid,
             }
