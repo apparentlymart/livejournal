@@ -724,7 +724,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             ContextualPopup.hourglass = jQuery(e).hourglass()[0];
 
             //entering mouse on the hourglass should no close popup
-            jQuery(ContextualPopup.hourglass.ele).bind('mouseenter', function(ev) {
+            jQuery(ContextualPopup.hourglass.ele).bind('mouseenter', function () {
                 popup.element.trigger('mouseenter');
             });
 
@@ -820,12 +820,12 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
     };
 
     // Update changing relations functionality to work through relations manager
-    // that is declared in `js/relations.js`
+    // that is declared in `js/relations/relations.js`
     if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
 
         // redeclare `changeRelation` method to interact with relations manager
         ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {
-            LiveJournal.run_hook('relations.change', {
+            LJ.Event.trigger('relations.change', {
                 action: action,
                 username: info.username
             });
@@ -850,7 +850,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
         // subscribe to change relation events
         (function () {
-            LiveJournal.register_hook('relations.changed', function (eventData) {
+            LJ.Event.on('relations.changed', function (eventData) {
                 var data = eventData.data,
                     username = eventData.username;
 
