@@ -4711,6 +4711,8 @@ main.search.search=Search
 main.settings|staleness=1
 main.settings=Rating Settings
 
+main.scrolltop=Scroll to top
+
 main.top.aday=Today
 
 main.top.allcommunities|staleness=1
