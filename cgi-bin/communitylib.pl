@@ -623,6 +623,10 @@ sub join_community {
     die 'Expected parameter $u in LJ::leave_community not found' unless $u;
     die 'Expected parameter $c in LJ::leave_community not found' unless $c;
 
+    if ($c->is_banned($u)) {
+        return (0, LJ::Lang::ml('/community/join.bml.label.banned'));
+    }
+
     unless ($c->is_community) {
         return (0, LJ::Lang::ml('error.code.comm_not_comm'));
     }
