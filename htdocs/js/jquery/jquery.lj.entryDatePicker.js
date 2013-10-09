@@ -1,5 +1,7 @@
 //= require js/jquery/jquery.lj.calendar.js
 
+//= require_style widgets/datepicker.css
+
 //= require_preprocessed_template Widgets/datepicker.tmpl
 
  /**
