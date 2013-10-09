@@ -5,362 +5,478 @@ body<=
 {
 #line 6
     use strict;
+    use warnings;
+
+   use strict;
+    use warnings;
+
     use vars qw(%GET %POST);
-    use LJ::JSON;
 
     LJ::set_active_crumb('managefriends');
 
     my $print_with_ad = sub {
         my $str = shift;
+        my $ad_full_width = LJ::get_ads({
+            location => 'bml.friends.edit/error'
+        }) || '';
 
-        my $ad_full_width = LJ::get_ads({ location => 'bml.friends.edit/error', ljadwrapper => 1 });
         return $ad_full_width . $str;
     };
 
-    return $print_with_ad->(LJ::server_down_html())
-        if $LJ::SERVER_DOWN;
-
-    return $print_with_ad->("<?badinput?>")
-        unless LJ::text_in(\%POST);
-
-    my $remote = LJ::get_remote();
-    return $print_with_ad->("<?needlogin?>")
-        unless $remote;
-
-    my $authas = $GET{'authas'} || $remote->user;
-    my $getextra = $authas ne $remote->user ? "?authas=$authas" : '';
-
-    my $u = LJ::get_authas_user($authas);
-    return $print_with_ad->(LJ::bad_input($ML{'error.invalidauth'}))
-        unless $u;
-    return BML::redirect("$LJ::SITEROOT/community/members.bml?authas=$u->{'user'}")
-        if $u->is_community;
-    return $print_with_ad->(LJ::bad_input($ML{'.error.badjournaltype'}))
-        unless $u->is_person || $u->is_shared || $u->is_identity;
-
-    my $ret;
-
-    # no post, show edit form
-    unless (LJ::did_post()) {
-        ### who has you defined as a friend?
-        my %res = ();
-        LJ::do_request({
-            "user" => $u->{'user'},
-            "mode" => "friendof",
-            "ver" => $LJ::PROTOCOL_VER,
-        }, \%res, { "noauth" => 1, 'u' => $u });
-
-        ### who do you have defined as a friend?
-        my %resf = ();
-        LJ::do_request({
-            "user" => $u->{'user'},
-            "mode" => "getfriends",
-            "ver" => $LJ::PROTOCOL_VER,
-        }, \%resf, { "noauth" => 1, 'u' => $u });
-
-        # put it all together!
-        my %friends = ();
-
-        foreach my $i (1..$resf{'friend_count'}) {
-            my $who = $resf{"friend_${i}_user"};
-            $friends{$who} = { username => $who, rel => 'FR',  # for "friend"
-                                map { $_ => $resf{"friend_${i}_$_"} } qw(name bg fg) };
-        }
-
-        foreach my $i (1..$res{'friendof_count'}) {
-            my $who = $res{"friendof_${i}_user"};
-
-            if (defined $friends{$who}) {
-                $friends{$who}->{'rel'} = 'M'; # for "mutual"
-            } else {
-                $friends{$who} = { username => $who, name => $res{"friendof_${i}_name"}, rel => 'FO' };
-            }
-        }
-
-        my $sort = $GET{'sort'} || 'username';
-        my $filter = $GET{'filter'} || '';
-
-        my @friends = values %friends;
-
-        if (@friends and $filter ne '') {
-            my @friends_filtered =
-                grep { $_->{'username'} =~ /\Q$filter\E/i } @friends;
-
-            if (@friends_filtered) {
-                @friends = @friends_filtered;
-            } else {
-                $ret .= '<?warningbar '
-                     .  LJ::Lang::ml('.filter.warning.no_matching_users')
-                     .  ' warningbar?>';
-            }
-        }
-
-        $ret .= "<form action=\"$LJ::SITEROOT/friends/edit.bml\" method=\"get\">";
-        $ret .= LJ::html_hidden('sort' => $sort);
-        $ret .= "<label for=\"filter\">" . LJ::Lang::ml('.filter.label')
-             .  ":</label> ";
-        $ret .= LJ::html_text({
-            'name'  => 'filter',
-            'id'    => 'filter',
-            'value' => $filter,
-        });
-        $ret .= LJ::html_submit(LJ::Lang::ml('.filter.btn'));
-        $ret .= "</form>";
-
-        $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
-        $ret .= LJ::form_auth();
-
-        ### edit friends. only show if they have friends/friend-ofs
-        if (@friends) {
-            if ($sort eq 'rel') {
-                @friends = sort { $b->{'rel'} cmp $a->{'rel'} || $a->{'username'} cmp $b->{'username'} } @friends;
-            }
-
-            if ($sort eq 'username') {
-                @friends = sort { $a->{'username'} cmp $b->{'username'} } @friends;
-            }
-
-            my %items = BML::paging(\@friends, $GET{'page'}, 50);
-            my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
-            @friends = @{$items{'items'}};
-
-            $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589'>",
-                                                            'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589'>" });
-            $ret .= " p?><div align='center'>";
-
-            $ret .= $navbar;
-
-            $ret .= "<br><table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
-
-            $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
-            $ret .= "<th width='3%'>";
-            if ($sort eq 'rel') {
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' />";
-            } else {
-                $ret .= "<a href='". BML::self_link({'sort' => 'rel', 'page' => 1}) . "'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' border='0' /></a>";
-            }
-            $ret .= "</th>";
-
-            $ret .= "<th width='30%' align='left'>";
-            if ($sort eq 'username') {
-                $ret .= "$ML{'.editfriends.username'}";
-            } else {
-                $ret .= "<a href='". BML::self_link({'sort' => 'username', 'page' => 1}) . "'>$ML{'.editfriends.username'}</a>";
-            }
-
-            $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
-
-            if ($remote->get_cap('aliases')) {
-                $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
-            }
-            
-            $ret .= "<th style='text-align:left;'>$ML{'.editfriends.tagsonly'}</th>";
-            $ret .= "</tr>";
-
-            my $friends_tags = LJ::FriendsTags->load($remote);
-            
-            my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
-            foreach my $f (@friends) {
-                my $who = $f->{'username'};
-
-                $ret .= "<tr>";
-                $ret .= "<td align='center'>";
-                # non-checked checkboxes for "friend-of". checking these boxes adds the user
-                if ($f->{'rel'} eq 'FO') {
-                    $ret .= LJ::html_check({ 'type' => 'check',
-                                             'name' => "editfriend_add_${j}_user",
-                                             'id' => "editfriend_add_${j}_user",
-                                             'value' => $who });
-                } else {
-                    # checked checkboxes for friend/mutual. unchecking these deletes the user.
-                    # protocol wants to know who we're deleting, though, so we keep a hidden field
-                    # so we can compare differences before/after
-                    $ret .= LJ::html_check({ 'type' => 'check',
-                                             'name' => "editfriend_keep_$who",
-                                             'id' => "editfriend_keep_$who",
-                                             'checked' => 1} );
-                    $ret .= LJ::html_hidden("editfriend_has_${j}", "$who");
-                }
-                $ret .= "</td>";
-                $ret .= "<td align='center'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589' alt='friend' title='friend'>"
-                    if $f->{'rel'} eq 'FR';
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589' alt='friend-of' title='friend-of'>"
-                    if $f->{'rel'} eq 'FO';
-                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' alt='mutual friend' title='mutual friend'>"
-                    if $f->{'rel'} eq 'M';
-                $ret .= "</td>";
-
-                $ret .= "<td style='text-align:left;'>" . LJ::ljuser($who) . "</td>\n";
-
-                my $colors;
-                $colors = "color: " . $f->{'fg'} . "; " if $f->{'fg'};
-                $colors .= "background-color: " . $f->{'bg'} . ";" if $f->{'bg'};
-                $colors = " style='$colors'" if $colors;
-                $ret .= "<td$colors  style='text-align:left;'>" . LJ::ehtml($f->{'name'}) . "</td>\n";
-
-                my $who_u = LJ::load_user($who);
-                if ($remote->get_cap('aliases')) {
-                    $ret .= "<td style='text-align: left;'>";
-                    if ($who ne $authas) {
-                        $ret .= LJ::html_text({
-                                size => "30",
-                                maxlength => "200",
-                                name => "useralias_" . $who_u->{userid},
-                                id   => "useralias_$who",
-                                value => LJ::ljuser_alias($f->{username}),
-                                class => "type-text",
-                                raw => q|onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"|
-                                });
-                    } else { 
-                        $ret .= " ";
-                    }
-                        
-                    $ret .= "</td>";
-                }
-                
-                $ret .= "<td style='text-align: left;'>";
-                my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($who_u->{userid});
-                if ($friends{$who} && $friends{$who}->{rel} ne 'FO' && !$who_u->is_identity()) {
-                    if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
-                        my $stringify = sub {
-                            return LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
-                                       join(', ', map { LJ::ehtml($_) } @_) :
-                                       join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @_);
-                        };
-                        my $friend_tags_str;
-                        if (scalar(@$friend_tags_list) > 5) {
-                            $friend_tags_str = $stringify->(@$friend_tags_list[0..4]) . ',&nbsp;...';
-                        } else {
-                            $friend_tags_str = $stringify->(@$friend_tags_list);
-                        }
-                        $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>$friend_tags_str</a>";
-                    } else {
-                        $ret .= "(<a href='/friends/add.bml?user=$who_u->{user}'>" . BML::ml('.selecttags.text') . "</a>)";
-                    }
-                }
-                $ret .= "</td>";
-
-                $ret .= "</tr>\n";
-                $j++;
-            }
-
-            $ret .= "</table><br>";
-            $ret .= $navbar;
-            $ret .= "</div><br /><br />";
-        }
-
-        ### add friends
-        $ret .= "<?h1 $ML{'.addfriends.head'} h1?>\n";
-        $ret .= "<?p " . BML::ml('.addfriends.text', { aopts => "href='$LJ::SITEROOT/friends/invite.bml'" }) . " p?>";
-
-        $ret .= "<br />";
-        $ret .= "<div align='center'><table class='borderedtable'>\n";
-        $ret .= "<tr><td align='center'><b>$ML{'.friend'}</b></td><td align='center'><b>$ML{'.foreground'}</b></td><td align='center'><b>$ML{'.background'}</b></td>\n";
-
-        # load the colors
-        my @color = ();
-        LJ::load_codes({ "color" => \@color });
-
-        $ret .= "<td rowspan='11' valign='middle'>";
-
-        ### color swatch
-        $ret .= "<table border='0' cellspacing='0' cellpadding='0' align='center' width='100'>\n";
-        $ret .= "<tr><td colspan='5'><p align='center'><small>$ML{'.hover'}</small></p></td></tr>\n";
-        my $col = 0;
-        foreach (@color) {
-            $col = $col % 5;
-            $ret .= "<tr>\n" if $col == 0;
-
-            my $ecolor = LJ::ehtml($_->{'item'});
-            $ret .= "<td bgcolor='$_->{'code'}'><img src='/img/dot.gif?v=557' width='14' height='14' title='$ecolor' alt='$ecolor' /></td>\n";
-
-            $col++;
-            $ret .= "</tr>\n" if $col == 5;
-        }
-
-        $ret .= "</tr>\n" if ($col % 5); # close out row if we don't have a full row
-        $ret .= "</table>";
-
-        $ret .= "<p align='center'><input type='button' value='" . LJ::ehtml($ML{'.btn.toggle'}) . "' ";
-        $ret .= "onClick='togglePreview(); return true;'></p>\n";
-
-        $ret .= "</td></tr>";
-
-        foreach my $i (1..10) {
-            $ret .= "<tr><td>";
-            $ret .= LJ::html_text({ 'name' => "editfriend_add_${i}_user",
-                                    'size' => '15', 'maxlength' => '15',
-                                    'onchange' => "updatePreview(); return true;",
-                                    'onfocus' => "setFriend($i);" });
-            $ret .= "</td><td>";
-            $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_fg",
-                                      'selected' => '#000000',
-                                      'onchange' => "updatePreview(); return true;",
-                                      'onfocus' => "setFriend($i);" },
-                                      map { lc($_->{'code'}), $_->{'item'} } @color );
-            $ret .= "</td><td>";
-            $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_bg",
-                                      'selected' => '#ffffff',
-                                      'onchange' => "updatePreview(); return true;",
-                                      'onfocus' => "setFriend($i);" },
-                                      map { lc($_->{'code'}), $_->{'item'} } @color );
-
-            $ret .= "</td></tr>\n";
-        }
-        $ret .= "</table></div><br />";
-
-        ### ending submit block
-        $ret .= "<?standout " . LJ::html_submit($ML{'.btn.save'}) . " standout?>\n";
-        $ret .= "</form>\n";
-
-        return $print_with_ad->($ret);
+    if ($LJ::SERVER_DOWN) {
+        return $print_with_ad->(
+            LJ::server_down_html()
+        );
     }
 
+    my $remote = LJ::get_remote();
 
-    # if they did a post, then process their changes
-    if (LJ::did_post()) {
-        return $print_with_ad->(LJ::bad_input($ML{'error.invalidform'}))
-            unless LJ::check_form_auth();
+    unless ($remote) {
+        return $print_with_ad->(
+            "<?needlogin?>"
+        );
+    }
 
-        my %request = ();
-        $request{'mode'} = "editfriends";
-        $request{'ver'} = $LJ::PROTOCOL_VER;
-        $request{'user'} = $u->user;
+    my $u;
+    my $authas;
 
-        # process the additions
-        foreach (grep { /^editfriend_add/ } keys %POST) {
-            $request{$_} = $POST{$_};
-        }
+    if ($authas = $GET{'authas'}) {
+        $u = LJ::get_authas_user($authas);
+    } else {
+        $u = $remote;
+        $authas = $remote->user;
+    }
 
-        my %friends_page_tags;
+    unless ($u) {
+        return $print_with_ad->(
+            LJ::bad_input(
+                $ML{'error.invalidauth'}
+            )
+        );
+    }
 
-        # now flip the logic and process the deletions
-        foreach (grep { /^editfriend_has/} keys %POST) {
-            my $who = $POST{$_};
-            $request{"editfriend_delete_${who}"} = 1 unless $POST{"editfriend_keep_${who}"};
-            my $who_u = LJ::load_user($who);
-        }
-        
-        # set new aliases for friends
-        if ($remote->get_cap('aliases')) {
-            my (@aliases, $error);
-            foreach my $key (keys %POST) {
-                $key =~ /^useralias_(\d+)/ or next;
-                push @aliases, ($1, $POST{$key})
+    if ($u->is_community) {
+        return BML::redirect(
+            "$LJ::SITEROOT/community/members.bml?authas=$u->{'user'}"
+        )
+    }
+
+    unless ($u->is_person || $u->is_shared || $u->is_identity) {
+        return $print_with_ad->(
+            LJ::bad_input(
+                $ML{'.error.badjournaltype'}
+            )
+        );
+    }
+
+    my $old_render_func = sub {
+         my $ret;
+
+        # no post, show edit form
+        unless (LJ::did_post()) {
+            ### who has you defined as a friend?
+            my %res = ();
+            LJ::do_request({
+                "user" => $u->{'user'},
+                "mode" => "friendof",
+                "ver" => $LJ::PROTOCOL_VER,
+            }, \%res, { "noauth" => 1, 'u' => $u });
+
+            ### who do you have defined as a friend?
+            my %resf = ();
+            LJ::do_request({
+                "user" => $u->{'user'},
+                "mode" => "getfriends",
+                "ver" => $LJ::PROTOCOL_VER,
+            }, \%resf, { "noauth" => 1, 'u' => $u });
+
+            # put it all together!
+            my %friends = ();
+
+            foreach my $i (1..$resf{'friend_count'}) {
+                my $who = $resf{"friend_${i}_user"};
+                $friends{$who} = { username => $who, rel => 'FR',  # for "friend"
+                                    map { $_ => $resf{"friend_${i}_$_"} } qw(name bg fg) };
             }
-            if (!LJ::set_alias(\@aliases, \$error)) {
-                return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $error p?>\n<ul>" . 
-                    "<li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n"
-                );
+
+            foreach my $i (1..$res{'friendof_count'}) {
+                my $who = $res{"friendof_${i}_user"};
+
+                if (defined $friends{$who}) {
+                    $friends{$who}->{'rel'} = 'M'; # for "mutual"
+                } else {
+                    $friends{$who} = { username => $who, name => $res{"friendof_${i}_name"}, rel => 'FO' };
+                }
+            }
+
+            my $sort = $GET{'sort'} || 'username';
+            my $filter = $GET{'filter'} || '';
+
+            my @friends = values %friends;
+
+            if (@friends and $filter ne '') {
+                my @friends_filtered =
+                    grep { $_->{'username'} =~ /\Q$filter\E/i } @friends;
+
+                if (@friends_filtered) {
+                    @friends = @friends_filtered;
+                } else {
+                    $ret .= '<?warningbar '
+                         .  LJ::Lang::ml('.filter.warning.no_matching_users')
+                         .  ' warningbar?>';
+                }
+            }
+
+            $ret .= "<form action=\"$LJ::SITEROOT/friends/edit.bml\" method=\"get\">";
+            $ret .= LJ::html_hidden('sort' => $sort);
+            $ret .= "<label for=\"filter\">" . LJ::Lang::ml('.filter.label')
+                 .  ":</label> ";
+            $ret .= LJ::html_text({
+                'name'  => 'filter',
+                'id'    => 'filter',
+                'value' => $filter,
+            });
+            $ret .= LJ::html_submit(LJ::Lang::ml('.filter.btn'));
+            $ret .= "</form>";
+
+            my $getextra = $authas ne $remote->user ? "?authas=$authas" : '';
+
+            $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
+            $ret .= LJ::form_auth();
+
+            ### edit friends. only show if they have friends/friend-ofs
+            if (@friends) {
+                if ($sort eq 'rel') {
+                    @friends = sort { $b->{'rel'} cmp $a->{'rel'} || $a->{'username'} cmp $b->{'username'} } @friends;
+                }
+
+                if ($sort eq 'username') {
+                    @friends = sort { $a->{'username'} cmp $b->{'username'} } @friends;
+                }
+
+                my %items = BML::paging(\@friends, $GET{'page'}, 50);
+                my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'}) || '';
+                @friends = @{$items{'items'}};
+
+                $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589'>",
+                                                                'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589'>" });
+                $ret .= " p?><div align='center'>";
+
+                $ret .= $navbar;
+
+                $ret .= "<br><table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
+
+                $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
+                $ret .= "<th width='3%'>";
+                if ($sort eq 'rel') {
+                    $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' />";
+                } else {
+                    $ret .= "<a href='". BML::self_link({'sort' => 'rel', 'page' => 1}) . "'>";
+                    $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' border='0' /></a>";
+                }
+                $ret .= "</th>";
+
+                $ret .= "<th width='30%' align='left'>";
+                if ($sort eq 'username') {
+                    $ret .= "$ML{'.editfriends.username'}";
+                } else {
+                    $ret .= "<a href='". BML::self_link({'sort' => 'username', 'page' => 1}) . "'>$ML{'.editfriends.username'}</a>";
+                }
+
+                $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
+
+                if ($remote->get_cap('aliases')) {
+                    $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
+                }
+                
+                $ret .= "<th style='text-align:left;'>$ML{'.editfriends.tagsonly'}</th>";
+                $ret .= "</tr>";
+
+                my $friends_tags = LJ::FriendsTags->load($remote);
+                
+                my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
+                foreach my $f (@friends) {
+                    my $who = $f->{'username'};
+
+                    $ret .= "<tr>";
+                    $ret .= "<td align='center'>";
+                    # non-checked checkboxes for "friend-of". checking these boxes adds the user
+                    if ($f->{'rel'} eq 'FO') {
+                        $ret .= LJ::html_check({ 'type' => 'check',
+                                                 'name' => "editfriend_add_${j}_user",
+                                                 'id' => "editfriend_add_${j}_user",
+                                                 'value' => $who });
+                    } else {
+                        # checked checkboxes for friend/mutual. unchecking these deletes the user.
+                        # protocol wants to know who we're deleting, though, so we keep a hidden field
+                        # so we can compare differences before/after
+                        $ret .= LJ::html_check({ 'type' => 'check',
+                                                 'name' => "editfriend_keep_$who",
+                                                 'id' => "editfriend_keep_$who",
+                                                 'checked' => 1} );
+                        $ret .= LJ::html_hidden("editfriend_has_${j}", "$who");
+                    }
+                    $ret .= "</td>";
+                    $ret .= "<td align='center'>";
+                    $ret .= "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589' alt='friend' title='friend'>"
+                        if $f->{'rel'} eq 'FR';
+                    $ret .= "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589' alt='friend-of' title='friend-of'>"
+                        if $f->{'rel'} eq 'FO';
+                    $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' alt='mutual friend' title='mutual friend'>"
+                        if $f->{'rel'} eq 'M';
+                    $ret .= "</td>";
+
+                    $ret .= "<td style='text-align:left;'>" . LJ::ljuser($who) . "</td>\n";
+
+                    my $colors;
+                    $colors = "color: " . $f->{'fg'} . "; " if $f->{'fg'};
+                    $colors .= "background-color: " . $f->{'bg'} . ";" if $f->{'bg'};
+                    $colors = " style='$colors'" if $colors;
+                    $colors ||= '';
+                    $ret .= "<td$colors  style='text-align:left;'>" . LJ::ehtml($f->{'name'}) . "</td>\n";
+
+                    my $who_u = LJ::load_user($who);
+                    if ($remote->get_cap('aliases')) {
+                        $ret .= "<td style='text-align: left;'>";
+                        if ($who ne $authas) {
+                            $ret .= LJ::html_text({
+                                    size => "30",
+                                    maxlength => "200",
+                                    name => "useralias_" . $who_u->{userid},
+                                    id   => "useralias_$who",
+                                    value => LJ::ljuser_alias($f->{username}),
+                                    class => "type-text",
+                                    raw => q|onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"|
+                                    });
+                        } else { 
+                            $ret .= " ";
+                        }
+                            
+                        $ret .= "</td>";
+                    }
+                    
+                    $ret .= "<td style='text-align: left;'>";
+                    my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($who_u->{userid});
+                    if ($friends{$who} && $friends{$who}->{rel} ne 'FO' && !$who_u->is_identity()) {
+                        if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
+                            my $stringify = sub {
+                                return LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
+                                           join(', ', map { LJ::ehtml($_) } @_) :
+                                           join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @_);
+                            };
+                            my $friend_tags_str;
+                            if (scalar(@$friend_tags_list) > 5) {
+                                $friend_tags_str = $stringify->(@$friend_tags_list[0..4]) . ',&nbsp;...';
+                            } else {
+                                $friend_tags_str = $stringify->(@$friend_tags_list);
+                            }
+                            $ret .= "<a href='/friends/add.bml?user=$who_u->{user}'>$friend_tags_str</a>";
+                        } else {
+                            $ret .= "(<a href='/friends/add.bml?user=$who_u->{user}'>" . BML::ml('.selecttags.text') . "</a>)";
+                        }
+                    }
+                    $ret .= "</td>";
+
+                    $ret .= "</tr>\n";
+                    $j++;
+                }
+
+                $ret .= "</table><br>";
+                $ret .= $navbar;
+                $ret .= "</div><br /><br />";
+            }
+
+            ### add friends
+            $ret .= "<?h1 $ML{'.addfriends.head'} h1?>\n";
+            $ret .= "<?p " . BML::ml('.addfriends.text', { aopts => "href='$LJ::SITEROOT/friends/invite.bml'" }) . " p?>";
+
+            $ret .= "<br />";
+            $ret .= "<div align='center'><table class='borderedtable'>\n";
+            $ret .= "<tr><td align='center'><b>$ML{'.friend'}</b></td><td align='center'><b>$ML{'.foreground'}</b></td><td align='center'><b>$ML{'.background'}</b></td>\n";
+
+            # load the colors
+            my @color = ();
+            LJ::load_codes({ "color" => \@color });
+
+            $ret .= "<td rowspan='11' valign='middle'>";
+
+            ### color swatch
+            $ret .= "<table border='0' cellspacing='0' cellpadding='0' align='center' width='100'>\n";
+            $ret .= "<tr><td colspan='5'><p align='center'><small>$ML{'.hover'}</small></p></td></tr>\n";
+            my $col = 0;
+            foreach (@color) {
+                $col = $col % 5;
+                $ret .= "<tr>\n" if $col == 0;
+
+                my $ecolor = LJ::ehtml($_->{'item'});
+                $ret .= "<td bgcolor='$_->{'code'}'><img src='/img/dot.gif?v=557' width='14' height='14' title='$ecolor' alt='$ecolor' /></td>\n";
+
+                $col++;
+                $ret .= "</tr>\n" if $col == 5;
+            }
+
+            $ret .= "</tr>\n" if ($col % 5); # close out row if we don't have a full row
+            $ret .= "</table>";
+
+            $ret .= "<p align='center'><input type='button' value='" . LJ::ehtml($ML{'.btn.toggle'}) . "' ";
+            $ret .= "onClick='togglePreview(); return true;'></p>\n";
+
+            $ret .= "</td></tr>";
+
+            foreach my $i (1..10) {
+                $ret .= "<tr><td>";
+                $ret .= LJ::html_text({ 'name' => "editfriend_add_${i}_user",
+                                        'size' => '15', 'maxlength' => '15',
+                                        'onchange' => "updatePreview(); return true;",
+                                        'onfocus' => "setFriend($i);" });
+                $ret .= "</td><td>";
+                $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_fg",
+                                          'selected' => '#000000',
+                                          'onchange' => "updatePreview(); return true;",
+                                          'onfocus' => "setFriend($i);" },
+                                          map { lc($_->{'code'}), $_->{'item'} } @color );
+                $ret .= "</td><td>";
+                $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_bg",
+                                          'selected' => '#ffffff',
+                                          'onchange' => "updatePreview(); return true;",
+                                          'onfocus' => "setFriend($i);" },
+                                          map { lc($_->{'code'}), $_->{'item'} } @color );
+
+                $ret .= "</td></tr>\n";
+            }
+            $ret .= "</table></div><br />";
+
+            ### ending submit block
+            $ret .= "<?standout " . LJ::html_submit($ML{'.btn.save'}) . " standout?>\n";
+            $ret .= "</form>\n";
+
+            return $print_with_ad->($ret);
+        }
+
+
+        # if they did a post, then process their changes
+        if (LJ::did_post()) {
+            return $print_with_ad->(LJ::bad_input($ML{'error.invalidform'}))
+                unless LJ::check_form_auth();
+
+            my %request = ();
+            $request{'mode'} = "editfriends";
+            $request{'ver'} = $LJ::PROTOCOL_VER;
+            $request{'user'} = $u->user;
+
+            # process the additions
+            foreach (grep { /^editfriend_add/ } keys %POST) {
+                $request{$_} = $POST{$_};
+            }
+
+            my %friends_page_tags;
+
+            # now flip the logic and process the deletions
+            foreach (grep { /^editfriend_has/} keys %POST) {
+                my $who = $POST{$_};
+                $request{"editfriend_delete_${who}"} = 1 unless $POST{"editfriend_keep_${who}"};
+                my $who_u = LJ::load_user($who);
+            }
+            
+            # set new aliases for friends
+            if ($remote->get_cap('aliases')) {
+                my (@aliases, $error);
+                foreach my $key (keys %POST) {
+                    $key =~ /^useralias_(\d+)/ or next;
+                    push @aliases, ($1, $POST{$key})
+                }
+                if (!LJ::set_alias(\@aliases, \$error)) {
+                    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $error p?>\n<ul>" . 
+                        "<li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n"
+                    );
+                }
+            }
+
+            my %response = ();
+            LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
+
+            if ($response{'success'} eq "OK") {
+                $ret = LJ::get_ads({ 
+                    location    => 'bml.friends.edit/main', 
+                    ljadwrapper => 1,
+                    below_ad    => LJ::CProd->full_box_for($remote, width => 300) 
+                });
+                $ret .= "<?h1 $ML{'.success.head'} h1?>";
+                $ret .= "<?p $ML{'.success.fromhere'} p?>";
+                $ret .= "<ul>";
+                $ret .= "<li><a href='" . $u->journal_base . "/friends'>$ML{'.success.friendspage'}</a></li>";
+                $ret .= "<li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li>";
+                $ret .= "<li><a href='$LJ::SITEROOT/friends/editgroups.bml'>$ML{'.success.editgroups'}</a></li>";
+                $ret .= "</ul>";
+                $ret .= LJ::Widget::GettingStarted->render;
+
+                return $ret;
+            } else {
+                return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n <ul><li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n");
             }
         }
 
-        my %response = ();
-        LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
+        return $print_with_ad->($ML{'error.unknownmode'});
+    };
 
-        if ($response{'success'} eq "OK") {
+    my $new_render_func = sub {
+        my $ret;
+
+        # if they did a post, then process their changes
+        if (LJ::did_post()) {
+            return $print_with_ad->("<?badinput?>")
+                unless LJ::text_in(\%POST);
+
+            return $print_with_ad->(LJ::bad_input($ML{'error.invalidform'}))
+                unless LJ::check_form_auth();
+            
+            # set new aliases for friends
+            if ($remote->get_cap('aliases')) {
+                my (@aliases, $error);
+
+                foreach my $key (keys %POST) {
+                    $key =~ /^useralias_(\d+)/ or next;
+                    push @aliases, ($1, $POST{$key})
+                }
+
+                if (!LJ::set_alias(\@aliases, \$error)) {
+                    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $error p?>\n<ul>" . 
+                        "<li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n"
+                    );
+                }
+            }
+
+            my $err;
+
+            while (my ($k, $v) = each %POST) {
+                if ($k =~ /^editfriend_add_\d+_user$/) {
+                    if (my $target = LJ::load_user($v)) {
+                        if ($u->can_add_friends(\$err, { friend => $target })) {
+                            $remote->add_friend($target);
+                        }
+                    }
+                }
+                if ($k =~ /^editfriend_has_\d+$/) {
+                    unless ($POST{"editfriend_keep_$v"}) {
+                        if (my $target = LJ::load_user($v)) {
+                            $remote->remove_friend($target);
+                        }
+                    }
+                }
+                if ($k =~ /^editmysubscription_add_\d+_user$/) {
+                    if (my $target = LJ::load_user($v)) {
+                        $remote->subscribe_to_user($target);
+                    }
+                }
+                if ($k =~ /^editmysubscription_has_\d+$/) {
+                    unless ($POST{"editmysubscription_keep_$v"}) {
+                        if (my $target = LJ::load_user($v)) {
+                            $remote->unsubscribe_from_user($target);
+                        }
+                    }
+                }
+            }
+
             $ret = LJ::get_ads({ 
                 location    => 'bml.friends.edit/main', 
                 ljadwrapper => 1,
@@ -376,12 +492,356 @@ body<=
             $ret .= LJ::Widget::GettingStarted->render;
 
             return $ret;
-        } else {
-            return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n <ul><li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li></ul>\n");
         }
-    }
 
-    return $print_with_ad->($ML{'error.unknownmode'});
+        # Relations:
+        #   (1) friend/friend
+        #   (2) friend/subscriber
+        #   (3) friend
+        #   (4) mysubscription/friendof
+        #   (5) mysubscription/subscriber
+        #   (6) mysubscription
+        #   (7) friendof
+        #   (8) subscriber
+
+        my $friends         = $u->friends();
+        my $friendsof       = $u->friendsof();
+        my $subscibers      = $u->subscribers();
+        my $mysubscriptions = $u->mysubscriptions();
+
+        # # put it all together!
+        my %friends2        = %$friends;
+        my %friendsof       = %$friendsof;
+        my %subscibers      = %$subscibers;
+        my %mysubscriptions = %$mysubscriptions;
+
+        my %users = (
+            %friends2,
+            %friendsof,
+            %subscibers,
+            %mysubscriptions,
+        );
+
+        my @friends;
+
+        foreach my $u (values %users) {
+            next unless $u;
+
+            my $rel = '';
+            my $who = $u->user;
+
+            next unless $who;
+
+            my $is_friend         = $remote->is_friend($u);
+            my $is_mysubscription = $remote->is_mysubscription($u);
+
+            if ($is_friend) {
+                if ($remote->is_friendof($u)) {
+                    $rel = 1;
+                } elsif ($remote->is_subscriber($u)) {
+                    $rel = 2;
+                } else {
+                    $rel = 3;
+                }
+            } elsif ($is_mysubscription) {
+                if ($remote->is_friendof($u)) {
+                    $rel = 4;
+                } elsif ($remote->is_subscriber($u)) {
+                    $rel = 5;
+                } else {
+                    $rel = 6;
+                }
+            } else {
+                if ($remote->is_friendof($u)) {
+                    $rel = 7;
+                } else {
+                    $rel = 8;
+                }
+            }
+
+            push @friends, {
+                rel               => $rel,
+                name              => $u->name,
+                username          => $who,
+                is_friend         => $is_friend,
+                is_mysubscription => $is_mysubscription
+            };
+        }
+
+        my $sort    = $GET{'sort'} || 'username';
+        my $filter  = $GET{'filter'} || '';
+
+        if (@friends and $filter ne '') {
+            my @friends_filtered = grep {
+                $_->{'username'} =~ /\Q$filter\E/i
+            } @friends;
+
+            if (@friends_filtered) {
+                @friends = @friends_filtered;
+            } else {
+                $ret .= '<?warningbar '
+                     .  LJ::Lang::ml('.filter.warning.no_matching_users')
+                     .  ' warningbar?>';
+            }
+        }
+
+        $ret .= "<form action=\"$LJ::SITEROOT/friends/edit.bml\" method=\"get\">";
+        $ret .= "<input type='hidden' name=\"sort\" value=\"$sort\" />";
+        $ret .= "<label for=\"filter\">" . LJ::Lang::ml('.filter.label') . ":</label> ";
+        $ret .= "<input type=\"text\" value=\"$filter\" name=\"filter\" id=\"filter\" />";
+        $ret .= "<input type='submit' value=\"" . LJ::Lang::ml('.filter.btn') . '" \/>';
+        $ret .= "</form>";
+
+        my $getextra = $authas ne $remote->user ? "?authas=$authas" : '';
+
+        $ret .= "<form method='post' name='editFriends' action='edit.bml$getextra'>\n";
+        $ret .= LJ::form_auth();
+
+        ### edit friends. only show if they have friends/friend-ofs
+        if (@friends) {
+            if ($sort eq 'rel') {
+                @friends = sort {
+                    $a->{'rel'} cmp $b->{'rel'} || $a->{'username'} cmp $b->{'username'}
+                } @friends;
+            }
+
+            if ($sort eq 'username') {
+                @friends = sort {
+                    $a->{'username'} cmp $b->{'username'}
+                } @friends;
+            }
+
+            my %items  = BML::paging(\@friends, $GET{'page'}, 50);
+            my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'}) || '';
+
+            @friends = @{$items{'items'}};
+
+            $ret .= "<?p " . BML::ml('.editfriends.text', {
+                    'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif?v=10589'>",
+                    'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif?v=10589'>"
+                }
+            );
+
+            $ret .= " p?><div align='center'>$navbar";
+            $ret .= "<br><table class='borderedtable b-form-changelist' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
+            $ret .= "<th width='5%'>$ML{'.editfriends.friend'}</th>";
+            $ret .= "<th width='5%'>$ML{'.editfriends.mysubscription'}</th>";
+            $ret .= "<th width='3%'>";
+
+            if ($sort eq 'rel') {
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' />";
+            } else {
+                $ret .= "<a href='". BML::self_link({'sort' => 'rel', 'page' => 1}) . "'>";
+                $ret .= "<img src='$LJ::IMGPREFIX/arrow-mutual.gif?v=10589' border='0' /></a>";
+            }
+
+            $ret .= "</th>";
+            $ret .= "<th width='30%' align='left'>";
+
+            if ($sort eq 'username') {
+                $ret .= "$ML{'.editfriends.username'}";
+            } else {
+                $ret .= "<a href='". BML::self_link({
+                    'sort' => 'username', 'page' => 1
+                }) . "'>$ML{'.editfriends.username'}</a>";
+            }
+
+            $ret .= "</th><th width='30%' style='text-align:left;'>$ML{'.editfriends.name'}</th>";
+
+            if ($remote->get_cap('aliases')) {
+                $ret .= "<th style='text-align:left;'>$ML{'.editfriends.alias'}</th>";
+            }
+            
+            $ret .= "<th style='text-align:left;'>$ML{'.editfriends.tagsonly'}</th>";
+            $ret .= "</tr>";
+
+            my $j = 11; # to uniquely distinguish 'friend-of' checkboxes, 1-10 are reserved for friend-add boxes
+            my $friends_tags = LJ::FriendsTags->load($remote);
+
+            my $err;
+
+            my $can_subscribes = $remote->can_subscsribe_to_users();
+            my $can_addfriends = $remote->can_add_friends(\$err, {no_target_check => 1});
+
+            foreach my $f (@friends) {
+                my $who = $f->{'username'};
+                my $fu = LJ::load_user($who);
+
+                $ret .= "<tr>";
+                $ret .= "<td align='center'>";
+
+                unless ($f->{is_friend}) {
+                    my $disabled = $can_addfriends ? 0 : 1;
+
+                    unless ($disabled) {
+                        unless ($remote->can_add_friend($fu)) {
+                            $disabled = 1;
+                        }
+                    }
+
+                    $ret .= LJ::html_check({
+                        'type' => 'check',
+                        'name' => "editfriend_add_${j}_user",
+                        'id' => "editfriend_add_${j}_user",
+                        'value' => $who,
+                        'disabled' => $disabled,
+                    });
+                } else {
+                    $ret .= LJ::html_check({
+                        'type' => 'check',
+                        'name' => "editfriend_keep_$who",
+                        'id' => "editfriend_keep_$who",
+                        'checked' => 1
+                    });
+                    $ret .= LJ::html_hidden(
+                        "editfriend_has_${j}", "$who"
+                    );
+                }
+
+                $ret .= "</td>";
+                $ret .= "<td align='center'>";
+
+                unless ($f->{is_mysubscription}) {
+                    my $disabled = $can_subscribes ? 0 : 1;
+
+                    unless ($disabled) {
+                        if ($remote->can_subscsribe_to_user($fu)) {
+                            $disabled = 1;
+                        }
+                    }
+
+                    $ret .= LJ::html_check({
+                        'type' => 'check',
+                        'name' => "editmysubscription_add_${j}_user",
+                        'id' => "editmysubscription_add_${j}_user",
+                        'value' => $who,
+                        'disabled' => $disabled,
+                    });
+                } else {
+                    $ret .= LJ::html_check({
+                        'type' => 'check',
+                        'name' => "editmysubscription_keep_$who",
+                        'id' => "editmysubscription_keep_$who",
+                        'checked' => 1
+                    });
+                    $ret .= LJ::html_hidden(
+                        "editmysubscription_has_${j}", "$who"
+                    );
+                }
+
+                $ret .= "</td>";
+                $ret .= "<td align='center'>";
+
+
+                if ($f->{'rel'} == 1) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-mutual-friends.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 2) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-friend-subscribers.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 3) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-friend.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 4) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-subscription-friendof.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 5) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-mutual-subscribers.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 6) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-subscription.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 7) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-friendof.gif?v=34916'>";
+                }
+
+                if ($f->{'rel'} == 8) {
+                    $ret .= "<img src='$LJ::IMGPREFIX/editusers/arrow-subscribers.gif?v=34916'>";
+                }
+                    
+                $ret .= "</td>";
+                $ret .= "<td style='text-align:left;'>" . LJ::ljuser($who) . "</td>\n";
+
+                my $colors;
+
+                $colors = "color: " . $f->{'fg'} . "; " if $f->{'fg'};
+                $colors .= "background-color: " . $f->{'bg'} . ";" if $f->{'bg'};
+                $colors = " style='$colors'" if $colors;
+                $colors ||= '';
+                $ret .= "<td$colors  style='text-align:left;'>" . LJ::ehtml($f->{'name'}) . "</td>\n";
+
+                if ($remote->get_cap('aliases')) {
+                    $ret .= "<td style='text-align: left;'>";
+
+                    if ($who ne $authas) {
+                        $ret .= LJ::html_text({
+                            size => "30",
+                            maxlength => "200",
+                            name => "useralias_" . $fu->{userid},
+                            id   => "useralias_$who",
+                            value => LJ::ljuser_alias($f->{username}),
+                            class => "type-text",
+                            raw => q|onblur="DOM[this.value==this.defaultValue?'removeClassName':'addClassName'](this, 'type-text-changed')"|
+                        });
+                    } else { 
+                        $ret .= " ";
+                    }
+                        
+                    $ret .= "</td>";
+                }
+                
+                $ret .= "<td style='text-align: left;'>";
+
+                my ($friend_tags_mode, $friend_tags_list) = $friends_tags->get_tags($fu->{userid});
+
+                if ($f && $f->{rel} != 7 && !$fu->is_identity()) {
+                    if ($friend_tags_list && ref($friend_tags_list) eq 'ARRAY' && scalar(@$friend_tags_list) > 0) {
+                        my $stringify = sub {
+                            return LJ::FriendsTags->is_allow_mode($friend_tags_mode) ?
+                                       join(', ', map { LJ::ehtml($_) } @_) :
+                                       join(', ', map { '<s>' . LJ::ehtml($_) . '</s>' } @_);
+                        };
+
+                        my $friend_tags_str;
+
+                        if (scalar(@$friend_tags_list) > 5) {
+                            $friend_tags_str = $stringify->(@$friend_tags_list[0..4]) . ',&nbsp;...';
+                        } else {
+                            $friend_tags_str = $stringify->(@$friend_tags_list);
+                        }
+
+                        $ret .= "<a href='/users/add?user=$fu->{user}'>$friend_tags_str</a>";
+                    } else {
+                        $ret .= "(<a href='/users/add?user=$fu->{user}'>" . BML::ml('.selecttags.text') . "</a>)";
+                    }
+                }
+
+                $ret .= "</td></tr>\n";
+
+                $j++;
+            }
+
+            $ret .= "</table><br>$navbar</div><br /><br />";
+        }
+
+        ### ending submit block
+        $ret .= "<?standout " . LJ::html_submit($ML{'.btn.save'}) . " standout?>\n";
+        $ret .= "</form>\n";
+
+        return $print_with_ad->($ret);
+    };
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        return $new_render_func->();
+    } else {
+        return $old_render_func->();
+    }
 }
 _code?>
 <=body

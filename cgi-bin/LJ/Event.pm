@@ -77,8 +77,10 @@ sub new {
     my ($class, $u, @args) = @_;
     confess("too many args")        if @args > 4;
 
+    my $userid = LJ::want_userid($u);
+
     return bless {
-        userid => LJ::want_userid($u),
+        userid => $userid,
         args   => \@args,
         user   => $u,
     }, $class;

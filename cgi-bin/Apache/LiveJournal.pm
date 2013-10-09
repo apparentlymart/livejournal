@@ -244,6 +244,11 @@ sub handler
         LJ::work_report_start();
     }
 
+    # checks redirects
+    if (my $url = LJ::Router->check_redirects) {
+        return redir($url);
+    }
+
     # try to match controller
     LJ::Router->match_controller;
     if ( my $controller = LJ::Request->notes('controller') ) {
@@ -406,10 +411,8 @@ sub trans {
     ## request.
     if ($is_ssl) {
         $LJ::IMGPREFIX = '/img';
-        $LJ::STATPREFIX = '/stc';
     } else {
         $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
-        $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
         $LJ::USERPIC_ROOT = $LJ::USERPICROOT_BAK if $LJ::USERPICROOT_BAK;
     }
 
@@ -2004,6 +2007,8 @@ sub journal_content
         }
     }
 
+    LJ::SocialScripts::addToPage();
+
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {
         my $args = LJ::Request->args;
@@ -2180,7 +2185,6 @@ sub journal_content
     my $before_body_close = "";
 
     LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
-    $before_body_close .=  LJ::SocialScripts::load_scripts();
     LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close);
     {
         my $journalu = LJ::load_user($user);

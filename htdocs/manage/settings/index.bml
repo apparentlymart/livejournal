@@ -453,6 +453,8 @@ body<=
                 'PollVote-u',
                 'Befriended-u',
                 'Defriended-u',
+                'Subscribed-u',
+                'Unsubscribed-u',
                 'UserMessageRecvd-u',
             ]),
             'u' => $u,

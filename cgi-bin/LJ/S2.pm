@@ -2574,6 +2574,12 @@ sub UserLite {
     return LJ::S2::UserLite($u);
 }
 
+sub User {
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return LJ::S2::User($u);
+}
+
 sub UserExtended {
     my ($ctx,$username) = @_;
     my $u = LJ::load_user($username);

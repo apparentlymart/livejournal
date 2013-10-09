@@ -1068,6 +1068,9 @@ function builtin PalItem(int index, Color c) : PalItem
 function builtin UserLite(string username) : UserLite
 "Constructor for making a UserLite object from a username";
 
+function builtin User(string username) : User
+"Constructor for making a User object from a username";
+
 function builtin UserExtended(string username) : UserExtended
 "Constructor for making a UserExtended object from a username";
 

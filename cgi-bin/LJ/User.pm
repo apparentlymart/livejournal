@@ -4660,8 +4660,21 @@ sub is_memorial {
     return $u->statusvis eq 'M';
 }
 
+sub cluster_info {
+    my $cid = shift;
+    my $block_id = 'cluster_config.rc';
+    my $block = LJ::ExtBlock->load_by_id($block_id, {cache_valid => 15});
+    return ($block && $block->data->{$cid}) ? $block->data->{$cid} : {};
+}
+
 sub is_readonly {
     my $u = shift;
+
+    unless ( $LJ::IS_DEV_SERVER ) {
+        my $c = cluster_info($u->clusterid);
+        return 1 unless exists $c->{'active'};
+    }
+
     return $u->statusvis eq 'O';
 }
 
@@ -8786,30 +8799,6 @@ sub userpic_count {
 }
 
 # <LJFUNC>
-# name: LJ::_friends_do
-# des: Runs given SQL, then deletes the given userid's friends from memcache.
-# args: uuserid, sql, args
-# des-uuserid: a userid or u object
-# des-sql: SQL to run via $dbh->do()
-# des-args: a list of arguments to pass use via: $dbh->do($sql, undef, @args)
-# returns: return false on error
-# </LJFUNC>
-sub _friends_do {
-    my ($uuid, $sql, @args) = @_;
-    my $uid = want_userid($uuid);
-    return undef unless $uid && $sql;
-
-    my $dbh = LJ::get_db_writer() or return 0;
-
-    my $ret = $dbh->do($sql, undef, @args);
-    return 0 if $dbh->err;
-
-    LJ::memcache_kill($uid, "friends");
-
-    return 1;
-}
-
-# <LJFUNC>
 # name: LJ::add_friend
 # des: Simple interface to add a friend edge.
 # args: uuid, to_add, opts?
@@ -8818,91 +8807,44 @@ sub _friends_do {
 #                    'groupmask' key means use this group mask
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
+#
+#   DONT PUT ANY LOGIC IN THIS METHOD
+#   ALL IN LJ::User::Relations::Friends::remove_friend
+#
 sub add_friend {
-    my ($userid, $to_add, $opts) = @_;
+    my ($u, $targets, $opts) = @_;
 
-    $userid = LJ::want_userid($userid);
-    return 0 unless $userid;
+    $u = LJ::want_user($u);
 
-    my @add_ids = ref $to_add eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_add : ( LJ::want_userid($to_add) );
-    return 0 unless @add_ids;
+    return 0 unless $u;
+    return 0 unless $targets;
 
-    # clean widget cache
-    my $widget_key = "friend_birthdays:" . $userid;
-    LJ::MemCache::delete($widget_key);
+    if (ref $targets eq 'ARRAY') {
+        my @ids = map {
+            LJ::want_userid($_)
+        } @$targets;
 
-    my $friender = LJ::load_userid($userid);
-
-    # check action rate
-    ## TODO: rate check of adding friends needs PM elaboration
-    ## Remove '1 ||' when specification is complete  
-    unless (1 || $opts->{no_rate_check}){
-        my $cond = ["ratecheck:add_friend:$userid",
-                    [ $LJ::ADD_FRIEND_RATE_LIMIT || [ 1, 3600 ] ]
-                   ];
-        return 0 unless LJ::RateLimit->check($friender, [ $cond ]);
+        if (@ids) {
+           LJ::load_userids(@ids);  
+        }
+    } else {
+        $targets = [$targets];
     }
 
-    my $sclient  = LJ::theschwartz();
+    my $cnta = 0;
+    my $cntt = scalar @$targets;
 
-    my $fgcol = LJ::color_todb($opts->{'fgcolor'}) || LJ::color_todb("#000000");
-    my $bgcol = LJ::color_todb($opts->{'bgcolor'});
-    # in case the background color is #000000, in which case the || falls through
-    # so only overwrite what we got if what we got was undef (invalid input)
-    $bgcol = LJ::color_todb("#ffffff") unless defined $bgcol;
+    foreach my $target (@$targets) {
+        $target = LJ::want_user($target);
 
-    $opts ||= {};
+        next unless $target;
 
-    my $groupmask = 1;
-    if (defined $opts->{groupmask}) {
-        $groupmask = $opts->{groupmask};
-    } elsif ($opts->{'defaultview'}) {
-        # TAG:FR:ljlib:add_friend_getdefviewmask
-        my $group = LJ::get_friend_group($userid, { name => 'Default View' });
-        my $grp = $group ? $group->{groupnum}+0 : 0;
-        $groupmask |= (1 << $grp) if $grp;
+        if ($u->add_friend($target, $opts)) {
+            $cnta++;
+        }
     }
 
-    # part of the criteria for whether to fire befriended event
-    my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
-                 && $friender->is_visible && $friender->is_person;
-
-
-    # load all users at once
-    LJ::load_userids(@add_ids);
-    foreach my $add_id (@add_ids) {
-        LJ::RelationService->create_relation_to(
-            $friender, $add_id, 'F', 
-            groupmask => $groupmask, 
-            fgcolor   => $fgcol,
-            bgcolor   => $bgcol,
-        );
-
-        my $friendee = LJ::load_userid($add_id);
-        LJ::add_to_friend_list($friender, $friendee);
-         __drop_short_lifetime_cache($friender, $friendee);
-
-        if ($sclient) {
-            my @jobs;
-
-            # only fire event if the friender is a person and not banned and visible
-            if ($notify && !$friendee->is_banned($friender)) {
-                require LJ::Event::BefriendedDelayed;
-                LJ::Event::BefriendedDelayed->send($friendee, $friender);
-            }
-
-            push @jobs, TheSchwartz::Job->new(
-                                              funcname => "LJ::NewWorker::TheSchwartz::FriendChange",
-                                              arg      => [$userid, 'add', $add_id],
-                                              ) unless $LJ::DISABLED{'friendchange-schwartz'};
-
-            $sclient->insert_jobs(@jobs) if @jobs;
-
-       }
-    }
-
-    # WARNING: always returns "true". Check result of executing "REPLACE INTO friends ..." statement above.
-    return 1;
+    return $cnta > 0 ? 1 : 0;
 }
 
 # <LJFUNC>
@@ -8912,56 +8854,46 @@ sub add_friend {
 # des-to_del: a single uuid or an arrayref of uuids to remove.
 # returns: boolean
 # </LJFUNC>
+#
+#   DONT PUT ANY LOGIC IN THIS METHOD
+#   ALL IN LJ::User::Relations::Friends::remove_friend
+#
 sub remove_friend {
-    my ($userid, $to_del, $opts) = @_;
+    my ($u, $targets, $opts) = @_;
 
-    $userid = LJ::want_userid($userid);
-    return undef unless $userid;
+    $u = LJ::want_user($u);
 
-    my @del_ids = ref $to_del eq 'ARRAY' ? map { LJ::want_userid($_) } @$to_del : ( LJ::want_userid($to_del) );
-    return 0 unless @del_ids;
+    return 0 unless $u;
+    return 0 unless $targets;
 
-    my $u = LJ::load_userid($userid);
+    if (ref $targets eq 'ARRAY') {
+        my @ids = map {
+            LJ::want_userid($_)
+        } @$targets;
 
-    my $dbh = LJ::get_db_writer() or return 0;
-
-    my $sclient = LJ::theschwartz();
-    # part of the criteria for whether to fire defriended event
-    my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify} && $u->is_visible && $u->is_person;
-
-    foreach my $del_id (@del_ids) {
-        LJ::RelationService->remove_relation_to( $u, $del_id, 'F' );
+        if (@ids) {
+           LJ::load_userids(@ids);  
+        }
+    } else {
+        $targets = [$targets];
     }
 
-    LJ::load_userids(@del_ids); 
-    # delete friend-of memcache keys for anyone who was removed
-    foreach my $fid (@del_ids) {
-        my $friendee = LJ::load_userid($fid);
+    my $cntr = 0;
+    my $cntt = scalar @$targets;
 
-        LJ::remove_from_friend_list($u, $friendee);
-        __drop_short_lifetime_cache($u, $friendee);
+    foreach my $target (@$targets) {
+        $target = LJ::want_user($target);
 
-        if ($sclient) {
-            my @jobs;
+        next unless $target;
 
-            # only fire event if the friender is a person and not banned and visible
-            if ($notify && !$friendee->has_banned($u)) {
-                require LJ::Event::DefriendedDelayed;
-                LJ::Event::DefriendedDelayed->send($friendee, $u);
-            }
-
-            push @jobs, TheSchwartz::Job->new(
-                                              funcname => "LJ::NewWorker::TheSchwartz::FriendChange",
-                                              arg      => [$userid, 'del', $fid],
-                                              ) unless $LJ::DISABLED{'friendchange-schwartz'};
- 
-            $sclient->insert_jobs(@jobs);
-
+        if ($u->remove_friend($target, $opts)) {
+            $cntr++;
         }
     }
 
-    return 1;
+    return $cntr > 0 ? 1 : 0;
 }
+
 *delete_friend_edge = \&LJ::remove_friend;
 
 sub __drop_short_lifetime_cache {

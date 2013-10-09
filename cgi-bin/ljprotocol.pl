@@ -27,6 +27,7 @@ use Class::Autouse qw(
                       LJ::MemCacheProxy
                       LJ::Entry::Repost
                       LJ::Tags
+                      LJ::User::FriendGroups
                       );
 
 use LJ::TimeUtil;
@@ -532,31 +533,37 @@ sub checksession {
     }
 }
 
-sub addcomment
-{
+sub addcomment {
     my ($req, $err, $flags) = @_;
-    
+
     $flags->{allow_anonymous} = 1;
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'addcomment');
+
     my $u = $flags->{'u'};
 
-    return fail($err,200,"body") unless($req->{body});
-    return fail($err,200,"ditemid") unless($req->{ditemid});
-    return fail($err,200,"journal/journalid") unless($u || $req->{journal} || $req->{journalid});
+    return fail($err, 318) if $u && $u->is_readonly;
+    return fail($err, 200, "body") unless($req->{body});
+    return fail($err, 200, "ditemid") unless($req->{ditemid});
+    return fail($err, 200, "journal/journalid") unless($u || $req->{journal} || $req->{journalid});
 
     my $journal;
     if ($req->{journal}) {
         return fail($err,100) unless LJ::canonical_username($req->{journal});
+
         $journal = LJ::load_user($req->{journal}) or return fail($err, 100);
         return fail($err,226)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
-    } elsif ( $req->{journalid} ) {
+    }
+    elsif ( $req->{journalid} ) {
         $journal = LJ::load_userid($req->{journalid}) or return fail($err, 100);
         return fail($err,226)
             if LJ::Talk::Post::require_captcha_test($u, $journal, $req->{body}, $req->{ditemid});
-    } else {
+    }
+    else {
         $journal = $u;
     }
+
+    return fail($err, 318) if $journal && $journal->is_readonly;
 
     # some additional checks
     return fail($err,214) if LJ::Comment->is_text_spam( \ $req->{body} );
@@ -4792,72 +4799,66 @@ sub getrepoststatus {
     return $result;
 }
 
-sub editfriends
-{
+#
+#   DONT PUT ANY RELATION LOGIC IN THIS METHOD
+#   ALL IN LJ::User::Relations::Friends::remove_friend
+#
+sub editfriends {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editfriends');
 
-    my $u = $flags->{'u'};
+    my $u      = $flags->{'u'};
     my $userid = $u->{'userid'};
-    my $dbh = LJ::get_db_writer();
-    my $sth;
-
-    return fail($err,306) unless $dbh;
 
     # do not let locked people do this
     return fail($err, 308) if $u->{statusvis} eq 'L';
 
-#
-# Do not have values for $LJ::ADD_FRIEND_RATE_LIMIT
-#
-#    # check action frequency
-#    unless ($flags->{no_rate_check}){
-#        my $cond = ["ratecheck:add_friend:$userid",
-#                    [ $LJ::ADD_FRIEND_RATE_LIMIT || [ 10, 600 ] ]
-#                   ];
-#        return fail($err, 411)
-#            unless LJ::RateLimit->check($u, [ $cond ]);
-#    }
+    my $dbh = LJ::get_db_writer();
+
+    return fail($err,306) unless $dbh;
 
     my $res = {
         xc3 => {
             u => $u
-        }
+        },
+        added => [
+        ],
     };
 
     ## first, figure out who the current friends are to save us work later
-    my %curfriend;
-    my $friend_count = 0;
+    my $error_flag      = 0;
+    my $friend_count    = 0;
     my $friends_changed = 0;
 
-    # TAG:FR:protocol:editfriends1
-    $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
-                         "WHERE u.userid=f.friendid AND f.userid=$userid");
-    $sth->execute;
-    while (my ($friend) = $sth->fetchrow_array) {
-        $curfriend{$friend} = 1;
-        $friend_count++;
-    }
-    $sth->finish;
+    $friend_count = $dbh->selectrow_array(qq[
+            SELECT
+                COUNT(*)
+            FROM
+                useridmap u,
+                friends f
+            WHERE
+                u.userid = f.friendid
+            AND
+                f.userid = ?
+        ],
+        undef,
+        $userid
+    );
 
     # perform the deletions
   DELETEFRIEND:
-    foreach (@{$req->{'delete'}})
-    {
-        my $deluser = LJ::canonical_username($_);
-        next DELETEFRIEND unless ($curfriend{$deluser});
+    foreach my $username (@{$req->{'delete'}}) {
+        next unless $username;
 
-        my $friendid = LJ::get_userid($deluser);
-        # TAG:FR:protocol:editfriends2_del
-        LJ::remove_friend($userid, $friendid);
-        $friend_count--;
-        $friends_changed = 1;
+        if (my $friend = LJ::load_user($username)) {
+            if ($u->remove_friend($friend)) {
+                $friend_count--;
+                $friends_changed = 1;
+            }
+        }
     }
 
-    my $error_flag = 0;
-    my $friends_added = 0;
     my $fail = sub {
-        LJ::memcache_kill($userid, "friends");
         return fail($err, $_[0], $_[1]);
     };
 
@@ -4872,149 +4873,131 @@ sub editfriends
     return $fail->(305, 'xmlrpc.des.suspended_add_friend')
         if ($u->is_suspended);
 
-     my $sclient = LJ::theschwartz();
-
     # perform the adds
   ADDFRIEND:
-    foreach my $fa (@{$req->{'add'}})
-    {
+    foreach my $fa (@{$req->{'add'}}) {
         unless (ref $fa eq "HASH") {
-            $fa = { 'username' => $fa };
+            $fa = {
+                'username' => $fa
+            };
         }
 
-        my $aname = LJ::canonical_username($fa->{'username'});
-        unless ($aname) {
+        my $fg    = $fa->{'fgcolor'} || "#000000";
+        my $bg    = $fa->{'bgcolor'} || "#FFFFFF";
+        my $gmask = $fa->{'groupmask'};
+
+        if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i) {
+            return $fail->(203, 'xmlrpc.des.bad_value', {'param'=>'color'});
+        }
+
+        # force bit 0 on.
+        $gmask |= 1;
+
+        my $row = LJ::load_user(
+            $fa->{username}
+        );
+
+        unless ($row) {
             $error_flag = 1;
             next ADDFRIEND;
         }
 
-        $friend_count++ unless $curfriend{$aname};
+        if ($u->is_friend($row)) {
+            $u->update_friend(
+                $row,
+                fgcolor   => LJ::color_todb($fg),
+                bgcolor   => LJ::color_todb($bg),
+                groupmask => $gmask
+            );
+            next ADDFRIEND;
+        }
+
+        if ($row->{'statusvis'} ne "V") {
+            $error_flag = 1;
+            next ADDFRIEND;
+        }
+
+        if ($row->{'journaltype'} eq "R") {
+            return $fail->(154);
+        }
 
         my $err;
+
         return $fail->(104, "$err")
             unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count, friend => $fa });
 
-        my $fg = $fa->{'fgcolor'} || "#000000";
-        my $bg = $fa->{'bgcolor'} || "#FFFFFF";
-        if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i) {
-            return $fail->(203, 'xmlrpc.des.bad_value',{'param'=>'color'});
+        my $opts = {
+            fgcolor   => $fg,
+            bgcolor   => $bg,
+            groupmask => $gmask
+        };
+
+        unless ($u->add_friend($row, $opts)) {
+            next ADDFRIEND;
         }
 
-        my $row = LJ::load_user($aname);
-        my $currently_is_friend = LJ::is_friend($u, $row);
-        my $currently_is_banned = LJ::is_banned($u, $row);
+        $friend_count++;
+        $friends_changed = 1;
 
-        # XXX - on some errors we fail out, on others we continue and try adding
-        # any other users in the request. also, error message for redirect should
-        # point the user to the redirected username.
-        if (! $row) {
-            $error_flag = 1;
-        } elsif ($row->{'journaltype'} eq "R") {
-            return $fail->(154);
-        } elsif ($row->{'statusvis'} ne "V") {
-            $error_flag = 1;
-        } else {
-            $friends_added++;
-            my $added = { 'username'    => $aname,
-                          'fullname'    => $row->{'name'},
-                          'journaltype' => $row->{journaltype},
-                          'defaultpicurl' => ($row->{'defaultpicid'} && "$LJ::USERPIC_ROOT/$row->{'defaultpicid'}/$row->{'userid'}"),
-                          'fgcolor'     => $fg,
-                          'bgcolor'     => $bg,
-                      };
-            if ($req->{'ver'} >= 1) {
-                LJ::text_out(\$added->{'fullname'});
-            }
+        my $added = {
+            'fgcolor'       => $fg,
+            'bgcolor'       => $bg,
+            'username'      => LJ::canonical_username(
+                $fa->{username}
+            ),
+            'fullname'      => $row->{'name'},
+            'groupmask'     => $gmask,
+            'journaltype'   => $row->{journaltype},
+            'defaultpicurl' => (
+                $row->{'defaultpicid'} && "$LJ::USERPIC_ROOT/$row->{'defaultpicid'}/$row->{'userid'}"
+            ),
+        };
 
-            if ($row->identity) {
-                my $i = $row->identity;
+        if ($req->{'ver'} >= 1) {
+            LJ::text_out(
+                \$added->{'fullname'}
+            );
+        }
+
+        if ($row->identity) {
+            if (my $i = $row->identity) {
+                $added->{'identity_url'} = $i->url($row);
                 $added->{'identity_type'} = $i->pretty_type;
                 $added->{'identity_value'} = $i->value;
-                $added->{'identity_url'} = $i->url($row);
                 $added->{'identity_display'} = $row->display_name;
             }
-            $added->{"type"} = {
+        }
+
+        if ($row->{'journaltype'} ne 'P') {
+            $added->{type} = {
                 'C' => 'community',
                 'Y' => 'syndicated',
                 'N' => 'news',
                 'S' => 'shared',
                 'I' => 'identity',
-            }->{$row->{'journaltype'}} if $row->{'journaltype'} ne 'P';
-
-            my $qfg = LJ::color_todb($fg);
-            my $qbg = LJ::color_todb($bg);
-
-            my $friendid = $row->{'userid'};
-
-            my $gmask = $fa->{'groupmask'};
-            if (! $gmask && $curfriend{$aname}) {
-                # if no group mask sent, use the existing one if this is an existing friend
-                # TAG:FR:protocol:editfriends3_getmask
-                my $sth = $dbh->prepare("SELECT groupmask FROM friends ".
-                                        "WHERE userid=$userid AND friendid=$friendid");
-                $sth->execute;
-                $gmask = $sth->fetchrow_array;
-            }
-            # force bit 0 on.
-            $gmask |= 1;
-
-            $added->{groupmask} = $gmask;
-            push @{$res->{'added'}}, $added;
-
-            # TAG:FR:protocol:editfriends4_addeditfriend
-            my $cnt = $dbh->do("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
-                               "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
-            return $fail->(501,$dbh->errstr) if $dbh->err;
-
-            if ($cnt == 1) {
-                LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
-                LJ::User->increase_friendsof_counter($friendid);
-            }
-
-            my $memkey = [$userid,"frgmask:$userid:$friendid"];
-            LJ::MemCacheProxy::set($memkey, $gmask+0, time()+60*15);
-            LJ::memcache_kill($friendid, 'friendofs');
-            LJ::memcache_kill($friendid, 'friendofs2');
-
-            if ($sclient && !$currently_is_friend && !$currently_is_banned) {
-
-                # For Profile
-                my $friender = LJ::load_userid($userid);
-                my $friendee = LJ::load_userid($friendid);
-
-                $friender->clear_cache_friends($friendee);
-
-                ## delay event to accumulate users activity
-                require LJ::Event::BefriendedDelayed;
-                LJ::Event::BefriendedDelayed->send(
-                                                    $friendee,  ## to user
-                                                    $friender   ## from user
-                                                    );
-                my @jobs;
-                push @jobs, TheSchwartz::Job->new(
-                                                  funcname => "LJ::Worker::FriendChange",
-                                                  arg      => [$userid, 'add', $friendid],
-                                                  ) unless $LJ::DISABLED{'friendchange-schwartz'};
-
-                $sclient->insert_jobs(@jobs) if @jobs;
-            }
-            $friends_changed = 1;
+            }->{
+                $row->{'journaltype'}
+            };
         }
+
+        push @{
+            $res->{'added'}
+        }, $added;
     }
 
     return $fail->(104) if $error_flag;
 
-    # invalidate memcache of friends
-    LJ::memcache_kill($userid, "friends");
-    LJ::memcache_kill($userid, "friends2");
-
-    LJ::run_hooks('friends_changed', LJ::load_userid($userid)) if $friends_changed;
+    if ($friends_changed) {
+        LJ::run_hooks(
+            'friends_changed',
+            LJ::load_userid($userid)
+        );
+    }
 
     return $res;
 }
 
-sub editfriendgroups
-{
+sub editfriendgroups {
     my ($req, $err, $flags) = @_;
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'editfriendgroups');
 
@@ -5040,19 +5023,10 @@ sub editfriendgroups
     $req->{'delete'} = [] unless
         (ref $req->{'delete'} eq "ARRAY");
 
-    # Keep track of what bits are already set, so we can know later
-    # whether to INSERT or UPDATE.
-    my %bitset;
-    my $groups = LJ::get_friend_group($userid);
-    foreach my $bit (keys %{$groups || {}}) {
-        $bitset{$bit} = 1;
-    }
-
     ## before we perform any DB operations, validate input text
     # (groups' names) for correctness so we can fail gracefully
     if ($LJ::UNICODE) {
-        foreach my $bit (keys %{$req->{'set'}})
-        {
+        foreach my $bit (keys %{$req->{'set'}}) {
             my $name = $req->{'set'}->{$bit}->{'name'};
             return fail($err,207,'xmlrpc.des.not_ascii')
                 if $req->{'ver'} < 1 and not LJ::is_ascii($name);
@@ -5061,22 +5035,22 @@ sub editfriendgroups
         }
     }
 
-    ## figure out deletions we'll do later
-    foreach my $bit (@{$req->{'delete'}})
-    {
-        $bit += 0;
-        next unless ($bit >= 1 && $bit <= 30);
-        $bitset{$bit} = 0;  # so later we replace into, not update.
-    }
-
     ## do additions/modifications ('set' hash)
     my %added;
-    foreach my $bit (keys %{$req->{'set'}})
-    {
+    my @foradd = ();
+
+    foreach my $bit (keys %{$req->{'set'}}) {
         $bit += 0;
+
         next unless ($bit >= 1 && $bit <= 30);
-        my $sa = $req->{'set'}->{$bit};
-        my $name = LJ::text_trim($sa->{'name'}, $bmax, $cmax);
+
+        my $sa   = $req->{'set'}->{$bit};
+
+        next unless $sa;
+
+        my $name   = LJ::text_trim($sa->{'name'}, $bmax, $cmax);
+        my $sort   = defined $sa->{'sort'} ? ($sa->{'sort'}+0) : 50;
+        my $public = defined $sa->{'public'} ? ($sa->{'public'}+0) : 0;
 
         # can't end with a slash
         $name =~ s!/$!!;
@@ -5087,104 +5061,48 @@ sub editfriendgroups
             next;
         }
 
-        my $qname = $db->quote($name);
-        my $qsort = defined $sa->{'sort'} ? ($sa->{'sort'}+0) : 50;
-        my $qpublic = $db->quote(defined $sa->{'public'} ? ($sa->{'public'}+0) : 0);
-
-        if ($bitset{$bit}) {
-            # so update it
-            my $sets;
-            if (defined $sa->{'public'}) {
-                $sets .= ", is_public=$qpublic";
-            }
-            $db->do("UPDATE $fgtable SET groupname=$qname, sortorder=$qsort ".
-                    "$sets WHERE userid=$userid AND groupnum=$bit");
-        } else {
-            $db->do("REPLACE INTO $fgtable (userid, groupnum, ".
-                    "groupname, sortorder, is_public) VALUES ".
-                    "($userid, $bit, $qname, $qsort, $qpublic)");
-        }
         $added{$bit} = 1;
+
+        push @foradd, {
+            id     => $bit,
+            sort   => $sort,
+            name   => $name,
+            public => $public,
+        };
     }
 
+    LJ::User::FriendGroups->update_groups(
+        $u, \@foradd
+    );
 
-    ## do deletions ('delete' array)
-    my $dbcm = LJ::get_cluster_master($u);
+    my @fordelete = grep {
+        ! $added{$_}
+    } @{
+        $req->{'delete'}
+    };
 
-    # ignore bits that aren't integers or that are outside 1-30 range
-    my @delete_bits = grep {$_ >= 1 and $_ <= 30} map {$_+0} @{$req->{'delete'}};
-    my $delete_mask = 0;
-    foreach my $bit (@delete_bits) {
-        $delete_mask |= (1 << $bit)
-    }
+    LJ::User::FriendGroups->remove_groups(
+        $u, \@fordelete
+    );
 
-    # remove the bits for deleted groups from all friends groupmasks
-    my $dbh = LJ::get_db_writer();
-    if ($delete_mask) {
-        # TAG:FR:protocol:editfriendgroups_removemasks
-        $dbh->do("UPDATE friends".
-                 "   SET groupmask = groupmask & ~$delete_mask".
-                 " WHERE userid = $userid");
-    }
+    my @forupdate = ();
 
-    foreach my $bit (@delete_bits)
-    {
-        # remove all posts from allowing that group:
-        my @posts_to_clean = ();
-        $sth = $dbcm->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
-        $sth->execute;
-        while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
-        while (@posts_to_clean) {
-            my @batch;
-            if (scalar(@posts_to_clean) < 20) {
-                @batch = @posts_to_clean;
-                @posts_to_clean = ();
-            } else {
-                @batch = splice(@posts_to_clean, 0, 20);
-            }
-
-            my $in = join(",", @batch);
-            LJ::run_hooks('report_entry_update', $userid, \@batch);
-            $u->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
-                   "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
-            $u->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
-                   "WHERE journalid=$userid AND jitemid IN ($in)");
-
-            foreach my $id (@batch) {
-                LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
-            }
-            LJ::MemCache::delete([$userid, "log2lt:$userid"]);
-        }
-        LJ::Tags::deleted_friend_group($u, $bit);
-
-        LJ::load_user_props($u, 'pp_transallow');
-
-        $u->set_prop( 'pp_transallow' => -1 )
-            if $bit == $u->{pp_transallow};
-
-        # remove the friend group, unless we just added it this transaction
-        unless ($added{$bit}) {
-            $db->do("DELETE FROM $fgtable WHERE ".
-                    "userid=$userid AND groupnum=$bit");
-        }
-    }
-
-    ## change friends' masks
-    # TAG:FR:protocol:editfriendgroups_changemasks
-    foreach my $friend (keys %{$req->{'groupmasks'}})
-    {
-        my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
+    foreach my $friend (keys %{$req->{'groupmasks'}}) {
+        my $mask     = int($req->{'groupmasks'}->{$friend}) | 1;
         my $friendid = LJ::get_userid($friend);
 
-        $dbh->do("UPDATE friends SET groupmask=$mask ".
-                 "WHERE userid=$userid AND friendid=?",
-                 undef, $friendid);
-        LJ::MemCacheProxy::set([$userid, "frgmask:$userid:$friendid"], $mask);
+        next unless $mask;
+        next unless $friendid;
+
+        push @forupdate, {
+            id => $friendid,
+            groupmask => $mask,
+        };
     }
 
-    # invalidate memcache of friends/groups
-    LJ::memcache_kill($userid, "friends");
-    LJ::memcache_kill($userid, "fgrp");
+    LJ::User::FriendGroups->update_users_groupmask(
+        $u, \@forupdate
+    );
 
     # return value for this is nothing.
     return {
@@ -5537,10 +5455,14 @@ sub list_friendgroups
     # group sortorder; also note that the map is used to construct a new hashref
     # out of the old group hashref so that we have all of the field names converted
     # to a format our callers can recognize
-    my @res = map { { id => $_->{groupnum},      name => $_->{groupname},
-                      public => $_->{is_public}, sortorder => $_->{sortorder}, } }
-              sort { $a->{sortorder} <=> $b->{sortorder} }
-              values %$groups;
+    my @res = map {{
+        id => $_->{groupnum},
+        name => $_->{groupname},
+        public => $_->{is_public},
+        sortorder => $_->{sortorder},
+    }} sort {
+        $a->{sortorder} <=> $b->{sortorder}
+    } values %$groups;
 
     return \@res;
 }

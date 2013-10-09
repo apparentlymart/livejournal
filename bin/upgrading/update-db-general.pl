@@ -326,6 +326,7 @@ CREATE TABLE `comet_history` (
 )
 EOC
 
+=unused
 register_tablecreate('comm_promo_list', <<'EOC');
 CREATE TABLE `comm_promo_list` (
   `journalid` int(10) unsigned NOT NULL,
@@ -334,7 +335,9 @@ CREATE TABLE `comm_promo_list` (
   KEY `r_start` (`r_start`)
 )
 EOC
+=cut
 
+=unused
 register_tablecreate('commenturls', <<'EOC');
 CREATE TABLE `commenturls` (
   `posterid` int(10) unsigned NOT NULL,
@@ -346,6 +349,7 @@ CREATE TABLE `commenturls` (
   KEY `timecreate` (`timecreate`)
 )
 EOC
+=cut
 
 register_tablecreate('commenturlsext', <<'EOC');
 CREATE TABLE `commenturlsext` (
@@ -1397,6 +1401,7 @@ CREATE TABLE `openid_endpoint` (
 )
 EOC
 
+=unused
 register_tablecreate('openid_external', <<'EOC');
 CREATE TABLE `openid_external` (
   `userid` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1404,6 +1409,7 @@ CREATE TABLE `openid_external` (
   KEY `userid` (`userid`)
 )
 EOC
+=cut
 
 register_tablecreate('openid_trust', <<'EOC');
 CREATE TABLE `openid_trust` (
@@ -1834,6 +1840,7 @@ CREATE TABLE `random_user_set` (
 )
 EOC
 
+=unused
 register_tablecreate('rateabuse', <<'EOC');
 CREATE TABLE `rateabuse` (
   `rlid` tinyint(3) unsigned NOT NULL,
@@ -1846,6 +1853,7 @@ CREATE TABLE `rateabuse` (
   KEY `ip` (`ip`)
 )
 EOC
+=cut
 
 register_tablecreate('ratelist', <<'EOC');
 CREATE TABLE `ratelist` (
@@ -1908,6 +1916,25 @@ CREATE TABLE `reluser2` (
   `targetid` int(10) unsigned NOT NULL,
   PRIMARY KEY (`userid`,`type`,`targetid`),
   KEY `userid` (`userid`,`targetid`)
+)
+EOC
+
+# clustered subscribers
+register_tablecreate('subscribers2', <<'EOC');
+CREATE TABLE `subscribers2` (
+  `userid` int(10) unsigned NOT NULL DEFAULT '0',
+  `subscriptionid` int(10) unsigned NOT NULL DEFAULT '0',
+  `filtermask` int(10) unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`userid`,`subscriptionid`)
+)
+EOC
+
+# clustered subscribers inverse
+register_tablecreate('subscribersleft', <<'EOC');
+CREATE TABLE `subscribersleft` (
+  `subscriptionid` int(10) unsigned NOT NULL DEFAULT '0',
+  `userid` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`subscriptionid`,`userid`)
 )
 EOC
 
@@ -2067,6 +2094,7 @@ CREATE TABLE `s2styles` (
 )
 EOC
 
+=unused
 register_tablecreate('sch_error', <<'EOC');
 CREATE TABLE `sch_error` (
   `error_time` int(10) unsigned NOT NULL,
@@ -2078,6 +2106,7 @@ CREATE TABLE `sch_error` (
   KEY `funcid` (`funcid`,`error_time`)
 )
 EOC
+=cut
 
 register_tablecreate('sch_exitstatus', <<'EOC');
 CREATE TABLE `sch_exitstatus` (
@@ -2119,6 +2148,7 @@ CREATE TABLE `sch_job` (
 )
 EOC
 
+=unused
 register_tablecreate('sch_mass_error', <<'EOC');
 CREATE TABLE `sch_mass_error` (
   `error_time` int(10) unsigned NOT NULL,
@@ -2128,6 +2158,7 @@ CREATE TABLE `sch_mass_error` (
   KEY `jobid` (`jobid`)
 )
 EOC
+=cut
 
 register_tablecreate('sch_mass_exitstatus', <<'EOC');
 CREATE TABLE `sch_mass_exitstatus` (
@@ -3570,7 +3601,9 @@ post_create("comminterests",
             );
 
 register_tabledrop("ibill_codes");
+=unused
 register_tabledrop("paycredit");
+=cut
 register_tabledrop("payments");
 register_tabledrop("tmp_contributed");
 register_tabledrop("transferinfo");
@@ -4017,12 +4050,14 @@ register_alter(sub {
                 "AFTER posterid");
     }
 
+=unused
     if (column_type("commenturls", "ip") eq '') {
         do_alter("commenturls",
                 "ALTER TABLE commenturls " .
                 "ADD ip VARCHAR(15) DEFAULT NULL " .
                 "AFTER journalid");
     }
+=cut
 
     if (column_type("sessions", "exptype") !~ /once/) {
         do_alter("sessions",
@@ -4161,9 +4196,11 @@ register_alter(sub {
                  "ADD INDEX (etypeid, journalid)");
     }
 
+=unused
     unless (column_type("sch_error", "funcid")) {
         do_alter("sch_error", "alter table sch_error add funcid int(10) unsigned NOT NULL default 0, add index (funcid, error_time)");
     }
+=cut
 
     unless (column_type("sch_exitstatus", "funcid")) {
         do_alter("sch_exitstatus", "alter table sch_exitstatus add funcid INT UNSIGNED NOT NULL DEFAULT 0, add index (funcid)");
@@ -4441,11 +4478,13 @@ register_alter(sub {
                  "MODIFY jtalkid INT UNSIGNED NOT NULL");
     }
 
+=unused
     if (column_type("commenturls", "jtalkid") =~ /mediumint/) {
         do_alter("commenturls",
                  "ALTER TABLE commenturls " .
                  "MODIFY jtalkid INT UNSIGNED NOT NULL");
     }
+=cut
 
     # add an index on 'country' column
     unless (index_name("schools_pending", "INDEX:country")) {

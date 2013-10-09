@@ -53,7 +53,7 @@ use MIME::Words qw//;
 # <LJFUNC>
 # name: LJ::send_mail
 # des: Sends email.  Character set will only be used if message is not ASCII.
-# args: opt, async_caller
+# args: opt
 # des-opt: Hashref of arguments.  Required: to, from, subject, body.
 #          Optional: toname, fromname, cc, bcc, charset, wrap, html.
 #          All text must be in UTF-8 (without UTF flag, as usual in LJ code).
@@ -67,7 +67,6 @@ use MIME::Words qw//;
 # </LJFUNC>
 sub send_mail {
     my $opt = shift;
-    my $async_caller = shift;
 
     init();
 
@@ -213,16 +212,28 @@ sub send_mail {
     ##  Ok. We've tried to avoid this... But delayed sending.
     ##  Deligate this job to SendMail worker.   
 
-    return _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt )
-        if $opt->{'force_schwartz'};
+    return _send_via_schwartz(
+        from  => $from,
+        rcpts => \@rcpts,
+        text  => $message_text,
+        opt   => $opt,
+    ) if $opt->{'force_schwartz'};
 
-    @rcpts = _send_now( from => $from, rcpts => \@rcpts, text => $message_text )
-        if !LJ::is_web_context();
+    @rcpts = _send_now(
+        from  => $from,
+        rcpts => \@rcpts,
+        text  => $message_text,
+    ) if !LJ::is_web_context();
 
     ## Do we still have someone to notify?
     return 1 unless @rcpts;
 
-    return _send_via_schwartz( from => $from, rcpts => \@rcpts, text => $message_text, opt => $opt );
+    return _send_via_schwartz(
+        from  => $from,
+        rcpts => \@rcpts,
+        text  => $message_text,
+        opt   => $opt,
+    );
 }
 
 sub _send_via_schwartz {
@@ -250,19 +261,24 @@ sub _send_via_schwartz {
     ## reduce memory usage on TheSchwartz clusters
     my $compressed_text = Compress::Zlib::memGzip($text);
 
-    my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
-                                    arg      => {
-                                        env_from => $from,
-                                        rcpts    => $rcpts,
-                                        data     => $compressed_text,
-                                        compressed => 1,
-                                    },
-                                    coalesce => $coalesce,
-                                    );
+    my $job = TheSchwartz::Job->new(
+        funcname => "TheSchwartz::Worker::SendEmail",
+        priority => $opt->{'priority'} || 0,
+        arg      => {
+            env_from => $from,
+            rcpts    => $rcpts,
+            data     => $compressed_text,
+            compressed => 1,
+        },
+        coalesce => $coalesce,
+    );
     my $h = $sclient->insert($job);
 
-    LJ::blocking_report( 'the_schwartz', 'send_mail',
-                         Time::HiRes::tv_interval($starttime));
+    LJ::blocking_report(
+        'the_schwartz',
+        'send_mail',
+        Time::HiRes::tv_interval($starttime),
+    );
 
     return $h ? 1 : 0;
 }

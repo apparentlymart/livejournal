@@ -44,7 +44,7 @@
 
 			updateQuestionNav();
 
-			top.LJ.DOM.injectStyle('<?statprefix?>/js/ck/skins/v2/dialog.css?t=' + (top.Site ? top.Site.version : ''), window);
+			top.LJ.injectStyle('<?statprefix?>/js/ck/skins/v2/dialog.css?t=' + (top.Site ? top.Site.version : ''), window);
 		};
 
 		function insertQandA(add_answers, switch_answers, q_num, poll){

@@ -723,7 +723,7 @@ sub do_join_community {
     # friend user -> comm
     if ($friend) {
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
-            $u->subscribe_to_user($c)
+            $u->subscribe_to_user($c, nonotify => 1)
         } else {
             # don't do the work if they already friended the comm
             unless ($u->has_friend($c)) {

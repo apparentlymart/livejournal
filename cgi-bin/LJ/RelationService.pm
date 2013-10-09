@@ -1,5 +1,12 @@
 package LJ::RelationService;
 
+#############################################
+#
+#   NEED OPTIMIZATION FOR PROCESS CACHE !!!
+#
+#############################################
+
+
 use strict;
 use warnings;
 
@@ -93,19 +100,20 @@ sub find_relation_sources {
     my %opts  = @_;
 
     $u = LJ::want_user($u);
+
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
     if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
+        if (my $alt = $class->rs_api($u)) {
             $alt->find_relation_sources($u, $type, %opts);
         }
     }
 
     my $interface = $class->mysql_api($u);
-    return $interface->find_relation_sources($u, $type, %opts);
-   
+    my @result    = $interface->find_relation_sources($u, $type, %opts);
+
+    return @result;
 }
 
 sub load_relation_destinations {
@@ -115,21 +123,24 @@ sub load_relation_destinations {
     my %opts  = @_;
 
     $u = LJ::want_user($u);
+
     return undef unless $u;
 
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
     if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
+        if (my $alt = $class->rs_api($u)) {
             $alt->load_relation_destinations($u, $type, %opts);
         }
     }
 
     my $interface = $class->mysql_api($u);
+    my $result    = $interface->load_relation_destinations($u, $type, %opts);
+
     delete $singletons{$u->userid};
-    return $interface->load_relation_destinations($u, $type, %opts);
+
+    return $result;
 }
 
 sub create_relation_to {
@@ -152,8 +163,10 @@ sub create_relation_to {
     }
 
     my $interface = $class->mysql_api($u);
-    my $result = $interface->create_relation_to($u, $friend, $type, %opts);
+    my $result    = $interface->create_relation_to($u, $friend, $type, %opts);
+
     delete $singletons{$u->userid}->{$friend->userid};
+
     return $result;
 }
 
@@ -203,10 +216,6 @@ sub is_relation_to {
         return undef unless $u && $friend && $type;
     }
 
-    return $singletons{$u->{userid}}->{$friend->{userid}}->{$type}
-        if exists $singletons{$u->{userid}}->{$friend->{userid}}->{$type} && 
-                    !%opts && LJ::Request->is_inited;
-
     if ($class->_load_rs_api('read', $type)) {
         my $alt = $class->rs_api($u);
         if ($alt) {
@@ -215,9 +224,9 @@ sub is_relation_to {
     }
 
     my $interface = $class->mysql_api($u);
-    my $relation = $interface->is_relation_to($u, $friend, $type, %opts);   
-    $singletons{$u->{userid}}->{$friend->{userid}}->{$type} = $relation;
-    return $relation;
+    my $result    = $interface->is_relation_to($u, $friend, $type, %opts);   
+
+    return $result;
 }
 
 sub is_relation_type_to {
@@ -247,39 +256,79 @@ sub is_relation_type_to {
 sub get_groupmask {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my %opts   = @_;
     
-    my $type = $opts{type} || 'F';
-    
-    $u = LJ::want_user($u);
-    $friend = LJ::want_user($friend);
-    
-    return 0 unless $u && $friend && $type;
+    $u      = LJ::want_user($u);
+    $target = LJ::want_user($target);
 
-    return $singletons{$u->userid}->{$friend->userid}->{gmask}
-        if exists $singletons{$u->userid}->{$friend->userid}->{gmask} && 
+    return 0 unless $u;
+    return 0 unless $target;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    return $singletons{$uid}->{$tid}->{F}->{groupmask}
+        if exists $singletons{$uid}->{$tid}->{F}->{groupmask} && 
                     !%opts && LJ::Request->is_inited;
 
-    if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
-            $alt->get_groupmask($u, $friend, $type, %opts);
+    if ($class->_load_rs_api('read', 'F')) {
+        if (my $alt = $class->rs_api($u)) {
+            $alt->find_relation_attributes($u, $target, 'F', %opts);
         }
     }
 
     my $interface = $class->mysql_api($u);
-    my $result = $interface->get_groupmask($u, $friend, %opts);
-    $singletons{$u->userid}->{$friend->userid}->{gmask} = $result;
-    return $result;
+    my $result    = $interface->find_relation_attributes($u, $target, 'F', %opts);
+
+    unless ($result) {
+        return 0;
+    }
+
+    $result->{groupmask} ||= 1;
+
+    $singletons{$uid}->{$tid}->{F} = $result;
+
+    return $result->{groupmask};
 }
 
 sub get_filtermask {
-    my $class = shift;
-    my $u     = shift;
-    my $user  = shift;
-    my %opts  = @_;
-    return 1;
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    return $singletons{$uid}->{$tid}->{R}->{filtermask}
+        if exists $singletons{$uid}->{$tid}->{R}->{filtermask} && 
+                    !%opts && LJ::Request->is_inited;
+
+    if ($class->_load_rs_api('read', 'R')) {
+        if (my $alt = $class->rs_api($u)) {
+            $alt->find_relation_attributes($u, $target, 'R', %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api($u);
+    my $result    = $interface->find_relation_attributes($u, $target, 'R', %opts);
+
+    unless ($result) {
+        return 0;
+    }
+
+    $result->{filtermask} ||= 1;
+
+    $singletons{$uid}->{$tid}->{R} = $result;
+
+    return $result->{filtermask};
 }
 
 sub delete_and_purge_completely {
@@ -358,6 +407,52 @@ sub find_relation_attributes {
 
     my $interface = $class->mysql_api($u);
     return $interface->find_relation_attributes($u, $friend, $type, %opts);    
+}
+
+sub update_relation_attributes {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    return 0 unless $u;
+    return 0 unless $type;
+    return 0 unless $target;
+
+    if ($class->_load_rs_api('update', $type)) {
+        if (my $alt = $class->rs_api($u)) {
+            $alt->update_relation_attributes($u, $target, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api($u);
+    my $result    = $interface->update_relation_attributes($u, $target, $type, %opts);
+
+    return $result;
+}
+
+# Special methods which destroy architectural logic but are necessary for productivity
+
+sub update_relation_attribute_mask_for_all {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    return 0 unless $u;
+    return 0 unless $type;
+
+    if ($class->_load_rs_api('update', $type)) {
+        if (my $alt = $class->rs_api($u)) {
+            $alt->update_relation_attribute_mask_for_all($u, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api($u);
+    my $result    = $interface->update_relation_attribute_mask_for_all($u, $type, %opts);
+
+    return $result;
 }
 
 1;

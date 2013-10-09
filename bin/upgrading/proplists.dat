@@ -758,6 +758,14 @@ userproplist.opt_hidefriendofs:
   multihomed: 0
   prettyname: Hide Friend-Of List
 
+userproplist.opt_hidesubscribers:
+  cldversion: 4
+  datatype: bool
+  des: 0: show subscribers, 1: hide subscribers
+  indexed: 0
+  multihomed: 0
+  prettyname: Hide Subscribers List
+
 userproplist.opt_hidememberofs:
   cldversion: 4
   datatype: bool

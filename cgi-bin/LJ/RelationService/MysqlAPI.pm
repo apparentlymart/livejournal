@@ -1,5 +1,15 @@
 package LJ::RelationService::MysqlAPI;
 
+############################################################
+#
+#        WE NEED REALIZE SMART CACHING 
+#
+# See uin _get_rel_memcache and _set_rel_memcache in ljrelation.pl
+# it has to be the good decision in order that not invalidate in large quantities a cache
+# or move to rs :)
+#
+############################################################
+
 use strict;
 use warnings;
 
@@ -9,11 +19,15 @@ use Readonly;
 # Internal modules
 use LJ::MemCacheProxy;
 
-Readonly my $MEMCACHE_REL_KEY_PREFIX  => 'rel';
-Readonly my $MEMCACHE_RELS_KEY_PREFIX => 'rels';
+Readonly my $MEMCACHE_REL_TIMECACHE     => 3600;
+Readonly my $MEMCACHE_RELS_TIMECACHE    => 2 * 86400;
+Readonly my $MEMCACHE_RELSOF_TIMECACHE  => 2 * 86400;
+Readonly my $MEMCACHE_REL_KEY_PREFIX    => 'rel';
+Readonly my $MEMCACHE_RELS_KEY_PREFIX   => 'rels';
+Readonly my $MEMCACHE_RELSOF_KEY_PREFIX => 'relsof';
 
-Readonly my $FRIEND_DATA_PACK_FORMAT  => "NH6H6NC";
-Readonly my $MAX_SIZE_FOR_PACK_STRUCT => 950 * 1024; # 950Kb
+Readonly my $MAX_SIZE_FOR_PACK_STRUCT    => 950 * 1024; # 950Kb
+Readonly my $MAX_COUNT_FOR_CACHE_REL_IDS => 200000;
 
 ##
 sub create_relation_to {
@@ -38,12 +52,16 @@ sub _create_relation_to_type_f {
     my $target = shift;
     my %opts   = @_;
 
-    my $dbh = LJ::get_db_writer();
-
-    return unless $dbh;
-
     my $uid = $u->id;
     my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    my $dbh = LJ::get_db_writer();
+
+    return 0 unless $dbh;
+
     my $cnt = $dbh->do(qq[
             REPLACE INTO friends  (
                 userid, friendid, fgcolor, bgcolor, groupmask
@@ -60,7 +78,7 @@ sub _create_relation_to_type_f {
     );
 
     if ($dbh->err) {
-        die "create_relation_to error: " . $dbh->errstr;
+        return 0;
     }
 
     # invalidate memcache of friends
@@ -70,17 +88,16 @@ sub _create_relation_to_type_f {
     LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
 
-    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid" ]);
+    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
 
-    LJ::User->increase_friendsof_counter($tid);
-
-    $u->clear_cache_friends($target);
-
-    LJ::run_hooks('befriended', $u, $target);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
     
-    return $cnt;
+    return 1;
 }
 
+# Maybe in this method we must use transaction,
+# because we write into 2 table and its an atomic action
 sub _create_relation_to_type_r {
     my $class  = shift;
     my $u      = shift;
@@ -105,18 +122,6 @@ sub _create_relation_to_type_r {
     return 0 unless $dbhu;
     return 0 unless $dbht;
 
-    my $same_cluster = ($cidu == $cidt ? 1 : 0);
-
-    $dbhu->{AutoCommit} = 0;
-    $dbht->{AutoCommit} = 0;
-
-    if ($same_cluster) {
-        $dbhu->begin_work;
-    } else {
-        $dbhu->begin_work;
-        $dbht->begin_work;
-    }
-
     my $cntu = $dbhu->do(qq[
             REPLACE INTO subscribers2 (
                 userid, subscriptionid, filtermask
@@ -130,6 +135,10 @@ sub _create_relation_to_type_r {
         $args{filtermask}
     );
 
+    if ($dbhu->err) {
+        return 0;
+    }
+
     my $cntt = $dbht->do(qq[
             REPLACE INTO subscribersleft (
                 subscriptionid, userid
@@ -142,34 +151,12 @@ sub _create_relation_to_type_r {
         $uid
     );
 
-    my $ok  = ($cntu && $cntt ? 1 : 0);
-    my $err = $dbhu->err || $dbht->err;
-
-    if ($err) {
-        $ok = 0;
-    }
-
-    if ($ok) {
-        if ($same_cluster) {
-            $dbhu->commit;
-        } else {
-            $dbhu->commit;
-            $dbht->commit;
-        }
-    } else {
-        if ($same_cluster) {
-            $dbhu->rollback;
-        } else {
-            $dbhu->rollback;
-            $dbht->rollback;
-        }
-    }
-
-    return 0 unless $ok;
-
     # Invalidate user cache
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+
+    # Invalidate target cache
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$tid"]);
 
     return 1;
 }
@@ -233,32 +220,52 @@ sub remove_relation_to {
 sub _remove_relation_to_type_f {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
 
-    my $dbh = LJ::get_db_writer() 
-        or return 0;
+    my $uid = $u->id;
+    my $tid = $target->id;
 
-    my $cnt = $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?",
-                        undef, $u->userid, $friend->userid);
+    return 0 unless $uid;
+    return 0 unless $tid;
 
-    if (!$dbh->err && $cnt > 0) {
-        LJ::run_hooks('defriended', $u, $friend);
-        LJ::User->decrease_friendsof_counter($friend->userid);
+    my $dbh = LJ::get_db_writer();
 
-        # delete friend-of memcache keys for anyone who was removed
-        LJ::MemCacheProxy::delete([ $u->userid, "frgmask:" . $u->userid . ":" . $friend->userid ]);
-        LJ::memcache_kill($friend->userid, 'friendofs');
-        LJ::memcache_kill($friend->userid, 'friendofs2');
+    return 0 unless $dbh;
 
-        LJ::memcache_kill($u->userid, 'friends');
-        LJ::memcache_kill($u->userid, 'friends2');
+    my $cnt = $dbh->do(qq[
+            DELETE FROM
+                friends
+            WHERE
+                userid = ?
+            AND
+                friendid = ?
+        ],
+        undef,
+        $uid,
+        $tid
+    );
 
-        $u->clear_cache_friends($friend);
+    if ($dbh->err) {
+        return 0;
     }
 
-    return $cnt;
+    # invalidate memcache of friends
+    LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
+
+    LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
+
+    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
+
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+
+    return 1;
 }
 
+# Maybe in this method we must use transaction,
+# because we write into 2 table and its an atomic action
 sub _remove_relation_to_type_r {
     my $class  = shift;
     my $u      = shift;
@@ -282,18 +289,6 @@ sub _remove_relation_to_type_r {
     return 0 unless $dbhu;
     return 0 unless $dbht;
 
-    my $same_cluster = ($cidu == $cidt ? 1 : 0);
-
-    $dbhu->{AutoCommit} = 0;
-    $dbht->{AutoCommit} = 0;
-
-    if ($same_cluster) {
-        $dbhu->begin_work;
-    } else {
-        $dbhu->begin_work;
-        $dbht->begin_work;
-    }
-
     my $cntu = $dbhu->do(qq[
             DELETE FROM
                 subscribers2
@@ -307,47 +302,29 @@ sub _remove_relation_to_type_r {
         $tid
     );
 
+    if ($dbhu->err) {
+        return 0;
+    }
+
     my $cntt = $dbht->do(qq[
             DELETE FROM
                 subscribersleft
             WHERE
                 subscriptionid = ?
             AND
-                useid = ?
+                userid = ?
         ],
         undef,
         $tid,
         $uid
     );
 
-    my $ok = ($cntu && $cntt ? 1 : 0);
-    my $err = $dbhu->err || $dbht->err;
-
-    unless ($err) {
-        $ok = 1;
-    }
-
-    if ($ok) {
-        if ($same_cluster) {
-            $dbhu->commit;
-        } else {
-            $dbhu->commit;
-            $dbht->commit;
-        }
-    } else {
-        if ($same_cluster) {
-            $dbhu->rollback;
-        } else {
-            $dbhu->rollback;
-            $dbht->rollback;
-        }
-    }
-
-    return 0 unless $ok;
-
     # Invalidate user cache
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+
+    # Invalidate target cache
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$tid"]);
 
     return 1;
 }
@@ -722,8 +699,10 @@ sub find_relation_sources {
     my $type  = shift;
     my %opts  = @_;
 
-    if ( $type eq 'F' ) {
+    if ($type eq 'F') {
         return $class->_find_relation_sources_type_f($u, %opts);
+    } elsif ($type eq 'R') {
+        return $class->_find_relation_sources_type_r($u, %opts);
     } else {
         return $class->_find_relation_sources_type_other($u, $type, %opts);
     }
@@ -738,6 +717,82 @@ sub _find_relation_sources_type_f {
                         limit     => $opts{limit}, 
                         mode      => "friendofs",
                         );
+    return @$uids;
+}
+
+sub _find_relation_sources_type_r {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $dbh = LJ::get_cluster_master($u);
+
+    return unless $dbh;
+
+    my $limit  = int($opts{limit});
+    my $memkey = [$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$uid"];
+
+    if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+        my ($slimit, @uids) = unpack("N*", $pack);
+        # value in memcache is good if stored limit (from last time)
+        # is >= the limit currently being requested.  we just may
+        # have to truncate it to match the requested limit
+
+        if ($slimit >= $limit) {
+            if (scalar @uids > $limit) {
+                return @uids[0..$limit-1];
+            }
+
+            return @uids;
+        }
+
+        # value in memcache is also good if number of items is less
+        # than the stored limit... because then we know it's the full
+        # set that got stored, not a truncated version.
+        return @uids if @uids < $slimit;
+    }
+
+    my $uids = $dbh->selectcol_arrayref(qq[
+            SELECT
+                userid
+            FROM
+                subscribersleft
+            WHERE
+                subscriptionid = ?
+            LIMIT
+                0, $limit
+        ],
+        undef,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    # We cant cache more then 200000 (~ 1MB)
+    if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+        splice @$uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @$uids;
+    }
+
+    ## do not cache if $nolimit option is in use,
+    ## because with disabled limit we might put in the cache
+    ## much more data than usually required.
+
+    my $pack = pack 'N*', ($limit, @$uids);
+
+    if ($pack) {
+        if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+            warn "TO MUCH pack. max count must be less";
+        } else {
+            LJ::MemCacheProxy::set($memkey, $pack, $MEMCACHE_RELSOF_TIMECACHE);
+        }
+    }
+
     return @$uids;
 }
 
@@ -813,9 +868,14 @@ sub _friend_friendof_uids {
         # is >= the limit currently being requested.  we just may
         # have to truncate it to match the requested limit
 
-        if ($slimit >= $limit) {
-            @uids = @uids[0..$limit-1] if @uids > $limit;
-            return \@uids;
+        if ($limit) {
+            if ($slimit >= $limit) {
+                if (@uids > $limit) {
+                    @uids = @uids[0..$limit-1];
+                }
+
+                return \@uids;
+            }
         }
 
         # value in memcache is also good if number of items is less
@@ -839,30 +899,48 @@ sub _friend_friendof_uids {
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
 
     if (not $nolimit and $uids and @$uids){
+        # We cant cache more then 200000 (~ 1MB)
+        if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+            splice @$uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @$uids;
+        }
+
         ## do not cache if $nolimit option is in use,
         ## because with disabled limit we might put in the cache
         ## much more data than usually required.
 
-        # if the list of uids is greater than 950k
-        # -- slow but this definitely works
-        my $pack = pack("N*", $limit);
-        foreach (@$uids) {
-            last if length $pack > $MAX_SIZE_FOR_PACK_STRUCT;
-            $pack .= pack("N*", $_);
-        }
+        my $pack = pack 'N*', ($limit, @$uids);
 
-        ## memcached
-        LJ::MemCache::add($memkey, $pack, 3600);
+        if ($pack) {
+            if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+                warn "TO MUCH pack. max count must be less";
+            } else {
+                LJ::MemCacheProxy::set($memkey, $pack, 3600);
+            }
+        }
     }
 
     return $uids;
 }
 
-## friends rows
 sub load_relation_destinations {
     my $class = shift;
     my $u     = shift;
     my $type  = shift;
+    my %args  = @_;
+
+    if ($type eq 'F') {
+        return $class->_load_relation_destinations_f($u, %args);
+    } elsif ($type eq 'R') {
+        return $class->_load_relation_destinations_r($u, %args);
+    }
+
+    return {}
+}
+
+## friends rows
+sub _load_relation_destinations_f {
+    my $class = shift;
+    my $u     = shift;
     my %args  = @_;
 
     die 'Expected parameter $u LJ::RelationService::MysqlAPI::load_relation_destinations()' unless $u;
@@ -911,7 +989,6 @@ sub load_relation_destinations {
     # memcache data info
     my $ver = 1;
     my $memkey = [$userid, "friends:$userid"];
-    my $packlen = 15;  # bytes
 
     # columns we're selecting
     my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
@@ -924,11 +1001,10 @@ sub load_relation_destinations {
     $sth->execute($userid);
     die $dbh->errstr if $dbh->err;
     while (my @row = $sth->fetchrow_array) {
-
         # convert color columns to hex
         $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
 
-        my $newpack = pack($FRIEND_DATA_PACK_FORMAT, @row);
+        my $newpack = pack('NH6H6NC', @row);
         last if length($mempack) + length($newpack) > $MAX_SIZE_FOR_PACK_STRUCT;
 
         $mempack .= $newpack;
@@ -947,7 +1023,7 @@ sub load_relation_destinations {
         }
     }
 
-    LJ::MemCache::add($memkey, $mempack);
+    LJ::MemCache::set($memkey, $mempack);
 
     # finished with lock, release it
     $release_lock->();
@@ -955,84 +1031,124 @@ sub load_relation_destinations {
     return \%friends;
 }
 
-sub _get_friends_memc {
-    my $class  = shift;
-    my $userid = shift
-        or Carp::croak("no userid to _get_friends_db");
-    my $mask = shift;
+sub _load_relation_destinations_r {
+    my $class = shift;
+    my $u     = shift;
+    my %args  = @_;
 
-    # memcache data version
-    my $ver = 1;
-    my $packlen = 15;  # bytes
+    my $uid = $u->id;
 
-    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
+    return unless $uid;
 
-    # first, check memcache
-    my $memkey = [$userid, "friends:$userid"];
+    my %res  = ();
+    my $key  = [$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"];
+    my @data = ();
 
-    my $memfriends = LJ::MemCache::get($memkey);
-    return undef unless $memfriends;
+    if (my $val = LJ::MemCacheProxy::get($key)) {
+        @data = unpack 'N*', $val;
+    } else {
+        return if $args{memcache_only};
 
-    my %friends; # rows to be returned
+        my $dbh = LJ::get_cluster_master($u);
 
-    # first byte of object is data version
-    # only version 1 is meaningful right now
-    my $memver = substr($memfriends, 0, 1, '');
-    return undef unless $memver == $ver;
+        return unless $dbh;
 
-    # get each $packlen-byte row
-    while (length($memfriends) >= $packlen) {
-        my @row = unpack($FRIEND_DATA_PACK_FORMAT, substr($memfriends, 0, $packlen, ''));
+        my $name = "$MEMCACHE_RELS_KEY_PREFIX:R:$uid";
+        my $lock = LJ::get_lock($dbh, "user", $name);
 
-        # don't add into %friends hash if groupmask doesn't match
-        next if $mask && ! ($row[3]+0 & $mask+0);
+        return unless $lock;
 
-        # add "#" to beginning of colors
-        $row[$_] = "\#$row[$_]" foreach 1..2;
+        # in lock, try memcache
+        if (my $val = LJ::MemCacheProxy::get($key)) {
+            @data = unpack 'N*', $val;
+        } else {
+            my $data = $dbh->selectcol_arrayref(qq[
+                    SELECT
+                        subscriptionid, filtermask
+                    FROM
+                        subscribers2
+                    WHERE
+                        userid = ?
+                ],
+                {
+                    Columns => [1,2]
+                },
+                $uid
+            );
 
-        # turn unpacked row into hashref
-        my $fid = $row[0];
-        my $idx = 1;
-        foreach my $col (@cols[1..$#cols]) {
-            $friends{$fid}->{$col} = $row[$idx];
-            $idx++;
+            if ($dbh->err) {
+                return;
+            }
+
+            @data = @$data;
+
+            my $pack = pack 'N*', @data;
+
+            if ($pack) {
+                LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
+            }
+        }
+
+        LJ::release_lock($dbh, "user", $name);
+    }
+
+    my $filters      = $args{filters} || {};
+    my $filtrate     = 0;
+    my $f_filtermask = $filters->{filtermask};
+
+    {
+        $filtrate = 1, last if $f_filtermask;
+    }
+
+    if ($filtrate) {
+        $f_filtermask += 0;
+
+        for (my $i = 0; $i < $#data; $i += 2) {
+            next unless $f_filtermask & $data[$i+1];
+
+            $res{$data[$i]} = {
+                filtermask => $data[$i+1]
+            };
+        }
+    } else {
+        for (my $i = 0; $i < $#data; $i += 2) {
+            $res{$data[$i]} = {
+                filtermask => $data[$i+1]
+            };
         }
     }
 
-    # got from memcache, return
-    return \%friends;
+    return \%res;
 }
 
-sub get_groupmask {
+sub _get_friends_memc {
     my $class  = shift;
-    my $u      = shift;
-    my $friend = shift;
-    my %opts   = @_;
-    
-    return 0 unless $u && $friend;
- 
-    my $jid = LJ::want_userid($u);
-    my $fid = LJ::want_userid($friend);
-    return 0 unless $jid && $fid;
+    my $uid    = shift;
+    my $mask   = shift;
 
-    my $memkey = [$jid,"frgmask:$jid:$fid"];
-    my $mask = LJ::MemCacheProxy::get($memkey);
-    unless (defined $mask) {
-        my $dbw = LJ::get_db_writer();
-        die "No database reader available" unless $dbw;
+    return unless $uid;
 
-        $mask = $dbw->selectrow_array("SELECT groupmask FROM friends ".
-                                      "WHERE userid=? AND friendid=?",
-                                      undef, $jid, $fid);
+    my %res = ();
+    my $val = LJ::MemCache::get([$uid, "friends:$uid"]);
 
-        unless (defined $mask) {
-            $mask = 0;
-        }
+    return undef unless $val;
 
-        LJ::MemCacheProxy::set($memkey, $mask+0, time()+60*15);
+    $val =~ s/^\d//;
+
+    my @data = unpack '(NH6H6NC)*', $val;
+
+    for (my $i = 0; $i < $#data; $i += 5) {
+        next if $mask && ! ($data[$i+3]+0 & $mask+0);
+
+        $res{$data[$i]} = {
+            fgcolor       => '#' . $data[$i+1],
+            bgcolor       => '#' . $data[$i+2],
+            groupmask     => $data[$i+3],
+            showbydefault => $data[$i+4],
+        };
     }
 
-    return $mask+0;  # force it to a numeric scalar
+    return \%res;
 }
 
 sub find_relation_attributes {
@@ -1071,10 +1187,10 @@ sub _find_relation_attributes_r {
 
     # Check memcache
     if (my $val = LJ::MemCacheProxy::get($key)) {
-        $val = unpack 'N', $val;
+        my @vals = unpack 'N', $val;
 
         return {
-            filtermask => $val
+            filtermask => $vals[0]
         };
     }
 
@@ -1102,10 +1218,10 @@ sub _find_relation_attributes_r {
 
     return unless $row;
 
-    my $val = pack 'N', $row->{filtermask};
+    my $pack = pack 'N', $row->{filtermask};
 
-    if ($val) {
-        LJ::MemCacheProxy::set($key, $val);
+    if ($pack) {
+        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
     }
 
     return $row;
@@ -1122,6 +1238,19 @@ sub _find_relation_attributes_f {
 
     return undef unless $uid;
     return undef unless $tid;
+
+    my $key = [$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"];
+
+    # Check memcache
+    if (my $val = LJ::MemCacheProxy::get($key)) {
+        my @vals = unpack 'NNN', $val;
+
+        return {
+            bgcolor   => $vals[1],
+            fgcolor   => $vals[2],
+            groupmask => $vals[0]
+        };
+    }
 
     my $dbh = LJ::get_db_writer();
 
@@ -1144,7 +1273,143 @@ sub _find_relation_attributes_f {
         $tid
     );
 
+    return unless $row;
+
+    my $pack = pack 'NNN', (
+        $row->{groupmask},
+        $row->{fgcolor},
+        $row->{bgcolor}
+    );
+
+    if ($pack) {
+        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
+    }
+
     return $row;
+}
+
+
+sub update_relation_attributes {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    return 0 unless $u;
+    return 0 unless $target;
+
+    if ($type eq 'F') {
+        return $class->_update_relation_attributes_f($u, $target, %opts);
+    } elsif ($type eq 'R') {
+        return $class->_update_relation_attributes_r($u, $target, %opts);
+    }
+
+    return 0;
+}
+
+sub _update_relation_attributes_f {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    my $dbh = LJ::get_db_writer();
+
+    return 0 unless $dbh;
+
+    my @sets = ();
+    my @vals = ();
+
+    foreach my $attr (qw(fgcolor bgcolor groupmask)) {
+        if (exists $opts{$attr}) {
+            push @sets, "$attr = ?";
+            push @vals, $opts{$attr};
+        }
+    }
+
+    return 1 unless @sets;
+    return 1 unless @vals;
+
+    my $sets = join ',', @sets;
+
+    my $cnt = $dbh->do(qq[
+            UPDATE
+                friends
+            SET
+                $sets
+            WHERE
+                userid = ?
+            AND
+                friendid = ?
+        ],
+        undef,
+        @vals,
+        $uid,
+        $tid
+    );
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    # invalidate memcache of friends
+    LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    
+    return 1;
+}
+
+sub _update_relation_attributes_r {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+    return 0 unless $opts{filtermask};
+
+    my $dbh = LJ::get_cluster_master($u);
+
+    return 0 unless $dbh;
+
+    my $cnt = $dbh->do(qq[
+            UPDATE
+                subscribers2
+            SET
+                filtermask = ?
+            WHERE
+                userid = ?
+            AND
+                subscriptionid = ?
+        ],
+        undef,
+        $opts{filtermask},
+        $uid,
+        $tid
+    );
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    # Invalidate
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+
+    return $cnt;
 }
 
 sub delete_and_purge_completely {
@@ -1155,10 +1420,20 @@ sub delete_and_purge_completely {
     return unless $u;
     
     my $dbh = LJ::get_db_writer();
-    $dbh->do("DELETE FROM reluser WHERE userid=?", undef, $u->id);
-    $dbh->do("DELETE FROM friends WHERE userid=?", undef, $u->id);
-    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
-    $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
+
+    if ($dbh) {
+        $dbh->do("DELETE FROM reluser WHERE userid=?", undef, $u->id);
+        $dbh->do("DELETE FROM friends WHERE userid=?", undef, $u->id);
+        $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
+        $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
+    }
+
+    $dbh = LJ::get_cluster_master($u);
+
+    if ($dbh) {
+        $dbh->do("DELETE FROM subscribers2 WHERE userid = ?", undef, $u->id);
+        $dbh->do("DELETE FROM subscribersleft WHERE subscriptionid = ?", undef, $u->id);
+    }
 
     foreach my $type (LJ::get_relation_types()) {
         my $typeid = LJ::get_reluser_id($type) || 0;
@@ -1171,6 +1446,105 @@ sub delete_and_purge_completely {
 
         LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $u->id);
         LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $u->id);
+    }
+
+    return 1;
+}
+
+# Special methods which destroy architectural logic but are necessary for productivity
+
+sub update_relation_attribute_mask_for_all {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $mask   = $opts{mask};
+    my $action = $opts{action};
+
+    return unless $mask;
+    return unless $action;
+
+    if ($action eq 'add') {
+        $action = '|'
+    }
+
+    if ($action eq 'del') {
+        $action = '&'
+    }
+
+    return unless $action =~ /^(?:\&|\|)$/;
+
+    $mask = int($mask);
+
+    if ($type eq 'F') {
+        my $dbh = LJ::get_db_writer();
+
+        return unless $dbh;
+
+        my $cnt = $dbh->do(qq[
+                UPDATE
+                    friends
+                SET
+                    groupmask = groupmask $action ~(?)
+                WHERE
+                    userid = ?
+            ],
+            undef,
+            $mask,
+            $uid
+        );
+
+        if ($dbh->err) {
+            return;
+        }
+
+        # Its a very bad. Need smart cache. See a top at this file
+        my @ids = $class->find_relation_destinations($u, 'F', %opts, nolimit => 1);
+
+        foreach my $tid (@ids) {
+            LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
+            LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+        }
+
+        LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
+        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    }
+
+    if ($type eq 'R') {
+        my $dbh = LJ::get_cluster_master($u);
+
+        return unless $dbh;
+
+        my $cnt = $dbh->do(qq[
+                UPDATE
+                    subscribers2
+                SET
+                    filtermask = filtermask $action ~(?)
+                WHERE
+                    userid = ?
+            ],
+            undef,
+            $mask,
+            $uid
+        );
+
+        if ($dbh->err) {
+            return;
+        }
+
+        # Its a very bad. Need smart cache. See a top at this file
+        my $rels = $class->load_relation_destinations($u, 'R', %opts);
+
+        foreach my $tid (keys %$rels) {
+            LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+        }
+
+        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     }
 
     return 1;

@@ -1,6 +1,8 @@
 //= require js/hourglass.js
 //= require js/relations/relations.js
 
+//= require_style contextualhover.css
+
 //= require_preprocessed_template Widgets/contextualhover.jqtmpl
 
 /*global ContextualPopup, Hourglass */
@@ -294,7 +296,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                 }());
 
                 // subscribe/unsubscribe
-                if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+                if ( LJ.Flags.isEnabled('friendsAndSubscriptions') && !data.is_identity ) {
                     buildObject.headLinks.push({
                         selector: 'a[href=#subscription]',
                         url: '#subscription',

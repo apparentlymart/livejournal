@@ -98,6 +98,7 @@ sub render_body {
         'returnto'          => $thispage,
         'js_check_domain'   => $opts{'js_check_domain'},
         'resources_html'    => $opts{'resources_html'},
+        'external_resources'=> $opts{'external_resources'},
     );
 
     ## well cooked widget is here

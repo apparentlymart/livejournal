@@ -8,6 +8,7 @@ use LJ::Request;
 use LJ::TimeUtil;
 use LJ::UserApps;
 use LJ::Entry::Repost;
+use LJ::User::SubscriptionFilters;
 
 sub FriendsPage
 {
@@ -125,9 +126,19 @@ sub FriendsPage
             }
         }
 
-        my $grp = LJ::get_friend_group($u, { 'name' => $group_name || "Default View" });
-        my $bit = $grp->{'groupnum'};
-        my $public = $grp->{'is_public'};
+        my $grp;
+        my $bit;
+        my $public;
+
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            $grp = LJ::User::SubscriptionFilters->get_user_filter($u, 'name' => $group_name || "Default View" );
+            $bit = $grp->{'num'};
+            $public = $grp->{'public'};
+        } else {
+            $grp = LJ::get_friend_group($u, { 'name' => $group_name || "Default View" });
+            $bit = $grp->{'groupnum'};
+            $public = $grp->{'is_public'};
+        }
 
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit);

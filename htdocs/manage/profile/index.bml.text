@@ -180,6 +180,8 @@
 
 .fn.state=State
 
+.fn.subscribers="Subscribers" list
+
 .fn.timezone=Timezone
 
 .fn.txtmsg=Allow text messaging from
@@ -436,6 +438,8 @@
 .showljtalk=Do not show field?
 
 .state.us=US States
+
+.subscribers=Show list of users who have subscribed to you
 
 .success.editpics=Manage your userpics
 

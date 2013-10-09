@@ -6,7 +6,7 @@
 	<meta content="noindex, nofollow" name="robots">
 	<script type="text/javascript">
 		window.ready = function(poll){
-			top.LJ.DOM.injectStyle('<?statprefix?>/js/ck/skins/v2/dialog.css?t=' + (top.Site ? top.Site.version : ''), window);
+			top.LJ.injectStyle('<?statprefix?>/js/ck/skins/v2/dialog.css?t=' + (top.Site ? top.Site.version : ''), window);
 
 			top.jQuery(document.poll.whovote).val([poll.whovote]);
 			top.jQuery(document.poll.whoview).val([poll.whoview]);

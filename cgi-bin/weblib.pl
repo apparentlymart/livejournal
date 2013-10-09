@@ -1395,6 +1395,24 @@ sub need_res_group {
 }
 
 sub need_journal_res {
+    LJ::need_string(qw{
+        paidrepost.button.title
+        paidrepost.button.title.owner
+        paidrepost.button.title.curr
+        paidrepost.button.title.delete
+        paidrepost.button.title.counter
+
+        paidrepost.button.label
+        paidrepost.button.label.done
+
+        repost.button.title
+        repost.button.label
+        repost.button.counter
+
+        entry.reference.label.title
+        entry.reference.label.reposted
+    });
+
     LJ::need_res(@LJ::JOURNAL_RES_ALL);
 }
 
@@ -2306,17 +2324,11 @@ sub journal_js_inject {
     LJ::need_journal_res();
 
     LJ::need_res(qw(
-                    js/journal.js
-                    js/jquery/jquery.calendarEvents.js
-                    ));
-
-    LJ::need_res(qw(
-                    js/s2.js
-                    js/esn.js
-                    js/jquery/jquery.lj.confirmbubble.js
-                    templates/Widgets/popupcontent.tmpl
-                    js/jquery/jquery.lj.ljcut.js
-                    ));
+        js/s2.js
+        js/esn.js
+        js/jquery/jquery.lj.confirmbubble.js
+        js/jquery/jquery.lj.ljcut.js
+    ));
 
     LJ::run_hooks('extra_journal_js');
 }

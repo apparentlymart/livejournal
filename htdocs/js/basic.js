@@ -545,24 +545,6 @@ LJ.define('LJ.Util.Date');
 LJ.DOM = LJ.DOM || {};
 
 /**
- * Inject stylesheet into page.
- *
- * @param {string} Stylesheet filename to inject.
- * @param {global} Global object.
- */
-LJ.DOM.injectStyle = function(fileName, _window) {
-  var w = _window || window,
-    head = w.document.getElementsByTagName("head")[0],
-    cssNode = w.document.createElement('link');
-
-  cssNode.type = 'text/css';
-  cssNode.rel = 'stylesheet';
-  cssNode.href = fileName;
-
-  head.appendChild(cssNode);
-};
-
-/**
  * Get field's selection
  * @param  {jQuery/DOM} node jQuery or DOM node
  * @return {Object}      Object, contains { start, end } coordinates of selection

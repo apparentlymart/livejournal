@@ -3,257 +3,321 @@ title=><?_ml .title2 _ml?>
 body<=
 <?_code
 
- use strict;
- use vars qw(%GET %POST);
+    use strict;
+    use warnings;
 
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    use vars qw(%GET %POST);
 
- LJ::set_active_crumb('managecommunities');
-
- my $dbr = LJ::get_db_reader();
-
- my $ret;
- my $remote = LJ::get_remote();
- my $authas;
- my $u;
- my $submit_msg = '';
-
- unless ($remote) {
-    return "<?needlogin?>";
- }
- 
- return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.badaccounttype'} p?>"
-    unless $remote->{journaltype} eq 'P' || $remote->{journaltype} eq 'I';
-    
- $authas = $GET{authas};
- $authas = undef if ($authas eq $remote->user);
- if ($authas) {
-    # LJSUP-15473: Ability to view user's settings
-    if ( LJ::priv_can_view("/community/manage.bml", $remote) ) {
-        $u = LJ::load_user($authas);
-        $ret .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />";
-        $remote = $u;
-    } else {
-        my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
-        $u = LJ::load_user($authas);
-        my $error_mes = LJ::Lang::get_text(
-            $lang,
-            (LJ::priv_for_page("/community/manage.bml") ? 'error.no_permission' : 'error.invalidauth'),
-            undef,
-            {
-                username   => $u->ljuser_display,
-                priv       => LJ::priv_for_page("/community/manage.bml"),
-            }
-        );
-        return LJ::bad_input($error_mes);
+    if ($LJ::SERVER_DOWN) {
+        return LJ::server_down_html();
     }
- } else {
-    $ret .= "<?p $ML{'.commlist.text'} p?>";
- }
- $ret .= "<div style='margin: 15px 0'>";
 
- my %show;
+    LJ::set_active_crumb('managecommunities');
 
- # what communities does remote 
- my $cids = LJ::load_rel_target($remote, 'A');
- my %admin;
- if ($cids) { foreach (@$cids) { $admin{$_} = $show{$_} = 1; } }
+    my $remote = LJ::get_remote();
 
- # keep track of what communities remote moderates
- my $mods = LJ::load_rel_target($remote, 'M');
- my %mods; 
- if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
+    unless ($remote) {
+        return "<?needlogin?>";
+    }
 
- # keep track of what communities remote supermaintainer
- my $smods = LJ::load_rel_target($remote, 'S');
- my %smods; 
- if ($smods) { foreach (@$smods) { $admin{$_} = $smods{$_} = $show{$_} = 1; } }
+    unless ($remote->{journaltype} eq 'P' || $remote->{journaltype} eq 'I') {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.badaccounttype'} p?>"
+    }
 
- my %names = ();
- my %pending = ();
- if (%show) {
-    my $in = join(',', keys %show);
-    my $us = LJ::load_userids(keys %show);
+    my $dbr = LJ::get_db_reader();
 
-    my $sth = $dbr->prepare("SELECT userid, membership FROM community ".
-                            "WHERE userid IN ($in)");
-    $sth->execute;
-    my $udbr;
-    while (my ($uid, $membership) = $sth->fetchrow_array) {
-        my $cu = $us->{$uid};
-        next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
-        $names{$uid} = { user => $cu->{user}, name => $cu->{name}, count => 0, lj_art => $cu->prop('ljart_event') };
-        if ($mods{$uid} || $admin{$uid}) {
-                $udbr = LJ::get_cluster_reader($cu);
-                my $sql = "SELECT COUNT(*), posterid" .
-                            " FROM modlog WHERE journalid=$uid GROUP BY posterid";
-                my $modlogref = $udbr->selectall_arrayref($sql);
-                my $modlogcount_for_users = 0;
-                foreach (@$modlogref) {
-                    my ($modlogcount, $posterid) = map {$_ || 0} @$_;
-                    if ($modlogcount && $posterid) {
-                        my $poster = LJ::want_user($posterid);
-                        if ($poster && $poster->is_suspended()) {
-                            $modlogcount = 0;   # Don't show requests from suspended users
-                        }
+    my $u;
+    my $ret;
+    my $authas;
+    my $submit_msg = '';
+
+    $authas = $GET{authas} || '';
+
+    if ($authas eq $remote->user) {
+        $authas = undef;
+    }
+
+    if ($authas) {
+        $u = LJ::load_user($authas);
+
+        if ($u) {
+            # LJSUP-15473: Ability to view user's settings
+            if ($u && LJ::priv_can_view("/community/manage.bml", $remote) ) {
+                $ret .= "<?warningbar $ML{'.warning.edit_foreign'}".$u->ljuser_display." warningbar?><br />";
+                $remote = $u;
+            } else {
+                my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
+                my $error_mes = LJ::Lang::get_text(
+                    $lang,
+                    (LJ::priv_for_page("/community/manage.bml") ? 'error.no_permission' : 'error.invalidauth'),
+                    undef,
+                    {
+                        username   => $u->ljuser_display,
+                        priv       => LJ::priv_for_page("/community/manage.bml"),
                     }
-                    $modlogcount_for_users += $modlogcount;
-                }
-                $names{$uid}->{'count'} = $modlogcount_for_users;
-        }
-        if ($membership eq 'moderated') {
-            my $ids = LJ::get_pending_members($uid) || [];
-            $pending{$uid} = scalar @$ids;
-        }
-    }
- }
-
- # deleted and expunged communities won't show up in this
- if (%names) {
-
-    # Make up the first table row, linking to the other sort methods
-    my @snames;
-    $ret .= "<table class='alternating-rows' cellpadding='0' cellspacing='0' style='width: 100%;'><tr>";
-
-    if (!defined $GET{'sortby'} || $GET{'sortby'} eq 'username') {
-        $ret .= "<th>$ML{'.commlist.username'}</th>";
-        @snames = sort { $names{$a}->{'user'} cmp $names{$b}->{'user'} } keys %names;
-    } else {
-        $ret .= "<th><a href='".BML::self_link({'sortby' => 'username'}) . "'>$ML{'.commlist.username'}</a></th>";
-    }
-
-    if ($GET{'sortby'} eq 'title') {
-        $ret .= "<th>$ML{'.commlist.title'}</th>";
-        @snames = sort { $names{$a}->{'name'} cmp $names{$b}->{'name'} } keys %names;
-    } else {
-        $ret .= "<th><a href='".BML::self_link({'sortby' => 'title'}) . "'>$ML{'.commlist.title'}</a></th>";
-    }
-
-    $ret .= "<th>$ML{'.commlist.actions'}</th>";
-
-    if ($GET{'sortby'} eq 'mod') {
-        $ret .= "<th>$ML{'.commlist.moderation'}</th>";
-        @snames = sort { $names{$b}->{'count'} <=> $names{$a}->{'count'} } keys %names;
-    } elsif (@$mods) {
-        $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
-    } else {
-        $ret .= "<th>&nbsp;</th>";
-    }
-
-    my $rc = 0;
-    foreach my $id (@snames) {
-        my $user = $names{$id}->{'user'};
-        my $name = $names{$id}->{'name'};
-        my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
-        $ret .= "<tr class='$rstyle'><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
-        if ($admin{$id}) {
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/update.bml?usejournal=$user'>$ML{'.commlist.post'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= LJ::run_hook('community_manage_actionlink', $user);
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/mailing.bml?authas=$user'>$ML{'.commlist.mailing2'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='$LJ::SITEROOT/customize/?authas=$user'>$ML{'.commlist.customize2'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/settings.bml?authas=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/sentinvites.bml?authas=$user'>$ML{'.commlist.actinvites'}</a>"}) . "&nbsp;&nbsp;";
-            my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
-                                               aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/members.bml?authas=$user'>$ML{'.commlist.actmembers2'}</a>$pend"}) . "&nbsp;&nbsp;";
-
-            if ( LJ::is_enabled('lj_art') && $names{$id}->{'lj_art'} ) {
-                $ret .= BML::ml('Actionlink', {
-                    'link'=>"<a href='/community/ljart.bml?authas=$user'>$ML{'.commlist.ljart'}</a>"}) . "&nbsp;&nbsp;";
-            }   
-        }
-        if ($mods{$id} && !$admin{$id}) {
-            my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
-                                               aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
-            $ret .= BML::ml('Actionlink', {'link'=>$ML{'.commlist.actmembers2'}.$pend}) . "&nbsp;&nbsp;" if $pend;
-        }
-        $ret .= "</td><td align='center'>";
-        if ($admin{$id} || $mods{$id}) {
-            my $num = $names{$id}->{'count'} || "0"; # relying on this to be <b>-wrapped
-            $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?authas=$user'", 'num' => $num});
+                );
+                return LJ::bad_input($error_mes);
+            }
         } else {
-            $ret .= "&nbsp";
+            $ret .= "<?p $ML{'.commlist.text'} p?>";
+        }
+    } else {
+        $ret .= "<?p $ML{'.commlist.text'} p?>";
+    }
+
+    $ret .= "<div style='margin: 15px 0'>";
+
+    my %show;
+
+    # what communities does remote
+    my $cids  = LJ::load_rel_target($remote, 'A');
+    my %admin = ();
+
+    if ($cids) {
+        foreach (@$cids) {
+            $admin{$_} = $show{$_} = 1;
+        }
+    }
+
+    # keep track of what communities remote moderates
+    my $mods = LJ::load_rel_target($remote, 'M');
+    my %mods = ();
+
+    if ($mods) {
+        foreach (@$mods) {
+            $mods{$_} = $show{$_} = 1;
+        }
+    }
+
+    # keep track of what communities remote supermaintainer
+    my $smods = LJ::load_rel_target($remote, 'S');
+    my %smods = ();
+
+    if ($smods) {
+        foreach (@$smods) {
+            $admin{$_} = $smods{$_} = $show{$_} = 1;
+        }
+    }
+
+    my %names   = ();
+    my %pending = ();
+
+    if (%show) {
+        my $in = join(',', keys %show);
+        my $us = LJ::load_userids(keys %show);
+
+        my $sth = $dbr->prepare(qq[
+                SELECT
+                    userid, membership
+                FROM
+                    community
+                WHERE
+                    userid IN ($in)
+            ]
+        );
+
+        $sth->execute;
+
+        while (my ($uid, $membership) = $sth->fetchrow_array) {
+            my $cu = $us->{$uid};
+            next unless $cu;
+            next unless $cu->{statusvis} eq "V" || $cu->is_readonly;
+
+            $names{$uid} = {
+                user   => $cu->{user},
+                name   => $cu->{name},
+                count  => 0,
+                lj_art => $cu->prop('ljart_event')
+            };
+
+            if ($mods{$uid} || $admin{$uid}) {
+                if (my $udbr = LJ::get_cluster_reader($cu)) {
+                    my $modlogref = $udbr->selectall_arrayref(qq[
+                        SELECT
+                            COUNT(*), posterid
+                        FROM
+                            modlog
+                        WHERE
+                            journalid = $uid
+                        GROUP BY
+                            posterid
+                    ]);
+                    my $modlogcount_for_users = 0;
+
+                    foreach (@$modlogref) {
+                        my ($modlogcount, $posterid) = map {$_ || 0} @$_;
+
+                        if ($modlogcount && $posterid) {
+                            my $poster = LJ::want_user($posterid);
+
+                            if ($poster && $poster->is_suspended()) {
+                                $modlogcount = 0;   # Don't show requests from suspended users
+                            }
+                        }
+
+                        $modlogcount_for_users += $modlogcount;
+                    }
+
+                    $names{$uid}->{'count'} = $modlogcount_for_users;
+                }
+            }
+
+            if ($membership eq 'moderated') {
+                my $ids = LJ::get_pending_members($uid) || [];
+                $pending{$uid} = scalar @$ids;
+            }
+        }
+    }
+
+    # deleted and expunged communities won't show up in this
+    if (%names) {
+
+        # Make up the first table row, linking to the other sort methods
+        my @snames;
+        $ret .= "<table class='alternating-rows' cellpadding='0' cellspacing='0' style='width: 100%;'><tr>";
+
+        my $sortby = $GET{'sortby'} || '';
+
+        if (! $sortby || $sortby eq 'username') {
+            $ret .= "<th>$ML{'.commlist.username'}</th>";
+            @snames = sort { $names{$a}->{'user'} cmp $names{$b}->{'user'} } keys %names;
+        } else {
+            $ret .= "<th><a href='".BML::self_link({'sortby' => 'username'}) . "'>$ML{'.commlist.username'}</a></th>";
         }
 
-        $ret .= "</td></tr>";
+        if ($sortby eq 'title') {
+            $ret .= "<th>$ML{'.commlist.title'}</th>";
+            @snames = sort { $names{$a}->{'name'} cmp $names{$b}->{'name'} } keys %names;
+        } else {
+            $ret .= "<th><a href='".BML::self_link({'sortby' => 'title'}) . "'>$ML{'.commlist.title'}</a></th>";
+        }
+
+        $ret .= "<th>$ML{'.commlist.actions'}</th>";
+
+        if ($sortby eq 'mod') {
+            $ret .= "<th>$ML{'.commlist.moderation'}</th>";
+            @snames = sort { $names{$b}->{'count'} <=> $names{$a}->{'count'} } keys %names;
+        } elsif (@$mods) {
+            $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
+        } else {
+            $ret .= "<th>&nbsp;</th>";
+        }
+
+        my $rc = 0;
+        foreach my $id (@snames) {
+            my $user = $names{$id}->{'user'};
+            my $name = $names{$id}->{'name'};
+            my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
+            $ret .= "<tr class='$rstyle'><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
+            if ($admin{$id}) {
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/update.bml?usejournal=$user'>$ML{'.commlist.post'}</a>"}) . "&nbsp;&nbsp;";
+                $ret .= LJ::run_hook('community_manage_actionlink', $user);
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/community/mailing.bml?authas=$user'>$ML{'.commlist.mailing2'}</a>"}) . "&nbsp;&nbsp;";
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='$LJ::SITEROOT/customize/?authas=$user'>$ML{'.commlist.customize2'}</a>"}) . "&nbsp;&nbsp;";
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/community/settings.bml?authas=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/community/sentinvites.bml?authas=$user'>$ML{'.commlist.actinvites'}</a>"}) . "&nbsp;&nbsp;";
+                my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
+                                                   aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
+                $ret .= BML::ml('Actionlink', {
+                    'link'=>"<a href='/community/members.bml?authas=$user'>$ML{'.commlist.actmembers2'}</a>$pend"}) . "&nbsp;&nbsp;";
+
+                if ( LJ::is_enabled('lj_art') && $names{$id}->{'lj_art'} ) {
+                    $ret .= BML::ml('Actionlink', {
+                        'link'=>"<a href='/community/ljart.bml?authas=$user'>$ML{'.commlist.ljart'}</a>"}) . "&nbsp;&nbsp;";
+                }
+            }
+            if ($mods{$id} && !$admin{$id}) {
+                my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
+                                                   aopts => "href=\"/community/pending.bml?authas=$user\"" }) : '';
+                $ret .= BML::ml('Actionlink', {'link'=>$ML{'.commlist.actmembers2'}.$pend}) . "&nbsp;&nbsp;" if $pend;
+            }
+            $ret .= "</td><td align='center'>";
+            if ($admin{$id} || $mods{$id}) {
+                my $num = $names{$id}->{'count'} || "0"; # relying on this to be <b>-wrapped
+                $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?authas=$user'", 'num' => $num});
+            } else {
+                $ret .= "&nbsp";
+            }
+
+            $ret .= "</td></tr>";
+        }
+
+        $ret .= "</table>";
+        $ret .= "</div>";
+    } else {
+        $ret .= "$ML{'.commlist.none'}";
+        $ret .= "</div><hr class='hr' />";
     }
-    $ret .= "</table>";
-    $ret .= "</div>";
- } else {
-    $ret .= "$ML{'.commlist.none'}";
-    $ret .= "</div><hr class='hr' />";
- }
 
- # save any changes
- if (LJ::did_post()) {
-    return LJ::bad_input($ML{'error.invalidauth'}) if LJ::Setting::is_viewonly_mode( $authas);
-    unless (LJ::check_form_auth()) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
-        return $ret;
+    # save any changes
+    if (LJ::did_post()) {
+        return LJ::bad_input($ML{'error.invalidauth'}) if LJ::Setting::is_viewonly_mode( $authas);
+        unless (LJ::check_form_auth()) {
+            $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+            return $ret;
+        }
+
+        my $mod_emails = $POST{modemail} ? 1 : 0;
+        $remote->set_prop( 'opt_nomodemail' => $mod_emails ? undef : 1 );
+
+        my $mod_reject = $POST{modreject} ? 1 : 0;
+        $remote->set_prop( 'opt_modrejectemail' => $mod_reject );
     }
 
-     my $mod_emails = $POST{modemail} ? 1 : 0;
-     $remote->set_prop( 'opt_nomodemail' => $mod_emails ? undef : 1 );
-     
-     my $mod_reject = $POST{modreject} ? 1 : 0;
-     $remote->set_prop( 'opt_modrejectemail' => $mod_reject );
- }
+    my $mod_emails = $remote->prop("opt_nomodemail") ? 0 : 1;
+    my $mod_reject = $remote->prop("opt_modrejectemail") ? 1 : 0;
 
- my $mod_emails = $remote->prop("opt_nomodemail") ? 0 : 1;
- my $mod_reject = $remote->prop("opt_modrejectemail") ? 1 : 0;
+    $ret .= "<div class='columns-2 pkg' style='margin-bottom: 15px;'>\n";
+    $ret .= "<div class='columns-2-left'>\n";
 
- $ret .= "<div class='columns-2 pkg' style='margin-bottom: 15px;'>\n";
- $ret .= "<div class='columns-2-left'>\n";
- 
- unless ( $authas ) {
-     # form for setting email option
-     $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";
-     $ret .= "<?p " . BML::ml('.joinmail.body2', { aopts=>"href='$LJ::SITEROOT/manage/subscriptions/'" }). " p?>\n";
-     $ret .= "<form method='post' action='manage.bml'>\n";
-     $ret .= LJ::form_auth();
-     # options for getting moderation emails
-     $ret .= "<?p $ML{'.modemail.body'} p?>";
-     $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
-    
-     $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_yes', 
+        # form for setting email option
+        $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";
+        $ret .= "<?p " . BML::ml('.joinmail.body2', { aopts=>"href='$LJ::SITEROOT/manage/subscriptions/'" }). " p?>\n";
+        $ret .= "<form method='post' action='manage.bml'>\n";
+        $ret .= LJ::form_auth();
+        # options for getting moderation emails
+        $ret .= "<?p $ML{'.modemail.body'} p?>";
+        $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
+
+        $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_yes',
                               value => '1', selected => $mod_emails });
-     $ret .= "<label for='modemail_yes'>$ML{'.modemail.yes'}</label><br />";
-    
-     $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_no', 
+        $ret .= "<label for='modemail_yes'>$ML{'.modemail.yes'}</label><br />";
+
+        $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_no',
                               value => '0', selected => !$mod_emails });
-     $ret .= "<label for='modemail_no'>$ML{'.modemail.no'}</label><br />";
-     $ret .= "</fieldset> ";
-     $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
-     $ret .= LJ::html_check({ type => 'checkbox', name => 'modreject', id => 'modreject', 
+        $ret .= "<label for='modemail_no'>$ML{'.modemail.no'}</label><br />";
+        $ret .= "</fieldset> ";
+        $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
+        $ret .= LJ::html_check({ type => 'checkbox', name => 'modreject', id => 'modreject',
                               value => '1', selected => $mod_reject });
-     $ret .= "<label for='modreject'>$ML{'.modreject'}</label><br />";
-     $ret .= "</fieldset> ";
-     $ret .= "<?standout " . LJ::html_submit($ML{'.joinmail.save'}) . " standout?>";
-     $ret .= "</form>";
-     $ret .= "</div><!-- end .columns-2-left -->";
-     $ret .= "<div class='columns-2-right'>";
-    
-     $ret .= "<?h1 $ML{'.create.header'} h1?>";
-     $ret .= "<?p " . BML::ml('.create.text2', {'aopts' => "href='$LJ::SITEROOT/community/create.bml'"}) . " p?>";
-    
-    
-     $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";
-     $ret .= "<?p <a href=\"/manage/invites.bml\"><?_ml /manage/invites.bml.title _ml?></a> p?>";
-    
-     if (LJ::is_enabled("browse")) {
+        $ret .= "<label for='modreject'>$ML{'.modreject'}</label><br />";
+        $ret .= "</fieldset> ";
+        $ret .= "<?standout " . LJ::html_submit($ML{'.joinmail.save'}) . " standout?>";
+        $ret .= "</form>";
+        $ret .= "</div><!-- end .columns-2-left -->";
+        $ret .= "<div class='columns-2-right'>";
+
+        $ret .= "<?h1 $ML{'.create.header'} h1?>";
+        $ret .= "<?p " . BML::ml('.create.text2', {'aopts' => "href='$LJ::SITEROOT/community/create.bml'"}) . " p?>";
+
+
+        $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";
+        $ret .= "<?p <a href=\"/manage/invites.bml\"><?_ml /manage/invites.bml.title _ml?></a> p?>";
+
+        if (LJ::is_enabled("browse")) {
          $ret .= "<?h1 $ML{'.communitydirectory'} h1?>";
          $ret .= "<?p <a href=\"/community/directory.bml\">$ML{'.communitydirectory.manage'}</a> p?>";
-     }
-     $ret .= "</div><!-- end .columns-2-right -->";
-     $ret .= "</div><!-- end .columns-2 -->";
- }
- return $ret;
+        }
+        $ret .= "</div><!-- end .columns-2-right -->";
+        $ret .= "</div><!-- end .columns-2 -->";
+
+
+    return $ret;
 
 _code?>
 

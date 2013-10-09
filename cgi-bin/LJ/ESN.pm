@@ -621,6 +621,9 @@ sub work {
         $opts{'_debug_headers'}->{"X-Esn-TheSchwartz-Role"} = $LJ::THESCHWARTZ_ROLE_MASS;
     }
 
+    # process usercluster readonly state for Inbox
+    return $job->postpone if $u->is_readonly && ref($subsc->notification) eq 'LJ::NotificationMethod::Inbox';
+
     $subsc->process(\%opts, $evt)
         or die "Failed to process notification method for userid=$userid/subid=$subdump, evt=[@$eparams]\n";
     $job->completed;

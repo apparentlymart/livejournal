@@ -42,9 +42,11 @@
     my $maxitems = $mode eq 'comment_meta' ? 10000 : 1000;
     my $numitems = $GET{numitems};
     my $gather;
-    if (defined $numitems && ($numitems > 0) && ($numitems <= $maxitems)) {
+
+    if ( defined $numitems && ($numitems > 0) && ($numitems <= $maxitems) ) {
         $gather = $numitems;
-    } else {
+    }
+    else {
         $gather = $maxitems;
     }
 
@@ -52,59 +54,83 @@
     my $endid = $startid + $gather;
 
     # get metadata
-    my $rows = $dbcr->selectall_arrayref('SELECT jtalkid, nodeid, parenttalkid, posterid, state, datepost ' .
-                                         "FROM talk2 WHERE nodetype = 'L' AND journalid = ? AND " .
-                                         "                 jtalkid >= $startid AND jtalkid < $endid",
-                                         undef, $u->{userid});
+    my $rows = $dbcr->selectall_arrayref('
+        SELECT jtalkid,
+               nodeid,
+               parenttalkid,
+               posterid,
+               state,
+               datepost
+          FROM talk2
+         WHERE nodetype = \'L\'
+           AND journalid = ?
+           AND jtalkid >= ?
+           AND jtalkid < ?',
+        undef,
+        $u->{userid},
+        $startid,
+        $endid
+    );
 
     # now let's gather them all together while making a list of posterids
-    my %posterids;
-    my %comments;
-    foreach my $r (@{$rows || []}) {
+    my ( %posterids, %comments );
+
+    foreach my $r ( @{$rows || []} ) {
         $comments{$r->[0]} = {
-            nodeid => $r->[1],
+            nodeid       => $r->[1],
             parenttalkid => $r->[2],
-            posterid => $r->[3],
-            state => $r->[4],
-            datepost => $r->[5],
+            posterid     => $r->[3],
+            state        => $r->[4],
+            datepost     => $r->[5],
         };
         $posterids{$r->[3]} = 1 if $r->[3]; # don't include 0 (anonymous)
     }
 
     # now we have two choices: comments themselves or metadata
-    if ($mode eq 'comment_meta') {
+    if ( $mode eq 'comment_meta' ) {
         # meta data is easy :)
-        my $max = $dbcr->selectrow_array('SELECT MAX(jtalkid) FROM talk2 ' .
-                                        "WHERE journalid = ? AND nodetype = 'L'",
-                                        undef, $u->{userid});
+        my $max = $dbcr->selectrow_array('
+            SELECT MAX(jtalkid)
+              FROM talk2
+             WHERE journalid = ?
+               AND nodetype = \'L\'',
+            undef,
+            $u->{userid},
+        );
         $max += 0;
         LJ::Request->print("<maxid>$max</maxid>\n");
         my $nextid = $startid + $gather;
         LJ::Request->print("<nextid>$nextid</nextid>\n") unless ($nextid > $max);
+
         # load posterids
         my $us = LJ::load_userids(keys %posterids);
 
         # now spit out the metadata
         LJ::Request->print("<comments>\n");
+
         while (my ($id, $data) = each %comments) {
             my $ret = "<comment id='$id'";
             $ret .= " posterid='$data->{posterid}'" if $data->{posterid};
             $ret .= " state='$data->{state}'" if $data->{state} ne 'A';
+            $ret .= " jitemid='$data->{nodeid}'";
             $ret .= " />\n";
             LJ::Request->print($ret);
         }
+
         LJ::Request->print("</comments>\n<usermaps>\n");
 
         # now spit out usermap
         my $ret = '';
+
         while (my ($id, $user) = each %$us) {
             $ret .= "<usermap id='$id' user='$user->{user}' />\n";
         }
+
         LJ::Request->print($ret);
         LJ::Request->print("</usermaps>\n");
-
+    }
     # comment data also presented in glorious XML:
-    } elsif ($mode eq 'comment_body') {
+    elsif ($mode eq 'comment_body') {
         # get real comments from startid to a limit of 10k data, however far that takes us
         my @ids = sort { $a <=> $b } keys %comments;
 

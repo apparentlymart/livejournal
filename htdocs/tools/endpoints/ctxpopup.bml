@@ -162,6 +162,9 @@
         $ret{is_friend_of} = $u->is_friend($remote);
         $ret{is_requester} = LJ::u_equals($remote, $u);
 
+        # For community
+        $ret{is_member} = $ret{is_friend_of};
+
         # Subscribe/Unscubscribe to/from user
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
             $ret{is_subscriber}   = $u->is_subscribedon($remote);

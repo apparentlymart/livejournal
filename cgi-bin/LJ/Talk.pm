@@ -1799,17 +1799,14 @@ sub resources_for_talkform {
 
     LJ::need_res(qw(
         stc/display_none.css
-    ));
-    LJ::need_res(qw(
+
         js/jquery/jquery.lj.subjecticons.js
         js/jquery/jquery.lj.commentator.js
         js/jquery/jquery.lj.quotescreator.js
-    ));
-    LJ::need_res(qw(
+
         js/jquery/jquery.lj.authtype.js
         js/jquery/jquery.lj.userpicker.js
         js/jquery/jquery.lj.commentform.js
-        js/jquery/jquery.easing.js
     ));
     LJ::need_res( {condition => 'IE'}, 'js/jquery/jquery.ie6multipleclass.min.js');
     LJ::need_string(qw(/talkpost_do.bml.quote.info.message));
@@ -2291,6 +2288,7 @@ sub talkform {
         'logout_url'            => $opts->{'logout_url'},
         'js_check_domain'       => $opts->{'js_check_domain'},
         'resources_html'        => $opts->{'resources_html'},
+        'external_resources'    => $opts->{'external_resources'},
         'partner_domain'        => $opts->{'partner_domain'},
         'partner_remote_ljuser' => $opts->{'partner_remote_ljuser'},
         'lang'                  => LJ::Lang::current_language(),

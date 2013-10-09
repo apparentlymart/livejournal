@@ -127,6 +127,15 @@ EOJS
         $content =~ s!src=(["'])(https?://www\.youtube\.com/embed/.*?)\1! 'src=' . $1 . $transform_youtube_url->($2) . $1 !ige;
 
         return qq {<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Video Iframe</title><style>HTML,BODY {overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: transparent;} IFRAME, OBJECT, EMBED {width: 100%; height: 100%;}</style></head><body>$content</body></html>};
+    } elsif ($mode eq 'video_011013') {   # piece of shit from LJSUP-16719
+        return <<EOJS;
+<div id="infoxplayer"></div>
+<script type="text/javascript">
+if(!window.jQuery){document.write(unescape('<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">%3C/script%3E'));}
+if (!window.swfobject){document.write(unescape('<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js">%3C/script%3E'));}
+document.write(unescape('<script type="text/javascript" src="http://www.infox.ru/system/php/trans.php?dx=1&str=rid3muhay1mmh9p1rxwjuak4u57xr0s0">%3C/script%3E'));
+</script> 
+EOJS
     }
 } 
 _code?>

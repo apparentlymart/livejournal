@@ -1,8 +1,12 @@
 package LJ::ControlStrip;
 
 use strict;
+use warnings;
+
+# Internal modules
 use LJ::Widget::Calendar;
 use LJ::Widget::JournalPromoStrip;
+use LJ::User::SubscriptionFilters;
 
 sub render {
     my ($class, $user) = @_;
@@ -141,64 +145,14 @@ sub render {
 
         if ($data_journal->{is_own}) {
             if ($data_journal->{view_friends}) {
-                my %res;
-                my %group;
-                my @filters = (
-                    all             => LJ::Lang::ml('web.controlstrip.select.friends.all'),
-                    showpeople      => LJ::Lang::ml('web.controlstrip.select.friends.journals'),
-                    showcommunities => LJ::Lang::ml('web.controlstrip.select.friends.communities'),
-                    showsyndicated  => LJ::Lang::ml('web.controlstrip.select.friends.feeds'),
-                );
-
-                # FIXME: make this use LJ::Protocol::do_request
-                LJ::do_request(
-                    {
-                        'mode' => 'getfriendgroups',
-                        'ver'  => $LJ::PROTOCOL_VER,
-                        'user' => $remote->{'user'},
-                    },
-                    \%res,
-                    {
-                        'noauth' => 1,
-                        'userid' => $remote->{'userid'}
-                    }
-                );
-
-                foreach my $k (keys %res) {
-                    if ($k =~ /^frgrp_(\d+)_name/) {
-                        $group{$1}->{'name'} = $res{$k};
-                    } elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
-                        $group{$1}->{'sortorder'} = $res{$k};
-                    }
-                }
-
-                my $selected_group = undef;
-
-                if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
-                    my %GET = LJ::Request->args;
-
-                    if ($GET{show}) {
-                        $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1));
-                    }
-                } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
-                    $selected_group = LJ::durl($1);
-                    $data_journal->{view_friends_group} = $selected_group;
-                }
-
-                foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
-                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
-
-                    my $item = {
-                        name  => lc($group{$g}->{name}),
-                        value => $group{$g}->{name},
-                    };
-
-                    if ($item->{name} eq lc($selected_group)) {
-                        $item->{selected} = 1;
-                        $data_remote->{has_selected_groups} = 1;
-                    }
-
-                    push @{$data_remote->{friend_groups}}, $item;
+                if (LJ::is_enabled('new_friends_and_subscriptions')) {
+                    $class->get_feed_filters_new(
+                        $remote, $data_journal, $data_remote
+                    );
+                } else {
+                    $class->get_feed_filters_old(
+                        $remote, $data_journal, $data_remote
+                    );
                 }
             }
         } elsif ($data_journal->{is_community}) {
@@ -206,6 +160,7 @@ sub render {
 
             $data_remote->{can_post}         = LJ::check_rel($journal, $remote, 'P');
             $data_remote->{can_manage}       = $remote->can_manage($journal);
+            $data_remote->{can_moderate}     = $remote->can_moderate($journal);
             $data_journal->{pending_members} = scalar(@$pending_members);
         }
     } else {
@@ -321,7 +276,6 @@ sub need_res {
         stc/widgets/filter-settings.css
         stc/popup/popupus.css
         stc/popup/popupus-blue.css
-        stc/msgsystem.css
     });
 
     LJ::need_string(qw{
@@ -386,8 +340,10 @@ sub get_status {
 
         $args->{journal} ||= {};
 
+        my $view = LJ::Request->notes('view') || '';
+
         unless (exists $args->{journal}->{view_friends}) {
-            if (LJ::Request->notes('view') eq 'friends') {
+            if ($view eq 'friends') {
                 $args->{journal}->{view_friends} = 1;
             } else {
                 $args->{journal}->{view_friends} = 0;
@@ -395,7 +351,7 @@ sub get_status {
         }
 
         unless (exists $args->{journal}->{view_friendsfriends}) {
-            if (LJ::Request->notes('view') eq 'friendsfriends') {
+            if ($view eq 'friendsfriends') {
                 $args->{journal}->{view_friendsfriends} = 1;
             } else {
                 $args->{journal}->{view_friendsfriends} = 0;
@@ -542,6 +498,134 @@ sub relations_data {
     }
 
     return $data;
+}
+
+sub get_feed_filters_new {
+    my ($class, $remote, $data_journal, $data_remote) = @_;
+    my $filters;
+    my %filters;
+
+    unless ($remote) {
+        $filters = [];
+    } else {
+        $filters = LJ::User::SubscriptionFilters->list_user_filters($remote);
+    }
+
+    foreach my $filter (@$filters) {
+        $filters{$filter->{num}}->{name} = $filter->{name};
+    }
+
+    my $selected_group = undef;
+
+    my $uri  = LJ::Request->uri;
+    my $args = LJ::Request->args;
+
+    if (($uri && $uri eq "/friends") && ($args && $args ne "")) {
+        my %GET = LJ::Request->args;
+
+        if ($GET{show}) {
+            $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1));
+        }
+    } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
+        $selected_group = LJ::durl($1);
+        $data_journal->{view_friends_group} = $selected_group;
+    }
+
+    my @friend_groups = ();
+
+    foreach my $g (sort { $filters{$a}->{'name'} cmp $filters{$b}->{'name'} } keys %filters) {
+        my $item = {
+            name  => lc($filters{$g}->{name}),
+            value => $filters{$g}->{name},
+        };
+
+        if ($selected_group) {
+            if ($item->{name} eq lc($selected_group)) {
+                $item->{selected} = 1;
+                $data_remote->{has_selected_groups} = 1;
+            }
+        } else {
+            if ($g == $LJ::User::SubscriptionFilters::DEFAULT_FILTER_NUM) {
+                $item->{selected} = 1;
+                $data_remote->{has_selected_groups} = 1;
+            }
+        }
+
+        push @friend_groups, $item;
+    }
+
+    $data_remote->{friend_groups} = \@friend_groups;
+
+    return;
+}
+
+sub get_feed_filters_old {
+    my ($class, $remote, $data_journal, $data_remote) = @_;
+    my %res;
+    my %group;
+    my @filters = (
+        all             => LJ::Lang::ml('web.controlstrip.select.friends.all'),
+        showpeople      => LJ::Lang::ml('web.controlstrip.select.friends.journals'),
+        showcommunities => LJ::Lang::ml('web.controlstrip.select.friends.communities'),
+        showsyndicated  => LJ::Lang::ml('web.controlstrip.select.friends.feeds'),
+    );
+
+    # FIXME: make this use LJ::Protocol::do_request
+    LJ::do_request(
+        {
+            'mode' => 'getfriendgroups',
+            'ver'  => $LJ::PROTOCOL_VER,
+            'user' => $remote->{'user'},
+        },
+        \%res,
+        {
+            'noauth' => 1,
+            'userid' => $remote->{'userid'}
+        }
+    );
+
+    foreach my $k (keys %res) {
+        if ($k =~ /^frgrp_(\d+)_name/) {
+            $group{$1}->{'name'} = $res{$k};
+        } elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
+            $group{$1}->{'sortorder'} = $res{$k};
+        }
+    }
+
+    my $selected_group = undef;
+
+    if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
+        my %GET = LJ::Request->args;
+
+        if ($GET{show}) {
+            $data_journal->{view_friends_show} = uc(substr($GET{show}, 0, 1));
+        }
+    } elsif (LJ::Request->uri =~ /^\/friends\/([^\/]+)/i) {
+        $selected_group = LJ::durl($1);
+        $data_journal->{view_friends_group} = $selected_group;
+    }
+
+    my @friend_groups = ();
+
+    foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
+        push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
+
+        my $item = {
+            name  => lc($group{$g}->{name}),
+            value => $group{$g}->{name},
+        };
+
+        if ($item->{name} eq lc($selected_group)) {
+            $item->{selected} = 1;
+            $data_remote->{has_selected_groups} = 1;
+        }
+
+        push @friend_groups, $item;
+    }
+
+    $data_remote->{friend_groups} = \@friend_groups;
+
+    return;
 }
 
 # Utils

@@ -723,6 +723,15 @@ sub available_for_user  {
         return 1;
     }
 
+    # user does not receive notification if entry is not visible to user
+    if (my $comment = $self->comment) {
+        if (my $entry = $comment->entry) {
+            unless ($entry->visible_to($u)) {
+                return 0;
+            }
+        }
+    }
+
     # user can always track comments to a specific entry
     if ($arg1) {
         return 1;

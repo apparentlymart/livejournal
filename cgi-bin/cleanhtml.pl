@@ -1233,7 +1233,7 @@ sub clean {
                 if ( $tag eq 'iframe' and $hash->{'src'} ) {
                     foreach my $host (keys %LJ::WHITELIST_VIDEO_HOSTS) {
                         if ( index $host, $hash->{'src'} ) {
-                            if ( $hash->{'src'} !~ m!wmode=opaque!i ) {
+                            if ( $hash->{'src'} !~ m!player\.seemedia\.pro! && $hash->{'src'} !~ m!wmode=opaque!i ) {
                                 if ( $hash->{'src'} =~ m!\?! ) {
                                     $hash->{'src'} .= '&wmode=opaque';
                                 } else {
