@@ -1,5 +1,7 @@
 //= require js/jquery/jquery.lj.calendar.js
 
+//= require_preprocessed_template Widgets/datepicker.tmpl
+
  /**
  * @author dmitry.petrov@sup.com (Dmitry Petrov)
  * @fileoverview LiveJournal post date widget for new post page.
