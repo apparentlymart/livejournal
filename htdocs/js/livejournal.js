@@ -55,7 +55,7 @@ LiveJournal.initResizeHelper = function() {
     var $window = jQuery(window),
         $body = jQuery('body'),
         hasClass = false,
-        resizeFunc = LJ.throttle(function() {
+        resizeFunc = LJ.Function.throttle(function() {
             if ($window.width() <= 1000) {
                 if (!hasClass) {
                     $body.addClass('l-width1000');

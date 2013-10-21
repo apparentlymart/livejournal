@@ -102,7 +102,7 @@
 					.delegate(selectors.closeBtn, 'click', this, onClose);
 
 				this._faderNode.bind('click', this, onClose);
-				$(window).scroll(LJ.throttle(onScroll.bind(this), 200));
+				$(window).scroll(LJ.Function.throttle(onScroll.bind(this), 200));
 
 				$(document).bind('keydown', this, onCloseEsc);
 			}
