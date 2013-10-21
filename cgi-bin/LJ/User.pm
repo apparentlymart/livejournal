@@ -2848,7 +2848,7 @@ sub get_social_capital {
     my $attr = '_social_capital';
 
     return $u->{$attr} if defined $u->{$attr};
-    
+
     my $soc_capital = LJ::MemCache::get( $key );
 
     unless (defined $soc_capital || $LJ::IS_DEV_SERVER || !LJ::is_enabled('authority_redis_storage')) {
@@ -2863,8 +2863,8 @@ sub get_social_capital {
     unless (defined $soc_capital) {
         my $response = LJ::PersonalStats::DB->fetch_raw('ratings', {func => 'get_authority', journal_id => $u->userid}); 
         if ($response) {
-            $soc_capital = int($response->{result}->{authority}/1000);
-            LJ::MemCache::set( $key, $soc_capital, 5*60);
+            $soc_capital = int($response->{result}->{authority} / 1000);
+            LJ::MemCache::set($key, $soc_capital, 5 * 60);
         }
     }
 
@@ -9170,13 +9170,17 @@ sub priv_can_view {
     my $priv = $privilege->{'priv'};
     my $arg  = $privilege->{'arg'};
     if ( LJ::check_priv($remote, $priv, $arg) ) {
-    	my $uri = LJ::Request->uri;
-	    my $args = LJ::Request->args;
-	    my $current_url = "$uri?$args";
-            my $authas = LJ::Request->get_param('authas') || LJ::Request->post_param('authas');
-	    my $u = LJ::load_user($authas);
-	    LJ::statushistory_add($u, $remote, "view_settings", "$current_url" );
-    	
+        my $uri = LJ::Request->uri;
+        my $args = LJ::Request->args;
+        my $current_url = "$uri?$args";
+        my $authas = LJ::Request->get_param('authas') || LJ::Request->post_param('authas');
+        my $u = LJ::load_user($authas);
+        if ($u) {
+            my $maintainer = LJ::RelationService->is_relation_to($u, $remote, 'M');
+            my $owner = LJ::RelationService->is_relation_to($u, $remote, 'S');
+            my $not_historic = $maintainer || $owner || ($u->user eq $remote->user);
+            LJ::statushistory_add($u, $remote, "view_settings", "$current_url" ) unless $not_historic;
+        }
         return 1;
     }
 }

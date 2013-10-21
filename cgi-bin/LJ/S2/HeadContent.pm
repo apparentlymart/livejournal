@@ -51,6 +51,19 @@ sub subst_header {
     return $head_content;
 }
 
+sub feeds {
+    my $u = shift;
+
+    my $atomapi = "$LJ::SITEROOT/interface/atomapi/$u->{'user'}";
+
+    return qq(
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="$u->{'_journalbase'}/data/rss" />
+    <link rel="alternate" type="application/atom+xml" title="Atom" href="$u->{'_journalbase'}/data/atom" />
+    <link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$atomapi/feed" />
+    <link rel="service.post" type="application/atom+xml" title="Create a new post" href="$atomapi/post" />
+    );
+}
+
 sub _page_head {
     my $self = shift;
 
@@ -79,19 +92,7 @@ sub _page_head {
 
     # Automatic Discovery of RSS/Atom
     if ( $opts->{'addfeeds'} ) {
-        $head_content .= qq(<link rel="alternate" type="application/rss+xml" );
-        $head_content .= qq(title="RSS" href="$base_url/data/rss" />\n );
-
-        $head_content .= qq(<link rel="alternate" type="application/atom+xml" );
-        $head_content .= qq(title="Atom" href="$base_url/data/atom" />\n);
-
-        $head_content .= qq(<link rel="service.feed" type="application/atom+xml" );
-        $head_content .= qq(title="AtomAPI-enabled feed" );
-        $head_content .= qq(href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n);
-
-        $head_content .= qq(<link rel="service.post" type="application/atom+xml" );
-        $head_content .= qq(title="Create a new post" );
-        $head_content .= qq(href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n);
+        $head_content .= feeds($u);
     }
 
     # OpenID information if the caller asked us to include it here.
@@ -126,8 +127,13 @@ sub _page_head {
         LJ::Share->request_resources();
     }
 
-    $head_content .= LJ::res_includes() . $extra_js;
-    $head_content .= LJ::res_includes({ only_needed => 1, only_tmpl   => 1 });
+    if ($opts->{'without_js'}) {
+        $head_content .= LJ::res_includes({ only_css => 1 });
+    } else {
+        $head_content .= LJ::res_includes() . $extra_js;
+    }
+
+    $head_content .= LJ::res_includes({ only_needed => 1, only_tmpl => 1 });
     LJ::run_hooks( 'head_content', \$head_content );
 
     my $get = $opts->{'getargs'};

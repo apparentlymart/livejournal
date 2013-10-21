@@ -2933,6 +2933,18 @@ sub viewer_is_friend
     return LJ::is_friend($ju, $remote);
 }
 
+sub viewer_is_subscription
+{
+    my ($ctx) = @_;
+    return 0 unless LJ::is_enabled('new_friends_and_subscriptions');
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return 0 unless defined($LJ::S2::CURR_PAGE);
+
+    my $ju = $LJ::S2::CURR_PAGE->{'_u'};
+    return $remote->is_mysubscription($ju);
+}
+
 sub viewer_is_member
 {
     my ($ctx) = @_;
@@ -4157,7 +4169,16 @@ sub UserLite__get_link
     };
 
     if ($key eq 'add_friend' && defined($remote) && ! LJ::is_friend($remote, $u)) {
-        return $button->("$LJ::SITEROOT/friends/add.bml?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            if (!$remote->is_mysubscription($u)) {
+                return $button->("$LJ::SITEROOT/users/add?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
+            }
+        } else {
+            return $button->("$LJ::SITEROOT/friends/add.bml?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
+        }
+    }
+    if ($key eq 'modify_friend' && defined($remote) && LJ::is_enabled('new_friends_and_subscriptions') && $remote->is_subscription($u)) {
+        return $button->("$LJ::SITEROOT/users/add?user=$user", "Modify $user in friends list", "btn_addfriend.gif?v=17312");
     }
     if ($key eq 'post_entry') {
         return undef unless $has_journal and LJ::can_use_journal($remote->{'userid'}, $user);
@@ -5774,6 +5795,27 @@ sub Page__need_res {
     } else {
         LJ::need_res(@valid_resources);
     }
+}
+
+sub Page__render_resource {
+    my ($self, $page, $opts) = @_;
+
+    if ($opts->{'without_js'}) {
+        my $head_content = LJ::S2::HeadContent->new({
+            u      => $page->{'_u'},
+            remote => LJ::get_remote(),
+            type   => 'Page',
+            opts   => $opts
+        });
+
+        return $head_content->subst_header();
+    }
+
+    if ($opts->{'js'}) {
+        return LJ::res_includes({ only_js => 1 });
+    }
+
+    return '';
 }
 
 sub _is_secure_resource {

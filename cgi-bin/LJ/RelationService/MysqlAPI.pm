@@ -733,27 +733,30 @@ sub _find_relation_sources_type_r {
 
     return unless $dbh;
 
+    my $force  = $opts{force};
     my $limit  = int($opts{limit});
     my $memkey = [$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$uid"];
 
-    if (my $pack = LJ::MemCacheProxy::get($memkey)) {
-        my ($slimit, @uids) = unpack("N*", $pack);
-        # value in memcache is good if stored limit (from last time)
-        # is >= the limit currently being requested.  we just may
-        # have to truncate it to match the requested limit
+    unless ($force) {
+        if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+            my ($slimit, @uids) = unpack("N*", $pack);
+            # value in memcache is good if stored limit (from last time)
+            # is >= the limit currently being requested.  we just may
+            # have to truncate it to match the requested limit
 
-        if ($slimit >= $limit) {
-            if (scalar @uids > $limit) {
-                return @uids[0..$limit-1];
+            if ($slimit >= $limit) {
+                if (scalar @uids > $limit) {
+                    return @uids[0..$limit-1];
+                }
+
+                return @uids;
             }
 
-            return @uids;
+            # value in memcache is also good if number of items is less
+            # than the stored limit... because then we know it's the full
+            # set that got stored, not a truncated version.
+            return @uids if @uids < $slimit;
         }
-
-        # value in memcache is also good if number of items is less
-        # than the stored limit... because then we know it's the full
-        # set that got stored, not a truncated version.
-        return @uids if @uids < $slimit;
     }
 
     my $uids = $dbh->selectcol_arrayref(qq[
@@ -763,8 +766,6 @@ sub _find_relation_sources_type_r {
                 subscribersleft
             WHERE
                 subscriptionid = ?
-            LIMIT
-                0, $limit
         ],
         undef,
         $uid
@@ -773,6 +774,12 @@ sub _find_relation_sources_type_r {
     if ($dbh->err) {
         return;
     }
+
+    if ($force) {
+        return @$uids;
+    }
+
+    my @uids = @$uids;
 
     # We cant cache more then 200000 (~ 1MB)
     if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
@@ -793,7 +800,7 @@ sub _find_relation_sources_type_r {
         }
     }
 
-    return @$uids;
+    return @uids;
 }
 
 sub _find_relation_sources_type_other {
@@ -868,7 +875,7 @@ sub _friend_friendof_uids {
         # is >= the limit currently being requested.  we just may
         # have to truncate it to match the requested limit
 
-        if ($limit) {
+        if ($limit && ! $nolimit) {
             if ($slimit >= $limit) {
                 if (@uids > $limit) {
                     @uids = @uids[0..$limit-1];
@@ -885,7 +892,7 @@ sub _friend_friendof_uids {
     }
 
     my $sql     = '';
-    my $sqlimit = $limit && !$nolimit ? " LIMIT $limit" : '';
+    my $sqlimit = $limit && ! $nolimit ? " LIMIT $limit" : '';
 
     if ($mode eq 'friends'){
         $sql = "SELECT friendid FROM friends WHERE userid=? $sqlimit";
@@ -898,17 +905,27 @@ sub _friend_friendof_uids {
     my $dbh  = LJ::get_db_reader();
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
 
-    if (not $nolimit and $uids and @$uids){
+    if ($dbh->err) {
+        return [];
+    }
+
+    unless ($uids) {
+        return [];
+    }
+
+    my @uids = @$uids;
+
+    if (! $nolimit && @uids){
         # We cant cache more then 200000 (~ 1MB)
-        if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
-            splice @$uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @$uids;
+        if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+            splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
         }
 
         ## do not cache if $nolimit option is in use,
         ## because with disabled limit we might put in the cache
         ## much more data than usually required.
 
-        my $pack = pack 'N*', ($limit, @$uids);
+        my $pack = pack 'N*', ($limit, @uids);
 
         if ($pack) {
             if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {

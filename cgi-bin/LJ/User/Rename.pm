@@ -232,40 +232,71 @@ sub basic_rename {
         ## "Remove all users from your Friends list and leave all communities"
         if ($opts->{opt_delfriends}) {
             # delete friends
-            my $friends = LJ::get_friends($u, undef, undef, 'force') || {};
-            LJ::remove_friend($u, [ keys %$friends ], { 'nonotify' => 1 });
-        
+            my $friends = $u->friends(nolimit => 1);
+
+            foreach my $target (values %$friends) {
+                if ($target) {
+                    $u->remove_friend($target, {
+                        nonotify => 1
+                    });
+                }
+            }
+
+            # remove from communities
+            my $friendsof = $u->friendsof(nolimit => 1);
+
+            foreach my $target (values %$friendsof) {
+                if ($target) {
+                    if ($target->is_community) {
+                        $target->remove_friend($u, {
+                            nonotify => 1
+                        });
+                    }
+                }
+            }
+
+            # delete mysubscriptions
+            my $mysubscriptions = $u->mysubscriptions();
+
+            foreach my $target (values %$mysubscriptions) {
+                if ($target) {
+                    $u->unsubscribe_from_user(
+                        $target,
+                        nonotify => 1
+                    );
+                }
+            }
+
             # delete access to post to communities
             LJ::clear_rel('*', $u, 'P');
-        
-            # delete friend-ofs that are communities
-            # TAG:fr:bml_rename_use:get_member_of
-            my $users = $dbh->selectcol_arrayref(qq{
-                SELECT u.userid FROM friends f, user u 
-                    WHERE f.friendid=$u->{'userid'} AND 
-                    f.userid=u.userid and u.journaltype <> 'P'
-            });
-            if ($users && @$users) {
-                my $in = join(',', @$users);
-                $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
-                LJ::memcache_kill($_, "friends") foreach @$users;
-            }
         }
     
         ## "Remove everyone from your Friend Of list"
         if ($opts->{'opt_delfriendofs'}) {
-            # delete people (only people) who list this user as a friend
-            my $users = $dbh->selectcol_arrayref(qq{
-                SELECT u.userid FROM friends f, user u 
-                    WHERE f.friendid=$u->{'userid'} AND 
-                    f.userid=u.userid and u.journaltype = 'P'
-            });
-            if ($users && @$users) {
-                my $in = join(',', @$users);
-                $dbh->do("DELETE FROM friends WHERE friendid=$u->{'userid'} AND userid IN ($in)");
-                foreach my $fofid ( @$users ) {
-                    LJ::memcache_kill( $fofid, "friends" );
-                    LJ::MemCacheProxy::delete( [ $fofid, "frgmask:$fofid:$u->{'userid'}" ] );
+            # remove friendofs
+            my $friendsof = $u->friendsof(nolimit => 1);
+
+            foreach my $target (values %$friendsof) {
+                if ($target) {
+                    unless ($target->is_community) {
+                        $target->remove_friend($u, {
+                            nonotify => 1
+                        });
+                    }
+                }
+            }
+
+            # Remove subscribers
+            my $subscribers = $u->subscribers(
+                force => 1
+            );
+
+            foreach my $target (values %$subscribers) {
+                if ($target) {
+                    $target->unsubscribe_from_user(
+                        $u,
+                        nonotify => 1
+                    );
                 }
             }
         }

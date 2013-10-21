@@ -1,3 +1,5 @@
+//= require js/widget_ippu/settingprod.js
+
 function displaySettingProd(sett, fname, title, options) {
     if (!sett) return true;
     if (!title) title = 'New Setting!';

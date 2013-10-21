@@ -434,7 +434,7 @@ sub homepage_flags {
 }
 
 sub user_params {
-    my ($self, $u, $url) = @_;
+    my ($self, $u) = @_;
 
     my $host = LJ::Request->header_in("Host");
     my $uri  = LJ::Request->uri();
@@ -442,10 +442,20 @@ sub user_params {
 
     $args = "?$args" if $args;
  
+    # Special requirement from ATI:
+    # The character „&“ should not be used, or encoded two times. O_O
+    $args =~ s/(&)/LJ::eurl($1)/eg;
+
+    my $url = LJ::eurl("$host$uri$args");
+
     if ( $u ) {
 
         my $journaltype  = $u->journaltype_readable;
         my $journal_user = $u->user;
+
+        if ($journaltype eq 'redirect' && (my $renamedto = LJ::load_user($u->prop('renamedto')))) {
+            $journaltype = $renamedto->journaltype_readable;
+        }
 
         return {
             userid          => $u->userid(),
@@ -454,7 +464,7 @@ sub user_params {
             sup_enabled     => LJ::SUP->is_sup_enabled($u) ? 'Cyr' : 'nonCyr',
             premium_package => $u->get_cap('perm') ? 'perm' : $u->get_cap('paid') ? 'paid' : 'no',
             account_level   => $self->account_level($u),
-            page_params     => "journal::$journaltype\:\:$journal_user\:\:$host$uri$args",
+            page_params     => "journal::$journaltype\:\:$journal_user\:\:$url",
             adult_content   => $u->adult_content_calculated,
             early_adopter   => LJ::get_cap($u, 'early') ? 'yes' : 'no',
             user_md5_base64 => md5_base64($u->user, 0, 8),
@@ -473,7 +483,7 @@ sub user_params {
             sup_enabled     => LJ::SUP->is_sup_ip_class($ip_class) ? 'Cyr' : 'nonCyr', 
             premium_package => 'undef', 
             account_level   => 'undef', 
-            page_params     => "service::undef::undef::$host$uri$args",
+            page_params     => "service::undef::undef::$url",
             adult_content   => 'undef',
             early_adopter   => 'undef', 
             user_md5_base64 => 'undef',

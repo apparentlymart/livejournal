@@ -1,3 +1,6 @@
+//= require js/ljwidget.js
+//= require js/lj_ippu.js
+
 LJWidgetIPPU = new Class(LJWidget, {
     init: function (opts, reqParams) {
         var title          = opts.title;

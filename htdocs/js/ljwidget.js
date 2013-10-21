@@ -1,3 +1,5 @@
+// @TODO: remove HTTPReq dependency, move to $.ajax
+
 LJWidget = new Class(Object, {
     // replace the widget contents with an ajax call to render with params
     updateContent: function (params) {

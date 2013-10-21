@@ -27,12 +27,10 @@ sub render_body {
 }
 
 sub need_res {
-    qw(js/settingprod.js
-       js/ljwidget.js
-       js/ljwidget_ippu.js
-       js/widget_ippu/settingprod.js
-       stc/widgets/settingprod.css
-      )
+  qw(
+    stc/widgets/settingprod.css
+    js/settingprod.js
+  )
 }
 
 1;

@@ -15,85 +15,113 @@
 /**
  * Widget shows the dialog to edit current user note.
  */
-LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
-    init: function (opts, params) {
-        opts.widgetClass = "IPPU::AddAlias";
-        this.width = opts.width; // Use for resizing later
-        this.height = opts.height; // Use for resizing later
-        this.alias = opts.alias;
-        LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
-    },
 
-    changeAlias: function (evt, form) {
-        this.doPost({
-            alias: form['Widget[IPPU_AddAlias]_alias'].value + '',
-            foruser: form['Widget[IPPU_AddAlias]_foruser'].value + ''
+/*
+ * Load ljwidget_ippu.js asynchronously and
+ * create window.LJWidgetIPPU_AddAlias. This is
+ * useful to move all IPPU stuff out of core
+ * and load it on demand.
+ *
+ * @param {function} callback
+ */
+var loadIPPU = (function() {
+    var files  = ['ljwidget_ippu.js'], // all dependencies are listed via require
+        loaded = false;
+
+    return function(callback) {
+        if (loaded) {
+            return callback.call(this);
+        }
+
+        LJ.injectScript(LJ.get('statprefix') + '/js/??' + files.join(',')).then(function() {
+            createAlias();
+            loaded = true;
+
+            callback.call(this);
         });
+    };
 
-        evt.preventDefault();
-    },
+    function createAlias() {
+        window.LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
+            init: function (opts, params) {
+                opts.widgetClass = "IPPU::AddAlias";
+                this.width = opts.width; // Use for resizing later
+                this.height = opts.height; // Use for resizing later
+                this.alias = opts.alias;
+                LJWidgetIPPU_AddAlias.superClass.init.apply(this, arguments);
+            },
 
-    onData: function (data) {
-        if (!data.res || !data.res.success) {
-            return;
-        }
+            changeAlias: function (evt, form) {
+                this.doPost({
+                    alias: form['Widget[IPPU_AddAlias]_alias'].value + '',
+                    foruser: form['Widget[IPPU_AddAlias]_foruser'].value + ''
+                });
 
-        this.close();
+                evt.preventDefault();
+            },
 
-        //Changing button. Only on profile page
-        var edit_node = jQuery('.profile_addalias');
-        if (edit_node.length) {
-            if (data.res.alias) {
-                edit_node[0].style.display = 'none';
-                edit_node[1].style.display = 'block';
-                edit_node[1].firstChild.alias = data.res.alias;
-            } else {
-                edit_node[0].style.display = 'block';
-                edit_node[1].style.display = 'none';
+            onData: function (data) {
+                if (!data.res || !data.res.success) {
+                    return;
+                }
+
+                this.close();
+
+                //Changing button. Only on profile page
+                var edit_node = jQuery('.profile_addalias');
+                if (edit_node.length) {
+                    if (data.res.alias) {
+                        edit_node[0].style.display = 'none';
+                        edit_node[1].style.display = 'block';
+                        edit_node[1].firstChild.alias = data.res.alias;
+                    } else {
+                        edit_node[0].style.display = 'block';
+                        edit_node[1].style.display = 'none';
+                    }
+                }
+
+                var username = data.res.username,
+                    alias = data.res.alias;
+                if (ContextualPopup.cachedResults[username]) {
+                    ContextualPopup.cachedResults[username].alias_title = alias ? 'Edit Note' : 'Add Note';
+                    ContextualPopup.cachedResults[username].alias = alias;
+                }
+
+                if (ContextualPopup.currentId === username) {
+                    ContextualPopup.renderPopup(ContextualPopup.currentId);
+                }
+            },
+
+            onError: function (msg) {
+                LJ_IPPU.showErrorNote('Error: ' + msg);
+            },
+
+            onRefresh: function () {
+                var form = jQuery('#addalias_form').get(0),
+                    input = jQuery(form['Widget[IPPU_AddAlias]_alias']),
+                    delete_btn = jQuery(form['Widget[IPPU_AddAlias]_aliasdelete']),
+                    widget = this;
+                input.focus();
+
+                if (delete_btn.length) {
+                    delete_btn.click(function(){
+                        input.val('');
+                    });
+                    input.input(function() {
+                        // save button disabled
+                        form['Widget[IPPU_AddAlias]_aliaschange'].disabled = !this.value;
+                    });
+                }
+
+                jQuery(form).submit(function(e) { widget.changeAlias(e, form); });
+            },
+
+            cancel: function () {
+                this.close();
             }
-        }
-
-        var username = data.res.username,
-            alias = data.res.alias;
-        if (ContextualPopup.cachedResults[username]) {
-            ContextualPopup.cachedResults[username].alias_title = alias ? 'Edit Note' : 'Add Note';
-            ContextualPopup.cachedResults[username].alias = alias;
-        }
-
-        if (ContextualPopup.currentId === username) {
-            ContextualPopup.renderPopup(ContextualPopup.currentId);
-        }
-    },
-
-    onError: function (msg) {
-        LJ_IPPU.showErrorNote('Error: ' + msg);
-    },
-
-    onRefresh: function () {
-        var form = jQuery('#addalias_form').get(0),
-            input = jQuery(form['Widget[IPPU_AddAlias]_alias']),
-            delete_btn = jQuery(form['Widget[IPPU_AddAlias]_aliasdelete']),
-            widget = this;
-        input.focus();
-
-        if (delete_btn.length) {
-            delete_btn.click(function(){
-                input.val('');
-            });
-            input.input(function() {
-                // save button disabled
-                form['Widget[IPPU_AddAlias]_aliaschange'].disabled = !this.value;
-            });
-        }
-
-        jQuery(form).submit(function(e) { widget.changeAlias(e, form); });
-    },
-
-    cancel: function () {
-        this.close();
+        });
     }
-});
-
+})();
 
 //this object contains only authToken
 Aliases = {};
@@ -247,8 +275,15 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                         url: Site.siteroot + '/manage/notes.bml',
                         click: function(e)
                         {
+                            var that = this;
+
                             e.preventDefault();
-                            addAlias(this, data.alias_title, data.username, data.alias || '');
+
+                            LJ.Track.event('Site', 'ContextualHover', 'Edit note');
+
+                            loadIPPU(function() {
+                                addAlias(that, data.alias_title, data.username, data.alias || '');
+                            });
                         },
                         text: data.alias_title
                     });
@@ -739,7 +774,10 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
         // create a little popup to notify the user of something
         showNote: function (note, ele) {
             ele = ele || popup.element[0];
-            LJ_IPPU.showNote(note, ele);
+
+            loadIPPU(function() {
+                LJ_IPPU.showNote(note, ele);
+            });
         },
 
         cleanCache: function(keys) {

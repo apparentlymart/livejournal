@@ -2007,7 +2007,7 @@ sub journal_content
         }
     }
 
-    LJ::SocialScripts::addToPage();
+    LJ::SocialScripts::add_to_page();
 
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {
@@ -2446,11 +2446,6 @@ sub db_logger
                  LJ::AccessLogSink::DInsertd->new,
                  LJ::AccessLogSink::DBIProfile->new,
                  );
-
-    if (@LJ::EXTRA_ACCESS_LOG_SINKS) {
-        # will convert them to objects from class/ctor-arg arrayrefs
-        push @sinks, LJ::AccessLogSink->extra_log_sinks;
-    }
 
     foreach my $sink (@sinks) {
         foreach my $rec (@recs) {

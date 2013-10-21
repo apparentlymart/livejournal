@@ -717,6 +717,12 @@ class Page
 
     function builtin render_journalpromo() : bool
     "Print rendered journal promo and return true if journal promo is not empty.";
+
+    function print_pagewide_slot()
+    "Prints page-wide slot.";
+
+    function builtin render_resource(int{} opts) : string
+    "Returns a string containing external resources and meta information (js, css, meta, rss).";
 }
 
 class TagsPage extends Page
@@ -1004,6 +1010,9 @@ Useful for returning links to manage information, or edit entries.";
 
 function builtin viewer_is_friend() : bool
 "Returns true if the user viewing the page is both logged in, and is a friend of the journal being viewed. Always returns false for communities, since they cannot have friends.";
+
+function builtin viewer_is_subscription() : bool
+"Returns true if the user viewing the page is both logged in, and is a subscription of the journal being viewed.";
 
 function builtin viewer_is_member() : bool
 "Returns true if the user viewing the page is both logged in, and is a member of the community being viewed. Always returns false for personal journals, since they cannot have members.";
@@ -2699,6 +2708,15 @@ function Page::print_custom_head() {
     # blank
 }
 
+function Page::print_pagewide_slot() {
+    if (viewer_sees_ad_box("s2.personal.top.test.b")) {
+      $this->print_ad_box("s2.personal.top.test.b");
+    }
+    if (viewer_sees_ad_box("s2.personal.top.test.c")) {
+      $this->print_ad_box("s2.personal.top.test.c");
+    }    
+}
+
 function Page::print_linklist() {
     if (size $.linklist <= 0) {
         return;
@@ -3220,6 +3238,12 @@ function Redirector::end_form ()
 
 function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
+
+    while (size $cs == 1) {
+        $this->print_comment($cs[0]);
+        $cs = $cs[0].replies;
+    }
+
     foreach var Comment c ($cs) {
         $this->print_comment($c);
         $this->print_comments($c.replies);

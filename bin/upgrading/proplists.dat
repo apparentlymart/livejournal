@@ -1526,6 +1526,14 @@ userproplist.webmastertools_yandex:
   multihomed: 0
   prettyname:  
 
+userproplist.webmastertools_mailru:
+  cldversion: 8
+  datatype: char
+  des: Meta tag content value provided by Mail.ru
+  indexed: 1
+  multihomed: 0
+  prettyname:  
+
 userproplist.who_invited:
   cldversion: 4
   datatype: char

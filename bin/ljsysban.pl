@@ -168,6 +168,11 @@ if ($modify) {
             LJ::procnotify_add("unban_contentflag", { 'username' => $value || $ban->{'value'} });
             LJ::MemCache::delete("sysban:contentflag");
         }
+
+        if ($ban->{'what'} eq 'ip_captcha'){
+            LJ::CaptchaServer->unban_ip($ban->{'value'});
+        }
+
     }
         
     # what - must have a value

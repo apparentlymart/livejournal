@@ -8,14 +8,12 @@ use LJ::TimeUtil;
 
 sub need_res {
     return qw(
-              js/ippu.js
-              js/lj_ippu.js
-              js/httpreq.js
-              stc/contentflag.css
-              js/ljwidget_ippu.js
-              js/widget_ippu/contentflagreporters.js
-              js/widget_ippu/entrysummary.js
-              );
+      stc/contentflag.css
+      
+      js/httpreq.js
+      js/widget_ippu/contentflagreporters.js
+      js/widget_ippu/entrysummary.js
+    );
 }
 
 sub ajax { 1 }

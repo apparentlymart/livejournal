@@ -6798,6 +6798,12 @@ setting.webmastertools_yandex.label=Yandex webmaster tools
 setting.webmastertools_yandex.label2|staleness=1
 setting.webmastertools_yandex.label2=Enter your meta tag content value obtained from Yandex
 
+setting.webmastertools_mailru.label|staleness=1
+setting.webmastertools_mailru.label=Mail.ru webmaster tools
+
+setting.webmastertools_mailru.label2|staleness=1
+setting.webmastertools_mailru.label2=Enter your meta tag content value obtained from Mail.ru
+
 settings.city=City
 
 settings.country=Country

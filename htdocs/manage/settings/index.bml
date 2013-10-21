@@ -198,6 +198,7 @@ body<=
                 LJ::Setting::VkontakteConnect
                 LJ::Setting::WebmasterTools::Google
                 LJ::Setting::WebmasterTools::Yandex
+                LJ::Setting::WebmasterTools::Mailru
                 LJ::Setting::GiveFeatures
                 LJ::Setting::LJTimes),
                 $LJ::DISABLED{'trava'} || ( $u && $u->is_community ) ? undef : 'LJ::Setting::Music',

@@ -78,18 +78,22 @@ sub find_relation_destinations {
     my %opts  = @_;
     
     $u = LJ::want_user($u);
+
+    return unless $u;
+
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
     if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
+        if (my $alt = $class->rs_api) {
             $alt->find_relation_destinations($u, $type, %opts);
         }
     }
 
     my $interface = $class->mysql_api($u);
-    return $interface->find_relation_destinations($u, $type, %opts);   
+    my @result    = $interface->find_relation_destinations($u, $type, %opts);
+
+    return @result;
 }
 
 ## findRelationSources
@@ -101,11 +105,13 @@ sub find_relation_sources {
 
     $u = LJ::want_user($u);
 
+    return unless $u;
+
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
     if ($class->_load_rs_api('read', $type)) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->find_relation_sources($u, $type, %opts);
         }
     }

@@ -305,64 +305,6 @@ LiveJournal.closeSiteMessage = function(node, e, id) {
     }, 'json');
 };
 
-/**
- * Insert script in the document asynchronously.
- *
- * @param {String}  url     Url of the script
- * @param {Object=} params  Data to apply to the scipt node object, e.g. async, text.
- * @param {Node=}   parent  If exists, script tag will be inserted in this node or before the
- *                          first script tag otherwise.
- *
- * @return {jQuery.Deferred}    jQuery deferred object that will be resolved when
- *                              script loaded.
- */
-LiveJournal.injectScript = function(url, params, parent) {
-    var deferred = jQuery.Deferred(),
-        defaults = {
-            async: true
-        },
-        script,
-        prop;
-
-    script = document.createElement('script');
-    script.src = url;
-
-    if (params && jQuery.type(params) === 'object') {
-        params = jQuery.extend({}, defaults, params);
-
-        for (prop in params) {
-            if ( params.hasOwnProperty(prop) ) {
-                script[prop] = params[prop];
-            }
-        }
-    }
-
-    if (script.readyState) {
-        // IE
-        script.onreadystatechange = function () {
-            if ( script.readyState === 'loaded' || script.readyState === 'complete' ) {
-                script.onreadystatechange = null;
-                deferred.resolve();
-            }
-        };
-    } else {
-        // Others
-        script.onload = function(){
-            deferred.resolve();
-        };
-    }
-
-
-    if (parent) {
-        parent.appendChild(script);
-    } else {
-        parent = document.getElementsByTagName('script')[0];
-        parent.parentNode.insertBefore(script, parent);
-    }
-
-    return deferred;
-};
-
 LiveJournal.getLocalizedStr = LJ.ml;
 
 LiveJournal.JSON = JSON;

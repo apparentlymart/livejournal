@@ -39,9 +39,12 @@
     return $error->("You must be logged in to be here.")
         unless $remote;
     
+    my $can_view   = LJ::check_priv($remote, 'canview', 'spamreports');
+    my $can_manage = LJ::check_priv($remote, 'siteadmin', 'spamreports');
+    
     # priv check
     return $error->("You do not have the necessary privilege to be here.")
-        unless LJ::check_priv($remote, 'siteadmin', 'spamreports');
+        unless $can_view || $can_manage;
 
     # show the top 10 spam reports by IP
     my $mode = lc($GET{mode} || $POST{mode});

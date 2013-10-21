@@ -1,3 +1,5 @@
+//= require js/ljwidget_ippu.js
+
 LJWidgetIPPU_AddAlias = new Class(LJWidgetIPPU, {
   init: function (opts, params) {
     opts.widgetClass = "IPPU::AddAlias";

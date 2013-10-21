@@ -1,3 +1,5 @@
+//= require js/ljwidget_ippu.js
+
 LJWidgetIPPU_ContentFlagReporters = new Class(LJWidgetIPPU, {
   init: function (opts, params) {
     opts.widgetClass = "IPPU::ContentFlagReporters";
