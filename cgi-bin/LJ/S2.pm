@@ -2413,6 +2413,7 @@ sub UserExtended
     $o->{'friends_count'} = $u->friends_personal_count;
     $o->{'friendof_count'} = $u->friendof_count;
     $o->{'social_capital'} = $u->get_social_capital;
+    $o->{'entry_count'} = $u->number_of_posts;
     return $o;
 }
 
