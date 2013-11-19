@@ -27,7 +27,7 @@ use vars qw($body $title $windowtitle %GET %POST);
                  js/lib/jquery-ui/jquery.ui.position.min.js
                  js/lib/jquery-ui/jquery.ui.autocomplete.min.js
                  js/jquery/jquery.bgiframe.js
-                 js/addfriend.js));
+                 js/addfriend.old.js));
 
  LJ::set_active_crumb('addfriend');
 
