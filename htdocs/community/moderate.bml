@@ -102,6 +102,14 @@ body<=
                 $success = 1;
                 my $approved_entry = LJ::Entry->new($c, jitemid => $res->{itemid});
                 $approved_entry->set_prop( moderator_id => $remote->userid );
+
+                LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+                    action => 'approve',
+                    id => $approved_entry->jitemid(),
+                    posterid => $approved_entry->posterid(),
+                    journalid => $approved_entry->journalid(),
+                );
+
                 my $err = sub { return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>"; };
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";
                 $ret .= "<br />" .$err->($prot_err). "<br />" unless $res;
@@ -146,10 +154,20 @@ body<=
             ($do_mail, $why_mail) = (1, 'reject')
                 if $poster->{'status'} eq 'A';
 
+            LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+                action   => 'reject',
+                id       => $modid,
+                posterid => $entry->{posterid},
+            ) unless $POST{'mark_as_spam'};
             LJ::run_hooks('rejected_entry', $c, $modid, $poster);
 
             if ($POST{'mark_as_spam'}) {
-                if  (LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
+                if (LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
+                    LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+                        action   => 'spam',
+                        id       => $modid,
+                        posterid => $entry->{posterid},
+                    );
                     $c->ban_user($poster);
                     LJ::set_rel($c->{'userid'}, $poster->{'userid'}, 'D');
                     LJ::User::UserlogRecord::SpamSet->create( $c, 'spammerid' => $poster->{'userid'}, 'remote' => $remote );

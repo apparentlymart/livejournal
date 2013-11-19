@@ -32,6 +32,7 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     MaintainerAdd
     MaintainerRemove
     MassPrivacyChange
+    ModerateEntry
     PasswordChange
     PasswordReset
     PasswordResetRequest
