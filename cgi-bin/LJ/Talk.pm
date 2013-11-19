@@ -151,8 +151,10 @@ sub link_bar
                                        "itemid=$itemid";
 
     # << Previous
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry", 'prev');
-    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev' rel='Previous' />\n";
+    if (LJ::get_before_item_link($u, {itemid => int($itemid / 256), use_sticky => 1})) {
+        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry", 'prev');
+        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev' rel='Previous' />\n";
+    }
 
     # memories
     unless ($LJ::DISABLED{'memories'} || $entry->is_delayed) {
@@ -210,8 +212,10 @@ sub link_bar
     }
 
     ## Next
-    push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry", 'next');
-    $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next' rel='Next' />\n";
+    if (LJ::get_after_item_link($u, {itemid => int($itemid / 256), use_sticky => 1})) {
+        push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry", 'next');
+        $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next' rel='Next' />\n";
+    }
 
     if ( LJ::is_enabled('comment_controller') ) {
         return \@linkele;
