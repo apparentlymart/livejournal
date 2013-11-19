@@ -444,13 +444,14 @@ sub process {
     # upload picture attachments to fotobilder.
     # undef return value? retry posting for later.
     $fb_upload = upload_images(
-        $entity, $u,
+        $entity,
+        $u,
         \$fb_upload_errstr,
         {
             imgsec  => $lj_headers{'imgsecurity'},
             galname => $lj_headers{'gallery'} || $u->{'emailpost_gallery'}
         }
-      ) || return $err->( $fb_upload_errstr, { retry => 1 } );
+    ) || return $err->( $fb_upload_errstr, { retry => 1 } );
 
     # if we found and successfully uploaded some images...
     if (ref $fb_upload eq 'ARRAY') {
@@ -486,14 +487,14 @@ sub process {
     # build lj entry
     $req = {
         'usejournal' => $journal,
-        'ver' => 1,
-        'username' => $user,
-        'event' => $body,
-        'subject' => $subject,
-        'security' => $lj_headers{security},
-        'allowmask' => $amask,
-        'props' => $props,
-        'tz'    => 'guess',
+        'ver'        => 1,
+        'username'   => $user,
+        'event'      => $body,
+        'subject'    => $subject,
+        'security'   => $lj_headers{security},
+        'allowmask'  => $amask,
+        'props'      => $props,
+        'tz'         => 'guess',
     };
 
     $req->{'props'}->{'interface'} = "email";
@@ -510,8 +511,7 @@ sub process {
 # of that type. (image, application, etc)
 # Specifying a type of 'all' will return all MIME::Entities,
 # regardless of type.
-sub get_entity
-{
+sub get_entity {
     my ($entity, $type) = @_;
 
     # old arguments were a hashref
@@ -673,8 +673,7 @@ sub check_sig {
 # undef - failure during upload
 # http_code - failure during upload w/ code
 # hashref - { title => url } for each image uploaded
-sub upload_images
-{
+sub upload_images {
     my ($entity, $u, $rv, $opts) = @_;
     return 1 unless LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
 
@@ -727,8 +726,7 @@ sub upload_images
     return;
 }
 
-sub dblog
-{
+sub dblog {
     my ( $u, $info ) = @_;
     chomp $info->{s};
     LJ::User::UserlogRecord::EmailPost->create( $u, 'extra' => $info );

@@ -23,15 +23,13 @@ use File::Basename ();
 # Don't let startup continue unless LWP is ok.
 die "* Installed version of LWP is too old! *" if LWP->VERSION < 5.803;
 
-sub make_auth
-{
+sub make_auth {
     my ($chal, $password) = @_;
     return unless $chal && $password;
     return "crp:$chal:" . hash($chal . hash($password));
 }
 
-sub get_challenge
-{
+sub get_challenge {
     my ($u, $ua, $err) = @_;
     return unless $u && $ua;
 
@@ -69,8 +67,7 @@ sub get_challenge
 #         On HTTP failure, returns numeric HTTP error code, and
 #         sets $rv reference with errorstring. Or undef on unrecoverable failure.
 # </LJFUNC>
-sub do_upload
-{
+sub do_upload {
     my ($u, $rv, $opts) = @_;
     unless ($u && $opts->{'path'}) {
         $$rv = "Invalid parameters to do_upload()";
@@ -169,8 +166,7 @@ sub do_upload
 # returns: html string suitable for entry post body
 # TODO: Hook this like the Fotobilder "post to journal"
 #       caption posting page.  More pretty. (layout keywords?)
-sub make_html
-{
+sub make_html {
     my ($u, $images, $opts) = @_;
     my ($icount, $html);
 
@@ -183,7 +179,8 @@ sub make_html
     my @props = qw/ emailpost_imgsize emailpost_imglayout emailpost_imgcut /;
 
     LJ::load_user_props( $u, @props );
-    foreach (@props) {
+
+    foreach ( @props ) {
         my $prop = $_;
         $prop =~ s/emailpost_//;
         $opts->{$prop} = lc($opts->{$prop}) || $u->{$_};
@@ -208,7 +205,7 @@ sub make_html
           if $opts->{imgcut} eq 'count';
     $html .= "<table border='0'><tr>" if $horiz;
 
-    foreach my $i (@$images) {
+    foreach my $i ( @$images ) {
         my $title = LJ::ehtml($i->{'title'});
 
         my ( $image_url, $page_url, $scaled_url );
@@ -218,18 +215,20 @@ sub make_html
         my $image_hostname = $image_uri ? $image_uri->host : '';
 
         if ( $image_hostname =~ /^ic?[.]pics/ ) {
-            my $extension = ( $image_url =~ /(\w+)$/ );
+            my ($extension) = ( $image_url =~ /(\w+)$/ );
 
-            $page_url = $image_url;
-            $page_url =~ s/\w*original[.]\w+$//;
+            $scaled_url = $page_url = $image_url;
+            $scaled_url =~ s/\w*original[.]\w+$//;
 
             $scaled_url = $page_url . $width . '.' . $extension;
-        } else {
-            $page_url   = $image_url . '/';
+        }
+        else {
+            $page_url = $image_url . '/';
 
             if ( $i->{'width'} > $width || $i->{'height'} > $height ) {
                 $scaled_url = $page_url . '/s' . $opts->{'imgsize'};
-            } else {
+            }
+            else {
                 $scaled_url = $image_url;
             }
         }
@@ -248,6 +247,7 @@ sub make_html
         $html .= $horiz ? '</td>' : '<br />';
         $html .= "</lj-cut> " if $opts->{imgcut} eq 'titles';
     }
+
     $html .= "</tr></table>" if $horiz;
     $html .= "</lj-cut>\n" if $opts->{imgcut} eq 'count';
 
