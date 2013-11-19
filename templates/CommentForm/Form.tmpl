@@ -126,10 +126,6 @@
                         </ul>
                     </div>
 
-                    <script type="text/javascript">
-                        jQuery('div.b-subjecticons').subjecticons();
-                    </script>
-
                     <p class="b-bubble b-bubble-warning b-bubble-noarrow b-bubble-intext b-postform-alert-nosubjecthtml"><TMPL_VAR expr="ml('/talkpost.bml.nosubjecthtml')"></p>
 
                     <TMPL_IF text_hint>
@@ -218,21 +214,6 @@
         </table>
     </form>
 </div>
-
-<script type="text/javascript">
-    jQuery('#postform-wrapper')
-        .commentator({
-            publicKey: '<TMPL_VAR captcha_public>',
-            captchaContainerId: 'captcha-container'
-        })
-        .authtype({
-            forceStartupCaptcha: !!(Number('<TMPL_VAR need_captcha>')),
-            selectors: {
-                authTypeRadios: '.b-postform-login-{authType} .b-postform-login-radio'
-            }
-        })
-        .quotescreator()
-</script>
 
 <TMPL_ELSE>
     <p class="b-bubble b-bubble-alert b-bubble-noarrow b-bubble-intext"><TMPL_VAR expr="ml('/talkpost_do.bml.error.nocomments')"></p>

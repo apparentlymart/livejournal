@@ -2225,6 +2225,11 @@ sub talkform {
         'willscreenfriend' => $ml_willscreenfriend,
     );
 
+    LJ::need_var({
+        captcha_public => LJ::conf_test( $LJ::RECAPTCHA{'public_key'} ),
+        need_captcha => $opts->{'do_captcha'}
+    });
+
     # COMMON TEMPLATE PARAMS ARE DEFINED HERE
     $template->param(
 

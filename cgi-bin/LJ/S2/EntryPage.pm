@@ -55,7 +55,6 @@ sub EntryPage
 
     # quickreply js libs
     LJ::need_res(qw(
-        js/basic.js
         js/template.js
         js/ippu.js
         js/lj_ippu.js
@@ -73,6 +72,7 @@ sub EntryPage
         js/md5.js
         js/thread_expander.js
         js/thread_expander.ex.js
+        js/commentmanage.js
     ));
 
     if($remote) {
@@ -400,11 +400,7 @@ sub EntryPage
 
         $recurse->($recurse, $p->{'comments'}, 0);
 
-        my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
-        $js .= "var LJ_cmtinfo = " . LJ::js_dumper($cmtinfo) . "\n";
-        $js .= '</script>';
-        $p->{'LJ_cmtinfo'} = $js if $opts->{'need_cmtinfo'};
-        $entry_cminfo .= $js;
+        LJ::need_var(LJ_cmtinfo => $cmtinfo);
     }
     
     $p->{head_content}->set_options( { entry_cmtinfo => $entry_cminfo} );
@@ -412,10 +408,6 @@ sub EntryPage
         $p->{head_content}->set_options(
             { entry_metadata_html => $entry->metadata_html } );
     }
-
-    LJ::need_res(qw(
-                    js/commentmanage.js
-                    ));
 
     $p->{'_stylemine'} = $get->{'style'} eq 'mine' ? 1 : 0;
     $p->{'_picture_keyword'} = $get->{'prop_picture_keyword'};
