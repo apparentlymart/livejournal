@@ -224,6 +224,21 @@ sub ejs
     return $a;
 }
 
+# <LJFUNC>
+# name: LJ::ecvs
+# class: text
+# des: Escapes a string value before it can be put in .csv file.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
+sub ecsv
+{
+    my $a = $_[0];
+    $a =~ s/"/""/g;
+    return '"'.$a.'"';
+}
+
 # given a string, makes it into a string you can put into javascript,
 # including protecting against closing </script> tags in the entry.
 # does the double quotes for ya.

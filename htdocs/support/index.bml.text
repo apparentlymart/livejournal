@@ -5,6 +5,12 @@
 .ask.text|staleness=1
 .ask.text=If you can't find what you're looking for, <a [[aopts]]>open a support request</a> and we'll get back to you.
 
+.communities.head=LiveJournal communities
+
+.communities.one.desc=Staff members post important announcements of site information and changes.
+
+.communities.two.desc=You can suggest additions and changes to LiveJournal's FAQs.
+
 .faq.all|staleness=1
 .faq.all=view all faqs
 
@@ -13,6 +19,8 @@
 
 .faq.search.btn|staleness=1
 .faq.search.btn=Search
+
+.faq.search.placeholder=search
 
 .faq.text|staleness=1
 .faq.text=We've got answers to hundreds of questions. Search the FAQ -- you may just find what you're looking for.

@@ -12,34 +12,37 @@ sub need_res {
 }
 
 sub _format_one_message {
-    my $class = shift;
-    my $message = shift;
-    my $opts = shift;
-
+    my ($class, $message, $opts ) = @_;
     my $lang;
     my $remote = LJ::get_remote();
 
-    if ($remote) {
+    if ( $remote ) {
         $lang = $remote->prop("browselang"); # exlude s2 context language from opportunities,
         # because S2 journal code executes BML::set_language($lang, \&LJ::Lang::get_text) with its own language
-    } else {
-        $lang = LJ::locale_to_lang ($opts->{'locale'});
+    }
+    else {
+        $lang = LJ::locale_to_lang($opts->{'locale'});
     }
 
     my $mid = $message->{'mid'};
     my $text = $class->ml( $class->ml_key("$mid.text"), undef, $lang );
+
+    # override wrong code for journals that being moving
+    $text = $message->{text} if $message->{in_move};
     $text .= "<i class='close' lj-sys-message-close='1'></i>";
+
     ## LJ::CleanHTML::clean* will fix broken HTML and expand 
     ## <lj user> tags and lj-sys-message-close attributes
     LJ::CleanHTML::clean_event(\$text, { 'lj_sys_message_id' => $mid });
 
     my $is_office = LJ::SiteMessages->has_mask('OfficeOnly', $message->{accounts}) ? '<b>[Only for office]</b> ' : '';
+
     if ($remote && LJ::SiteMessages->has_mask('NewPhotohosting', $message->{accounts}))  {
         my $url = $remote->journal_base . "/pics/new_photo_service";
         $text = "<a href=$url>$text</a>"
     }
 
-    return 
+    return
         "<p class='b-message b-message-suggestion b-message-system'>" .
         "<span class='b-message-wrap'>" .
         "<img width='16' height='14' alt='' src='$LJ::IMGPREFIX/message-system-alert.gif?v=9067' />" .
@@ -52,12 +55,13 @@ sub render_body {
     my %opts = @_;
     my $ret;
 
-    if ($opts{all}) {
+    if ( $opts{all} ) {
         foreach my $message (LJ::SiteMessages->get_messages) {
             $ret .= $class->_format_one_message($message, \%opts);
         }
-    } else {
-        my $message = LJ::SiteMessages->get_open_message;
+    }
+    else {
+        my $message = LJ::SiteMessages->get_open_message($opts{journal});
 
         ## quick hack for just one message
         ## can be removed after r92.
@@ -76,12 +80,11 @@ sub render_body {
 }
 
 sub should_render {
-    my $class = shift;
-    my %opts = @_;
+    my ( $class, %opts ) = @_;
 
-    return 1 if $opts{all}; # always show at admin pages
-
-    return LJ::SiteMessages->get_open_message ? 1 : 0;
+    # always show at admin pages
+    return 1 if $opts{all};
+    return LJ::SiteMessages->get_open_message($opts{journal}) ? 1 : 0;
 }
 
 1;

@@ -1,137 +1,192 @@
-/* styles for /tour/ */
+/* Tour of LiveJournal (LJSUP-16814) */
+/*
+Structure of page:
+- b-tourpage l-contentplus
+- - l-contentplus-header
+- - - l-contentplus-head
+- - l-contentplus-container
+- - - b-tourpage-slide
+- - - - H2
+- - - - H3
+- - - - P
+- - - - UL
+- - - - b-tourpage-pic
+- - - - b-tourpage-bottomline
+- - - - b-tourpage-nav
 
-.layout-2col-r300 {
-    padding-right: 320px;
-}
-* html .layout-2col-r300 {
-    height: 1%;
-}
-.primary {
-    float: left;
-    width: 100%;
-}
-.secondary {
-    width: 300px;
-    padding-left: 20px;
-    float: right;
-    margin-right: -320px;
-}
-* html .secondary {
-    float: left;
-}
-dl,dt,dd {
+URL:
+http://www.livejournal.com/tour/
+
+Need resources:
+stc/contentreset.css
+stc/framework/layout.css
+*/
+
+
+
+.b-tourpage {
     margin: 0;
-    padding: 0;
+    }
+
+    .b-tourpage .b-service-body {
+        padding: 2em 0 1em;
+        }
+
+    /* slides */
+    .b-tourpage-slide {
+        position: relative;
+        width: 70%;
+        margin: 0 auto;
+        }
+
+        /* typography */
+        .b-tourpage-slide H2 {
+            margin: 0 0 0.3em;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 220%;
+            color: #000;
+            }
+        .b-tourpage-slide H3 {
+            margin: 0 0 0.1em;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 150%;
+            color: #000;
+            }
+        .b-tourpage-slide P {
+            margin: 0 0 2em;
+            }
+        .b-tourpage-slide UL {
+            margin: 0 0 2em;
+            padding: 0 0 0 2em;
+            }
+            .b-tourpage-slide UL LI {
+                margin: 0 0 0.1em;
+                padding: 0;
+                }
+
+        /* pic */
+        .b-tourpage-pic {
+            margin: 0 0 2em;
+            text-align: center;
+            }
+            .b-tourpage-pic A {
+                display: inline-block;
+                box-shadow: inset 0 0 3px 1px rgba(0,0,0,0.2);
+                }
+                .b-tourpage-pic-img {
+                    position: relative;
+                    z-index: -1;
+                    max-width: 100%;
+                    width: auto;
+                    height: auto;
+                    vertical-align: top;
+                    }
+
+        /* bottomline */
+        .b-tourpage-slide .b-tourpage-bottomline {
+            text-align: center;
+            }
+
+        /* pic */
+        .b-tourpage-action {
+            position: relative;
+            display: inline-block;
+            margin: 0;
+            padding: 0.7em 1.1em;
+            border-radius: 20px;
+            box-shadow: 0 3px 3px rgba(0, 0, 0, 0.3);
+            background-color: #049;
+            font-weight: bold;
+            text-decoration: none;
+            color: #FFF;
+            }
+        .b-reset .b-tourpage-action:link,
+        .b-reset .b-tourpage-action:visited {
+            background-image: -webkit-linear-gradient(top, #3387DC 0%, #023589 100%);
+            background-image:    -moz-linear-gradient(top, #3387DC 0%, #023589 100%);
+            background-image:      -o-linear-gradient(top, #3387DC 0%, #023589 100%);
+            background-image:   linear-gradient(to bottom, #3387DC 0%, #023589 100%);
+            text-decoration: none;
+            color: #FFF !important;
+            }
+        .b-reset .b-tourpage-action:hover,
+        .b-reset .b-tourpage-action:active {
+            background-image: -webkit-linear-gradient(top, #7FD4F9 0%, #1977D6 100%);
+            background-image:    -moz-linear-gradient(top, #7FD4F9 0%, #1977D6 100%);
+            background-image:      -o-linear-gradient(top, #7FD4F9 0%, #1977D6 100%);
+            background-image:   linear-gradient(to bottom, #7FD4F9 0%, #1977D6 100%);
+            text-decoration: none;
+            color: #FFF !important;
+            }
+
+        /* nav */
+        .b-tourpage-nav {
+            }
+        .b-tourpage-nav,
+        .b-tourpage-slide .b-tourpage-nav {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            }
+            .b-tourpage-nav-item {
+                position: absolute;
+                top: 150px;
+                width: 90px;
+                height: 90px;
+                }
+            .b-tourpage-nav-item,
+            .b-tourpage-slide .b-tourpage-nav-item {
+                margin: 0;
+                padding: 0;
+                }
+            .b-tourpage-nav-item-prev {
+                left: -120px;
+                }
+            .b-tourpage-nav-item-next {
+                right: -120px;
+                }
+                .b-tourpage-nav-item A {
+                    display: block;
+                    width: 90px;
+                    height: 90px;
+                    border: 0;
+                    background: url(/img/icons/slidenav.png?v=1) no-repeat 0 0;
+                    text-shadow: none;
+                    font: 0/0 a;
+                    color: transparent;
+                    }
+                .b-tourpage-nav-item-prev A {
+                    background-position: 0 -180px;
+                    }
+                .b-tourpage-nav-item-prev A:hover {
+                    background-position: 0 -270px;
+                    }
+                .b-tourpage-nav-item-next A {
+                    background-position: 0 0;
+                    }
+                .b-tourpage-nav-item-next A:hover {
+                    background-position: 0 -90px;
+                    }
+
+
+
+/* small screen (55em) */
+@media all and (max-width: 55em) {
+
+    /* full width */
+    .b-tourpage-slide {
+        width: auto;
+        margin-right: 30px;
+        margin-left: 30px;
+        }
+
+    /* hide nav */
+    .b-tourpage-nav {
+        display: none;
+        }
+
 }
-dl {
-    border-bottom: 1px solid #ccc;
-    padding: 10px 0;
-}
-dl.over {
-    background-color: #eee;
-}
-dt {
-    font-weight: bold;
-    margin-bottom: 3px;
-    font-size: 120% !important;
-}
-dd {
-    padding-right: 10px;
-}
-dd.image {
-    float: left;
-    margin-right: 10px;
-    width: 70px;
-    text-align: center;
-    padding-right: 0;
-}
-p.image-wrapper {
-    text-align: center;
-}
-ul.doublearrows {
-    margin-bottom: 15px !important;    
-}
-ul.doublearrows li a {
-    background: url(/img/arrow-double-black.gif?v=10472) no-repeat 0 6px;
-    padding-left: 12px;
-}
-ul#tourskip {
-    position: relative;
-    width: 100%;
-    padding-top: 10px;
-    border-top: 1px solid #ccc;
-}
-ul#tourskip li {
-    font-weight: bold;
-}
-ul#tourskip li.home {
-    text-align: center;
-}
-ul#tourskip li.prev {
-    position: absolute;
-    left: 0;
-}
-ul#tourskip li.next {
-    position: absolute;
-    right: 0;
-}
-.start {
-    font-size: 1.2em;
-    text-align: center;
-    padding: 3px 10px;
-}
-.placeholder {
-    width: 300px;
-    height: 250px;
-}
-input.start {
-    background: #6293C3;
-    color: #fff;
-    border: 2px solid #90BDE8;
-    border-bottom: 2px solid #46719C;
-    border-right: 2px solid #46719C;
-}
-.getstarted-button {
-    position: absolute;
-    right: 30px;
-    top: 0;
-    float: right;
-    margin: 0;
-}
-.getstarted {
-    padding: 3px 6px;
-    border: 1px solid #cccccc;
-    background-color: #eeeeee;
-    text-align: center;
-}
-.getstarted-home {
-    text-align: center;
-    margin-bottom: 10px;
-}
-#tour-points {
-    border: 1px solid #ccc;
-    background-color: #eee;
-    margin-bottom: 15px;
-    padding: 10px;
-}
-#tour-points ul {
-    margin: 0;
-    padding: 0 0 0 15px;
-}
-#tour-points ul li {
-    font-size: 95% !important;
-    margin-bottom: 4px;
-    padding: 0;
-}
-#tour-questions p {
-    margin-top: 0;
-}
-.appwidget {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-.tour-login {
-    font-size: 85%;
-    text-align: center;
-    margin: 8px 0;
-}
+
+

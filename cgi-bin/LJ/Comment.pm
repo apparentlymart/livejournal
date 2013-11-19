@@ -432,8 +432,12 @@ sub preload_rows {
     foreach my $obj (@$obj_list) {
         my $u = $obj->journal;
 
-        my $row = $row_map{join("-", $u->id, $obj->jtalkid)};
-        next unless $row;
+        my $row = $row_map{join("-", $obj->{'journalid'}, $obj->{'jtalkid'})};
+        unless ($row) {
+            ## if comment does not exist, we should not try to load it in future
+            delete $unloaded{join(":", $obj->{'journalid'}, $obj->{'jtalkid'})};
+            next;
+        }
 
         # absorb row into the given LJ::Comment object
         $obj->absorb_row($row);

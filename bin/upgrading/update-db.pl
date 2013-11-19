@@ -985,6 +985,17 @@ sub skip_opt {
     return $opt_skip;
 }
 
+sub has_primary {
+    my $table = shift;
+    my $data = $dbh->selectall_arrayref('SHOW indexes FROM ' . $table);
+
+    for my $row ( @$data ) {
+        return 1 if $row->[2] eq 'PRIMARY';
+    }
+
+    return 0;
+}
+
 sub do_sql {
     my $sql = shift;
     chomp $sql;
@@ -1043,24 +1054,31 @@ sub create_table {
     return if $cluster && ! defined $clustered_table{$table};
 
     my $create_sql = $table_create{$table};
+
     if ($opt_innodb && $create_sql !~ /(?:type|engine)=/i) {
         $create_sql .= " ENGINE=InnoDB";
     }
+
+    unless ( $create_sql =~ /PRIMARY KEY/is ) {
+        warn "NO PRIMARY KEY DEFINED FOR TABLE: $table!\nTable is not created!\n";
+        return;
+    }
+
     do_sql($create_sql);
 
-    foreach my $pc (@{$post_create{$table}})
-    {
+    foreach my $pc ( @{$post_create{$table}} ) {
         my @args = @{$pc};
         my $ac = shift @args;
-        if ($ac eq "sql") {
+
+        if ( $ac eq "sql" ) {
             print "# post-create SQL\n";
             do_sql($args[0]);
         }
-        elsif ($ac eq "sqltry") {
+        elsif ( $ac eq "sqltry" ) {
             print "# post-create SQL (necessary if upgrading only)\n";
             try_sql($args[0]);
         }
-        elsif ($ac eq "code") {
+        elsif ( $ac eq "code" ) {
             print "# post-create code\n";
             $args[0]->($dbh, $opt_sql);
         }
@@ -1068,6 +1086,10 @@ sub create_table {
     }
 
     clear_table_info($table);
+
+    unless ( has_primary($table) ) {
+        warn "Table $table has no PRIMARY KEY\nPLEASE, define one!\n";
+    }
 }
 
 sub drop_table {

@@ -106,7 +106,6 @@ body<=
                 LJ::Setting::StyleAlwaysMine
                 LJ::Setting::CommentsStyleMine
                 LJ::Setting::StyleMine
-                LJ::Setting::GettingStarted
                 LJ::Setting::SiteScheme
                 LJ::Setting::AdultContent
                 LJ::Setting::ViewingAdultContent
@@ -193,6 +192,7 @@ body<=
             settings    => [qw(
                 LJ::Setting::MSN
                 LJ::Setting::GoogleAnalytics
+                LJ::Setting::YandexMetrika
                 LJ::Setting::FacebookBeacon
                 LJ::Setting::TwitterConnect
                 LJ::Setting::VkontakteConnect
@@ -436,7 +436,6 @@ body<=
     if ($given_cat eq "notifications") {
         my $widget = LJ::Widget::SubscribeInterface->new;
         $widget->{'no_table'} = 1;
-        $widget->{'no_container_div'} = 1;
         $widget->{'allow_delete'} = 1;
         $widget->{'page'} = $selfuri;
 
@@ -454,12 +453,12 @@ body<=
                 'PollVote-u',
                 'Befriended-u',
                 'Defriended-u',
-                'Subscribed-u',
-                'Unsubscribed-u',
+                (LJ::is_enabled('new_friends_and_subscriptions') ? ('Subscribed-u', 'Unsubscribed-u') : ()),
                 'UserMessageRecvd-u',
             ]),
             'u' => $u,
             'css_class' => 'my_account',
+            'no_container_div' => 1
         });
 
         my $can_getselfemail = LJ::get_cap($u, 'getselfemail');

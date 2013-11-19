@@ -54,7 +54,16 @@ sub save {
         $val = "" unless $val =~ /^(friends|private)$/;
     }
 
+    my $old_value = $u->prop("newpost_minsecurity");
     $u->set_prop( newpost_minsecurity => $val );
+
+    return 1 if $old_value eq $val;
+
+    LJ::User::UserlogRecord::ChangeSetting->create( $u,
+        setting_name => 'newpost_minsecurity',
+        new_value    => $val || 'public',
+        old_value    => $old_value || 'public',
+    );
 
     return 1;
 }

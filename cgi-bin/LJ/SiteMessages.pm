@@ -4,48 +4,47 @@ use Carp qw(croak);
 use LJ::Pics::Migration;
 
 use constant AccountMask => {
-    Permanent   => {    
+    Permanent   => {
                         value       => 1,
                         group       => 0,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return $u && $u->in_class('perm');
                                        },
                     },
-    
-    Sponsored   => {    
+
+    Sponsored   => {
                         value       => 2,
                         group       => 0,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return $u && $u->in_class('sponsored');
                                        },
                     },
-                    
-    Paid        => {    
+
+    Paid        => {
                         value       => 4,
                         group       => 0,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return $u && $u->get_cap('paid');
                                        },
                     },
-    
-    Plus        => {    
+
+    Plus        => {
                         value       => 8,
                         group       => 0,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return $u && $u->in_class('plus') && !$u->get_cap('paid');
                                        },
                     },
-    
-    Basic       => {    
-                        
+
+    Basic       => {
                         value       => 16,
                         group       => 0,
                         validate    => sub {
@@ -54,34 +53,33 @@ use constant AccountMask => {
                                             return $u && !($u->in_class('plus') || $u->get_cap('paid'));
                                        }
                     },
-    
-    SUP         => {    
+
+    SUP         => {
                         value       => 32,
                         group       => 1,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return LJ::SUP->is_sup_enabled($u);
                                        }
                     },
-    
-    NonSUP      => {    
+
+    NonSUP      => {
                         value       => 64,
                         group       => 1,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return !LJ::SUP->is_sup_enabled($u);
                                        }
                     },
-    
-    
-    OfficeOnly  => {    
+
+    OfficeOnly  => {
                         value       => 128,
                         group       => 2,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             my $country = LJ::GeoLocation->get_country_info_by_ip(
                                                                                                     LJ::get_remote_ip(),
                                                                                                     { allow_spec_country => 1 } 
@@ -91,18 +89,17 @@ use constant AccountMask => {
                                        }
                     },
 
-
-    TryNBuy     => {    
+    TryNBuy     => {
                         value       => 256,
                         group       => 3,
                         validate    => sub {
                                             my ($u) = @_;
 
-                                            return $u && $u->get_cap('trynbuy');      
+                                            return $u && $u->get_cap('trynbuy');
                                        }
                     },
-    
-    AlreadyTryNBuy => { 
+
+    AlreadyTryNBuy => {
                         value       => 512,
                         group       => 3,
                         validate    => sub {
@@ -111,8 +108,8 @@ use constant AccountMask => {
                                             return $u && LJ::TryNBuy->already_used($u);
                                        }
                     },
-    
-    NeverTryNBuy   => { 
+
+    NeverTryNBuy   => {
                         value       => 1024,
                         group       => 3,
                         validate    => sub {
@@ -121,13 +118,13 @@ use constant AccountMask => {
                                             return $u && !(LJ::TryNBuy->already_used($u) || $u->get_cap('trynbuy'));
                                        }
                     },
-    
-    EmailFaulty    => { 
+
+    EmailFaulty    => {
                         value       => 2048,
                         group       => 4,
                         validate    => sub {
                                             my ($u) = @_;
-                                            
+
                                             return $u && $u->prop('email_faulty');
                                        }
                     },
@@ -299,8 +296,7 @@ sub filter_by_country {
 }
 
 sub get_messages {
-    my $class = shift;
-    my %opts = @_;
+    my ( $class, %opts ) = @_;
 
     # direct the questions at the given $u, or remote if no $u given
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
@@ -308,6 +304,32 @@ sub get_messages {
     my @messages = $class->load_messages;
     @messages = $class->filter_messages($u, @messages);
     @messages = $class->filter_by_country($u, @messages);
+
+    # message for journal owner
+    if ( $u && $u->get_cap("readonly") ) {
+        push @messages, {
+            mid     => time,
+            active  => 'Y',
+            text    => LJ::Lang::ml('your.journal.move.in.progress'),
+            in_move => 1,
+        };
+    }
+
+    my $journal_u = LJ::load_user($opts{journal});
+
+    # message for journal viewer
+    if ( $journal_u && $journal_u->get_cap("readonly") && ! LJ::u_equals($u, $journal_u) ) {
+        push @messages, {
+            mid        => time,
+            time_start => 0,
+            time_end   => 4294967295,
+            active     => 'Y',
+            text       => LJ::Lang::ml('this.journal.move.in.progress'),
+            in_move    => 1,
+            remote     => 1,
+
+        };
+    }
 
     return @messages;
 }
@@ -318,7 +340,7 @@ sub get_messages {
 sub filter_messages {
     my $class = shift;
     my $u = shift;
-  
+
     my @messages;
     MESSAGE:
     foreach my $m (@_) {
@@ -470,7 +492,7 @@ sub change_active_status {
 
 # get one message, that will be shown to current remote user
 sub get_open_message {
-    my $class = shift;
+    my ( $class, $journal ) = @_;
 
     my $remote = LJ::get_remote();
 
@@ -478,10 +500,10 @@ sub get_open_message {
     $remote->preload_props(qw/country closed_sm/) if $remote;
 
     ##
-    my @messages = $class->get_messages(user => $remote);
-
+    my @messages = $class->get_messages(user => $remote, journal => $journal);
     my $closed = $remote ? $remote->prop('closed_sm') : undef;
-    if ($closed) {
+
+    if ( $closed ) {
         my %closed = map { $_ => 1 } split(',', $closed);
         @messages = grep { not $closed{$_->{mid}} } @messages;
     }

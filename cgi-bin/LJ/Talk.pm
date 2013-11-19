@@ -584,6 +584,16 @@ sub delete_thread {
     $entry->touch_commentalter;
 
     LJ::Talk::update_journals_commentalter($u);
+
+    my $remote = LJ::get_remote();
+    my $comment = LJ::Comment->new($u, 'jtalkid' => $jtalkid);
+    LJ::User::UserlogRecord::CommentDelete->create(
+        $remote,
+        type     => 'thread',
+        dtalkid  => $comment->dtalkid,
+        num      => $num,
+    ) if $remote;
+
     return 1;
 }
 
@@ -623,6 +633,16 @@ sub delete_author {
     $entry->touch_commentalter;
 
     LJ::Talk::update_journals_commentalter($u);
+
+    my $remote = LJ::get_remote();
+    LJ::User::UserlogRecord::CommentDelete->create(
+        $remote,
+        type     => 'author',
+        journalurl  => $entry->url,
+        num      => $num,
+        posterid => $posterid,
+    ) if $remote;
+
     return 1;
 }
 
@@ -665,6 +685,14 @@ sub delete_comment {
     $entry->touch_commentalter;
 
     LJ::Talk::update_journals_commentalter($u);
+
+    my $remote = LJ::get_remote();
+    my $comment = LJ::Comment->new($u, 'jtalkid' => $jtalkid);
+    LJ::User::UserlogRecord::CommentDelete->create(
+        $remote,
+        type => 'one',
+        dtalkid => $comment->dtalkid
+    ) if $remote;
 
     # done
     return 1;
@@ -2482,7 +2510,8 @@ sub get_talk2_row_multi {
         my @ret = ();
         foreach my $it (@items) {
             my ($journalu, $jtalkid) = @$it;
-            push @ret, $have{$journalu->id}->{$jtalkid};
+            push @ret, $have{$journalu->id}->{$jtalkid}
+                if $have{$journalu->id}->{$jtalkid};
         }
 
         return @ret;
@@ -2539,6 +2568,7 @@ sub get_talk2_row_multi {
         $sth->execute(@vals);
 
         while (my $row = $sth->fetchrow_hashref) {
+            $row ||= {};
             my $jid = $row->{journalid};
             my $jtalkid = $row->{jtalkid};
 

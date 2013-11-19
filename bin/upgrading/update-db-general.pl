@@ -3150,6 +3150,14 @@ CREATE TABLE `usermsg` (
 )
 EOC
 
+register_tablecreate('usermsgbookmarks', <<'EOC');
+CREATE TABLE `usermsgbookmarks` (
+  `journalid` int(10) unsigned NOT NULL,
+  `msgid` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`journalid`,`msgid`)
+)
+EOC
+
 register_tablecreate('usermsgprop', <<'EOC');
 CREATE TABLE `usermsgprop` (
   `journalid` int(10) unsigned NOT NULL,

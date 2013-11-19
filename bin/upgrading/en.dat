@@ -4501,6 +4501,8 @@ main.editors.hour=Entry of the hour
 main.editors.main|staleness=1
 main.editors.main=Main Entry
 
+main.editors.more=Show more entries
+
 main.editors.recommends|staleness=1
 main.editors.recommends=LiveJournal Recommends
 
@@ -4821,6 +4823,8 @@ main.tour.nav.next=Next feature
 
 main.tour.nav.prev|staleness=1
 main.tour.nav.prev=Previous feature
+
+main.updates.ban=Ban user from updates list
 
 main.updates.comments|staleness=1
 main.updates.comments=[[comments_count]] <a href="[[comments_url]]">new [[?comments_count|comment|comments]]</a>
@@ -9730,6 +9734,9 @@ web.account.settings.tab.title.tags=Tags
 web.account.settings.tab.title.users|staleness=1
 web.account.settings.tab.title.users=Groups & Filters
 
+web.account.settings.tab.title.friends|staleness=1
+web.account.settings.tab.title.friends=Friends
+
 web.account.settings.tab.title.users.filters|staleness=1
 web.account.settings.tab.title.users.filters=Filters
 
@@ -11184,8 +11191,12 @@ widget.support.submit.language.other=(Other)
 widget.support.submit.login.note|staleness=1
 widget.support.submit.login.note=If you're a [[sitename]] user, <a [[loginlink]]>please log in</a> before submitting your request.
 
+widget.support.submit.login.message=If you're a LiveJournal user, you will be logged in after submitting your request.
+
 widget.support.submit.notshow|staleness=1
 widget.support.submit.notshow=(not shown to the public)
+
+widget.support.submit.optional=(optional, if you're a LiveJournal user only)
 
 widget.support.submit.question|staleness=1
 widget.support.submit.question=Question or Problem
@@ -11205,11 +11216,15 @@ widget.support.submit.text_question=Make sure to include your username. If you w
 widget.support.submit.text_submit|staleness=1
 widget.support.submit.text_submit=Submit Inquiry
 
+widget.support.submit.yourlogin=Your login:
+
 widget.support.submit.yourmail|staleness=1
 widget.support.submit.yourmail=Your email address:
 
 widget.support.submit.yourname|staleness=1
 widget.support.submit.yourname=Your name:
+
+widget.support.submit.yourpassword=Your password:
 
 widget.themechooser.btn.layout_filter|staleness=1
 widget.themechooser.btn.layout_filter=Submit

@@ -21,6 +21,23 @@ sub can_execute {
     return LJ::check_priv($remote, "admin") || $LJ::IS_DEV_SERVER;
 }
 
+sub remote_can_grant {
+    my ($remote, $priv, $arg) = @_;
+    return 1 if LJ::check_priv($remote, 'admin', $priv) || 
+                LJ::check_priv($remote, 'admin', '*') || 
+                LJ::check_priv($remote, 'admin', "$priv/$arg");
+
+    if (LJ::check_priv($remote, 'admin', '#')) {
+        return 0 if $LJ::SENSITIVE_PRIVILEGES{$priv} || 
+                    $LJ::SENSITIVE_PRIVILEGES{"$priv:$arg"};
+        $arg =~ s/^admin\///;
+        return 0 if $priv eq 'admin' && 
+                    $LJ::SENSITIVE_PRIVILEGES{$arg};
+        return 1;
+    }
+    return 0;
+}
+
 sub execute {
     my ($self, $action, $privs, $usernames, @args) = @_;
 
@@ -53,7 +70,7 @@ sub execute {
     my $remote = LJ::get_remote();
     foreach my $pair (@privs) {
         my ($priv, $arg) = @$pair;
-        unless (LJ::check_priv($remote, "admin", "$priv") || LJ::check_priv($remote, "admin", "$priv/$arg")) {
+        unless ( remote_can_grant($remote, $priv, $arg) ) {
             $self->error("You are not permitted to $action $priv:$arg");
             next;
         }

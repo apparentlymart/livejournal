@@ -1,32 +1,3 @@
-/* Width & Height for Moods */
-* html IMG#mood_image_preview  {
-    height: auto;
-    }
-* html IMG#mood_image_preview {
-	zoom:expression(
-		function(t){
-			if (60 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
-				t.width = '60';
-			}
-			else if (60 < t.scrollHeight) {
-				t.height = '60';
-			}
-		t.runtimeStyle.zoom = 1;
-	}(this));
-}
-* html IMG.meta-mood-img {
-	zoom:expression(
-		function(t){
-			if (100 < t.scrollWidth && t.scrollWidth > t.scrollHeight) {
-				t.width = '100';
-			}
-			else if (100 < t.scrollHeight) {
-				t.height = '100';
-			}
-		t.runtimeStyle.zoom = 1;
-	}(this));
-}
-
 /* UPDATE.bml bugfix 
 __________________________________________*/
 .appwidget-entryform {
@@ -35,126 +6,32 @@ __________________________________________*/
 
 /* LJTimes
 __________________________________________*/
-* HTML BODY {
-	background-attachment: fixed;
-	}
-* HTML .b-ljtimes-wrapper {
-	position: absolute;
-	bottom: auto;
-	top: expression(eval(document.compatMode && document.compatMode=='CSS1Compat') ? documentElement.scrollTop +(documentElement.clientHeight-this.clientHeight) : document.body.scrollTop +(document.body.clientHeight-this.clientHeight));
-	}
-* HTML .b-ljtimes-update,
-* HTML .b-ljtimes-suggest,
-* HTML .b-ljtimes-suggestbbl,
-* HTML .b-ljtimes-inbox {
-	position: absolute;
-	bottom: auto;
-	}
-* HTML .b-ljtimes-update,
-* HTML .b-ljtimes-suggest,
-* HTML .b-ljtimes-suggestbbl,
-* HTML .b-ljtimes-inbox {
-	top: expression( ( -33 - this.offsetHeight + ( document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight ) + ( ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop ) ) + 'px' );
-	}
-* HTML .b-ljtimes-login-form,
-* HTML .b-ljtimes-logged-input {
-	zoom: 1;
-	}
 .b-ljtimes-login .i-ljtimes-checkbox {
-	vertical-align: -3px;
-	}
+    vertical-align: -3px;
+    }
 .b-ljtimes-logged-submit {
-	overflow: visible;
-	}
-* HTML .b-ljtimes-bubble-content{
-	zoom: 1;
-	}
-* > HTML .b-ljtimes-bubble-content{
-	width: 292px;
-	}
-* HTML .b-ttiny {
-	width: expression((document.documentElement.clientWidth || document.body.clientWidth) < 995 ? "995px" : "100%");
-	}
-
+    overflow: visible;
+    }
 
 .b-tlarge,
 .b-inner,
 .b-header,
-.b-live-clmn,
-* HTML .b-top-content LI {
-	*zoom:1;
-	}
-* HTML .b-quick .b-inbox .outer,
-* HTML .b-quick .b-inbox .inner,
-* HTML .b-quick .b-inbox .arrow {
-	display: inline;
-	zoom: 1;
-	}
-* HTML .i-theme-bg {
-	width: expression(this.parentNode.clientWidth);
-	height: expression(this.parentNode.clientHeight);
-	}
-* HTML .b-themes-title {
-	float: left;
-	}
-* HTML .b-live-item{ 
-	behavior: expression( 
-	this.onmouseover = new Function("this.className += ' b-live-item-hover'"), 
-	this.onmouseout = new Function("this.className = this.className.replace(' b-live-item-hover','')"), 
-	this.style.behavior = null 
-	);
-	}
+.b-live-clmn{
+    *zoom:1;
+    }
 .b-live-item:hover .b-live-post,
 .b-live-item-hover .b-live-post {
-	top: -21px;
-	left: -21px;
-	border: 1px solid #999;
-	}
-* HTML .b-themes-content .pic {
-	width: expression(document.body.clientWidth > 96? "96px": "auto" );
-	}
-* HTML .b-live-pic IMG {
-	width: expression(document.body.clientWidth > 140? "140px": "auto" );
-	}
-* HTML .b-domino-pic LI { 
-	behavior: expression( 
-	this.onmouseover = new Function("this.className += ' hover'"), 
-	this.onmouseout = new Function("this.className = this.className.replace(' hover','')"), 
-	this.style.behavior = null 
-	);
-	}
-* HTML .b-live-share-arr {
-	_border-top-color: pink;
-	_border-right-color: pink;
-	_border-left-color: pink;
-	_filter: chroma(color=pink);
-	}
-
-/* Styles for bubbles
---------------------------- */
-/*Must be removed after implementation of Framework! */
-.i-bubble {
-	*display:inline;
-	*zoom:1;
-	}
-* HTML .i-bubble-arrow,
-* HTML .i-bubble-arrow-border {
-	_border-top-color: pink;
-	_border-bottom-color: pink;
-	_border-left-color: pink;
-	_filter: chroma(color=pink);
-	}
-
-#postform TABLE TD.b-postform-active .i-postform-label {
-	vertical-align: 1em !important;
-	}
+    top: -21px;
+    left: -21px;
+    border: 1px solid #999;
+    }
 
 /* Credit card form
 -----------------------------------------------*/
 .b-ccform LI,
 .b-ccform LI DL {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Facebook & Openid
 --------------------------- */
@@ -165,187 +42,77 @@ __________________________________________*/
 .b-auth-item FORM,
 .m-auth-bl,
 .m-auth-br {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 .b-facebookbtn,
 .b-twitterbtn,
 .b-googlebtn,
 .b-mailrubtn,
 .b-vkontaktebtn {
-	overflow: visible;
-	}
-* HTML .m-auth-item {
-	position: relative;
-	}
-* HTML .m-auth-bl,
-* HTML .m-auth-br {
-	bottom: auto;
-	top: expression(this.parentNode.clientHeight);
-	}
-* HTML .m-auth-openid .m-auth-bl {
-	left: -1px;
-	}
-* HTML .m-auth-facebook .m-auth-bl {
-	left: expression(this.parentNode.offsetLeft*(-1)-11);
-	}
-* HTML .m-auth-br {
-	margin: 0;
-	left: expression(this.parentNode.parentNode.clientWidth-this.parentNode.offsetLeft-2);
-	}
+    overflow: visible;
+    }
+
 
 /* SMS Notifications
 --------------------------- */
 /* Must be removed after implementation of Framework! */
 .b-manage-smsn {
-	zoom: 1;
-	}
-	.b-manage-smsn .b-manage-smsn-status {
-		padding: 0 0 0 2.5em;
-		}
-	.b-manage-smsn-status #link_2 {
-		vertical-align: 7px;
-		}
-	.b-manage-smsn .b-manage-smsn-status {
-		zoom: 1;
-		display: inline;
-		}
-
-/* Custom Userheads in Edit Profile Page
---------------------------- */
-/* Must be removed after implementation of Framework! */
-* HTML .b-manage-userheads LI {
-	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(/ ?hover/g,'')"), this.style.behavior = null);
-	}
+    zoom: 1;
+    }
+    .b-manage-smsn .b-manage-smsn-status {
+        padding: 0 0 0 2.5em;
+        }
+    .b-manage-smsn-status #link_2 {
+        vertical-align: 7px;
+        }
+    .b-manage-smsn .b-manage-smsn-status {
+        zoom: 1;
+        display: inline;
+        }
 
 /* Reject Users in Manage Community
 --------------------------- */
 /* Must be removed after implementation of Framework! */
-* HTML .b-pending-users LI {
-	behavior: expression(this.onmouseover = new Function("this.className += ' hover'"), this.onmouseout = new Function("this.className = this.className.replace(/ ?hover/g,'')"), this.style.behavior = null);
-	}
 .b-pending-users {
-	zoom: 1;
-	}
-
-/* Choose Facebook Repost Pic
---------------------------- */
-/* Must be removed after implementation of Framework! */
-* HTML .b-repost-pics-bg {
-	width: expression(this.parentNode.clientWidth);
-	height: 151px;
-	}
-* HTML .b-repost-pics-l {
-	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src=/img/repost/pics-l.png);
-	}
-* HTML .b-repost-pics-r {
-	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src=/img/repost/pics-r.png);
-	}
-* HTML .b-repost-pics-arr {
-	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=crop,src=/img/repost/pics-arr.png);
-	}
-* HTML .b-repost-pics-items LI IMG {
-	width: 96px;
-	height: 96px;
-	}
-
-/* Max width & max height
------------------------------------------------*/
-* HTML .lj_qotd_entry_userpic .userpic-img,
-* HTML .appwidget-recentcomments .userpic-img,
-* HTML .b-catalogue-item DD.b-catalogue-item-img IMG,
-* HTML #lj_controlstrip_userpic IMG,
-* HTML .b-wishes-list DIV IMG,
-* HTML .whl-autocomplete-list .whl-autocomplete-img,
-* HTML .appwidget-wishrecommendations .whl-rec-img,
-* HTML .appwidget-gamefriendsplaying .w-body .friends-playing-list LI .pic IMG,
-* HTML .appwidget-gamefriendsactivity .w-body .friends-activity-list LI .pic IMG,
-* HTML .appwidget-gamewhoplaying .w-body .who-playing-list LI .pic IMG,
-* HTML DIV.lj_ippu_app .ljappippu_share_persons {
-	zoom:expression(
-			function(t){
-				t.runtimeStyle.zoom = 1;
-				var maxW = parseInt(t.currentStyle['max-width'], 10);
-				var maxH = parseInt(t.currentStyle['max-height'], 10);
-				if (t.scrollWidth > maxW && t.scrollWidth >= t.scrollHeight) {
-					t.style.width = maxW;
-				} else if (t.scrollHeight > maxH) {
-					t.style.height = maxH;
-				}
-			}(this)
-		);
-	}
-
-/* Photos2homepage widget
------------------------------------------------*/
-.appwidget-photos2homepage .w-body .pic-list,
-.appwidget-photos2homepage .w-body .content {
-	zoom: 1;
-	}
-*HTML .appwidget-photos2homepage .w-body .content {
-	height: 105px;
-	}
-
-/* Photos2homepage admin
------------------------------------------------*/
-.photos2homepage-admin,
-.photos2homepage-admin .content,
-.photos2homepage-admin .new-entry,
-.photos2homepage-admin .new-entry UL {
-	zoom: 1;
-	}
-.photos2homepage-admin .new-entry UL LI LABEL SPAN {
-	display: inline;
-	zoom: 1;
-	}
-*HTML .photos2homepage-admin .new-entry UL LI LABEL SPAN {
-	width: 140px;
-	height: 105px;
-	}
-
-/* S1 comments */
-.talk-comment-head {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Search Yandex lenta
 -----------------------------------------------*/
 .search-precise .found.yalenta .yandex-ru {
-	top: 0;
-	}
+    top: 0;
+    }
 
 /* widgets on browse page
 -----------------------------------------------*/
 .appwidget-browse .w-content {
-	padding:0 0 7px;
-	}
+    padding:0 0 7px;
+    }
 .appwidget-browse .appwidget-featuredcomms,
 .appwidget-browse .appwidget-featuredcomms .b-posts LI {
     zoom:1;
     }
-	.appwidget-browse .b-posts DT {
-		_position:relative;
-		}
-		.appwidget-browse .b-posts-data {
-			_height:20px;
-			}
+    .appwidget-browse .b-posts DT {
+        _position:relative;
+        }
+        .appwidget-browse .b-posts-data {
+            _height:20px;
+            }
 
 .appwidget-browse .appwidget-search INPUT.type-text {
-	width:223px;
-	}
+    width:223px;
+    }
 .w-body .b-search-tags,
 .b-search-tags {
-	width:230px;
-	}
+    width:230px;
+    }
 
 .appwidget-featuredposts .b-posts-head {
-	_height:40px;
-	}
+    _height:40px;
+    }
 .appwidget-browse .vertical_view .appwidget-search LABEL {
-	top:6px;
-	}
+    top:6px;
+    }
 
 /* Game friends playing widget
 ----------------------------------------------- */
@@ -354,8 +121,8 @@ __________________________________________*/
 .appwidget-gamefriendsplaying .w-body .friends-playing-list LI,
 .appwidget-gamefriendsplaying .w-body .friends-playing-list LI .inner,
 .appwidget-gamefriendsplaying .w-body .friends-playing-list LI .ljuser {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Game friends activity widget
 ----------------------------------------------- */
@@ -364,22 +131,22 @@ __________________________________________*/
 .appwidget-gamefriendsactivity .w-body .friends-activity-list LI,
 .appwidget-gamefriendsactivity .w-body .friends-activity-list LI .inner,
 .appwidget-gamefriendsactivity .w-body .friends-activity-list LI .ljuser {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* FriendsTimes
 ----------------------------------------------- */
 .b-friendstimes-comments {
-	margin-top: -3px;
-	}
+    margin-top: -3px;
+    }
 .b-friendstimes-comments-wrapper,
 .b-friendstimes-close-dialog,
 .b-friendstimes-toolbar,
 .b-friendstimes-toolbar-title,
 .w-friendstimes,
 .w-friendstimes-opened {
-	zoom:1;
-	}
+    zoom:1;
+    }
 
 /* Game who playing widget
 ----------------------------------------------- */
@@ -388,181 +155,83 @@ __________________________________________*/
 .appwidget-gamewhoplaying .w-body .who-playing-list LI,
 .appwidget-gamewhoplaying .w-body .who-playing-list LI .inner,
 .appwidget-gamewhoplaying .w-body .who-playing-list LI .ljuser {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Game big point widget
 ----------------------------------------------- */
 .b-catalogue-app .appwidget-gamebigpoint .w-body {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Game list widget
 ----------------------------------------------- */
 .appwidget-gamelist .w-body .gamelist LI {
-	display: inline;
-	zoom: 1;
-	}
-
-/* Catalogue popup
------------------------------------------------ */
-* HTML .w-popup .b-catalogue-item DL {
-    height: 70px;
+    display: inline;
+    zoom: 1;
     }
 
-/* Wishlist
------------------------------------------------ */
-.whl-autocomplete-list,
-.whl-autocomplete-list .whl-autocomplete-wrapper,
-.whl-autocomplete-list .whl-autocomplete-desc,
-.whl-popup-inner,
-.whl-bar,
-.whl-items,
-.whl-item,
-.appwidget-wishrecommendations .whl-rec-item,
-.whl-edit-functions {
-	zoom: 1;
-	}
-* HTML .whl-fadeout {
-	background: none;
-	}
-.whl-wishes LI.current {
-	position: relative;
-	}
-.whl-wishes LI.first .tl {
-	display: none;
-	}
-.whl-item-def {
-	float: left;
-	width: 440px;
-	}
-.whl-item-meta .whl-external {
-	width: 440px;
-	overflow: hidden;
-	}
-.whl-controls,
-.whl-item-meta .whl-status {
-	position: relative;
-	display: inline;
-	zoom: 1;
-	}
-* HTML .whl-edit-want .whl-select {
-	left: 631px;
-	}
-* HTML .whl-edit-privacy .whl-select {
-	left: 628px;
-	}
-* HTML .whl-edit-options .whl-popup-close {
-	right: 10px;
-	}
-* HTML .whl-edit-fields-wrapper {
-	zoom: 1;
-	}
-* HTML .whl-want-icon {
-	right: 7px;
-	}
-* HTML .whl-privacy-icon {
-	right: 8px;
-	}
-* HTML .whl-item-img {
-	width: 102px;
-	height: 102px;
-	}
-.whl-rec-def,
-.whl-want-icon,
-.whl-privacy-icon {
-	display: inline;
-	zoom: 1;
-	}
-* HTML .whl-autocomplete {
-	left: 157px;
-	}
-.whl-autocomplete-list .whl-autocomplete-item,
-.b-paging-nav-first,
-.b-paging-nav-last,
-.b-paging-nav-prev,
-.b-paging-nav-next {
-	zoom: 1;
-	display: inline;
-	}
-.b-fader {
-    filter: alpha(opacity = 60);
-    }
-* HTML .b-fader {
-	stretch:expression(
-		function(t){
-			var h = t.parentNode.offsetHeight;
-			if (t.h != h) {
-				t.style.height = t.h = h;
-			}
-		}(this)
-	);
-	}
-.whl-5comments .whl-bar {
-	margin-bottom: -20px;
-	}
 
 /* Calendar
 -----------------------------------------------*/
 .input-wrapper {
-	display:inline;
-	zoom:1;
-	}
+    display:inline;
+    zoom:1;
+    }
 
 /* New controlstrip
 -----------------------------------------------*/
 .w-cs .w-cs-group .ljuser, 
 .w-cs .w-cs-group .submit-wrap {
-	float: left;
-	}
+    float: left;
+    }
 .w-cs .w-cs-search {
-	width: auto !important;
-	}
+    width: auto !important;
+    }
 .w-cs INPUT.submit {
-	overflow: visible;
-	}
+    overflow: visible;
+    }
 .w-cs INPUT.checkbox {
-	margin: -6px 2px -3px -5px;
-	}
-* HTML .w-cs .w-cs-userpic  IMG {
+    margin: -6px 2px -3px -5px;
+    }
+* HTML .w-cs .w-cs-userpic IMG {
     width: 50px;
-    height: 50px;    
+    height: 50px;
     }
 #NoUserpic A {
-	display: block;
-	position: relative;
-	height: 100px;
-	}
+    display: block;
+    position: relative;
+    height: 100px;
+    }
 #NoUserpic IMG {
-	position: static;
-	}
+    position: static;
+    }
 #NoUserpic A SPAN {
-	position: absolute;
-	left: 0;
-	top: 30px;
-	height: auto;
-	}
+    position: absolute;
+    left: 0;
+    top: 30px;
+    height: auto;
+    }
 
 /* this needs for correct floating at external login tabs */
 .b-auth-desc {
-	zoom:0;
-	}
+    zoom:0;
+    }
 .b-identity-header {
-	filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#194874', endColorstr='#6d9bc7',GradientType=0 ); /* IE6-9 */
-	zoom:1;
-	}
+    zoom:1;
+    }
 
 /* Fotki
 -----------------------------------------------*/
 .b-pics-bar,
 .b-pics-nav,
 .b-pics-edit-field-text {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 .b-pics-input-submit {
-	overflow: visible;
-	padding: 0 10px;
-	}
+    overflow: visible;
+    padding: 0 10px;
+    }
 .b-pics-edit-field-click .b-pics-input-edit,
 .b-pics-edit-field-click .b-pics-textarea-edit,
 .b-pics-edit-field-click .b-pics-btn,
@@ -580,30 +249,30 @@ __________________________________________*/
 .b-pics-with-output .b-pics-size-list,
 .b-pics-with-output .b-pics-size-label,
 .b-pics-with-output .b-pics-post-button {
-	display: inline;
-	zoom: 1;
-	}
+    display: inline;
+    zoom: 1;
+    }
 .b-pics-submit-options {
-	zoom: 1 !important;
-	}
+    zoom: 1 !important;
+    }
 .b-pics-header-select-album {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 .b-pics-bar .b-pics-edit-field {
-	height: 22px;
-	}
+    height: 22px;
+    }
 .b-pics-edit-field-click {
-	margin: -1px 0 0 -2px;
-	}
-	.b-pics-edit-field-click .b-pics-input-text {
-		padding-left: 2px;
-		}
-	.b-pics-edit-field .b-pics-textarea-edit {
-		width: 572px;
-		}
+    margin: -1px 0 0 -2px;
+    }
+    .b-pics-edit-field-click .b-pics-input-text {
+        padding-left: 2px;
+        }
+    .b-pics-edit-field .b-pics-textarea-edit {
+        width: 572px;
+        }
 .b-pics-privacy .b-pics-privacy-icon {
-	margin-right: 3px;
-	}
+    margin-right: 3px;
+    }
 .b-popup-pics .b-popup-pics-add-many .b-popup-pics-gallery LI {
     margin: 7px 8px;
     }
@@ -611,111 +280,103 @@ __________________________________________*/
     width: 100% !important;
     }
 .b-pics-list-albums-selection {
-	bottom: -1px;
-	left: 62px;
-	}
+    bottom: -1px;
+    left: 62px;
+    }
 *:first-child+html .b-popup-pics-gallery,
 *:first-child+html .b-popup-pics-add-one .b-pics-submit-options {
-	min-width: 757px;
-	}
+    min-width: 757px;
+    }
 *:first-child+html .b-popup-pics-add-one .b-pics-submit-options {
-	width: 100%;
-	}
+    width: 100%;
+    }
 /*.b-pics-add-content {
-	width: 350px;
-	} */
+    width: 350px;
+    } */
 *:first-child+html .b-popup-pics-paste .b-pics-paste-url {
-	min-width: 757px;
-	}
+    min-width: 757px;
+    }
 *:first-child+html .b-pics-preview-wrapper,
 *:first-child+html .b-pics-add-fields {
-	display: inline-block;
-	}
+    display: inline-block;
+    }
 *:first-child+html .b-pics-url-field {
-	width: 620px;
-	}
+    width: 620px;
+    }
 *:first-child+html .b-pics-list-albums LI.b-pics-list-albums-item  {
-	display: inline;
-	zoom: 1 !important;
-	}
+    display: inline;
+    zoom: 1 !important;
+    }
 .b-popup-pics-add-one .b-popup-pics-upload-header,
 .b-popup-pics-add-one .b-popup-pics-paste-header,
 .b-popup-pics-add-one .b-popup-pics-list-header {
-	display: none;
-	}
+    display: none;
+    }
 
 /* Ratings */
 .rate-posts .selfpromo .voting .vote-value A {
-	top: 0;
-	}
+    top: 0;
+    }
 #updateForm #metainfo LI .title {
-	float: left;
-	min-width: 8.5em;
-	white-space: normal;
-	}
+    float: left;
+    min-width: 8.5em;
+    white-space: normal;
+    }
 #updateForm #metainfo LI .wrap {
-	overflow: hidden;
-	zoom: 1;
-	*width: 60%;
-	}
+    overflow: hidden;
+    zoom: 1;
+    *width: 60%;
+    }
 #updateForm #metainfo LI.pkg {
-	display: block;
-	}
+    display: block;
+    }
 
 /* LJ like buttons 
 -----------------------------------------------*/
 .lj-like-item {
-	display:inline!important;
-	zoom:1!important;
-	}
+    display:inline!important;
+    zoom:1!important;
+    }
 
 /* Edit Entries 
 -----------------------------------------------*/
 .b-editentry {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Betatest
 -----------------------------------------------*/
 .alt-servers-list LI.production-server {
-	margin-bottom: -4px;
-	}
+    margin-bottom: -4px;
+    }
 
 /* Contextual hover
 -----------------------------------------------*/
 .b-contextualhover,
 .b-contextualhover .b-contextualhover-section,
 .b-contextualhover .b-contextualhover-options LI {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 
 /* Comment From & Updatepage Form
 -----------------------------------------------*/
 *+HTML .s-lanzelot .b-watering-aside {
-	background-image: expression((function(node) {
-		node.runtimeStyle.backgroundImage = 'none';
-		if (!/mode=reply|replyto=|talkpost_do/.test(location.href)) { return; }
+    background-image: expression((function(node) {
+        node.runtimeStyle.backgroundImage = 'none';
+        if (!/mode=reply|replyto=|talkpost_do/.test(location.href)) { return; }
 
-		var parent = node.parentNode;
-		var timer = setInterval(function() {
-			var width = parent.clientWidth;
-			if (width) {
-				node.style.marginLeft = (width - parseInt(parent.currentStyle.paddingLeft, 10) -
-												parseInt(parent.currentStyle.paddingRight, 10)) * -1;
-				clearInterval(timer);
-			}
-		}, 100);
-	})(this));
-	}
+        var parent = node.parentNode;
+        var timer = setInterval(function() {
+            var width = parent.clientWidth;
+            if (width) {
+                node.style.marginLeft = (width - parseInt(parent.currentStyle.paddingLeft, 10) -
+                                                parseInt(parent.currentStyle.paddingRight, 10)) * -1;
+                clearInterval(timer);
+            }
+        }, 100);
+    })(this));
+    }
 
-/* Should be at bottom of the page! */
-* HTML .i-ljtimes-btn,
-* HTML .i-ljtimes-drag,
-* HTML .i-ljtimes-click,
-* HTML .b-ljtimes-bubble-bg,
-* HTML .b-ljtimes-bubble-top {
-	behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1?(this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "transparent.gif"):(this.origBg = this.origBg? this.origBg : this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='crop')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
-	}
 
 /* Pics paste url
 -----------------------------------------------*/
@@ -739,70 +400,66 @@ __________________________________________*/
 
 *:first-child+html #LJ__Setting__Music__LastFM_,
 *:first-child+html #LJ__Setting__Music__Trava_ {
-	display: inline;
-	}	
+    display: inline;
+    }   
 *:first-child+html .b-music-item-header DT, 
 *:first-child+html .b-music-item-header DD, 
 *:first-child+html .b-music-item DT, 
 *:first-child+html .b-music-item DD {
-	display: inline;
-	zoom: 1;
-	}
+    display: inline;
+    zoom: 1;
+    }
 *:first-child+html .b-music-list-searching {
-	overflow: hidden;
-	}
+    overflow: hidden;
+    }
 .b-music-item-artist SPAN,
 .b-music-item-album SPAN,
 .b-music-item-track SPAN {
-	zoom: 1;
-	}
-	
+    zoom: 1;
+    }
+    
 /* Music settings 
 -----------------------------------------------*/
 
 .b-pics-promo-wrapper {
-	display: none;
-	}
+    display: none;
+    }
 
 /* Profile Group Gradient
- ------------------------------------------- */	
+ ------------------------------------------- */ 
 .b-profile-group {
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#EDF7FF', EndColorStr = '#FFFFFF');
-	}
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#EDF7FF', EndColorStr = '#FFFFFF');
+    }
 
 /* Clear fix
 ----------------------------------------------*/
-* html .clearfix-lj {
-	zoom: 1;
-	} /* IE6 */
 *:first-child+html .clearfix-lj {
-	zoom: 1;
-	} /* IE7 */
-	
+    zoom: 1;
+    } /* IE7 */
+    
 /* transparency for ie */
 .lj_embedcontent { zoom:expression(runtimeStyle.zoom = '1',allowTransparency = true); }
 
 /* Fix Box-sizing IE7-IE8
 ----------------------------------------------*/
 *+html .b-dialog-prompt-wrap {
-	margin: 0 10px 0 0;
-	}
-	
+    margin: 0 10px 0 0;
+    }
+    
 *+html .b-dialog-btn {
-	overflow: hidden;
-	padding: 2px 5px;
-	}
+    overflow: hidden;
+    padding: 2px 5px;
+    }
 
 /* CVK */
-
 .b-cvk-rc,
 .b-cvk-auth {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 .b-cvk-code {
-	margin-left: 0;
-	padding-left: 30px;
-	}
+    margin-left: 0;
+    padding-left: 30px;
+    }
 
 /* journalpromo */
 .journalpromo-popup-info-list,
@@ -810,45 +467,44 @@ __________________________________________*/
 .journalpromo-popup-info-list,
 .journalpromo-popup-info-list LI,
 .b-journalpromo-header {
-	position: relative;
-	zoom: 1;
-	}
+    position: relative;
+    zoom: 1;
+    }
 .journalpromo-popup-content {
-	width: 320px;
-	}
+    width: 320px;
+    }
 .journalpromo-sc-icon {
-	margin-top: 1px;
-	}
+    margin-top: 1px;
+    }
 .journalpromo-sort-index {
-	margin-top: 2px;
-	vertical-align: middle;
-	}
+    margin-top: 2px;
+    vertical-align: middle;
+    }
 .b-journalpromo-order-journal .i-ljuser-userhead {
-	vertical-align: middle !important;
-	}
+    vertical-align: middle !important;
+    }
 .journalpromo-popup-info-list .journalpromo-popup-info-option,
 .b-journalpromo-header-title {
-	float: left;
-	}
+    float: left;
+    }
 .journalpromo-statistics-journals-loading .b-splatest-more-journals,
 .journalpromo-statistics-active-loading .b-splatest-more-active,
 .journalpromo-statistics-history-loading .b-splatest-more-history {
-	display: block;
-	}
+    display: block;
+    }
 .journalpromo-buttons,
 .your-price .b-journalpromo-notice {
-	display: inline;
-	}
+    display: inline;
+    }
 
 /* Dengi Online */
-
 .b-payment-list .b-payment-item {
-	display: inline;
-	}
+    display: inline;
+    }
 .confirm-form-subsection {
-	width: 350px;
-	}
+    width: 350px;
+    }
 .confirm-form-section DL {
-	zoom: 1;
-	}
+    zoom: 1;
+    }
 

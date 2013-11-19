@@ -318,7 +318,8 @@ sub s2_run
 
     eval {
     # real work for header generating, now all res in NEED_RES
-    LJ::S2::subst_header($page);
+
+    LJ::S2::insert_resources($page);
 
     S2::Builtin::LJ::end_css($ctx) if $css_mode;
 
@@ -336,9 +337,35 @@ sub s2_run
     return 1;
 }
 
-sub subst_header {
+# After S2 html is generated, fake resource placeholders
+# are replaced with real ones. Such method is used, because
+# we need to wait after all LJ::need_res are called,
+# which could be inside S2.
+
+sub insert_resources {
     my ($page) = @_;
-    $$LJ::S2::ret_ref =~ s/<!\-\-SubstHeadContent\-\->/$page->{head_content}->subst_header()/e;
+
+    return unless $page;
+
+    my $hc = LJ::S2::HeadContent->new({
+        u      => $page->{'_u'},
+        remote => LJ::get_remote(),
+        type   => 'Page'
+    });
+
+    my %res = (
+        ALL_RES => $hc->subst_header() || '',
+
+        JS_RES => LJ::res_includes({ only_js => 1 }) || ''
+    );
+
+    $hc->{opts} = {
+        without_js => 1
+    };
+
+    $res{ALL_WITHOUT_JS_RES} = $hc->subst_header() || '';
+
+    $$LJ::S2::ret_ref =~ s/<!\-\-(ALL_RES|ALL_WITHOUT_JS_RES|JS_RES)\-\->/$res{$1}/g;
 }
 
 # <LJFUNC>
@@ -5802,21 +5829,14 @@ sub Page__render_resource {
     my ($self, $page, $opts) = @_;
 
     if ($opts->{'without_js'}) {
-        my $head_content = LJ::S2::HeadContent->new({
-            u      => $page->{'_u'},
-            remote => LJ::get_remote(),
-            type   => 'Page',
-            opts   => $opts
-        });
-
-        return $head_content->subst_header();
+        return '<!--ALL_WITHOUT_JS_RES-->';
     }
 
     if ($opts->{'js'}) {
-        return LJ::res_includes({ only_js => 1 });
+        return '<!--JS_RES-->';
     }
 
-    return '';
+    return '<!--ALL_RES-->';
 }
 
 sub _is_secure_resource {

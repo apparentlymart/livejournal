@@ -290,7 +290,7 @@ sub work {
           or return dequeue("Error appending request?");
 
         if ($splid) {
-            LJ::Support::set_response_prop($splid,'Content-type',$content_type);
+            LJ::Support::set_response_prop($splid,'Content-type',$content_type) if $content_type;
         }
 
         LJ::Support::touch_request($spid);

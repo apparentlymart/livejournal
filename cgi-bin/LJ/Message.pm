@@ -80,6 +80,11 @@ sub send {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
 
+    # Check for readonly cluster
+    if ( $ou->is_readonly || $ru->is_readonly ) {
+        return 0;
+    }
+
     {
         last unless $ou;
         last unless $ru;
@@ -142,7 +147,7 @@ sub send {
         if ($self->parent_msgid) {
             my $nitem = LJ::NotificationItem->new($self->_orig_u, $self->parent_qid);
             $nitem->mark_read;
-        }       
+        }
 
         return 1;
     } else {
@@ -284,7 +289,7 @@ sub _save_msgprop_row_to_db {
     for my $prop (qw(userpic preformatted)){
         my $propval = $self->$prop;
         next unless $propval;
-        
+
         my $tm = $self->typemap;
         my $propid = $tm->class_to_typeid($prop);
         my $sql = "INSERT INTO usermsgprop (journalid, msgid, propid, propval) " .
@@ -302,7 +307,35 @@ sub _save_msgprop_row_to_db {
             return 0;
         }
     }
-    
+
+    return 1;
+}
+
+# Remove message from usermsg, usermsgprop, usermsgtextm usermsgbookmarks
+sub remove {
+    my ($self, $u, $msgid) = @_;
+
+    $u     ||= $self->_orig_u;
+    $msgid ||= $self->msgid;
+
+    return unless $u && $msgid;
+
+    $u->do("DELETE FROM usermsg WHERE msgid=? AND journalid=?", undef, $msgid, $u->userid);
+    die $u->errstr 
+        if $u->err;
+
+    $u->do("DELETE FROM usermsgtext WHERE msgid=? AND journalid=?", undef, $msgid, $u->userid);
+    die $u->errstr 
+        if $u->err;
+
+    $u->do("DELETE FROM usermsgprop WHERE msgid=? AND journalid=?", undef, $msgid, $u->userid);
+    die $u->errstr 
+        if $u->err;
+
+    $u->do("DELETE FROM usermsgbookmarks WHERE msgid=? AND journalid=?", undef, $msgid, $u->userid);
+    die $u->errstr 
+        if $u->err;
+
     return 1;
 }
 
@@ -331,8 +364,32 @@ sub type {
     return $_[0]->{'type'} ||= $_[0]->_row_getter(type => 'msg');
 }
 
+sub in {
+    return &type eq 'in';
+}
+
+sub out {
+    return &type eq 'out';
+}
+
 sub state {
     return $_[0]->{'state'} ||= $_[0]->_row_getter(state => 'msg');
+}
+
+sub read {
+    return &state eq 'R';
+}
+
+sub unread {
+    return uc &state eq 'N';
+}
+
+sub user_unread {
+    return &state eq 'n';
+}
+
+sub spam {
+    return &state eq 'S';
 }
 
 sub parent_msgid {
@@ -418,16 +475,35 @@ sub set_msgid {
     $self->{msgid} = $val;
 }
 
-sub set_state {
-    my ($self, $val) = @_;
-
-    $self->{state} = $val;
-}
-
 sub set_timesent {
     my ($self, $val) = @_;
 
     $self->{timesent} = $val;
+}
+
+sub set_state {
+    my ($self, $val) = @_;
+
+    my $u = &_orig_u;
+
+    $u->do("UPDATE usermsg SET state=? WHERE journalid=? AND msgid=?", undef, $val, $u->userid, $self->msgid)
+        or die $u->errstr;
+
+    $self->{'state'} = $val;
+}
+
+sub mark_read {
+    return if &read;
+    set_state($_[0], 'R');
+}
+
+sub auto_read {
+    &mark_read unless &read or &user_unread;
+}
+
+sub mark_unread {
+    return if &unread;
+    set_state($_[0], 'n');
 }
 
 ###################
@@ -582,6 +658,53 @@ sub preload_rows {
     
     ($messages{$_->{'journalid'}, $_->{'msgid'}} or next)->absorb_row($table, %$_)
         foreach $self->$getter(\@messages);
+}
+
+sub load_all {
+    my ($self, $u) = @_;
+
+    unless ($LJ::REQ_CACHE_INBOX{'messages'}) {
+
+        my $dbh = LJ::get_cluster_master($u);
+        return unless $dbh;
+
+        my $userid   = $u->userid;
+        my $key      = [$userid, "inbox:messages:$userid"];
+        my $messages = LJ::MemCache::get($key);
+        my $format   = "(ANNNNNA)*";
+        my @fields   = qw{ type journalid msgid parent_msgid otherid timesent state };
+        my @messages;
+
+        unless (defined $messages) {
+
+            my $res = $dbh->selectall_hashref('
+                SELECT 
+                    type, journalid, msgid, parent_msgid, otherid, timesent, state
+                FROM 
+                    usermsg
+                WHERE 
+                    journalid=?',
+                'msgid', undef, $userid
+            ) || {};
+
+            @messages = values %$res;
+            my $value = pack $format, map { $_ || 0 } map { @{ $_ }{ @fields } } @messages;
+ 
+            LJ::MemCache::set($key, $value, 86400);
+        } else {
+            my @cache = unpack $format, $messages;
+
+            while ( my @row = splice(@cache, 0, scalar @fields) ) {
+                my $message = {};
+                @{ $message }{ @fields } = @row;
+                push @messages, $message;
+            }
+        }
+
+        $LJ::REQ_CACHE_INBOX{'messages'} = \@messages;
+    }
+
+    return $LJ::REQ_CACHE_INBOX{'messages'};
 }
 
 # get the core message data from memcache or the DB

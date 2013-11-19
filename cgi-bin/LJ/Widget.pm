@@ -117,7 +117,7 @@ sub render {
     my $widget_ele_id = $class->widget_ele_id;
 
     return "" unless $class->should_render(@opts);
-    
+
     ## parameters beside widgets layout
     my $ret_opts = {};
     push @opts => (ret_opts => $ret_opts);
@@ -148,18 +148,21 @@ sub render {
                 LJ::need_res($file);
             }
         }
+
         LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
         return $widget->render_body(@opts);
     } or $class->handle_error($@);
 
-    if (!$rv) {
+    unless ( $rv ) {
         return '';
-    } elsif (ref $class && $class->{'no_container_div'}) {
+    }
+    elsif (defined $opt_hash{no_container_div}) {
         return $rv;
-    } else {
+    }
+    else {
         my $widget_content_id = $ret_opts->{widget_content_id};
-        
-        return 
+
+        return
             "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id' data-cid='$widget_content_id'>\n" .
             $rv .
             "</div><!-- end .appwidget-$css_subclass -->\n";

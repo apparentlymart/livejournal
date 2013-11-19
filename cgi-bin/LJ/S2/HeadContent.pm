@@ -26,7 +26,7 @@ sub set_options {
 
 sub as_string {
     my $self = shift;
-    return '<!--SubstHeadContent-->';
+    return '<!--ALL_RES-->';
 }
 
 sub subst_header {

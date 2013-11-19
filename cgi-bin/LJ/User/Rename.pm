@@ -232,7 +232,7 @@ sub basic_rename {
         ## "Remove all users from your Friends list and leave all communities"
         if ($opts->{opt_delfriends}) {
             # delete friends
-            my $friends = $u->friends(nolimit => 1);
+            my $friends = $u->friends(force => 1);
 
             foreach my $target (values %$friends) {
                 if ($target) {
@@ -243,7 +243,7 @@ sub basic_rename {
             }
 
             # remove from communities
-            my $friendsof = $u->friendsof(nolimit => 1);
+            my $friendsof = $u->friendsof(force => 1);
 
             foreach my $target (values %$friendsof) {
                 if ($target) {
@@ -274,7 +274,7 @@ sub basic_rename {
         ## "Remove everyone from your Friend Of list"
         if ($opts->{'opt_delfriendofs'}) {
             # remove friendofs
-            my $friendsof = $u->friendsof(nolimit => 1);
+            my $friendsof = $u->friendsof(force => 1);
 
             foreach my $target (values %$friendsof) {
                 if ($target) {
@@ -287,9 +287,7 @@ sub basic_rename {
             }
 
             # Remove subscribers
-            my $subscribers = $u->subscribers(
-                force => 1
-            );
+            my $subscribers = $u->subscribers(force => 1);
 
             foreach my $target (values %$subscribers) {
                 if ($target) {

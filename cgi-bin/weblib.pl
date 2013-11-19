@@ -1453,16 +1453,31 @@ sub need_res {
 
         die "Bogus reskey $reskey" unless $reskey =~ m!^(js|stc)/!;
 
-        unless (exists $LJ::NEEDED_RES{$reskey}) {
-            push @reskeys, $reskey;
+        if ($opts->{'separate_list'}) {
+            unless (exists $LJ::NEEDED_RES_SEPARATE{$reskey}) {
+                push @reskeys, $reskey;
+            }
+            $LJ::NEEDED_RES_SEPARATE{$reskey} = $resopts;
+        } else {
+            unless (exists $LJ::NEEDED_RES{$reskey}) {
+                push @reskeys, $reskey;
+            }
+            $LJ::NEEDED_RES{$reskey} = $resopts;
         }
-        $LJ::NEEDED_RES{$reskey} = $resopts;
     }
 
-    if ($insert_head) {
-        unshift @LJ::NEEDED_RES, @reskeys;
+    if ($opts->{'separate_list'}) {
+        if ($insert_head) {
+            unshift @LJ::NEEDED_RES_SEPARATE, @reskeys;
+        } else {
+            push @LJ::NEEDED_RES_SEPARATE, @reskeys;
+        }
     } else {
-        push @LJ::NEEDED_RES, @reskeys;
+        if ($insert_head) {
+            unshift @LJ::NEEDED_RES, @reskeys;
+        } else {
+            push @LJ::NEEDED_RES, @reskeys;
+        }
     }
 
     return;
@@ -1860,6 +1875,24 @@ sub res_includes {
         }
     }
 
+    foreach my $key (@LJ::NEEDED_RES_SEPARATE) {
+        my $path;
+        my $mtime;
+        my $library;
+
+        $path = $key;
+
+        if ($path =~ m!^js/(.+)!) {
+            $add->("js2$library", $1, $mtime, $LJ::NEEDED_RES_SEPARATE{$key} || {});
+        }
+        elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
+            $add->("${1}stccss$library", $2, $mtime, $LJ::NEEDED_RES_SEPARATE{$key});
+        }
+        elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
+            $add->("${1}stcjs", $2, $mtime, $LJ::NEEDED_RES_SEPARATE{$key});
+        }
+    }
+
     my $tags = sub {
         my ($type, $template) = @_;
         return unless $list{$type};
@@ -1936,6 +1969,7 @@ sub res_includes {
 
         $tags->("common_js", "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
         $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
+        $tags->("js2",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>");
         $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>");
         $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>");
     }

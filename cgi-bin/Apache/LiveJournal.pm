@@ -49,7 +49,6 @@ BEGIN {
 
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
-my %REDIR;
 
 # Mapping of MIME types to image types understood by the blob functions.
 my %MimeTypeMap = (
@@ -66,17 +65,6 @@ my %MimeTypeMapd6 = (
 $USERPIC{'cache_dir'} = "$ENV{'LJHOME'}/htdocs/userpics";
 $USERPIC{'use_disk_cache'} = -d $USERPIC{'cache_dir'};
 $USERPIC{'symlink'} = eval { symlink('',''); 1; };
-
-# redirect data.
-foreach my $file ('redirect.dat', 'redirect-local.dat') {
-    open (REDIR, "$ENV{'LJHOME'}/cgi-bin/$file") or next;
-    while (<REDIR>) {
-        next unless (/^(\S+)\s+(\S+)/);
-        my ($src, $dest) = ($1, $2);
-        $REDIR{$src} = $dest;
-    }
-    close REDIR;
-}
 
 ##
 ## The code below is a bit rough, it was written during DDoS attacks.
@@ -129,6 +117,8 @@ sub handler
     my $method   = LJ::Request->method;
     my $hostname = LJ::Request->hostname;
 
+    $LJ::IS_SSL = LJ::run_hook('ssl_check');
+
     # let foo.com still work, but redirect to www.foo.com
     {
         last unless $LJ::DOMAIN_WEB;
@@ -139,7 +129,7 @@ sub handler
         my $args = LJ::Request->args;
 
         if ($method eq 'GET') {
-            return redir("$LJ::SITEROOT$uri" . ($args ? "?$args" : ''));
+            return redir( ($LJ::IS_SSL ? $LJ::SSLROOT : $LJ::SITEROOT) . $uri . ($args ? "?$args" : '') );
         }
 
         # Maybe will need to do something with request with another methods
@@ -246,7 +236,7 @@ sub handler
 
     # checks redirects
     if (my $url = LJ::Router->check_redirects) {
-        return redir($url);
+        return redir($url, LJ::Request::HTTP_MOVED_PERMANENTLY);
     }
 
     # try to match controller
@@ -400,16 +390,13 @@ sub trans {
         LJ::Request->pnotes( 'gtop_mem' => $gtop->proc_mem($$) );
     }
 
-    # $LJ::IS_SSL is used in LJ::start_request, so we must init it here
-    my $is_ssl = $LJ::IS_SSL = LJ::run_hook('ssl_check');
-
     LJ::start_request();
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
     ## The following block of code with 'constants' redefinition *** MUST *** be called for any 
     ## request.
-    if ($is_ssl) {
+    if ($LJ::IS_SSL) {
         $LJ::IMGPREFIX = '/img';
     } else {
         $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
@@ -572,7 +559,10 @@ sub trans {
     LJ::run_hooks( 'suspicious_handler', \$suspicious_response );
     if ($suspicious_response) {
         LJ::Request->handler('perl-script');
-        LJ::Request->set_handlers( 'PerlHandler' => sub { eval { $suspicious_response->output } } );
+        LJ::Request->set_handlers( 'PerlHandler' => sub { 
+            LJ::Lang::current_language(undef);
+            eval { $suspicious_response->output } 
+        } );
         return LJ::Request::OK;
     }
 
@@ -587,7 +577,7 @@ sub trans {
     }
 
     # only allow certain pages over SSL
-    if ($is_ssl) {
+    if ($LJ::IS_SSL) {
         if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
             # handled later
         }
@@ -1352,7 +1342,7 @@ sub trans {
         LJ::Request->handler("perl-script");
         if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
-            $RQ{'is_ssl'} = $is_ssl;
+            $RQ{'is_ssl'} = $LJ::IS_SSL;
             LJ::Request->set_handlers(PerlHandler => \&interface_content);
             return LJ::Request::OK
         }
@@ -1382,16 +1372,6 @@ sub trans {
         LJ::Request->handler("perl-script");
         LJ::Request->set_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
         return LJ::Request::OK;
-    }
-
-    # redirected resources
-    if ($REDIR{$uri}) {
-        my $new = $REDIR{$uri};
-        if (LJ::Request->args) {
-            $new .= ($new =~ /\?/ ? "&" : "?");
-            $new .= LJ::Request->args;
-        }
-        return redir($new, LJ::Request::HTTP_MOVED_PERMANENTLY);
     }
 
     # confirm

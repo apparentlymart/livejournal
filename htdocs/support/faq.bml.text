@@ -5,6 +5,8 @@
 .cannotfind.note|staleness=1
 .cannotfind.note=Note that the search feature is still in beta testing and under development, but it just may find you what you're looking for.
 
+.contents=Contents
+
 .faq.back.link|staleness=1
 .faq.back.link=Back to <a [[backlink]]>the support area</a>.
 

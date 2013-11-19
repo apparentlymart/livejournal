@@ -2,7 +2,7 @@ package LJ::RelationService::MysqlAPI;
 
 ############################################################
 #
-#        WE NEED REALIZE SMART CACHING 
+#        WE NEED REALIZE SMART CACHING/CHUNK CACHING
 #
 # See uin _get_rel_memcache and _set_rel_memcache in ljrelation.pl
 # it has to be the good decision in order that not invalidate in large quantities a cache
@@ -17,26 +17,19 @@ use warnings;
 use Readonly;
 
 # Internal modules
+use LJ::Utils::List;
 use LJ::MemCacheProxy;
+use LJ::RelationService::Const;
 
-Readonly my $MEMCACHE_REL_TIMECACHE     => 3600;
-Readonly my $MEMCACHE_RELS_TIMECACHE    => 2 * 86400;
-Readonly my $MEMCACHE_RELSOF_TIMECACHE  => 2 * 86400;
-Readonly my $MEMCACHE_REL_KEY_PREFIX    => 'rel';
-Readonly my $MEMCACHE_RELS_KEY_PREFIX   => 'rels';
-Readonly my $MEMCACHE_RELSOF_KEY_PREFIX => 'relsof';
+require 'ljdb.pl';
 
-Readonly my $MAX_SIZE_FOR_PACK_STRUCT    => 950 * 1024; # 950Kb
-Readonly my $MAX_COUNT_FOR_CACHE_REL_IDS => 200000;
-
-##
 sub create_relation_to {
     my $class  = shift;
     my $u      = shift;
     my $target = shift;
     my $type   = shift;
     my %opts   = @_;
-    
+
     if ( $type eq 'F' ) {
         return $class->_create_relation_to_type_f($u, $target, %opts);
     } elsif ($type eq 'R') {
@@ -61,6 +54,10 @@ sub _create_relation_to_type_f {
     my $dbh = LJ::get_db_writer();
 
     return 0 unless $dbh;
+
+    $opts{fgcolor}   ||= 0;
+    $opts{bgcolor}   ||= 16777215;
+    $opts{groupmask} ||= 1;
 
     my $cnt = $dbh->do(qq[
             REPLACE INTO friends  (
@@ -102,7 +99,7 @@ sub _create_relation_to_type_r {
     my $class  = shift;
     my $u      = shift;
     my $target = shift;
-    my %args   = @_;
+    my %opts   = @_;
 
     my $uid = $u->id;
     my $tid = $target->id;
@@ -113,14 +110,16 @@ sub _create_relation_to_type_r {
     my $cidu = $u->clusterid;
     my $cidt = $target->clusterid;
 
-    return unless $cidu;
-    return unless $cidt;
+    return 0 unless $cidu;
+    return 0 unless $cidt;
 
     my $dbhu = LJ::get_cluster_master($u);
     my $dbht = LJ::get_cluster_master($target);
 
     return 0 unless $dbhu;
     return 0 unless $dbht;
+
+    $opts{filtermask} ||= 1;
 
     my $cntu = $dbhu->do(qq[
             REPLACE INTO subscribers2 (
@@ -132,7 +131,7 @@ sub _create_relation_to_type_r {
         undef,
         $uid,
         $tid,
-        $args{filtermask}
+        $opts{filtermask}
     );
 
     if ($dbhu->err) {
@@ -170,7 +169,7 @@ sub _create_relation_to_type_other {
 
     my $dbh = LJ::get_db_writer();
 
-    return unless $dbh;
+    return 0 unless $dbh;
 
     my $uid = $u->id;
     my $tid = $target->id;
@@ -189,7 +188,7 @@ sub _create_relation_to_type_other {
         $type
     );
 
-    return if $dbh->err;
+    return 0 if $dbh->err;
 
     # set in memcache
     LJ::_set_rel_memcache($uid, $tid, $type, 1);
@@ -213,7 +212,13 @@ sub remove_relation_to {
     } elsif ($type eq 'R') {
         return $class->_remove_relation_to_type_r($u, $target);
     } else {
-        return $class->_remove_relation_to_type_other($u, $target, $type);
+        if ($target eq '*') {
+            return $class->_remove_all_relations_destinations_to_type_other($u, $type);
+        } elsif ($u eq '*') {
+            return $class->_remove_all_relations_sources_to_type_other($target, $type);
+        } else {
+            return $class->_remove_relation_to_type_other($u, $target, $type);
+        }
     }
 }
 
@@ -280,8 +285,8 @@ sub _remove_relation_to_type_r {
     my $cidu = $u->clusterid;
     my $cidt = $target->clusterid;
 
-    return unless $cidu;
-    return unless $cidt;
+    return 0 unless $cidu;
+    return 0 unless $cidt;
 
     my $dbhu = LJ::get_cluster_master($u);
     my $dbht = LJ::get_cluster_master($target);
@@ -329,75 +334,148 @@ sub _remove_relation_to_type_r {
     return 1;
 }
 
+sub _remove_all_relations_destinations_to_type_other {
+    my $class  = shift;
+    my $u      = shift;
+    my $type   = shift;
+
+    my $uid = $u->id;
+
+    return 0 unless $uid;
+
+    my $rels = $class->_find_relation_destinations(
+        $u, $type, dont_set_cache => 1
+    );
+
+    # non-clustered global reluser table
+    my $dbh = LJ::get_db_writer();
+
+    unless ($dbh) {
+        return 0;
+    }
+
+    $dbh->do(qq[
+            DELETE FROM
+                reluser
+            WHERE
+                type = ?
+            AND
+                userid = ?
+        ],
+        undef,
+        $type,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    # Invalidate cache
+    LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
+    LJ::MemCacheProxy::delete("rlist:src:$type:$uid");
+
+    foreach my $tid (@$rels) {
+        LJ::MemCacheProxy::delete("rel:$uid:$tid:$type");
+        LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
+    }   
+
+    return 1;
+}
+
+sub _remove_all_relations_sources_to_type_other {
+    my $class  = shift;
+    my $target = shift;
+    my $type   = shift;
+
+    my $tid = $target->id;
+
+    return 0 unless $tid;
+
+    my $rels = $class->_find_relation_sources(
+        $target, $type, dont_set_cache => 1
+    );
+
+    # non-clustered global reluser table
+    my $dbh = LJ::get_db_writer();
+
+    unless ($dbh) {
+        return 0;
+    }
+
+    $dbh->do(qq[
+            DELETE FROM
+                reluser
+            WHERE
+                type = ?
+            AND
+                targetid = ?
+        ],
+        undef,
+        $type,
+        $tid
+    );
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    # Invalidate cache
+    LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
+    LJ::MemCacheProxy::delete("rlist:dst:$type:$tid");
+
+    foreach my $uid (@$rels) {
+        LJ::MemCacheProxy::delete("rel:$uid:$tid:$type");
+        LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
+    }   
+
+    return 1;
+}
+
 sub _remove_relation_to_type_other {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $type   = shift;
 
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $userid = ref($u) ? $u->userid : $u;
-    my $friendid = ref($friend) ? $friend->userid : $friend;
+    my $uid = $u->id;
+    my $tid = $target->id;
 
-    my @caches_to_delete = ();
-    my @rels = ($friendid);
+    return 0 unless $uid;
+    return 0 unless $tid;
 
-    my $eff_type = $typeid ? $typeid : $type;
-    if ($friendid eq '*') {
-        @rels = $class->_find_relation_destinations_type_other($u, $type, dont_set_cache => 1);
-        push @caches_to_delete, map {"rlist:src:$eff_type:$_"} @rels;
-        push @caches_to_delete, "rlist:dst:$eff_type:$userid";
+    my $dbh = LJ::get_db_writer();
 
-    } elsif ($userid eq '*') {
-        @rels = $class->_find_relation_sources_type_other($friend, $type, dont_set_cache => 1);
-        push @caches_to_delete, map {"rlist:dst:$eff_type:$_"} @rels;
-        push @caches_to_delete, "rlist:src:$eff_type:$friendid";
-    } else {
-        push @caches_to_delete, "rlist:dst:$eff_type:$userid";
-        push @caches_to_delete, "rlist:src:$eff_type:$friendid";
+    unless ($dbh) {
+        return 0;
     }
 
-    if ($typeid) {
-        # clustered reluser2 table
-        return undef unless $u->writer;
+    $dbh->do(qq[
+            DELETE FROM
+                reluser
+            WHERE
+                type = ?
+            AND
+                userid = ?
+            AND
+                targetid = ?
+        ],
+        undef,
+        $type,
+        $uid,
+        $tid
+    );
 
-        $u->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? ("userid=".$userid." AND ") : "") .
-               ($friendid ne '*' ? ("targetid=".$friendid." AND ") : "") . "type=$typeid");
-
-        return undef if $u->err;
-    } else {
-        # non-clustered global reluser table
-        my $dbh = LJ::get_db_writer()
-            or return undef;
-
-        my $qtype = $dbh->quote($type);
-        $dbh->do("DELETE FROM reluser WHERE " . ($userid ne '*' ? ("userid=".$userid." AND ") : "") .
-                 ($friendid ne '*' ? ("targetid=".$friendid." AND ") : "") . "type=$qtype");
-
-        return undef if $dbh->err;
+    if ($dbh->err) {
+        return 0;
     }
     
-    # if one of userid or targetid are '*', then we need to note the modtime
-    # of the reluser edge from the specified id (the one that's not '*')
-    # so that subsequent gets on rel:userid:targetid:type will know to ignore
-    # what they got from memcache
-    $eff_type = $typeid || $type;
-    if ($userid eq '*') {
-        LJ::MemCacheProxy::set([$friendid, "relmodt:$friendid:$eff_type"], time());
-    } elsif ($friendid eq '*') {
-        LJ::MemCacheProxy::set([$userid, "relmodu:$userid:$eff_type"], time());
+    # Update cache
+    LJ::_set_rel_memcache($uid, $tid, $type, 0);
 
-    # if neither userid nor targetid are '*', then just call _set_rel_memcache
-    # to update the rel:userid:targetid:type memcache key as well as the
-    # userid and targetid modtime keys
-    } else {
-        LJ::_set_rel_memcache($userid, $friendid, $eff_type, 0);
-    }    
-
-    # drop list rel lists
-    foreach my $key (@caches_to_delete) {
-        LJ::MemCacheProxy::delete($key);
-    }   
+    # Invalidate cache
+    LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
+    LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
 
     return 1;
 }
@@ -417,7 +495,7 @@ sub clear_rel_multi {
 # <LJFUNC>
 # name: LJ::RelationService::MysqlAPI::_mod_rel_multi
 # des: Sets/Clears relationship edges for lists of user tuples.
-# args: keys, edges
+# opts: keys, edges
 # des-keys: keys: mode  => {clear|set}.
 # des-edges: edges =>  array of arrayrefs of edges to set: [userid, targetid, type]
 #            Where:
@@ -428,92 +506,39 @@ sub clear_rel_multi {
 # </LJFUNC>
 sub _mod_rel_multi {
     my $opts = shift;
-    return undef unless @{$opts->{edges}};
 
-    my $mode = $opts->{mode} eq 'clear' ? 'clear' : 'set';
+    unless (@{$opts->{edges}}) {
+        return 0;
+    }
+
+    my $mode   = $opts->{mode} eq 'clear' ? 'clear' : 'set';
     my $memval = $mode eq 'set' ? 1 : 0;
 
-    my @reluser  = (); # [userid, targetid, type]
-    my @reluser2 = ();
+    my @reluser = (); # [userid, targetid, type]
+
     foreach my $edge (@{$opts->{edges}}) {
         my ($userid, $targetid, $type) = @$edge;
-        $userid = LJ::want_userid($userid);
+
+        $userid   = LJ::want_userid($userid);
         $targetid = LJ::want_userid($targetid);
-        next unless $type && $userid && $targetid;
 
-        my $typeid = LJ::get_reluser_id($type)+0;
-        my $eff_type = $typeid || $type;
+        next unless $type;
+        next unless $userid;
+        next unless $targetid;
 
-        LJ::MemCacheProxy::delete("rlist:src:$eff_type:$targetid");
-        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:$userid");
+        LJ::MemCacheProxy::delete("rlist:src:$type:$targetid");
+        LJ::MemCacheProxy::delete("rlist:dst:$type:$userid");
 
-        # working on reluser or reluser2?
-        push @{$typeid ? \@reluser2 : \@reluser}, [$userid, $targetid, $eff_type];
-    }
-
-    # now group reluser2 edges by clusterid
-    my %reluser2 = (); # cid => [userid, targetid, type]
-    my $users = LJ::load_userids(map { $_->[0] } @reluser2);
-    foreach (@reluser2) {
-        my $cid = $users->{$_->[0]}->{clusterid} or next;
-        push @{$reluser2{$cid}}, $_;
-    }
-    @reluser2 = ();
-
-    # try to get all required cluster masters before we start doing database updates
-    my %cache_dbcm = ();
-    foreach my $cid (keys %reluser2) {
-        next unless @{$reluser2{$cid}};
-
-        # return undef immediately if we won't be able to do all the updates
-        $cache_dbcm{$cid} = LJ::get_cluster_master($cid)
-            or return undef;
-    }
-
-    # if any error occurs with a cluster, we'll skip over that cluster and continue
-    # trying to process others since we've likely already done some amount of db
-    # updates already, but we'll return undef to signify that everything did not
-    # go smoothly
-    my $ret = 1;
-
-    # do clustered reluser2 updates
-    foreach my $cid (keys %cache_dbcm) {
-        # array of arrayrefs: [userid, targetid, type]
-        my @edges = @{$reluser2{$cid}};
-
-        # set in database, then in memcache.  keep the two atomic per clusterid
-        my $dbcm = $cache_dbcm{$cid};
-
-        my @vals = map { @$_ } @edges;
-
-        if ($mode eq 'set') {
-            my $bind = join(",", map { "(?,?,?)" } @edges);
-            $dbcm->do("REPLACE INTO reluser2 (userid, targetid, type) VALUES $bind",
-                      undef, @vals);
-        }
-
-        if ($mode eq 'clear') {
-            my $where = join(" OR ", map { "(userid=? AND targetid=? AND type=?)" } @edges);
-            $dbcm->do("DELETE FROM reluser2 WHERE $where", undef, @vals);
-        }
-
-        # don't update memcache if db update failed for this cluster
-        if ($dbcm->err) {
-            $ret = undef;
-            next;
-        }
-
-        # updates to this cluster succeeded, set memcache
-        LJ::_set_rel_memcache(@$_, $memval) foreach @edges;
+        push @reluser, [$userid, $targetid, $type];
     }
 
     # do global reluser updates
     if (@reluser) {
+        my $dbh = LJ::get_db_writer();
 
-        # nothing to do after this block but return, so we can
-        # immediately return undef from here if there's a problem
-        my $dbh = LJ::get_db_writer()
-            or return undef;
+        unless ($dbh) {
+            return 0;
+        }
 
         my @vals = map { @$_ } @reluser;
 
@@ -528,14 +553,17 @@ sub _mod_rel_multi {
             $dbh->do("DELETE FROM reluser WHERE $where", undef, @vals);
         }
 
-        # don't update memcache if db update failed for this cluster
-        return undef if $dbh->err;
+        if ($dbh->err) {
+            return 0;
+        }
 
         # $_ = [userid, targetid, type] for each iteration
-        LJ::_set_rel_memcache(@$_, $memval) foreach @reluser;
+        foreach my $rel (@reluser) {
+            LJ::_set_rel_memcache(@$rel, $memval);
+        }
     }
 
-    return $ret;
+    return 1;
 }
 
 sub is_relation_to {
@@ -547,6 +575,8 @@ sub is_relation_to {
 
     if ($type eq 'R') {
         return $class->find_relation_attributes($u, $target, $type, %opts) ? 1 : 0;
+    } elsif ($type eq 'F') {
+        return $class->find_relation_attributes($u, $target, $type, %opts) ? 1 : 0;
     } else {
         return $class->_is_relation_to_other($u, $target, $type, %opts);
     }
@@ -555,69 +585,99 @@ sub is_relation_to {
 sub _is_relation_to_other {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $type   = shift;
     my %opts   = @_;
     
-    return undef unless $type && $u && $friend;
+    my $uid = $u->id;
+    my $tid = $target->id;
 
-    my $userid = LJ::want_userid($u);
-    my $friendid = LJ::want_userid($friend);
-
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $eff_type = $typeid || $type;
-
-    my $key = "$userid-$friendid-$eff_type";
-    return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
+    return 0 unless $uid;
+    return 0 unless $tid;
 
     # did we get something from memcache?
-    my $memval = LJ::_get_rel_memcache($userid, $friendid, $eff_type);
-    return $memval if defined $memval;
+    my $val = LJ::_get_rel_memcache($uid, $tid, $type);
 
-    # are we working on reluser or reluser2?
-    my ($db, $table);
-    if ($typeid) {
-        # clustered reluser2 table
-        $db = LJ::get_cluster_reader($u);
-        $table = "reluser2";
-    } else {
-        # non-clustered reluser table
-        $db ||= LJ::get_db_reader();
-        $table = "reluser";
+    if (defined $val) {
+        return $val;
     }
 
-    # get data from db, force result to be {0|1}
-    my $dbval = $db->selectrow_array("SELECT COUNT(*) FROM $table ".
-                                     "WHERE userid=? AND targetid=? AND type=? ",
-                                     undef, $userid, $friendid, $eff_type)
-        ? 1 : 0;
+    my $dbh = LJ::get_db_reader();
+
+    unless ($dbh) {
+        return 0;
+    }
+
+    $val = $dbh->selectrow_array(qq[
+            SELECT
+                COUNT(*)
+            FROM
+                reluser
+            WHERE
+                userid = ?
+            AND
+                targetid = ?
+            AND
+                type = ?
+        ],
+        undef,
+        $uid, 
+        $tid,
+        $type
+    );
+
+    if ($dbh->err) {
+        return 0;
+    }
 
     # set in memcache
-    LJ::_set_rel_memcache($userid, $friendid, $eff_type, $dbval);
+    LJ::_set_rel_memcache($uid, $tid, $type, $val);
 
     # return and set request cache
-    return $LJ::REQ_CACHE_REL{$key} = $dbval;
+    return $val;
 }
 
 sub is_relation_type_to {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $types  = shift;
     my %opts   = @_;
-    
-    return undef unless $u && $friend;
-    return undef unless ref $types eq 'ARRAY';
 
-    my $userid = LJ::want_userid($u);
-    my $friendid = LJ::want_userid($friend);
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
 
     $types = join ",", map {"'$_'"} @$types;
 
     my $dbh = LJ::get_db_writer();
-    my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                         "WHERE userid=$userid AND targetid=$friendid ".
-                                         "AND type IN ($types)");
+
+    unless ($dbh) {
+        return 0;
+    }
+
+    my $relcount = $dbh->selectrow_array(
+        qq[
+            SELECT
+                COUNT(*)
+            FROM
+                reluser
+            WHERE
+                userid = ?
+            AND
+                targetid = ?
+            AND
+                type
+            IN
+                ($types)
+        ],
+        undef,
+        $uid,
+        $tid
+    );
+
     return $relcount;
 }
 
@@ -628,8 +688,30 @@ sub find_relation_destinations {
     my $type  = shift;
     my %opts  = @_;
 
+    return unless $u;
+    return unless $type;
+
+    my $ids = $class->_find_relation_destinations($u, $type, %opts);
+
+    return unless $ids;
+
+    if (my $filters = $opts{filters}) {
+        $class->_filter($u, $ids, $filters);
+    }
+
+    return @$ids;
+}
+
+sub _find_relation_destinations {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
     if ( $type eq 'F' ) {
         return $class->_find_relation_destinations_type_f($u, %opts);
+    } elsif ($type eq 'R')  {
+        return $class->_find_relation_destinations_type_r($u, %opts);
     } else {
         return $class->_find_relation_destinations_type_other($u, $type, %opts);
     }
@@ -639,12 +721,125 @@ sub _find_relation_destinations_type_f {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    my $uids  = $class->_friend_friendof_uids($u, 
-                        %opts,
-                        limit     => $opts{limit}, 
-                        mode      => "friends",
-                        );
-    return @$uids;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $force  = $opts{force};
+    my $limit  = $opts{limit} || 50000;
+    my $memkey = [$uid, "friends2:$uid"];
+
+    ## check cache first
+    unless ($force) {
+        if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+            my ($slimit, @uids) = unpack("N*", $pack);
+            # value in memcache is good if stored limit (from last time)
+            # is >= the limit currently being requested.  we just may
+            # have to truncate it to match the requested limit
+
+            if ($limit) {
+                if ($slimit >= $limit) {
+                    if (@uids > $limit) {
+                        @uids = @uids[0..$limit-1];
+                    }
+
+                    return \@uids;
+                }
+            }
+
+            # value in memcache is also good if number of items is less
+            # than the stored limit... because then we know it's the full
+            # set that got stored, not a truncated version.
+            return \@uids if @uids < $slimit;
+        }
+    }
+
+    my $dbh  = LJ::get_db_writer();
+
+    return unless $dbh;
+
+    my $sqlimit = $limit ? " LIMIT $limit" : '';
+    my $uids    = $dbh->selectcol_arrayref(qq[
+            SELECT
+                friendid
+            FROM
+                friends
+            WHERE
+                userid = ?
+            ORDER BY
+                friendid
+            $sqlimit
+        ],
+        undef, $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    my @uids = @$uids;
+
+    # We cant cache more then 200000 (~ 1MB)
+    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
+    }
+
+    my $pack = pack 'N*', ($limit, @uids);
+
+    if ($pack) {
+        if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+            warn "TO MUCH pack [uid=$uid]. max count must be less";
+        } else {
+            LJ::MemCacheProxy::set($memkey, $pack, 3600);
+        }
+    }
+
+    return $uids;
+}
+
+sub _find_relation_destinations_type_r {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $key = [$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"];
+    my $val = LJ::MemCacheProxy::get($key);
+
+    if ($val) {
+        my @ids = unpack 'V*', $val;
+        return \@ids;
+    }
+
+    my $dbh = LJ::get_cluster_master($u);
+
+    return unless $dbh;
+
+    my $uids = $dbh->selectcol_arrayref(qq[
+            SELECT
+                subscriptionid
+            FROM
+                subscribers2
+            WHERE
+                userid = ?
+        ],
+        undef,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    if (my $pack = pack 'V*', @$uids) {
+        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
+    }
+
+    return $uids;
 }
 
 sub _find_relation_destinations_type_other {
@@ -653,47 +848,70 @@ sub _find_relation_destinations_type_other {
     my $type  = shift;
     my %opts  = @_;
 
-    my $userid = $u->userid;
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $uids;
+    my $uid = $u->id;
 
-    my $eff_type = $typeid ? $typeid : $type;
-    my $cached_data = LJ::MemCacheProxy::get("rlist:dst:$eff_type:$userid");
-    if ($cached_data) {
-        my @userids = unpack('V*', $cached_data);
-        return @userids;
+    return unless $uid;
+
+    my $key = "rlist:dst:$type:$uid";
+    my $val = LJ::MemCacheProxy::get($key);
+
+    if ($val) {
+        my @ids = unpack('V*', $val);
+        return \@ids;
     }
 
-    if ($typeid) {
-        # clustered reluser2 table
-        my $db = LJ::get_cluster_reader($u);
-        $uids = $db->selectcol_arrayref("
-            SELECT targetid 
-            FROM reluser2 
-            WHERE userid=? 
-              AND type=?
-        ", undef, $userid, $typeid);
-    } else {
-        # non-clustered reluser global table
-        my $db = LJ::get_db_reader();
-        $uids = $db->selectcol_arrayref("
-            SELECT targetid 
-            FROM reluser 
-            WHERE userid=? 
-              AND type=?
-        ", undef, $userid, $type);
-    }
+    my $dbh = LJ::get_db_reader();
+
+    return unless $dbh;
+
+    my $uids = $dbh->selectcol_arrayref(qq[
+            SELECT
+                targetid 
+            FROM
+                reluser 
+            WHERE
+                userid = ? 
+            AND
+                type = ?
+            ORDER BY
+                targetid
+        ],
+        undef,
+        $uid,
+        $type
+    );
 
     unless ($opts{dont_set_cache}) {
-        my $packed = pack('V*', @$uids);
-        LJ::MemCacheProxy::set("rlist:dst:$eff_type:$userid", $packed, 24 * 3600);
+        if (my $packed = pack('V*', @$uids)) {
+            LJ::MemCacheProxy::set($key, $packed, $MEMCACHE_RELS_TIMECACHE);
+        }
     }
 
-    return @$uids;
+    return $uids;
 }
 
 ## friendofs
 sub find_relation_sources {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    return unless $u;
+    return unless $type;
+
+    my $ids = $class->_find_relation_sources($u, $type, %opts);
+
+    return unless $ids;
+
+    if (my $filters = $opts{filters}) {
+        $class->_filter($u, $ids, $filters);
+    }
+
+    return @$ids;
+}
+
+sub _find_relation_sources {
     my $class = shift;
     my $u     = shift;
     my $type  = shift;
@@ -712,12 +930,82 @@ sub _find_relation_sources_type_f {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    my $uids  = $class->_friend_friendof_uids($u, 
-                        %opts,
-                        limit     => $opts{limit}, 
-                        mode      => "friendofs",
-                        );
-    return @$uids;
+    
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $force  = $opts{force};
+    my $limit  = $opts{limit} || 50000;
+    my $memkey = [$uid, "friendofs2:$uid"];
+
+    ## check cache first
+    unless ($force) {
+        if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+            my ($slimit, @uids) = unpack("N*", $pack);
+            # value in memcache is good if stored limit (from last time)
+            # is >= the limit currently being requested.  we just may
+            # have to truncate it to match the requested limit
+
+            if ($limit) {
+                if ($slimit >= $limit) {
+                    if (@uids > $limit) {
+                        @uids = @uids[0..$limit-1];
+                    }
+
+                    return \@uids;
+                }
+            }
+
+            # value in memcache is also good if number of items is less
+            # than the stored limit... because then we know it's the full
+            # set that got stored, not a truncated version.
+            return \@uids if @uids < $slimit;
+        }
+    }
+
+    my $dbh = LJ::get_db_writer();
+
+    return unless $dbh;
+
+    my $sqlimit = $limit ? " LIMIT $limit" : '';
+    my $uids    = $dbh->selectcol_arrayref(qq[
+            SELECT
+                userid
+            FROM
+                friends
+            WHERE
+                friendid = ?
+            ORDER BY
+                userid
+            $sqlimit
+        ],
+        undef,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    my @uids = @$uids;
+
+    # We cant cache more then 200000 (~ 1MB)
+    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
+    }
+
+    my $pack = pack 'N*', ($limit, @uids);
+
+    if ($pack) {
+        if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+            warn "TO MUCH pack [uid=$uid]. max count must be less";
+        } else {
+            LJ::MemCacheProxy::set($memkey, $pack, 3600);
+        }
+    }
+
+    return $uids;
 }
 
 sub _find_relation_sources_type_r {
@@ -729,12 +1017,8 @@ sub _find_relation_sources_type_r {
 
     return unless $uid;
 
-    my $dbh = LJ::get_cluster_master($u);
-
-    return unless $dbh;
-
     my $force  = $opts{force};
-    my $limit  = int($opts{limit});
+    my $limit  = int($opts{limit} || 50000);
     my $memkey = [$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$uid"];
 
     unless ($force) {
@@ -749,15 +1033,19 @@ sub _find_relation_sources_type_r {
                     return @uids[0..$limit-1];
                 }
 
-                return @uids;
+                return \@uids;
             }
 
             # value in memcache is also good if number of items is less
             # than the stored limit... because then we know it's the full
             # set that got stored, not a truncated version.
-            return @uids if @uids < $slimit;
+            return \@uids if @uids < $slimit;
         }
     }
+
+    my $dbh = LJ::get_cluster_master($u);
+
+    return unless $dbh;
 
     my $uids = $dbh->selectcol_arrayref(qq[
             SELECT
@@ -775,10 +1063,6 @@ sub _find_relation_sources_type_r {
         return;
     }
 
-    if ($force) {
-        return @$uids;
-    }
-
     my @uids = @$uids;
 
     # We cant cache more then 200000 (~ 1MB)
@@ -786,21 +1070,17 @@ sub _find_relation_sources_type_r {
         splice @$uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @$uids;
     }
 
-    ## do not cache if $nolimit option is in use,
-    ## because with disabled limit we might put in the cache
-    ## much more data than usually required.
-
     my $pack = pack 'N*', ($limit, @$uids);
 
     if ($pack) {
         if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
-            warn "TO MUCH pack. max count must be less";
+            warn "TO MUCH pack [uid=$uid]. max count must be less";
         } else {
             LJ::MemCacheProxy::set($memkey, $pack, $MEMCACHE_RELSOF_TIMECACHE);
         }
     }
 
-    return @uids;
+    return $uids;
 }
 
 sub _find_relation_sources_type_other {
@@ -809,130 +1089,42 @@ sub _find_relation_sources_type_other {
     my $type  = shift;
     my %opts  = @_;
 
-    my $userid = $u->userid;
-    my $typeid = LJ::get_reluser_id($type)+0;
-    my $uids;
+    my $uid = $u->id;
 
-    my $eff_type = $typeid ? $typeid : $type;
-    my $cached_data = LJ::MemCacheProxy::get("rlist:src:$eff_type:$userid");
-    if ($cached_data) {
-        my @userids = unpack('V*', $cached_data);
-        return @userids;
+    return unless $uid;
+
+    my $key = "rlist:src:$type:$uid";
+    my $val = LJ::MemCacheProxy::get($key);
+
+    if ($val) {
+        my @ids = unpack('V*', $val);
+        return \@ids;
     }
 
-    if ($typeid) {
-        # clustered reluser2 table
-        my $db = LJ::get_cluster_reader($u);
-        $uids = $db->selectcol_arrayref("
-            SELECT userid 
-            FROM reluser2 
-            WHERE targetid=? 
-              AND type=?
-        ", undef, $userid, $typeid);
-    } else {
-        # non-clustered reluser global table
-        my $db = LJ::get_db_reader();
-        $uids = $db->selectcol_arrayref("
-            SELECT userid 
-            FROM reluser 
-            WHERE targetid=? 
-              AND type=?
-        ", undef, $userid, $type);
-    }
+    my $dbh = LJ::get_db_reader();
+
+    return unless $dbh;
+
+    my $uids = $dbh->selectcol_arrayref(qq[
+            SELECT
+                userid
+            FROM
+                reluser
+            WHERE
+                targetid = ?
+            AND
+                type = ?
+            ORDER BY
+                userid
+        ],
+        undef,
+        $uid,
+        $type
+    );
 
     unless ($opts{dont_set_cache}) {
-        my $packed = pack('V*', @$uids);
-        LJ::MemCacheProxy::set("rlist:src:$eff_type:$userid", $packed, 24 * 3600);
-    }
-
-    return @$uids;
-}
-
-# helper method since the logic for both friends and friendofs is so similar
-sub _friend_friendof_uids {
-    my $class = shift;
-    my $u     = shift;
-    my %args  = @_;
-
-    my $mode    = $args{mode};
-    my $limit   = $args{limit};
-    my $nolimit = $args{nolimit} ? 1 : 0; ## use it with care
-
-    my $memkey;
-
-    if ($mode eq "friends") {
-        $memkey = [$u->id, "friends2:" . $u->id];
-    } elsif ($mode eq "friendofs") {
-        $memkey = [$u->id, "friendofs2:" . $u->id];
-    } else {
-        die "mode must either be 'friends' or 'friendofs'";
-    }
-
-    ## check cache first
-    if (my $pack = LJ::MemCacheProxy::get($memkey)) {
-        my ($slimit, @uids) = unpack("N*", $pack);
-        # value in memcache is good if stored limit (from last time)
-        # is >= the limit currently being requested.  we just may
-        # have to truncate it to match the requested limit
-
-        if ($limit && ! $nolimit) {
-            if ($slimit >= $limit) {
-                if (@uids > $limit) {
-                    @uids = @uids[0..$limit-1];
-                }
-
-                return \@uids;
-            }
-        }
-
-        # value in memcache is also good if number of items is less
-        # than the stored limit... because then we know it's the full
-        # set that got stored, not a truncated version.
-        return \@uids if @uids < $slimit;
-    }
-
-    my $sql     = '';
-    my $sqlimit = $limit && ! $nolimit ? " LIMIT $limit" : '';
-
-    if ($mode eq 'friends'){
-        $sql = "SELECT friendid FROM friends WHERE userid=? $sqlimit";
-    } elsif ($mode eq 'friendofs'){
-        $sql = "SELECT userid FROM friends WHERE friendid=? $sqlimit";
-    } else {
-        die "mode must either be 'friends' or 'friendofs'";
-    }
-
-    my $dbh  = LJ::get_db_reader();
-    my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
-
-    if ($dbh->err) {
-        return [];
-    }
-
-    unless ($uids) {
-        return [];
-    }
-
-    my @uids = @$uids;
-
-    if (! $nolimit && @uids){
-        # We cant cache more then 200000 (~ 1MB)
-        if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
-            splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
-        }
-
-        ## do not cache if $nolimit option is in use,
-        ## because with disabled limit we might put in the cache
-        ## much more data than usually required.
-
-        my $pack = pack 'N*', ($limit, @uids);
-
-        if ($pack) {
-            if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
-                warn "TO MUCH pack. max count must be less";
-            } else {
-                LJ::MemCacheProxy::set($memkey, $pack, 3600);
-            }
+        if (my $packed = pack('V*', @$uids)) {
+            LJ::MemCacheProxy::set($key, $packed, $MEMCACHE_RELSOF_TIMECACHE);
         }
     }
 
@@ -943,115 +1135,119 @@ sub load_relation_destinations {
     my $class = shift;
     my $u     = shift;
     my $type  = shift;
-    my %args  = @_;
+    my %opts  = @_;
 
     if ($type eq 'F') {
-        return $class->_load_relation_destinations_f($u, %args);
+        return $class->_load_relation_destinations_f($u, %opts);
     } elsif ($type eq 'R') {
-        return $class->_load_relation_destinations_r($u, %args);
+        return $class->_load_relation_destinations_r($u, %opts);
     }
 
-    return {}
+    return {};
 }
 
 ## friends rows
 sub _load_relation_destinations_f {
     my $class = shift;
     my $u     = shift;
-    my %args  = @_;
+    my %opts  = @_;
 
-    die 'Expected parameter $u LJ::RelationService::MysqlAPI::load_relation_destinations()' unless $u;
+    my $uid = $u->id;
 
-    my $mask          = $args{mask};
-    my $force_db      = $args{force_db};
-    my $memcache_only = $args{memcache_only};
+    return unless $uid;
 
-    return unless $u->userid;
-    return if $LJ::FORCE_EMPTY_FRIENDS{$u->userid};
+    my %res  = ();
+    my $key  = [$uid, "friends:$uid"];
+    my @data = ();
 
-    unless ($force_db) {
-        if (my $memc = $class->_get_friends_memc($u->userid, $mask)) {
-            return $memc;
+    if (my $val = LJ::MemCacheProxy::get($key)) {
+        $val =~ s/^\d//;
+
+        @data = unpack '(NH6H6NC)*', $val;
+    } else {
+        return {} if $opts{memcache_only};
+
+        my $dbh = LJ::get_db_writer();
+
+        return unless $dbh;
+
+        my $name = "$MEMCACHE_RELS_KEY_PREFIX:F:$uid";
+        my $lock = LJ::get_lock($dbh, "global", $name);
+
+        return unless $lock;
+
+        # in lock, try memcache
+        if (my $val = LJ::MemCacheProxy::get($key)) {
+            $val =~ s/^\d//;
+
+            @data = unpack '(NH6H6NC)*', $val;
+        } else {
+            my $data = $dbh->selectcol_arrayref(qq[
+                    SELECT
+                        friendid, fgcolor, bgcolor, groupmask, showbydefault
+                    FROM
+                        friends
+                    WHERE
+                        userid =? 
+                ],
+                {
+                    Columns => [1,2,3,4,5]
+                },
+                $uid
+            );
+
+            if ($dbh->err) {
+                LJ::release_lock($dbh, "global", $name);
+                return;
+            }
+
+            @data = @$data;
+
+            my $count = $#data;
+
+            foreach (my $i = 0; $i < $count; $i += 5) {
+                $data[$i+1] = sprintf("%06x", $data[$i+1]);
+                $data[$i+2] = sprintf("%06x", $data[$i+2]);
+            }
+
+            my $pack = pack '(NH6H6NC)*', @data;
+
+            $pack = 1 . $pack;
+
+            if ($pack) {
+                if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+                    warn "TO MUCH pack [uid=$uid]. max count must be less";
+                } else {
+                    LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
+                }
+            }
         }
+
+        # finished with lock, release it
+        LJ::release_lock($dbh, "global", $name);
     }
 
-    return {} if $memcache_only; # no friends
+    my $mask  = $opts{mask};
+    my $count = $#data;
 
-    # nothing from memcache, select all rows from the
-    # database and insert those into memcache
-    # then return rows that matched the given groupmask
+    foreach (my $i = 0; $i < $count; $i += 5) {
+        next if $mask && ! ($data[$i+3] + 0 & $mask + 0);
 
-    my $userid = $u->id;
-
-    my $dbh = LJ::get_db_writer();
-
-    my $lockname = "get_friends:$userid";
-    my $release_lock = sub {
-        LJ::release_lock($dbh, "global", $lockname);
-    };
-
-    # get a lock
-    my $lock = LJ::get_lock($dbh, "global", $lockname);
-    return {} unless $lock;
-
-    # in lock, try memcache
-    my $memc = $class->_get_friends_memc($userid, $mask);
-    if ($memc) {
-        $release_lock->();
-        return $memc;
+        $res{$data[$i]} = {
+            fgcolor       => '#' . $data[$i+1],
+            bgcolor       => '#' . $data[$i+2],
+            groupmask     => $data[$i+3],
+            showbydefault => $data[$i+4]
+        };
     }
 
-    # inside lock, but still not populated, query db
-
-    # memcache data info
-    my $ver = 1;
-    my $memkey = [$userid, "friends:$userid"];
-
-    # columns we're selecting
-    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
-
-    my $mempack = $ver; # full packed string to insert into memcache, byte 1 is dversion
-    my %friends = ();   # friends object to be returned, all groupmasks match
-
-    my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
-                            "FROM friends WHERE userid=?");
-    $sth->execute($userid);
-    die $dbh->errstr if $dbh->err;
-    while (my @row = $sth->fetchrow_array) {
-        # convert color columns to hex
-        $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
-
-        my $newpack = pack('NH6H6NC', @row);
-        last if length($mempack) + length($newpack) > $MAX_SIZE_FOR_PACK_STRUCT;
-
-        $mempack .= $newpack;
-
-        # unless groupmask matches, skip adding to %friends
-        next if $mask && ! ($row[3]+0 & $mask+0);
-
-        # add "#" to beginning of colors
-        $row[$_] = "\#$row[$_]" foreach 1..2;
-
-        my $fid = $row[0];
-        my $idx = 1;
-        foreach my $col (@cols[1..$#cols]) {
-            $friends{$fid}->{$col} = $row[$idx];
-            $idx++;
-        }
-    }
-
-    LJ::MemCache::set($memkey, $mempack);
-
-    # finished with lock, release it
-    $release_lock->();
-
-    return \%friends;
+    return \%res;
 }
 
 sub _load_relation_destinations_r {
     my $class = shift;
     my $u     = shift;
-    my %args  = @_;
+    my %opts  = @_;
 
     my $uid = $u->id;
 
@@ -1064,7 +1260,7 @@ sub _load_relation_destinations_r {
     if (my $val = LJ::MemCacheProxy::get($key)) {
         @data = unpack 'N*', $val;
     } else {
-        return if $args{memcache_only};
+        return if $opts{memcache_only};
 
         my $dbh = LJ::get_cluster_master($u);
 
@@ -1086,6 +1282,8 @@ sub _load_relation_destinations_r {
                         subscribers2
                     WHERE
                         userid = ?
+                    ORDER BY
+                        subscriptionid
                 ],
                 {
                     Columns => [1,2]
@@ -1094,6 +1292,7 @@ sub _load_relation_destinations_r {
             );
 
             if ($dbh->err) {
+                LJ::release_lock($dbh, "user", $name);
                 return;
             }
 
@@ -1109,7 +1308,7 @@ sub _load_relation_destinations_r {
         LJ::release_lock($dbh, "user", $name);
     }
 
-    my $filters      = $args{filters} || {};
+    my $filters      = $opts{filters} || {};
     my $filtrate     = 0;
     my $f_filtermask = $filters->{filtermask};
 
@@ -1117,10 +1316,12 @@ sub _load_relation_destinations_r {
         $filtrate = 1, last if $f_filtermask;
     }
 
+    my $count = $#data;
+
     if ($filtrate) {
         $f_filtermask += 0;
 
-        for (my $i = 0; $i < $#data; $i += 2) {
+        for (my $i = 0; $i < $count; $i += 2) {
             next unless $f_filtermask & $data[$i+1];
 
             $res{$data[$i]} = {
@@ -1128,41 +1329,11 @@ sub _load_relation_destinations_r {
             };
         }
     } else {
-        for (my $i = 0; $i < $#data; $i += 2) {
+        for (my $i = 0; $i < $count; $i += 2) {
             $res{$data[$i]} = {
                 filtermask => $data[$i+1]
             };
         }
-    }
-
-    return \%res;
-}
-
-sub _get_friends_memc {
-    my $class  = shift;
-    my $uid    = shift;
-    my $mask   = shift;
-
-    return unless $uid;
-
-    my %res = ();
-    my $val = LJ::MemCache::get([$uid, "friends:$uid"]);
-
-    return undef unless $val;
-
-    $val =~ s/^\d//;
-
-    my @data = unpack '(NH6H6NC)*', $val;
-
-    for (my $i = 0; $i < $#data; $i += 5) {
-        next if $mask && ! ($data[$i+3]+0 & $mask+0);
-
-        $res{$data[$i]} = {
-            fgcolor       => '#' . $data[$i+1],
-            bgcolor       => '#' . $data[$i+2],
-            groupmask     => $data[$i+3],
-            showbydefault => $data[$i+4],
-        };
     }
 
     return \%res;
@@ -1175,8 +1346,8 @@ sub find_relation_attributes {
     my $type   = shift;
     my %opts   = @_;
 
-    return undef unless $u;
-    return undef unless $target;
+    return unless $u;
+    return unless $target;
 
     if ($type eq 'F') {
         return $class->_find_relation_attributes_f($u, $target, %opts);
@@ -1184,7 +1355,7 @@ sub find_relation_attributes {
         return $class->_find_relation_attributes_r($u, $target, %opts);
     }
 
-    return undef;
+    return;
 }
 
 sub _find_relation_attributes_r {
@@ -1253,8 +1424,8 @@ sub _find_relation_attributes_f {
     my $uid = LJ::want_userid($u);
     my $tid = LJ::want_userid($target);
 
-    return undef unless $uid;
-    return undef unless $tid;
+    return unless $uid;
+    return unless $tid;
 
     my $key = [$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"];
 
@@ -1263,15 +1434,15 @@ sub _find_relation_attributes_f {
         my @vals = unpack 'NNN', $val;
 
         return {
-            bgcolor   => $vals[1],
-            fgcolor   => $vals[2],
+            bgcolor   => $vals[2],
+            fgcolor   => $vals[1],
             groupmask => $vals[0]
         };
     }
 
     my $dbh = LJ::get_db_writer();
 
-    return undef unless $dbh;
+    return unless $dbh;
 
     my $row = $dbh->selectrow_hashref(qq[
             SELECT
@@ -1431,10 +1602,10 @@ sub _update_relation_attributes_r {
 
 sub delete_and_purge_completely {
     my $class = shift;
-    my $u = shift;
-    my %opts = @_;
+    my $u     = shift;
+    my %opts  = @_;
     
-    return unless $u;
+    return 0 unless $u;
     
     my $dbh = LJ::get_db_writer();
 
@@ -1452,17 +1623,17 @@ sub delete_and_purge_completely {
         $dbh->do("DELETE FROM subscribersleft WHERE subscriptionid = ?", undef, $u->id);
     }
 
-    foreach my $type (LJ::get_relation_types()) {
-        my $typeid = LJ::get_reluser_id($type) || 0;
-        my $eff_type = $typeid || $type;
-
-        my @rels = $class->_find_relation_sources_type_other($u, $type, dont_set_cache => 1);
+    foreach my $type (@RELATION_TYPES) {
+        my @rels = $class->_find_relation_sources(
+            $u, $type, dont_set_cache => 1
+        );
+    
         foreach my $uid (@rels) {
-            LJ::MemCacheProxy::delete("rlist:dst:$eff_type:$uid");
+            LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
         }
 
-        LJ::MemCacheProxy::delete("rlist:src:$eff_type:" . $u->id);
-        LJ::MemCacheProxy::delete("rlist:dst:$eff_type:" . $u->id);
+        LJ::MemCacheProxy::delete("rlist:src:$type:" . $u->id);
+        LJ::MemCacheProxy::delete("rlist:dst:$type:" . $u->id);
     }
 
     return 1;
@@ -1478,13 +1649,13 @@ sub update_relation_attribute_mask_for_all {
 
     my $uid = $u->id;
 
-    return unless $uid;
+    return 0 unless $uid;
 
     my $mask   = $opts{mask};
     my $action = $opts{action};
 
-    return unless $mask;
-    return unless $action;
+    return 0 unless $mask;
+    return 0 unless $action;
 
     if ($action eq 'add') {
         $action = '|'
@@ -1494,14 +1665,14 @@ sub update_relation_attribute_mask_for_all {
         $action = '&'
     }
 
-    return unless $action =~ /^(?:\&|\|)$/;
+    return 0 unless $action =~ /^(?:\&|\|)$/;
 
     $mask = int($mask);
 
     if ($type eq 'F') {
         my $dbh = LJ::get_db_writer();
 
-        return unless $dbh;
+        return 0 unless $dbh;
 
         my $cnt = $dbh->do(qq[
                 UPDATE
@@ -1517,11 +1688,11 @@ sub update_relation_attribute_mask_for_all {
         );
 
         if ($dbh->err) {
-            return;
+            return 0;
         }
 
         # Its a very bad. Need smart cache. See a top at this file
-        my @ids = $class->find_relation_destinations($u, 'F', %opts, nolimit => 1);
+        my @ids = $class->find_relation_destinations($u, 'F', %opts);
 
         foreach my $tid (@ids) {
             LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
@@ -1535,7 +1706,7 @@ sub update_relation_attribute_mask_for_all {
     if ($type eq 'R') {
         my $dbh = LJ::get_cluster_master($u);
 
-        return unless $dbh;
+        return 0 unless $dbh;
 
         my $cnt = $dbh->do(qq[
                 UPDATE
@@ -1551,7 +1722,7 @@ sub update_relation_attribute_mask_for_all {
         );
 
         if ($dbh->err) {
-            return;
+            return 0;
         }
 
         # Its a very bad. Need smart cache. See a top at this file
@@ -1565,6 +1736,37 @@ sub update_relation_attribute_mask_for_all {
     }
 
     return 1;
+}
+
+# Filters
+
+sub _filter {
+    my ($class, $u, $ids, $filters) = @_;
+
+    return unless $filters;
+
+    foreach my $filter (@$filters) {
+        my $type   = $filter->{type};
+        my $edge   = $filter->{edge};
+        my $edgeof = $filter->{edgeof};
+
+        next unless $type;
+        next unless $edge || $edgeof;
+
+        my $rels;
+
+        if ($edgeof) {
+            $rels = $class->_find_relation_sources($u, $edgeof);
+        } elsif ($edge) {
+            $rels = $class->_find_relation_destinations($u, $edge);
+        }
+
+        return unless $rels;
+
+        if ($type eq 'exclude') {
+            @$ids = LJ::Utils::List::exclude_sorted(undef, $ids, $rels);
+        }
+    }
 }
 
 1;

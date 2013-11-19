@@ -2061,14 +2061,14 @@ sub set_prop {
             # table and uses only one memcache key to cache that
 
             my $memkey = $handler->memcache_key($u);
-            LJ::MemCacheProxy::delete([ $u->userid, $memkey ]);
+            LJ::MemCache::delete([ $u->userid, $memkey ]);
         } elsif ( $memcache_policy eq 'blob' ) {
             # the handler uses one memcache key for each prop,
             # so let's delete them all
 
             foreach my $propname (@$propnames_handled) {
                 my $memkey = $handler->memcache_key( $u, $propname );
-                LJ::MemCacheProxy::delete([ $u->userid, $memkey ]);
+                LJ::MemCache::delete([ $u->userid, $memkey ]);
             }
         }
     }
@@ -2387,6 +2387,7 @@ sub emails_visible {
         $hide_contactinfo->();
 
     my @emails = ($u->email_raw);
+
     if ($u->{'opt_whatemailshow'} eq "L") {
         @emails = ();
     }
@@ -6065,9 +6066,9 @@ sub custom_usericon {
     if ($propval) {
         ## If it buyed we need to check exp date
         my $individual_uh_info = LJ::JSON->from_json ($propval);
+        my ($uh_id) = ($indiv_uh_id) = $individual_uh_info->{'uh_id'} =~ m#uh-(\d+)#;
+        my $uh = LJ::UserHead->get_userhead ($uh_id);
         if ($individual_uh_info->{'date_exp'} > time) {
-            my ($uh_id) = ($indiv_uh_id) = $individual_uh_info->{'uh_id'} =~ m#uh-(\d+)#;
-            my $uh = LJ::UserHead->get_userhead ($uh_id);
             if ($uh && $selected_uh_id == $indiv_uh_id) {
                 my $uh_fs = LJ::FileStore->get_path_info ( path => "/userhead/".$uh_id );
                 $url = $LJ::FILEPREFIX."/userhead/".$uh_id;
@@ -6076,7 +6077,8 @@ sub custom_usericon {
         } else {
             ## If indiv userhead was selected and date is expired, set userhead to default
             if ($selected_uh_id == $indiv_uh_id) {
-                $u->set_custom_usericon (undef);
+                $u->set_prop ('custom_usericon_individual', '');
+                $uh->set_individ_buyer ('');
             }
         }
     }
@@ -6662,7 +6664,7 @@ sub load_user_props_multi {
 
         if ( $memcache_policy eq 'lite' ) {
             my %memkeys;
-            my $propmaps = LJ::MemCacheProxy::get_multi(map {
+            my $propmaps = LJ::MemCache::get_multi(map {
                 [
                     ($_ => ($memkeys{$_} = $handler->memcache_key($users->{$_})))
                 ]
@@ -8966,13 +8968,11 @@ sub get_friends {
 
     my $u = LJ::load_userid($userid);
 
-    return LJ::RelationService->load_relation_destinations(
-            $u, 'F',
-                uuid          => $uuid,
-                mask          => $mask,
-                memcache_only => $memcache_only,
-                force_db      => $force,
-                );
+    return LJ::RelationService->load_relation_destinations($u, 'F',
+        mask          => $mask,
+        force         => $force,
+        memcache_only => $memcache_only,
+    );
 }
 
 # <LJFUNC>
@@ -8989,10 +8989,10 @@ sub get_friendofs {
     return undef unless $userid;
 
     my $u = LJ::load_userid($userid);
-    return LJ::RelationService->find_relation_sources($u, 'F', 
-            nolimit        => $opts->{force} || 0,
-            skip_memcached => $opts->{force},
-            );
+
+    return LJ::RelationService->find_relation_sources($u, 'F',
+        force => $opts->{force}
+    );
 }
 
 # <LJFUNC>

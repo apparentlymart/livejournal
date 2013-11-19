@@ -601,6 +601,11 @@ sub file_request
 
     my $reqsubject = LJ::trim($o->{'subject'});
     my $reqbody = LJ::trim($o->{'body'});
+    my $url =  LJ::trim($o->{'url'});
+
+    if ($url) {
+        $reqbody = "Url: $url\n" . $reqbody;
+    }
 
     # remove the auth portion of any see_request.bml links
     $reqbody =~ s/(see_request\.bml.+?)\&auth=\w+/$1/ig;

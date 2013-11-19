@@ -5,20 +5,21 @@ use strict;
 use Getopt::Long;
 
 # parse input options
-my ($list, $add, $modify, $banid, $status, $bandate, $banuntil, $banlength, $what, $value, $note, $format);
-exit 1 unless GetOptions('list' => \$list,
-                         'add' => \$add,
-                         'modify' => \$modify,
-                         'banid=s' => \$banid,
-                         'status=s' => \$status,
-                         'bandate=s' => \$bandate,
-                         'banuntil=s' => \$banuntil,
-                         'banlength=s' => \$banlength,
-                         'what=s' => \$what,
-                         'value=s' => \$value,
-                         'note=s' => \$note,
-                         'format=s' => \$format,
-                         );
+my ($list, $add, $post_report, $modify, $banid, $status, $bandate, $banuntil, $banlength, $what, $value, $note, $format);
+exit 1 unless GetOptions(
+    'list'        => \$list,
+    'add'         => \$add,
+    'modify'      => \$modify,
+    'banid=s'     => \$banid,
+    'status=s'    => \$status,
+    'bandate=s'   => \$bandate,
+    'banuntil=s'  => \$banuntil,
+    'banlength=s' => \$banlength,
+    'what=s'      => \$what,
+    'value=s'     => \$value,
+    'note=s'      => \$note,
+    'format=s'    => \$format,
+);
 
 # did they give valid input?
 my $an_opt = ($what || $value || $status || $bandate || $banuntil || $note);
@@ -121,13 +122,13 @@ if ($add) {
     ## on success LJ::sysban_create returns banid,
     ## or error message as string on error.
     my $res = LJ::sysban_create(
-        bandate  => defined $bandate  ? $bandate : undef,
-        banuntil => defined $banuntil ? $banuntil : undef,
-        status   => $status,
-        what     => $what,
-        value    => $value,
-        note     => $note,
-        );
+        bandate     => defined $bandate  ? $bandate : undef,
+        banuntil    => defined $banuntil ? $banuntil : undef,
+        status      => $status,
+        what        => $what,
+        value       => $value,
+        note        => $note,
+    );
     die $res unless $res eq int $res;
 
     my $banid = $res;

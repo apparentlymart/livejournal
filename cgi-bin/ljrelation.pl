@@ -23,21 +23,6 @@ use LJ::RelationService;
 # F - friend
 #########################
 
-sub get_relation_types {
-    return ('P', # - poster
-            'A', # - maintainer
-            'B', # - ban
-            'N', # - pre-approved
-            'M', # - moderator
-            'S', # - supermaintainer
-            'I', # - inviter
-            'D', # - spammer
-            'W', # - journal sweeper
-            'C', # - do not receive mass mailing from community
-            'J', # - ban in journalpromo
-            );
-}
-
 # <LJFUNC>
 # name: LJ::is_friend
 # des: Checks to see if a user is a friend of another user.
@@ -47,8 +32,6 @@ sub get_relation_types {
 # des-userb: Destination user hashref or userid. (can be undef)
 # </LJFUNC>
 sub is_friend {
-    &nodb;
-
     my ($ua, $ub) = @_[0, 1];
 
     $ua = LJ::want_userid($ua);
@@ -72,8 +55,6 @@ sub is_friend {
 # des-journal: Journal hashref or userid.
 # </LJFUNC>
 sub is_banned {
-    &nodb;
-
     # get user and journal ids
     my $uid = LJ::want_userid(shift);
     my $jid = LJ::want_userid(shift);
@@ -101,31 +82,6 @@ sub get_filtermask {
     return LJ::RelationService->get_filtermask($journal, $remote);
 }
 
-
-# <LJFUNC>
-# name: LJ::get_reluser_id
-# des: for [dbtable[reluser2]], numbers 1 - 31999 are reserved for
-#      livejournal stuff, whereas numbers 32000-65535 are used for local sites.
-# info: If you wish to add your own hooks to this, you should define a
-#       hook "get_reluser_id" in ljlib-local.pl. No reluser2 [special[reluserdefs]]
-#        types can be a single character, those are reserved for
-#        the [dbtable[reluser]] table, so we don't have namespace problems.
-# args: type
-# des-type: the name of the type you're trying to access, e.g. "hide_comm_assoc"
-# returns: id of type, 0 means it's not a reluser2 type
-# </LJFUNC>
-sub get_reluser_id {
-    my $type = shift;
-    return 0 if length $type == 1; # must be more than a single character
-    my $val =
-        {
-            'hide_comm_assoc' => 1,
-        }->{$type}+0;
-    return $val if $val;
-    return 0 unless $type =~ /^local-/;
-    return LJ::run_hook('get_reluser_id', $type)+0;
-}
-
 # <LJFUNC>
 # name: LJ::load_rel_user
 # des: Load user relationship information. Loads all relationships of type 'type' in
@@ -136,8 +92,7 @@ sub get_reluser_id {
 # des-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
-sub load_rel_user
-{
+sub load_rel_user {
     my $db = isdb($_[0]) ? shift : undef;
     my ($u, $type, %args) = @_;
 
@@ -160,8 +115,7 @@ sub load_rel_user
 # des-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
-sub load_rel_user_cache
-{
+sub load_rel_user_cache {
     my ($userid, $type) = @_;
     return undef unless $type && $userid;
 
@@ -192,8 +146,7 @@ sub load_rel_user_cache
 # des-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
-sub load_rel_target
-{
+sub load_rel_target {
     my $db = isdb($_[0]) ? shift : undef;
     my ($u, $type, %args) = @_;
 
@@ -288,8 +241,7 @@ sub _set_rel_memcache {
 # des-type: type of the relationship
 # returns: 1 if the relationship exists, 0 otherwise
 # </LJFUNC>
-sub check_rel
-{
+sub check_rel {
     my ($userid, $targetid, $type) = @_;
     return undef unless $type && $userid && $targetid;
 
@@ -312,8 +264,7 @@ sub check_rel
 # des-type: type of the relationship
 # returns: 1 if set succeeded, otherwise undef
 # </LJFUNC>
-sub set_rel
-{
+sub set_rel {
     my ($userid, $targetid, $type) = @_;
 
     return LJ::RelationService->create_relation_to($userid, $targetid, $type);
@@ -364,9 +315,7 @@ sub clear_rel_multi {
 # des-type: type of the relationship
 # returns: 1 if clear succeeded, otherwise undef
 # </LJFUNC>
-sub clear_rel
-{
-    &nodb;
+sub clear_rel {
     my ($userid, $targetid, $type) = @_;
     return undef if $userid eq '*' and $targetid eq '*';
 

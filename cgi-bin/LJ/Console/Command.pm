@@ -151,7 +151,9 @@ sub print {
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'success', text => $text );
 
-    return 1;
+    return wantarray
+        ? ( 1, 1 )
+        : 1;
 }
 
 sub error {
@@ -160,7 +162,9 @@ sub error {
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'error', text => $text );
 
-    return 1;
+    return wantarray
+        ? ( 1, 0 )
+        : 1;
 }
 
 sub info {
@@ -169,7 +173,9 @@ sub info {
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'info', text => $text );
 
-    return 1;
+    return wantarray
+        ? ( 1, 1 )
+        : 1;
 }
 
 1;

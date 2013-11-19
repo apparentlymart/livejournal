@@ -503,6 +503,22 @@ sub add_bookmark {
     die $user->errstr
         if $user->err;
 
+    # try to load message by qid
+    $rmessage_typeid ||= LJ::Event::UserMessageRecvd->etypeid;
+    $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
+
+    if (my ($msgid) = $user->selectrow_array("
+        SELECT arg1 
+        FROM notifyqueue 
+        WHERE userid=? AND qid=? AND etypeid IN (?, ?)", 
+        undef, $self->{'userid'}, $qid, $rmessage_typeid, $smessage_typeid)) {
+
+        $user->do('INSERT IGNORE INTO usermsgbookmarks (journalid, msgid) VALUES (?, ?)', undef, $self->{'userid'}, $msgid);
+
+        die $user->errstr
+           if $user->err;
+    }
+
     # Make sure notice is in inbox
     $self->ensure_queued($qid);
 
@@ -526,6 +542,22 @@ sub remove_bookmark {
 
     die $user->errstr
         if $user->err;
+
+    # try to load message by qid
+    $rmessage_typeid ||= LJ::Event::UserMessageRecvd->etypeid;
+    $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
+
+    if (my ($msgid) = $user->selectrow_array("
+        SELECT arg1 
+        FROM notifyqueue 
+        WHERE userid=? AND qid=? AND etypeid IN (?, ?)", 
+        undef, $self->{'userid'}, $qid, $rmessage_typeid, $smessage_typeid)) {
+
+        $user->do('DELETE FROM usermsgbookmarks WHERE journalid=? AND msgid=?', undef, $self->{'userid'}, $msgid);
+
+        die $user->errstr
+           if $user->err;
+    }
 
     delete $self->{'bookmarks'}{$qid};
 

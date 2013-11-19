@@ -79,7 +79,14 @@
      my ($remote, $priv, $arg) = @_;
      return 0 unless defined $priv;
      return 1 if $LJ::DEBUG{"unrestricted_priv_grant"};
-     return LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
+     return 1 if LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
+     if (LJ::check_priv($remote, 'admin', '#')) {
+        return 0 if $LJ::SENSITIVE_PRIVILEGES{$priv} || $LJ::SENSITIVE_PRIVILEGES{"$priv:$arg"};
+        $arg =~ s/^admin\///;
+        return 0 if $priv eq 'admin' && $LJ::SENSITIVE_PRIVILEGES{$arg};
+        return 1;
+     }
+     return 0;
  }
 
  if ($mode eq "userchange" || $mode eq "privchange")

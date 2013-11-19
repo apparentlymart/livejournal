@@ -1233,6 +1233,16 @@ sub clean {
                 if ( $tag eq 'iframe' and $hash->{'src'} ) {
                     foreach my $host (keys %LJ::WHITELIST_VIDEO_HOSTS) {
                         if ( index $host, $hash->{'src'} ) {
+
+                            # Youtube accepts escaped parameters in form "%61utoplay=1"
+                            $hash->{'src'} = LJ::durl($hash->{'src'});
+    
+                            # LJSUP-17010: For all links with media parameter "autoplay" must be deleted or = 0
+                            $hash->{'src'} =~ s/autoplay=1/autoplay=0/gi;
+
+                            # LJSUP-17018: Replacement autoplay = true on autoplay = false
+                            $hash->{'src'} =~ s/autoplay=true/autoplay=false/gi;
+
                             if ( $hash->{'src'} !~ m!player\.seemedia\.pro! && $hash->{'src'} !~ m!wmode=opaque!i ) {
                                 if ( $hash->{'src'} =~ m!\?! ) {
                                     $hash->{'src'} .= '&wmode=opaque';

@@ -48,7 +48,7 @@ sub render {
 
     $data_journal->{'is_' . $data_journal->{type}} = 1;
 
-    $data_journal->{view} = LJ::Request->notes('view');
+    $data_journal->{view} = LJ::Request->notes('view') || '';
     $data_journal->{display} = LJ::ljuser($journal);
     $data_journal->{view_tag} = $data_journal->{view} eq 'tag';
     $data_journal->{view_entry} = $data_journal->{view} eq 'entry';
@@ -594,7 +594,7 @@ sub get_feed_filters_old {
 
     my $selected_group = undef;
 
-    if (LJ::Request->uri eq "/friends" && LJ::Request->args ne "") {
+    if (LJ::Request->uri eq "/friends" && LJ::Request->args && LJ::Request->args ne "") {
         my %GET = LJ::Request->args;
 
         if ($GET{show}) {

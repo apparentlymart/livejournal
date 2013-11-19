@@ -11,6 +11,10 @@
 ;(function ($) {
   'use strict';
 
+  // currently in IE8 when documentMode IE7 Standards is ON, some stuff is not working properly (e.g. ng-class)
+  // Use fallback for that browser. Angular functionality should be turned off
+  var IE7mode = Boolean(typeof document.documentMode !== 'undefined' && document.documentMode < 8);
+
   /**
    * Add community filter functionality for control strip
    */
@@ -73,7 +77,7 @@
     initFilter();
     addLabledPlaceholders();
 
-    if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+    if ( LJ.Flags.isEnabled('friendsAndSubscriptions') && !IE7mode ) {
       // init angular
       angular.bootstrap( $('[data-controlstrip]'), ['Relations.Menu']);
     }
@@ -128,6 +132,14 @@
         return new Date(date[0], date[1], date[2]);
       }
     }());
+
+    $('.b-loginpopup').bubble({
+      target: '.i-auth-control',
+      closeControl: false,
+      showOn: 'click'
+    });
+
+    $('input.text').labeledPlaceholder();
   }
 
   $(function () {

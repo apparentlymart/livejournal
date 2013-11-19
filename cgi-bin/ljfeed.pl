@@ -85,6 +85,8 @@ sub make_feed {
     # if we do not want items for this view, just call out
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
 
+    LJ::run_hooks('make_feed', $feedtype, $u, { remote => $remote });
+
     return $viewfunc->{handler}->($journalinfo, $u, $opts)
         unless $viewfunc->{need_items};
 

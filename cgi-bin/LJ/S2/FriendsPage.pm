@@ -189,8 +189,21 @@ sub FriendsPage
 
     while ($_ = each %friends) {
         # we expect fgcolor/bgcolor to be in here later
-        $friends{$_}->{'fgcolor'} = $friends_row{$_}->{'fgcolor'} || '#ffffff';
-        $friends{$_}->{'bgcolor'} = $friends_row{$_}->{'bgcolor'} || '#000000';
+        unless (defined $friends_row{$_}->{'fgcolor'}) {
+            $friends{$_}->{'fgcolor'} = '#000000';
+        } else {
+            $friends{$_}->{'fgcolor'} = LJ::color_fromdb(
+                $friends_row{$_}->{'fgcolor'}
+            );
+        }
+
+        unless (defined $friends_row{$_}->{'bgcolor'}) {
+            $friends{$_}->{'bgcolor'} = '#ffffff';
+        } else {
+            $friends{$_}->{'bgcolor'} = LJ::color_fromdb(
+                $friends_row{$_}->{'bgcolor'}
+            );
+        }
     }
 
     return $p unless %friends;

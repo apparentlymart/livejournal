@@ -436,10 +436,12 @@ sub homepage_flags {
 sub user_params {
     my ($self, $u) = @_;
 
-    my $host = LJ::Request->header_in("Host");
-    my $uri  = LJ::Request->uri();
-    my $args = LJ::Request->args();
-
+    my $req = !LJ::Request->is_initial_req && LJ::Request->prev || LJ::Request->request; 
+   
+    my $host = $req->header_in('Host');
+    my $uri  = $req->uri;
+    my $args = $req->args;
+    
     $args = "?$args" if $args;
  
     # Special requirement from ATI:
@@ -492,7 +494,6 @@ sub user_params {
         }
 
     } 
-
 }
 
 1;

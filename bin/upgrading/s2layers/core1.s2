@@ -2715,7 +2715,10 @@ function Page::print_pagewide_slot() {
     }
     if (viewer_sees_ad_box("s2.personal.top.test.c")) {
       $this->print_ad_box("s2.personal.top.test.c");
-    }    
+    }
+    if (viewer_sees_ad_box("s2.personal.top.test.d")) {
+      $this->print_ad_box("s2.personal.top.test.d");
+    }
 }
 
 function Page::print_linklist() {

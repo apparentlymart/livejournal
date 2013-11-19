@@ -6,12 +6,8 @@ package LJ::RelationService;
 #
 #############################################
 
-
 use strict;
 use warnings;
-
-# External modules
-use Data::Dumper;
 
 # Internal modules
 use LJ::JSON;
@@ -60,17 +56,129 @@ sub _load_rs_api {
 
 sub rs_api {
     my $class = shift;
-    my $u     = shift;
     return "LJ::RelationService::RSAPI";
 }
 
 sub mysql_api {
     my $class = shift;
-    my $u     = shift;
     return "LJ::RelationService::MysqlAPI";
 }
 
-## findRelationDestinations
+sub create_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+    my %opts   = @_;
+    
+    $u      = LJ::want_user($u);
+    $target = LJ::want_user($target);
+    
+    return undef unless $u;
+    return undef unless $type;
+    return undef unless $target;
+
+    if ($class->_load_rs_api('update')) {
+        if (my $alt = $class->rs_api) {
+            $alt->create_relation_to($u, $target, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->create_relation_to($u, $target, $type, %opts);
+
+    return $result;
+}
+
+
+sub remove_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+
+    $u      = LJ::want_user($u) unless $u eq '*';
+    $target = LJ::want_user($target) unless $target eq '*';
+    
+    return undef unless $u;
+    return undef unless $type;
+    return undef unless $target;
+    return undef if $u eq '*' and $target eq '*';
+
+    if ($class->_load_rs_api('update')) {
+        if (my $alt = $class->rs_api) {
+            $alt->remove_relation_to($u, $target, $type);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->remove_relation_to($u, $target, $type);
+
+    return $result;
+}
+
+sub is_relation_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $type   = shift;
+    my %opts   = @_;
+
+    return undef unless $u;
+    return undef unless $type;
+    return undef unless $target;
+
+    unless (UNIVERSAL::isa($u, 'LJ::User') && UNIVERSAL::isa($target, 'LJ::User')) {
+        $u      = LJ::want_user($u);
+        $target = LJ::want_user($target);
+
+        return undef unless $u;
+        return undef unless $type;
+        return undef unless $target;
+    }
+
+    if ($class->_load_rs_api('read', $type)) {
+        if (my $alt = $class->rs_api) {
+            $alt->is_relation_to($u, $target, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->is_relation_to($u, $target, $type, %opts);   
+
+    return $result;
+}
+
+sub is_relation_type_to {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my $types  = shift;
+    my %opts   = @_;
+    
+    $u      = LJ::want_user($u);
+    $target = LJ::want_user($target);
+    
+    return undef unless $u;
+    return undef unless $types;
+    return undef unless $target;
+
+    unless (ref $types eq 'ARRAY') {
+        $types = [$types];
+    }
+
+    if ($class->_load_rs_api('read', $types)) {
+        if (my $alt = $class->rs_api) {
+            $alt->is_relation_type_to($u, $target, $types, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->is_relation_type_to($u, $target, $types, %opts);
+
+    return $result;
+}
+
 sub find_relation_destinations {
     my $class = shift;
     my $u     = shift;
@@ -90,13 +198,12 @@ sub find_relation_destinations {
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my @result    = $interface->find_relation_destinations($u, $type, %opts);
 
     return @result;
 }
 
-## findRelationSources
 sub find_relation_sources {
     my $class = shift;
     my $u     = shift;
@@ -116,7 +223,7 @@ sub find_relation_sources {
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my @result    = $interface->find_relation_sources($u, $type, %opts);
 
     return @result;
@@ -136,127 +243,15 @@ sub load_relation_destinations {
     $opts{limit}  ||= 50000;
 
     if ($class->_load_rs_api('read', $type)) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->load_relation_destinations($u, $type, %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my $result    = $interface->load_relation_destinations($u, $type, %opts);
 
-    delete $singletons{$u->userid};
-
     return $result;
-}
-
-sub create_relation_to {
-    my $class  = shift;
-    my $u      = shift;
-    my $friend = shift;
-    my $type   = shift;
-    my %opts   = @_;
-    
-    $u = LJ::want_user($u);
-    $friend = LJ::want_user($friend);
-    
-    return undef unless $type and $u and $friend;
-
-    if ($class->_load_rs_api('update')) {
-        my $alt = $class->rs_api($u);
-        if ($alt){
-            $alt->create_relation_to($u, $friend, $type, %opts);
-        }
-    }
-
-    my $interface = $class->mysql_api($u);
-    my $result    = $interface->create_relation_to($u, $friend, $type, %opts);
-
-    delete $singletons{$u->userid}->{$friend->userid};
-
-    return $result;
-}
-
-
-sub remove_relation_to {
-    my $class  = shift;
-    my $u      = shift;
-    my $friend = shift;
-    my $type   = shift;
-
-    $u = LJ::want_user($u) unless $u eq '*';
-    $friend = LJ::want_user($friend) unless $friend eq '*';
-    
-    return undef unless $type and $u and $friend;
-    return undef if $u eq '*' and $friend eq '*';
-
-    if ($class->_load_rs_api('update')) {
-        my $alt = $class->rs_api($u, $friend, $type);
-        if ($alt){
-            $alt->remove_relation_to($u, $friend, $type);
-        }
-    }
-    my $interface = $class->mysql_api($u);
-    if ($u ne '*' && UNIVERSAL::isa($u, 'LJ::User')) {
-        if  ($friend ne '*' && UNIVERSAL::isa($friend, 'LJ::User')) {
-            delete $singletons{$u->userid}->{$friend->userid};
-        } else {
-            delete $singletons{$u->userid};
-        }
-    }
-    return $interface->remove_relation_to($u, $friend, $type);
-}
-
-sub is_relation_to {
-    my $class  = shift;
-    my $u      = shift;
-    my $friend = shift;
-    my $type   = shift;
-    my %opts   = @_;
-
-    return undef unless $u && $friend && $type;
-
-    unless (UNIVERSAL::isa($u, 'LJ::User') && UNIVERSAL::isa($friend, 'LJ::User')) {
-        $u = LJ::want_user($u);
-        $friend = LJ::want_user($friend);
-
-        return undef unless $u && $friend && $type;
-    }
-
-    if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
-            $alt->is_relation_to($u, $friend, $type, %opts);
-        }
-    }
-
-    my $interface = $class->mysql_api($u);
-    my $result    = $interface->is_relation_to($u, $friend, $type, %opts);   
-
-    return $result;
-}
-
-sub is_relation_type_to {
-    my $class  = shift;
-    my $u      = shift;
-    my $friend = shift;
-    my $types  = shift;
-    my %opts   = @_;
-    
-    $u = LJ::want_user($u);
-    $friend = LJ::want_user($friend);
-    
-    return undef unless $u && $friend && $types;
-    $types = [ $types ] unless ref $types eq 'ARRAY';
-
-    if ($class->_load_rs_api('read', $types)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
-            $alt->is_relation_type_to($u, $friend, $types, %opts);
-        }
-    }
-
-    my $interface = $class->mysql_api($u);
-    return $interface->is_relation_type_to($u, $friend, $types, %opts);    
 }
 
 sub get_groupmask {
@@ -271,23 +266,13 @@ sub get_groupmask {
     return 0 unless $u;
     return 0 unless $target;
 
-    my $uid = $u->id;
-    my $tid = $target->id;
-
-    return 0 unless $uid;
-    return 0 unless $tid;
-
-    return $singletons{$uid}->{$tid}->{F}->{groupmask}
-        if exists $singletons{$uid}->{$tid}->{F}->{groupmask} && 
-                    !%opts && LJ::Request->is_inited;
-
     if ($class->_load_rs_api('read', 'F')) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->find_relation_attributes($u, $target, 'F', %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my $result    = $interface->find_relation_attributes($u, $target, 'F', %opts);
 
     unless ($result) {
@@ -295,8 +280,6 @@ sub get_groupmask {
     }
 
     $result->{groupmask} ||= 1;
-
-    $singletons{$uid}->{$tid}->{F} = $result;
 
     return $result->{groupmask};
 }
@@ -307,23 +290,16 @@ sub get_filtermask {
     my $target = shift;
     my %opts   = @_;
 
-    my $uid = $u->id;
-    my $tid = $target->id;
-
-    return 0 unless $uid;
-    return 0 unless $tid;
-
-    return $singletons{$uid}->{$tid}->{R}->{filtermask}
-        if exists $singletons{$uid}->{$tid}->{R}->{filtermask} && 
-                    !%opts && LJ::Request->is_inited;
+    return 0 unless $u;
+    return 0 unless $target;
 
     if ($class->_load_rs_api('read', 'R')) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->find_relation_attributes($u, $target, 'R', %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my $result    = $interface->find_relation_attributes($u, $target, 'R', %opts);
 
     unless ($result) {
@@ -331,8 +307,6 @@ sub get_filtermask {
     }
 
     $result->{filtermask} ||= 1;
-
-    $singletons{$uid}->{$tid}->{R} = $result;
 
     return $result->{filtermask};
 }
@@ -347,15 +321,15 @@ sub delete_and_purge_completely {
     return unless $u;
 
     if ($class->_load_rs_api('update', 'F')) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
+        if (my $alt = $class->rs_api) {
             $alt->delete_and_purge_completely($u, %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
-    delete $singletons{$u->userid};
-    return $interface->delete_and_purge_completely($u, %opts);    
+    my $interface = $class->mysql_api;
+    my $result    = $interface->delete_and_purge_completely($u, %opts);
+
+    return $result;
 }
 
 sub clear_rel_multi {
@@ -365,14 +339,15 @@ sub clear_rel_multi {
     return undef unless ref $edges eq 'ARRAY';
 
     if ($class->_load_rs_api('update', 'B')) {
-        my $alt = $class->rs_api();
-        if ($alt) {
+        if (my $alt = $class->rs_api) {
             $alt->clear_rel_multi($edges);
         }
     }
 
     my $interface = $class->mysql_api();
-    return $interface->clear_rel_multi($edges);
+    my $result    = $interface->clear_rel_multi($edges);
+
+    return $result;
 }
 
 sub set_rel_multi {
@@ -382,37 +357,41 @@ sub set_rel_multi {
     return undef unless ref $edges eq 'ARRAY';
 
     if ($class->_load_rs_api('update', 'B')) {
-        my $alt = $class->rs_api();
-        if ($alt) {
+        if (my $alt = $class->rs_api) {
             $alt->set_rel_multi($edges);
         }
     }
 
-    my $interface = $class->mysql_api();
-    return $interface->set_rel_multi($edges);
+    my $interface = $class->mysql_api;
+    my $result    = $interface->set_rel_multi($edges);
+
+    return $result;
 }
 
 sub find_relation_attributes {
     my $class  = shift;
     my $u      = shift;
-    my $friend = shift;
+    my $target = shift;
     my $type   = shift;
     my %opts   = @_;
     
-    $u = LJ::want_user($u);
-    $friend = LJ::want_user($friend);
-    
-    return undef unless $u && $friend && $type;
+    $u      = LJ::want_user($u);
+    $target = LJ::want_user($target);
+
+    return undef unless $u;
+    return undef unless $type;
+    return undef unless $target;
 
     if ($class->_load_rs_api('read', $type)) {
-        my $alt = $class->rs_api($u);
-        if ($alt) {
-            $alt->find_relation_attributes($u, $friend, $type, %opts);
+        if (my $alt = $class->rs_api) {
+            $alt->find_relation_attributes($u, $target, $type, %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
-    return $interface->find_relation_attributes($u, $friend, $type, %opts);    
+    my $interface = $class->mysql_api;
+    my $result    = $interface->find_relation_attributes($u, $target, $type, %opts);
+
+    return $result;
 }
 
 sub update_relation_attributes {
@@ -427,12 +406,12 @@ sub update_relation_attributes {
     return 0 unless $target;
 
     if ($class->_load_rs_api('update', $type)) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->update_relation_attributes($u, $target, $type, %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my $result    = $interface->update_relation_attributes($u, $target, $type, %opts);
 
     return $result;
@@ -450,12 +429,12 @@ sub update_relation_attribute_mask_for_all {
     return 0 unless $type;
 
     if ($class->_load_rs_api('update', $type)) {
-        if (my $alt = $class->rs_api($u)) {
+        if (my $alt = $class->rs_api) {
             $alt->update_relation_attribute_mask_for_all($u, $type, %opts);
         }
     }
 
-    my $interface = $class->mysql_api($u);
+    my $interface = $class->mysql_api;
     my $result    = $interface->update_relation_attribute_mask_for_all($u, $type, %opts);
 
     return $result;

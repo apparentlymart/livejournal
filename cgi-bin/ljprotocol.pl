@@ -28,6 +28,7 @@ use Class::Autouse qw(
                       LJ::Entry::Repost
                       LJ::Tags
                       LJ::User::FriendGroups
+                      LJ::RelationService
                       );
 
 use LJ::TimeUtil;
@@ -4890,9 +4891,6 @@ sub editfriends {
             return $fail->(203, 'xmlrpc.des.bad_value', {'param'=>'color'});
         }
 
-        # force bit 0 on.
-        $gmask |= 1;
-
         my $row = LJ::load_user(
             $fa->{username}
         );
@@ -4907,7 +4905,7 @@ sub editfriends {
                 $row,
                 fgcolor   => LJ::color_todb($fg),
                 bgcolor   => LJ::color_todb($bg),
-                groupmask => $gmask
+                ($gmask ? (groupmask => $gmask) : ())
             );
             next ADDFRIEND;
         }
@@ -4926,10 +4924,16 @@ sub editfriends {
         return $fail->(104, "$err")
             unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count, friend => $fa });
 
+        # force bit 0 on.
+        if ($gmask) {
+            $gmask |= 1;
+        }
+
         my $opts = {
             fgcolor   => $fg,
             bgcolor   => $bg,
-            groupmask => $gmask
+            groupmask => $gmask,
+            defaultview => 1
         };
 
         unless ($u->add_friend($row, $opts)) {
@@ -5171,44 +5175,26 @@ sub sessiongenerate {
 
 sub list_friends {
     my ($u, $opts) = @_;
-
-    # do not show people in here
-    my %hide;  # userid -> 1
-
-    # TAG:FR:protocol:list_friends
-    my $sql;
+    my $us;
+    my $rels;
 
     unless ($opts->{'friendof'}) {
-        $sql = "SELECT friendid, fgcolor, bgcolor, groupmask FROM friends WHERE userid=?";
-    }
-    else {
-        $sql = "SELECT userid FROM friends WHERE friendid=?";
+        $rels = LJ::RelationService->load_relation_destinations($u, 'F');
 
-        if (my $list = LJ::load_rel_user($u, 'B')) {
-            $hide{$_} = 1 foreach @$list;
-        }
-    }
-
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare($sql);
-    $sth->execute($u->{'userid'});
-
-    my @frow;
-
-    while (my @row = $sth->fetchrow_array) {
-        next if $hide{$row[0]};
-        push @frow, [ @row ];
+        $us = LJ::load_userids(keys %$rels);
+    } else {
+        $us = $u->friendsof(
+            filters => [{
+                type => 'exclude',
+                edge => 'B'
+            }]
+        );
     }
 
-    my $us = LJ::load_userids(map { $_->[0] } @frow);
-    my $limitnum = $opts->{'limit'}+0;
+    my $res      = [];
+    my $limitnum = $opts->{'limit'} + 0;
 
-    my $res = [];
-
-    foreach my $f (sort { $us->{$a->[0]}{'user'} cmp $us->{$b->[0]}{'user'} }
-                   grep { $us->{$_->[0]} } @frow)
-    {
-        my $u = $us->{$f->[0]};
+    foreach my $u (values %$us) {
         next if $opts->{'friendof'} && $u->{'statusvis'} ne 'V';
 
         my $r = {
@@ -5216,12 +5202,10 @@ sub list_friends {
             'fullname' => $u->{'name'},
         };
 
-
-        if ($u->identity) {
-            my $i = $u->identity;
+        if (my $i = $u->identity) {
+            $r->{'identity_url'}     = $i->url($u);
             $r->{'identity_type'}    = $i->pretty_type;
             $r->{'identity_value'}   = $i->value;
-            $r->{'identity_url'} = $i->url($u);
             $r->{'identity_display'} = $u->display_name;
         }
 
@@ -5233,31 +5217,46 @@ sub list_friends {
             $r->{'birthday'} = $u->{'bdate'};
         }
 
-        unless ($opts->{'friendof'}) {
-            $r->{'fgcolor'}   = LJ::color_fromdb($f->[1]);
-            $r->{'bgcolor'}   = LJ::color_fromdb($f->[2]);
-            $r->{'groupmask'} = $f->[3] if $f->[3] != 1;
+        if ($u->{'statusvis'} ne 'V') {
+            $r->{"status"} = {
+                'D' => "deleted",
+                'S' => "suspended",
+                'X' => "purged",
+            }->{$u->{'statusvis'}};
         }
-        else {
+
+        if ($u->{'journaltype'} ne 'P') {
+            $r->{"type"} = {
+                'C' => 'community',
+                'Y' => 'syndicated',
+                'N' => 'news',
+                'S' => 'shared',
+                'I' => 'identity',
+            }->{$u->{'journaltype'}};
+        }
+
+        if ($opts->{'friendof'}) {
             $r->{'fgcolor'} = "#000000";
             $r->{'bgcolor'} = "#ffffff";
+        } elsif ($rels) {
+            my $uid = $u->id;
+
+            if ($rels->{$uid}->{fgcolor}) {
+                $r->{'fgcolor'} = $rels->{$uid}->{fgcolor};
+            }
+
+            if ($rels->{$uid}->{bgcolor}) {
+                $r->{'bgcolor'} = $rels->{$uid}->{bgcolor};
+            }
+
+            if ($rels->{$uid}->{groupmask} != 1) {
+                $r->{'groupmask'} = $rels->{$uid}->{groupmask};
+            }
         }
 
-        $r->{"type"} = {
-            'C' => 'community',
-            'Y' => 'syndicated',
-            'N' => 'news',
-            'S' => 'shared',
-            'I' => 'identity',
-        }->{$u->{'journaltype'}} if $u->{'journaltype'} ne 'P';
-
-        $r->{"status"} = {
-            'D' => "deleted",
-            'S' => "suspended",
-            'X' => "purged",
-        }->{$u->{'statusvis'}} if $u->{'statusvis'} ne 'V';
-
-        $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}" if $u->{'defaultpicid'};
+        if ($u->{'defaultpicid'}) {
+            $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}";
+        }
 
         push @$res, $r;
 

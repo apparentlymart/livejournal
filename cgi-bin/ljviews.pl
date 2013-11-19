@@ -1824,8 +1824,21 @@ sub create_view_friends {
     for ( keys %friends ) {
 #    while ($_ = each %friends) {
         # we expect fgcolor/bgcolor to be in here later
-        $friends{$_}->{'fgcolor'} = $friends_row{$_}->{'fgcolor'} || '#000000';
-        $friends{$_}->{'bgcolor'} = $friends_row{$_}->{'bgcolor'} || '#ffffff';
+        unless (defined $friends_row{$_}->{'fgcolor'}) {
+            $friends{$_}->{'fgcolor'} = '#000000';
+        } else {
+            $friends{$_}->{'fgcolor'} = LJ::color_fromdb(
+                $friends_row{$_}->{'fgcolor'}
+            );
+        }
+
+        unless (defined $friends_row{$_}->{'bgcolor'}) {
+            $friends{$_}->{'bgcolor'} = '#ffffff';
+        } else {
+            $friends{$_}->{'bgcolor'} = LJ::color_fromdb(
+                $friends_row{$_}->{'bgcolor'}
+            );
+        }
     }
 
     unless ( %friends ) {

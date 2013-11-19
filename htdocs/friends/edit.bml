@@ -300,7 +300,7 @@ body<=
 
             $ret .= "<td rowspan='11' valign='middle'>";
 
-            ### color swatch
+            ## color swatch
             $ret .= "<table border='0' cellspacing='0' cellpadding='0' align='center' width='100'>\n";
             $ret .= "<tr><td colspan='5'><p align='center'><small>$ML{'.hover'}</small></p></td></tr>\n";
             my $col = 0;

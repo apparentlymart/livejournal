@@ -11,10 +11,13 @@ __PACKAGE__->mk_accessors( qw(
 my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     AccountCreate
     AccountStatus
+    AddRemoveFriend
     BanSet
     BanUnset
+    CommentDelete
     CustomRatingsScreen
     CustomRatingsUnscreen
+    ChangeSetting
     DeleteDelayedEntry
     DeleteEntry
     DeleteRepost
@@ -44,6 +47,8 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     SetOwner
     SpamSet
     SpamUnset
+    SuspiciousLoginBlock
+    SuspiciousLoginUnblock
     TagsManage
     TryNBuyUpgrade
     TwitterFailed

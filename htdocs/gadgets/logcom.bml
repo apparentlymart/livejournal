@@ -5,6 +5,8 @@
     use LJ::Widget::LoginMulti;
     use LJ::ExternalComments;
 
+    LJ::Request->header_out("X-XSS-Protection" => 0);
+
     return 'This feature is disabled'
         unless LJ::is_enabled('external_comments');
 
@@ -89,8 +91,7 @@
         LJ::Session->allow_login_from_iframe;
 
         my $w = LJ::Widget::LoginMulti->new;
-        $w->{'no_container_div'} = 1;
-
+        
         return $w->render(
             'embedded'           => 1,
             'partner'            => $partner,
@@ -100,6 +101,7 @@
             'thispage'           => $thispage,
             'lj_auth'            => 1,
             'external_resources' => $html,
+            'no_container_div'   => 1
         );
     }
 

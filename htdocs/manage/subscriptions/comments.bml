@@ -94,7 +94,6 @@ body<=
 
     my $widget = LJ::Widget::SubscribeInterface->new;
 
-    $widget->{'no_container_div'} = 1;
     $widget->{'page'} = '/manage/subscriptions/comments.bml';
 
     $ret .= '<form method="post" action="">';
@@ -109,6 +108,7 @@ body<=
         'groups' => $set->extract_groups($groups),
         'u' => $u,
         'css_class' => 'subscriptions_user',
+        'no_container_div' => 1
     });
 
     $ret .= LJ::html_submit('value' => $ML{'subscribe_interface.save'});

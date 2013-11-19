@@ -122,6 +122,8 @@ sub __create_repost_record {
             $blid,
             $time );
 
+    die $journalu->errstr if $journalu->err;
+
     #
     # remove last users list block from cache
     #

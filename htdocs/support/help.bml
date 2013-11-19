@@ -92,7 +92,7 @@ body<=
      $can_close = 1 if $fcat->{public_read} && LJ::check_priv($remote, 'supportclose', ''); # public cats
  }
 
- my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp", '*') ? 1 : 0;
+ my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp", '*') && $fcat ? 1 : 0;
 
  my $append;
 
@@ -478,7 +478,7 @@ body<=
             'id'    => 'mass_reply_text',
             'cols'  => 100,
             'rows'  => 8,
-            'wrap'  => 'on',
+            'wrap'  => 'soft',
             'value' => '',
         }) . '<br />';
 

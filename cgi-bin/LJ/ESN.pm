@@ -622,7 +622,7 @@ sub work {
     }
 
     # process usercluster readonly state for Inbox
-    return $job->postpone if $u->is_readonly && ref($subsc->notification) eq 'LJ::NotificationMethod::Inbox';
+    return $job->postpone if $u && $u->is_readonly && ref($subsc->notification) eq 'LJ::NotificationMethod::Inbox';
 
     $subsc->process(\%opts, $evt)
         or die "Failed to process notification method for userid=$userid/subid=$subdump, evt=[@$eparams]\n";
