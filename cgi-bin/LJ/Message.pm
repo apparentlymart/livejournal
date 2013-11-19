@@ -1038,6 +1038,8 @@ sub mark_as_spam {
         'spammerid' => $self->otherid );
 
     $self->_orig_u->ban_user($self->other_u);    
+
+    LJ::run_hook('auto_suspender_for_spam', $posterid);
             
     return 1;
 
