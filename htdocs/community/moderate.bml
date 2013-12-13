@@ -103,7 +103,7 @@ body<=
                 my $approved_entry = LJ::Entry->new($c, jitemid => $res->{itemid});
                 $approved_entry->set_prop( moderator_id => $remote->userid );
 
-                LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+                LJ::User::UserlogRecord::ModerateEntry->create( $c,
                     action => 'approve',
                     id => $approved_entry->jitemid(),
                     posterid => $approved_entry->posterid(),
@@ -154,7 +154,7 @@ body<=
             ($do_mail, $why_mail) = (1, 'reject')
                 if $poster->{'status'} eq 'A';
 
-            LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+            LJ::User::UserlogRecord::ModerateEntry->create( $c,
                 action   => 'reject',
                 id       => $modid,
                 posterid => $entry->{posterid},
@@ -163,7 +163,7 @@ body<=
 
             if ($POST{'mark_as_spam'}) {
                 if (LJ::reject_entry_as_spam($c->{'userid'}, $modid)) {
-                    LJ::User::UserlogRecord::ModerateEntry->create( $remote,
+                    LJ::User::UserlogRecord::ModerateEntry->create( $c,
                         action   => 'spam',
                         id       => $modid,
                         posterid => $entry->{posterid},

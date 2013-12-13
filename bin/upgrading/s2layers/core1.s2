@@ -392,6 +392,7 @@ class Entry extends EntryLite
     var string event_date_to ""; 
     var string event_time_from ""; 
     var string event_time_to ""; 
+    var string event_users "Members of event"; 
     var string portfolio "Entry used for portfolio of artist"; 
     var string portfolio_thumbnail "Url to image for portfolio of artist"; 
 
@@ -515,6 +516,8 @@ class Event extends UserLite
     var readonly string event_paid "Paid or free";
     var readonly string event_price "Price of event";
     var readonly string event_organizer "Organizer of event";
+    var readonly string event_date_from "Date of event from";
+    var readonly string event_date_to "Date of event to";
 }
 
 class Person extends UserLite
@@ -721,6 +724,12 @@ class Page
 
     function print_pagewide_slot()
     "Prints page-wide slot.";
+
+    function print_yacontext_slot( string custom_class )
+    "Prints slot for slot yandex context.";
+
+    function print_yacontext_slot()
+    "Prints slot for slot yandex context.";
 
     function builtin render_resource(int{} opts) : string
     "Returns a string containing external resources and meta information (js, css, meta, rss).";
@@ -1116,8 +1125,23 @@ function builtin journal_current_datetime() : DateTime
 function builtin style_is_active() : bool
 "Returns if the style (layout and theme) calling it is active based on a hook.  If hook isn't defined, returns true always.";
 
+function builtin get_lang_text_multi(string lang, string[] variables) : string{}
+"Returns list of values of lang variables. Lang in lowercase, example 'ru'";
+
 function builtin ljart_event_types() : string[]
 "Returns list of types of ljart events";
+
+function builtin ljart_artist_specs() : string[]
+"Returns list of specializations of ljart artists";
+
+function builtin ljart_institut_types() : string[]
+"Returns list of types of ljart institut";
+
+function builtin get_remote_ljart_town() : string
+"Returns remote's LJArt town";
+
+function builtin get_ljart_artists() : User[]
+"Returns all LJArt artists";
 
 ##[ properties ]
 
@@ -2710,15 +2734,25 @@ function Page::print_custom_head() {
 }
 
 function Page::print_pagewide_slot() {
-    if (viewer_sees_ad_box("s2.personal.top.test.b")) {
-      $this->print_ad_box("s2.personal.top.test.b");
+    if (viewer_sees_ad_box("common.banner")) {
+      $this->print_ad_box("common.banner");
     }
-    if (viewer_sees_ad_box("s2.personal.top.test.c")) {
-      $this->print_ad_box("s2.personal.top.test.c");
+}
+
+function Page::print_yacontext_slot( string custom_class ) {
+  if (viewer_sees_ad_box("yandex.context")) {
+      var string wrapper_class = "ya-context";
+      if ( $custom_class ){
+        $wrapper_class = $wrapper_class +" $custom_class";
+      }
+
+      """<div class="$wrapper_class">""";
+      $this->print_ad_box("yandex.context");
+      """</div>""";
     }
-    if (viewer_sees_ad_box("s2.personal.top.test.d")) {
-      $this->print_ad_box("s2.personal.top.test.d");
-    }
+}
+function Page::print_yacontext_slot() {
+  $this->print_yacontext_slot("");
 }
 
 function Page::print_linklist() {

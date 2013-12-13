@@ -140,7 +140,7 @@ body<=
                         'label' => $name,
                     });
                     $ret .=
-                        ' [<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
+                        ' [<a href="'.$LJ::SITEROOT.'/support/help.bml?state=tagged&' .
                         'tags=' . $name . '">' . $ML{'.requests'} . '</a>]';
                     $ret .= "&nbsp;&nbsp;&nbsp;";
                     $ret .= 
@@ -155,7 +155,7 @@ body<=
                         'tag='        . $name . 
                         '&tag_catid=' . $spcatid . '">Subscribe</a>]';
                 } else {
-                    $ret .= '<a href="'.$LJ::SITEROOT.'/support/help.bml?' .
+                    $ret .= '<a href="'.$LJ::SITEROOT.'/support/help.bml?state=tagged&' .
                         'tags=' . $name . '">' . $name . '</a>';
                 }
                 $ret .= '</li>';

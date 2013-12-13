@@ -347,11 +347,7 @@ sub insert_resources {
 
     return unless $page;
 
-    my $hc = LJ::S2::HeadContent->new({
-        u      => $page->{'_u'},
-        remote => LJ::get_remote(),
-        type   => 'Page'
-    });
+    my $hc = $page->{head_content};
 
     my %res = (
         ALL_RES => $hc->subst_header() || '',
@@ -359,9 +355,7 @@ sub insert_resources {
         JS_RES => LJ::res_includes({ only_js => 1 }) || ''
     );
 
-    $hc->{opts} = {
-        without_js => 1
-    };
+    $hc->{opts}->{without_js} = 1;
 
     $res{ALL_WITHOUT_JS_RES} = $hc->subst_header() || '';
 
@@ -2015,7 +2009,7 @@ sub Entry
         $e->{$_} = $arg->{$_};
     }
 
-    foreach (qw(event event_town event_location event_paid 
+    foreach (qw(event event_town event_location event_paid event_users
                 event_price event_type event_image event_desc 
                 portfolio portfolio_thumbnail)) {
         $e->{$_} = LJ::ehtml($arg->{'props'}->{"ljart_$_"});
@@ -2437,7 +2431,7 @@ sub UserExtended
     $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
     $o->{'timecreate'} = DateTime_unix( $u->timecreate );
     $o->{'last_entry_time'} = DateTime_unix( $u->last_public_entry_time );
-    $o->{'friends_count'} = $u->friends_personal_count;
+    $o->{'friends_count'} = $u->friends_count;
     $o->{'friendof_count'} = $u->friendof_count;
     $o->{'social_capital'} = $u->get_social_capital;
     $o->{'entry_count'} = $u->number_of_posts;
@@ -2457,6 +2451,7 @@ sub Event
         ljart_event_paid
         ljart_event_price
         ljart_event_organizer
+        ljart_event_date
     });
 
     $o->{'_type'} = "Event";
@@ -2468,6 +2463,7 @@ sub Event
     $o->{'event_paid'}      = $u->{'ljart_event_paid'};
     $o->{'event_price'}     = $u->{'ljart_event_price'};
     $o->{'event_organizer'} = $u->{'ljart_event_organizer'};
+    ($o->{'event_date_from'}, $o->{'event_date_to'}) = split '-', $u->{'ljart_event_date'};
 
     return $o;
 }
@@ -3218,18 +3214,9 @@ sub style_is_active {
     return 1;
 }
 
-sub ljart_event_types {
-    my ($ctx) = @_;
-    return [sort {$a cmp $b} values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
-        ljart.update.event.type.esplanade
-        ljart.update.event.type.exhibitions
-        ljart.update.event.type.music
-        ljart.update.event.type.theater
-        ljart.update.event.type.cinema
-        ljart.update.event.type.literature
-        ljart.update.event.type.sport
-        ljart.update.event.type.other
-    }])}];
+sub get_lang_text_multi {
+    my ($ctx, $lang, $variables) = @_;
+    return LJ::Lang::get_text_multi($lang, undef, $variables);
 }
 
 sub set_handler
@@ -4377,15 +4364,18 @@ sub _Entry__get_link
 
                 my $link = LJ::S2::Link($reposted_entry->url,
                                 $ctx->[S2::PROPS]->{"text_delete_repost"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif?v=22756", 24, 24));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif?v=22756", 24, 24), (
+                                    'class' => 'js-delete-repost'
+                                ));
 
-                $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $reposted_entry->url );
                 return $link;
             } else {
                 my $link = LJ::S2::Link($entry->url,
                                 $ctx->[S2::PROPS]->{"text_delete_repost"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif?v=22756", 24, 24));
-                $link->{'_raw'} = LJ::Entry::Repost->render_delete_js( $entry->url );
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_delete_repost.gif?v=22756", 24, 24), (
+                                    'class' => 'js-delete-repost'
+                                ));
+
                 return $link;
             }
         }
@@ -5825,6 +5815,7 @@ sub Page__need_res {
     }
 }
 
+# render placeholders, see LJ::S2::insert_resources
 sub Page__render_resource {
     my ($self, $page, $opts) = @_;
 
@@ -5916,5 +5907,59 @@ sub Page__render_journalpromo {
 *DayPage__render_journalpromo = \&Page__render_journalpromo;
 
 sub FriendsPage__render_journalpromo {0}
+
+# LJ Art
+sub ljart_event_types {
+    my ($ctx) = @_;
+    return [sort {$a cmp $b} values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
+        ljart.update.event.type.esplanade
+        ljart.update.event.type.exhibitions
+        ljart.update.event.type.music
+        ljart.update.event.type.theater
+        ljart.update.event.type.cinema
+        ljart.update.event.type.literature
+        ljart.update.event.type.sport
+        ljart.update.event.type.other
+    }])}];
+}
+
+sub ljart_artist_specs {
+    my ($ctx) = @_;
+    return [sort {$a cmp $b} values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
+        ljart.create.artist.spec.painter
+        ljart.create.artist.spec.musician
+        ljart.create.artist.spec.artist
+        ljart.create.artist.spec.writer
+        ljart.create.artist.spec.photographer
+        ljart.create.artist.spec.architect
+        ljart.create.artist.spec.theoretician
+    }])}];
+}
+
+sub ljart_institut_types {
+    my ($ctx) = @_;
+    return [sort {$a cmp $b} values %{ LJ::Lang::get_text_multi('ru', undef, [qw{
+        ljart.create.institut.type.none
+        ljart.create.institut.type.museum
+        ljart.create.institut.type.exhibition
+        ljart.create.institut.type.gallery
+        ljart.create.institut.type.other
+    }])}];
+}
+
+sub get_remote_ljart_town {
+    return LJ::ehtml(LJ::Request->cookie('ljarttown'));
+}
+
+sub get_ljart_artists {
+
+    my $dbh = LJ::get_db_reader() 
+        or return;
+
+    my $userids = $dbh->selectcol_arrayref('SELECT userid FROM ljart_artist');
+    my $users   = LJ::load_userids(@$userids);
+
+    return [map {LJ::S2::User($users->{$_})} grep {$users->{$_}} keys %$users];
+}
 
 1;

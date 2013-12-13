@@ -496,9 +496,7 @@ sub tags {
     return values %$entry_taginfo;
 }
 
-## returns string with hashtags 
-## (example #tag) separated by comma
-## use only for twitter
+# @return {string} Tags suitable for Twitter
 sub twitter_hashtags {
     my $self = shift;
 
@@ -508,16 +506,14 @@ sub twitter_hashtags {
     my @hashtags;
     
     for my $tag ( @tags ) {
-
         $tag = Encode::decode_utf8($tag);
 
-        next unless $tag =~ s/^#//;
+        $tag =~ s/^#//;
         next unless $tag =~ m/^\w+$/;
 
         $tag = Encode::encode_utf8($tag);
 
         push @hashtags, $tag;
-
     }
 
     return join ',', @hashtags;
@@ -2440,9 +2436,7 @@ sub get_log2_recent_user
 ##
 sub get_itemid_near2
 {
-    my $u = shift;
-    my $jitemid = shift;
-    my $after_before = shift;
+    my ($u, $jitemid, $after_before) = @_;
 
     $jitemid += 0;
 
@@ -2468,8 +2462,11 @@ sub get_itemid_near2
                                       "journalid=$jid AND jitemid=$jitemid");
     return 0 unless $stime;
 
-    my $secwhere = "AND security='public'";
-    my $remote = LJ::get_remote();
+    my $secwhere       = "AND security='public'";
+    my $suspendedwhere = "AND compressed !='S'";
+
+    my $remote         = LJ::get_remote();
+    my @variables      = ($jid, $stime, $jitemid);
 
     if ($remote) {
         if ($remote->can_manage($u->{'userid'})) {
@@ -2478,6 +2475,13 @@ sub get_itemid_near2
             my $gmask = LJ::get_groupmask($u, $remote);
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
                 if $gmask;
+        }
+        # check on suspended entries
+        if (LJ::check_priv($remote, 'canview', 'suspended')) {
+            $suspendedwhere = "";
+        } else {
+            $suspendedwhere = "AND (posterid=? OR compressed !='S')";
+            push @variables, $remote->userid;
         }
     }
 
@@ -2500,17 +2504,21 @@ sub get_itemid_near2
         $result_ref = $dbr->selectall_arrayref(
             "SELECT jitemid, anum, $field FROM log2 ".
                 "WHERE journalid=? AND $field $cmp1 ? AND jitemid <> ? ".
-                $secwhere. " ".
+                $secwhere. " ". $suspendedwhere . " " .
                 "ORDER BY $field $order LIMIT $limit",
-            undef, $jid, $stime, $jitemid
+            undef, @variables
         );
+
+        my $props = {};
+        LJ::load_log_props2($jid, [ map {$_->[0]} @$result_ref ], $props);
+        @$result_ref = grep {!$props->{$_->[0]}->{'repost_link'}} @$result_ref;
 
         my %hash_times = ();
         map {$hash_times{$_->[2]} = 1} @$result_ref;
 
         # If we has one the only 'time' in $limit fetched rows,
         # may be $limit cuts off our record. Increase the limit and repeat.
-        if (((scalar keys %hash_times) > 1) || (scalar @$result_ref) < $limit) {
+        if (((scalar keys %hash_times) > 1) || (scalar @$result_ref < $limit && scalar @$result_ref > 0)) {
             my @result;
 
             # Remove results with the same time but the jitemid is too high or low

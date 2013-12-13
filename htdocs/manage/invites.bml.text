@@ -30,6 +30,8 @@
 
 .label.preapprove=Unmoderated
 
+.label.friend=Friend
+
 .manage=Manage account
 
 .none.body=You have no pending community invitations at this time.

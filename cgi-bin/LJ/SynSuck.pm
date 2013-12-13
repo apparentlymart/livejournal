@@ -438,8 +438,11 @@ sub process_content {
     # update reader count while we're changing things, but not
     # if feed is stale (minimize DB work for inactive things)
     if ($newcount || ! defined $readers) {
-        $readers = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
-                                         "friendid=?", undef, $userid);
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            $readers = $su->subscribers_count();
+        } else {
+            $readers = $su->friendof_count();
+        }
     }
 
     # if readers are gone, don't check for a whole day

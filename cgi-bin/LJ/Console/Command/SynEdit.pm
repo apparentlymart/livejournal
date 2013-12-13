@@ -35,20 +35,22 @@ sub execute {
     return $self->error("Invalid URL")
         unless $newurl =~ m!^http://(.+?)/!;
 
-    my $dbh = LJ::get_db_writer();
+    my $dbh    = LJ::get_db_writer();
     my $oldurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?",
                                        undef, $u->id);
     $dbh->do("UPDATE syndicated SET synurl=?, checknext=NOW() WHERE userid=?",
              undef, $newurl, $u->id);
 
-    if ($dbh->err) {
+    if ( $dbh->err ) {
         my $acct = $dbh->selectrow_array("SELECT userid FROM syndicated WHERE synurl=?",
                                          undef, $newurl);
         my $oldu = LJ::load_userid($acct);
         return $self->error("URL for account $user not changed: URL in use by " . $oldu->user);
-    } else {
+    }
+    else {
         my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, 'synd_edit', "URL changed: $oldurl => $newurl");
+        LJ::MemCache::delete('synd:' .  $u->userid) if $u;
         return $self->print("URL for account $user changed: $oldurl => $newurl");
     }
 }

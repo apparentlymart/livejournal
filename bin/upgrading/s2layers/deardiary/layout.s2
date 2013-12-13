@@ -311,6 +311,10 @@ body, td, table, th, tr {
     color: $*clr_sidebar_fg;
 }
 
+#pagecontainer {
+    position: relative;
+    }
+
 #title {
     color: $*clr_title_fg;
     background-color: $*clr_title_bg;
@@ -1053,6 +1057,7 @@ function Page::print() {
 
 """;
 $this->print_control_strip();
+$this->print_pagewide_slot();
 """
 <div id="pagecontainer">
 

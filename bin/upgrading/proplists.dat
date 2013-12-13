@@ -1979,6 +1979,9 @@ ratelist.freevgifts:
 ratelist.invitefriend:
   des: Logged when a user sends a friend invite
 
+ratelist.invitesend:
+  des: Logged when a user sends a friend invite (new friends logic)
+
 ratelist.in_vertical:
   des: Logged when a journal's entry gets added to a vertical
 

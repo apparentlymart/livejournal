@@ -28,6 +28,7 @@ use Time::HiRes qw//;
 use Encode qw//;
 use MIME::Base64 qw//;
 use LJ::DoSendEmail;
+use LJ::Sendmail::Signer;
 
 use Class::Autouse qw(
                       IO::Socket::INET
@@ -95,97 +96,7 @@ sub send_mail {
         $log_action = 'email_send_raw';
     }
     else {
-        my $clean_name = sub {
-            my ($name, $email) = @_;
-            return $email unless $name;
-            $name =~ s/[\n\t\"<>]//g;
-            return $name ? "\"$name\" <$email>" : $email;
-        };
-
-        $Text::Wrap::huge = 'overflow'; # Don't break long lines with urls.
-        my $body = $opt->{'wrap'} ? Encode::encode_utf8(Text::Wrap::wrap('','',Encode::decode_utf8($opt->{'body'}))) : $opt->{'body'};
-        my $subject = $opt->{'subject'};
-        my $fromname = $opt->{'fromname'};
-
-        # if it's not ascii, add a charset header to either what we were explictly told
-        # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
-        # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
-        $opt->{'charset'} ||= "utf-8";
-        my $charset;
-        if (!LJ::is_ascii($subject)
-         || !LJ::is_ascii($body)
-         || ($opt->{html} && !LJ::is_ascii($opt->{html}))
-         || !LJ::is_ascii($fromname)) {
-            $charset = $opt->{'charset'};
-        } else {
-            $charset = 'us-ascii';
-        }
-
-        # Don't convert from us-ascii and utf-8 charsets.
-        unless (($charset =~ m/us-ascii/i) || ($charset =~ m/^utf-8$/i)) {
-            Encode::from_to($body,              "utf-8", $charset);
-            # Convert also html-part if we has it.
-            if ($opt->{html}) {
-                Encode::from_to($opt->{html},   "utf-8", $charset);
-            }
-        }
-
-        Encode::from_to($subject, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
-        if (!LJ::is_ascii($subject)) {
-            $subject = MIME::Words::encode_mimeword($subject, 'B', $charset);
-        }
-
-        Encode::from_to($fromname, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
-        if (!LJ::is_ascii($fromname)) {
-            $fromname = MIME::Words::encode_mimeword($fromname, 'B', $charset);
-        }
-        $fromname = $clean_name->($fromname, $opt->{'from'});
-
-        my $msg;
-        if ($opt->{html}) {
-            # do multipart, with plain and HTML parts
-
-            $msg = new MIME::Lite ('From'    => $fromname,
-                                   'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
-                                   'Cc'      => $opt->{'cc'},
-                                   'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => $subject,
-                                   'Type'    => 'multipart/alternative');
-
-            # add the plaintext version
-            my $plain = $msg->attach(
-                                     'Type'     => 'text/plain',
-                                     'Data'     => "$body\n",
-                                     'Encoding' => 'quoted-printable',
-                                     );
-            $plain->attr("content-type.charset" => $charset);
-
-            # add the html version
-            my $html = $msg->attach(
-                                    'Type'     => 'text/html',
-                                    'Data'     => $opt->{html},
-                                    'Encoding' => 'quoted-printable',
-                                    );
-            $html->attr("content-type.charset" => $charset);
-
-        } else {
-            # no html version, do simple email
-            $msg = new MIME::Lite ('From'    => $fromname,
-                                   'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
-                                   'Cc'      => $opt->{'cc'},
-                                   'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => $subject,
-                                   'Type'    => 'text/plain',
-                                   'Data'    => $body);
-
-            $msg->attr("content-type.charset" => $charset);
-        }
-
-        if ($opt->{headers}) {
-            while (my ($tag, $value) = each %{$opt->{headers}}) {
-                $msg->add($tag, $value);
-            }
-        }
+        my $msg = get_mail_message($opt);
 
         $message_text = $msg->as_string;
         $from = (map { $_->address } Mail::Address->parse($msg->get("From")))[0];
@@ -234,6 +145,125 @@ sub send_mail {
         text  => $message_text,
         opt   => $opt,
     );
+}
+
+sub get_mail_message {
+    my $opt = shift;
+
+    my $clean_name = sub {
+        my ($name, $email) = @_;
+        return $email unless $name;
+        $name =~ s/[\n\t\"<>]//g;
+        return $name ? "\"$name\" <$email>" : $email;
+    };
+
+    $Text::Wrap::huge = 'overflow'; # Don't break long lines with urls.
+    my $body = $opt->{'wrap'} ? Encode::encode_utf8(Text::Wrap::wrap('','',Encode::decode_utf8($opt->{'body'}))) : $opt->{'body'};
+    my $subject = $opt->{'subject'};
+    my $fromname = $opt->{'fromname'};
+
+    # if it's not ascii, add a charset header to either what we were explictly told
+    # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
+    # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
+    $opt->{'charset'} ||= "utf-8";
+    my $charset;
+    if (!LJ::is_ascii($subject)
+        || !LJ::is_ascii($body)
+        || ($opt->{html} && !LJ::is_ascii($opt->{html}))
+        || !LJ::is_ascii($fromname)) {
+        $charset = $opt->{'charset'};
+    } else {
+        $charset = 'us-ascii';
+    }
+
+    # Don't convert from us-ascii and utf-8 charsets.
+    unless (($charset =~ m/us-ascii/i) || ($charset =~ m/^utf-8$/i)) {
+        Encode::from_to($body,              "utf-8", $charset);
+        # Convert also html-part if we has it.
+        if ($opt->{html}) {
+            Encode::from_to($opt->{html},   "utf-8", $charset);
+        }
+    }
+
+    Encode::from_to($subject, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
+    if (!LJ::is_ascii($subject)) {
+        $subject = MIME::Words::encode_mimeword($subject, 'B', $charset);
+    }
+
+    Encode::from_to($fromname, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
+    if (!LJ::is_ascii($fromname)) {
+        $fromname = MIME::Words::encode_mimeword($fromname, 'B', $charset);
+    }
+    $fromname = $clean_name->($fromname, $opt->{'from'});
+
+    my $msg;
+    if ($opt->{html}) {
+        # do multipart, with plain and HTML parts
+
+        $msg = new MIME::Lite ('From'    => $fromname,
+                               'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
+                               'Cc'      => $opt->{'cc'},
+                               'Bcc'     => $opt->{'bcc'},
+                               'Subject' => $subject,
+                               'Type'    => 'multipart/alternative');
+
+        # add the plaintext version
+        my $plain = $msg->attach(
+                                 'Type'     => 'text/plain',
+                                 'Data'     => "$body\n",
+                                 'Encoding' => 'quoted-printable',
+                                 );
+        $plain->attr("content-type.charset" => $charset);
+
+        # add the html version
+        my $html = $msg->attach(
+                                'Type'     => 'text/html',
+                                'Data'     => $opt->{html},
+                                'Encoding' => 'quoted-printable',
+                                );
+        $html->attr("content-type.charset" => $charset);
+
+    } else {
+        # no html version, do simple email
+        $msg = new MIME::Lite ('From'    => $fromname,
+                               'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
+                               'Cc'      => $opt->{'cc'},
+                               'Bcc'     => $opt->{'bcc'},
+                               'Subject' => $subject,
+                               'Type'    => 'text/plain',
+                               'Data'    => $body);
+
+        $msg->attr("content-type.charset" => $charset);
+        }
+
+    if ($opt->{headers}) {
+        while (my ($tag, $value) = each %{$opt->{headers}}) {
+            $msg->add($tag, $value);
+        }
+    }
+
+    if ( $opt->{dkim} ) {
+        open FILE, "<$ENV{LJHOME}/etc/keys/dkim.private.key";
+        my $private_key = do { local $/; <FILE> };
+
+        my $dkim = LJ::Sendmail::Signer->new({
+            key => $private_key, #private key string
+            domain => $LJ::DKIM_DOMAIN,
+            selector => $LJ::DKIM_KEY,
+            c => 'simple/simple', ###simple/simple is the only supported Canonicalization
+            a => 'rsa-sha1', ##rsa-sha1 is the only supported method
+            i => '@'.$LJ::DKIM_DOMAIN,
+            l => '1', ##include body length in signature
+        });
+
+        ##create dkim signature for this message
+        my $signature = $dkim->sign($msg->header_as_string,$msg->body_as_string);
+
+        ##add dkim header to the message message
+        push @{$msg->{Header}}, [ $signature->{key}, $signature->{value} ];
+    }
+
+    return $msg;
 }
 
 sub _send_via_schwartz {

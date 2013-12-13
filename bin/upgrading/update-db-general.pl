@@ -3355,6 +3355,16 @@ CREATE TABLE `userusage` (
 )
 EOC
 
+register_tablecreate('usersingroups2', <<'EOC');
+CREATE TABLE `usersingroups2` (
+  `userid` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `targetid` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `groupnum` tinyint(4) UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`userid`,`targetid`,`groupnum`),
+  KEY `userid` (`userid`,`groupnum`)
+)
+EOC
+
 register_tablecreate('vertical', <<'EOC');
 CREATE TABLE `vertical` (
   `vertid` int(10) unsigned NOT NULL AUTO_INCREMENT,

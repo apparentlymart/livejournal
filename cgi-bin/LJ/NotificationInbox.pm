@@ -12,6 +12,7 @@ use Class::Autouse qw{
 };
 
 # Internal modules
+use LJ::MemCacheProxy;
 use LJ::NotificationItem;
 
 my ($comment_typeid, $rmessage_typeid, $smessage_typeid);
@@ -428,6 +429,71 @@ sub is_bookmark {
         unless $self->{'bookmarks'};
 
     return $self->{'bookmarks'}{$qid}? 1 : 0;
+}
+
+sub is_contact {
+    my ($class, $u, $target) = @_;
+    die 'Expected parameter $u in is_contact' unless $u;
+    die 'Expected parameter $target in is_contact' unless $target;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
+
+    my $key = [$uid, "inbox:contacts:$uid"];
+    my $val = LJ::MemCacheProxy::get($key);
+
+    if ($val) {
+        my %uids = unpack '(VC)*', $val;
+
+        if (exists $uids{$uid}) {
+            return $uids{$uid};
+        }
+    }
+
+    my $dbh = LJ::get_cluster_master($u);
+
+    return unless $dbh;
+
+    my $res = $dbh->selectcol_arrayref(qq[
+            SELECT
+                1
+            FROM
+                usermsg
+            WHERE
+                type = 'out'
+            AND
+                journalid = ?
+            AND
+                otherid = ?
+            LIMIT
+                1
+        ],
+        undef,
+        $uid,
+        $tid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    if ($res->[0]) {
+        $res = 1;
+    } else {
+        $res = 0;
+    }
+
+    $val ||= '';
+    $val .= pack 'VC', $uid, $res;
+
+    if ($val) {
+        LJ::MemCacheProxy::set($key, $val, 86400);
+    }
+
+    return $res;
 }
 
 # populate the bookmark hash

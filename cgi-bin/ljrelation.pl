@@ -34,11 +34,23 @@ use LJ::RelationService;
 sub is_friend {
     my ($ua, $ub) = @_[0, 1];
 
-    $ua = LJ::want_userid($ua);
-    $ub = LJ::want_userid($ub);
+    $ua = LJ::want_user($ua);
+    $ub = LJ::want_user($ub);
 
     return 0 unless $ua && $ub;
     return 1 if $ua == $ub;
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        my $res1 = LJ::RelationService->is_relation_to($ua, $ub, 'F');
+
+        if ($ua->is_community) {
+            return $res1;
+        }
+
+        my $res2 = LJ::RelationService->is_relation_to($ub, $ua, 'F');
+
+        return $res1 && $res2 ? 1 : 0;
+    }
 
     # get group mask from the first argument to the second argument and
     # see if first bit is set.  if it is, they're a friend.  get_groupmask
@@ -58,11 +70,9 @@ sub is_banned {
     # get user and journal ids
     my $uid = LJ::want_userid(shift);
     my $jid = LJ::want_userid(shift);
-    return 1 unless $uid && $jid;
 
-    # for speed: common case is non-community posting and replies
-    # in own journal.  avoid db hit.
-    return 0 if ($uid == $jid);
+    return 1 unless $uid && $jid;
+    return 0 if $uid == $jid;
     
     # edge from journal -> user
     return LJ::check_rel($jid, $uid, 'B');
@@ -71,6 +81,15 @@ sub is_banned {
 sub get_groupmask {
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
+
+    $remote = LJ::want_user($remote);
+    $journal = LJ::want_user($journal);
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        if (my $groupmask = LJ::User::Groups->get_groupmask($journal, $remote)) {
+            return $groupmask;
+        }
+    }
 
     return LJ::RelationService->get_groupmask($journal, $remote);
 }

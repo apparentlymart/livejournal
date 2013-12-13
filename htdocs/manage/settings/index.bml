@@ -494,6 +494,9 @@ body<=
                 ? [
                     'InvitedFriendJoins-u',
                     'CommunityInvite-u',
+                    'FriendInvite-u',
+                    'AcceptFriendship-u',,
+                    'RejectFriendship-u',
                     'NewUserpic',
                     'Birthday',
                     'NewVGift',
@@ -501,6 +504,9 @@ body<=
                 : [
                     'InvitedFriendJoins-u',
                     'CommunityInvite-u',
+                    'FriendInvite-u',
+                    'AcceptFriendship-u',
+                    'RejectFriendship-u',
                     'CommunityJoinRequest-u',
                     'NewUserpic',
                     'Birthday',

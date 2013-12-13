@@ -215,8 +215,13 @@ body<=
                 LJ::set_rel($cu, $remote, 'S');
 
                 # delete existing friends
-                my $friends = LJ::get_friends($cid, undef, undef, 'force') || {};
-                LJ::remove_friend($cid, [ keys %$friends ]);
+                if (my $cu = LJ::load_userid($cid)) {
+                    my $friends = $cu->members();
+
+                    foreach my $mu (values %$friends) {
+                        $cu->remove_friend($mu);
+                    }
+                }
 
                 # log this to statushistory
                 my $msg = "account '" . $cu->user . "' converted to community";
@@ -229,7 +234,7 @@ body<=
 
             # the new maintainer will be listed as a member of that community
             # with an ability to post to it, too
-            LJ::add_friend($cu->id, $remote->id);
+            $cu->add_friend($remote);
             LJ::set_rel($cu->id, $remote->id, 'P');
 
             # lazy-cleanup: if a community has subscriptions (most likely

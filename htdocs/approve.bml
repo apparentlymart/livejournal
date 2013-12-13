@@ -37,7 +37,11 @@ body<=
 
         # add to community
         if ($arg->{'member'}) {
-            LJ::add_friend($aa->{userid}, $targetid);
+            if (my $aau = LJ::load_userid($aa->{userid})) {
+                if (my $target = LJ::load_userid($targetid)) {
+                    $aau->add_friend($target);
+                }
+            }
         }
 
         # set up rels with this community

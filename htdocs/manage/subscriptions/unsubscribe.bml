@@ -24,7 +24,7 @@
         return LJ::Response::Redirect->new(where => $LJ::SITEROOT)->output;
     }
 
-    unless ($hash eq md5_hex($user, $LJ::ESN_UNSUBSCR_SECRET_CODE)) {
+    unless ($hash eq md5_hex($remote->user, $LJ::ESN_UNSUBSCR_SECRET_CODE)) {
         return LJ::Response::Redirect->new(where => $LJ::SITEROOT)->output;
     }
 

@@ -490,6 +490,7 @@ function Page::print () {
   <body>
     """;
     $this->print_control_strip();
+    $this->print_pagewide_slot();
     if (viewer_sees_control_strip()) { """<div id="content">"""; }
     if (viewer_sees_hbox_top()) {
         """<div style="text-align: center;"""; if (viewer_sees_vbox()) { " width: 75%;"; } "\">";

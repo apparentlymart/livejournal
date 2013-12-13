@@ -98,6 +98,11 @@ body<=
             push @errors, $ML{'.error.invalidemail'};
         }
 
+        if (LJ::sysban_check('email_domain', $email)) {
+            $blocked = 1;
+            push @errors, $ML{'.error.invalidemail'};
+        }
+
         if ($LJ::USER_EMAIL and $POST{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
             push @errors, BML::ml(".error.lj_domain", { 'user' => $remote->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
         }

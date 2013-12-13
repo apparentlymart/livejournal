@@ -116,17 +116,13 @@ body<=
                       "126,73,122,111,174,120,178,80,126,73,126,73", "WY",
                       );
 
-        while (my ($coords, $state) = splice(@shapes, 0, 2))
-        {
+        while ( my ($coords, $state) = splice(@shapes, 0, 2) ) {
             next unless ($count{'stateus'}->{$state});
             my $shape = "poly";
             if ($coords =~ /^[^,]+,[^,]+,[^,]+,[^,]+$/) { $shape = "RECTANGLE"; }
             $ret .= "<area shape='$shape' alt='$state' coords=\"$coords\" href=\"/directory.bml?s_loc=1&amp;loc_cn=US&amp;loc_st=$state&amp;opt_sort=ut\" onmouseover=\"Directory.updateStatus('";
             $ret .= BML::eall($state{$state});
-            $ret .= " - ";
-            $ret .= ($count{'stateus'}->{$state}+0);
-            my $s = $count{'stateus'}->{$state} != 1 ? "s" : "";
-            $ret .= " Journal$s'); return true;\" onmouseout=\"Directory.updateStatus(''); return true;\" />\n";
+            $ret .= "'); return true;\" onmouseout=\"Directory.updateStatus(''); return true;\" />\n";
         }
 
         $ret .= qq {
@@ -147,13 +143,16 @@ body<=
 
         my $total = scalar(keys %{$count{'country'}});
         my $count = 0;
-        my $col = 0;
-        foreach (sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}})
-        {
+        my $col   = 0;
+
+        foreach ( sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}} ) {
+            next unless $_;
+
             $count++;
-            $ret .= "<li><a href=\"/directory.bml?s_loc=1&amp;loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a> <i>($count{'country'}->{$_})</i></li>\n";
+            $ret .= "<li><a href=\"/directory.bml?s_loc=1&amp;loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a></li>\n";
             if ($col==0 && $count > ($total/2)) { $ret .= "</ul></td><td align='left'><ul>"; $col = 1; }
         }
+
         $ret .= "</ul></td></tr></table></div>";
 
         return $ret;

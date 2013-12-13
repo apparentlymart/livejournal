@@ -121,7 +121,8 @@ sub _page_head {
     LJ::run_hooks( "need_res_for_journals", $u );
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    my $extra_js = LJ::statusvis_message_js($u);
+    
+    LJ::statusvis_message_js($u);
 
     if ( LJ::is_enabled('sharing') ) {
         LJ::Share->request_resources();
@@ -130,7 +131,7 @@ sub _page_head {
     if ($opts->{'without_js'}) {
         $head_content .= LJ::res_includes({ only_css => 1 });
     } else {
-        $head_content .= LJ::res_includes() . $extra_js;
+        $head_content .= LJ::res_includes();
     }
 
     $head_content .= LJ::res_includes({ only_needed => 1, only_tmpl => 1 });
@@ -166,6 +167,11 @@ sub _entry_page_head {
     if ( $opts->{dont_show_nav_strip} ) {
         $head_content .= _get_html_dont_show_navstrip();
     }
+
+    if ($opts->{'_preview'}) {
+        $head_content .= LJ::run_hook('insert_html_before_body_close');
+    }
+
     return $head_content;
 }
 

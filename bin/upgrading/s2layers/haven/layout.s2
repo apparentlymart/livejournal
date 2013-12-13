@@ -1307,6 +1307,7 @@ function Page::print()
     println safe """<title>$.global_title</title>""";
     println "</head><body>";
     $this->print_control_strip();
+    $this->print_pagewide_slot();
 
     if ($*title_position == "top" or $*title_position == "both") { println $title_bar; print "<br />"; }
 

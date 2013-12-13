@@ -2,6 +2,8 @@
 {
     use strict;
     use LJ::Setting::Music;
+    
+    use LJ::SocialScripts;
 
     my $delayed_id = $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
     if (!(LJ::did_post() || $delayed_id)) {
@@ -9,6 +11,9 @@
     }
 
     my $ret;
+
+    LJ::SocialScripts::add_to_page();
+
     my $remote = LJ::get_remote();
     my $styleid; my $stylesys = 1;
 
@@ -125,7 +130,10 @@
             # it works, as bytes >= chars:
             $subject = LJ::text_trim($subject, 0, length($req{'subject'}) || 40);
         }
-
+        $ret .= "<html><head>";
+        $ret .= LJ::res_includes();
+        $ret .= "</head><body>";
+        $ret .= LJ::initial_body_html();
         $ret .= "<p>";
 
         if ($u) {
@@ -247,10 +255,13 @@
         $ret .= "</div>";
 
         $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
+        $ret .= LJ::final_body_html();
+        $ret .= "</body></html>";
     } else {
         $LJ::S2::ret_ref = \$ret;
         my $opts;
         $opts->{'r'} = 'UNUSED';
+        $opts->{'_preview'} = 1;
 
         $u->{'_s2styleid'} = $styleid + 0;
         $u->{'_journalbase'} = LJ::journal_base($u->{'user'});

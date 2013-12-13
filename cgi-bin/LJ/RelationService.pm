@@ -1,11 +1,5 @@
 package LJ::RelationService;
 
-#############################################
-#
-#   NEED OPTIMIZATION FOR PROCESS CACHE !!!
-#
-#############################################
-
 use strict;
 use warnings;
 
@@ -74,9 +68,21 @@ sub create_relation_to {
     $u      = LJ::want_user($u);
     $target = LJ::want_user($target);
     
-    return undef unless $u;
-    return undef unless $type;
-    return undef unless $target;
+    return unless $u;
+    return unless $type;
+    return unless $target;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
 
     if ($class->_load_rs_api('update')) {
         if (my $alt = $class->rs_api) {
@@ -86,6 +92,10 @@ sub create_relation_to {
 
     my $interface = $class->mysql_api;
     my $result    = $interface->create_relation_to($u, $target, $type, %opts);
+
+    if ($result) {
+        $class->del_cache($uid, $tid, $type);
+    }
 
     return $result;
 }
@@ -100,10 +110,13 @@ sub remove_relation_to {
     $u      = LJ::want_user($u) unless $u eq '*';
     $target = LJ::want_user($target) unless $target eq '*';
     
-    return undef unless $u;
-    return undef unless $type;
-    return undef unless $target;
-    return undef if $u eq '*' and $target eq '*';
+    return unless $u;
+    return unless $type;
+    return unless $target;
+
+    if ($u eq '*' and $target eq '*') {
+        return;
+    }
 
     if ($class->_load_rs_api('update')) {
         if (my $alt = $class->rs_api) {
@@ -113,6 +126,10 @@ sub remove_relation_to {
 
     my $interface = $class->mysql_api;
     my $result    = $interface->remove_relation_to($u, $target, $type);
+
+    if ($result) {
+        %singletons = ();
+    }
 
     return $result;
 }
@@ -124,17 +141,17 @@ sub is_relation_to {
     my $type   = shift;
     my %opts   = @_;
 
-    return undef unless $u;
-    return undef unless $type;
-    return undef unless $target;
+    return unless $u;
+    return unless $type;
+    return unless $target;
 
     unless (UNIVERSAL::isa($u, 'LJ::User') && UNIVERSAL::isa($target, 'LJ::User')) {
         $u      = LJ::want_user($u);
         $target = LJ::want_user($target);
 
-        return undef unless $u;
-        return undef unless $type;
-        return undef unless $target;
+        return unless $u;
+        return unless $type;
+        return unless $target;
     }
 
     if ($class->_load_rs_api('read', $type)) {
@@ -159,9 +176,9 @@ sub is_relation_type_to {
     $u      = LJ::want_user($u);
     $target = LJ::want_user($target);
     
-    return undef unless $u;
-    return undef unless $types;
-    return undef unless $target;
+    return unless $u;
+    return unless $types;
+    return unless $target;
 
     unless (ref $types eq 'ARRAY') {
         $types = [$types];
@@ -189,8 +206,18 @@ sub find_relation_destinations {
 
     return unless $u;
 
+    my $uid = $u->id;
+
+    return unless $uid;
+
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
 
     if ($class->_load_rs_api('read', $type)) {
         if (my $alt = $class->rs_api) {
@@ -217,6 +244,12 @@ sub find_relation_sources {
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
 
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
+
     if ($class->_load_rs_api('read', $type)) {
         if (my $alt = $class->rs_api) {
             $alt->find_relation_sources($u, $type, %opts);
@@ -237,10 +270,20 @@ sub load_relation_destinations {
 
     $u = LJ::want_user($u);
 
-    return undef unless $u;
+    return unless $u;
+
+    my $uid = $u->id;
+
+    return unless $uid;
 
     $opts{offset} ||= 0;
     $opts{limit}  ||= 50000;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
 
     if ($class->_load_rs_api('read', $type)) {
         if (my $alt = $class->rs_api) {
@@ -250,6 +293,10 @@ sub load_relation_destinations {
 
     my $interface = $class->mysql_api;
     my $result    = $interface->load_relation_destinations($u, $type, %opts);
+
+    if ($result) {
+        $class->set_cache($uid, undef, $type, $result);
+    }
 
     return $result;
 }
@@ -266,14 +313,7 @@ sub get_groupmask {
     return 0 unless $u;
     return 0 unless $target;
 
-    if ($class->_load_rs_api('read', 'F')) {
-        if (my $alt = $class->rs_api) {
-            $alt->find_relation_attributes($u, $target, 'F', %opts);
-        }
-    }
-
-    my $interface = $class->mysql_api;
-    my $result    = $interface->find_relation_attributes($u, $target, 'F', %opts);
+    my $result = $class->find_relation_attributes($u, $target, 'F', %opts);
 
     unless ($result) {
         return 0;
@@ -293,14 +333,7 @@ sub get_filtermask {
     return 0 unless $u;
     return 0 unless $target;
 
-    if ($class->_load_rs_api('read', 'R')) {
-        if (my $alt = $class->rs_api) {
-            $alt->find_relation_attributes($u, $target, 'R', %opts);
-        }
-    }
-
-    my $interface = $class->mysql_api;
-    my $result    = $interface->find_relation_attributes($u, $target, 'R', %opts);
+    my $result = $class->find_relation_attributes($u, $target, 'R', %opts);
 
     unless ($result) {
         return 0;
@@ -329,6 +362,10 @@ sub delete_and_purge_completely {
     my $interface = $class->mysql_api;
     my $result    = $interface->delete_and_purge_completely($u, %opts);
 
+    if ($result) {
+        %singletons = ();
+    }
+
     return $result;
 }
 
@@ -336,7 +373,7 @@ sub clear_rel_multi {
     my $class = shift;
     my $edges = shift;
     
-    return undef unless ref $edges eq 'ARRAY';
+    return unless ref $edges eq 'ARRAY';
 
     if ($class->_load_rs_api('update', 'B')) {
         if (my $alt = $class->rs_api) {
@@ -346,6 +383,12 @@ sub clear_rel_multi {
 
     my $interface = $class->mysql_api();
     my $result    = $interface->clear_rel_multi($edges);
+
+    if ($result) {
+        foreach my $edge (@$edges) {
+            $class->del_cache(@$edge);
+        }
+    }
 
     return $result;
 }
@@ -365,6 +408,12 @@ sub set_rel_multi {
     my $interface = $class->mysql_api;
     my $result    = $interface->set_rel_multi($edges);
 
+    if ($result) {
+        foreach my $edge (@$edges) {
+            $class->del_cache(@$edge);
+        }
+    }
+
     return $result;
 }
 
@@ -378,9 +427,19 @@ sub find_relation_attributes {
     $u      = LJ::want_user($u);
     $target = LJ::want_user($target);
 
-    return undef unless $u;
-    return undef unless $type;
-    return undef unless $target;
+    return unless $u;
+    return unless $type;
+    return unless $target;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
+
+    if (my $val = $class->get_cache($uid, $tid, $type)) {
+        return $val;
+    }
 
     if ($class->_load_rs_api('read', $type)) {
         if (my $alt = $class->rs_api) {
@@ -390,6 +449,10 @@ sub find_relation_attributes {
 
     my $interface = $class->mysql_api;
     my $result    = $interface->find_relation_attributes($u, $target, $type, %opts);
+
+    if ($result) {
+        $class->set_cache($uid, $tid, $type, $result);
+    }
 
     return $result;
 }
@@ -401,9 +464,15 @@ sub update_relation_attributes {
     my $type   = shift;
     my %opts   = @_;
 
-    return 0 unless $u;
-    return 0 unless $type;
-    return 0 unless $target;
+    return unless $u;
+    return unless $type;
+    return unless $target;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
 
     if ($class->_load_rs_api('update', $type)) {
         if (my $alt = $class->rs_api) {
@@ -413,6 +482,10 @@ sub update_relation_attributes {
 
     my $interface = $class->mysql_api;
     my $result    = $interface->update_relation_attributes($u, $target, $type, %opts);
+
+    if ($result) {
+        $class->del_cache($uid, $tid, $type);
+    }
 
     return $result;
 }
@@ -425,8 +498,12 @@ sub update_relation_attribute_mask_for_all {
     my $type  = shift;
     my %opts  = @_;
 
-    return 0 unless $u;
-    return 0 unless $type;
+    return unless $u;
+    return unless $type;
+
+    my $uid = $u->id;
+
+    return unless $uid;
 
     if ($class->_load_rs_api('update', $type)) {
         if (my $alt = $class->rs_api) {
@@ -437,7 +514,92 @@ sub update_relation_attribute_mask_for_all {
     my $interface = $class->mysql_api;
     my $result    = $interface->update_relation_attribute_mask_for_all($u, $type, %opts);
 
+    if ($result) {
+        $class->del_cache($uid, undef, $type);
+    }
+
     return $result;
+}
+
+# Process cache
+
+sub set_cache {
+    my ($class, $uid, $tid, $type, $val) = @_;
+
+    return unless $val;
+    return unless LJ::is_web_context();
+
+    if ($uid && $tid && $type) {
+        $singletons{$uid}{$type}{$tid} = $val;
+    } elsif ($uid && $type) {
+        $singletons{$uid}{$type} = $val;
+    } elsif ($uid) {
+        $singletons{$uid} = $val;
+    }
+
+    return;
+}
+
+sub get_cache {
+    my ($class, $uid, $tid, $type) = @_;
+
+    return unless LJ::is_web_context();
+
+    if ($uid && $tid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+            last unless exists $singletons{$uid}{$type}{$tid};
+
+            return $singletons{$uid}{$type}{$tid};
+        }
+    } elsif ($uid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+
+            return $singletons{$uid}{$type};
+        }
+    } elsif ($uid) {
+        {
+            last unless exists $singletons{$uid};
+
+            return $singletons{$uid};
+        }
+    }
+
+    return;
+}
+
+sub del_cache {
+    my ($class, $uid, $tid, $type) = @_;
+
+    return unless LJ::is_web_context();
+
+    if ($uid && $tid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+            last unless exists $singletons{$uid}{$type}{$tid};
+
+            delete $singletons{$uid}{$type}{$tid};
+        }
+    } elsif ($uid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+
+            delete $singletons{$uid}{$type};
+        }
+    } elsif ($uid) {
+        {
+            last unless exists $singletons{$uid};
+
+            delete $singletons{$uid};
+        }
+    }
+
+    return;
 }
 
 1;

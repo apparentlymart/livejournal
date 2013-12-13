@@ -2373,6 +2373,7 @@ sub interface_content
     my %FORM = LJ::Request->post_params;
     # the protocol needs the remote IP in just one place, where tracking is done.
     $ENV{'_REMOTE_IP'} = LJ::Request->remote_ip();
+    $FORM{'props'}->{'interface'} = "flat";
     LJ::do_request(\%FORM, \%out);
 
     if ($FORM{'responseenc'} eq "urlenc") {

@@ -60,7 +60,13 @@ sub execute {
             my $us = LJ::load_userids(@ids_batch);
             ## unban users multi
             @ids_batch = grep { $us->{$_}->is_suspended || $us->{$_}->is_expunged } @ids_batch;
-            $journal->unban_user_multi(@ids_batch);
+
+            if (@ids_batch) {
+                if (my $us = LJ::load_userids(@ids_batch)) {
+                    $journal->unban_user_multi([values %$us]);
+                }
+            }
+
             for (@ids_batch) {
                 $self->print("User " . $us->{$_}->user . " unbanned from " . $journal->user);
             }
@@ -71,7 +77,7 @@ sub execute {
         return $self->error("Unknown account: $user")
             unless $banuser;
 
-        $journal->unban_user_multi($banuser->userid);
+        $journal->unban_user($banuser);
 
         return $self->print("User " . $banuser->user . " unbanned from " . $journal->user);
     }

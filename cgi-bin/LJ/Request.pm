@@ -336,9 +336,11 @@ sub current_page_url_custom {
         delete $get{$_};
     }
     my @params = map { "$_=$get{$_}" } keys %get;
-    my $args = join("&", (@params));
+    my $par = join("&", (@params));
+    $par = $par ? "?$par" : '';
 
-    return "$proto://$host$uri?$args";
+    my $pref = $args->{no_host} ? '' : "$proto://$host";
+    return "$pref$uri$par";
 }
 
 =head2 Cleanup

@@ -568,8 +568,8 @@ sub ljtalk_load_roster_item {
 
     # otherwise, we have to augment the jabber-only relationship with the
     # LJ/friends/database relationship.  so figure out the LJ relationship...
-    my $to   = LJ::is_friend($u, $cu);
-    my $from = LJ::is_friend($cu, $u);
+    my $to   = $u->is_friend($cu);
+    my $from = $cu->is_friend($u);
 
     # start with the jabber-only relationship,
     my $substate = $rostrow ? ($rostrow->{substate}+0) : 0;

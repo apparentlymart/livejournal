@@ -748,7 +748,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             }
 
             LJ.Api.call(
-                'change_relation.' + action.toLowerCase(),
+                'relations.' + action.toLowerCase(),
                 { target: info.username },
                 function (data) {
                     ContextualPopup.hourglass.hide();

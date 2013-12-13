@@ -21,7 +21,7 @@ sub usage { '<command> <user> [ <group> ] [ <fgcolor> ] [ <bgcolor> ]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, 'siteadmin') || 
+    return LJ::check_priv($remote, 'siteadmin') ||
            LJ::check_priv($remote, 'supporthelp') ||
            LJ::check_priv($remote, 'betatest', 'omega') ||
            $LJ::IS_DEV_SERVER;
@@ -48,20 +48,17 @@ sub execute {
             return $self->error("You are not allowed to view other's friends")
                 if $fu->id != $remote->id;
         }
-    
-        my $dbh = LJ::get_db_reader();
-        my $sth = $dbh->prepare("SELECT u.userid, u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f ".
-                                "WHERE u.userid=f.friendid AND f.userid=? ORDER BY u.user");
-        $sth->execute($fu->id);
+
+        my $friends = $fu->friends();
 
         if ($command eq 'list') {
             $self->info(sprintf("%-15s S T  Name", "User"));
             $self->info("-" x 58);
 
-            while (my ($userid, $username, $name, $statusvis, $type) = $sth->fetchrow_array) {
-                $statusvis = "" if $statusvis eq "V";
-                $type = "" if $type eq "P";
-                $self->info(sprintf("%-15s %1s %1s  %s", $username, $statusvis, $type, $name));
+            foreach my $u (values %$friends) {
+                my $type = $u->journaltype eq "P" ? "" : $u->journaltype;
+                my $statusvis = $u->statusvis eq "V" ? "" : $u->statusvis;
+                $self->info(sprintf("%-15s %1s %1s  %s", $u->username, $statusvis, $type, $u->name));
             }
         }
         elsif ($command eq 'list_tags') {
@@ -77,15 +74,16 @@ sub execute {
                 $tags_list = [] unless $tags_list && ref($tags_list) eq 'ARRAY';
                 return ($mode eq 'D' ? '- ' : '+ ') . join(', ', @$tags_list);
             };
-        
+
             $self->info(sprintf("%-15s S T  Tags", "User"));
             $self->info("-" x 58);
 
-            while (my ($userid, $username, $name, $statusvis, $type) = $sth->fetchrow_array) {
-                $statusvis = "" if $statusvis eq "V";
-                $type ="" if $type eq "P";
+            foreach my $u (values %$friends) {
+                my $type = $u->journaltype eq "P" ? "" : $u->journaltype;
+                my $userid = $u->id;
+                my $statusvis = $u->statusvis eq "V" ? "" : $u->statusvis;
 
-                $self->info(sprintf("%-15s %1s %1s  %s", $username, $statusvis, $type,
+                $self->info(sprintf("%-15s %1s %1s  %s", $u->username, $statusvis, $type,
                                     $get_tags_str->($tags_by_friendid->{$userid})));
 
                 delete $tags_by_friendid->{$userid};
@@ -101,7 +99,7 @@ sub execute {
                 }
             }
         }
-    
+
         return 1;
     }
 
@@ -122,9 +120,11 @@ sub execute {
     }
 
     if ($command eq "add") {
-        my $errmsg;
-        return $self->error($errmsg)
-            unless $remote->can_add_friends(\$errmsg, {friend => $fu});
+        unless (LJ::is_enabled('new_friends_and_subscriptions')) {
+            my $errmsg;
+            return $self->error($errmsg)
+                unless $remote->can_add_friends(\$errmsg, {friend => $fu});
+        }
 
         return $self->error("You cannot add inactive journals to your Friends list.")
             unless $fu->is_visible;
@@ -155,10 +155,16 @@ sub execute {
         $opts->{'fgcolor'} = $fg if $fg;
         $opts->{'bgcolor'} = $bg if $bg;
 
-        if ($remote->add_friend($fu, $opts)) {
-            return $self->print("$user added as a friend.");
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            unless ($remote->to_offer_friendship($fu)) {
+                return $self->error("Error invite sending $user.");
+            }
         } else {
-            return $self->error("Error adding $user to friends list.");
+            if ($remote->add_friend($fu, $opts)) {
+                return $self->print("$user added as a friend.");
+            } else {
+                return $self->error("Error adding $user to friends list.");
+            }
         }
     }
 }

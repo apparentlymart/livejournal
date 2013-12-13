@@ -237,6 +237,7 @@ function print_stylesheet ()
     }
 
     """body {
+    margin-top: 0;
     background-color: $*body_bgcolor;
 }
 td,body,p,div {
@@ -275,6 +276,9 @@ A.subjlink, A.subjlink:hover, A.subjlink:visited {
    font-size: 1em;
 }
 
+.wrapper {
+  margin-top: 10px;
+}
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color;
 }
@@ -344,6 +348,8 @@ function Page::print()
  <body>
  """;
  $this->print_control_strip();
+ $this->print_pagewide_slot();
+ """<div class="wrapper">""";
  if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     if ($margin == "") {
         """<table width="100%" height="100%">""";
@@ -476,6 +482,7 @@ print safe """
     "</table>";
   }
   """
+  </div>
  </body>
 </html>
     """;

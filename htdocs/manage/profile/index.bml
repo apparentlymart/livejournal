@@ -700,18 +700,27 @@ body<=
 
         $ret .= "<table class='field_block'>\n";
 
-        # opt_hidefriendofs
-        $ret .= "<tr><td class='field_name'><label for='opt_hidefriendofs'>$ML{'.fn.friendof'}</label></td><td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
-                                 'selected' => ! $u->{'opt_hidefriendofs'} });
-        $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
-
         # opt_hidesubscribers
         if (LJ::is_enabled('new_friends_and_subscriptions')) {    
             $ret .= "<tr><td class='field_name'><label for='opt_hidesubscribers'>$ML{'.fn.subscribers'}</label></td><td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidesubscribers', 'id' => 'opt_hidesubscribers',
-                                     'selected' => ! $u->{'opt_hidesubscribers'} });
+            $ret .= LJ::html_check({
+                'type'     => 'check',
+                'name'     => 'opt_hidesubscribers',
+                'id'       => 'opt_hidesubscribers',
+                'selected' => !$u->{'opt_hidesubscribers'},
+            });
             $ret .= " <label for='opt_hidesubscribers'>$ML{'.subscribers'}</label></td></tr>\n";
+
+        # opt_hidefriendofs
+        } else {
+            $ret .= "<tr><td class='field_name'><label for='opt_hidefriendofs'>$ML{'.fn.friendof'}</label></td><td>";
+            $ret .= LJ::html_check({
+                'type'     => 'check',
+                'name'     => 'opt_hidefriendofs',
+                'id'       => 'opt_hidefriendofs',
+                'selected' => !$u->{'opt_hidefriendofs'},
+            });
+            $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
         }
 
         $ret .= "</table>\n";

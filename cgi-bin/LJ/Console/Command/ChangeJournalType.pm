@@ -111,11 +111,8 @@ sub execute {
     # delete friend-ofs if we're changing to a person account. otherwise
     # the owner can log in and read those users' entries.
     if ($type eq "person") {
-        my @ids = $u->friendof_uids;
-        $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
-
-        LJ::memcache_kill($_, "friends") foreach @ids;
-        LJ::memcache_kill($u, "friendofs");
+        $u->remove_all_friendofs();
+        $u->remove_all_subscribers();
     }
 
     #############################

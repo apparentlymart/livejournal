@@ -1459,6 +1459,7 @@ print safe """
 """;
 
 $this->print_control_strip();
+$this->print_pagewide_slot();
 
 if ($margin == "") {
     print safe """<table border="0" cellspacing="0" cellpadding="0" width="$*content_width" align="$*content_alignment">""";

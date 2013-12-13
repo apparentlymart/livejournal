@@ -1,5 +1,8 @@
 package LJ::RateLimit;
+
 use strict;
+use warnings;
+
 use LJ::MemCache qw//;
 
 our $RATE_DATAVER = 1;
@@ -43,7 +46,7 @@ sub check {
 
         # parse the old log
         my @times = ();
-        if (length($log) % 4 == 1 && substr($log,0,1) eq $RATE_DATAVER) {
+        if ($log && length($log) % 4 == 1 && substr($log,0,1) eq $RATE_DATAVER) {
             my $ct = (length($log)-1) / 4;
             for (my $i=0; $i<$ct; $i++) {
                 my $time = unpack("N", substr($log,$i*4+1,4));

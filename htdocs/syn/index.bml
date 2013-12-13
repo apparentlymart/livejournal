@@ -146,7 +146,11 @@ body<=
                 return "<?h1 $ML{'.invalid.inuse.title'} h1?><?p $ML{'.invalid.inuse.text'} p?>"
                     unless $synfeed;
 
-                $u->friend_and_watch($synfeed);
+                if (LJ::is_enabled('new_friends_and_subscriptions')) {
+                    $u->subscribe_to_user($synfeed);
+                } else {
+                    $u->add_friend($synfeed);
+                }
 
                 $su = $dbh->selectrow_hashref("SELECT u.user, s.* FROM syndicated s, useridmap u ".
                                               "WHERE s.userid=? AND s.userid=u.userid",
@@ -196,7 +200,13 @@ body<=
         next if $friends->{$suserid} || !$suser->is_visible;
 
         if ($POST{'action:add'} && $POST{"add_$user"}) {
-            LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });
+            if (my $su = LJ::load_userid($suserid)) {
+                if (LJ::is_enabled('new_friends_and_subscriptions')) {
+                    $u->subscribe_to_user($su);
+                } else {
+                    $u->add_friend($su);
+                }
+            }
         } else {
             push @pop, [ $user, $url, $count ];
             last if @pop >= 20;

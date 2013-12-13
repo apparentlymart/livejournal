@@ -719,7 +719,7 @@ body<=
             @tags = sort @tags;
             $tags_string = join(', ', @tags);
             @tags = map {
-                '<a href="' . $LJ::SITEROOT . '/support/help.bml?tags=' . $_ .
+                '<a href="' . $LJ::SITEROOT . '/support/help.bml?state=tagged&tags=' . $_ .
                 '">' . $_ . '</a>';
             } @tags;
             $ret .= '<td>' . join(', ', @tags). '</td>';

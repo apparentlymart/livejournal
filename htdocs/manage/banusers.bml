@@ -80,7 +80,11 @@ body<=
             }
 
             # now unban the users
-            $u->unban_user_multi(@unbanlist) if @unbanlist;
+            if (@unbanlist) {
+                if (my $us = LJ::load_userids(@unbanlist)) {
+                    $u->unban_user_multi([values %$us]);
+                }
+            }
         }
 
         if ($POST{unban_users_btn}) {
@@ -112,7 +116,11 @@ body<=
                 $submit_msg = "<?errorbar $ML{'.error.toomanybans'} errorbar?>";
             } else {
                 # now ban the users
-                $u->ban_user_multi(@banlist) if @banlist;
+                if (@banlist) {
+                    if (my $us = LJ::load_userids(@banlist)) {
+                        $u->ban_user_multi([values %$us]);
+                    }
+                }
             }
 
             if (scalar @cantbanlist) {

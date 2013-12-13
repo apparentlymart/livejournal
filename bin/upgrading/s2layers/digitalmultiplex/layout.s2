@@ -769,6 +769,7 @@ function print_stylesheet() {
 
     """
 body {
+    margin-top: 0;
     background-color: $*page_background_color;
 """;
     if (clean_url($*page_background_image) != "") {
@@ -809,9 +810,7 @@ a:visited {
 /* Title */
 #top_title {
     width: $*page_content_width;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 10px;
+    margin: 10px auto;
     border: 1px solid $*border_color;
 }
 #journal_title {
@@ -1000,6 +999,7 @@ function Page::print() {
     println "</head><body>";
 
     $this->print_control_strip();
+    $this->print_pagewide_slot();
 
     println """<a name="top"></a><div align="center">""";
 

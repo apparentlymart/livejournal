@@ -80,7 +80,7 @@ body<=
      my $u = LJ::load_userid($aa->{'userid'});
 
      # verify their email hasn't subsequently changed
-     unless ($u->email_raw eq $aa->{arg1}) {
+     unless ($u && ($u->email_raw eq $aa->{arg1})) {
          return "<?h1 $ML{'Error'} h1?><?p " .
              BML::ml('.error.emailchanged', { aopts => "href='$LJ::SITEROOT/register.bml'" }) . " p?>";
      }
@@ -141,6 +141,10 @@ body<=
                       newemail => $aa->{arg1},
                       suspend  => 1,
                   });
+
+     # if we used an authcode, we'll need to expire it now
+     LJ::mark_authaction_used($aaid);
+
  } else {
      return "<?needlogin?>"
          unless $remote;

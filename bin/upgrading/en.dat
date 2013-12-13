@@ -2356,6 +2356,72 @@ LiveJournal Team
 www.livejournal.com/
 .
 
+esn.friend_invite.inbox=User [[potential_friend]] want add you to friend list.
+
+esn.friend_invite.subject=User [[potential_friend]] want add you to friend list.
+esn.friend_invite.email.html<<
+Hello, [[user]]! User [[potential_friend]] want add you to friend list.
+You can reject or accept her invite on this page.
+<ul>
+    <li><a href="[[potential_friend_journal]]">Read journal of user</a> [[potential_friend]]</li>
+    <li><a href="[[potentical_friend_info_page]]">Read profile of user</a> [[potential_friend]]</li>
+</ul>
+.
+
+esn.friend_invite.email.text<<
+Hello, [[user]]! User [[potential_friend]] want add you to friend list.
+You can reject or accept her invite on this page.
+
+Read [[potential_friend]] journal [[potential_friend_journal]]
+Read [[potential_friend]] profile [[potentical_friend_info_page]]
+.
+
+esn.friend_accept.inbox=User [[potential_friend]] add you to friend list.
+
+esn.friend_accept.subject=User [[potential_friend]] add you to friend list.
+esn.friend_accept.email.html<<
+Hello, [[user]]! User [[potential_friend]] accept your invite and add you to friend list.
+
+<ul>
+    <li><a href="[[potential_friend_journal]]">Read journal of user</a> [[potential_friend]]</li>
+    <li><a href="[[potentical_friend_info_page]]">Read profile of user</a> [[potential_friend]]</li>
+    <li><a href="[[domain]]/account/settings/users/groups/">Edit friends group</a></li>
+    <li><a href="[[domain]]/account/settings/friends/friends/">Edit friends list</a></li>
+</ul>
+.
+
+esn.friend_accept.email.text<<
+Hello, [[user]]! User [[potential_friend]] accept your invite and add you to friend list.
+
+Read [[potential_friend]] journal [[potential_friend_journal]]
+Read [[potential_friend]] profile [[potentical_friend_info_page]]
+Edit friends group [[domain]]/account/settings/users/groups/
+Edit friends list [[domain]]/account/settings/friends/friends/
+.
+
+esn.friend_reject.inbox=User [[potential_friend]] reject your friendship.
+
+esn.friend_reject.subject=User [[potential_friend]] reject your friendship.
+esn.friend_reject.email.html<<
+Hello, [[user]]! User [[potential_friend]] reject your friendship.
+
+<ul>
+    <li><a href="[[potential_friend_journal]]">Read journal of user</a> [[potential_friend]]</li>
+    <li><a href="[[potentical_friend_info_page]]">Read profile of user</a> [[potential_friend]]</li>
+    <li><a href="[[domain]]/account/settings/users/groups/">Edit friends group</a></li>
+    <li><a href="[[domain]]/account/settings/friends/friends/">Edit friends list</a></li>
+</ul>
+.
+
+esn.friend_reject.email.text<<
+Hello, [[user]]! User [[potential_friend]] reject your friendship.
+
+Read [[potential_friend]] journal [[potential_friend_journal]]
+Read [[potential_friend]] profile [[potentical_friend_info_page]]
+Edit friends group [[domain]]/account/settings/users/groups/
+Edit friends list [[domain]]/account/settings/friends/friends/
+.
+
 esn.footer.html|staleness=1
 esn.footer.html<<
 <div style="font-size: 9px;">This automatic notification email was sent by LiveJournal.com according to your <a href="[[siteroot]]/manage/subscriptions/">email preferences</a>.</div>
@@ -3109,6 +3175,15 @@ event.defriended.user=Someone removes [[user]] from their Friends list
 
 event.invited_friend_joins|staleness=1
 event.invited_friend_joins=Someone I invited creates a new journal
+
+event.friend_invite|staleness=1
+event.friend_invite=User send invite to add you in friends list
+
+event.friend_accept|staleness=1
+event.friend_accept=User accept your friendship
+
+event.friend_reject|staleness=1
+event.friend_reject=User reject your friendship
 
 event.journal_new_comment.friend|staleness=1
 event.journal_new_comment.friend=Someone comments in any journal on my friends page
@@ -4651,6 +4726,9 @@ main.ljtoday.next=Next journal
 main.ljtoday.prev|staleness=1
 main.ljtoday.prev=Previous journal
 
+main.memes.more|staleness=1
+main.memes.more=More
+
 main.menu.categories|staleness=1
 main.menu.categories=Categories
 
@@ -4658,6 +4736,9 @@ main.menu.editors|staleness=1
 main.menu.editors=Editors
 
 main.menu.latest=Latest
+
+main.menu.memes|staleness=1
+main.menu.memes=Memes
 
 main.menu.index|staleness=1
 main.menu.index=Home
@@ -4714,6 +4795,8 @@ main.settings|staleness=1
 main.settings=Rating Settings
 
 main.scrolltop=Scroll to top
+
+main.special.more=Show more entries
 
 main.top.aday=Today
 
@@ -8368,6 +8451,8 @@ talk.video.paste=Paste a Video URL (embed, iframe, <a href="http://www.youtube.c
 talk.willscreen|staleness=1
 talk.willscreen=Your reply will be screened
 
+talk.wrote=wrote in
+
 time.ago.day=[[num]] [[?num|day|days]] ago
 
 time.ago.halfhour|staleness=1
@@ -9742,6 +9827,15 @@ web.account.settings.tab.title.users.filters=Filters
 
 web.account.settings.tab.title.users.groups|staleness=1
 web.account.settings.tab.title.users.groups=Groups
+
+web.account.settings.tab.title.friends.subscriptions|staleness=1
+web.account.settings.tab.title.friends.subscriptions=Subscriptions
+
+web.account.settings.tab.title.friends.friends|staleness=1
+web.account.settings.tab.title.friends.friends=Friends
+
+web.account.settings.tab.title.friends.invites|staleness=1
+web.account.settings.tab.title.friends.invites=Invites
 
 web.account.settings.title|staleness=1
 web.account.settings.title=Account Settings

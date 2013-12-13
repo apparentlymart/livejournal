@@ -134,7 +134,8 @@ sub EntryPage
     my $userlite_journal = UserLite($u);
 
     my @comments;
-    if ($entry->comments_shown) {
+    my $should_comments_shown = $flat_mode ? 1 : $entry->comments_shown;
+    if ($should_comments_shown) {
         ## allow to modify strategies to load/expand comments tree.
         LJ::run_hooks('load_comments_opts', $u, $itemid, $copts);
         @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);

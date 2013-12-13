@@ -5,6 +5,15 @@
 
     # TODO: use LJ::Auth
 
+    return "Your user ID has been blocked please contact support for further advice"
+        if LJ::did_post() && grep { $POST{'user'} eq $_ } qw/
+            ljinf
+            anyutavasser
+            ilyapoleja
+            pashkaivanov
+            null
+        /;
+
     my $crumb = $LJ::IS_SSL ? 'securelogin' : 'login';
     LJ::set_active_crumb($crumb);
 

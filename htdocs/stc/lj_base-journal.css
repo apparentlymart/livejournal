@@ -982,10 +982,13 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 	margin: 0 0 0 5px;
 	}
 
+
+
 /* Native Sharing */
 .b-sharethis {
 	margin: 0;
 	padding: 0;
+	list-style: none;
 	color: #000;
 	text-align: left;
 	font: 12px/1.1 Arial,sans-serif;
@@ -1000,7 +1003,8 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 	.b-sharethis-services {
 		margin: 0;
 		padding: 0;
-		background: #FFF;
+		list-style: none;
+		background: transparent;
 		color: #000;
 		}
 		.b-sharethis-services SPAN {
@@ -1013,20 +1017,30 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				display: inline-block;
 				margin: 0;
 				padding: 5px 5px 5px 25px;
-				color: #000 !important;
 				text-decoration: none !important;
-				border: 1px solid #FFF !important;
-				-moz-border-radius: 3px;
+				border: 1px solid transparent !important;
 				border-radius: 3px;
-				background-color: #FFF;
-				background-image: url(/img/icons/sharethis.png?v=29927);
+				background-color: transparent;
+				background-image: url(/img/icons/sharethis.png?v=333);
 				background-position: 0 0;
 				background-repeat: no-repeat;
+				color: #000 !important;
 				}
 			.b-sharethis-services A:hover,
 			.b-sharethis-services A:active {
-				background-color: #F5F5F5;
 				border: 1px solid #CCC !important;
+				background-color: #F5F5F5;
+				}
+			/* lebedev version (november 2013) */
+			.b-sharethis-services-s1 A:link,
+			.b-sharethis-services-s1 A:visited {
+				display: block;
+				border-radius: 0;
+				}
+			.b-sharethis-services-s1 A:hover,
+			.b-sharethis-services-s1 A:active {
+				border: 1px solid transparent !important;
+				background-color: #C8E6FF;
 				}
 			.b-sharethis-services .b-sharethis-livejournal A {
 				background-position: 5px 4px;
@@ -1058,6 +1072,8 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 			.b-sharethis-services .b-sharethis-moimir A {
 				background-position: 5px -428px;
 				}
+
+
 
 /* Subject Picture Popup */
 .b-subjecticons {

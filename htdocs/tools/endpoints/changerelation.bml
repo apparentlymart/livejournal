@@ -41,7 +41,7 @@
         return $err->($errmsg)
             unless $remote->can_add_friends(\$errmsg, {friend => $targetu});
 
-        $success = $remote->friend_and_watch($targetu);
+        $success = $remote->add_friend($targetu);
     } elsif ($action eq 'removeFriend') {
         $success = $remote->remove_friend($targetu);
     } elsif ($action eq 'join') {
@@ -74,7 +74,7 @@
 
     } elsif ($action eq 'setUnban') {
         my $unban_user = LJ::load_user($target);
-        $success = $remote->unban_user_multi($unban_user->{userid});
+        $success = $remote->unban_user($unban_user);
 
     } elsif ($action eq 'banEverywhere') {
 
@@ -120,7 +120,7 @@
 
         foreach my $u (values %$us) {
             next if $u->is_expunged;
-            $success = 0 unless $u->unban_user_multi($unban_user->userid);
+            $success = 0 unless $u->unban_user($unban_user);
         }
 
     } else {

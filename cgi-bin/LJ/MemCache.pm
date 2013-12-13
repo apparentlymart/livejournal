@@ -153,14 +153,18 @@ is set when writing and checked when fetching data.
 =cut
 
 package LJ::MemCache;
+
 use strict;
 use warnings;
 
-use String::CRC32 qw();
 use Carp qw();
-use Data::Dumper qw();
 use IO::Handle qw();
+use Data::Dumper qw();
+use String::CRC32 qw();
 
+# Internal modules
+use LJ::MemCache::PP;
+use LJ::MemCache::Fast;
 use LJ::RequestStatistics;
 
 ### VARIABLES ###
@@ -175,6 +179,8 @@ my $used_handler;
 my %connections;
 ## 'host:port' => pid
 my %connections_pid;
+## enable profiling
+my $enable_profiling = $ENV{'LJ_MEMCACHE_PROFILE'};
 
 my $DEFAULT_EXPIRE = 864000; # 10 days
 
@@ -221,84 +227,6 @@ $GET_DISABLED = 0;
 
 my $logfile = undef;
 
-### PRIVATE FUNCTIONS ###
-
-sub _hashfunc {
-    my ($what) = @_;
-    return ( String::CRC32::crc32($what) >> 16 ) & 0x7fff;
-}
-
-sub _connect {
-    my ($server) = @_;
-
-    if ($connections{$server} && $connections_pid{$server} ne $$) {
-        warn "Connection to $server was established from other PID: old=$connections_pid{$server}, cur=$$"
-            if $LJ::IS_DEV_SERVER;
-
-        my $old_handler = delete $connections{$server};
-        $old_handler->disconnect_all;
-    }
-
-    unless ( exists $connections{$server} ) {
-        init()
-            unless defined $used_handler;
-
-        $connections{$server}
-            = $used_handler->new({ 'servers' => [ $server ] });
-        $connections_pid{$server} = $$;
-    }
-
-    return $connections{$server};
-}
-
-sub _get_connection {
-    my ($key) = @_;
-
-    my $hashval     = ref $key eq 'ARRAY' ? int $key->[0]
-                                          : _hashfunc($key);
-
-    my $num_server  = $hashval % scalar(@LJ::MEMCACHE_SERVERS);
-    my $server      = $LJ::MEMCACHE_SERVERS[$num_server];
-
-    return _connect($server);
-}
-
-sub _set_compression {
-    my ( $conn, $key ) = @_;
-
-    # currently, we aren't compressing the value only if we get to work
-    # with a key as follows:
-    #
-    #   1. "talk2:$journalu->{'userid'}:L:$itemid"
-    if ( $key =~ /^talk2:/ ) {
-        $conn->enable_compress(0);
-        return;
-    }
-
-    $conn->enable_compress(1);
-}
-
-my $enable_profiling = $ENV{'LJ_MEMCACHE_PROFILE'};
-
-sub _profile {
-    my ( $funcname, $key, $result ) = @_;
-
-    return unless $enable_profiling;
-
-    unless ( defined $logfile ) {
-        open $logfile, '>>', "$ENV{LJHOME}/var/memcache-profile/$$.log"
-            or die "cannot open log: $!";
-
-        $logfile->autoflush;
-    }
-
-    $key =~ s/\b\d+\b/?/g;
-
-    print $logfile "$funcname($key) " .
-                   ( defined $result ? '[hit]' : '[miss]' ) .
-                   "\n";
-}
-
 ### MAINTENANCE METHODS ###
 
 sub init {
@@ -315,26 +243,9 @@ sub init {
         unless defined $used_handler;
 }
 
-sub get_memcache {
-    return $used_handler;
-}
-
-sub set_memcache {
-    my ($new_handler) = @_;
-    $used_handler = $new_handler;
-}
-
 sub reload_conf {
     %connections = ();
     init();
-}
-
-sub disconnect_all {
-    foreach my $conn ( values %connections ) {
-        $conn->disconnect_all;
-    }
-    %connections     = ();
-    %connections_pid = ();
 }
 
 sub list_servers {
@@ -345,6 +256,23 @@ sub list_servers {
     }
 
     return \%ret;
+}
+
+sub get_memcache {
+    return $used_handler;
+}
+
+sub set_memcache {
+    my ($new_handler) = @_;
+    $used_handler = $new_handler;
+}
+
+sub disconnect_all {
+    foreach my $conn ( values %connections ) {
+        $conn->disconnect_all;
+    }
+    %connections     = ();
+    %connections_pid = ();
 }
 
 ### READING METHODS ###
@@ -369,10 +297,6 @@ sub get {
     return $res;
 }
 
-sub can_gets {
-    return $used_handler->can_gets;
-}
-
 sub gets {
     my ($key) = @_;
 
@@ -388,6 +312,10 @@ sub gets {
     _profile( 'gets', $key, $res ) if $enable_profiling;
 
     return $res;
+}
+
+sub can_gets {
+    return $used_handler->can_gets;
 }
 
 sub get_multi {
@@ -509,21 +437,21 @@ sub set {
     return $conn->set( $key, $value, $expire );
 }
 
-sub replace {
-    my ( $key, $value, $expire ) = @_;
+sub cas {
+    my ( $key, $cas, $value ) = @_;
 
     $value = '' unless defined $value;
-    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     my $conn = _get_connection($key);
 
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    _profile( 'replace', $key ) if $enable_profiling;
+    my $res = $conn->cas( $key, $cas, $value );
 
-    _set_compression( $conn, $key );
-    return $conn->replace( $key, $value, $expire );
+    _profile( 'cas', $key, $res ) if $enable_profiling;
+
+    return $res;
 }
 
 sub incr {
@@ -554,6 +482,21 @@ sub decr {
     _profile( 'decr', $key ) if $enable_profiling;
 
     return $conn->decr( $key, $value );
+}
+
+sub delete {
+    my ( $key, $expire ) = @_;
+
+    my $conn = _get_connection($key);
+
+    $key = $key->[1]
+        if ref $key eq 'ARRAY';
+
+    _profile( 'delete', $key ) if $enable_profiling;
+
+    my $res = $conn->delete( $key, $expire );
+
+    return $res;
 }
 
 sub append {
@@ -608,36 +551,70 @@ sub prepend {
     return $res;
 }
 
-sub delete {
-    my ( $key, $expire ) = @_;
-
-    my $conn = _get_connection($key);
-
-    $key = $key->[1]
-        if ref $key eq 'ARRAY';
-
-    _profile( 'delete', $key ) if $enable_profiling;
-
-    my $res = $conn->delete( $key, $expire );
-
-    return $res;
-}
-
-sub cas {
-    my ( $key, $cas, $value ) = @_;
+sub replace {
+    my ( $key, $value, $expire ) = @_;
 
     $value = '' unless defined $value;
+    $expire = $DEFAULT_EXPIRE unless defined $expire;
 
     my $conn = _get_connection($key);
 
     $key = $key->[1]
         if ref $key eq 'ARRAY';
 
-    my $res = $conn->cas( $key, $cas, $value );
+    _profile( 'replace', $key ) if $enable_profiling;
 
-    _profile( 'cas', $key, $res ) if $enable_profiling;
+    _set_compression( $conn, $key );
+    return $conn->replace( $key, $value, $expire );
+}
 
-    return $res;
+sub set_multi {
+    my @data = @_;
+    my %data = ();
+
+    foreach my $item (@data) {
+        my $key = $item->[0];
+        my $val = $item->[1];
+        my $exp = $item->[2];
+
+        next unless $key;
+
+        # Only complex key
+        $key = $key->[0];
+
+        next unless $key;
+
+        my $num = _get_server_num([$key]);
+
+        next unless defined $num;
+
+        unless (defined $val) {
+            $val = '';
+        }
+
+        unless (defined $exp) {
+            $exp = $DEFAULT_EXPIRE;
+        }
+
+        push @{
+            $data{$num} ||= []
+        }, [
+            $key, $val, $exp
+        ];
+    }
+
+    while (my ($num, $data) = each %data) {
+        my $conn = _get_connection_by_num($num);
+
+        next unless $conn;
+
+        # Compression always 
+        _set_compression($conn, '');
+
+        $conn->set_multi(@{$data{$num}});
+    }
+
+    return;
 }
 
 ### UTILITY METHODS ###
@@ -726,83 +703,90 @@ sub hash_to_array {
     return \@ret;
 }
 
-package LJ::MemCache::Fast;
+### PRIVATE FUNCTIONS ###
 
-BEGIN { our @ISA = qw( Cache::Memcached::Fast ); }
-
-sub can_use {
-    return unless LJ::is_enabled('cache_memcached_fast');
-
-    eval { require Cache::Memcached::Fast };
-    return if $@;
-
-    return 1;
+sub _hashfunc {
+    my ($what) = @_;
+    return ( String::CRC32::crc32($what) >> 16 ) & 0x7fff;
 }
 
-sub new {
-    my ( $class, $opts ) = @_;
+sub _connect {
+    my ($server) = @_;
 
-    return $class->SUPER::new({
-        %$opts,
-        'compress_threshold' => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
-        'connect_timeout'    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
-        'nowait'             => 1,
-        'max_failures'       => 1,
-        'failure_timeout'    => 25,
-    });
-}
+    if ($connections{$server} && $connections_pid{$server} ne $$) {
+        warn "Connection to $server was established from other PID: old=$connections_pid{$server}, cur=$$"
+            if $LJ::IS_DEV_SERVER;
 
-sub can_gets { 1 }
-
-package LJ::MemCache::PP;
-
-BEGIN { our @ISA = qw( Cache::Memcached ); }
-
-sub can_use {
-    eval { require Cache::Memcached };
-    1;
-}
-
-sub new {
-    my ( $class, $opts ) = @_;
-
-    my $conn = $class->SUPER::new({
-        %$opts,
-        'compress_threshold' => $LJ::MEMCACHE_COMPRESS_THRESHOLD,
-        'connect_timeout'    => $LJ::MEMCACHE_CONNECT_TIMEOUT,
-        'nowait'             => 1,
-
-        # Cache::Memcached specific options
-        'debug'              => $LJ::DEBUG{'memcached'},
-        'pref_ip'            => \%LJ::MEMCACHE_PREF_IP,
-        'cb_connect_fail'    => $LJ::MEMCACHE_CB_CONNECT_FAIL,
-        'readonly'           => $ENV{'LJ_MEMC_READONLY'} ? 1 : 0,
-    });
-
-    if ($LJ::DB_LOG_HOST) {
-        $conn->set_stat_callback(sub {
-            my ($stime, $etime, $host, $action) = @_;
-
-            LJ::blocking_report( $host, 'memcache', $etime - $stime,
-                                 "memcache: $action" );
-        });
+        my $old_handler = delete $connections{$server};
+        $old_handler->disconnect_all;
     }
 
-    return $conn;
+    unless ( exists $connections{$server} ) {
+        init()
+            unless defined $used_handler;
+
+        $connections{$server}
+            = $used_handler->new({ 'servers' => [ $server ] });
+        $connections_pid{$server} = $$;
+    }
+
+    return $connections{$server};
 }
 
-sub can_gets { 0 }
+sub _profile {
+    my ( $funcname, $key, $result ) = @_;
 
-sub append {
-    return Cache::Memcached::_set( 'append', @_ );
+    return unless $enable_profiling;
+
+    unless ( defined $logfile ) {
+        open $logfile, '>>', "$ENV{LJHOME}/var/memcache-profile/$$.log"
+            or die "cannot open log: $!";
+
+        $logfile->autoflush;
+    }
+
+    $key =~ s/\b\d+\b/?/g;
+
+    print $logfile "$funcname($key) " .
+                   ( defined $result ? '[hit]' : '[miss]' ) .
+                   "\n";
 }
 
-sub prepend {
-    return Cache::Memcached::_set( 'prepend', @_ );
+sub _get_server_num {
+    my ($key) = @_;
+    my $hashval    = ref $key eq 'ARRAY' ? int $key->[0] : _hashfunc($key);
+    my $num_server = $hashval % scalar(@LJ::MEMCACHE_SERVERS);
+
+    return $num_server;
 }
 
-sub cas {
-    return Cache::Memcached::_set( 'cas', @_ );
+sub _get_connection {
+    my ($key) = @_;
+    my $num_server = _get_server_num($key);
+
+    return _get_connection_by_num($num_server);
+}
+
+sub _set_compression {
+    my ( $conn, $key ) = @_;
+
+    # currently, we aren't compressing the value only if we get to work
+    # with a key as follows:
+    #
+    #   1. "talk2:$journalu->{'userid'}:L:$itemid"
+    if ( $key =~ /^talk2:/ ) {
+        $conn->enable_compress(0);
+        return;
+    }
+
+    $conn->enable_compress(1);
+}
+
+sub _get_connection_by_num {
+    my ($num) = @_;
+    my $server = $LJ::MEMCACHE_SERVERS[$num];
+
+    return _connect($server);
 }
 
 1;

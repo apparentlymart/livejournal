@@ -352,7 +352,7 @@ sub RecentPage
             'real_journalid' => $repost_entry_obj ? $repost_entry_obj->journalid : undef,
             'real_itemid'    => $repost_entry_obj ? $repost_entry_obj->jitemid : undef,
         });
-        
+       
         $all_users{$entry_obj->posterid} = $entry_obj->poster;
         
         push @{$p->{'entries'}}, $entry;
@@ -411,6 +411,17 @@ sub RecentPage
         }
     }
 
+    # LJ Art - LJSUP-17205 Need ability to save city for user and get it from S2
+    my $prefix_town = LJ::Lang::get_text('ru', "ljart.update.event.prefix.town");
+    my $current_tags = $opts->{'tags'} || [];
+    for (@$current_tags) {
+        if (my ($town) = $_ =~ m/^$prefix_town:\s(.*?)$/) {
+            LJ::Request->set_cookie(ljarttown => $town);
+            LJ::Request->send_cookies;
+            last;
+        }
+    }
+ 
     $p->{'nav'} = $nav;
     return $p;
 }

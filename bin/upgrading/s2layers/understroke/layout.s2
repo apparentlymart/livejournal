@@ -507,7 +507,9 @@ function _Header {
 	<meta name="viewport" id="iphone-viewport" content="width=480, maximum-scale=0.6667" />
 	<title>$title</title>
 </head>
-<body class="$bc">"""; if (viewer_sees_control_strip()) { """<div class="controlstrip">"""; $p->print_control_strip(); "</div>"; } """
+<body class="$bc">"""; if (viewer_sees_control_strip()) { """<div class="controlstrip">"""; $p->print_control_strip(); "</div>"; } 
+$this->print_pagewide_slot();
+"""
 <div id="Page" class="$bc">
 """;
 }

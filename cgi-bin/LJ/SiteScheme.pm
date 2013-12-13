@@ -36,7 +36,7 @@ sub render_page {
 
     if ( LJ::is_web_context() ) {
         LJ::Request->notes ( using_site_scheme => 1 );
-        $params->{'lj_res_in_bottom'}      = LJ::Request->get_param('res_bottom')? 1 : 0;
+        $params->{'lj_res_in_bottom'}      = $args->{'lj_res_in_bottom'} || (LJ::Request->get_param('res_bottom') ? 1 : 0);
         $params->{'lj_res_includes'}       = LJ::res_includes();
         $params->{'lj_res_includes_basic'} = LJ::res_includes({ only_needed => 1 });
         $params->{'lj_res_templates'}      = LJ::res_includes({ only_needed => 1, only_tmpl   => 1 });

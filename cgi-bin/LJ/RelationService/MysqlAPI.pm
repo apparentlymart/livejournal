@@ -31,15 +31,102 @@ sub create_relation_to {
     my %opts   = @_;
 
     if ( $type eq 'F' ) {
-        return $class->_create_relation_to_type_f($u, $target, %opts);
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return $class->_create_relation_to_type_f_new($u, $target, %opts);
+        } else {
+            return $class->_create_relation_to_type_f_old($u, $target, %opts);
+        }
     } elsif ($type eq 'R') {
         return $class->_create_relation_to_type_r($u, $target, %opts);
+    } elsif ($type eq 'PC') {
+        return $class->_create_relation_to_type_f_old($u, $target, %opts);
     } else {
         return $class->_create_relation_to_type_other($u, $target, $type, %opts);
     }
 }
 
-sub _create_relation_to_type_f {
+sub _create_relation_to_type_f_new {
+    my $class  = shift;
+    my $u      = shift;
+    my $target = shift;
+    my %opts   = @_;
+
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return 0 unless $uid;
+    return 0 unless $tid;
+
+    my $dbh = LJ::get_db_writer();
+
+    return 0 unless $dbh;
+
+    $dbh->begin_work();
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    $dbh->do(qq[
+            REPLACE INTO friends  (
+                userid, friendid, groupmask
+            ) VALUES (
+                ?, ?, 1
+            )
+        ],
+        undef, 
+        $uid,
+        $tid
+    );
+
+    if ($dbh->err) {
+        $dbh->rollback();
+        return 0;
+    }
+
+    $dbh->do(qq[
+            REPLACE INTO friends  (
+                userid, friendid, groupmask
+            ) VALUES (
+                ?, ?, 1
+            )
+        ],
+        undef, 
+        $tid,
+        $uid
+    );
+
+    if ($dbh->err) {
+        $dbh->rollback();
+        return 0;
+    }
+
+    $dbh->commit();
+
+    if ($dbh->err) {
+        return 0;
+    }
+
+    # Invalidate user memcache
+    LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
+
+    # Invalidate target memcache
+    LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:F:$tid:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
+    
+    return 1;
+}
+
+sub _create_relation_to_type_f_old {
     my $class  = shift;
     my $u      = shift;
     my $target = shift;
@@ -78,17 +165,21 @@ sub _create_relation_to_type_f {
         return 0;
     }
 
-    # invalidate memcache of friends
+    # Invalidate user memcache
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
 
+    # Invalidate target memcache
     LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
-
-    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
-
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:F:$tid:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
     
     return 1;
 }
@@ -153,6 +244,7 @@ sub _create_relation_to_type_r {
     # Invalidate user cache
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid"]);
 
     # Invalidate target cache
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$tid"]);
@@ -194,8 +286,8 @@ sub _create_relation_to_type_other {
     LJ::_set_rel_memcache($uid, $tid, $type, 1);
 
     # drop list rel list
-    LJ::MemCacheProxy::delete("rlist:dst:$type:" . $uid);
-    LJ::MemCacheProxy::delete("rlist:src:$type:" . $tid);
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$tid");
 
     return 1;
 }
@@ -254,17 +346,21 @@ sub _remove_relation_to_type_f {
         return 0;
     }
 
-    # invalidate memcache of friends
+    # Invalidate user memcache
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
 
+    # Invalidate target memcache
     LJ::MemCacheProxy::delete([$tid, "friendofs:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
-
-    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
-
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:F:$tid:$uid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
 
     return 1;
 }
@@ -327,6 +423,7 @@ sub _remove_relation_to_type_r {
     # Invalidate user cache
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid"]);
 
     # Invalidate target cache
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$tid"]);
@@ -372,12 +469,12 @@ sub _remove_all_relations_destinations_to_type_other {
     }
 
     # Invalidate cache
-    LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
-    LJ::MemCacheProxy::delete("rlist:src:$type:$uid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$uid");
 
     foreach my $tid (@$rels) {
         LJ::MemCacheProxy::delete("rel:$uid:$tid:$type");
-        LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$tid");
     }   
 
     return 1;
@@ -421,12 +518,12 @@ sub _remove_all_relations_sources_to_type_other {
     }
 
     # Invalidate cache
-    LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
-    LJ::MemCacheProxy::delete("rlist:dst:$type:$tid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$tid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$tid");
 
     foreach my $uid (@$rels) {
         LJ::MemCacheProxy::delete("rel:$uid:$tid:$type");
-        LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid");
     }   
 
     return 1;
@@ -474,8 +571,8 @@ sub _remove_relation_to_type_other {
     LJ::_set_rel_memcache($uid, $tid, $type, 0);
 
     # Invalidate cache
-    LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
-    LJ::MemCacheProxy::delete("rlist:src:$type:$tid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid");
+    LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$tid");
 
     return 1;
 }
@@ -526,8 +623,8 @@ sub _mod_rel_multi {
         next unless $userid;
         next unless $targetid;
 
-        LJ::MemCacheProxy::delete("rlist:src:$type:$targetid");
-        LJ::MemCacheProxy::delete("rlist:dst:$type:$userid");
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$targetid");
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$userid");
 
         push @reluser, [$userid, $targetid, $type];
     }
@@ -709,15 +806,108 @@ sub _find_relation_destinations {
     my %opts  = @_;
 
     if ( $type eq 'F' ) {
-        return $class->_find_relation_destinations_type_f($u, %opts);
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return $class->_find_relation_destinations_type_f_new($u, %opts);
+        } else {
+            return $class->_find_relation_destinations_type_f_old($u, %opts);
+        }
     } elsif ($type eq 'R')  {
         return $class->_find_relation_destinations_type_r($u, %opts);
+    } elsif ($type eq 'PC') {
+        return $class->_find_relation_destinations_type_f_old($u, %opts);
     } else {
         return $class->_find_relation_destinations_type_other($u, $type, %opts);
     }
 }
 
-sub _find_relation_destinations_type_f {
+sub _find_relation_destinations_type_f_new {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $force  = $opts{force};
+    my $limit  = $opts{limit} || 50000;
+    my $memkey = [$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"];
+
+    ## check cache first
+    unless ($force) {
+        if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+            my ($slimit, @uids) = unpack("N*", $pack);
+            # value in memcache is good if stored limit (from last time)
+            # is >= the limit currently being requested.  we just may
+            # have to truncate it to match the requested limit
+
+            if ($limit) {
+                if ($slimit >= $limit) {
+                    if (@uids > $limit) {
+                        @uids = @uids[0..$limit-1];
+                    }
+
+                    return \@uids;
+                }
+            }
+
+            # value in memcache is also good if number of items is less
+            # than the stored limit... because then we know it's the full
+            # set that got stored, not a truncated version.
+            return \@uids if @uids < $slimit;
+        }
+    }
+
+    my $dbh  = LJ::get_db_writer();
+
+    return unless $dbh;
+
+    my $sqlimit = $limit ? " LIMIT $limit" : '';
+    my $uids    = $dbh->selectcol_arrayref(qq[
+            SELECT
+                f1.friendid
+            FROM
+                friends as f1
+            LEFT JOIN
+                friends as f2
+            ON
+                f1.friendid = f2.userid
+            WHERE
+                f1.userid = ?
+            AND
+                f2.friendid = ?
+            $sqlimit
+        ],
+        undef,
+        $uid,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    my @uids = @$uids;
+
+    # We cant cache more then 200000 (~ 1MB)
+    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
+    }
+
+    my $pack = pack 'N*', ($limit, @uids);
+
+    if ($pack) {
+        if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+            warn "TO MUCH pack [uid=$uid]. max count must be less";
+        } else {
+            LJ::MemCacheProxy::set($memkey, $pack, 3600);
+        }
+    }
+
+    return $uids;
+}
+
+sub _find_relation_destinations_type_f_old {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
@@ -811,7 +1001,7 @@ sub _find_relation_destinations_type_r {
     my $val = LJ::MemCacheProxy::get($key);
 
     if ($val) {
-        my @ids = unpack 'V*', $val;
+        my @ids = unpack 'N*', $val;
         return \@ids;
     }
 
@@ -835,9 +1025,7 @@ sub _find_relation_destinations_type_r {
         return;
     }
 
-    if (my $pack = pack 'V*', @$uids) {
-        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
-    }
+    LJ::MemCacheProxy::set($key, (pack 'N*', @$uids), $MEMCACHE_RELS_TIMECACHE);
 
     return $uids;
 }
@@ -852,11 +1040,11 @@ sub _find_relation_destinations_type_other {
 
     return unless $uid;
 
-    my $key = "rlist:dst:$type:$uid";
+    my $key = [$uid, "$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid"];
     my $val = LJ::MemCacheProxy::get($key);
 
     if ($val) {
-        my @ids = unpack('V*', $val);
+        my @ids = unpack('N*', $val);
         return \@ids;
     }
 
@@ -882,9 +1070,7 @@ sub _find_relation_destinations_type_other {
     );
 
     unless ($opts{dont_set_cache}) {
-        if (my $packed = pack('V*', @$uids)) {
-            LJ::MemCacheProxy::set($key, $packed, $MEMCACHE_RELS_TIMECACHE);
-        }
+        LJ::MemCacheProxy::set($key, pack('N*', @$uids), $MEMCACHE_RELS_TIMECACHE);
     }
 
     return $uids;
@@ -918,15 +1104,108 @@ sub _find_relation_sources {
     my %opts  = @_;
 
     if ($type eq 'F') {
-        return $class->_find_relation_sources_type_f($u, %opts);
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return $class->_find_relation_sources_type_f_new($u, %opts);
+        } else {
+            return $class->_find_relation_sources_type_f_old($u, %opts);
+        }
     } elsif ($type eq 'R') {
         return $class->_find_relation_sources_type_r($u, %opts);
+    } elsif ($type eq 'PC') {
+        return $class->_find_relation_sources_type_f_old($u, %opts);
     } else {
         return $class->_find_relation_sources_type_other($u, $type, %opts);
     }
 }
 
-sub _find_relation_sources_type_f {
+sub _find_relation_sources_type_f_new {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+    
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my $force  = $opts{force};
+    my $limit  = $opts{limit} || 50000;
+    my $memkey = [$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$uid"];
+
+    ## check cache first
+    unless ($force) {
+        if (my $pack = LJ::MemCacheProxy::get($memkey)) {
+            my ($slimit, @uids) = unpack("N*", $pack);
+            # value in memcache is good if stored limit (from last time)
+            # is >= the limit currently being requested.  we just may
+            # have to truncate it to match the requested limit
+
+            if ($limit) {
+                if ($slimit >= $limit) {
+                    if (@uids > $limit) {
+                        @uids = @uids[0..$limit-1];
+                    }
+
+                    return \@uids;
+                }
+            }
+
+            # value in memcache is also good if number of items is less
+            # than the stored limit... because then we know it's the full
+            # set that got stored, not a truncated version.
+            return \@uids if @uids < $slimit;
+        }
+    }
+
+    my $dbh = LJ::get_db_writer();
+
+    return unless $dbh;
+
+    my $sqlimit = $limit ? " LIMIT $limit" : '';
+    my $uids    = $dbh->selectcol_arrayref(qq[
+            SELECT
+                f1.userid
+            FROM
+                friends as f1
+            LEFT JOIN
+                friends as f2
+            ON
+                f1.userid = f2.friendid
+            WHERE
+                f1.friendid = ?
+            AND
+                f2.userid = ?
+            $sqlimit
+        ],
+        undef,
+        $uid,
+        $uid
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    my @uids = @$uids;
+
+    # We cant cache more then 200000 (~ 1MB)
+    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
+        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
+    }
+
+    my $pack = pack 'N*', ($limit, @uids);
+
+    if ($pack) {
+        if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+            warn "TO MUCH pack [uid=$uid]. max count must be less";
+        } else {
+            LJ::MemCacheProxy::set($memkey, $pack, 3600);
+        }
+    }
+
+    return $uids;
+}
+
+sub _find_relation_sources_type_f_old {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
@@ -1018,7 +1297,7 @@ sub _find_relation_sources_type_r {
     return unless $uid;
 
     my $force  = $opts{force};
-    my $limit  = int($opts{limit} || 50000);
+    my $limit  = $opts{limit} || 50000;
     my $memkey = [$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:R:$uid"];
 
     unless ($force) {
@@ -1093,11 +1372,11 @@ sub _find_relation_sources_type_other {
 
     return unless $uid;
 
-    my $key = "rlist:src:$type:$uid";
+    my $key = [$uid, "$MEMCACHE_RELIST_KEY_PREFIX:src:$type:$uid"];
     my $val = LJ::MemCacheProxy::get($key);
 
     if ($val) {
-        my @ids = unpack('V*', $val);
+        my @ids = unpack('N*', $val);
         return \@ids;
     }
 
@@ -1123,9 +1402,7 @@ sub _find_relation_sources_type_other {
     );
 
     unless ($opts{dont_set_cache}) {
-        if (my $packed = pack('V*', @$uids)) {
-            LJ::MemCacheProxy::set($key, $packed, $MEMCACHE_RELSOF_TIMECACHE);
-        }
+        LJ::MemCacheProxy::set($key, pack('N*', @$uids), $MEMCACHE_RELSOF_TIMECACHE);
     }
 
     return $uids;
@@ -1138,16 +1415,109 @@ sub load_relation_destinations {
     my %opts  = @_;
 
     if ($type eq 'F') {
-        return $class->_load_relation_destinations_f($u, %opts);
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return $class->_load_relation_destinations_f_new($u, %opts);
+        } else {
+            return $class->_load_relation_destinations_f_old($u, %opts);
+        }
     } elsif ($type eq 'R') {
         return $class->_load_relation_destinations_r($u, %opts);
+    } elsif ($type eq' PC') {
+        return $class->_load_relation_destinations_f_old($u, %opts);
     }
 
     return {};
 }
 
-## friends rows
-sub _load_relation_destinations_f {
+sub _load_relation_destinations_f_new {
+    my $class = shift;
+    my $u     = shift;
+    my %opts  = @_;
+
+    my $uid = $u->id;
+
+    return unless $uid;
+
+    my %res  = ();
+    my $key  = [$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"];
+    my @data = ();
+
+    if (my $val = LJ::MemCacheProxy::get($key)) {
+        @data = unpack 'N*', $val;
+    } else {
+        return {} if $opts{memcache_only};
+
+        my $dbh = LJ::get_db_writer();
+
+        return unless $dbh;
+
+        my $name = "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid";
+        my $lock = LJ::get_lock($dbh, "global", $name);
+
+        return unless $lock;
+
+        # in lock, try memcache
+        if (my $val = LJ::MemCacheProxy::get($key)) {
+            @data = unpack 'N*', $val;
+        } else {
+            my $data = $dbh->selectcol_arrayref(qq[
+                    SELECT
+                        f1.friendid, f1.groupmask
+                    FROM
+                        friends as f1
+                    LEFT JOIN
+                        friends as f2
+                    ON
+                        f1.friendid = f2.userid
+                    WHERE
+                        f1.userid = ?
+                    AND
+                        f2.friendid = ?
+                ],
+                {
+                    Columns => [1,2]
+                },
+                $uid,
+                $uid
+            );
+
+            if ($dbh->err) {
+                LJ::release_lock($dbh, "global", $name);
+                return;
+            }
+
+            @data = @$data;
+
+            my $pack = pack 'N*', @$data;
+
+            if ($pack) {
+                if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
+                    warn "TO MUCH pack [uid=$uid]. max count must be less";
+                } else {
+                    LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
+                }
+            }
+        }
+
+        # finished with lock, release it
+        LJ::release_lock($dbh, "global", $name);
+    }
+
+    my $mask  = $opts{mask};
+    my $count = $#data;
+
+    foreach (my $i = 0; $i < $count; $i += 2) {
+        next if $mask && ! ($data[$i+3] + 0 & $mask + 0);
+
+        $res{$data[$i]} = {
+            groupmask => $data[$i+1],
+        };
+    }
+
+    return \%res;
+}
+
+sub _load_relation_destinations_f_old {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
@@ -1254,7 +1624,7 @@ sub _load_relation_destinations_r {
     return unless $uid;
 
     my %res  = ();
-    my $key  = [$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"];
+    my $key  = [$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid"];
     my @data = ();
 
     if (my $val = LJ::MemCacheProxy::get($key)) {
@@ -1266,7 +1636,7 @@ sub _load_relation_destinations_r {
 
         return unless $dbh;
 
-        my $name = "$MEMCACHE_RELS_KEY_PREFIX:R:$uid";
+        my $name = "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid";
         my $lock = LJ::get_lock($dbh, "user", $name);
 
         return unless $lock;
@@ -1298,11 +1668,7 @@ sub _load_relation_destinations_r {
 
             @data = @$data;
 
-            my $pack = pack 'N*', @data;
-
-            if ($pack) {
-                LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_RELS_TIMECACHE);
-            }
+            LJ::MemCacheProxy::set($key, (pack 'N*', @data), $MEMCACHE_RELS_TIMECACHE);
         }
 
         LJ::release_lock($dbh, "user", $name);
@@ -1408,9 +1774,7 @@ sub _find_relation_attributes_r {
 
     my $pack = pack 'N', $row->{filtermask};
 
-    if ($pack) {
-        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
-    }
+    LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
 
     return $row;
 }
@@ -1469,9 +1833,7 @@ sub _find_relation_attributes_f {
         $row->{bgcolor}
     );
 
-    if ($pack) {
-        LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
-    }
+    LJ::MemCacheProxy::set($key, $pack, $MEMCACHE_REL_TIMECACHE);
 
     return $row;
 }
@@ -1549,9 +1911,8 @@ sub _update_relation_attributes_f {
 
     # invalidate memcache of friends
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
     
     return 1;
 }
@@ -1594,8 +1955,8 @@ sub _update_relation_attributes_r {
     }
 
     # Invalidate
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
+    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid"]);
 
     return $cnt;
 }
@@ -1629,11 +1990,11 @@ sub delete_and_purge_completely {
         );
     
         foreach my $uid (@rels) {
-            LJ::MemCacheProxy::delete("rlist:dst:$type:$uid");
+            LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:$uid");
         }
 
-        LJ::MemCacheProxy::delete("rlist:src:$type:" . $u->id);
-        LJ::MemCacheProxy::delete("rlist:dst:$type:" . $u->id);
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:src:$type:" . $u->id);
+        LJ::MemCacheProxy::delete("$MEMCACHE_RELIST_KEY_PREFIX:dst:$type:" . $u->id);
     }
 
     return 1;
@@ -1695,12 +2056,11 @@ sub update_relation_attribute_mask_for_all {
         my @ids = $class->find_relation_destinations($u, 'F', %opts);
 
         foreach my $tid (@ids) {
-            LJ::MemCacheProxy::delete([$uid, "frgmask:$uid:$tid"]);
             LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:F:$uid:$tid"]);
         }
 
         LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
-        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
+        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
     }
 
     if ($type eq 'R') {
@@ -1732,7 +2092,7 @@ sub update_relation_attribute_mask_for_all {
             LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:R:$uid:$tid"]);
         }
 
-        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
+        LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:R:$uid"]);
     }
 
     return 1;
@@ -1744,7 +2104,8 @@ sub _filter {
     my ($class, $u, $ids, $filters) = @_;
 
     return unless $filters;
-
+    return unless ref $filters eq 'ARRAY';
+    
     foreach my $filter (@$filters) {
         my $type   = $filter->{type};
         my $edge   = $filter->{edge};

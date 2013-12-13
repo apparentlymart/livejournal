@@ -347,12 +347,12 @@ function captionbar (Page p, bool top) {
     if ($top and $*counter_code != "") {
         """<br />$*counter_code""";
     }
-    "
+    """
         </td>
       </tr>
     </table>
   </td>
-</tr></table>";
+</tr></table>""";
 }
 
 function captionbar (Page p) {
@@ -371,7 +371,11 @@ function print_stylesheet ()
     }
     """/* Tabular Indent Stylesheet */
 body {
+    margin: 0;
     background-color:  $*body_bgcolor;
+}
+.wrapper {
+  margin: 10px 0;
 }
 .captionbar {
     width:             100%;
@@ -464,6 +468,8 @@ function Page::print ()
     """;
 
     $this->print_control_strip();
+    $this->print_pagewide_slot();
+    """<div class="wrapper">""";
     if ($margin == "") {
         print safe """<table style="width: $*content_width;" align="$*content_alignment">""";
     } else {
@@ -507,6 +513,7 @@ function Page::print ()
     "</td></tr></table>";
 
     """
+    </div>
   </body>
 </html>
     """;

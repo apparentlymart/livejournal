@@ -54,7 +54,7 @@ body<=
     }
 
     my $cid = $c->{'userid'};
-    
+
     my $view_only_mode = 0;
     my $lang = $remote->prop('browselang') || $LJ::DEFAULT_LANG;
     # is $remote an admin?
@@ -116,8 +116,8 @@ body<=
 
         my $log = '';
         my $poll_id = LJ::create_supermaintainer_election_poll (
-                comm_id      => $c->userid, 
-                maint_list   => \@maintainers, 
+                comm_id      => $c->userid,
+                maint_list   => \@maintainers,
                 log          => \$log,
                 no_job       => 0,
                 check_active => 1,
@@ -407,7 +407,17 @@ body<=
         # delete members
         if (%{$delete{'member'}}) {
             # TAG:FR:bml_comm_members:del_members
-            LJ::remove_friend($cid, [ keys %{$delete{'member'}} ]);
+            if (my $cu = LJ::load_userid($cid)) {
+                my $members = LJ::load_userids(
+                    keys %{$delete{'member'}}
+                );
+
+                foreach my $mu (values %$members)  {
+                    if ($mu) {
+                        $cu->remove_friend($mu);
+                    }
+                }
+            }
         }
 
         # get all the maintainers who were removed
@@ -436,7 +446,7 @@ body<=
                             sitename        => $LJ::SITENAME,
                             siteroot        => $LJ::SITEROOT,
                         });
-    
+
             my $plain = LJ::Lang::get_text($lang, 'community.members.maintainer.remove.email_plain', undef, {
                             sitenameshort   => $LJ::SITENAMESHORT,
                             user            => $mailusername,
@@ -453,7 +463,7 @@ body<=
             $sendmail->($delmaintu, $html, $plain, $subject);
         }
 
-        
+
 
         # delete other rel edges
         LJ::clear_rel_multi(
@@ -544,7 +554,7 @@ body<=
                            (map { [$cid, $_, 'M'] } keys %{$add{moderate}   || {}}),
                            (map { [$cid, $_, 'N'] } keys %{$add{preapprove} || {}}),
                            );
-                           
+
         #if delete admin permissions need to unsubscribe user from CommunityMantioned
         foreach my $uid (keys %{$delete{admin} || {}}) {
             my $u = LJ::load_userid($uid);
@@ -572,8 +582,8 @@ body<=
             push @msgs, LJ::ljuser($users{$id}) . ":<ul>$str</ul>" if $str;
         }
 
-        my $ad_box = LJ::get_ads({ 
-            location    => 'bml.community.members/main', 
+        my $ad_box = LJ::get_ads({
+            location    => 'bml.community.members/main',
             ljadwrapper => 1,
             below_ad    => LJ::CProd->full_box_for($remote, width => 300),
         });
@@ -623,22 +633,18 @@ body<=
 
     # now get lists of: members, admins, able to post, moderators
     my %users = ();
+    my $friends = $c->members();
+
+    foreach my $mu (values %$friends) {
+        if (my $id = $mu->id) {
+            $users{$id}->{'name'} = $mu->user;
+            $users{$id}->{'userid'} = $mu->id;
+            $users{$id}->{'member'} = 1;
+        }
+    }
 
     # need a dbr now
     my $dbr = LJ::get_db_reader();
-
-    # get community members
-    # TAG:FR:bml_comm_members:get_members
-    my $sth = $dbr->prepare("SELECT u.userid, u.user FROM useridmap u, friends f " .
-                            "WHERE u.userid=f.friendid AND f.userid=?");
-    $sth->execute($cid);
-
-    while (my ($id, $user) = $sth->fetchrow_array) {
-        $users{$id}->{'userid'} = $id;
-        $users{$id}->{'name'} = $user;
-        $users{$id}->{'member'} = 1;
-    }
-
     my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, useridmap u " .
                             "WHERE r.targetid = u.userid AND r.userid=? AND r.type IN ('A','P','M','N')");
     $sth->execute($cid);
@@ -726,8 +732,8 @@ body<=
     if ($remote->can_super_manage($c)) {
         $ret .= BML::ml('.you.supermaintainer', { comm => LJ::ljuser($c->user) });
         my $ids = LJ::load_rel_user($c->userid, 'A');
-        
-        my @users = map { 
+
+        my @users = map {
                             my $u = LJ::load_userid($_);
                             {
                                 text => $u->user,
@@ -756,8 +762,8 @@ body<=
                     $show_owner = 1 if $remote && ($item->{item} =~ m#<lj user='$remote->{user}'>#);
                 }
             }
-            $ret .= "<br>" . LJ::Lang::ml('community.election.owner.election.link', { 
-                                    community   => LJ::ljuser($c), 
+            $ret .= "<br>" . LJ::Lang::ml('community.election.owner.election.link', {
+                                    community   => LJ::ljuser($c),
                                     href        => "href='$LJ::SITEROOT/community/election.bml?authas=$c->{user}'"
                             }) . "<br>" if $show_owner;
         }
@@ -814,7 +820,7 @@ body<=
                                         : (),
                                    });
             $ret .= LJ::html_hidden({ 'name' => "edit_$_->{'userid'}_$key",
-                                      value => $_->{$key} ? 'on' : '' 
+                                      value => $_->{$key} ? 'on' : ''
                                     }) if ($username ne $remote->user) && ($key =~ /admin/) && (%disabled || %disabled_maint);
             $wstr .= $attrshort_r{$key} if $_->{$key};
             $ret .= "</td>";

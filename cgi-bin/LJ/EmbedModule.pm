@@ -194,7 +194,7 @@ sub parse_module_embed {
     return if LJ::conf_test($LJ::DISABLED{embed_module});
 
     # fast track out if we don't have to expand anything
-    return unless $$postref =~ /lj\-embed|embed|object|iframe/i;
+    return unless $$postref =~ /lj\-embed|embed|object|iframe|video|audio/i;
 
     # do we want to replace with the lj-embed tags or iframes?
     my $expand = $opts{expand};
@@ -315,7 +315,7 @@ sub parse_module_embed {
                     $newtxt .= $embed_ext;
                 }
 
-            } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') && $type eq 'S') {
+            } elsif (($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe' || $tag eq 'video' || $tag eq 'audio') && $type eq 'S') {
                 # <object> or <embed>
                 # switch to IMPLICIT state unless it is a self-closed tag
                 unless ($attr->{'/'}) {
@@ -333,7 +333,7 @@ sub parse_module_embed {
                 $newtxt .= $reconstructed;
             }
         } elsif ($state == IMPLICIT) {
-            if ($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe') {
+            if ($tag eq 'object' || $tag eq 'embed' || $tag eq 'iframe' || $tag eq 'video' || $tag eq 'audio') {
                 if ($type eq 'E') {
                     # </object> or </embed>
                     # update tag balance, but only if we have a valid balance up to this moment
@@ -618,6 +618,9 @@ sub reconstruct {
                     next;
                 }
             }
+
+            ## Remove autoplay from video and audio tag
+            next if ($tag eq 'video' || $tag eq 'audio') && $name eq 'autoplay';
 
             my $tribute = " $name=\"" . LJ::ehtml($attr->{$name}) . "\"";
 

@@ -27,7 +27,7 @@ use Class::Autouse qw(
                       LJ::MemCacheProxy
                       LJ::Entry::Repost
                       LJ::Tags
-                      LJ::User::FriendGroups
+                      LJ::User::Groups
                       LJ::RelationService
                       );
 
@@ -4828,23 +4828,8 @@ sub editfriends {
 
     ## first, figure out who the current friends are to save us work later
     my $error_flag      = 0;
-    my $friend_count    = 0;
+    my $friend_count    = $u->friends_count();
     my $friends_changed = 0;
-
-    $friend_count = $dbh->selectrow_array(qq[
-            SELECT
-                COUNT(*)
-            FROM
-                useridmap u,
-                friends f
-            WHERE
-                u.userid = f.friendid
-            AND
-                f.userid = ?
-        ],
-        undef,
-        $userid
-    );
 
     # perform the deletions
   DELETEFRIEND:
@@ -4921,8 +4906,10 @@ sub editfriends {
 
         my $err;
 
-        return $fail->(104, "$err")
-            unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count, friend => $fa });
+        unless (LJ::is_enabled('new_friends_and_subscriptions')) {
+            return $fail->(104, "$err")
+                unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count, friend => $fa });
+        }
 
         # force bit 0 on.
         if ($gmask) {
@@ -4936,8 +4923,14 @@ sub editfriends {
             defaultview => 1
         };
 
-        unless ($u->add_friend($row, $opts)) {
-            next ADDFRIEND;
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            unless ($u->to_offer_friendship($row)) {
+                next ADDFRIEND;
+            }
+        } else {
+            unless ($u->add_friend($row, $opts)) {
+                next ADDFRIEND;
+            }
         }
 
         $friend_count++;
@@ -5075,7 +5068,7 @@ sub editfriendgroups {
         };
     }
 
-    LJ::User::FriendGroups->update_groups(
+    LJ::User::Groups->update_groups(
         $u, \@foradd
     );
 
@@ -5085,7 +5078,7 @@ sub editfriendgroups {
         $req->{'delete'}
     };
 
-    LJ::User::FriendGroups->remove_groups(
+    LJ::User::Groups->remove_groups(
         $u, \@fordelete
     );
 
@@ -5098,13 +5091,14 @@ sub editfriendgroups {
         next unless $mask;
         next unless $friendid;
 
-        push @forupdate, {
-            id => $friendid,
-            groupmask => $mask,
-        };
+        my $friend = LJ::load_userid($friendid);
+
+        push @forupdate, [
+            $friend, $mask
+        ];
     }
 
-    LJ::User::FriendGroups->update_users_groupmask(
+    LJ::User::Groups->update_groupmasks(
         $u, \@forupdate
     );
 
@@ -5176,12 +5170,11 @@ sub sessiongenerate {
 sub list_friends {
     my ($u, $opts) = @_;
     my $us;
-    my $rels;
 
     unless ($opts->{'friendof'}) {
-        $rels = LJ::RelationService->load_relation_destinations($u, 'F');
-
-        $us = LJ::load_userids(keys %$rels);
+        $us = $u->friends(
+            with_attr => 1
+        );
     } else {
         $us = $u->friendsof(
             filters => [{
@@ -5194,68 +5187,71 @@ sub list_friends {
     my $res      = [];
     my $limitnum = $opts->{'limit'} + 0;
 
-    foreach my $u (values %$us) {
+    foreach my $f (values %$us) {
         next if $opts->{'friendof'} && $u->{'statusvis'} ne 'V';
 
         my $r = {
-            'username' => $u->{'user'},
-            'fullname' => $u->{'name'},
+            'username' => $f->{'user'},
+            'fullname' => $f->{'name'},
         };
 
-        if (my $i = $u->identity) {
-            $r->{'identity_url'}     = $i->url($u);
+        if (my $i = $f->identity) {
+            $r->{'identity_url'}     = $i->url($f);
             $r->{'identity_type'}    = $i->pretty_type;
             $r->{'identity_value'}   = $i->value;
-            $r->{'identity_display'} = $u->display_name;
+            $r->{'identity_display'} = $f->display_name;
         }
 
         if ($opts->{'includebdays'} &&
-            $u->{'bdate'} &&
-            $u->{'bdate'} ne "0000-00-00" &&
-            $u->can_show_full_bday)
+            $f->{'bdate'} &&
+            $f->{'bdate'} ne "0000-00-00" &&
+            $f->can_show_full_bday)
         {
-            $r->{'birthday'} = $u->{'bdate'};
+            $r->{'birthday'} = $f->{'bdate'};
         }
 
-        if ($u->{'statusvis'} ne 'V') {
+        if ($f->{'statusvis'} ne 'V') {
             $r->{"status"} = {
                 'D' => "deleted",
                 'S' => "suspended",
                 'X' => "purged",
-            }->{$u->{'statusvis'}};
+            }->{$f->{'statusvis'}};
         }
 
-        if ($u->{'journaltype'} ne 'P') {
+        if ($f->{'journaltype'} ne 'P') {
             $r->{"type"} = {
                 'C' => 'community',
                 'Y' => 'syndicated',
                 'N' => 'news',
                 'S' => 'shared',
                 'I' => 'identity',
-            }->{$u->{'journaltype'}};
+            }->{$f->{'journaltype'}};
         }
 
         if ($opts->{'friendof'}) {
             $r->{'fgcolor'} = "#000000";
             $r->{'bgcolor'} = "#ffffff";
-        } elsif ($rels) {
-            my $uid = $u->id;
+        } else {
+            my $uid  = $f->id;
+            my $attr = $u->get_friend_attributes($f);
 
-            if ($rels->{$uid}->{fgcolor}) {
-                $r->{'fgcolor'} = $rels->{$uid}->{fgcolor};
-            }
+            if ($attr) {
+                if ($attr->{fgcolor}) {
+                    $r->{'fgcolor'} = $attr->{fgcolor};
+                }
 
-            if ($rels->{$uid}->{bgcolor}) {
-                $r->{'bgcolor'} = $rels->{$uid}->{bgcolor};
-            }
+                if ($attr->{bgcolor}) {
+                    $r->{'bgcolor'} = $attr->{bgcolor};
+                }
 
-            if ($rels->{$uid}->{groupmask} != 1) {
-                $r->{'groupmask'} = $rels->{$uid}->{groupmask};
+                if ($attr->{groupmask} != 1) {
+                    $r->{'groupmask'} = $attr->{groupmask};
+                }
             }
         }
 
-        if ($u->{'defaultpicid'}) {
-            $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}";
+        if ($f->{'defaultpicid'}) {
+            $r->{defaultpicurl} = "$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$f->{'userid'}";
         }
 
         push @$res, $r;
@@ -6769,7 +6765,8 @@ sub editevent
     my $err = 0;
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
-
+    $rq->{'props'}->{'interface'} = "flat";
+    
     my $rs = LJ::Protocol::do_request("editevent", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";

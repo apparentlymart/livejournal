@@ -224,6 +224,16 @@ $maint{'clean_caches'} = sub
     }
     LJ::disconnect_dbs();
 
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+    print "-I- Cleaning invite tables.\n";
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        $dbcm->do("DELETE FROM invitesent WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
+        $dbcm->do("DELETE FROM inviterecv WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
+    }
+    LJ::disconnect_dbs();
+    }
+
 };
 
 1;

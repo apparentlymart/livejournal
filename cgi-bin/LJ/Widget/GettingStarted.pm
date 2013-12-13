@@ -67,6 +67,8 @@ sub render_body {
 sub should_render {
     my $class = shift;
 
+    return 0 if $LJ::DISABLED{'getting_started'};
+
     my $remote = LJ::get_remote();
     return 0 unless $remote;
     return 0 unless $remote->has_enabled_getting_started;

@@ -365,6 +365,7 @@ body, table, td, div {
   font-size: $*main_font_size;
 }
 body {
+  margin-top: 0;
   background-color: $*main_bgcolor;
 """;
 if(clean_url($*page_background_image) != ""){
@@ -372,17 +373,20 @@ if(clean_url($*page_background_image) != ""){
      background-position: $*page_background_position;
      background-repeat: $*page_background_repeat;
      background-attachment: $*page_background_scrolling;
-""";
+     width: 100%;
+     $fontspec
+     """; }"""
 }
-if ($*content_top_margin != "0") {
-"""  margin-top:       $*content_top_margin;""";
-} else {
-"""  margin-top:       30px;""";
+
+.main-table {  """;
+  if ($*content_top_margin != "0") {
+  """  margin-top:       $*content_top_margin;""";
+  } else {
+  """  margin-top:       30px;""";
+  }
+  """  margin-bottom:    10px;
 }
-"""  margin-bottom:    10px;
-  width:            100%;
-$fontspec
-}
+
 .daycol {
   text-align: center;
   width:      14%;
@@ -1816,8 +1820,9 @@ print safe """<title>$title</title>
 <body>""";
 
 $this->print_control_strip();
+$this->print_pagewide_slot();
 
-"""<table style="width: 100%;">""";
+"""<table style="width: 100%;" class="main-table">""";
 "<tr>";
 if ($*sidebar_align == "left") {
 """

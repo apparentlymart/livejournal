@@ -59,11 +59,9 @@
  unless ($remote && $remote->{'userid'} == $u->{'userid'}) {
      my $friendclause;
      if ($remote) {
-         # check to see if this user's a friend
-         $sth = $dbh->prepare("SELECT COUNT(*) AS 'isfriend' FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-         $sth->execute;
-         my ($isfriend) = $sth->fetchrow_array;
-         if ($isfriend) { $friendclause = ", 'friends'"; }
+         if ($u->is_friend($remote)) {
+            $friendclause = ", 'friends'";
+        }
      }
      $where .= "AND t.security IN ('public' $friendclause)";
  } 

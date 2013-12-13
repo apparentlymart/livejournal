@@ -345,17 +345,17 @@ sub clean {
     my $eatall = $cut_retrieve ? 1 : 0;
 
   TOKEN:
-    while (my $token = $p->get_token)
-    {
+    while (my $token = $p->get_token) {
         my $type = $token->[0];
 
         # See if this tag should be treated as an alias
 
-        $token->[1] = $tag_substitute{$token->[1]} if defined $tag_substitute{$token->[1]} &&
-            ($type eq 'S' || $type eq 'E');
+        if ( ($type eq 'S' || $type eq 'E') ) {
+            $token->[1] = $tag_substitute{$token->[1]} if defined $tag_substitute{$token->[1]};
+        }
 
-        if ($type eq "S")     # start tag
-        {
+        # start tag
+        if ($type eq "S") {
             my $tag  = $token->[1];
             my $attr = $token->[2];  # hashref
 
@@ -367,7 +367,6 @@ sub clean {
             if ($ljcut_div && $ljcut_disable) {
                 $ljcut_div = 0;
             }
-
 
             if (LJ::is_enabled('remove_allowscriptaccess')) {
                 ## TODO: remove closing </param> tag,
@@ -635,7 +634,10 @@ sub clean {
                 next;
             }
 
-            if ($tag eq 'iframe') {
+            if ($tag eq 'iframe' || $tag eq 'video' || $tag eq 'audio' || $tag eq 'source') { 
+
+                ## Remove all autoplay tags
+                delete $attr->{'autoplay'};
 
                 ## Allow some iframes from trusted sources (if they are not eaten already)
                 ## YouTube (http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html),
@@ -655,6 +657,10 @@ sub clean {
                             last;
                         }
                     }
+                ## tags video and audio may have no attribute 'src'
+                ## and using special tag <source>
+                } elsif ($tag =~ /^(?:video|audio)$/) {
+                    $src_allowed = 1;
                 }
 
                 unless ($src_allowed) {
@@ -852,20 +858,17 @@ sub clean {
                     $newdata .= "<b>[Unknown LJ tag]</b>";
                 }
             }
-            elsif ($tag eq "lj-raw")
-            {
+            elsif ($tag eq "lj-raw") {
                 # Strip it out, but still register it as being open
                 $opencount{$tag}++;
             }
-            elsif ($tag eq "lj-cvk-poll") 
-            {
+            elsif ($tag eq "lj-cvk-poll") {
                 $newdata .= Encode::decode_utf8(LJ::Widget::CVK->render_body());
             }
             elsif ( $tag eq 'lj-like' ) {
                 next TOKEN if $opts->{'textonly'};
 
-                unless ( exists $opts->{'entry_url'} && $opts->{'entry_url'} )
-                {
+                unless ( exists $opts->{'entry_url'} && $opts->{'entry_url'} ) {
                     $newdata .= '<b>[lj-like in invalid context]</b>';
                     next TOKEN;
                 }
@@ -873,8 +876,8 @@ sub clean {
 
                 my $like = LJ::CleanHtml::Like->new({ 'entry_url' => $opts->{'entry_url'},
                                                   'buttons'   => $attr->{'buttons'} ,
-                                                });     
-        
+                                                });
+
                 $newdata .= $like->html({ 'vkontakte_like_js' => \%vkontakte_like_js});
             }
 
@@ -1232,7 +1235,7 @@ sub clean {
                 # LJSV-2152: When comment has embed in it - bubbles should be above buttons
                 if ( $tag eq 'iframe' and $hash->{'src'} ) {
                     foreach my $host (keys %LJ::WHITELIST_VIDEO_HOSTS) {
-                        if ( index $host, $hash->{'src'} ) {
+                        if ( index ($hash->{'src'}, $host) != -1) {
 
                             # Youtube accepts escaped parameters in form "%61utoplay=1"
                             $hash->{'src'} = LJ::durl($hash->{'src'});
@@ -1759,8 +1762,7 @@ sub clean {
 
 
 # takes a reference to HTML and a base URL, and modifies HTML in place to use absolute URLs from the given base
-sub resolve_relative_urls
-{
+sub resolve_relative_urls {
     my ($data, $base) = @_;
     my $p = HTML::TokeParser->new($data);
 
@@ -1846,8 +1848,7 @@ sub resolve_relative_urls
     return undef;
 }
 
-sub ExpandLJURL
-{
+sub ExpandLJURL {
     my @args = grep { $_ } split(/\//, $_[0]);
     my $mode = shift @args;
 
@@ -1926,8 +1927,7 @@ sub ExpandLJURL
 my $subject_eat = [qw[head title style layer iframe applet object param base]];
 my $subject_allow = [qw[a b i u em strong cite]];
 my $subject_remove = [qw[bgsound embed object caption link font noscript lj-userpic]];
-sub clean_subject
-{
+sub clean_subject {
     my $ref = shift;
     return unless $$ref =~ /[\<\>]/;
     my $opts = shift || {};
@@ -1948,8 +1948,7 @@ sub clean_subject
 
 ## returns a pure text subject (needed in links, email headers, etc...)
 my $subjectall_eat = [qw[head title style layer iframe applet object lj-spoiler ]];
-sub clean_subject_all
-{
+sub clean_subject_all {
     my $ref = shift;
     return unless $$ref =~ /[\<\>]/;
     clean($ref, {
@@ -1985,14 +1984,13 @@ my @comment_close = qw(
     table tr td th tbody tfoot thead colgroup caption
     area map form textarea blink
 );
-my @comment_all = (@comment_close, "img", "br", "hr", "p", "col", "iframe");
+my @comment_all = (@comment_close, qw{img br hr p col iframe audio video source});
 
 my $userbio_eat = $event_eat;
 my $userbio_remove = $event_remove;
 my @userbio_close = @comment_close;
 
-sub clean_event
-{
+sub clean_event {
     my ($ref, $opts) = @_;
 
     # old prototype was passing in the ref and preformatted flag.
@@ -2046,8 +2044,7 @@ sub clean_event
     });
 }
 
-sub pre_clean_event_for_entryform
-{
+sub pre_clean_event_for_entryform {
     my $ref = shift;
 
     ## fast path - no html tags
@@ -2128,8 +2125,7 @@ sub pre_clean_event_for_entryform
     $$ref = Encode::encode_utf8($newdata);
 }
 
-sub get_okay_comment_tags
-{
+sub get_okay_comment_tags {
     return @comment_all;
 }
 
@@ -2139,8 +2135,7 @@ sub get_okay_comment_tags
 #         - preformatted:  if true, don't insert breaks and auto-linkify
 #         - anon_comment:  don't linkify things, and prevent <a> tags
 #       or, opts can just be a boolean scalar, which implies the performatted tag
-sub clean_comment
-{
+sub clean_comment {
     my ($ref, $opts) = @_;
 
     unless (ref $opts) {
@@ -2183,8 +2178,7 @@ sub clean_comment
 }
 
 # ref: scalarref of text to clean, gets cleaned in-place
-sub clean_message
-{
+sub clean_message {
     my ($ref, $opts) = @_;
 
     # slow path: need to be run it through the cleaner
@@ -2208,7 +2202,7 @@ sub clean_message
 
 sub clean_userbio {
     my ($ref, %opts) = @_;
-    
+
     return undef unless ref $ref;
 
     my %final_opts = (
@@ -2228,8 +2222,7 @@ sub clean_userbio {
     clean($ref, \%final_opts);
 }
 
-sub clean_s1_style
-{
+sub clean_s1_style {
     my $s1 = shift;
     my $clean;
 
@@ -2305,8 +2298,7 @@ sub break_word {
 }
 
 
-sub clean_friends
-{
+sub clean_friends {
     my $ref = shift;
 
     my @tags_remove = qw(bgsound embed object link body meta noscript plaintext noframes);

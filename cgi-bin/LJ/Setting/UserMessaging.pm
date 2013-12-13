@@ -21,8 +21,9 @@ sub as_html {
                               { text => LJ::Lang::ml('settings.usermessaging.opt.F'),
                                 value => "F",
                                 disabled => $u->is_child,},
+                              ($LJ::DISABLED{'new_friends_and_subscriptions'} ? 
                               { text => LJ::Lang::ml('settings.usermessaging.opt.M'),
-                                value => "M",},
+                                value => "M",} : ()),
                               { text => LJ::Lang::ml('settings.usermessaging.opt.N'),
                                 value => "N",});
     $ret .= "<div class='helper'>" .

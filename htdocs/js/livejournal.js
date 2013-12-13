@@ -2,6 +2,8 @@
 //= require js/core/track.js
 //= require js/core/widget.js
 
+//= require js/jquery/jquery.lj.share.js
+
 // This file contains general-purpose LJ code
 var LiveJournal = {};
 
@@ -13,6 +15,8 @@ LiveJournal.remove_hook   = LJ.Event.off;
 LiveJournal.run_hook      = LJ.Event.trigger;
 
 
+(function($) {
+
 LiveJournal.initPage = function () {
     //LJRU-3137: The code relies on the Site global variable
     //so it appears on all livejournal pages. If it's
@@ -22,7 +26,7 @@ LiveJournal.initPage = function () {
     }
 
     // when page loads, set up contextual popups
-    jQuery(ContextualPopup.setupLive);
+    $(ContextualPopup.setupLive);
 
     if (LJ.Api) {
         LJ.Api.init({ auth_token: LJ.get('auth_token') });
@@ -31,8 +35,8 @@ LiveJournal.initPage = function () {
     LJ.UI.bootstrap();
 
     //register system hooks
-    LiveJournal.register_hook('update_wallet_balance', LiveJournal.updateWalletBalance);
-    LiveJournal.register_hook('xdr/message', LiveJournal.processXdr);
+    LJ.Event.on('update_wallet_balance', LiveJournal.updateWalletBalance);
+    LJ.Event.on('xdr/message', LiveJournal.processXdr);
 
     LiveJournal.initSpoilers();
     LiveJournal.initResizeHelper();
@@ -41,11 +45,39 @@ LiveJournal.initPage = function () {
     LiveJournal.checkLjUniq();
 
     // run other hooks
-    LiveJournal.run_hook('page_load');
+    LJ.Event.trigger('page_load');
 
     // Lazy like buttons loader
-    jQuery(document.body).ljLikes();
+    $(document.body).ljLikes();
+
+    if (LJ.get('LJShareParams')) {
+        var s1   = LJ.get('comments'),
+            feed = LJ.get('entryUniqs');
+
+        $(document.body).share(
+            /*
+             * On s1 entries Share controller is used to
+             * display the bubble, check entry/main.js.
+             */
+
+            (s1 || feed) ? {
+                bubble: false
+            } : {}
+        );
+    }
+
+    /*
+     * Remove repost
+     */
+    $('.js-delete-repost').on('click', function(event) {
+        event.preventDefault();
+        LJ.Event.trigger('repost.requestRemove', this, $(this).attr('href'));
+    });
+
+    LiveJournal.initBanner();
 };
+
+})(jQuery);
 
 /**
  * Special helper class is added to the body if browser doesn't support media queries and
@@ -308,3 +340,30 @@ LiveJournal.closeSiteMessage = function(node, e, id) {
 LiveJournal.getLocalizedStr = LJ.ml;
 
 LiveJournal.JSON = JSON;
+
+LiveJournal.initBanner = function() {
+    var slot = jQuery('.common-banner');
+
+    if (!slot.length || Cookie('common_banner_close'))  {
+        return;
+    }
+
+    // add close handler
+    slot.on('click', '.common-banner-close', function () {
+        var expires = new Date();
+
+        // release cookie time: 00:00:01 of tomorrow
+        expires.setDate( expires.getDate() + 1 );
+        expires.setHours(0);
+        expires.setMinutes(0);
+        expires.setSeconds(1);
+
+        slot.remove();
+        Cookie('common_banner_close', '1', {
+            expires: expires,
+            domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
+            path: '/'
+        });
+
+    });
+};

@@ -19,6 +19,8 @@ use Readonly;
 use LJ::MemCacheProxy;
 use LJ::RelationService;
 
+use LJ::User::FriendInvites;
+
 Readonly my $COMMUNITY_ROW_CACHE_KEY => 'community:';
 
 # Possible membership:
@@ -244,6 +246,22 @@ sub get_sent_invites {
     $cu = LJ::want_user($cu);
     return undef unless $cu;
 
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        my @invites = LJ::User::FriendInvites->list_sent_invites($cu);
+
+        return [ map {
+            my $temp = {};
+            LJ::decode_url_string($_->{args}, $temp);
+            {
+                userid => $_->{userid},
+                maintid => $_->{maintid},
+                recvtime => $_->{recvtime},
+                status => $_->{status},
+                args => $temp,
+            }
+        } @invites ];
+    }
+
     # now hit the database for their recent invites
     my $dbcr = LJ::get_cluster_def_reader($cu);
     return LJ::error('db') unless $dbcr;
@@ -281,6 +299,11 @@ sub get_sent_invites {
 # </LJFUNC>
 sub send_comm_invite {
     my ($u, $cu, $mu, $attrs) = @_;
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        return LJ::User::FriendInvites->send($u, $cu, $mu, $attrs);
+    }
+
     $u = LJ::want_user($u);
     $cu = LJ::want_user($cu);
     $mu = LJ::want_user($mu);
@@ -362,6 +385,11 @@ sub send_comm_invite {
 # </LJFUNC>
 sub accept_comm_invite {
     my ($u, $cu) = @_;
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        return LJ::User::FriendInvites->accept($u, $cu);
+    }
+
     $u = LJ::want_user($u);
     $cu = LJ::want_user($cu);
     return undef unless $u && $cu;
@@ -455,6 +483,11 @@ sub accept_comm_invite {
 # </LJFUNC>
 sub reject_comm_invite {
     my ($u, $cu) = @_;
+
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        return LJ::User::FriendInvites->accept($u, $cu);
+    }
+
     $u = LJ::want_user($u);
     $cu = LJ::want_user($cu);
     return undef unless $u && $cu;
@@ -494,6 +527,11 @@ sub get_pending_invites {
     my $u = shift;
     $u = LJ::want_user($u);
     return undef unless $u;
+    
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        my @invites = LJ::User::FriendInvites->list_recv_invites($u);
+        return [ map { [$_->{commid}, $_->{maintid}, $_->{recvtime}, $_->{args}] } @invites ];
+    }
 
     # hit up database for invites and return them
     my $dbcr = LJ::get_cluster_def_reader($u);
@@ -543,6 +581,11 @@ sub revoke_invites {
                          "commid = ?", undef, $uid, $cu->{userid});
 
         push @{$stats->{users}}, { id => $u->userid, caps => $u->caps } if $res;
+
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            my $invite = LJ::User::FriendInvites->new({ commid  => $cu->{userid}, userid  => $uid });
+            $invite->clear_cache;
+        }
     }
 
     LJ::run_hooks('revoke_invite', $stats);
@@ -585,7 +628,7 @@ sub leave_community {
 
     # clear edges that effect this relationship
     foreach my $edge (qw(P N A M)) {
-        LJ::clear_rel($c->id, $u->id, $edge);
+        LJ::clear_rel($c, $u, $edge);
     }
 
     # defriend user -> comm?
@@ -602,6 +645,42 @@ sub leave_community {
 
     # don't care if we failed the removal of comm from user's friends list...
     return 1;
+}
+
+sub leave_all_communities {
+    my ($u, %args) = @_;
+    my $friendsof = $u->friendsof();
+
+    foreach my $c (values %$friendsof) {
+        next unless $c;
+        next unless $c->is_community;
+
+        if (LJ::is_maintainer($u, $c)) {
+            if (LJ::count_maintainers($c) <= 1) {
+                next;
+            }
+        }
+
+        # defriend comm -> user
+        unless ($c->remove_friend($u, {nonotify => 1})) {
+            return;
+        }
+
+        # clear edges that effect this relationship
+        foreach my $edge (qw(P N A M)) {
+            LJ::clear_rel($c, $u, $edge);
+        }
+
+        if (LJ::is_maintainer($u, $c)) {
+            LJ::User::UserlogRecord::MaintainerRemove->create(
+                $c, maintid => $u->id,
+            );
+        }
+
+        $c->clear_cache_friends($u);
+    }
+
+    return;
 }
 
 # <LJFUNC>
@@ -738,7 +817,7 @@ sub do_join_community {
                         . "your Friends list. $err");
                 }
 
-                $u->friend_and_watch($c);
+                $u->add_friend($c);
             }
         }
     }
@@ -1185,7 +1264,7 @@ sub maintainer_linkbar {
         ? '<strong>' . LJ::Lang::ml('/community/manage.bml.commlist.massmailing') . '</strong>'
         : "<a href='$LJ::SITEROOT/community/mailing.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.massmailing') . "</a>";
 
-    if (LJ::is_enabled('lj_art') && $comm->prop('ljart_event')) {
+    if (LJ::is_enabled('lj_art') && ($comm->prop('ljart_event') || $comm->prop('ljart_institut'))) {
         push @links, $page eq "ljart" ?
             "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.ljart') . "</strong>" :
             "<a href='$LJ::SITEROOT/community/ljart.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.ljart') . "</a>",
@@ -1255,6 +1334,41 @@ sub count_maintainers {
     $ids ||= [];
 
     return scalar @$ids;
+}
+
+
+sub set_community_user_edge {
+    my ($c, $u, $edge, $remote) = @_;
+
+    unless ($edge =~ /^[A-Z]$/) {
+        $edge = {
+            post       => 'P',
+            preapprove => 'N',
+            moderate   => 'M',
+            admin      => 'A',
+        }->{$edge};
+    }
+
+    if ($edge eq 'A') {
+        my ( $is_super, $poll ) = ( undef, undef );
+        my $poll_id = $c->prop('election_poll_id');
+        if ($poll_id) {
+            $poll     = LJ::Poll->new($poll_id);
+            $is_super = $poll->prop('supermaintainer');
+        }
+
+        if ( $poll && $is_super && !$poll->is_closed ) {
+            return LJ::error("Can't set user $u->{user} as maintainer for $c->{user}");
+        }
+
+        LJ::User::UserlogRecord::MaintainerAdd->create(
+            $c,
+            'maintid' => $u->userid,
+            'remote'  => $remote || $u,
+        );
+    }
+
+    LJ::set_rel( $c->userid, $u->userid, $edge );
 }
 
 1;

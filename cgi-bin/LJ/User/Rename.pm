@@ -231,76 +231,17 @@ sub basic_rename {
     if ($u->{journaltype} eq 'P') {
         ## "Remove all users from your Friends list and leave all communities"
         if ($opts->{opt_delfriends}) {
-            # delete friends
-            my $friends = $u->friends(force => 1);
+            $u->remove_all_friends();
+            $u->remove_all_mysubscriptions();
 
-            foreach my $target (values %$friends) {
-                if ($target) {
-                    $u->remove_friend($target, {
-                        nonotify => 1
-                    });
-                }
-            }
-
-            # remove from communities
-            my $friendsof = $u->friendsof(force => 1);
-
-            foreach my $target (values %$friendsof) {
-                if ($target) {
-                    if ($target->is_community) {
-                        $target->remove_friend($u, {
-                            nonotify => 1
-                        });
-                    }
-                }
-            }
-
-            # delete mysubscriptions
-            my $mysubscriptions = $u->mysubscriptions();
-
-            foreach my $target (values %$mysubscriptions) {
-                if ($target) {
-                    $u->unsubscribe_from_user(
-                        $target,
-                        nonotify => 1
-                    );
-                }
-            }
-
-            # delete access to post to communities
-            LJ::clear_rel('*', $u, 'P');
+            LJ::leave_all_communities($u);
         }
     
         ## "Remove everyone from your Friend Of list"
-        if ($opts->{'opt_delfriendofs'}) {
-            # remove friendofs
-            my $friendsof = $u->friendsof(force => 1);
-
-            foreach my $target (values %$friendsof) {
-                if ($target) {
-                    unless ($target->is_community) {
-                        $target->remove_friend($u, {
-                            nonotify => 1
-                        });
-                    }
-                }
-            }
-
-            # Remove subscribers
-            my $subscribers = $u->subscribers(force => 1);
-
-            foreach my $target (values %$subscribers) {
-                if ($target) {
-                    $target->unsubscribe_from_user(
-                        $u,
-                        nonotify => 1
-                    );
-                }
-            }
+        if ($opts->{opt_delfriendofs}) {
+            $u->remove_all_friendofs();
+            $u->remove_all_subscribers();
         }
-
-        # delete friend of memcaching, as either path might have done it
-        LJ::MemCache::delete([ $u->{userid}, "friendofs:$u->{userid}" ]);
     }
     
     if ($opts->{preserve_old_username}) {

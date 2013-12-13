@@ -611,8 +611,11 @@ sub rate_multiple {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
 
-    return 10 unless ($ru->has_friend($ou) || $self->{parent_msgid});
-    return 1;
+    return 0 if $ru->is_friend($ou);
+    return 1 if $self->{parent_msgid};
+    return 1 if $ru->is_subscribedon($ou);
+
+    return 10;
 }
 
 sub is_spam {

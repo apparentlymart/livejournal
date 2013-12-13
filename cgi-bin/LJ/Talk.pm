@@ -117,8 +117,8 @@ sub show_none_image
 sub link_bar
 {
     my $opts = shift;
-    my ($u, $up, $remote, $headref, $itemid) =
-        map { $opts->{$_} } qw(u up remote headref itemid);
+    my ($u, $up, $remote, $headref, $itemid, $afterid, $beforeid) =
+        map { $opts->{$_} } qw(u up remote headref itemid afterid beforeid);
     my $ret;
 
     my @linkele;
@@ -131,9 +131,9 @@ sub link_bar
                     "</a>");
         } else {
             my $title = LJ::Lang::ml('talk.'. $class);
-            return sprintf
+            return { link => (sprintf
                 '<a href="%s" rel="nofollow" title="%s" class="b-controls b-controls-%s"><i class="b-controls-bg"></i>%s</a>',
-                $url, $title, $class, $title;
+                $url, $title, $class, $title), type => $class };
         }
     };
 
@@ -151,13 +151,16 @@ sub link_bar
                                        "itemid=$itemid";
 
     # << Previous
-    if (LJ::get_before_item_link($u, {itemid => int($itemid / 256), use_sticky => 1})) {
+    $beforeid = LJ::get_itemid_after2($u, int($itemid/256))
+        unless defined $beforeid;
+
+    if ($beforeid) {
         push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev", "prev_entry", 'prev');
         $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=prev' rel='Previous' />\n";
     }
 
     # memories
-    unless ($LJ::DISABLED{'memories'} || $entry->is_delayed) {
+    unless ($LJ::DISABLED{'memories'} || $entry->is_delayed || !$remote) {
         push @linkele, $mlink->("$LJ::SITEROOT/tools/memadd.bml?${jargent}itemid=$itemid", "memadd", 'memadd');
     }
 
@@ -193,11 +196,11 @@ sub link_bar
 
         LJ::Share->request_resources();
 
-        push @linkele, sprintf '
+        push @linkele, { link => (sprintf '
             <a href="#" rel="nofollow" title="%s" class="b-controls b-controls-share js-lj-share" %s>
                 <i class="b-controls-bg"></i>%s
             </a>
-        ', $title, $extra_attrs, $title;
+        ', $title, $extra_attrs, $title), type => 'share' };
     }
 
     if ($remote && $remote->can_use_esn && !$entry->is_delayed) {
@@ -212,7 +215,10 @@ sub link_bar
     }
 
     ## Next
-    if (LJ::get_after_item_link($u, {itemid => int($itemid / 256), use_sticky => 1})) {
+    $afterid = LJ::get_itemid_after2($u, int($itemid/256))
+        unless defined $afterid;
+
+    if ($afterid) {
         push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next", "next_entry", 'next');
         $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}$itemlnk&amp;dir=next' rel='Next' />\n";
     }
@@ -592,7 +598,7 @@ sub delete_thread {
     my $remote = LJ::get_remote();
     my $comment = LJ::Comment->new($u, 'jtalkid' => $jtalkid);
     LJ::User::UserlogRecord::CommentDelete->create(
-        $remote,
+        $u,
         type     => 'thread',
         dtalkid  => $comment->dtalkid,
         num      => $num,
@@ -640,7 +646,7 @@ sub delete_author {
 
     my $remote = LJ::get_remote();
     LJ::User::UserlogRecord::CommentDelete->create(
-        $remote,
+        $u,
         type     => 'author',
         journalurl  => $entry->url,
         num      => $num,
@@ -693,7 +699,7 @@ sub delete_comment {
     my $remote = LJ::get_remote();
     my $comment = LJ::Comment->new($u, 'jtalkid' => $jtalkid);
     LJ::User::UserlogRecord::CommentDelete->create(
-        $remote,
+        $u,
         type => 'one',
         dtalkid => $comment->dtalkid
     ) if $remote;
@@ -1560,6 +1566,17 @@ sub load_comments
 
     # paranoic code
     $opts->{'out_error'} = undef;
+
+=head
+    if (
+        defined $opts->{'flat'} && $opts->{'flat'}
+        && (!defined $opts->{'force_flat'} || !$opts->{'force_flat'})
+    ) {
+        $opts->{'out_error'} = "flat_restrict";
+        ## we do return right here because we shouldn't read any comment from DB
+        return;
+    }
+=cut
 
     my ($posts, $top_replies, $children) = load_comments_tree($u, $remote, $nodetype, $nodeid, $opts);
 
@@ -2724,7 +2741,11 @@ sub get_thread_html
     LJ::run_hooks('load_comments_opts', $u, $entry->jitemid, $opts);
 
     my @comments = LJ::Talk::load_comments($u, $remote, "L", $entry->jitemid, $opts);
-        
+
+    if ($opts->{'out_error'} eq 'flat_restrict') {
+        $output->{error} = "Sorry"; #LJ::Lang::ml('error.flat_interface_restricted');
+    }
+
     if ($opts->{'out_error'} eq "nodb")
     {
         $output->{error} = BML::ml('error.nodbmaintenance');

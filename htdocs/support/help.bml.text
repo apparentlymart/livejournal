@@ -58,6 +58,15 @@
 .statr.youreplied|staleness=1
 .statr.youreplied=You Replied
 
+.state.tagged.text|staleness=1
+.state.tagged.text=This shows all open and tagged requests or requests with particular tag despite of its state.
+
+.state.tagged.title|staleness=1
+.state.tagged.title=Tagged Support Requests
+
+.state.tagged|staleness=1
+.state.tagged=Tagged
+
 .status.awaitingclose|staleness=1
 .status.awaitingclose=answered awaiting close
 

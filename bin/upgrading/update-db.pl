@@ -34,6 +34,7 @@ my $opt_forcebuild    = 0;
 my $opt_compiletodisk = 0;
 my $opt_innodb;
 my $opt_force_production_alter;
+my $opt_no_check_pk;
 my $opt_beta;
 
 my $usage = "
@@ -51,6 +52,7 @@ Usage: update-db.pl [options]
       --force-alter  By default, alter statements on production database are not
                      executed (they may take too much time). This option forces
                      these statements to be executed
+      --no-check-pk  Do not check existence of primary keys on created tables
   -b  --beta         Affects '--populate' option - only data that are safe during
                      update of beta server will be loaded into DB
       --nobeta       to run in 'production' mode on beta server (don't do it)
@@ -72,6 +74,7 @@ die $usage unless
         "ctd"           => \$opt_compiletodisk,
         "innodb"        => \$opt_innodb,
         "force-alter"   => \$opt_force_production_alter,
+        "no-check-pk"   => \$opt_no_check_pk,
     );
 
 $opt_nostyles = 1 unless LJ::is_enabled("update_styles");
@@ -1059,7 +1062,7 @@ sub create_table {
         $create_sql .= " ENGINE=InnoDB";
     }
 
-    unless ( $create_sql =~ /PRIMARY KEY/is ) {
+    unless ( $opt_no_check_pk || $create_sql =~ /PRIMARY KEY/is ) {
         warn "NO PRIMARY KEY DEFINED FOR TABLE: $table!\nTable is not created!\n";
         return;
     }

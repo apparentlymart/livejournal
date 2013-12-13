@@ -144,6 +144,7 @@ function navlinktext(RecentNav nav, bool next) : string
 function print_stylesheet() {
 """
 body {
+margin: 0;
 background: $*clr_page_back;
 color: $*clr_page_text;
 """;
@@ -172,6 +173,10 @@ color: $*clr_page_vlink;
 
 img {
 border: 0;
+}
+
+.main-table {
+margin: 10px 0;
 }
 
 .box {
@@ -534,8 +539,9 @@ function Page::print() {
 <body class="$.view">
 """;
 $this->print_control_strip();
+$this->print_pagewide_slot();
 """
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="main-table">
 <tr valign="top">
 """;
 

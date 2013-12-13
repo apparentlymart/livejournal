@@ -12,7 +12,7 @@ StatusvisMessage.init = function () {
     message.style.width = "auto";
     message.style.textAlign = "center";
     message.className = "warning-background";
-    message.innerHTML = Site.StatusvisMessage;
+    message.innerHTML = LJ.get('StatusvisMessage');
 
     if ($('lj_controlstrip')) {
         document.body.insertBefore(message, $('lj_controlstrip').nextSibling);

@@ -24,6 +24,10 @@ sub can_execute {
 sub execute {
     my ($self, $from_user, $to, $to_user, $using, $url, @args) = @_;
 
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        return $self->error("Sorry it doesn't work now");
+    }
+
     return $self->error("This command takes five arguments. Consult the reference.")
         unless $from_user && $to_user && $url && scalar(@args) == 0;
 
@@ -76,7 +80,7 @@ sub execute {
 
     # 4) make users who befriend 'from_user' now befriend 'to_user'
     #    'force' so we get master db and there's no row limit
-    if (my @ids = LJ::get_friendofs($from_u, { force => 1 } )) {
+    if (my @ids = $from_u->friendof_uids(force => 1)) {
 
         # update ignore so we don't raise duplicate key errors
         $dbh->do("UPDATE IGNORE friends SET friendid=? WHERE friendid=?",

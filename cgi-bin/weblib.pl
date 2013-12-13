@@ -284,8 +284,10 @@ sub help_icon_html {
     my $pre = shift || "";
     my $post = shift || "";
     my $title = shift || "";
+    my $helplink_class = ($title) ? "b-helplink b-helplink-withtitle" : "b-helplink";
+    my $title_wrapper = ($title) ? "<span class=\"b-helplink-title\">$title</span>" : "";
     # FIXME: use LJ::img() here, not hard-coding width/height
-    return "$pre<a href=\"$url\" class=\"helplink\" target=\"_blank\"><img src=\"$LJ::IMGPREFIX/help.gif?v=6803\" alt=\"Help\" title=\"Help\" width=\"14\" height=\"14\" border=\"0\" />$title</a>$post";
+    return "$pre<a href=\"$url\" class=\"$helplink_class\" target=\"_blank\" title=\"Help\"><span class=\"b-helplink-icon\"></span>$title_wrapper</a>$post";
 }
 
 # <LJFUNC>
@@ -1182,7 +1184,7 @@ sub entry_form_decode
                 prop_ljart_event_town prop_ljart_event_location
                 prop_ljart_event_paid prop_ljart_event_price
                 prop_ljart_event_type prop_ljart_event_image
-                prop_ljart_event_desc prop_ljart_event
+                prop_ljart_event_desc prop_ljart_event prop_ljart_event_users
                 prop_ljart_portfolio_thumbnail prop_ljart_portfolio
                 repost_budget paid_repost_on repost_limit_sc
                 repost_targeting_age repost_targeting_gender
@@ -1405,13 +1407,11 @@ sub need_journal_res {
         paidrepost.button.label
         paidrepost.button.label.done
 
-        repost.button.title
-        repost.button.label
-        repost.button.counter
-
         entry.reference.label.title
         entry.reference.label.reposted
     });
+
+    LJ::need_string(@LJ::REPOST_ML);
 
     LJ::need_res(@LJ::JOURNAL_RES_ALL);
 }
@@ -1719,6 +1719,7 @@ sub res_includes {
                 country                  => $country,
                 %comm_access,
         );
+        $site{remote} = get_remote_info();
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
         $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
@@ -1846,6 +1847,8 @@ sub res_includes {
             } @LJ::NEEDED_RES;
     }
 
+    my $mtime0 = stc_0_modtime($now);
+
     foreach my $key (@LJ::NEEDED_RES) {
         my $path;
         my $mtime;
@@ -1861,6 +1864,8 @@ sub res_includes {
                 $mtime = $lmtime if $lmtime > $mtime;
             }
         }
+
+        $mtime = $mtime0 unless defined $mtime;
 
         $path = $key;
 
@@ -1999,6 +2004,30 @@ sub res_includes {
 
 
     return $ret;
+}
+
+sub get_remote_info {
+    my $remote = LJ::get_remote();
+
+    return unless $remote;
+
+    return {
+        # Personal info
+        id               => $remote->id,
+        username         => $remote->username,
+        profile_url      => $remote->profile_url,
+        journal_url      => $remote->journal_url,
+        userhead_url     => $remote->userhead_url,
+        journal_title    => $remote->journal_title,
+        display_username => $remote->display_username,
+
+        # Flags
+        is_sup           => LJ::JSON->to_boolean($remote->is_sup),
+        is_paid          => LJ::JSON->to_boolean($remote->is_paid),
+        is_personal      => LJ::JSON->to_boolean($remote->is_personal),
+        is_identity      => LJ::JSON->to_boolean($remote->is_identity),
+        is_suspended     => LJ::JSON->to_boolean($remote->is_suspended),
+    };
 }
 
 # Returns HTML of a dynamic tag could given passed in data
@@ -2613,7 +2642,8 @@ sub statusvis_message_js {
     $statusvis_full = "readonly" if $statusvis eq "O";
 
     LJ::need_res("js/statusvis_message.js");
-    return "<script>Site.StatusvisMessage=\"" . LJ::Lang::ml("statusvis_message.$statusvis_full") . "\";</script>";
+
+    LJ::need_var(StatusvisMessage => LJ::Lang::ml("statusvis_message.$statusvis_full"));
 }
 
 sub needlogin_redirect_url {

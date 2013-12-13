@@ -74,6 +74,10 @@ foreach my $subclass (@SubclassesList) {
     $ActionToSubclassMap{ $subclass->action } = $subclass;
 }
 
+sub get_action_list {
+    return keys %ActionToSubclassMap;
+}
+
 sub new {
     my ( $class, %data ) = @_;
 

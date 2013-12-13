@@ -68,7 +68,7 @@ body<=
  my $cats = LJ::Support::load_cats();
 
  my $state = $FORM{'state'};
- $state = 'open' unless $state =~ /^(?:open|closed|green|youreplied)$/;
+ $state = 'open' unless $state =~ /^(?:open|closed|green|youreplied|tagged)$/;
 
  my $filtercat = $FORM{'cat'};
  $filtercat = "" unless ($filtercat =~ /^[\w\-,]+$/);
@@ -79,17 +79,25 @@ body<=
     LJ::check_priv($remote, 'supportviewinternal') ||
     LJ::check_priv($remote, 'supporthelp');
 
+ if ($state eq "tagged") {
+    $state = "open" 
+        unless $can_see_tags;
+}
+    
  my $filtertags = $FORM{'tags'};
- $filtertags = '' unless $can_see_tags;
+ $filtertags = '' 
+    unless $can_see_tags;
  my @filtertags = map { $normalize_tag->($_); }
-    split(/,/, $FORM{'tags'});
+    split(/,/, $filtertags);
  my %filtertags = map { $_ => 1 } @filtertags;
 
  # determine if user can close stuff
  my $can_close = 0;
  if ($remote && $state =~ /(?:green|open)/ && $filtercat && $filtercat !~ /^_/) {
      $can_close = 1 if LJ::check_priv($remote, 'supportclose', $filtercat);        # private cats/only this cat
-     $can_close = 1 if $fcat->{public_read} && LJ::check_priv($remote, 'supportclose', ''); # public cats
+     if ($fcat) {
+        $can_close = 1 if $fcat->{public_read} && LJ::check_priv($remote, 'supportclose', ''); # public cats
+     }
  }
 
  my $can_mass_reply = $remote && LJ::check_priv($remote, "supporthelp", '*') && $fcat ? 1 : 0;
@@ -114,11 +122,64 @@ body<=
 
  my @support_log;
  my @shown_cats;
+ 
+#prepare list of categories
+ if ($fcat) {
+    @shown_cats = ($fcat->{spcatid});
+} else {
+    if ($filtercat eq '_nonprivate') {
+       @shown_cats =
+           grep { $_->{'public_read'} }
+           values %$cats;
+    } elsif ($filtercat eq '_nonpublic') {
+       @shown_cats =
+           grep { LJ::Support::can_read_cat($_, $remote) }
+           grep { !$_->{'public_read'} }
+           values %$cats;
+    } elsif ($filtercat) {
+       my %filter = map { $_ => 1 } split(/\s*,\s*/, $filtercat);
+       @shown_cats =
+           grep { LJ::Support::can_read_cat($_, $remote) }
+           grep { $filter{$_->{'catkey'}} }
+           values %$cats;
+    } else {
+       @shown_cats =
+           grep { LJ::Support::can_read_cat($_, $remote) }
+           values %$cats;
+    }
 
- # if we have a cat to filter to and we have abstracts for it
+    @shown_cats = map { $_->{'spcatid'} } @shown_cats;
+}
+
  my $rct = 0;
  my $abstracts = 0;
- if ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read && $state ne 'youreplied') {
+ if ($state eq "tagged" && $filtertags) {
+     my @tagids;
+     foreach my $tag_name (keys %filtertags) {
+         foreach my $cat_for_tag (@shown_cats) {
+             my $filtered_tag_id = LJ::Support::Request::Tag::tag_name_to_id ($tag_name, $cat_for_tag, 1);
+             if ($filtered_tag_id) {
+                 push @tagids, $filtered_tag_id
+             }
+         }
+     }
+     my @tagged_spids = LJ::Support::Request::Tag::get_tagged_requests(@tagids);
+     my $tagged_spids = join(',', map { int $_ } @tagged_spids);
+     if ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read) {
+         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 200) AS 'message' " .
+                               "FROM support s, supportlog sl " .
+                               "WHERE s.spid = sl.spid AND sl.type = 'req' " .
+                               "AND s.spid IN ( $tagged_spids )");
+         $abstracts = 1;
+     } else {
+         $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.spid IN ( $tagged_spids )");
+     }
+     $sth->execute();
+     
+     push @support_log, $_ while $_ = $sth->fetchrow_hashref();
+     $rct = scalar(@support_log);
+ # if we have a cat to filter to and we have abstracts for it    
+ } elsif ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read && $state ne 'youreplied') {
      # yes, we should show abstracts for this category, so do so
      if ($state eq "closed") {
          $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 200) AS 'message' " .
@@ -136,32 +197,8 @@ body<=
      push @support_log, $_ while $_ = $sth->fetchrow_hashref();
      $rct = scalar(@support_log);
      $abstracts = 1;
-     @shown_cats = ($fcat->{spcatid});
  } else {
      my $filterwhere;
-
-     if ($filtercat eq '_nonprivate') {
-        @shown_cats =
-            grep { $_->{'public_read'} }
-            values %$cats;
-     } elsif ($filtercat eq '_nonpublic') {
-        @shown_cats =
-            grep { LJ::Support::can_read_cat($_, $remote) }
-            grep { !$_->{'public_read'} }
-            values %$cats;
-     } elsif ($filtercat) {
-        my %filter = map { $_ => 1 } split(/\s*,\s*/, $filtercat);
-        @shown_cats =
-            grep { LJ::Support::can_read_cat($_, $remote) }
-            grep { $filter{$_->{'catkey'}} }
-            values %$cats;
-     } else {
-        @shown_cats =
-            grep { LJ::Support::can_read_cat($_, $remote) }
-            values %$cats;
-     }
-
-     @shown_cats = map { $_->{'spcatid'} } @shown_cats;
 
      $filterwhere = ' AND s.spcatid IN ('. join( ',', @shown_cats ) .')'
         if @shown_cats;
@@ -235,6 +272,9 @@ body<=
                    "green" => $ML{'.state.green'});
      if ($remote) {
          push @states, ("youreplied", $ML{'.statr.youreplied'});
+         if ($can_see_tags) {
+            push @states, ("tagged", $ML{'.state.tagged'});
+         }
      }
      while (@states) {
          my ($skey, $sname) = splice(@states, 0, 2);
@@ -337,6 +377,10 @@ body<=
      next unless (LJ::Support::can_read($sp, $remote));
 
      my @tagids = @{$tags->{$sp->{'spid'}}};
+     if ($state eq 'tagged') {
+        next
+            unless scalar( @tagids);
+     }
      my @tagnames = map { LJ::Support::Request::Tag::tag_id_to_name($_) }
         @tagids;
 

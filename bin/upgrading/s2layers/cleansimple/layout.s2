@@ -335,10 +335,13 @@ if (not viewer_sees_control_strip()) {
     """padding-left: $*opt_margin_size;
     padding-right: $*opt_margin_size;""";
     }
-    """
-    margin: 0;
-    """;
 }
+else {
+   """
+   margin: 0;
+   """;
+}
+
 css_fontspec($*font_base,$*font_fallback);
 """
 }
@@ -688,6 +691,7 @@ print safe """<title>$title</title>
 </head>
 <body>""";
 $this->print_control_strip();
+$this->print_pagewide_slot();
 if (viewer_sees_hbox_top()) {
     """<div style="text-align: center; margin-bottom: -15px;">""";
     $this->print_hbox_top();

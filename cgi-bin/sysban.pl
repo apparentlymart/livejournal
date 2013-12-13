@@ -8,6 +8,7 @@ package LJ;
 
 use LJ::TimeUtil;
 use LJ::CaptchaServer;
+use Net::Patricia;
 
 # <LJFUNC>
 # name: LJ::sysban_check
@@ -23,39 +24,33 @@ sub sysban_check {
     # cache if ip ban
     if ($what eq 'ip') {
 
+        return undef
+            if $LJ::DISABLED{'sysban'};
+
         my $now = time();
         my $ip_ban_delay = $LJ::SYSBAN_IP_REFRESH || 120; 
 
         # check memcache first if not loaded
         unless ($LJ::IP_BANNED_LOADED + $ip_ban_delay > $now) {
             my $memval = LJ::MemCache::get("sysban:ip");
-            if ($memval) {
-                *LJ::IP_BANNED = $memval;
-                $LJ::IP_BANNED_LOADED = $now;
-            } else {
-                $LJ::IP_BANNED_LOADED = 0;
+            unless ($memval) {
+                LJ::sysban_populate($memval, "ip")
+                    or return undef $LJ::IP_BANNED_LOADED;
+
+                # set in memcache
+                LJ::MemCache::set("sysban:ip", $memval, $ip_ban_delay);
+
             }
+
+            $LJ::IP_BANNED_LOADED = $now;
+
+            $LJ::IP_BANNED = new Net::Patricia;
+            $LJ::IP_BANNED->add_string ($_, $memval->{$_})
+                foreach keys %$memval;
         }
-        
-        # is it already cached in memory?
-        if ($LJ::IP_BANNED_LOADED) {
-            return (defined $LJ::IP_BANNED{$value} &&
-                    ($LJ::IP_BANNED{$value} == 0 ||     # forever
-                     $LJ::IP_BANNED{$value} > time())); # not-expired
-        }
-
-        # set this before the query
-        $LJ::IP_BANNED_LOADED = time();
-
-        LJ::sysban_populate(\%LJ::IP_BANNED, "ip")
-            or return undef $LJ::IP_BANNED_LOADED;
-
-        # set in memcache
-        LJ::MemCache::set("sysban:ip", \%LJ::IP_BANNED, $ip_ban_delay);
 
         # return value to user
-        return $LJ::IP_BANNED{$value};
-    
+        return $LJ::IP_BANNED ? $LJ::IP_BANNED->match_string($value) : undef;
     }
     elsif ($what eq 'ip_captcha'){
         my $now = time();
@@ -248,18 +243,18 @@ sub sysban_populate {
     # invoke gearman
     my $args = Storable::nfreeze({what => $what});
     my $task = Gearman::Task->new("sysban_populate", \$args,
-                                  {
-                                      uniq => $what,
-                                      on_complete => sub {
-                                          my $res = shift;
-                                          return unless $res;
+                                    {
+                                        uniq => $what,
+                                        on_complete => sub {
+                                            my $res = shift;
+                                            return unless $res;
 
-                                          my $rv = Storable::thaw($$res);
-                                          return unless $rv;
+                                            my $rv = Storable::thaw($$res);
+                                            return unless $rv;
 
-                                          $where->{$_} = $rv->{$_} foreach keys %$rv;
-                                      }
-                                  });
+                                            $where->{$_} = $rv->{$_} foreach keys %$rv;
+                                        }
+                                    });
     my $ts = $gc->new_task_set();
     $ts->add_task($task);
     $ts->wait(timeout => 30); # 30 sec timeout
@@ -432,13 +427,16 @@ sub sysban_validate {
             my $ip = shift;
 
             return "Format: xxx.xxx.xxx.xxx (ip address)" 
-                unless $ip =~ /^$ip_regexp$/;
+                unless $ip =~ /^$ip_regexp(?:\/\d+)?$/;
+
+            my $tmp = new Net::IP ($ip) or
+                return Net::IP::Error();
 
             while (my ($ip_re, $reason) = each %LJ::UNBANNABLE_IPS) {
                 next unless $ip =~ $ip_re;
                 return "Cannot ban IP $ip: " . LJ::ehtml($reason);
             }
-            
+
             ## LJ::sysban_populate() doesn't return notes, so select them from DB
             my $dbh = LJ::get_db_reader()
                 or die "Can't connect to db reader";
@@ -462,7 +460,7 @@ sub sysban_validate {
                 my $matched_wl;
                 foreach my $wl (@$whitelist) {
                     my $mask = $wl->{value}; ## see ip_whitelist below for possible formats
-                    if ($mask =~ /^$ip_regexp$/) {
+                    if ($mask =~ m!^$ip_regexp$!) {
                         if ($mask eq $ip) {
                             $matched_wl = $wl;
                             last;

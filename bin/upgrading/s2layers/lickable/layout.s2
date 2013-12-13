@@ -1272,6 +1272,7 @@ function Page::print() {
 """;
 
 $this->print_control_strip();
+$this->print_pagewide_slot();
 
 """
 <div id="shadowhack1">

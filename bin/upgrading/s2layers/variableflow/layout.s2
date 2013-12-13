@@ -379,6 +379,7 @@ function Page::print() {
 <body class="$.view">
 """;
 $this->print_control_strip();
+$this->print_pagewide_slot();
 if (viewer_sees_hbox_top()) {
     """<div style="text-align: center; margin-left: $*margin_left; margin-right: $*margin_right;">""";
     $this->print_hbox_top();

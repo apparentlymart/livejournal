@@ -5,6 +5,10 @@ use strict;
 LJ::register_hook('head_content', sub {
     my ($headref) = @_;
 
+    LJ::need_res({ 'separate_list' => 1 }, qw{
+        js/ads/axz.min.js
+    });
+
     my $journal = LJ::get_active_journal();
     return unless $journal;
 
@@ -28,14 +32,5 @@ LJ::register_hook('head_content', sub {
         };
     }
 });
-
-LJ::register_hook('head_content', sub {
-    my ($headref) = @_; 
-    return if $LJ::DISABLED{siteconfidence_rum_script};
-
-    my $prefix = $LJ::IS_SSL ? $LJ::SSLJSPREFIX : $LJ::STATPREFIX."/js";
-    $$headref .= qq{<script src="$prefix/ads/axz.min.js"></script>};
-});
-
 
 1;

@@ -127,7 +127,7 @@ body<=
                 user   => $cu->{user},
                 name   => $cu->{name},
                 count  => 0,
-                lj_art => $cu->prop('ljart_event')
+                lj_art => $cu->prop('ljart_event') || $cu->prop('ljart_institut'),
             };
 
             if ($mods{$uid} || $admin{$uid}) {

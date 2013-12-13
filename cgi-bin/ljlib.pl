@@ -5,17 +5,6 @@ no warnings 'uninitialized';
 use lib "$ENV{LJHOME}/cgi-bin";
 use lib "$ENV{LJHOME}/src/s2";
 
-BEGIN {
-    # ugly hack to shutup dependent libraries which sometimes want to bring in
-    # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.
-    # we REALLY need to move the rest of this crap to .pm files.
-    $LJ::_LJLIB_INIT = 1;
-
-    # All config options have to be loaded before load any modules that depends on them.
-    use LJ::Config;
-    LJ::Config->load;
-}
-
 use Carp;
 use DBI;
 use DBI::Role;
@@ -112,7 +101,7 @@ sub END { LJ::end_request(); }
                     "eventrates", "eventratescounters",
                     "friending_actions_q", "delayedlog2", "delayedblob2",
                     "repost2", "subscriptionfilter2","pollsubmissionprop2",
-                    "subscribers2", "subscribersleft"
+                    "subscribers2", "subscribersleft", "usersingroups2"
                     );
 
 # keep track of what db locks we have out
@@ -1211,7 +1200,7 @@ sub is_valid_authaction {
     # used multiple times
     my $dbh = LJ::get_db_writer();
     my ($aaid, $auth) = @_;
-    return $dbh->selectrow_hashref("SELECT * FROM authactions WHERE aaid=? AND authcode=?",
+    return $dbh->selectrow_hashref("SELECT * FROM authactions WHERE aaid=? AND authcode=? AND used='N'",
                                    undef, $aaid, $auth);
 }
 
@@ -2198,109 +2187,6 @@ sub can_use_journal {
     return 0;
 }
 
-
-# <LJFUNC>
-# name: LJ::get_recommended_communities
-# class:
-# des: Get communities associated with a user.
-# info:
-# args: user, types
-# des-types: The default value for type is 'normal', which indicates a community
-#           is visible and has not been closed. A value of 'new' means the community has
-#           been created in the last 10 days. Last, a value of 'mm' indicates the user
-#           passed in is a maintainer or moderator of the community.
-# returns: array of communities
-# </LJFUNC>
-sub get_recommended_communities {
-    my $u = shift;
-    # Indicates relationship to user, or activity of community
-    my $type = shift() || {};
-    my %comms;
-
-    # Load their friendofs to determine community membership
-    my @ids = LJ::get_friendofs($u);
-    my %fro = %{ LJ::load_userids(@ids) || {} };
-
-    foreach my $ulocal (values %fro) {
-        next unless $ulocal->{'statusvis'} eq 'V';
-        next unless $ulocal->is_community;
-
-        # TODO: This is bad if they belong to a lot of communities,
-        # is a db query to global each call
-        my $ci = LJ::get_community_row($ulocal);
-        next if $ci->{'membership'} eq 'closed';
-
-        # Add to %comms
-        $type->{$ulocal->{userid}} = 'normal';
-        $comms{$ulocal->{userid}} = $ulocal;
-    }
-
-    # Contains timeupdate and timecreate in an array ref
-    my %times;
-    # Get usage information about comms
-    if (%comms) {
-        my $ids = join(',', keys %comms);
-
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(timeupdate), UNIX_TIMESTAMP(timecreate), userid ".
-                                 "FROM userusage WHERE userid IN ($ids)");
-        $sth->execute;
-
-        while (my @row = $sth->fetchrow_array) {
-            @{$times{$row[2]}} = @row[0,1];
-        }
-    }
-
-    # Prune the list by time last updated and make sure to
-    # display comms created in the past 10 days or where
-    # the inviter is a maint or mod
-    my $over30 = 0;
-    my $now = time();
-    foreach my $commid (sort {$times{$b}->[0] <=> $times{$a}->[0]} keys %comms) {
-        my $comm = $comms{$commid};
-        if ($now - $times{$commid}->[1] <= 86400*10) {
-            $type->{$commid} = 'new';
-            next;
-        }
-
-        my $maintainers = LJ::load_rel_user_cache($commid, 'A') || [];
-        my $moderators  = LJ::load_rel_user_cache($commid, 'M') || [];
-        foreach (@$maintainers, @$moderators) {
-            if ($_ == $u->{userid}) {
-                $type->{$commid} = 'mm';
-                next;
-            }
-        }
-
-        # Once a community over 30 days old is reached
-        # all subsequent communities will be older and can be deleted
-        if ($over30) {
-            delete $comms{$commid};
-            next;
-        } else {
-            if ($now - $times{$commid}->[0] > 86400*30) {
-                delete $comms{$commid};
-                $over30 = 1;
-            }
-        }
-    }
-
-    # If we still have more than 20 comms, delete any with less than
-    # five members
-    if (%comms > 20) {
-        foreach my $comm (values %comms) {
-            next unless $type->{$comm->{userid}} eq 'normal';
-
-            my $ids = LJ::get_friends($comm);
-            if (%$ids < 5) {
-                delete $comms{$comm->{userid}};
-            }
-        }
-    }
-
-    return values %comms;
-}
-
 # <LJFUNC>
 # name: LJ::load_talk_props2
 # class:
@@ -2570,14 +2456,19 @@ sub procnotify_callback
         return;
     }
 
+    $LJ::IP_BANNED = new Net::Patricia
+        unless $LJ::IP_BANNED;
+
     # ip bans
     if ($cmd eq "ban_ip") {
-        $LJ::IP_BANNED{$arg->{'ip'}} = $arg->{'exptime'};
+#        $LJ::IP_BANNED{$arg->{'ip'}} = $arg->{'exptime'};
+        $LJ::IP_BANNED->add_string($arg->{'ip'}, $arg->{'exptime'});
         return;
     }
 
     if ($cmd eq "unban_ip") {
-        delete $LJ::IP_BANNED{$arg->{'ip'}};
+#        delete $LJ::IP_BANNED{$arg->{'ip'}};
+        $LJ::IP_BANNED->remove_string($arg->{'ip'});
         return;
     }
 

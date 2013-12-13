@@ -14,6 +14,7 @@ sub need_res { qw(
                     js/ace/mode-s2.js
                     stc/s2edit.css
                     stc/widgets/layereditor.css
+                    js/ljwidget_ippu.js
                     js/s2edit/xlib.js
                     js/s2edit/s2edit.js
                     js/s2edit/s2gui.js

@@ -64,8 +64,7 @@ sub get_requests_tags {
 
     return {} unless @spids;
 
-    @spids = map { int $_ } @spids;
-    my $spids = join ',', @spids;
+    my $spids = join ',', map { int $_ } @spids;
 
     my $dbr = LJ::get_db_reader();
     my $rows = $dbr->selectall_arrayref(
@@ -95,6 +94,37 @@ sub get_request_tags {
     return $tags->{$spid};
 }
 
+# get_tagged_requests(): fetches a list of requests mapped to any of the given tagid;
+sub get_tagged_requests {
+    my @tagids = @_;
+
+    return [] unless @tagids;
+    
+    @tagids = map { int $_ } @tagids;
+    my $tagids = join (',', map { "?" } @tagids);
+    my $dbr = LJ::get_db_reader();
+    my $rows = $dbr->selectall_arrayref( 
+        qq{
+            SELECT spid 
+            FROM   supporttagmap
+            WHERE  sptagid in ($tagids)
+        },
+        { Slice => {} },
+        @tagids
+        
+    );
+
+    my %spids;
+    my @sp;
+    foreach my $row (@$rows) {
+        my $spid = $row->{'spid'};
+        unless ($spids{ $spid }) {
+            push @sp, $spid;
+            $spids{ $spid } = 1;
+        }
+    }
+    return @sp;
+}
 
 # rename_tag() : rename tag
 # calling format

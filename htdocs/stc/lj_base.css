@@ -197,8 +197,13 @@ Must be removed after implementation of Framework! */
     }
 
 
-/* Styles for bubbles
---------------------------- */
+/*
+Styles for bubbles
+---------------------------
+- b-bubble || i-bubble
+- - i-bubble-arrow-border
+- - i-bubble-arrow
+*/
 /*Must be removed after implementation of Framework! */
 .b-bubble {
     display: block;
@@ -213,6 +218,7 @@ Must be removed after implementation of Framework! */
     padding: 8px 10px;
     border-width: 1px;
     border-style: solid;
+    border-color: #000;
     border-radius: 5px;
     font-size: 90%;
     color: #000;
@@ -233,12 +239,14 @@ Must be removed after implementation of Framework! */
         margin: -5px 0 0;
         border-width: 5px 10px 5px 0;
         border-style: solid;
+        border-right-color: #FFF;
         }
     .i-bubble-arrow-border {
         left: -11px;
         margin: -5px 0 0;
         border-width: 5px 10px 5px 0;
         border-style: solid;
+        border-right-color: #000;
         }
 .b-bubble-noarrow {
     margin: 0 !important;
@@ -1314,6 +1322,8 @@ DIV.lj_ippu_app {
                 vertical-align: -4px;
                 }
 
+
+
 /* Fader
 --------------------------- */
 /* Must be removed after implementation of Framework! */
@@ -1355,6 +1365,8 @@ DIV.lj_ippu_app {
         font: 10px/1 Arial, sans-serif;
         }
 
+
+
 /* Help Link
 ----------------------------------- */
 .b-helplink {
@@ -1362,24 +1374,28 @@ DIV.lj_ippu_app {
     display: inline-block;
     min-height: 16px;
     margin: 0 0 0 0.5em;
-    padding: 0 0 0 20px;
+    padding: 0 0 0 16px;
     border: 0;
     vertical-align: -3px;
     }
-BODY div .b-helplink:link,
-BODY div .b-helplink:visited,
-BODY div .b-helplink:hover,
-BODY div .b-helplink:active {
-    border: 0;
+
+/* css specificity overwrite */
+HTML BODY .b-helplink:link,
+HTML BODY .b-helplink:visited,
+HTML BODY .b-helplink:hover,
+HTML BODY .b-helplink:active {
+    border: 0 !important;
     text-decoration: underline;
     color: #8E9194 !important;
     }
-BODY div .b-helplink:hover,
-BODY div .b-helplink:active {
-    border: 0;
+HTML BODY .b-helplink:hover,
+HTML BODY .b-helplink:active {
+    border: 0 !important;
     text-decoration: underline;
     color: #C00 !important;
     }
+
+    /* icon */
     .b-helplink-icon {
         position: absolute;
         top: 50%;
@@ -1389,14 +1405,47 @@ BODY div .b-helplink:active {
         height: 16px;
         margin: -7px 0 0;
         padding: 0;
-        cursor: pointer;
+        border: 0;
         background: url(/img/icons/help.png?v=15718) 0 0 no-repeat;
-        font: 0/0 serif;
+        text-shadow: none;
+        font: 0/0 a;
+        color: transparent;
+        cursor: pointer;
         }
     .b-helplink:hover .b-helplink-icon,
-    .b-helplink:focus .b-helplink-icon {
+    .b-helplink:focus .b-helplink-icon,
+    .b-helplink-frozen .b-helplink-icon {
         background-position: -16px 0;
         }
+
+    /* title */
+    .b-helplink-title {
+        margin: 0;
+        }
+
+/* helplink with title */
+.b-helplink-withtitle {
+    padding: 0 0 0 20px;
+    }
+
+/* helplink for horizon scheme */
+.s-usernav .b-helplink {
+    margin: 0 0 0 0.2em;
+    padding: 0 0 0 14px;
+    }
+
+/* helplink for settings page (LJSUP-17071) */
+TD.help .b-helplink {
+    margin: 0;
+    }
+
+/* helplink for editpics.bml page (LJSUP-17071) */
+.input-wrapper .b-helplink {
+    margin: 0;
+    }
+
+
+
 
 /* Value Bar
 ----------------------------------- */
@@ -1419,6 +1468,8 @@ BODY div .b-helplink:active {
         font-size: 90%;
         color: #666;
         }
+
+
 
 /* Message System
 ----------------------------------- */
@@ -1550,6 +1601,8 @@ BODY div .b-helplink:active {
         display: block;
         }
 
+
+
 /* LJ Button
 ----------------------------------- */
 .b-ljbutton {
@@ -1587,6 +1640,7 @@ BODY div .b-helplink:active {
     background-image:      -o-linear-gradient(top, #DA0000 0%, #970000 100%);
     background-image:   linear-gradient(to bottom, #DA0000 0%, #970000 100%);
     }
+
 
 
 /* LJ-CUT link
@@ -1711,6 +1765,7 @@ BODY div .b-helplink:active {
         }
 
 
+
 /* LJ User
 --------------------------------------*/
 HTML BODY .i-ljuser {
@@ -1727,23 +1782,43 @@ HTML BODY .i-ljuser {
 .i-ljuser-deleted {
     text-decoration: line-through;
     }
-    HTML BODY .i-ljuser A {
+    /* profile link */
+    HTML BODY .i-ljuser-profile {
         width: auto !important;
         height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         border: 0 !important;
         }
-    HTML BODY .i-ljuser-userhead {
-        width: 16px !important;
-        height: 16px !important;
-        margin: 0 !important;
-        padding: 0 1px 0 0 !important;
-        border: 0 !important;
-        vertical-align: bottom !important;
-        }
+        /* userhead */
+        HTML BODY .i-ljuser-userhead {
+            width: 16px !important;
+            height: 16px !important;
+            margin: 0 !important;
+            padding: 0 1px 0 0 !important;
+            border: 0 !important;
+            vertical-align: text-bottom !important;
+            }
+    /* username & journal link */
     .i-ljuser-username {
         }
+    /* alias */
+    .i-ljuser-alias {
+        display: none;
+        }
+    .i-ljuser-alias:before {
+        content: "\00a0\2014\00a0";
+        }
+    /* show * if alias */
+    .i-ljuser-withalias .i-ljuser-username:after {
+        content: "*";
+        }
+    /* show if option */
+    .i-ljuser-withalias.i-ljuser-showalias .i-ljuser-alias {
+        display: inline;
+        }
+
+
 
 /* Popup content
 --------------------------------------*/

@@ -343,7 +343,7 @@ sub init {
 
     # User is disabled and checks below are not needed
     # return with empty errret (this case is handled correctly by talkpost_do.bml)
-    if ( LJ::isu($up) and $up->is_suspended || $up->is_deleted || $up->is_expunged ) {
+    if ( LJ::isu($up) and $up->is_suspended || $up->is_deleted || $up->is_expunged || $up->prop('suspicious_login')) {
         @$errret = ('');
     }
 

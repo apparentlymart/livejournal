@@ -1,5 +1,9 @@
 ;; -*- coding: utf-8 -*-
+.end.activity=End Activity
+
 .intro=This page shows you all of your currently logged in sessions on [[sitename]] as well as some of your prior login sessions. You can individually log out any logged in session if, for example, you forgot to log out when leaving a friend's computer.
+
+.loggedin.empty=No current sessions
 
 .loggedin.header=Currently Logged In Sessions
 
@@ -29,6 +33,8 @@
 
 .loggedin.table.useragent=User Agent
 
+.prior.empty=No previous sessions
+
 .prior.header=Prior Login Sessions
 
 .prior.header.user=Prior Login Sessions for [[user]]
@@ -40,6 +46,10 @@
 .prior.table.useragent=User Agent
 
 .title=Manage Your Login Sessions
+
+.view=View Custom User Login Sessions
+
+.view.button=View User Sessions
 
 .user=Username:
 

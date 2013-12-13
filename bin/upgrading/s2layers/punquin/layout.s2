@@ -270,6 +270,7 @@ function print_stylesheet ()
     }
     print """
 body {
+    margin: 0;
     background-color:  $*body_bgcolor;
     color:             $*main_fgcolor;
     font:              normal normal 10pt $font;
@@ -287,6 +288,9 @@ a:visited {
 a:active {
     color:             $*alink_color;
     background:        transparent;
+}
+.wrapper {
+  margin: 10px 0;
 }
 #title {
     font:              normal bold 10pt $font;
@@ -466,7 +470,8 @@ function Page::print ()
 
     "<a name='top'></a>";
     $this->print_control_strip();
-    "<div align='center'>\n";
+    $this->print_pagewide_slot();
+    "<div align='center' class='wrapper'>\n";
 
     # Table wrapper
     if ($margin == "") {

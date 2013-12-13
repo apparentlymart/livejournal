@@ -968,6 +968,16 @@ SUP.i-new {
         box-shadow: inset 0 0 6px #2B4C7B;
         color: #FFF;
         }
+    .b-steps-step.disable A,
+    .b-tabs .b-steps-step.disable A:link,
+    .b-tabs .b-steps-step.disable A:visited,
+    .b-tabs .b-steps-step.disable A:hover,
+    .b-tabs .b-steps-step.disable A:active {
+        pointer-events: none;
+        border-bottom: 0 !important;
+        cursor: default;
+        color: #000 !important;
+        }
 
 
 /* Panel
