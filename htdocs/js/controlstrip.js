@@ -1,8 +1,6 @@
 //= require js/jquery/jquery.calendarEvents.js
 //= require js/relations/menu.js
 
-/*global ContextualPopup, Hourglass */
-
 /**
  * @author Valeriy Vasin (valeriy.vasin@sup.com)
  * @description Controlstrip functionality
