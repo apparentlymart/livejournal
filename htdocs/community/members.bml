@@ -561,12 +561,6 @@ body<=
             $u->unsubscribe( event => 'CommunityMantioned', journalid => $c->{userid}, method => 'Email' );
         }
 
-        # delete reluser memcache key
-        LJ::MemCache::delete([ $cid, "reluser:$cid:A" ]);
-        LJ::MemCache::delete([ $cid, "reluser:$cid:P" ]);
-        LJ::MemCache::delete([ $cid, "reluser:$cid:M" ]);
-        LJ::MemCache::delete([ $cid, "reluser:$cid:N" ]);
-
         # create some other messages
         my %done; # keep track of who we've done
         foreach my $id (keys %addr, keys %delr) {

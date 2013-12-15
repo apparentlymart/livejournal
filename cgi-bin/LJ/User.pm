@@ -6435,7 +6435,7 @@ sub get_groupmask {
 
 sub get_filtermask {
     my ($u, $target) = @_;
-    return LJ::get_filtermask($u, $target) || 0;
+    return LJ::RelationService->get_filtermask($u, $target);
 }
 
 

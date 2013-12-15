@@ -82,23 +82,22 @@ sub get_groupmask {
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
 
-    $remote = LJ::want_user($remote);
+    $remote  = LJ::want_user($remote);
     $journal = LJ::want_user($journal);
 
     if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        if (my $groupmask = LJ::RelationService->get_groupmask($journal, $remote)) {
+            return $groupmask;
+        }
+
         if (my $groupmask = LJ::User::Groups->get_groupmask($journal, $remote)) {
             return $groupmask;
         }
+
+        return 0;
     }
 
     return LJ::RelationService->get_groupmask($journal, $remote);
-}
-
-sub get_filtermask {
-    my ($journal, $remote) = @_;
-    return 0 unless $journal && $remote;
-
-    return LJ::RelationService->get_filtermask($journal, $remote);
 }
 
 # <LJFUNC>
@@ -140,19 +139,8 @@ sub load_rel_user_cache {
 
     my $u = LJ::want_user($userid);
     return undef unless $u;
-    $userid = $u->{'userid'};
 
-    my $key = [ $userid, "reluser:$userid:$type" ];
-    my $res = LJ::MemCacheProxy::get($key);
-
-    return $res if $res;
-
-    $res = LJ::load_rel_user($userid, $type);
-
-    my $exp = time() + 60*30; # 30 min
-    LJ::MemCacheProxy::set($key, $res, $exp);
-
-    return $res;
+    return LJ::load_rel_user($u, $type);
 }
 
 # <LJFUNC>
@@ -241,12 +229,10 @@ sub _set_rel_memcache {
 
     my $now = time();
     my $exp = $now + 3600*6; # 6 hour
+
     LJ::MemCacheProxy::set($relkey, [$val, $now], $exp);
     LJ::MemCacheProxy::set($modukey, $now, $exp);
     LJ::MemCacheProxy::set($modtkey, $now, $exp);
-
-    # Also, delete this key, since the contents have changed.
-    LJ::MemCacheProxy::delete([$userid, "reluser:$userid:$type"]);
 
     return 1;
 }

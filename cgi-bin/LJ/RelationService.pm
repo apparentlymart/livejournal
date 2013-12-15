@@ -154,6 +154,16 @@ sub is_relation_to {
         return unless $target;
     }
 
+    my $uid = $u->id;
+    my $tid = $target->id;
+
+    return unless $uid;
+    return unless $tid;
+
+    if ($class->exist_cache($uid, $tid, $type)) {
+        return 1;
+    }
+
     if ($class->_load_rs_api('read', $type)) {
         if (my $alt = $class->rs_api) {
             $alt->is_relation_to($u, $target, $type, %opts);
@@ -227,6 +237,14 @@ sub find_relation_destinations {
 
     my $interface = $class->mysql_api;
     my @result    = $interface->find_relation_destinations($u, $type, %opts);
+
+    if (@result) {
+        $class->set_cache($uid, undef, $type, {
+            map {
+                $_ => undef
+            } @result
+        });
+    }
 
     return @result;
 }
@@ -596,6 +614,37 @@ sub del_cache {
             last unless exists $singletons{$uid};
 
             delete $singletons{$uid};
+        }
+    }
+
+    return;
+}
+
+sub exist_cache {
+    my ($class, $uid, $tid, $type) = @_;
+
+    return unless LJ::is_web_context();
+
+    if ($uid && $tid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+            last unless exists $singletons{$uid}{$type}{$tid};
+
+            return 1;
+        }
+    } elsif ($uid && $type) {
+        {
+            last unless exists $singletons{$uid};
+            last unless exists $singletons{$uid}{$type};
+
+            return 1;
+        }
+    } elsif ($uid) {
+        {
+            last unless exists $singletons{$uid};
+
+            return 1;
         }
     }
 
