@@ -7,42 +7,54 @@ $maint{'clean_caches'} = sub
     my $sth;
 
     my $verbose = $LJ::LJMAINT_VERBOSE;
+    my $count;
 
     print "-I- Cleaning authactions.\n";
-    $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+    $count = $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+    print "    deleted $count\n";
 
     print "-I- Cleaning faquses.\n";
-    $dbh->do("DELETE FROM faquses WHERE dateview < DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    $count = $dbh->do("DELETE FROM faquses WHERE dateview < DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    print "    deleted $count\n";
 
     print "-I- Cleaning duplock.\n";
-    $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+    $count = $dbh->do("DELETE FROM duplock WHERE instime < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+    print "    deleted $count\n";
 
     print "-I- Cleaning commenturl.\n";
-    $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    $count = $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    print "    deleted $count\n";
     
     print "-I- Cleaning entry url.\n";
-    $dbh->do("DELETE FROM entryurlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    $count = $dbh->do("DELETE FROM entryurlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    print "    deleted $count\n";
 
     print "-I- Cleaning syslog table.\n";
-    $dbh->do("DELETE FROM syslog WHERE log_time < UNIX_TIMESTAMP() - 86400 * 30 * 2");  ## 2 months
+    $count = $dbh->do("DELETE FROM syslog WHERE log_time < UNIX_TIMESTAMP() - 86400 * 30 * 2");  ## 2 months
+    print "    deleted $count\n";
 
     if ($LJ::COPPA_CHECK && $LJ::UNIQ_COOKIES) {
         print "-I- Cleaning underage uniqs.\n";
-        $dbh->do("DELETE FROM underage WHERE timeof < (UNIX_TIMESTAMP() - 86400*90) LIMIT 2000");
+        $count = $dbh->do("DELETE FROM underage WHERE timeof < (UNIX_TIMESTAMP() - 86400*90) LIMIT 2000");
+        print "    deleted $count\n";
     }
 
     print "-I- Cleaning captcha sessions.\n";
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
         next unless $dbcm;
-        $dbcm->do("DELETE FROM captcha_session WHERE sesstime < UNIX_TIMESTAMP()-86400");
+        $count += $dbcm->do("DELETE FROM captcha_session WHERE sesstime < UNIX_TIMESTAMP()-86400");
     }
+    print "    deleted total $count\n";
 
     print "-I- Cleaning blobcache.\n";
-    $dbh->do("DELETE FROM blobcache WHERE dateupdate < NOW() - INTERVAL 30 DAY");
+    $count = $dbh->do("DELETE FROM blobcache WHERE dateupdate < NOW() - INTERVAL 30 DAY");
+    print "    deleted $count\n";
+
 
     print "-I- Cleaning old anonymous comment IP logs.\n";
-    my $count;
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
         next unless $dbcm;
@@ -52,7 +64,7 @@ $maint{'clean_caches'} = sub
     print "    deleted $count\n";
 
     print "-I- Cleaning old random users.\n";
-    my $count;
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
         next unless $dbcm;
@@ -70,20 +82,23 @@ $maint{'clean_caches'} = sub
     print "-I- Cleaning diresearchres.\n";
     # need insert before delete so master logs delete and slaves actually do it
     $dbh->do("INSERT INTO dirsearchres2 VALUES (MD5(NOW()), DATE_SUB(NOW(), INTERVAL 31 MINUTE), '')");
-    $dbh->do("DELETE FROM dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+    $count = $dbh->do("DELETE FROM dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+    print "    deleted $count\n";
 
     # clean incoming emails older than 7 days from Mogile...
     my $mogc = LJ::mogclient();
     if ($mogc) {
+        $count = 0;
         print "-I- Cleaning incoming email temporary handles.\n";
         $sth = $dbh->prepare("SELECT ieid FROM incoming_email_handle WHERE timerecv < UNIX_TIMESTAMP() - 86400*7 LIMIT 10000");
         $sth->execute;
         while (my ($id) = $sth->fetchrow_array) {
             if ($mogc->delete("ie:$id")) {
-                $dbh->do("DELETE FROM incoming_email_handle WHERE ieid=?", undef, $id);
+                $count += $dbh->do("DELETE FROM incoming_email_handle WHERE ieid=?", undef, $id);
             }
         }
     }
+    print "    deleted $count\n";
 
     print "-I- Cleaning meme.\n";
     do {
@@ -195,43 +210,53 @@ $maint{'clean_caches'} = sub
 =cut
 
     print "-I- Cleaning cc_usage\n";
-    $dbh->do("DELETE FROM cc_usage WHERE time < (UNIX_TIMESTAMP() - 86400*30) LIMIT 5000");
+    $count = $dbh->do("DELETE FROM cc_usage WHERE time < (UNIX_TIMESTAMP() - 86400*30) LIMIT 5000");
+    print "    deleted $count\n";
 
     print "-I- Cleaning cc_lock\n";
-    $dbh->do("DELETE FROM cc_lock WHERE locktill < UNIX_TIMESTAMP()");
+    $count = $dbh->do("DELETE FROM cc_lock WHERE locktill < UNIX_TIMESTAMP()");
+    print "    deleted $count\n";
 
     print "-I- Remove outdated sessions.\n";
-    LJ::disconnect_dbs();
+   # LJ::disconnect_dbs();
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbh = LJ::get_cluster_master($c);
-        $dbh->do("DELETE FROM sessions WHERE timeexpire < UNIX_TIMESTAMP() LIMIT 100000");
+        $count += $dbh->do("DELETE FROM sessions WHERE timeexpire < UNIX_TIMESTAMP() LIMIT 100000");
     }
+    print "    deleted $count\n";
 
     LJ::run_hooks('extra_cache_clean');
-    LJ::disconnect_dbs();
+  #  LJ::disconnect_dbs();
 
     print "-I- Cleaning friendstimes.\n";
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
-        $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*14 LIMIT 100000");
+        $count = $dbcm->do("DELETE FROM friendstimes WHERE added < UNIX_TIMESTAMP() - 86400*14 LIMIT 100000");
     }
-    LJ::disconnect_dbs();
+    print "    deleted $count\n";
+  #  LJ::disconnect_dbs();
 
     print "-I- Cleaning comet_history.\n";
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
-        $dbcm->do("DELETE FROM comet_history WHERE added < FROM_UNIXTIME( UNIX_TIMESTAMP() - 86400*10 ) LIMIT 100000");
+        $count = $dbcm->do("DELETE FROM comet_history WHERE added < FROM_UNIXTIME( UNIX_TIMESTAMP() - 86400*10 ) LIMIT 100000");
     }
-    LJ::disconnect_dbs();
+    print "    deleted $count\n";
+  #  LJ::disconnect_dbs();
 
     if (LJ::is_enabled('new_friends_and_subscriptions')) {
     print "-I- Cleaning invite tables.\n";
+    $count = 0;
     foreach my $c (@LJ::CLUSTERS) {
         my $dbcm = LJ::get_cluster_master($c);
-        $dbcm->do("DELETE FROM invitesent WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
-        $dbcm->do("DELETE FROM inviterecv WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
+        $count += $dbcm->do("DELETE FROM invitesent WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
+        $count += $dbcm->do("DELETE FROM inviterecv WHERE recvtime < ( UNIX_TIMESTAMP() - 86400*30 ) LIMIT 100000");
     }
-    LJ::disconnect_dbs();
+    print "    deleted $count\n";
+ #   LJ::disconnect_dbs();
     }
 
 };
