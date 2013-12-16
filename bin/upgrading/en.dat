@@ -10024,6 +10024,8 @@ web.controlstrip.links.viewownstyle=View in own style
 
 web.controlstrip.links.watchcomm=Watch this community
 
+web.controlstrip.links.waitfriend=Friend Request Sent
+
 web.controlstrip.login.forgot=Forgot your password?
 
 web.controlstrip.login.google|staleness=1
