@@ -3142,9 +3142,11 @@ sub editevent {
     my $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm && $dbh;
 
-    # can't specify both a custom security and 'friends-only'
-    return fail($err, 203, 'xmlrpc.des.friends_security')
-        if $qallowmask > 1 && $qallowmask % 2;
+    unless ( LJ::is_enabled('new_friends_and_subscriptions') ) {
+        # can't specify both a custom security and 'friends-only'
+        return fail($err, 203, 'xmlrpc.des.friends_security')
+            if $qallowmask > 1 && $qallowmask % 2;
+    }
 
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
