@@ -150,9 +150,7 @@ use vars qw($body $title $windowtitle %GET %POST);
                           remid => $remote->{userid});
 
 
- my $fr = LJ::load_userid($userid);
- 
- $fr = $u->get_friend_attributes($fr);
+ my $fr = $remote->get_friend_attributes($u);
 
  if ($fr) {
      $title .= $ML{'.error3.title'};
