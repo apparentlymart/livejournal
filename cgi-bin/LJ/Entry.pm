@@ -503,20 +503,21 @@ sub twitter_hashtags {
     return unless $self;
 
     my @tags = $self->tags();
-    my @hashtags;
+    my %hashtags;
     
     for my $tag ( @tags ) {
         $tag = Encode::decode_utf8($tag);
 
-        $tag =~ s/^#//;
+        $tag =~ s/[#\-\_\s]//g;
         next unless $tag =~ m/^\w+$/;
 
         $tag = Encode::encode_utf8($tag);
 
-        push @hashtags, $tag;
+        # remove dublicate tags
+        $hashtags{$tag}++;
     }
 
-    return join ',', @hashtags;
+    return join ',', keys %hashtags;
 }
 
 sub handle_prefetched_text {
