@@ -79,6 +79,9 @@ body<=
 
      my $u = LJ::load_userid($aa->{'userid'});
 
+     return "<?p You do not have access to send email validation requests to other people. p?>"
+         unless (LJ::u_equals ($u, $remote) || LJ::check_priv($remote, "siteadmin", "users") || LJ::check_priv($remote, "siteadmin", "*"));
+
      # verify their email hasn't subsequently changed
      unless ($u && ($u->email_raw eq $aa->{arg1})) {
          return "<?h1 $ML{'Error'} h1?><?p " .
