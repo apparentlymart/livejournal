@@ -1351,6 +1351,32 @@ sub get_previous_screened_replies {
 }
 
 # <LJFUNC>
+# name: LJ::Support::get_stock_answer_catid
+# des: Get support category id for specified stock answer
+# args: ansid
+# ansid: id of support stock answer we are looking after
+# returns: spcatid or undef
+# </LJFUNC>
+sub get_stock_answer_catid {
+    my $ansid = shift;
+    
+    my $dbr = LJ::get_db_reader();
+    my $res = $dbr->selectrow_hashref( 
+        qq(
+            SELECT spcatid
+            FROM   support_answers
+            WHERE  ansid = ?
+        ),
+        undef,
+        $ansid,
+    );
+
+    return $res->{'spcatid'} if $res;
+
+    return 0;
+}
+
+# <LJFUNC>
 # name: LJ::Support::get_latest_screen
 # des: Get screened replies between approve one and the previous answer
 # args: splid, userid

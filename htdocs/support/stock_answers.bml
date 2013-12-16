@@ -12,22 +12,32 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    # most things have a category id
-    my $spcatid = ($GET{spcatid} || $POST{spcatid} || 0) + 0;
+    my $ansid = ($GET{ansid} || 0) + 0;
+    
+    # if we have ansid we should use its catid, otherwise use params
+    my $spcatid;
+    if ($ansid) {
+        $spcatid = LJ::Support::get_stock_answer_catid($ansid);
+    } else {
+        $spcatid = ($GET{spcatid} || $POST{spcatid} || 0) + 0;
+    }
+    
     my $cats = LJ::Support::load_cats();
     return "<?h1 $ML{'.error'} h1?><?p $ML{'.category.not.exist'} p?>"
         unless !$spcatid || $cats->{$spcatid};
 
     my $formauth = LJ::form_auth();
 
-    # editing is based on ability to grant supporthelp.  and throw an error if they
-    # posted but can't edit.
-    my $spcatkey = $cats->{$spcatid}->{catkey};
-    my $canedit = ($spcatid && LJ::check_priv($remote, 'admin', "supporthelp/$spcatkey")) ||
-                  LJ::check_priv($remote, 'admin', 'supporthelp') ||
-                  LJ::check_priv($remote, 'admin', '*') ||
-                  (LJ::check_priv($remote, 'supporthelp', $spcatkey) && 
+    # editing is based on ability to grant supporthelp or admining particular category
+    # and throw an error if they posted but can't edit.
+    my $canedit = LJ::check_priv($remote, 'admin', 'supporthelp') ||
+                  LJ::check_priv($remote, 'admin', '*');
+    if (!$canedit && $spcatid) {
+        my $spcatkey = $cats->{$spcatid}->{catkey};
+        $canedit = LJ::check_priv($remote, 'admin', "supporthelp/$spcatkey") ||
+                  (LJ::check_priv($remote, 'supporthelp', $spcatkey) &&
                    LJ::check_priv($remote, 'supportclose', $spcatkey));
+    }
     if (LJ::did_post()) {
         return "<?h1 $ML{'Error'} h1?> $ML{'error.invalidform'}" unless LJ::check_form_auth();
         return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.to.actions'} p?>"
@@ -47,8 +57,6 @@ body<=
 
     # filter down the category list
     $cats = { map { $_->{spcatid}, $_ } grep { $canview{$_->{spcatid}} } values %$cats };
-
-    my $ansid = ($GET{ansid} || 0) + 0;
 
     my $ret = "<?h1 $ML{'.stock.answers'} h1?>";
     my $self = "$LJ::SITEROOT/support/stock_answers.bml";
