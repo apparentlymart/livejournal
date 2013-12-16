@@ -2432,9 +2432,11 @@ sub postevent {
         $uselogsec = 1;
     }
 
-    # can't specify both a custom security and 'friends-only'
-    return fail($err, 203, 'xmlrpc.des.friends_security')
-        if $qallowmask > 1 && $qallowmask % 2;
+    unless ( LJ::is_enabled('new_friends_and_subscriptions') ) {
+        # can't specify both a custom security and 'friends-only'
+        return fail($err, 203, 'xmlrpc.des.friends_security')
+            if $qallowmask > 1 && $qallowmask % 2;
+    }
 
     ## if newpost_minsecurity is set, new entries have to be
     ## a minimum security level
