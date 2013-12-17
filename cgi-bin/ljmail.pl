@@ -244,11 +244,8 @@ sub get_mail_message {
     }
 
     if ( $opt->{dkim} ) {
-        open FILE, "<$ENV{LJHOME}/etc/keys/dkim.private.key";
-        my $private_key = do { local $/; <FILE> };
-
         my $dkim = LJ::Sendmail::Signer->new({
-            key => $private_key, #private key string
+            key => $LJ::DKIM_PRIVATE_KEY, #private key string
             domain => $LJ::DKIM_DOMAIN,
             selector => $LJ::DKIM_KEY,
             c => 'simple/simple', ###simple/simple is the only supported Canonicalization
