@@ -202,6 +202,12 @@ sub _extract_metadata {
             my $parser = HTML::TokeParser->new( \$html );
             while (my $taginfo = $parser->get_tag('meta')) {
                 my $attr = $taginfo->[1];
+
+                if (my $charset = $attr->{'charset'}) {
+                    $encoding = $charset;
+                    last;
+                }
+
                 my $he = $attr->{'http-equiv'};
                 if ($he && lc($he) eq 'content-type') {
                     my $content = $attr->{'content'};
