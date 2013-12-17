@@ -32,7 +32,7 @@ sub execute {
     return $self->error("You cannot create these ban types")
         unless LJ::check_priv($remote, "sysban", $what);
 
-    my $err = LJ::sysban_validate($what, $value);
+    my $err = LJ::sysban_validate($what, $value, { force_use => 1 });
     return $self->error($err) if $err;
 
     $days ||= 0;

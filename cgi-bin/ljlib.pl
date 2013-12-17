@@ -2456,20 +2456,17 @@ sub procnotify_callback
         return;
     }
 
-    $LJ::IP_BANNED = new Net::Patricia
-        unless $LJ::IP_BANNED;
+    unless ($LJ::DISABLED{'sysban'}) {
+        # ip bans
+        if ($cmd eq "ban_ip") {
+            $LJ::IP_BANNED{$arg->{'ip'}} = $arg->{'exptime'};
+            return;
+        }
 
-    # ip bans
-    if ($cmd eq "ban_ip") {
-#        $LJ::IP_BANNED{$arg->{'ip'}} = $arg->{'exptime'};
-        $LJ::IP_BANNED->add_string($arg->{'ip'}, $arg->{'exptime'});
-        return;
-    }
-
-    if ($cmd eq "unban_ip") {
-#        delete $LJ::IP_BANNED{$arg->{'ip'}};
-        $LJ::IP_BANNED->remove_string($arg->{'ip'});
-        return;
+        if ($cmd eq "unban_ip") {
+            delete $LJ::IP_BANNED{$arg->{'ip'}};
+            return;
+        }
     }
 
     # uniq key bans

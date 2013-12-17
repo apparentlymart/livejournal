@@ -114,7 +114,7 @@ if ($banlength) {
 # add new ban
 if ($add) {
 
-    my $err = LJ::sysban_validate($what, $value);
+    my $err = LJ::sysban_validate($what, $value, { force_use => 1 });
     die $err if $err;
 
     $status = ($status eq 'expired' ? 'expired' : 'active');
@@ -144,7 +144,7 @@ if ($modify) {
     die $dbh->errstr if $dbh->err;
 
     if ($what || $value) {
-        my $err = LJ::sysban_validate($what || $ban->{'what'}, $value || $ban->{'value'}, {skipexisting => 1});
+        my $err = LJ::sysban_validate($what || $ban->{'what'}, $value || $ban->{'value'}, {skipexisting => 1, force_use => 1});
         die $err if $err;
     }
 

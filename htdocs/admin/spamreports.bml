@@ -236,7 +236,7 @@
         my $in = join("','", map { $_+0 } @srids);
         $in = "'$in'";
 
-        if ($POST{'sysban_ip'} && !LJ::sysban_validate("talk_ip_test", $POST{'sysban_ip'})) {
+        if ($POST{'sysban_ip'} && !LJ::sysban_validate("talk_ip_test", $POST{'sysban_ip'}, { force_use => 1 } )) {
             LJ::sysban_create('what' => 'talk_ip_test', value => $POST{'sysban_ip'},
                               'banlength' => 0, note => "anonymous spamreports");
         }
