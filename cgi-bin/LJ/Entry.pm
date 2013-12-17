@@ -509,6 +509,7 @@ sub twitter_hashtags {
         $tag = Encode::decode_utf8($tag);
 
         $tag =~ s/[#\-\_\s]//g;
+        next if $tag =~ m/^\d+$/;
         next unless $tag =~ m/^\w+$/;
 
         $tag = Encode::encode_utf8($tag);
