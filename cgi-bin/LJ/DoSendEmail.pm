@@ -106,7 +106,13 @@ sub send {
     my @ex = ();
     if ($LJ::IS_DEV_SERVER){
         @ex = ('127.0.0.1'); ## use local relay
-        @ex = ('172.19.1.1');
+        # @ex = ('172.19.1.1');
+        if ($opts->{internal_relays}) {
+            warn "internal_relays";
+            @ex = ('172.19.1.1');
+        }
+    } elsif ( $opts->{internal_relays} ) {
+        @ex = @LJ::INTERNAL_MAIL_RELAYS;
     } else {
         ## give me the numbers!
         my @mailhosts = mx(resolver(), $host);

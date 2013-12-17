@@ -216,12 +216,14 @@ body<=
                 $body .= "Text:\n" . $req->{'event'} . "\n\n";
                 $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
             }
+
             LJ::send_mail({
                 'to' => $to,
                 'from' => $LJ::BOGUS_EMAIL,
                 'charset' => 'utf-8',
                 'subject' => $subject,
                 'body' => $body,
+                'internal_relays' => ($why_mail eq 'reject')&&($c->user eq $LJ::COMM_FOR_WHICH_INTERNAL_RELAYS) ? 1 : 0,
             });
         }
 
