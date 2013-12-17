@@ -1951,6 +1951,12 @@ pollproplist2.createdate:
 
 pollproplist2.explain_vote:
   des: Specify should voter explain his choice. Could be "R" - required, "A" - allowed, "N" - not needed (default value). 
+
+pollproplist2.min_soc_cap:
+  des: Minimal social capital of user for the possiblity of voting 
+ 
+pollproplist2.onlyauthor:
+  des: 1 if only author of poll can view all results
   
 pollproplist2.supermaintainer:
   des: If set to !0, only maintainers can see, vote and view results for this poll. Has value as UserID - SuperMaintainer.

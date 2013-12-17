@@ -284,6 +284,13 @@ sub new_from_html {
                         return $err->('poll.error.explain_vote');
                     }
                 }
+
+                if ($opts->{'minsoccap'} && $opts->{'minsoccap'} =~ /^\d+$/) {
+                    $popts{'props'}->{'min_soc_cap'} = $opts->{'minsoccap'};
+                }
+                if ($opts->{'onlyauthor'} && $opts->{'onlyauthor'} =~ /^[01]$/) {
+                    $popts{'props'}->{'onlyauthor'} = $opts->{'onlyauthor'};
+                }
                 
                 LJ::run_hook('get_more_options_from_poll', finalopts => \%popts, givenopts => $opts, journalu => $journal);
 
@@ -1994,6 +2001,9 @@ sub render_new {
         post_uri     => $opts{post_uri},
         show_close   => $self->is_owner($remote) && !$self->is_closed ? 1 : 0,
         show_open    => $self->is_owner($remote) && $self->is_closed ? 1 : 0,
+        is_author    => $remoteid == $self->posterid ? 1 : 0,
+        onlyauthor   => $self->prop('onlyauthor') ? 1 : 0,
+        can_vote     => $can_vote,
     );
 
     if($opts{widget}) {
@@ -2021,6 +2031,9 @@ sub can_vote {
     my $is_friend = $remote && LJ::is_friend($self->journalid, $remote->userid);
 
     return 0 if $self->whovote eq "friends" && !$is_friend;
+
+    my $min_soc_cap = $self->prop('min_soc_cap');
+    return 0 if $min_soc_cap && (!$remote || (!$remote->is_identity && $remote->get_social_capital < $min_soc_cap));
 
     if (LJ::is_banned($remote, $self->journalid) || LJ::is_banned($remote, $self->posterid)) {
         return 0;

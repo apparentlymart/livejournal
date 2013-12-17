@@ -5986,6 +5986,8 @@ poll.error.whovote=whovote must be 'all' or 'friends'.
 poll.isclosed|staleness=1
 poll.isclosed=This poll is closed.
 
+poll.onlyauthor.result=Thank you, you have successfully voted.
+
 poll.navalny.body<<
 You can take part in voting if you have registered on <a href="https://election.cvk2012.org/">Central Election Comission site</a> and <a href="http://www.cvk2012.org/electorial/verify/">verified</a> your account.   
 How to vote:  
