@@ -134,6 +134,7 @@ sub send_mail {
         from  => $from,
         rcpts => \@rcpts,
         text  => $message_text,
+        opt   => $opt,
     ) if !LJ::is_web_context();
 
     ## Do we still have someone to notify?
@@ -299,6 +300,7 @@ sub _send_via_schwartz {
             rcpts    => $rcpts,
             data     => $compressed_text,
             compressed => 1,
+            internal_relays => $opt->{internal_relays},
         },
         coalesce => $coalesce,
     );
@@ -322,13 +324,14 @@ sub _send_now {
 
     foreach my $rcpt (@$rcpts){
         my $res = LJ::DoSendEmail->send($rcpt, {
-                    from    => $from,         ## Envelope From
-                    data    => $text,
+            from    => $from,         ## Envelope From
+            data    => $text,
 
-                    ## Optional params
-                    # sender_id => "",  ## stored in email headers. for debug.
-                    timeout   => 120,   ## Default timeout for sending email is 300 sec.
-                    });
+            ## Optional params
+            # sender_id => "",  ## stored in email headers. for debug.
+            timeout   => 120,   ## Default timeout for sending email is 300 sec.
+            internal_relays => $args{opt}->{'internal_relays'},
+        });
 
         ## handle result
         if ($res eq LJ::DoSendEmail::OK){
