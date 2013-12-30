@@ -1717,9 +1717,7 @@ sub _load_relation_destinations_f_new {
                 return;
             }
 
-            @data = sort {
-                $a <=> $b
-            } @$data;
+            @data = @$data;
 
             my $pack = pack 'N*', @$data;
 
