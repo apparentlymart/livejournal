@@ -4564,6 +4564,8 @@ lynx.nav.update=Update Journal
 main.banner.close|staleness=1
 main.banner.close=Close banner for today
 
+main.banner.mpt=<a href="http://freedom.livejournal.com/1593026.html" target="_blank">Election of a new quality mark</a>
+
 main.banner.title|staleness=1
 main.banner.title=Advertising
 
@@ -10025,6 +10027,8 @@ web.controlstrip.links.viewownstyle|staleness=1
 web.controlstrip.links.viewownstyle=View in own style
 
 web.controlstrip.links.watchcomm=Watch this community
+
+web.controlstrip.links.waitcomm=Join Request Submitted
 
 web.controlstrip.links.waitfriend=Friend Request Sent
 

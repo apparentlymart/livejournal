@@ -44,17 +44,27 @@ $maint{'clean_caches'} = sub
     $time = Time::HiRes::time() - $time;
     print "    deleted $count, in ".$display_time->($time)."\n";
 
-    print "-I- Cleaning commenturl.\n";
+    print "-I- Cleaning commenturlsext.\n";
     $time = Time::HiRes::time();
-    $count = $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
+    my $try1 = 0;
+    while ($count = $dbh->do("DELETE FROM commenturlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000")) {
+        print "    deleted $count, in ".$display_time->(Time::HiRes::time() - $time)."\n";
+        last if $count < 5000 || ++$try1 >= 10;
+        sleep 2;
+        $time = Time::HiRes::time();
+    }
     $time = Time::HiRes::time() - $time;
     print "    deleted $count, in ".$display_time->($time)."\n";
     
     print "-I- Cleaning entry url.\n";
     $time = Time::HiRes::time();
-    $count = $dbh->do("DELETE FROM entryurlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*30 LIMIT 5000");
-    $time = Time::HiRes::time() - $time;
-    print "    deleted $count, in ".$display_time->($time)."\n";
+    my $try2 = 0;
+    while ($count = $dbh->do("DELETE FROM entryurlsext WHERE timecreate < UNIX_TIMESTAMP() - 86400*3 LIMIT 5000")) {
+        print "    deleted $count, in ".$display_time->(Time::HiRes::time() - $time)."\n";
+        last if $count < 5000 || ++$try2 >= 10;
+        sleep 2;
+        $time = Time::HiRes::time();
+    }
 
     print "-I- Cleaning syslog table.\n";
     $time = Time::HiRes::time();

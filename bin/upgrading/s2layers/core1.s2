@@ -520,6 +520,15 @@ class Event extends UserLite
     var readonly string event_date_to "Date of event to";
 }
 
+class Institution extends UserLite
+"Lj art or other institution. Created from community"
+{
+    var Image default_pic "Information about default userpic";
+    var readonly string institution "Community is institution?";
+    var readonly string institution_type "Type of institution";
+    var readonly string institution_designation "Designation of institution";
+}
+
 class Person extends UserLite
 "Lj artist or other person. Created from user"
 {
@@ -725,7 +734,7 @@ class Page
     function print_pagewide_slot()
     "Prints page-wide slot.";
 
-    function print_yacontext_slot( string custom_class )
+    function print_yacontext_slot( string custom_class, string slot  )
     "Prints slot for slot yandex context.";
 
     function print_yacontext_slot()
@@ -1095,6 +1104,9 @@ function builtin UserExtended(string username) : UserExtended
 
 function builtin Event(string username) : Event
 "Constructor for making a Event object from a username";
+
+function builtin Institution(string username) : Institution
+"Constructor for making a Institution object from a username";
 
 function builtin Person(string username) : Person
 "Constructor for making a Person object from a username";
@@ -2739,20 +2751,20 @@ function Page::print_pagewide_slot() {
     }
 }
 
-function Page::print_yacontext_slot( string custom_class ) {
-  if (viewer_sees_ad_box("yandex.context")) {
+function Page::print_yacontext_slot( string custom_class, string slot ) {
+  if ( viewer_sees_ad_box("yandex.context") and $slot != "" ) {
       var string wrapper_class = "ya-context";
       if ( $custom_class ){
         $wrapper_class = $wrapper_class +" $custom_class";
       }
 
       """<div class="$wrapper_class">""";
-      $this->print_ad_box("yandex.context");
+      $this->print_ad_box($slot);
       """</div>""";
     }
 }
 function Page::print_yacontext_slot() {
-  $this->print_yacontext_slot("");
+  $this->print_yacontext_slot("", "yandex.context");
 }
 
 function Page::print_linklist() {

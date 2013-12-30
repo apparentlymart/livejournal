@@ -319,9 +319,9 @@ Must be removed after implementation of Framework! */
 .appwidget-sitemessages {
     padding: 0;
     }
-.mobile-msg .appwidget-sitemessages {
+/* .mobile-msg .appwidget-sitemessages {
     top: 130px;
-    }
+    } */
 HTML BODY.logged-in,
 HTML BODY.logged-out {
     padding-top: 0 !important;
@@ -406,28 +406,28 @@ HTML BODY.logged-out {
     left: 0;
     z-index: 1000;
     width: 100%;
-    height: 30px;
+    height: 72px;
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid #FFF;
-    background: #5A91D9;
+    background: #0095B3;
     text-align: left;
-    font: 11px/13px 'Arial', 'Helvetica', sans-serif;
+    font: 32px/32px 'Arial', 'Helvetica', sans-serif;
     color: #FFF;
     }
     .b-message-mobile .b-message-mobile-wrapper {
         margin: 0;
-        padding: 8px 13px;
+        padding: 20px 20px;
         }
     .b-message-mobile A:link,
     .b-message-mobile A:visited,
     .b-message-mobile A:hover,
     .b-message-mobile A:active {
+        display: block;
         margin: 0;
         padding: 0;
         border: 0;
         text-decoration: none !important;
-        font: 12px/14px 'Arial', 'Helvetica', sans-serif !important;
+        font: 32px/32px 'Arial', 'Helvetica', sans-serif !important;
         color: #FFF !important;
         }
 .b-message-mobile-theme {

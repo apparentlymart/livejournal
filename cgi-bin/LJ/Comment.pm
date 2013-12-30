@@ -88,7 +88,7 @@ sub instance {
         $jtalkid = int($dtalkid / 256);
     }
 
-    return undef 
+    return undef
         unless $jtalkid;
 
     croak("unknown parameter: " . join(", ", keys %opts))
@@ -97,10 +97,10 @@ sub instance {
     # do we have a singleton for this comment?
     return $singletons{$journalid}->{$jtalkid}
         if $singletons{$journalid}->{$jtalkid};
-    
+
     my $self = bless { journalid => $journalid, jtalkid => $jtalkid };
 
-    # save the singleton 
+    # save the singleton
     my $key = join(':', $journalid, $jtalkid);
     $singletons{$journalid}->{$jtalkid} = $self;
     $unloaded{$key} = $self;
@@ -130,14 +130,14 @@ sub new_from_url {
 # name: LJ::Comment::create
 # class: comment
 # des: Create a new comment. Add them to DB.
-# args: 
+# args:
 # returns: A new LJ::Comment object. Returns undef on failure.
 # </LJFUNC>
 
 sub create {
     my $class = shift;
     my %opts  = @_;
-    
+
     my $need_captcha = delete($opts{ need_captcha }) || 0;
 
     # %talk_opts emulates parameters received from web form.
@@ -169,12 +169,12 @@ sub create {
     # Because LJ::Talk::Post::init needs this.
     foreach my $key (  keys %{ $talk_opts{props} }  ){
         my $talk_key = "prop_$key";
-         
-        $talk_opts{$talk_key} = delete $talk_opts{props}->{$key} 
+
+        $talk_opts{$talk_key} = delete $talk_opts{props}->{$key}
                             if not exists $talk_opts{$talk_key};
     }
 
-    # The following 2 options are necessary for successful user authentification 
+    # The following 2 options are necessary for successful user authentification
     # in the depth of LJ::Talk::Post::init.
     #
     # FIXME: this almost certainly should be 'usertype=user' rather than
@@ -202,11 +202,11 @@ sub create {
     my $err;
     croak ($err)
         unless LJ::Talk::Post::post_comment($init->{entryu},  $init->{journalu},
-                                            $init->{comment}, $init->{parent}, 
+                                            $init->{comment}, $init->{parent},
                                             $init->{item},   \$err,
                                             );
-    
-    return 
+
+    return
         LJ::Comment->new($init->{journalu}, jtalkid => $init->{comment}->{talkid});
 
 }
@@ -782,21 +782,21 @@ sub state {
 sub set_state {
     my $self = shift;
     my $state = shift;
-   
+
     my $u = LJ::load_userid($self->{journalid});
     my $nodeid  = $self->{'nodeid'};
-    my $jtalkid = $self->{'jtalkid'};  
+    my $jtalkid = $self->{'jtalkid'};
     my $hookname = $state eq 'D' ? 'report_cmt_delete' :
                                    'report_cmt_update' ;
     LJ::run_hooks($hookname, $self->{'journalid'}, $jtalkid);
 
     my $updated = $u->talk2_do(
-        nodetype    => "L", 
+        nodetype    => "L",
         nodeid      => $nodeid,
         sql         => "UPDATE talk2 SET state=? ".
                         "WHERE journalid=?  AND jtalkid = ? ".
                         "AND nodetype='L' AND nodeid=? ",
-        bindings    => [$state, $self->{journalid}, $jtalkid, $nodeid], 
+        bindings    => [$state, $self->{journalid}, $jtalkid, $nodeid],
     );
     return undef unless $updated;
 
@@ -829,9 +829,9 @@ sub visible_to {
     my ($self, $u) = @_;
 
     return 0 unless $self->entry && $self->entry->visible_to($u);
-    
+
     # spam comment
-    return 0 if $self->is_spam 
+    return 0 if $self->is_spam
                 && !LJ::Talk::can_unmark_spam($u, $self->journal, $self->entry->poster, $self->poster);
 
     # screened comment
@@ -1385,14 +1385,18 @@ sub _format_mail_both {
         $body .= LJ::Lang::get_text($lang, 'esn.if_suport_form', undef) . "\n";
         $body .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
 
-        $body .= LJ::html_hidden
-            ( usertype     =>  "user",
-              parenttalkid =>  $self->jtalkid,
-              itemid       =>  $entry->ditemid,
-              journal      =>  $entry->journal->{user},
-              userpost     =>  $targetu->{user},
-              ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
-              );
+        $body .= LJ::html_hidden(
+            usertype     =>  "user",
+            parenttalkid =>  $self->jtalkid,
+            itemid       =>  $entry->ditemid,
+            journal      =>  $entry->journal->{user},
+            userpost     =>  $targetu->{user},
+            ecphash      =>  LJ::Talk::entry_comment_password_hash( {
+                poster => $targetu,
+                itemid => $entry->jitemid,
+                talkid => $self->jtalkid,
+            } ),
+        );
 
         $body .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
         my $newsub = $self->subject_html($targetu);
@@ -1463,14 +1467,18 @@ sub _format_template_mail {
     $t->param(delete_url    => $self->delete_url) if $self->user_can_delete($targetu);
     $t->param(want_form     => ($self->is_active || $can_unscreen));
     $t->param(form_action   => "$LJ::SITEROOT/talkpost_do.bml");
-    $t->param(hidden_fields => LJ::html_hidden
-                                    ( usertype     =>  "user",
-                                      parenttalkid =>  $self->jtalkid,
-                                      itemid       =>  $entry->ditemid,
-                                      journal      =>  $entry->journal->username,
-                                      userpost     =>  $targetu->username,
-                                      ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
-                                      ) .
+    $t->param(hidden_fields => LJ::html_hidden(
+                                   usertype     =>  "user",
+                                   parenttalkid =>  $self->jtalkid,
+                                   itemid       =>  $entry->ditemid,
+                                   journal      =>  $entry->journal->username,
+                                   userpost     =>  $targetu->username,
+                                   ecphash      =>  LJ::Talk::entry_comment_password_hash( {
+                                       poster => $targetu,
+                                       itemid => $entry->jitemid,
+                                       talkid => $self->jtalkid,
+                                   } ),
+                               ) .
                                ($encoding ne "UTF-8" ?
                                     LJ::html_hidden(encoding => $encoding):
                                     ''
@@ -1526,7 +1534,7 @@ sub format_template_html_mail {
     $t->param(email_subject => $email_subject);
 
     # parse template and return it
-    return $t->output; 
+    return $t->output;
 }
 
 # Processes template for PLAIN-TEXT e-mail notifications
@@ -1551,14 +1559,14 @@ sub format_template_text_mail {
     $t->param(email_subject => $email_subject);
 
     # parse template and return it
-    return $t->output; 
+    return $t->output;
 }
 
 sub delete {
     return LJ::Talk::delete_comment
         ( $_[0]->journal,
           $_[0]->nodeid, # jitemid
-          $_[0]->jtalkid, 
+          $_[0]->jtalkid,
           $_[0]->state );
 }
 
@@ -1579,9 +1587,9 @@ sub is_text_spam($\$) {
     my $class = shift;
 
     # REF on text
-    my $ref   = shift; 
+    my $ref   = shift;
        $ref   = \$ref unless ref ($ref) eq 'SCALAR';
-    
+
     my $plain = $$ref; # otherwise we modify the source text
        $plain = LJ::CleanHTML::clean_comment(\$plain);
 
@@ -1589,7 +1597,7 @@ sub is_text_spam($\$) {
         return 1 # spam
             if $re and ($plain =~ /$re/ or $$ref =~ /$re/);
     }
-    
+
     return 0; # normal text
 }
 
@@ -1762,7 +1770,7 @@ sub make_url {
     my $url = $urls->{$type} || $opts->{'base'} || $entry->url;
 
     if ( $modes{$type} ) {
-        $url .= '?' unless $url =~ /\?$/; 
+        $url .= '?' unless $url =~ /\?$/;
 
         unshift @$params, $modes{$type}. $dtalkid;
     } else {
@@ -1778,7 +1786,7 @@ sub make_url {
         }
     }
 
-    $url .= join('&', @$params); 
+    $url .= join('&', @$params);
 
     $url .= '#t'. $dtalkid if $type eq 'thread';
 

@@ -709,25 +709,19 @@ sub auth_wsse
           unless LJ::MemCache::add( "wsse_auth:$creds{username}:$creds{nonce}", 1, 180 )
     }
 
-    # validate hash
-    my $hash =
-      Digest::SHA1::sha1_base64(
-        $creds{nonce} . $creds{created} . $u->password );
-
     if (LJ::login_ip_banned($u)) {
         return $fail->("ip_ratelimiting");
     }
+
+    # validate hash
+    my $hash = Digest::SHA1::sha1_base64($creds{nonce} . $creds{created} . $u->clean_password);
 
     # Nokia's WSSE implementation is incorrect as of 1.5, and they
     # base64 encode their nonce *value*.  If the initial comparison
     # fails, we need to try this as well before saying it's invalid.
     if ($hash ne $creds{passworddigest}) {
 
-        $hash =
-          Digest::SHA1::sha1_base64(
-                MIME::Base64::decode_base64( $creds{nonce} ) .
-                $creds{created} .
-                $u->password );
+        $hash = Digest::SHA1::sha1_base64(MIME::Base64::decode_base64($creds{nonce}) . $creds{created} . $u->clean_password);
 
         if ($hash ne $creds{passworddigest}) {
             LJ::handle_bad_login($u);

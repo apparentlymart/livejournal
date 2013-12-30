@@ -47,7 +47,7 @@ sub all {
 sub get_handler {
     my ($class, $usertype) = @_;
 
-    foreach my $author_class($class->all) {
+    foreach my $author_class ($class->all) {
         return $author_class if $author_class->want_user_input($usertype);
     }
 

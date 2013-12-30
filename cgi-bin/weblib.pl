@@ -10,6 +10,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require "crumbs.pl";
 
 use Carp;
+use LJ::Auth::Challenge;
 use LJ::Request;
 use LJ::JSON;
 use Class::Autouse qw(
@@ -650,7 +651,7 @@ sub form_auth {
         my $sess   = $remote && $remote->session ? $remote->session->id : LJ::UniqCookie->current_uniq;
 
         my $auth = join('-', LJ::rand_chars(10), $id, $sess);
-        $chal = LJ::challenge_generate(86400, $auth);
+        $chal = LJ::Auth::Challenge->generate(86400, $auth);
         $LJ::REQ_GLOBAL{form_auth_chal} = $chal;
     }
 
@@ -689,9 +690,9 @@ sub check_form_auth {
     return 0 unless $sess eq $chal_sess;
 
     # check the signature is good and not expired
-    my $request_opts = { dont_check_count => !$opts->{enable_check_count} };  # in/out
-    my $result = LJ::challenge_check($formauth, $request_opts);
-    return $result;
+    return LJ::Auth::Challenge->check($formauth, {
+        dont_check_count => !$opts->{'enable_check_count'},
+    } );
 }
 
 # <LJFUNC>
@@ -747,11 +748,7 @@ sub create_qr_div {
 
     # rate limiting challenge
     {
-        my ($time, $secret) = LJ::get_secret();
-        my $rchars = LJ::rand_chars(20);
-        my $chal = $ditemid . "-$u->{userid}-$time-$rchars";
-        my $res = Digest::MD5::md5_hex($secret . $chal);
-        $qrhtml .= LJ::html_hidden("chrp1", "$chal-$res");
+        $qrhtml .= LJ::html_hidden("chrp1", LJ::Talk::generate_chrp1($u->{userid}, $ditemid));
     }
 
     # Start making the div itself
@@ -1594,6 +1591,7 @@ sub res_includes {
     my $opts = shift || {};
     my $only_needed = $opts->{only_needed}; # do not include defaults
     my $site_anyway = $opts->{site_anyway}; # Site anyway
+    my $is_mobile   = $opts->{is_mobile};   # m.livejournal.com
 
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
@@ -1606,8 +1604,12 @@ sub res_includes {
 
     # all conditions must be complete here
     # example: cyr/non-cyr flag changed at settings page
-    LJ::run_hooks('sitewide_resources') unless $only_needed;
-
+    unless ($only_needed) {
+        LJ::run_hooks('sitewide_resources', {
+            is_mobile => $is_mobile
+        });
+    }
+ 
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
     if ($LJ::IS_SSL) {
@@ -1719,7 +1721,6 @@ sub res_includes {
                 country                  => $country,
                 %comm_access,
         );
-        $site{remote} = get_remote_info();
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
         $site{is_dev_server} = 1 if $LJ::IS_DEV_SERVER;
         $site{inbox_unread_count} = $remote->notification_inbox->unread_count if $remote and LJ::is_enabled('inbox_unread_count_in_head');
@@ -1735,6 +1736,21 @@ sub res_includes {
         my $jsvar_out         = LJ::JSON->to_json(\%LJ::JSVAR);
         my $site_version      = LJ::ejs($LJ::CURRENT_VERSION);
 
+        my $remote_info  = get_remote_info();
+        my $journal_info = get_journal_info();
+
+        if ($remote_info) {
+            $remote_info = LJ::JSON->to_json($remote_info);
+        } else {
+            $remote_info = 'null';
+        }
+
+        if ($journal_info) {
+            $journal_info = LJ::JSON->to_json($journal_info);
+        } else {
+            $journal_info = 'null';
+        }
+
         # LJSUP-12854: Fix escape for Site object
         $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
         $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
@@ -1746,6 +1762,8 @@ sub res_includes {
                 Site.page = $jsvar_out;
                 Site.page.template = {};
                 Site.timer = +(new Date());
+                Site.remote = $remote_info;
+                Site.journal = $journal_info;
                 (function(){
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
@@ -2007,11 +2025,18 @@ sub res_includes {
 }
 
 sub get_remote_info {
-    my $remote = LJ::get_remote();
+    my $remote  = LJ::get_remote();
+    my $journal = LJ::get_active_journal();
 
     return unless $remote;
 
     return {
+        ($journal ? (
+            alias           => $remote->get_alias($journal),
+            is_friend       => LJ::JSON->to_boolean($remote->is_friend($remote)),
+            is_subscribedon => LJ::JSON->to_boolean($remote->is_mysubscription($remote)),
+        ) : ()),
+
         # Personal info
         id               => $remote->id,
         username         => $remote->username,
@@ -2027,6 +2052,39 @@ sub get_remote_info {
         is_personal      => LJ::JSON->to_boolean($remote->is_personal),
         is_identity      => LJ::JSON->to_boolean($remote->is_identity),
         is_suspended     => LJ::JSON->to_boolean($remote->is_suspended),
+        is_community     => LJ::JSON->to_boolean($remote->is_community),
+    };
+}
+
+sub get_journal_info {
+    my $remote  = LJ::get_remote();
+    my $journal = LJ::get_active_journal();
+
+    return unless $journal;
+
+    return {
+        ($remote ? (
+            is_member       => LJ::JSON->to_boolean($journal->is_member($remote)),
+            is_friend       => LJ::JSON->to_boolean($remote->is_friend($journal)),
+            is_invite_sent  => LJ::JSON->to_boolean($remote->is_invite_sent($journal)),
+            is_subscribedon => LJ::JSON->to_boolean($remote->is_mysubscription($journal)),
+        ) : ()),
+
+        # Personal info
+        id               => $journal->id,
+        username         => $journal->username,
+        profile_url      => $journal->profile_url,
+        journal_url      => $journal->journal_url,
+        userhead_url     => $journal->userhead_url,
+        journal_title    => $journal->journal_title,
+        display_username => $journal->display_username,
+
+        # Flags
+        is_paid          => LJ::JSON->to_boolean($journal->is_paid),
+        is_personal      => LJ::JSON->to_boolean($journal->is_personal),
+        is_identity      => LJ::JSON->to_boolean($journal->is_identity),
+        is_suspended     => LJ::JSON->to_boolean($journal->is_suspended),
+        is_community     => LJ::JSON->to_boolean($journal->is_community),
     };
 }
 

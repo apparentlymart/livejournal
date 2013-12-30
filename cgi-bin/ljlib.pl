@@ -28,6 +28,7 @@ use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
                       LJ::AdTargetedInterests
+                      LJ::Auth::Challenge
                       LJ::Comment
                       LJ::Knob
                       LJ::ExternalSite
@@ -249,7 +250,6 @@ sub get_user_by_url
         if ($func eq "journal") {
             ($user, $uri) = $url =~ m!^[\w\-]{1,15}\.\Q$LJ::USER_DOMAIN\E/(\w{1,15})(/.*)?$!;
             $uri ||= "/";
-
         }
 
         my $u = LJ::load_user($user);
@@ -682,7 +682,7 @@ sub get_recent_items {
 
     my $show_sticky_on_top = $opts->{show_sticky_on_top} || 0;
     $show_sticky_on_top &= LJ::is_enabled("delayed_entries");
-    
+
     my $max_hints = $LJ::MAX_SCROLLBACK_LASTN;  # temporary
     my $sort_key = "revttime";
 
@@ -714,7 +714,7 @@ sub get_recent_items {
     if ($skip > $maxskip) { $skip = $maxskip; }
     my $itemload = $itemshow + $skip;
     my $usual_show  = $itemshow;
-    my $skip_sticky = $skip;    
+    my $skip_sticky = $skip;
 
     if ( $show_sticky_on_top && $sticky ) {
         if($skip > 0) {
@@ -723,9 +723,9 @@ sub get_recent_items {
             $usual_show -= 1;
         }
     }
-    
+
     my $mask = 0;
-    if ($remote && ($remote->{'journaltype'} eq "P" || 
+    if ($remote && ($remote->{'journaltype'} eq "P" ||
         $remote->{'journaltype'} eq "I") && $remoteid != $userid) {
         $mask = LJ::get_groupmask($userid, $remoteid);
     }
@@ -912,7 +912,7 @@ sub get_recent_items {
                              'security'           => $entry->security,
                              'anum'               => $entry->anum,
                              'logtime'            => $entry->logtime_mysql, };
-                            
+
                 push @items, $item;
                 push @{$opts->{'entry_objects'}}, $item;
                 push @{$opts->{'itemids'}}, $entry->jitemid;
@@ -922,7 +922,7 @@ sub get_recent_items {
         # sticky exculustion
         $sql .= "AND jitemid <> $sticky";
     }
-    
+
     $sql .= qq{
         ORDER BY journalid, $sort_key
         $sql_limit };
@@ -931,7 +931,7 @@ sub get_recent_items {
         $$err = "nodb" if ref $err eq "SCALAR";
         return ();
     }
-    
+
     my $last_time;
     my @buf;
 
@@ -946,18 +946,18 @@ sub get_recent_items {
         $sth = $logdb->prepare($sql_request);
         $sth->execute;
         if ($logdb->err) { die $logdb->errstr; }
-    
+
         # keep track of the last alldatepart, and a per-minute buffer
         while (my $li = $sth->fetchrow_hashref) {
             push @{$opts->{'itemids'}}, $li->{'itemid'};
-    
+
             $flush->() if $li->{alldatepart} ne $last_time;
             push @buf, $li;
             $last_time = $li->{alldatepart};
-    
+
             # construct an LJ::Entry singleton
-            my $entry = LJ::Entry->new($userid, 
-                                        jitemid  => $li->{itemid}, 
+            my $entry = LJ::Entry->new($userid,
+                                        jitemid  => $li->{itemid},
                                         rlogtime => $li->{rlogtime},
                                         row      => $li);
             push @{$opts->{'entry_objects'}}, $entry;
@@ -990,7 +990,7 @@ sub get_recent_items {
         for my $Entry ( @{$opts->{'entry_objects'}} ) {
             $Entry->handle_prefetched_tags( $tags->{ $userid.' '.$Entry->{jitemid} } );
         }
-    } 
+    }
 
     return @items;
 }
@@ -1274,7 +1274,7 @@ sub load_props {
         next if defined $LJ::CACHE_PROP{$t};
         my $tablename = $t eq "rate" ? "ratelist" : "${t}proplist";
 
-        my $cache_key = "props:table:data:$tablename"; 
+        my $cache_key = "props:table:data:$tablename";
         my $cache_data  = LJ::MemCache::get($cache_key);
         if ($cache_data) {
             foreach my $p (@$cache_data) {
@@ -1282,7 +1282,7 @@ sub load_props {
                 $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
             }
             next;
-        } 
+        }
 
         $dbr ||= LJ::get_db_writer();
         my $sth = $dbr->prepare("SELECT * FROM $tablename");
@@ -1402,87 +1402,8 @@ sub load_state_city_for_zip {
     return ($zipcity, $zipstate);
 }
 
-# <LJFUNC>
-# name: LJ::auth_okay
-# des: Validates a user's password.  The "clear" or "md5" argument
-#      must be present, and either the "actual" argument (the correct
-#      password) must be set, or the first argument must be a user
-#      object ($u) with the 'password' key set.  This is the preferred
-#      way to validate a password (as opposed to doing it by hand),
-#      since <strong>this</strong> function will use a pluggable
-#      authenticator, if one is defined, so LiveJournal installations
-#       can be based off an LDAP server, for example.
-# returns: boolean; 1 if authentication succeeded, 0 on failure
-# args: u, clear, md5, actual?, ip_banned?
-# des-clear: Clear text password the client is sending. (need this or md5)
-# des-md5: MD5 of the password the client is sending. (need this or clear).
-#          If this value instead of clear, clear can be anything, as md5
-#          validation will take precedence.
-# des-actual: The actual password for the user.  Ignored if a pluggable
-#             authenticator is being used.  Required unless the first
-#             argument is a user object instead of a username scalar.
-# des-ip_banned: Optional scalar ref which this function will set to true
-#                if IP address of remote user is banned.
-# </LJFUNC>
-sub auth_okay
-{
-    my $u = shift;
-    my $clear = shift;
-    my $md5 = shift;
-    my $actual = shift;
-    my $ip_banned = shift;
-    return 0 unless isu($u);
-
-    LJ::run_hook ("update_counter", {
-        counter => "check_password",
-    });
-
-    $actual ||= $u->password;
-
-    my $user = $u->{'user'};
-
-    # set the IP banned flag, if it was provided.
-    my $fake_scalar;
-    my $ref = ref $ip_banned ? $ip_banned : \$fake_scalar;
-    if (LJ::login_ip_banned($u)) {
-        $$ref = 1;
-        return 0;
-    } else {
-        $$ref = 0;
-    }
-
-    my $bad_login = sub {
-        LJ::handle_bad_login($u);
-        return 0;
-    };
-
-    # setup this auth checker for LDAP
-    if ($LJ::LDAP_HOST && ! $LJ::AUTH_CHECK) {
-        require LJ::LDAP;
-        $LJ::AUTH_CHECK = sub {
-            my ($user, $try, $type) = @_;
-            die unless $type eq "clear";
-            return LJ::LDAP::is_good_ldap($user, $try);
-        };
-    }
-
-    ## custom authorization:
-    if (ref $LJ::AUTH_CHECK eq "CODE") {
-        my $type = $md5 ? "md5" : "clear";
-        my $try = $md5 || $clear;
-        my $good = $LJ::AUTH_CHECK->($user, $try, $type);
-        return $good || $bad_login->();
-    }
-
-    ## LJ default authorization:
-    return 0 unless $actual;
-    return 1 if $md5 && lc($md5) eq Digest::MD5::md5_hex($actual);
-    return 1 if $clear eq $actual;
-    return $bad_login->();
-}
-
 # Implement Digest authentication per RFC2617
-# called with Apache's request oject
+# called with Apache's request object
 # modifies outgoing header fields appropriately and returns
 # 1/0 according to whether auth succeeded. If succeeded, also
 # calls LJ::set_remote() to set up internal LJ auth.
@@ -1500,7 +1421,7 @@ sub auth_digest {
     my $decline = sub {
         my $stale = shift;
 
-        my $nonce = LJ::challenge_generate(180); # 3 mins timeout
+        my $nonce = LJ::Auth::Challenge->generate(180); # 3 mins timeout
         my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
         $authline .= ", stale=\"true\"" if $stale;
         LJ::Request->header_out("WWW-Authenticate", $authline);
@@ -1538,7 +1459,7 @@ sub auth_digest {
     }
 
     my %opts;
-    LJ::challenge_check($attrs{'nonce'}, \%opts);
+    LJ::Auth::Challenge->check($attrs{'nonce'}, \%opts);
 
     return $decline->(0) unless $opts{'valid'};
 
@@ -1566,11 +1487,11 @@ sub auth_digest {
 
     # don't allow empty passwords
 
-    return $decline->(0) unless $u->password;
+    return $decline->(0) unless $u->has_password;
 
     # recalculate the hash and compare to response
 
-    my $a1src = $u->user . ':lj:' . $u->password;
+    my $a1src = $u->user . ':lj:' . $u->clean_password;
     my $a1 = Digest::MD5::md5_hex($a1src);
     my $a2src = LJ::Request->method . ":$attrs{'uri'}";
     my $a2 = Digest::MD5::md5_hex($a2src);
@@ -1586,133 +1507,12 @@ sub auth_digest {
     return $u;
 }
 
-
-# Create a challenge token for secure logins
-sub challenge_generate
-{
-    my ($goodfor, $attr) = @_;
-
-    $goodfor ||= 60;
-    $attr ||= LJ::rand_chars(20);
-
-    my ($stime, $secret) = LJ::get_secret();
-
-    # challenge version, secret time, secret age, time in secs token is good for, random chars.
-    my $s_age = time() - $stime;
-    my $chalbare = "c0:$stime:$s_age:$goodfor:$attr";
-    my $chalsig = Digest::MD5::md5_hex($chalbare . $secret);
-    my $chal = "$chalbare:$chalsig";
-
-    return $chal;
-}
-
 # Return challenge info.
 # This could grow later - for now just return the rand chars used.
 sub get_challenge_attributes
 {
     return (split /:/, shift)[4];
 }
-
-# Validate a challenge string previously supplied by challenge_generate
-# return 1 "good" 0 "bad", plus sets keys in $opts:
-# 'valid'=1/0 whether the string itself was valid
-# 'expired'=1/0 whether the challenge expired, provided it's valid
-# 'count'=N number of times we've seen this challenge, including this one,
-#           provided it's valid and not expired
-# $opts also supports in parameters:
-#   'dont_check_count' => if true, won't return a count field
-# the return value is 1 if 'valid' and not 'expired' and 'count'==1
-sub challenge_check {
-    my ($chal, $opts) = @_;
-    my ($valid, $expired, $count) = (1, 0, 0);
-
-    my ($c_ver, $stime, $s_age, $goodfor, $rand, $chalsig) = split /:/, $chal;
-    my $secret = LJ::get_secret($stime);
-    my $chalbare = "$c_ver:$stime:$s_age:$goodfor:$rand";
-
-    # Validate token
-    $valid = 0
-        unless $secret && $c_ver eq 'c0'; # wrong version
-    $valid = 0
-        unless Digest::MD5::md5_hex($chalbare . $secret) eq $chalsig;
-
-    $expired = 1
-        unless (not $valid) or time() - ($stime + $s_age) < $goodfor;
-
-    # Check for token dups
-    if ($valid && !$expired && !$opts->{dont_check_count}) {
-        if (@LJ::MEMCACHE_SERVERS) {
-            $count = LJ::MemCache::incr("chaltoken:$chal", 1);
-            unless ($count) {
-                LJ::MemCache::add("chaltoken:$chal", 1, $goodfor);
-                $count = 1;
-            }
-        } else {
-            my $dbh = LJ::get_db_writer();
-            my $rv = $dbh->do("SELECT GET_LOCK(?,5)", undef, $chal);
-            if ($rv) {
-                $count = $dbh->selectrow_array("SELECT count FROM challenges WHERE challenge=?",
-                                               undef, $chal);
-                if ($count) {
-                    $dbh->do("UPDATE challenges SET count=count+1 WHERE challenge=?",
-                             undef, $chal);
-                    $count++;
-                } else {
-                    $dbh->do("INSERT INTO challenges SET ctime=?, challenge=?, count=1",
-                         undef, $stime + $s_age, $chal);
-                    $count = 1;
-                }
-            }
-            $dbh->do("SELECT RELEASE_LOCK(?)", undef, $chal);
-        }
-        # if we couldn't get the count (means we couldn't store either)
-        # , consider it invalid
-        $valid = 0 unless $count;
-    }
-
-    if ($opts) {
-        $opts->{'expired'} = $expired;
-        $opts->{'valid'}   = $valid;
-        $opts->{'count'}   = $count;
-        $opts->{'rand'}    = $rand;
-    }
-
-    return ($valid && !$expired && ($count==1 || $opts->{dont_check_count}));
-}
-
-
-# Validate login/talk md5 responses.
-# Return 1 on valid, 0 on invalid.
-sub challenge_check_login
-{
-    my ($u, $chal, $res, $banned, $opts) = @_;
-    return 0 unless $u;
-    my $pass = $u->password;
-    return 0 if $pass eq "";
-
-    # set the IP banned flag, if it was provided.
-    my $fake_scalar;
-    my $ref = ref $banned ? $banned : \$fake_scalar;
-    if (LJ::login_ip_banned($u)) {
-        $$ref = 1;
-        return 0;
-    } else {
-        $$ref = 0;
-    }
-
-    # check the challenge string validity
-    return 0 unless LJ::challenge_check($chal, $opts);
-
-    # Validate password
-    my $hashed = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($pass));
-    if ($hashed eq $res) {
-        return 1;
-    } else {
-        LJ::handle_bad_login($u);
-        return 0;
-    }
-}
-
 
 # <LJFUNC>
 # name: LJ::get_talktext2
@@ -2449,6 +2249,11 @@ sub procnotify_callback
     my $arg = {};
     LJ::decode_url_string($argstring, $arg);
 
+    if ($cmd eq "failover") {
+        $LJ::ExtBlock::LOCAL_CACHE{'cluster_config.rc'} = [];
+        return;
+    }
+
     if ($cmd eq "rename_user") {
         # this looks backwards, but the cache hash names are just odd:
         delete $LJ::CACHE_USERNAME{$arg->{'userid'}};
@@ -2909,13 +2714,11 @@ sub last_error_code
 
 sub last_error
 {
-    my $err = {
-        'utf8' => "Encoding isn't valid UTF-8",
-        'db' => "Database error",
-        'comm_invite_limit' => "Outstanding invitation limit reached",
-        'comm_user_has_banned' => "Unable to invite; user has banned community",
+    my $err = sub {
+        my $code = shift;
+        return LJ::Lang::ml("ljerror.$code");
     };
-    my $des = $err->{$LJ::last_error};
+    my $des = $err->($LJ::last_error);
     if ($LJ::last_error eq "db" && $LJ::db_error) {
         $des .= ": $LJ::db_error";
     }
@@ -3031,14 +2834,14 @@ sub is_enabled {
 
 sub is_enabled_dynamic {
     my $conf = shift;
-    
+
     my $redis = LJ::Redis->get_connection();
-    if ($redis && !$LJ::__dynamic_enable) {    
+    if ($redis && !$LJ::__dynamic_enable) {
         $LJ::__dynamic_enable = $redis->hgetall('lj:settings:disabled');
-    } 
-     
+    }
+
     if ($LJ::__dynamic_enable && exists $LJ::__dynamic_enable->{$conf}) {
-        return $LJ::__dynamic_enable->{$conf}; 
+        return $LJ::__dynamic_enable->{$conf};
     }
 
     return ! LJ::conf_test($LJ::DISABLED{$conf}, @_);

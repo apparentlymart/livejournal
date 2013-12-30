@@ -13,6 +13,9 @@ use Class::Autouse qw{
 # parameters: user, notification inbox id
 sub instance {
     my ($class, $u, $qid) = @_;
+    
+    return unless $u && $qid;
+
     my $singletonkey = $qid;
 
     my $items = \%LJ::REQ_CACHE_INBOX;

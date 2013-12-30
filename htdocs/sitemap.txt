@@ -33,12 +33,6 @@ http://www.livejournal.com/developer/styles.bml
 http://www.livejournal.com/developer/varlist.bml
 http://www.livejournal.com/developer/versions.bml
 http://www.livejournal.com/developer/views.bml
-http://www.livejournal.com/didyouknow/advancedsearch.bml
-http://www.livejournal.com/didyouknow/domainmapping.bml
-http://www.livejournal.com/didyouknow/mobile.bml
-http://www.livejournal.com/didyouknow/navigationstrip.bml
-http://www.livejournal.com/didyouknow/polls.bml
-http://www.livejournal.com/didyouknow/scrapbook.bml
 http://www.livejournal.com/directorysearch8.bml
 http://www.livejournal.com/doc/guide/index.bml
 http://www.livejournal.com/doc/guide/moodicons.bml

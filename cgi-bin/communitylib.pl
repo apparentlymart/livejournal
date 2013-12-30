@@ -370,6 +370,8 @@ sub send_comm_invite {
     # step 7: error check database work
     return LJ::error('db') if $u->err || $cu->err;
 
+    _clear_invite_cache($cu, $u);
+
     # success
     return 1;
 }
@@ -469,6 +471,8 @@ sub accept_comm_invite {
 
     $cu->clear_cache_friends($u);
 
+    _clear_invite_cache($cu, $u);
+
     # done
     return 1;
 }
@@ -510,6 +514,8 @@ sub reject_comm_invite {
             undef, $cu->{userid}, $u->{userid});
 
     $cu->clear_cache_friends($u);
+
+    _clear_invite_cache($cu, $u);
 
     # done
     return 1;
@@ -585,6 +591,8 @@ sub revoke_invites {
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
             my $invite = LJ::User::FriendInvites->new({ commid  => $cu->{userid}, userid  => $uid });
             $invite->clear_cache;
+        } else {
+            _clear_invite_cache($cu, $u);
         }
     }
 
@@ -593,6 +601,15 @@ sub revoke_invites {
     # success
     return 1;
 }
+
+# temporary method to handle beta/prod with enabled/disabled new scheme
+sub _clear_invite_cache {
+    my ($cu, $u) = @_;
+    my $keys = LJ::User::FriendInvites->_memkey(undef, {fromjournal => $cu, recipient => $u});
+    my @keys = values %$keys;
+    map { $_ && LJ::MemCache::delete($_) } @keys;
+}
+
 
 # <LJFUNC>
 # name: LJ::leave_community
@@ -827,118 +844,6 @@ sub do_join_community {
 }
 
 # <LJFUNC>
-# name: LJ::comm_join_request
-# des: Registers an authaction to add a user to a
-#      community and sends an approval email to the maintainers
-# returns: Hashref; output of LJ::register_authaction()
-#          includes datecreate of old row if no new row was created
-# args: comm, u
-# des-comm: Community user object
-# des-u: User object to add to community
-# </LJFUNC>
-sub comm_join_request {
-    my ($u, $c) = @_;
-    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
-    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
-
-    my $dbh = LJ::get_db_writer();
-    my $arg = "targetid=" . $u->id;
-
-    return unless $dbh;
-
-    # check for duplicates within the same hour (to prevent spamming)
-    my $oldaa = $dbh->selectrow_hashref(qq[
-            SELECT
-                aaid, authcode, datecreate
-            FROM
-                authactions
-            WHERE
-                userid = ?
-            AND
-                arg1 = ? 
-            AND
-                action = 'comm_join_request'
-            AND
-                used = 'N'
-            AND
-                NOW() < datecreate + INTERVAL 1 HOUR
-            ORDER BY
-                1
-            DESC LIMIT
-                1
-        ],
-        undef,
-        $c->id,
-        $arg
-    );
-
-    return $oldaa if $oldaa;
-
-    # insert authactions row
-    my $aa = LJ::register_authaction(
-        $c->id, 'comm_join_request', $arg
-    );
-
-    return unless $aa;
-
-    # if there are older duplicates, invalidate any existing unused authactions of this type
-    $dbh->do(qq[
-            UPDATE
-                authactions
-            SET
-                used = 'Y'
-            WHERE
-                userid = ?
-            AND
-                aaid <> ?
-            AND
-                arg1 = ?
-            AND
-                action = 'comm_invite'
-            AND
-                used = 'N'
-        ],
-        undef,
-        $c->id,
-        $aa->{aaid},
-        $arg
-    );
-
-    # get maintainers of community
-    my $adminids = LJ::load_rel_user($c->id, 'A') || [];
-    my $admins = LJ::load_userids(@$adminids);
-
-    # now prepare the emails
-    foreach my $au (values %$admins) {
-        next unless $au && !$au->is_expunged;
-
-        # unless it's a hyphen, we need to migrate
-        my $prop = $au->prop("opt_communityjoinemail");
-
-        if ($prop && $prop ne "-") {
-            if ($prop ne "N") {
-                my %params = (
-                    event   => 'CommunityJoinRequest',
-                    journal => $au
-                );
-
-                unless ($au->has_subscription(%params)) {
-                    foreach (qw(Inbox Email)) {
-                        $au->subscribe(%params, method => $_);
-                    }
-                }
-            }
-
-            $au->set_prop("opt_communityjoinemail", "-");
-        }
-
-        LJ::Event::CommunityJoinRequest->new($au, $u, $c)->fire;
-    }
-
-    return $aa;
-}
-
-# <LJFUNC>
 # name: LJ::get_community_row
 # des: Gets data relevant to a community such as their membership level and posting access.
 # args: ucommid
@@ -1060,6 +965,135 @@ sub get_community_moderation_queue {
     return @entries;
 }
 
+# Requests
+
+# <LJFUNC>
+# name: LJ::comm_join_request
+# des: Registers an authaction to add a user to a
+#      community and sends an approval email to the maintainers
+# returns: Hashref; output of LJ::register_authaction()
+#          includes datecreate of old row if no new row was created
+# args: comm, u
+# des-comm: Community user object
+# des-u: User object to add to community
+# </LJFUNC>
+sub comm_join_request {
+    my ($u, $c) = @_;
+    die 'Expected parameter $u in LJ::leave_community not found' unless $u;
+    die 'Expected parameter $c in LJ::leave_community not found' unless $c;
+
+    my $cid = $c->id;
+    my $uid = $u->id;
+
+    return unless $cid;
+    return unless $uid;
+
+    my $arg = "targetid=$uid";
+    my $dbh = LJ::get_db_writer();
+
+    return unless $dbh;
+
+    # check for duplicates within the same hour (to prevent spamming)
+    my $oldaa = $dbh->selectrow_hashref(qq[
+            SELECT
+                aaid, authcode, datecreate
+            FROM
+                authactions
+            WHERE
+                userid = ?
+            AND
+                arg1 = ? 
+            AND
+                action = 'comm_join_request'
+            AND
+                used = 'N'
+            AND
+                NOW() < datecreate + INTERVAL 1 HOUR
+            ORDER BY
+                1
+            DESC LIMIT
+                1
+        ],
+        undef,
+        $cid,
+        $arg
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    return $oldaa if $oldaa;
+
+    # insert authactions row
+    my $aa = LJ::register_authaction(
+        $cid, 'comm_join_request', $arg
+    );
+
+    return unless $aa;
+
+    # if there are older duplicates, invalidate any existing unused authactions of this type
+    $dbh->do(qq[
+            UPDATE
+                authactions
+            SET
+                used = 'Y'
+            WHERE
+                userid = ?
+            AND
+                aaid <> ?
+            AND
+                arg1 = ?
+            AND
+                action = 'comm_invite'
+            AND
+                used = 'N'
+        ],
+        undef,
+        $cid,
+        $aa->{aaid},
+        $arg
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    # get maintainers of community
+    my $admins = $c->maintainers();
+
+    # now prepare the emails
+    foreach my $au (values %$admins) {
+        next unless $au && !$au->is_expunged;
+
+        # unless it's a hyphen, we need to migrate
+        my $prop = $au->prop("opt_communityjoinemail");
+
+        if ($prop && $prop ne "-") {
+            if ($prop ne "N") {
+                my %params = (
+                    event   => 'CommunityJoinRequest',
+                    journal => $au
+                );
+
+                unless ($au->has_subscription(%params)) {
+                    foreach (qw(Inbox Email)) {
+                        $au->subscribe(%params, method => $_);
+                    }
+                }
+            }
+
+            $au->set_prop("opt_communityjoinemail", "-");
+        }
+
+        LJ::Event::CommunityJoinRequest->new($au, $u, $c)->fire;
+    }
+
+    LJ::MemCacheProxy::delete([$cid, "community:request:$cid:$uid"]);
+
+    return $aa;
+}
+
 # <LJFUNC>
 # name: LJ::get_pending_members
 # des: Gets a list of userids for people that have requested to be added to a community
@@ -1125,37 +1159,63 @@ sub get_pending_members {
 # returns: 1 on success, 0/undef on error
 # </LJFUNC>
 sub approve_pending_member {
-    my ($commid, $userid) = @_;
-    my $cu = LJ::want_user($commid);
-    my $u = LJ::want_user($userid);
-    return unless $cu && $u;
+    my ($cid, $uid) = @_;
+    my $c = LJ::want_user($cid);
+    my $u = LJ::want_user($uid);
 
-    # step 1, update authactions table
+    return unless $c;
+    return unless $u;
+
+    my $arg = "targetid=$uid";
     my $dbh = LJ::get_db_writer();
-    my $count = $dbh->do("UPDATE authactions SET used = 'Y' WHERE userid = ? AND arg1 = ?",
-                         undef, $cu->{userid}, "targetid=$u->{userid}");
-    return unless $count;
 
-    LJ::run_hooks('approve_member',
-        {
-            journalid   => $cu->userid,
-            journalcaps => $cu->caps,
-            users       => [ { id => $u->userid, caps => $u->caps } ]
-        }
+    return unless $dbh;
+
+    my $cnt = $dbh->do(qq[
+            UPDATE
+                authactions
+            SET
+                used = 'Y'
+            WHERE
+                userid = ?
+            AND
+                arg1 = ?
+        ],
+        undef,
+        $cid,
+        $arg
     );
 
-    # step 2, make user join the community
-    # 1 means "add community to user's friends list"
-    my ($code, $error) = LJ::do_join_community($u, $cu, 1);
+    if ($dbh->err) {
+        return;
+    }
+
+    return unless $cnt;
+
+    LJ::run_hooks('approve_member',{
+        users       => [{
+            id   => $uid,
+            caps => $u->caps
+        }],
+        journalid   => $cid,
+        journalcaps => $c->caps,
+    });
+
+    LJ::MemCacheProxy::delete([$cid, "community:request:$cid:$uid"]);
+
+    my ($code, $error) = LJ::do_join_community($u, $c, 1);
 
     return unless $code;
 
-    # step 3, email the user
     my %params = (event => 'CommunityJoinApprove', journal => $u);
+
     unless ($u->has_subscription(%params)) {
         $u->subscribe(%params, method => 'Email');
     }
-    LJ::Event::CommunityJoinApprove->new($u, $cu)->fire unless $LJ::DISABLED{esn};
+
+    unless ($LJ::DISABLED{esn}) {
+        LJ::Event::CommunityJoinApprove->new($u, $c)->fire;
+    }
 
     return 1;
 }
@@ -1171,51 +1231,136 @@ sub approve_pending_member {
 # </LJFUNC>
 ## LJ::reject_pending_member($cid, $id, $remote->{userid}, $POST{'reason'});
 sub reject_pending_member {
-    my ($commid, $userid, $maintid, $reason) = @_;
+    my ($cid, $uid, $mid, $reason) = @_;
+    my $c = LJ::want_user($cid);
+    my $u = LJ::want_user($uid);
+    my $m = LJ::want_user($mid);
 
-    $reason = LJ::Lang::ml('/community/pending.bml.reason.default.text') if $reason eq '0';
-    my $cu = LJ::want_user($commid);
-    my $u = LJ::want_user($userid);
-    my $mu = LJ::want_user($maintid);
-    return unless $cu && $u && $mu;
+    return unless $c;
+    return unless $u;
+    return unless $m;
+
+    if ($reason eq '0') {
+        $reason = LJ::Lang::ml('/community/pending.bml.reason.default.text');
+    }
 
     # step 1, update authactions table
+    my $arg = "targetid=$uid";
     my $dbh = LJ::get_db_writer();
 
-    my $count = $dbh->do("UPDATE authactions SET used = 'Y' WHERE userid = ? AND arg1 = ?",
-                         undef, $cu->{userid}, "targetid=$u->{userid}");
-    return unless $count;
+    return unless $dbh;
 
-    LJ::run_hooks(
-        'reject_member',
-        {
-            journalid   => $cu->userid,
-            journalcaps => $cu->caps,
-            users       => [ { id => $u->userid, caps => $u->caps } ]
-        }
+    my $cnt = $dbh->do(qq[
+            UPDATE
+                authactions
+            SET
+                used = 'Y'
+            WHERE
+                userid = ?
+            AND
+                arg1 = ?
+        ],
+        undef,
+        $cid, $arg
     );
 
+    if ($dbh->err) {
+        return;
+    }
+
+    return unless $cnt;
+
+    LJ::run_hooks('reject_member', {
+        users       => [{
+            id => $uid,
+            caps => $u->caps
+        }],
+        journalid   => $cid,
+        journalcaps => $c->caps,
+    });
+
+    LJ::MemCacheProxy::delete([$cid, "community:request:$cid:$uid"]);
+
     # step 2, email the user
-    my %params = (event => 'CommunityJoinReject', journal => $cu);
+    my %params = (event => 'CommunityJoinReject', journal => $c);
+
     unless ($u->has_subscription(%params)) {
         $u->subscribe(%params, method => 'Email');
     }
 
     # Email to user about rejecting
-    LJ::Event::CommunityJoinReject->new($cu, $u, undef, undef, $reason)->fire unless $LJ::DISABLED{esn};
+    unless ($LJ::DISABLED{esn}) {
+        LJ::Event::CommunityJoinReject->new($c, $u, undef, undef, $reason)->fire;
+    }
 
     # Email to maints about user rejecting
-    my $maintainers = LJ::load_rel_user($commid, 'A');
-    foreach my $mid (@$maintainers) {
-        next if $mid == $maintid;
-        my $maintu = LJ::load_userid($mid);
-        my %params = (event => 'CommunityJoinReject', journal => $cu);
-        if ($maintu && $maintu->has_subscription(%params)) {
-            LJ::Event::CommunityJoinReject->new($cu, $maintu, $mu, $u, $reason)->fire unless $LJ::DISABLED{esn};
+    my $maintainers = $c->maintainers();
+
+    foreach my $mu (values %$maintainers) {
+        next if $mu->id == $mid;
+
+        my %params = (event => 'CommunityJoinReject', journal => $c);
+
+        if ($mu && $mu->has_subscription(%params)) {
+            unless ($LJ::DISABLED{esn}) {
+                LJ::Event::CommunityJoinReject->new($c, $mu, $m, $u, $reason)->fire;
+            }
         }
     }
 
     return 1;
+}
+
+sub is_request_sent {
+    my ($c, $u) = @_;
+
+    return unless $c;
+    return unless $u;
+
+    my $cid = $c->id;
+    my $uid = $u->id;
+
+    return unless $cid;
+    return unless $uid;
+
+    my $key = [$cid, "community:request:$cid:$uid"];
+    my $val = LJ::MemCacheProxy::get([$cid, "community:request:$cid:$uid"]);
+
+    if (defined $val) {
+        return $val;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    my $arg = "targetid=$uid";
+
+    return unless $dbh;
+
+    my $row = $dbh->selectrow_hashref(qq[
+            SELECT
+                *
+            FROM
+                authactions
+            WHERE
+                userid = ?
+            AND
+                arg1 = ?
+            AND
+                action = 'comm_join_request'
+            AND
+                used = 'N'
+        ],
+        undef,
+        $cid,
+        $arg
+    );
+
+    if ($dbh->err) {
+        return;
+    }
+
+    LJ::MemCacheProxy::set([$cid, "community:request:$cid:$uid"], $row, 86400);
+
+    return $row;
 }
 
 sub maintainer_linkbar {

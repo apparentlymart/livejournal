@@ -27,7 +27,7 @@ body<=
 
     my $journal = LJ::load_user($GET{journal}) or return LJ::bad_input("No journal specified");
 
-    return BML::redirect("$LJ::SITEROOT/manage/subscriptions/")
+    return BML::redirect("$LJ::SITEROOT/manage/settings/?cat=notifications")
         if LJ::u_equals($remote, $journal);
 
     my $u = $remote;

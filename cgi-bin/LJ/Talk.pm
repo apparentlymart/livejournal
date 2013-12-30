@@ -14,6 +14,8 @@ use Captcha::reCAPTCHA;
 use Carp qw(croak);
 use MIME::Words;
 
+use LJ::Auth::Challenge;
+use LJ::Auth::Secret;
 use LJ::Comment;
 use LJ::Constants;
 use LJ::Event::JournalNewComment;
@@ -30,7 +32,7 @@ use LJ::DelayedEntry;
 use constant {
     PACK_FORMAT => "NNNNC",
     PACK_MULTI  => "C(NNNNC)*",
-}; ## $talkid, $parenttalkid, $poster, $time, $state 
+}; ## $talkid, $parenttalkid, $poster, $time, $state
 
 # dataversion for rate limit logging
 our $RATE_DATAVER = "1";
@@ -74,10 +76,12 @@ sub get_subjecticons
     return \%subjecticon;
 }
 
-# entryid-commentid-emailrecipientpassword hash
-sub ecphash {
-    my ($itemid, $talkid, $password) = @_;
-    return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
+# Hash, required for signing quick replies, that can be making directly from the notification letters.
+# User, who knows this hash, is allowed to reply on the 'talkid' comment in the entry 'itemid'.
+sub entry_comment_password_hash {
+    my $args = shift;
+    croak "Invalid usage of LJ::Talk::entry_comment_password_hash" unless LJ::isu($args->{'poster'});
+    return "ecph-" . Digest::MD5::md5_hex($args->{'itemid'} . $args->{'talkid'} . $args->{'poster'}->clean_password);
 }
 
 # Returns talkurl with GET args added (don't pass #anchors to this :-)
@@ -190,8 +194,8 @@ sub link_bar
 
     if ( LJ::is_enabled('sharing') && $entry->is_public && !$entry->is_delayed ) {
         my $title = LJ::Lang::ml('talk.'. 'share');
-        
-        my $attrs = $entry->sharing_attributes(); 
+
+        my $attrs = $entry->sharing_attributes();
         my $extra_attrs  = join ' ', map {$_.'="'.$attrs->{$_}.'"'} keys %$attrs;
 
         LJ::Share->request_resources();
@@ -487,7 +491,7 @@ sub screening_level {
     # now return userprop, as it's our last chance
     LJ::load_user_props($journalu, 'opt_whoscreened');
     return if $journalu->{opt_whoscreened} eq 'N';
-    $journalu->{opt_whoscreened} = 'R' 
+    $journalu->{opt_whoscreened} = 'R'
         if $journalu->{opt_whoscreened} eq 'L';
     return $journalu->{opt_whoscreened} || 'R';
 }
@@ -786,7 +790,7 @@ sub freeze_comments {
     # invalidate memcache for this comment
     LJ::Talk::invalidate_comment_cache($u->id, $nodeid, @$ids);
 
-    
+
     # set time of comments modification in the journal
     LJ::Talk::update_journals_commentalter($u);
 
@@ -874,7 +878,7 @@ sub unscreen_comment {
             $entry->set_prop( 'hasscreened' => 0 );
         }
     }
-    
+
     LJ::run_hooks('unscreen_comment', $userid, $itemid, $in);
 
     $entry->touch_commentalter;
@@ -904,7 +908,7 @@ sub spam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state NOT IN ('B','D')");
     return undef unless $updated;
-    
+
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
     $entry->set_prop('spam_counter', $spam_counter + 1);
@@ -930,11 +934,11 @@ sub unspam_comment {
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
     my @jtalkids = @_;
-    
+
     # TODO: have an LJ::Entry in the signature
-    
+
     my $new_state = 'A';
-    my $screening = LJ::Talk::screening_level( $u, $itemid ); 
+    my $screening = LJ::Talk::screening_level( $u, $itemid );
     if ($screening eq 'A') {
         $new_state = 'S';
     }
@@ -953,7 +957,7 @@ sub unspam_comment {
                                         "AND nodetype='L' AND nodeid=$itemid ".
                                         "AND state='B'");
     return undef unless $updated;
-    
+
     my $entry = LJ::Entry->new($u, jitemid => $itemid);
     my $spam_counter = $entry->prop('spam_counter') || 0;
 
@@ -991,7 +995,7 @@ sub get_talk_data {
     my $uid = $u->id;
 
     ## call normally if no gearman/not wanted
-    
+
     ## Do no try to connect to Gearman if there is no need.
     return get_talk_data_do($uid, $nodetype, $nodeid, $opts)
         unless LJ::conf_test($LJ::LOADCOMMENTS_USING_GEARMAN, $u->id);
@@ -1053,7 +1057,7 @@ sub get_talk_data_do
 
     my $init_comobj = 1;
        $init_comobj = $opts->{init_comobj} if exists $opts->{init_comobj};
-    
+
     my $ret = {};
 
     # check for data in memcache
@@ -1227,7 +1231,7 @@ sub get_talk_data_do
 
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
-    LJ::MemCache::set($memkey, $memval, 3600); # LJSV-748, using LJ::MemCache::append(...) in some (rare) cases 
+    LJ::MemCache::set($memkey, $memval, 3600); # LJSV-748, using LJ::MemCache::append(...) in some (rare) cases
                                                # can produce comment lose. This is a workaround. Real solution is more complicated.
     $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
@@ -1325,7 +1329,7 @@ sub fixup_logitem_replycount {
 #
 #   init_comobj -- init or not LJ::Comment object for every loaded raw data of a comment.
 #                  by default it is On (true), but in this case it produces a huge overhead:
-#                       LJ::Comment class stores in memory all comment instances and when load 
+#                       LJ::Comment class stores in memory all comment instances and when load
 #                       property for any of a comment LJ::Comment loads all properties for ALL inited comments.
 #                  (!) provide 'init_comobj => 0' wherever it is possible
 #   strict_page_size -- under some circumstances page size (defined in 'page_size' option') may be changed.
@@ -1375,7 +1379,7 @@ sub load_comments_tree
             delete $posts->{$commentid};
         }
     }
-    
+
     my %children; # talkid -> [ childenids+ ]
     my %has_children; # talkid -> 1 or undef
 
@@ -1680,9 +1684,9 @@ sub load_comments
                     @childrens = map { $children->{$_} ? @{$children->{$_}} : () } @childrens;
                 }
             }
-        }        
+        }
     }
-    
+
     my $thread = $opts->{'thread'}+0;
     my $visible_parents = int $opts->{'visible_parents'};
 
@@ -1751,7 +1755,7 @@ sub load_comments
         $post->{'subject'} = $subjects_loaded->{$talkid}?
             $subjects_loaded->{$talkid}->[0]:
             $no_subject;
-    } 
+    }
 
     # load meta-data
     {
@@ -1779,7 +1783,7 @@ sub load_comments
     if (%users_to_load) {
         LJ::load_userids_multiple([ map { $_, \$up{$_} } keys %users_to_load ]);
         LJ::load_user_props_multi([values %up], [qw{ custom_usericon custom_usericon_individual }]);
- 
+
         # fill in the 'userpost' member on each post being shown
         while (my ($id, $post) = each %$posts) {
             my $up = $up{$post->{'posterid'}};
@@ -1789,7 +1793,7 @@ sub load_comments
         }
     }
 
-    ## Fix: if authors of comments deleted their journals, 
+    ## Fix: if authors of comments deleted their journals,
     ## and choosed to delete their content in other journals,
     ## then show their comments as deleted.
     ## Note: only posts with loaded users (posts that will be shown) are processed here.
@@ -1804,7 +1808,7 @@ sub load_comments
                 }
             }
         }
-    } 
+    }
 
     # optionally give them back user refs
     if (ref($opts->{'userref'}) eq "HASH") {
@@ -1849,6 +1853,7 @@ sub resources_for_talkform {
     LJ::need_res(qw(
         stc/display_none.css
 
+        js/s2.js
         js/jquery/jquery.lj.subjecticons.js
         js/jquery/jquery.lj.commentator.js
         js/jquery/jquery.lj.quotescreator.js
@@ -1916,7 +1921,7 @@ sub talkform {
     #return "You cannot edit this comment."
     #    if $editid && !$is_person;
 
-    my $filename = $opts->{embedable_form} 
+    my $filename = $opts->{embedable_form}
         ? "$ENV{'LJHOME'}/templates/CommentForm/FormEmbedable.tmpl"
         : "$ENV{'LJHOME'}/templates/CommentForm/Form.tmpl";
 
@@ -1936,7 +1941,7 @@ sub talkform {
     $form_intro .= LJ::form_auth();
 
     # Login challenge/response
-    my $authchal = LJ::challenge_generate(900);    # 15 minute auth token
+    my $authchal = LJ::Auth::Challenge->generate(900);    # 15 minute auth token
     $form_intro .= qq{
         <input type='hidden' name='chal' id='login_chal' value='$authchal' />
         <input type='hidden' name='response' id='login_response' value='' />
@@ -1955,12 +1960,9 @@ sub talkform {
     );
 
     # rate limiting challenge
-    my ( $secret_time, $secret ) = LJ::get_secret();
-    my $rchars = LJ::rand_chars(20);
-    my $chal   = join( '-',
-        ( $entry->ditemid, $journalu->id, $secret_time, $rchars ) );
-    my $res = Digest::MD5::md5_hex( $secret . $chal );
-    $form_intro .= LJ::html_hidden( "chrp1", "$chal-$res" );
+    my $chrp1 = generate_chrp1($journalu->id, $entry->ditemid);
+    return "Internal error: could not generate chrp1." unless defined $chrp1;
+    $form_intro .= LJ::html_hidden("chrp1", $chrp1);
 
     $opts->{'errors'} ||= [];
     my $have_errors = scalar( @{ $opts->{errors} } );
@@ -2149,8 +2151,7 @@ sub talkform {
 
             # Captcha sessions
             my $cid = $journalu->{clusterid};
-            $captcha_chal = $form->{captcha_chal}
-                || LJ::challenge_generate(900);
+            $captcha_chal = $form->{captcha_chal} || LJ::Auth::Challenge->generate(900);
             $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
             my $dbcr = LJ::get_cluster_reader($journalu);
 
@@ -2353,12 +2354,12 @@ sub talkform {
     return $template->output;
 }
 
-# mobile commenting form 
+# mobile commenting form
 sub talkform_mobile {
     my $opts = shift;
 
     my @opts = (
-        'read','user',$opts->{form}{journal}, $opts->{form}{itemid}, 'comments', 
+        'read','user',$opts->{form}{journal}, $opts->{form}{itemid}, 'comments',
     );
 
     push @opts, $opts->{form}{thread}
@@ -2386,9 +2387,9 @@ sub talkform_mobile {
 
     # passing error messages
     $res->template->param(
-        errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],    
+        errors          => [map { { 'error' => $_ } } @{ $opts->{errors} }],
     );
-    
+
     # and get ready html code
     return $res->output_html;
 }
@@ -2631,7 +2632,7 @@ sub invalidate_comment_cache {
 
     ## invalidate cache with all commments for this entry
     LJ::MemCache::delete([$jid, "talk2:$jid:L:$nodeid"]);
- 
+
     ## and invalidate all individual caches for each comment
     foreach my $jtalkid (@jtalkids) {
         LJ::MemCache::delete([ $jid, "talk2row:$jid:$jtalkid" ]);
@@ -2693,7 +2694,7 @@ sub get_replycount {
 #            multiform_selects
 #
 # returns: Arrayref of hashrefs:
-# 
+#
 # </LJFUNC>
 sub get_thread_html
 {
@@ -2705,7 +2706,7 @@ sub get_thread_html
     my $s2_ctx = [];  # ghetto fake S2 context object
     if ($remote) {
         $tz_remote = $remote->prop('timezone') || undef;
-    }    
+    }
 
     my $viewsome = $input->{viewsome};
     my $viewall = $input->{viewall};
@@ -2756,14 +2757,14 @@ sub get_thread_html
     $output->{pages} = $opts->{out_pages};
 
     ##################################################
-        
+
     my $LJ_cmtinfo = $input->{LJ_cmtinfo};
 
     my $formatlight = $input->{'format'} eq 'light' ? 'format=light' : '';
     my $stylemine = $input->{'style'} eq "mine" ? "style=mine" : "";
-        
+
     my ($last_talkid, $last_jid) = LJ::get_lastcomment();
-        
+
     my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
     my $jarg = "journal=$u->{'user'}&";
     my $jargent ="journal=$u->{'user'}&amp;";
@@ -2779,7 +2780,7 @@ sub get_thread_html
 
         my ($self, $post, $depth) = @_;
         $depth ||= 0;
-        
+
         my $tid = $post->{'talkid'};
         my $dtid = $tid * 256 + $anum;
         my $thread_url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
@@ -2834,7 +2835,7 @@ sub get_thread_html
 
         my $html = {};
         my $state;
-                
+
         if ($post->{'state'} eq "D") ## LJSUP-6433
         {
             $state = 'deleted';
@@ -2852,10 +2853,10 @@ sub get_thread_html
         elsif ($post->{'state'} ne 'B' && $opts->{'showspam'}) {
             $html->{text} = undef;
         }
-        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote && $remote->user eq (ref $userpost ? $userpost->{'user'} : $userpost))) 
+        elsif ($post->{'state'} eq 'B' && !$opts->{'showspam'} && !($remote && $remote->user eq (ref $userpost ? $userpost->{'user'} : $userpost)))
         {
             $state = 'spamed';
-            if ($post->{'_show'}) { 
+            if ($post->{'_show'}) {
                 $html->{header} = $comment_header->();
                 $html->{text}   = BML::ml('.spamedpost');
                 $html->{footer} = $comment_footer->();
@@ -2885,18 +2886,18 @@ sub get_thread_html
                          LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                          "</a>";
             }
-               
+
             $html->{text} = $text;
         }
         else
         {
             $user = LJ::ljuser($upost, { side_alias => 1 }) if $upost;
-                
+
             my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
 
             my $get_expand_link = sub {
                 return
-                    "<span id='expand_$dtid'>" . 
+                    "<span id='expand_$dtid'>" .
                         " (<a href='$thread_url' onclick=\"ExpanderEx.make(event,this,'$thread_url','$dtid',true)\">" .
                             BML::ml('talk.expandlink') .
                         "</a>)" .
@@ -2931,7 +2932,7 @@ sub get_thread_html
 
                 $html->{header} = $comment_header->("width='100%' class='talk-comment'");
                 $html->{footer} = $comment_footer->();
-                    
+
                 my $text = "<div id='cmtbar$dtid' class='talk-comment-head' style='background-color:$bgcolor'>";
 
                 if (my $picid = $post->{'picid'}) {
@@ -2962,7 +2963,7 @@ sub get_thread_html
                         ## Display location of an IP.
                         $text .= LJ::Lang::ml('.fromip.extended', { ip => $ip, country => $country, city => $city });
                     } else {
-                        ## IP location is unknown 
+                        ## IP location is unknown
                         $text .= LJ::Lang::ml('.fromip', { ip => $ip });
                     }
                 }
@@ -2973,7 +2974,7 @@ sub get_thread_html
                              "#t$dtid' rel='nofollow'>" .
                              BML::ml('talk.commentpermlink') . "</a>)</font> ";
                 }
-                
+
                 if ($comment->remote_can_edit) {
                     $text .= "<a href='" .
                              LJ::Talk::talkargs($comment->edit_url, $stylemine, $formatlight) .
@@ -3005,7 +3006,7 @@ sub get_thread_html
                              LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
                              "</a>";
                 }
-                    
+
                 if ($post->{'state'} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) .
@@ -3017,7 +3018,7 @@ sub get_thread_html
                              LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
                              "</a>";
                 }
-                   
+
                 if ($post->{'state'} eq 'S' && LJ::Talk::can_unscreen($remote, $u, $up, $userpost)) {
                     $text .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid' rel='nofollow'>" .
                              LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) .
@@ -3092,7 +3093,7 @@ sub get_thread_html
 
                 BML::ebml(\$post->{'body'});
                 my $event = $post->{'body'};
-    
+
                 if ($input->{nohtml})
                 {
                     # quote all non-LJ tags
@@ -3141,7 +3142,7 @@ sub get_thread_html
                     my $dpid = $parentid * 256 + $anum;
                     $text .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid' rel='nofollow'>" . BML::ml('talk.parentlink') . "</a>) ";
                 }
-   
+
                 my $has_closed_children = 0;
                 if ($post->{'children'} && @{$post->{'children'}}) {
                     $text .= "(<a href='$thread_url' rel='nofollow'>" . BML::ml('talk.threadlink') . "</a>) ";
@@ -3173,7 +3174,7 @@ sub get_thread_html
 
                 # link to message
                 $LJci->{has_link} = 1;
-                    
+
                 $html->{header} = $comment_header->();
                 $html->{footer} = $comment_footer->();
 
@@ -3209,6 +3210,38 @@ sub get_thread_html
     $recurse_post->($recurse_post, $_, $input->{depth} || 0) foreach @comments;
 
     return $comments;
+}
+
+sub generate_chrp1 {
+    my ($userid, $ditemid) = @_;
+
+    my $secret = LJ::Auth::Secret->create();
+    return undef unless $secret;
+
+    my $rand_chars = LJ::rand_chars(20);
+    my $challenge_bare = join '-', $ditemid, $userid, $secret->ts, $rand_chars;
+    my $challenge_sign = Digest::MD5::md5_hex($secret->value . $challenge_bare);
+
+    return $challenge_bare . '-' . $challenge_sign;
+}
+
+sub check_chrp1 {
+    my $chrp = shift;
+
+    my ($ditemid, $userid, $stime, $chars, $input_sign) = split(/-/, $chrp);
+    return "invalid" unless defined $input_sign;
+
+    my $challenge_bare = "$ditemid-$userid-$stime-$chars";
+
+    return "too_old" if $LJ::REQUIRE_TALKHASH_NOTOLD && $stime < time() - 2 * 60 * 60;
+
+    my $secret = LJ::Auth::Secret->fetch($stime);
+    return "invalid" unless $secret;
+
+    my $challenge_sign = Digest::MD5::md5_hex($secret->value . $challenge_bare);
+    return "invalid" if $challenge_sign ne $input_sign;
+
+    return undef;
 }
 
 1;

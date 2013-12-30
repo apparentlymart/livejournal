@@ -5,12 +5,15 @@
     use LJ::Auth;
     use LJ::EmbedModule;
     use LJ::Maps;
+    use LJ::UserApps::ApplicationView::HTML;
+    use HTML::Template::Pro;
 
     # this can only be accessed from the embed module subdomain
     return "This page cannot be viewed from $LJ::DOMAIN"
         unless LJ::Request->header_in("Host") =~ /.*$LJ::EMBED_MODULE_DOMAIN$/i;
 
     my $mode = $GET{'mode'} || 'lj-embed';
+
     if ($mode eq 'lj-map') {
         return LJ::Maps->get_iframe_source(%GET);
     } elsif ($mode eq 'tackthis'){
@@ -136,7 +139,32 @@ if (!window.swfobject){document.write(unescape('<script type="text/javascript" s
 document.write(unescape('<script type="text/javascript" src="http://www.infox.ru/system/php/trans.php?dx=1&str=rid3muhay1mmh9p1rxwjuak4u57xr0s0">%3C/script%3E'));
 </script> 
 EOJS
+    } elsif ($mode eq 'js') {
+        my $app_id  = $GET{app_id};
+        my $view_id = $GET{view_id};
+
+        my $application = LJ::UserApps->get_application( id => $app_id );
+        return sprintf 'Application with id = %s not exist.', $app_id unless $application;
+
+        if ( $application->status() eq 'R' ) {
+            return sprintf 'Application "%s" not allow.', $application->name();
+        }
+
+        my $view = LJ::UserApps::ApplicationView->new(application_id => $app_id, view_id => $view_id);
+        return sprintf 'View %s in application "%s" not exist.', $view_id, $application->name() unless $view;
+
+        my $view_params = $view->get_params();
+
+        my $body = $view->body();
+
+        my $template = HTML::Template::Pro->new_scalar_ref(\$body);
+
+        foreach my $par (@$view_params) {
+            $template->param( $par => $GET{$par} );
+        }
+
+        return $template->output;
     }
-} 
+}
 _code?>
 

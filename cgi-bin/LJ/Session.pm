@@ -6,6 +6,7 @@ use LJ::Request;
 use Class::Autouse qw(
                       LJ::EventLogRecord::SessionExpired
                       );
+use LJ::Auth::Secret;
 use LJ::TimeUtil;
 use Digest::MD5;
 
@@ -275,7 +276,9 @@ sub domsess_cookie_string {
     croak("No domain cookie provided") unless $domcook;
 
     # compute a signed domain key
-    my ($time, $key) = LJ::get_secret();
+    my $secret = LJ::Auth::Secret->create();
+    croak("Could not create secret") unless $secret;
+    my $time = $secret->ts;
     my $sig = domsess_signature($time, $sess, $domcook);
 
     # the cookie
@@ -975,11 +978,11 @@ sub domsess_signature {
     my ($time, $sess, $domcook) = @_;
 
     my $u      = $sess->owner;
-    my $secret = LJ::get_secret($time);
+    my $secret = LJ::Auth::Secret->create($time);
+    croak("Could not create secret") unless $secret;
 
     my $data = join("-", $sess->{auth}, $domcook, $u->{userid}, $sess->{sessid}, $time);
-    my $sig  = hmac_sha1_hex($data, $secret);
-    return $sig;
+    return hmac_sha1_hex($data, $secret->value);
 }
 
 # same logic as domsess_signature, so just a wrapper

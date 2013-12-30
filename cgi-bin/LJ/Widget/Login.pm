@@ -3,6 +3,7 @@ package LJ::Widget::Login;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
+use LJ::Auth::Challenge;
 use LJ::Request;
 
 sub need_res { return 'stc/widgets/login.css' }
@@ -24,7 +25,7 @@ sub render_body {
     # Is this the login page?
     # If so treat ret value differently
     my $isloginpage = 0;
-    $isloginpage = 1 if (LJ::Request->uri eq '/login.bml');
+    $isloginpage = 1 if LJ::Request->uri eq '/login.bml';
 
     if (!$isloginpage && $opts{get_ret} == 1) {
         $getextra .= $getextra eq '' ? '?ret=1' : '&ret=1';
@@ -38,12 +39,12 @@ sub render_body {
 
     if (!$LJ::USE_SSL_LOGIN) {
         $ret .= LJ::form_auth();
-        my $chal = LJ::challenge_generate(300); # 5 minute auth token
+        my $chal = LJ::Auth::Challenge->generate(300); # 5 minute auth token
         $ret .= "<input type='hidden' name='chal' class='lj_login_chal' value='$chal' />\n";
         $ret .= "<input type='hidden' name='response' class='lj_login_response' value='' />\n";
     }
 
-    my $referer = BML::get_client_header('Referer');
+    my $referer = LJ::Request->header_in('Referer');
     if ($isloginpage && $opts{get_ret} == 1 && $referer) {
         my $eh_ref = LJ::ehtml($referer);
         $ret .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
@@ -51,7 +52,7 @@ sub render_body {
 
     if (! $opts{get_ret} && $opts{ret_cur_page}) {
         # use current url as return destination after login, for inline login
-        $ret .= LJ::html_hidden('ret', $LJ::SITEROOT . BML::get_uri());
+        $ret .= LJ::html_hidden('ret', $LJ::SITEROOT . LJ::Request->uri);
     }
 
     if ($opts{returnto}) {
@@ -71,7 +72,7 @@ sub render_body {
         $ret .= "<label for='lj_loginwidget_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
         $ret .= "<input type='password' id='lj_loginwidget_password' name='password' class='lj_login_password text' size='20' maxlength='30' /><a href='$LJ::SITEROOT/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
         $ret .= "</fieldset>\n";
-        $ret .= "<p><input type='checkbox' name='remember_me' id='remember_me' value='1' tabindex='4' /> <label for='remember_me'>".BML::ml('.login.remember')."</label></p>";
+        $ret .= "<p><input type='checkbox' name='remember_me' id='remember_me' value='1' tabindex='4' /> <label for='remember_me'>" . LJ::Lang::ml('/login.bml.login.remember') . "</label></p>";
 
         # standard/secure links removed for now
         my $secure = "<p>";

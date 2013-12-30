@@ -28,6 +28,7 @@ use LJ::Request;
 use LJ::Share;
 use LJ::TimeUtil;
 use LJ::Setting::Music;
+use LJ::SocialScripts;
 
 use LJ::Widget::Calendar;
 
@@ -349,10 +350,13 @@ sub insert_resources {
 
     my $hc = $page->{head_content};
 
+    my $js_inc = LJ::res_includes({ only_js => 1 }) || '';
+    $js_inc .= LJ::SocialScripts::print_scripts();
+
     my %res = (
         ALL_RES => $hc->subst_header() || '',
 
-        JS_RES => LJ::res_includes({ only_js => 1 }) || ''
+        JS_RES => $js_inc,
     );
 
     $hc->{opts}->{without_js} = 1;
@@ -729,8 +733,9 @@ sub get_style
         # special case here: styleid=0 is the default style, whatever
         # it is
 
+        my $style_params = $u && $u->is_syndicated ? $LJ::DEFAULT_STYLE_SYNDICATED : $LJ::DEFAULT_STYLE;
         my $public = get_public_layers();
-        while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
+        while (my ($layer, $name) = each %$style_params) {
             next unless $name ne "";
             next unless $public->{$name};
             my $id = $public->{$name}->{'s2lid'};
@@ -2468,6 +2473,26 @@ sub Event
     return $o;
 }
 
+sub Institution
+{
+    my ($u) = @_;
+    my $o = UserLite($u);
+
+    $u->preload_props(qw{
+        ljart_institut
+        ljart_institut_type
+        ljart_institut_designation
+    });
+
+    $o->{'_type'}                   = "Institution";
+    $o->{'default_pic'}             = Image_userpic($u, $u->{'defaultpicid'});
+    $o->{'institution'}             = $u->{'ljart_institut'};
+    $o->{'institution_type'}        = $u->{'ljart_institut_type'}; 
+    $o->{'institution_designation'} = $u->{'ljart_institut_designation'};
+
+    return $o;
+}
+
 sub Person
 {
     my ($u) = @_;
@@ -2614,6 +2639,12 @@ sub Event {
     my ($ctx,$username) = @_;
     my $u = LJ::load_user($username);
     return LJ::S2::Event($u);
+}
+
+sub Institution {
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return LJ::S2::Institution($u);
 }
 
 sub Person {

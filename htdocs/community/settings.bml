@@ -76,7 +76,7 @@ body<=
         }
 
         # if we're creating, community password must match
-        if ($mode eq 'create' && $cu && !LJ::auth_okay($cu, $POST{'cpassword'})) {
+        if ($mode eq 'create' && $cu && !LJ::Auth::Method::LoginPassword::Clear->check($cu, { password => $POST{'cpassword'} })) {
             $errors{'password'} = $ML{'.error.badpassword'};
         }
 

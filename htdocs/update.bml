@@ -439,17 +439,21 @@ EMBED
             $u = LJ::load_user($user);
 
             # Verify entered password, if it is present.
-            my $ok;
+            my $auth_ok;
 
-            if ($POST{response}) {
-                $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response});
+            if ($POST{'response'}) {
+                $auth_ok = LJ::Auth::Method::ChallengeResponse->check($u, {
+                    challenge => $POST{'chal'},
+                    response  => $POST{'response'},
+                } );
             }
             else {  # js disabled, fallback to plaintext
-                $ok = LJ::auth_okay($u, $POST{password});
+                $auth_ok = LJ::Auth::Method::LoginPassword::Clear->check($u, {
+                    password => $POST{'password'},
+                } );
             }
 
-            $flags = { 'noauth' => 1, 'u' => $u } if $ok;
-
+            $flags = { 'noauth' => 1, 'u' => $u } if $auth_ok;
         }
         elsif ($remote && LJ::check_referer()) {
             # assume remote if we have it
@@ -541,7 +545,7 @@ EMBED
                     'repost_limit_sc' => $POST{'repost_limit_sc'},
                     );
 
-        $flags->{'use_custom_time'} = 1; 
+        $flags->{'use_custom_time'} = 1;
         LJ::entry_form_decode(\%req, \%POST);
 
         if ($req{'event'} eq "") {
@@ -643,7 +647,7 @@ EMBED
                     {
                         $itemlink = LJ::DelayedEntry::item_link($ju, $res->{'delayedid'});
                     }
-                    
+
                     if ($itemid) {
                         $itemid = $itemid * 256 + $anum;
                         $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
@@ -806,13 +810,13 @@ head<=
 
     LJ::need_string(qw(
         entryform.close.confirm
-    )); 
+    ));
 
-    # append months names tranlation to Site.ml_text['month.names.long']  
+    # append months names tranlation to Site.ml_text['month.names.long']
     my @ml_months = map { LJ::Lang::month_long_langcode($_) } (1 .. 12);
     my @ml_months_texts = map { LJ::Lang::ml($_) } @ml_months;
 
-    $LJ::JSML{'month.names.long'} = \@ml_months_texts; 
+    $LJ::JSML{'month.names.long'} = \@ml_months_texts;
 
     $ret .= qq^
     <script type="text/javascript">

@@ -591,7 +591,8 @@ sub can_send {
 
     # Will this message put sender over rate limit
     unless ($LJ::WHITELIST_SEND_INBOX_MESSAGES{$ou->user}
-            || $self->rate_multiple && $ou->rate_check('usermessage', $self->rate_multiple) ) {
+            || !$self->rate_multiple 
+            || $ou->rate_check('usermessage', $self->rate_multiple) ) {
         my $up;
         $up = LJ::run_hook('upgrade_message', $ou, 'message');
         $up = "<br />$up" if ($up);

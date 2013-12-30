@@ -168,6 +168,7 @@
         # Subscribe/Unscubscribe to/from user
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
             $ret{is_subscriber}   = $u->is_subscribedon($remote);
+            $ret{is_invite_sent}  = $remote->is_invite_sent($u);
             $ret{is_subscribedon} = $remote->is_subscribedon($u);
         }
     }
@@ -193,7 +194,7 @@
         report send_gift buy_same_userhead send_message stop_community subscribe_feed
         this_is_you unban unsubscribe_feed updating view watch_community
         your_friend ljtalk online offline
-        subscribe unsubscribe
+        subscribe unsubscribe invite_sent
     /;
 
     ## optimization: load all ML strings into local cache at once

@@ -223,7 +223,7 @@ body<=
                 'charset' => 'utf-8',
                 'subject' => $subject,
                 'body' => $body,
-                'internal_relays' => ($why_mail eq 'reject')&&($c->user eq $LJ::COMM_FOR_WHICH_INTERNAL_RELAYS) ? 1 : 0,
+                'internal_relays' => ($why_mail eq 'reject')&&($c->user eq $LJ::LOG_OUTGOING_EMAILS_FOR_COMMUNITIES) ? 1 : 0,
             });
         }
 

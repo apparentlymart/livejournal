@@ -26,7 +26,7 @@ sub render_body {
         return unless $msg;
         return "$pre $msg $post";
     };
-    
+
     if ($LJ::COPPA_CHECK && $error_msg->('underage')) {
         return '<h1>' . $class->ml('widget.createaccount.error.underage.title') . '</h1>'
                . '<p>' . $class->ml('widget.createaccount.error.underage.message') . '</p>'
@@ -35,7 +35,7 @@ sub render_body {
                . '<p>' . $class->ml('widget.createaccount.error.underage.ljhome', { ljhome =>  $LJ::SITE_ROOT } ) . '</p>';
         ;
     }
-    
+
     # hooks
     LJ::run_hook('partners_registration_visited', $get->{from});
 
@@ -135,12 +135,12 @@ sub render_body {
         $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.password') . "</td>\n<td>";
     }
     $ret .= $class->html_text(
-        name => 'password1',
-        id => 'create_password1',
-        size => 28,
+        name      => 'password1',
+        id        => 'create_password1',
+        size      => 28,
         maxlength => 31,
-        type => "password",
-        value => $pass_value,
+        type      => "password",
+        value     => $pass_value,
     );
     $ret .= $error_msg->('password', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
@@ -156,12 +156,12 @@ sub render_body {
         $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.confirmpassword') . "</td>\n<td>";
     }
     $ret .= $class->html_text(
-        name => 'password2',
-        id => 'create_password2',
-        size => 28,
+        name      => 'password2',
+        id        => 'create_password2',
+        size      => 28,
         maxlength => 31,
-        type => "password",
-        value => $pass_value,
+        type      => "password",
+        value     => $pass_value,
     );
     $ret .= $error_msg->('confirmpass', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
@@ -181,7 +181,7 @@ sub render_body {
                 name => "gender",
                 id => "create_gender",
                 selected => $post->{gender},
-                list => [ 
+                list => [
                     '' => '',
                     'M' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.male"),
                     'F' =>  LJ::Lang::ml("/manage/profile/index.bml.gender.female"),
@@ -190,7 +190,7 @@ sub render_body {
                 ) . " ";
     $ret .= $error_msg->('gender', '<br /><span class="formitemFlag">', '</span>');
     $ret .= "</td></tr>\n" unless $alt_layout;
-    
+
 
     ### birthdate
     if ($LJ::COPPA_CHECK) {
@@ -219,7 +219,7 @@ sub render_body {
                 class => 'year',
                 maxlength => '4',
                 value => $post->{bday_yyyy} || "",
-            ); 
+            );
         } else {
             $ret .= "<tr><td class='field-name'>" . $class->ml('widget.createaccount.field.birthdate') . "</td>\n<td>";
             $ret .= $class->html_datetime(
@@ -262,7 +262,7 @@ sub render_body {
             $captcha_chal = $post->{captcha_chal};
             undef $captcha_chal if $errors->{captcha};
 
-            $captcha_chal = $captcha_chal || LJ::challenge_generate(900);
+            $captcha_chal ||= LJ::Auth::Challenge->generate(900);
             $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
 
             $ret .= "<tr valign='top'><td class='field-name'>" . $class->ml('widget.createaccount.field.captcha') . "</td>\n<td>";
@@ -361,7 +361,7 @@ sub render_body {
         $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), { class => "create-button" }) . "\n";
         $ret .= "</td></tr>\n";
     }
-	
+
     $ret .= "</table>\n" unless $alt_layout;
 
     $ret .= $class->end_form;
@@ -428,7 +428,7 @@ sub handle_post {
     my $alt_layout = $opts{alt_layout} ? 1 : 0;
 
     my $userip = LJ::get_remote_ip();
-    my $ua = LJ::Request->header_in ('User-Agent');  
+    my $ua = LJ::Request->header_in ('User-Agent');
     my $mem_key = md5_hex($userip.$ua);
 
     if (LJ::MemCache::get($mem_key)) {
@@ -483,20 +483,23 @@ sub handle_post {
 
     if ($post->{password1} ne $post->{password2}) {
         $from_post{errors}->{confirmpass} = $class->ml('widget.createaccount.error.password.nomatch');
-    } else {
+    }
+    else {
         my $checkpass = LJ::run_hook("bad_password", {
-            user => $user,
-            email => $email,
+            user     => $user,
+            email    => $email,
             password => $post->{password1},
-        });
+        } );
 
         if ($checkpass) {
             $from_post{errors}->{password} = $class->ml('widget.createaccount.error.password.bad') . " $checkpass";
         }
     }
+
     if (!$post->{password1}) {
         $from_post{errors}->{password} = $class->ml('widget.createaccount.error.password.blank');
-    } elsif (length $post->{password1} > 30) {
+    }
+    elsif (length $post->{password1} > 30) {
         $from_post{errors}->{password} = LJ::Lang::ml('password.max30');
     }
 
@@ -514,15 +517,15 @@ sub handle_post {
         if (LJ::Request->cookie('undeage')){
             $is_underage = 1;
         }else{
-        
+
             my ($year, $mon, $day) = ( $post->{bday_yyyy}+0, $post->{bday_mm}+0, $post->{bday_dd}+0 );
             if ($year < 100 && $year > 0) {
                 $post->{bday_yyyy} += 1900;
                 $year += 1900;
             }
-    
+
             my $nyear = (gmtime())[5] + 1900;
-    
+
             # require dates in the 1900s (or beyond)
             if ($year && $mon && $day && $year >= 1900 && $year < $nyear) {
                 my $age = LJ::TimeUtil->calc_age($year, $mon, $day);
@@ -535,10 +538,10 @@ sub handle_post {
             } else {
                 $from_post{errors}->{bday} = $class->ml('widget.createaccount.error.birthdate.invalid');
             }
-            
+
         }
-        
-        $from_post{errors}->{underage} = 1 
+
+        $from_post{errors}->{underage} = 1
             if $is_underage;
     }
     ### end COPPA_CHECK
@@ -583,18 +586,18 @@ sub handle_post {
     unless ($second_submit || keys %{$from_post{errors}} || (!LJ::is_enabled("recaptcha") && $wants_audio)) {
         my $bdate = sprintf("%04d-%02d-%02d", $post->{bday_yyyy}, $post->{bday_mm}, $post->{bday_dd});
 
-        my $nu = $class->create_account({
-            user => $user,
-            bdate => $bdate,
-            email => $email,
-            password => $post->{password1},
-            get_ljnews => $post->{news},
-            inviter => $get->{from},
-            underage => $is_underage,
-            ofage => $ofage,
-            extra_props => $opts{extra_props},
+        my $nu = $class->create_account( {
+            user           => $user,
+            bdate          => $bdate,
+            email          => $email,
+            password       => $post->{password1},
+            get_ljnews     => $post->{news},
+            inviter        => $get->{from},
+            underage       => $is_underage,
+            ofage          => $ofage,
+            extra_props    => $opts{extra_props},
             status_history => $opts{status_history},
-        });
+        } );
         return $class->ml('widget.createaccount.error.cannotcreate') unless $nu;
 
         $nu->revert_style;
@@ -651,7 +654,7 @@ sub handle_post {
 
         #my $url = LJ::ab_testing_value() == 0 ? "step2a.bml" : "step2b.bml";
         my $url = "step2a.bml";
-        
+
         return BML::redirect("$LJ::SITEROOT/create/$url$opts{getextra}");
     }
 

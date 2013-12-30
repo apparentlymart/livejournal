@@ -277,7 +277,7 @@ body<=
 
         # form for setting email option
         $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";
-        $ret .= "<?p " . BML::ml('.joinmail.body2', { aopts=>"href='$LJ::SITEROOT/manage/subscriptions/'" }). " p?>\n";
+        $ret .= "<?p " . BML::ml('.joinmail.body2', { aopts=>"href='$LJ::SITEROOT/manage/settings/?cat=notifications'" }). " p?>\n";
         $ret .= "<form method='post' action='manage.bml'>\n";
         $ret .= LJ::form_auth();
         # options for getting moderation emails

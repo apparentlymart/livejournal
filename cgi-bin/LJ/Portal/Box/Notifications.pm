@@ -62,7 +62,7 @@ sub generate_content {
 
     $content .= qq {
         <div class="ESN_Links"><a href="$LJ::SITEROOT/inbox/">Message Center</a> |
-            <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></div>
+            <a href="$LJ::SITEROOT/manage/settings/?cat=notifications">Manage Settings</a></div>
 
         <table style="width: 100%;">
             <tr class="PortalTableHeader"><td>Notification</td><td>Date</td><td>Delete</td></tr>

@@ -412,11 +412,20 @@ sub RecentPage
     }
 
     # LJ Art - LJSUP-17205 Need ability to save city for user and get it from S2
-    my $prefix_town = LJ::Lang::get_text('ru', "ljart.update.event.prefix.town");
+    my $prefix_town     = LJ::Lang::get_text('ru', "ljart.update.event.prefix.town");
+    my $prefix_all_town = LJ::Lang::get_text('ru', "ljart.update.event.prefix.all.town");
     my $current_tags = $opts->{'tags'} || [];
-    for (@$current_tags) {
-        if (my ($town) = $_ =~ m/^$prefix_town:\s(.*?)$/) {
-            LJ::Request->set_cookie(ljarttown => $town);
+    for my $tag (@$current_tags) {
+        if (my ($town) = $tag =~ m/^$prefix_town:\s(.*?)$/) {
+            LJ::Request->set_cookie(
+                ljarttown => $town,
+                expires   => time + 60*60*24*365,
+            );
+            LJ::Request->send_cookies;
+            last;
+        }
+        if ($tag eq $prefix_all_town) {
+            LJ::Request->delete_cookie('ljarttown');
             LJ::Request->send_cookies;
             last;
         }

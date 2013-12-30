@@ -303,9 +303,16 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                 // add/remove friend link
                 (function () {
 
-                    // do not show 'add friend / watch community' links. Only subscribe link should be
                     if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+
+                        // do not show 'add friend / watch community' links.
                         if (!data.is_person && !data.is_identity) {
+                            return;
+                        }
+
+                        // if invite has been sent - links for add/remove friend should not be on the page
+                        if (data.is_invite_sent) {
+                            buildObject.headLinks.push(data.ml_invite_sent);
                             return;
                         }
                     }
@@ -349,6 +356,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                     });
                 }
 
+                // manage friend
                 if (data.is_friend && !data.is_identity) {
                     buildObject.headLinks.push({
                         url: data.url_addfriend,
@@ -361,16 +369,22 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
             // community member
             if (data.is_logged_in && data.is_comm) {
-                linkGroup.push({
-                    selector: 'a[href="{url}"]',
-                    url: data.is_member ? data.url_leavecomm : data.url_joincomm,
-                    text: data.is_member ? data.ml_leave : data.ml_join_community,
-                    click: function(e)
-                    {
-                        e.preventDefault();
-                        ContextualPopup.changeRelation(data, ctxPopupId, data.is_member ? 'leave' : 'join', e);
-                    }
-                });
+
+                // invite has been sent to community maintainer
+                if (data.is_invite_sent) {
+                    linkGroup.push(data.ml_invite_sent);
+                } else {
+                    linkGroup.push({
+                        selector: 'a[href="{url}"]',
+                        url: data.is_member ? data.url_leavecomm : data.url_joincomm,
+                        text: data.is_member ? data.ml_leave : data.ml_join_community,
+                        click: function(e)
+                        {
+                            e.preventDefault();
+                            ContextualPopup.changeRelation(data, ctxPopupId, data.is_member ? 'leave' : 'join', e);
+                        }
+                    });
+                }
             }
 
             //filter community

@@ -6,6 +6,7 @@ use LJ::Blob qw{};
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ;
+use LJ::Auth::Challenge;
 
 ### get_visual_id() -> ( $capid, $anum )
 sub get_visual_id { get_id('image') }
@@ -241,14 +242,11 @@ sub expire {
 # Update/create captcha sessions, return new capid/anum pairs on success.
 # challenge, type, optional journalu->{clusterid} for clustering.
 # Type is either 'image' or 'audio'
-sub session
-{
+sub session {
     my ($chal, $type, $cid) = @_;
     return unless $chal && $type;
 
-    my $chalinfo = {};
-    LJ::challenge_check($chal, $chalinfo);
-    return unless $chalinfo->{valid};
+    return unless LJ::Auth::Challenge->check($chal);
 
     my $sess = LJ::get_challenge_attributes($chal);
     my ($capid, $anum) = ($type eq 'image') ?

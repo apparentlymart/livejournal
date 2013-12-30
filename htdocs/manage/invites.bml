@@ -150,6 +150,7 @@ body<=
         # get variables we'll need for HTML generatrion
         my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         my $cu = $us->{$invite->[0]};
+        next unless $cu->is_community;
         my $key = "pending_$invite->[0]";
         my @tags = ();
         my $args = {};

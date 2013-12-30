@@ -7,6 +7,7 @@ use warnings;
 use LJ::JSON;
 use LJ::Request;
 use LJ::ExtBlock;
+use LJ::User::Profile;
 use LJ::RelationService::RSAPI;
 use LJ::RelationService::MysqlAPI;
 
@@ -95,6 +96,7 @@ sub create_relation_to {
 
     if ($result) {
         $class->del_cache($uid, $tid, $type);
+        LJ::User::Profile->clear_cache($uid, $tid, $type);
     }
 
     return $result;
@@ -129,6 +131,13 @@ sub remove_relation_to {
 
     if ($result) {
         %singletons = ();
+
+        if ($u ne '*' && $target ne '*') {
+            my $uid = $u->id;
+            my $tid = $target->id;
+
+            LJ::User::Profile->clear_cache($uid, $tid, $type);
+        }
     }
 
     return $result;
@@ -159,6 +168,12 @@ sub is_relation_to {
 
     return unless $uid;
     return unless $tid;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
 
     if ($class->exist_cache($uid, $tid, $type)) {
         return 1;
@@ -220,9 +235,6 @@ sub find_relation_destinations {
 
     return unless $uid;
 
-    $opts{offset} ||= 0;
-    $opts{limit}  ||= 50000;
-
     if ($u->is_community || $u->is_news) {
         if ($type eq 'F') {
             $type = 'PC';
@@ -264,7 +276,7 @@ sub find_relation_sources {
 
     if ($u->is_community || $u->is_news) {
         if ($type eq 'F') {
-            $type = 'PC';
+            $type = 'R';
         }
     }
 
@@ -289,6 +301,7 @@ sub load_relation_destinations {
     $u = LJ::want_user($u);
 
     return unless $u;
+    return unless $type;
 
     my $uid = $u->id;
 
@@ -315,6 +328,60 @@ sub load_relation_destinations {
     if ($result) {
         $class->set_cache($uid, undef, $type, $result);
     }
+
+    return $result;
+}
+
+sub count_relation_destinations {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    return unless $u;
+    return unless $type;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
+
+    if ($class->_load_rs_api('read', $type)) {
+        if (my $alt = $class->rs_api) {
+            $alt->count_relation_destinations($u, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->count_relation_destinations($u, $type, %opts);
+
+    return $result;
+}
+
+sub count_relation_sources {
+    my $class = shift;
+    my $u     = shift;
+    my $type  = shift;
+    my %opts  = @_;
+
+    return unless $u;
+    return unless $type;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
+
+    if ($class->_load_rs_api('read', $type)) {
+        if (my $alt = $class->rs_api) {
+            $alt->count_relation_sources($u, $type, %opts);
+        }
+    }
+
+    my $interface = $class->mysql_api;
+    my $result    = $interface->count_relation_sources($u, $type, %opts);
 
     return $result;
 }
@@ -393,7 +460,7 @@ sub clear_rel_multi {
     
     return unless ref $edges eq 'ARRAY';
 
-    if ($class->_load_rs_api('update', 'B')) {
+    if ($class->_load_rs_api('update')) {
         if (my $alt = $class->rs_api) {
             $alt->clear_rel_multi($edges);
         }
@@ -405,6 +472,7 @@ sub clear_rel_multi {
     if ($result) {
         foreach my $edge (@$edges) {
             $class->del_cache(@$edge);
+            LJ::User::Profile->clear_cache(@$edge);
         }
     }
 
@@ -417,7 +485,7 @@ sub set_rel_multi {
     
     return undef unless ref $edges eq 'ARRAY';
 
-    if ($class->_load_rs_api('update', 'B')) {
+    if ($class->_load_rs_api('update')) {
         if (my $alt = $class->rs_api) {
             $alt->set_rel_multi($edges);
         }
@@ -429,6 +497,7 @@ sub set_rel_multi {
     if ($result) {
         foreach my $edge (@$edges) {
             $class->del_cache(@$edge);
+            LJ::User::Profile->clear_cache(@$edge);
         }
     }
 
@@ -454,6 +523,12 @@ sub find_relation_attributes {
 
     return unless $uid;
     return unless $tid;
+
+    if ($u->is_community || $u->is_news) {
+        if ($type eq 'F') {
+            $type = 'PC';
+        }
+    }
 
     if (my $val = $class->get_cache($uid, $tid, $type)) {
         return $val;

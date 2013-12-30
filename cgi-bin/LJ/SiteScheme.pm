@@ -2,6 +2,7 @@ package LJ::SiteScheme;
 use strict;
 use warnings;
 
+use LJ::Auth::Challenge;
 use LJ::Lang qw( ml );
 use LJ::Widget::SGMessages;
 
@@ -304,7 +305,7 @@ sub common_template_params {
             $loginform_root = $LJ::SSLROOT;
         } else {
             $loginform_root              = $LJ::SITEROOT;
-            $loginform_challenge         = LJ::challenge_generate(300);
+            $loginform_challenge         = LJ::Auth::Challenge->generate(300);
             $loginform_need_extra_fields = 1;
             $loginform_onclick           = "onclick='return sendForm()'";
         }

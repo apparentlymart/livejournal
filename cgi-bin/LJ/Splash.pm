@@ -164,7 +164,7 @@ sub checkauth {
     die "No nonce passed in\n" unless $nonce;
     die "No digest passed in\n" unless $digest;
 
-    my $cdigest = Digest::SHA1::sha1( $nonce . $ctime . $self->getpassword( $user ) );
+    my $cdigest = Digest::SHA1::sha1( $nonce . $ctime . $self->getpassword($user) );
     die "Login failure" unless $digest eq $cdigest;
 
     LJ::User->set_remote( $self->{u} );
@@ -175,20 +175,15 @@ sub getpassword {
     my $self = shift;
     my $user = shift;
 
-    my ($ljusername) = $user =~ m/^(\S+)\@livejournal\.com$/i;
+    my ($ljusername) = ($user =~ m/^(\S+)\@livejournal\.com$/i);
     die "Not an LJ user" unless $ljusername;
     die "Improper LJ username" unless LJ::canonical_username( $ljusername );
 
-    my $dbr = LJ::get_db_reader()
-        or die "LJ database system failure";
+    my $u = $self->{'u'} = LJ::load_user($ljusername);
+    die "Nonexistant user" unless $u;
+    die "Login IP banned" if LJ::login_ip_banned($u);
 
-    my $u = $self->{u} = LJ::load_user( $ljusername );
-
-    die "Nonexistant user" unless( $u );
-
-    die "Login IP banned" if (LJ::login_ip_banned( $u ));
-
-    return $u->password;
+    return $u->clean_password;
 }
 
 sub delete_category {

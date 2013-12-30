@@ -111,7 +111,7 @@ sub send {
             warn "internal_relays";
             @ex = ('172.19.1.1');
         }
-    } elsif ( $opts->{internal_relays} ) {
+    } elsif ( $opts->{internal_relays} && scalar(@LJ::INTERNAL_MAIL_RELAYS) ) {
         @ex = @LJ::INTERNAL_MAIL_RELAYS;
     } else {
         ## give me the numbers!

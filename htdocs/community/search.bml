@@ -27,10 +27,7 @@ body<=
 <?_code
 {
     my $remote = LJ::get_remote();
-    if (LJ::are_hooks("cprod_redirect_user")) {
-        return LJ::run_hook("cprod_redirect_user", $remote);
-    }
-    return;
+    return BML::redirect("$LJ::SITEROOT/login.bml") unless $remote;
 }
 _code?>
 

@@ -354,7 +354,12 @@ sub createtime {
     my ($self) = @_;
 
     my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
-    return $self->{'subs'}->{$inbox_ntypeid}->{'createtime'};
+    my $subs = $self->{'subs'};
+
+    return $subs->{$inbox_ntypeid}->{'createtime'} if $subs->{$inbox_ntypeid};
+
+    my ($time) = (sort map {$_->{'createtime'}} values %$subs);
+    return $time;
 }
 
 sub enabled {

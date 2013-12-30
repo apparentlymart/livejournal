@@ -37,7 +37,6 @@ use LJ::S2;
 use LJ::TimeUtil;
 use LJ::URI;
 use LJ::Handlers;
-use LJ::SocialScripts;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
@@ -1986,8 +1985,6 @@ sub journal_content
             return LJ::Request::DECLINED;
         }
     }
-
-    LJ::SocialScripts::add_to_page();
 
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {

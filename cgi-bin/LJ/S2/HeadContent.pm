@@ -168,10 +168,6 @@ sub _entry_page_head {
         $head_content .= _get_html_dont_show_navstrip();
     }
 
-    if ($opts->{'_preview'}) {
-        $head_content .= LJ::run_hook('insert_html_before_body_close');
-    }
-
     return $head_content;
 }
 

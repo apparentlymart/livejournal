@@ -133,7 +133,7 @@ _code?>
     my $remote = LJ::get_remote();
 
     if ($remote && $remote->can_use_esn) {
-        return '<li><a href="/manage/subscriptions/" title="<?_ml .manage.subscriptions _ml?>"><?_ml /manage/subscriptions/index.bml.title _ml?></a></li>';
+        return '<li><a href="/manage/settings/?cat=notifications" title="<?_ml .manage.subscriptions _ml?>"><?_ml /manage/subscriptions/index.bml.title _ml?></a></li>';
     } else {
         return '';
     }

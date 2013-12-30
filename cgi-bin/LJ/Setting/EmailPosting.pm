@@ -1,7 +1,8 @@
 package LJ::Setting::EmailPosting;
-use base 'LJ::Setting';
+
 use strict;
 use warnings;
+use base 'LJ::Setting';
 
 sub should_render {
     my ($class, $u) = @_;
@@ -111,11 +112,15 @@ sub save {
     LJ::Emailpost::set_allowed_senders($u, \%allowed);
 
     $pin_val =~ s/\s+//g;
-    $class->errors( emailposting_pin => $class->ml('setting.emailposting.error.pin.invalid', { num => 4 }) )
-        unless !$pin_val || $pin_val =~ /^([a-z0-9]){4,20}$/i;
 
-    $class->errors( emailposting_pin => $class->ml('setting.emailposting.error.pin.invalidaccount', { sitename => $LJ::SITENAMESHORT }) )
-        if $pin_val eq $u->password || $pin_val eq $u->user;
+    if ($pin_val) {
+        unless ($pin_val =~ /^[a-z0-9]{4,20}$/i) {
+            $class->errors( emailposting_pin => $class->ml('setting.emailposting.error.pin.invalid', { num => 4 }) );
+        }
+        if ($pin_val eq $u->user) {
+            $class->errors( emailposting_pin => $class->ml('setting.emailposting.error.pin.invalidaccount', { sitename => $LJ::SITENAMESHORT }) )
+        }
+    }
 
     $u->set_prop( emailpost_pin => $pin_val );
 

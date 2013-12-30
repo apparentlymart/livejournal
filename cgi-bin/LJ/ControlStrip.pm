@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 # Internal modules
+use LJ::Auth::Challenge;
 use LJ::Widget::Calendar;
 use LJ::Widget::JournalPromoStrip;
 use LJ::User::SubscriptionFilters;
@@ -99,7 +100,7 @@ sub render {
                 if ($custom_nav_strip ne "off") {
                     my $linkcolor = S2::get_property_value($ctx, "control_strip_linkcolor");
 
-                    if ($linkcolor ne "") {
+                    if ($linkcolor && $linkcolor ne "") {
                         $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif?v=6802", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
                     }
                 }
@@ -172,7 +173,7 @@ sub render {
             $data_journal->{login_form}->{root} = $LJ::SSLROOT;
         } else {
             $data_journal->{login_form}->{root} = $LJ::SITEROOT;
-            $data_journal->{login_form}->{challenge} = LJ::challenge_generate(300);
+            $data_journal->{login_form}->{challenge} = LJ::Auth::Challenge->generate(300);
         }
     }
 
@@ -301,7 +302,6 @@ sub need_res {
     my $relations = $class->relations_data($journal, $remote) || {};
 
     LJ::need_var({
-        remote => $relations,
         controlstrip => {
             status   => get_status($journal, {%$relations}),
             calendar => $calendar,
@@ -494,6 +494,7 @@ sub relations_data {
     # Subscribe/Unscubscribe to/from user
     if (LJ::is_enabled('new_friends_and_subscriptions')) {
         $data->{is_subscriber}   = $journal->is_subscribedon($remote);
+        $data->{is_invite_sent}  = $remote->is_invite_sent($journal);
         $data->{is_subscribedon} = $remote->is_subscribedon($journal);
     }
 

@@ -3,6 +3,7 @@ package LJ::Widget::EntryForm;
 use strict;
 use base 'LJ::Widget';
 
+use LJ::Auth::Challenge;
 use LJ::Pics;
 use LJ::Widget::Calendar;
 use LJ::Widget::Fotki::Upload;
@@ -1896,7 +1897,7 @@ sub render_body {
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
 
     # 1 hour auth token, should be adequate
-    my $chal = LJ::challenge_generate(3600);
+    my $chal = LJ::Auth::Challenge->generate(3600);
     my $style = $opts->{'richtext_default'} ? 'hide-html' : 'hide-richtext';
     $out .= "<div id='entry-form-wrapper' class='$style'>";
     $out .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";

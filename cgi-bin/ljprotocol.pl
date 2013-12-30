@@ -6,6 +6,10 @@ no warnings 'uninitialized';
 
 use LJ::Constants;
 use Class::Autouse qw(
+                      LJ::Auth::Challenge
+                      LJ::Auth::Method::ChallengeResponse
+                      LJ::Auth::Method::LoginPassword::Clear
+                      LJ::Auth::Method::LoginPassword::MD5
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
                       LJ::Entry
@@ -76,7 +80,7 @@ my %e = (
      "158" => E_TEMP,
      "159" => E_PERM,
      "160" => E_TEMP,
-     "161" => E_PERM,    
+     "161" => E_PERM,
 
      # Client Errors
      "200" => E_PERM,
@@ -101,7 +105,7 @@ my %e = (
      "219" => E_PERM,
      "220" => E_PERM,
      "221" => E_PERM,
-     "222" => E_PERM,    
+     "222" => E_PERM,
      "223" => E_TEMP,
      "224" => E_TEMP,
      "225" => E_TEMP,
@@ -149,7 +153,7 @@ my %e = (
      "335" => E_PERM,
      "336" => E_TEMP,
      "337" => E_TEMP,
-    
+
      # Limit errors
      "402" => E_TEMP,
      "404" => E_TEMP,
@@ -219,7 +223,7 @@ my %HANDLERS = (
     pushsubscriptions => \&pushsubscriptions,
     resetpushcounter  => \&resetpushcounter,
     getpushlist       => \&getpushlist,
-                
+
     !$LJ::DISABLED{'xmlrpc_ratings'} ? (geteventsrating => \&geteventsrating) : (),
     !$LJ::DISABLED{'xmlrpc_ratings'} ? (getusersrating => \&getusersrating) : (),
 );
@@ -281,7 +285,7 @@ sub do_request
             return fail($err, 221, $req->{'lang'} );
         }
     }
-    
+
     # set specified or default language
     my $current_lang = LJ::Lang::current_language();
     my $lang = $req->{'lang'} || $current_lang || $LJ::DEFAULT_LANG;
@@ -297,16 +301,13 @@ sub do_request
 
     my $method_ref = $HANDLERS{$method};
 
-    if ($method_ref)
-    {
+    if ($method_ref) {
         my $result = $method_ref->(@args);
 
-        if ($result && exists $result->{xc3})
-        {
-            my $xc3 = delete $result->{xc3};
+        if ($result && exists $result->{'xc3'}) {
+            my $xc3 = delete $result->{'xc3'}; 
 
-            if ($req->{props}->{interface} eq 'xml-rpc')
-            {
+            if ($req->{'props'}->{'interface'} eq 'xml-rpc') {
                 my $ua = eval { LJ::Request->header_in("User-Agent") };
                 Encode::from_to($ua, 'utf8', 'utf8') if $ua;
 
@@ -316,17 +317,17 @@ sub do_request
                     function => $method || ''
                 };
 
-                if ($xc3->{u})
+                if ($xc3->{'u'})
                 {
-                    my $u = $xc3->{u};
-                    $args->{userid} = $u->userid;
-                    $args->{usercaps} = $u->caps;
+                    my $u = $xc3->{'u'};
+                    $args->{'userid'} = $u->userid;
+                    $args->{'usercaps'} = $u->caps;
                 }
 
-                $args->{useragent} = $ua if $ua;
-                $args->{country}   = $country if $country;
-                $args->{post}      = $xc3->{post} if $xc3->{post};
-                $args->{comment}   = $xc3->{comment} if $xc3->{comment};
+                $args->{'useragent'} = $ua if $ua;
+                $args->{'country'}   = $country if $country;
+                $args->{'post'}      = $xc3->{'post'} if $xc3->{'post'};
+                $args->{'comment'}   = $xc3->{'comment'} if $xc3->{'comment'};
 
                 LJ::run_hooks("remote_procedure_call", $args);
             }
@@ -578,12 +579,12 @@ sub addcomment {
                                        journal      => $journal,
                                        ditemid      => $req->{ditemid},
                                        parenttalkid => ($req->{parenttalkid} || int($req->{parent} / 256)),
-                                       
+
                                        poster       => $u,   # TODO: to allow poster to be undef
-                                       
+
                                        body         => $req->{body},
                                        subject      => $req->{subject},
-                                       
+
                                        props        => { picture_keyword => $pk }
         );
     };
@@ -629,7 +630,7 @@ sub getcomments {
 
     return fail($err,200,"journal") unless($journal);
     return fail($err,200,'xmlrpc.des.or', {'first'=>'ditemid', 'second'=>'itemid'}) unless($req->{ditemid} || $req->{itemid});
-    
+
     my $itemid = int($req->{ditemid} / 256);
     $itemid ||= $req->{itemid} + 0;
 
@@ -870,12 +871,12 @@ sub deletecomments {
             # if they are the entry author, and the comment being deleted
             # has not been posted anonymously
             my $can_delauthor = $comm->poster && ( $can_manage || ( $u->userid == $comm->entry->poster->userid ) );
-            return fail($err, 328, 'dtalkid:'.$comm->dtalkid) unless $can_delauthor; 
+            return fail($err, 328, 'dtalkid:'.$comm->dtalkid) unless $can_delauthor;
             $to_delauthor{$comm->entry->jitemid}->{$comm->poster->userid} = 1;
         }
 
         if($req->{'ban'}) {
-            
+
             # they can ban the comment author if they are the journal owner
             # and there is an author; also, they will not be able to ban
             # themselves
@@ -884,12 +885,12 @@ sub deletecomments {
             return fail($err, 329, 'dtalkid:'.$comm->dtalkid) unless $can_ban;
             $to_ban{$comm->poster->userid} = $comm->poster;
         }
-        
+
         if($req->{'spam'}) {
 
             # they can mark as spam unless the comment is their own;
             # they don't need to be the community maintainer to do that
-            my $can_mark_spam = LJ::Talk::can_mark_spam($u, $journal, $comm->poster, $comm) 
+            my $can_mark_spam = LJ::Talk::can_mark_spam($u, $journal, $comm->poster, $comm)
                 && $comm->poster && ( $u->userid != $comm->poster->userid );
             return fail($err, 330, 'dtalkid:'.$comm->dtalkid) unless $can_mark_spam;
             $to_mark_spam{$comm->jtalkid} = $comm;
@@ -917,7 +918,7 @@ sub deletecomments {
 
     # delete all comments
     $_->delete for @to_delete;
-    
+
     # delete author comments (only for authors of root comment in thread)
     foreach my $jitemid (keys %to_delauthor) {
         foreach my $userid (keys %{$to_delauthor{$jitemid}}) {
@@ -939,11 +940,11 @@ sub deletecomments {
 
         LJ::run_hook('auto_suspender_for_spam', $poster->{userid});
     }
-    
+
     return {
         status => 'OK',
         result => @to_delete + 0,
-        dtalkids => [ map {$_->dtalkid} @to_delete ], 
+        dtalkids => [ map {$_->dtalkid} @to_delete ],
         xc3 => {
             u => $u,
         }
@@ -1036,7 +1037,7 @@ sub updatecomments {
     return {
         status => 'OK',
         result => @to_update + 0,
-        dtalkids => [ map {$_->dtalkid} @to_update ], 
+        dtalkids => [ map {$_->dtalkid} @to_update ],
         xc3 => {
             u => $u,
         }
@@ -1172,7 +1173,7 @@ sub editcomment {
     return fail($err, 319) if $journal && $journal->is_readonly;
 
     return fail($err, 200, "dtalkid") unless($req->{dtalkid});
-    
+
     my $comment = LJ::Comment->new($journal, dtalkid => $req->{dtalkid});
     return fail($err, 203, 'xmlrpc.des.and', {first=>'dtalkid',second=>'journal(id)'}) unless $comment;
 
@@ -1270,7 +1271,7 @@ sub getrecentcomments {
         my $comm_obj = LJ::Comment->new($journal, jtalkid => $comment->{jtalkid});
         my $userpic = $comm_obj->userpic;
         $comment->{poster_userpic_url} = $userpic && $userpic->url;
-        
+
     }
 
     return {
@@ -1319,7 +1320,7 @@ sub getfriendspage
     });
 
     my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
-   
+
     my @uids;
 
     my @res = ();
@@ -1379,7 +1380,7 @@ sub getfriendspage
 	    my $userpic = $original_entry->userpic;
 	    $h{poster_userpic_url} = $userpic && $userpic->url;
         }
-        
+
 
         $h{event_raw} = LJ::trim_widgets(
             length    => $req->{trim_widgets},
@@ -1523,7 +1524,7 @@ sub getinbox
         (!$before    || $_->when_unixtime <= $before) &&
         (!$sync_date || $_->when_unixtime >= $sync_date)
     } @notifications;
-    
+
     $itemshow = scalar @notifications - $skip if scalar @notifications < $skip + $itemshow;
 
     my @res;
@@ -1788,7 +1789,7 @@ sub login
     $res->{'fullname'} = $uowner->{'name'};
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
-    # Identity info 
+    # Identity info
     if ($uowner->is_identity){
         my $i = $uowner->identity;
         $res->{'identity_type'}    = $i->pretty_type;
@@ -2267,6 +2268,7 @@ sub postevent {
     my $post_noauth = LJ::run_hook('post_noauth', $req);
 
     return undef unless $post_noauth || authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'postevent');
+
     my $spam = 0;
     LJ::run_hook('spam_detector', $req, \$spam);
     return fail($err,320) if $spam;
@@ -2373,7 +2375,7 @@ sub postevent {
 
     # confirm we can add tags, at least
     return fail($err, 312)
-        if $req->{props} && 
+        if $req->{props} &&
         defined $req->{props}->{taglist} &&
         $req->{props}->{taglist} ne '' &&
         ! LJ::Tags::can_add_tags($uowner, $u);
@@ -2408,13 +2410,13 @@ sub postevent {
 
     # are they trying to post back in time?
     if ($posterid == $ownerid && $u->{'journaltype'} ne 'Y' &&
-        !LJ::is_enabled("delayed_entries") && 
+        !LJ::is_enabled("delayed_entries") &&
         !$time_was_faked && $u->{'newesteventtime'} &&
         $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, 'xmlrpc.des.entry_time_conflict', {'newesteventtime'=>$u->{'newesteventtime'}});
     }
-   
+
     if ( $req->{sticky} &&
          $uowner->is_community() &&
          !$u->can_manage($uowner) )
@@ -2493,7 +2495,7 @@ sub postevent {
         my $error;
 
         $repost_offer = LJ::Pay::Repost::Offer->from_create_entry(
-            \$event, 
+            \$event,
             {repost_budget => $req->{'repost_budget'},
              limit_sc      => $req->{'repost_limit_sc'},
              journalid     => $ownerid,
@@ -2501,12 +2503,12 @@ sub postevent {
              targeting_gender  => $req->{'repost_targeting_gender'},
              targeting_age     => $req->{'repost_targeting_age'},
              targeting_country => $req->{'repost_targeting_country'},
-             targeting_state   => $req->{'repost_targeting_state'}}, 
+             targeting_state   => $req->{'repost_targeting_state'}},
             \$error
         );
 
         return fail($err,222) if $repost_offer && ! $flags->{noauth};
-       
+
         return fail($err,160,$error) if $error;
     }
 
@@ -2559,15 +2561,15 @@ sub postevent {
                 $res->{'delayedid'} = $entry->delayedid;
                 $res->{'type'}      = 'delayed';
                 $res->{'url'}       = $entry->url;
-    
+
                 $res_done = 1;
                 $release->();
             }
             return;
         }
- 
+
         LJ::load_user_props($u, { use_master => 1, reload => 1 }, 'dupsig_post');
- 
+
         my @parts = split(/:/, $u->{'dupsig_post'});
         if ($parts[0] eq $dupsig) {
             # duplicate!  let's make the client think this was just the
@@ -2578,35 +2580,12 @@ sub postevent {
 
             my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
             $res->{'url'} = $dup_entry->url;
-            
+
             $res_done = 1;
             $release->();
         }
     };
 
-    # LJSUP-9616
-    if ($req->{'props'}->{'opt_backdated'}) {
-        my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
-        my $key = "stat:opt_backdated:$state_date";
-
-        LJ::MemCache::incr($key, 1) ||
-            (LJ::MemCache::add($key, 0),  LJ::MemCache::incr($key, 1));
-
-        my $poster_offset = $u->timezone;
-        my @ltime = gmtime(time() + $poster_offset * 3600);
-        my $current = sprintf("%04d-%02d-%02d %02d:%02d",
-                                 $ltime[5]+1900,
-                                 $ltime[4] + 1,
-                                 $ltime[3],
-                                 $ltime[2],
-                                 $ltime[1]);
-        if ($eventtime gt $current) {
-            my $key_future = "stat:opt_backdated:future:$state_date";
-            LJ::MemCache::incr($key_future, 1) ||
-                (LJ::MemCache::add($key_future, 0),  LJ::MemCache::incr($key_future, 1));
-        }
-    }
-    
     if ( $req->{ver} > 3 && LJ::is_enabled("delayed_entries") ) {
         if ( $req->{'custom_time'} && LJ::DelayedEntry::is_future_date($req) ) {
             return fail($err, 215) unless $req->{tz};
@@ -2623,8 +2602,8 @@ sub postevent {
             delete $req->{'custom_time'};
 
             $getlock->('delayed');
-            return $res if $res_done;  
-  
+            return $res if $res_done;
+
             my $entry = LJ::DelayedEntry->create( $req, { journal => $uowner,
                                                           poster  => $u,} );
             if (!$entry) {
@@ -2797,7 +2776,7 @@ sub postevent {
     if ( $req->{sticky} ) {
         $uowner->set_sticky_id($jitemid);
         my $state_date = POSIX::strftime("%Y-%m-%d", gmtime);
-        
+
         my $postfix = '';
         if ($uowner->is_community) {
            $postfix = '_community';
@@ -2875,8 +2854,8 @@ sub postevent {
             LJ::delete_entry($uowner, $jitemid, undef, $anum);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
-    }    
-    
+    }
+
     # Entry tags
     if ($req->{props} && defined $req->{props}->{taglist}) {
 
@@ -2956,7 +2935,7 @@ sub postevent {
     # Paid Repost Offer
     if ($repost_offer) {
         my $error = '';
-        
+
         $repost_offer->{jitemid} = $jitemid;
 
         my $offer_id = LJ::Pay::Repost::Offer->create(
@@ -3006,12 +2985,12 @@ sub postevent {
     my $uniq = LJ::UniqCookie->current_uniq();
 
     $u->do('INSERT INTO logleft(userid, posttime, journalid, ditemid, ip, uniq, publicitem)
-                     VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef, 
-        $posterid, 
-        $ownerid, 
-        $ditemid, 
-        $ip, 
-        $uniq, 
+                     VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef,
+        $posterid,
+        $ownerid,
+        $ditemid,
+        $ip,
+        $uniq,
         $security eq 'public'
     ) if $uowner->{'journaltype'} eq 'C';
 
@@ -3050,7 +3029,7 @@ sub postevent {
     $res->{'url'} = $entry->url;
 
     if ($flags->{'entryrepost'}) {
-        push @jobs, LJ::Event::JournalNewRepost->new($entry)->fire_job; 
+        push @jobs, LJ::Event::JournalNewRepost->new($entry)->fire_job;
     } else {
         push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
 
@@ -3203,7 +3182,7 @@ sub editevent {
 
                 return $res;
             }
-            
+
             # updating an entry:
             return undef
                 unless common_event_validation($req, $err, $flags);
@@ -3241,7 +3220,7 @@ sub editevent {
 
         my $suspicious_list = {};
         LJ::run_hook('spam_community_detector', $uowner, $req, \$need_moderated, $suspicious_list);
-        
+
         foreach ( keys %$suspicious_list_old ) {
             delete $suspicious_list->{$_};
         }
@@ -3249,7 +3228,7 @@ sub editevent {
 
         if ($uowner->{'journaltype'} eq 'C' && !$flags->{'nomod'}) {
 
-            
+
             if ($need_moderated) {
 
                 $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
@@ -3275,7 +3254,7 @@ sub editevent {
                     $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
                     return fail($err, 501);
                 }
-                
+
                 if ($modid_old) {
                     $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid_old");
                     return fail($err, 501) if $uowner->err;
@@ -3284,7 +3263,7 @@ sub editevent {
                 }
 
                 $entry->set_prop("mod_queue_id", $modid);
-            
+
                 my $suspicious_text = "";
                 foreach ( sort keys %$suspicious_list ) {
                     $suspicious_text .= "   - $suspicious_list->{$_}->{type} - $suspicious_list->{$_}->{url}\n";
@@ -3471,7 +3450,7 @@ sub editevent {
                         LJ::User::UserlogRecord::SpamSet->create(
                             $uowner,
                             remote => $remote,
-                            spammerid => $poster->userid, 
+                            spammerid => $poster->userid,
                         );
                     }
 
@@ -3511,10 +3490,10 @@ sub editevent {
         if $req->{event} eq $CannotBeShown;
 
     if (!LJ::is_enabled("delayed_entries")) {
-        # don't allow backdated posts in communities 
-        return fail($err,152) if 
-                    ($req->{'props'}->{"opt_backdated"} && 
-                     $uowner->{'journaltype'} ne "P"); 
+        # don't allow backdated posts in communities
+        return fail($err,152) if
+                    ($req->{'props'}->{"opt_backdated"} &&
+                     $uowner->{'journaltype'} ne "P");
     }
 
     # make year/mon/day/hour/min optional in an edit event,
@@ -3560,7 +3539,7 @@ sub editevent {
             },
             \$error,
         );
-                
+
         unless ($flags->{noauth}) {
             # cannot create or edit repost offer via api
             return fail($err,222) if $repost_offer && $repost_offer_action =~ /create|edit/;
@@ -3568,10 +3547,10 @@ sub editevent {
             # do not revoke repost offer via api
             undef $repost_offer if $repost_offer && $repost_offer_action =~ /revoke/;
         }
-  
+
         return fail($err,160,$error) if $error;
     }
-    
+
     # make post sticky
     if ( $req->{sticky} ) {
         if( $uowner->get_sticky_entry_id() != $itemid ) {
@@ -3642,22 +3621,22 @@ sub editevent {
 
     if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
-        (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) ||  
+        (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
         LJ::load_user_props($u, "newesteventtime");
         if ($u->{userid} == $uowner->{userid} &&
             $u->{newesteventtime} eq $oldevent->{eventtime}) {
-                if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) { 
-                    # if they set the backdated flag, then we no longer know 
-                    # the newesteventtime. 
-                    $u->clear_prop('newesteventtime'); 
-                } elsif ($eventtime ne $oldevent->{eventtime}) { 
-                    # otherwise, if they changed time on this event, 
-                    # the newesteventtime is this event's new time. 
-                    $u->set_prop( 'newesteventtime' => $eventtime ); 
-               } 
+                if (!$curprops{$itemid}->{opt_backdated} && $req->{props}{opt_backdated}) {
+                    # if they set the backdated flag, then we no longer know
+                    # the newesteventtime.
+                    $u->clear_prop('newesteventtime');
+                } elsif ($eventtime ne $oldevent->{eventtime}) {
+                    # otherwise, if they changed time on this event,
+                    # the newesteventtime is this event's new time.
+                    $u->set_prop( 'newesteventtime' => $eventtime );
+               }
         }
 
         my $qsecurity = $uowner->quote($security);
@@ -3722,23 +3701,23 @@ sub editevent {
 
     # update or create repost offer
     if ($repost_offer) {
-        my ($error, $warning); 
+        my ($error, $warning);
 
         if($repost_offer_action eq 'create') {
 
-            my $offer_id = LJ::Pay::Repost::Offer->create(\$error, %$repost_offer) or 
+            my $offer_id = LJ::Pay::Repost::Offer->create(\$error, %$repost_offer) or
                 fail(\$warning,160,$error);
-                        
+
         } elsif($repost_offer_action eq 'edit') {
             $repost_offer->edit(\$error,
                                 add_budget    => $repost_offer->{add_budget},
                                 limit_sc      => $repost_offer->{limit_sc},
                                 targeting_opt => $repost_offer->{targeting_opt},
                                 ) or fail(\$warning,160,$error);
-       
+
         } elsif($repost_offer_action eq 'revoke') {
-            
-            $repost_offer->revoke(\$error) or 
+
+            $repost_offer->revoke(\$error) or
                 fail(\$warning,161,$error);
         }
 
@@ -3821,7 +3800,7 @@ sub editevent {
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
         $res->{'ditemid'} = $itemid * 256 + $oldevent->{'anum'};
     }
-    
+
     $dbh->do("UPDATE userusage SET timeupdate=NOW() ".
              "WHERE userid=$ownerid");
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
@@ -3890,7 +3869,7 @@ sub getevents {
 
         return fail($err, "311", $errmsg) if $errmsg;
     }
-    
+
     my $can_manage = $u && $u->can_manage($uowner);
     my $secmask = 0;
 
@@ -4060,7 +4039,7 @@ sub getevents {
                             delete $props->{$key};
                         }
                     }
-    
+
                     $re->{props}           = $props;
                     $re->{eventtime}       = $entry->posttime;
                     $re->{event_timestamp} = $entry->system_posttime;
@@ -4278,7 +4257,7 @@ sub getevents {
         $where = "AND jitemid IN ($in)";
     }
     elsif ($req->{'selecttype'} eq 'tag') {
-        
+
         my $empty_res = {
             skip => $skip,
             xc3  => { u => $u },
@@ -4307,7 +4286,7 @@ sub getevents {
             unless LJ::Tags::is_valid_tagstring($req->{'tags'}, $tagnames, { omit_underscore_check => 1 });
 
         $tags = LJ::Tags::get_usertags($uowner, { remote => $u });
-        
+
         return $empty_res unless $tags && %$tags;
 
         while ( my ($tid, $tag) = each %$tags ) {
@@ -4318,13 +4297,13 @@ sub getevents {
 
         $tagids = [ map {
             my $tid = $known_tags->{LJ::Text->normalize_tag_name($_)};
-            $tid ? 
-                $tid : 
-                ( $tagmode eq 'and' ? return $empty_res : () ); 
+            $tid ?
+                $tid :
+                ( $tagmode eq 'and' ? return $empty_res : () );
         } @$tagnames ];
 
         return $empty_res unless $tagids && @$tagids;
-        
+
         if ($tagmode eq 'and') {
 
             my $limit = $LJ::TAG_INTERSECTION;
@@ -4343,7 +4322,7 @@ sub getevents {
             foreach my $jitemid (keys %mix) {
                 delete $mix{$jitemid} if $mix{$jitemid} < $need;
             }
-            
+
             $jitemids = [keys %mix];
         } else { # mode: 'or'
             # select jitemids uniquely
@@ -4354,7 +4333,7 @@ sub getevents {
         }
 
         return $empty_res unless @$jitemids;
-   
+
         $where = " AND jitemid IN (" .
             join(',', map { $_ + 0 } @$jitemids) .
             ")";
@@ -4505,13 +4484,13 @@ sub getevents {
         #
         # There is using final_ variabled to get correct link
         #
-        $evt->{'url'}         = LJ::item_link(LJ::load_userid($final_ownerid), 
-                                              $final_itemid, 
+        $evt->{'url'}         = LJ::item_link(LJ::load_userid($final_ownerid),
+                                              $final_itemid,
                                               $final_anum);
 
         $evt->{'reply_count'} = $replycount;
 
-        $evt->{'can_comment'} = $u ? $entry->remote_can_comment($u) : $entry->everyone_can_comment; 
+        $evt->{'can_comment'} = $u ? $entry->remote_can_comment($u) : $entry->everyone_can_comment;
 
         if ( $itemid == $sticky_id && $req->{'selecttype'} eq "lastn") {
             unshift @$events, $evt,
@@ -4564,7 +4543,7 @@ sub getevents {
                 unless ($flags->{'noauth'}) {
                     my $prop  = LJ::get_prop("log", $name);
                     my $ptype = $prop->{'datatype'};
-                
+
                     if ($ptype eq "bool" && $value !~ /^[01]$/) {
                         $value = $value ? 1 : 0;
                     }
@@ -4596,20 +4575,20 @@ sub getevents {
         if ($evt->{'repost_text'}) {
             $t->[0] = delete $evt->{'repost_subject'};
             $t->[1] = delete $evt->{'repost_text'};
-            
+
             $evt->{'props'}    = delete $evt->{'repost_props'}
                 unless $req->{'noprops'};
-            
+
             delete $evt->{'props'}{'repost_offer'} if $evt->{'props'};
-            
+
             $evt->{'itemid'}   = delete $evt->{'repost_itemid'};
             $evt->{'anum'}     = delete $evt->{'repost_anum'};
             $evt->{'ownerid'}  = delete $evt->{'repost_ownerid'};
-            $evt->{'repost'}   = 1; 
-            
+            $evt->{'repost'}   = 1;
+
             $real_uowner = LJ::want_user($evt->{'ownerid'});
-        } 
-  
+        }
+
 
         # if they want subjects to be events, replace event
         # with subject when requested.
@@ -4675,7 +4654,7 @@ sub getevents {
                 embed_url => $evt->{url});
         }
 
-        
+
         # truncate
         if ($req->{'truncate'} >= 4) {
             my $original = $t->[1];
@@ -4698,7 +4677,7 @@ sub getevents {
             my $tidy = LJ::Tidy->new();
             $evt->{'subject'} = $tidy->clean( $evt->{'subject'} );
             $t->[1]  = $tidy->clean( $t->[1] );
-        } 
+        }
 
         if ($req->{'lineendings'} eq "unix") {
             # do nothing.  native format.
@@ -4754,7 +4733,7 @@ sub createrepost {
     if ( my $error = $result->{error} ) {
         return fail($err, 228, $error->{error_message});
     }
-    
+
     $result->{result}{status} = 'OK';
 
     return $result->{result};
@@ -4773,13 +4752,13 @@ sub deleterepost {
 
     my $result = LJ::Entry::Repost->delete(  $u, # destination journal
                                              $entry,); # entry to be reposted
-    
+
     if ( my $error = $result->{error} ) {
         return fail($err, 229, $error->{error_message});
     }
-    
+
     $result->{status} = 'OK';
-    
+
     return $result;
 }
 
@@ -4857,7 +4836,7 @@ sub editfriends {
         unless ($u->{'journaltype'} eq 'P' ||
                 $u->{'journaltype'} eq 'S' ||
                 $u->{'journaltype'} eq 'I' ||
-                ($u->{'journaltype'} eq "Y" && $u->password));
+                ($u->{'journaltype'} eq "Y" && $u->clean_password)); # actually need $u->has_password
 
     # Don't let suspended users add friend
     return $fail->(305, 'xmlrpc.des.suspended_add_friend')
@@ -4928,8 +4907,14 @@ sub editfriends {
         };
 
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
-            unless ($u->to_offer_friendship($row)) {
-                next ADDFRIEND;
+            if ($flags->{noauth}) {
+                unless ($u->to_offer_friendship($row)) {
+                    next ADDFRIEND;
+                }
+            } else {
+                unless ($u->subscribe_to_user($row)) {
+                    next ADDFRIEND;
+                }
             }
         } else {
             unless ($u->add_friend($row, $opts)) {
@@ -5326,7 +5311,7 @@ sub syncitems {
                         "FROM logprop2 WHERE journalid=? ".
                         "AND propid IN ($p_calter->{'id'}, $p_revtime->{'id'}) ".
                         "AND value+0 > UNIX_TIMESTAMP(?)");
-    
+
          $sth->execute($ownerid, $date);
          while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
             my $entry = LJ::Entry->new($ownerid, jitemid => $id);
@@ -5409,13 +5394,13 @@ sub getchallenge
     my ($req, $err, $flags) = @_;
     my $res = {};
     my $now = time();
-    my $etime = 60;
+    my $challenge_lifetime = 60;
     return {
-        challenge   => LJ::challenge_generate($etime),
+        challenge   => LJ::Auth::Challenge->generate($challenge_lifetime),
         server_time => $now,
-        expire_time => $now + $etime,
+        expire_time => $now + $challenge_lifetime,
         auth_scheme => "c0",  # fixed for now, might support others later
-        xc3         => {}
+        xc3         => {},
     };
 }
 
@@ -5634,7 +5619,7 @@ sub authenticate
     };
 
     unless ($auth_meth eq "oauth") {
-  
+
         # add flag to avoid authentication
         if (!$username && $flags->{'allow_anonymous'}) {
             undef $flags->{'u'};
@@ -5654,47 +5639,51 @@ sub authenticate
         return unless $check_user->();
     }
 
-    my $ip_banned = 0;
-    my $chal_expired = 0;
     my $auth_check = sub {
-
         if ($auth_meth eq "clear") {
-            my $res = LJ::auth_okay($u,
-                                    $req->{'password'},
-                                    $req->{'hpassword'},
-                                    $u->password,
-                                    \$ip_banned);
+            my $auth_ok;
+            if (defined $req->{'hpassword'}) {
+                $auth_ok = LJ::Auth::Method::LoginPassword::MD5->check($u, { password_md5 => $req->{'hpassword'} });
+            }
+            else {
+                $auth_ok = LJ::Auth::Method::LoginPassword::Clear->check($u, { password => $req->{'password'} });
+            }
 
-            if ($res) {
-                LJ::Session->record_login($u);
+            unless ($auth_ok) {
+                return fail($err, 101);
             }
-            return $res;
+
+            LJ::Session->record_login($u);
+            return 1;
         }
-        if ($auth_meth eq "challenge") {
-            my $chal_opts = {};
-            my $chall_ok = LJ::challenge_check_login($u,
-                                                     $req->{'auth_challenge'},
-                                                     $req->{'auth_response'},
-                                                     \$ip_banned,
-                                                     $chal_opts);
-            $chal_expired = 1 if $chal_opts->{expired};
-            if ($chall_ok && !$chal_opts->{expired}) {
-                LJ::Session->record_login($u);
+        elsif ($auth_meth eq "challenge") {
+            my $challenge_result = {};
+            my $auth_ok = LJ::Auth::Method::ChallengeResponse->check($u, {
+                challenge => $req->{'auth_challenge'},
+                response  => $req->{'auth_response'},
+                output    => $challenge_result,
+            } );
+
+            unless ($auth_ok) {
+                return fail($err, 105) if $challenge_result->{'expired'};
+                return fail($err, 101);
             }
-            return $chall_ok;
+
+            LJ::Session->record_login($u);
+            return 1;
         }
-        if ($auth_meth eq "cookie") {
+        elsif ($auth_meth eq "cookie") {
             return unless LJ::Request->is_inited && LJ::Request->header_in("X-LJ-Auth") eq "cookie";
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
-        if ($auth_meth eq "oauth"){
-            my $rate_limiter = LJ::Request->is_inited ? 
-              LJ::API::RateLimiter->new(LJ::Request->request) :
-              LJ::API::RateLimiter->new();
+        elsif ($auth_meth eq "oauth"){
+            my $rate_limiter = LJ::Request->is_inited ?
+                LJ::API::RateLimiter->new(LJ::Request->request) :
+                LJ::API::RateLimiter->new();
 
             my $oauth = LJ::OAuth->new(rate_limiter => $rate_limiter);
-            
+
             my $result = $oauth->have_access;
             unless ($result->{http_status} == 200) {
                 return fail($err,331,$result->{oauth_problem}) if $result->{http_status} == 400;
@@ -5702,7 +5691,7 @@ sub authenticate
                 return fail($err,334,$result->{oauth_problem}) if $result->{http_status} == 403;
                 return fail($err,413,$result->{oauth_problem}) if $result->{http_status} == 503;
                 return fail($err,101);
-            } 
+            }
             $u = $result->{user};
             return unless $check_user->();
             $flags->{'user_access'} = $result->{access};
@@ -5710,17 +5699,19 @@ sub authenticate
         }
     };
 
-    unless ($flags->{'nopassword'} ||
-            $flags->{'noauth'} ||
-            $auth_check->() )
-    {
-        return undef if $$err;
-        return fail($err,402) if $ip_banned;
-        return fail($err,105) if $chal_expired;
-        return fail($err,101);
+    if ($u && LJ::login_ip_banned($u)) {
+        return fail($err,402);
     }
 
-    return 1 if ($flags->{'allow_anonymous'} && !$u);
+    unless ($flags->{'nopassword'} || $flags->{'noauth'}) {
+        my $auth_ok = $auth_check->();
+        unless ($auth_ok) {
+            return undef if $$err;
+            return fail($err, 101);
+        }
+    }
+
+    return 1 if $flags->{'allow_anonymous'} && !$u;
 
     # if there is a require TOS revision, check for it now
     return fail($err, 156) unless $u->tosagree_verify;
@@ -5735,13 +5726,14 @@ sub authenticate
 
     #check on suspisious login from api (LJSUP-16353)
     LJ::run_hook('api_auth', $u, $req->{'props'}->{'interface'}, $req->{'auth_method'}, $req->{'method'});
+
     return 1;
 }
 
 sub authorize
 {
     my ($req, $err, $flags, $method) = @_;
-    
+
     my $auth_method = $req->{'auth_method'};
 
     return 1 if ($flags->{noauth} || $flags->{nopassword});
@@ -5750,15 +5742,15 @@ sub authorize
 
         return fail($err,333) unless $flags->{'user_access'};
         return fail($err,333) unless defined $LJ::XMLRPC_USER_ACCESS{$method};
-        
+
         my $access_required = ref $LJ::XMLRPC_USER_ACCESS{$method} ? $LJ::XMLRPC_USER_ACCESS{$method} : [$LJ::XMLRPC_USER_ACCESS{$method}];
-        
+
         my %user_access = map {$_ => 1} @{$flags->{'user_access'}};
- 
+
         foreach my $p (@$access_required){
             return fail($err,333) unless ( $user_access{$p} || ($p =~ /(.+)_ro$/) && $user_access{"$1_rw"} );
         }
-    } 
+    }
 
     if ($LJ::XMLRPC_VALIDATION_METHOD{$method}) {
         # Deny access for accounts that have not validated their email
@@ -5770,7 +5762,7 @@ sub authorize
             return fail($err,336);
         }
     }
-    
+
     return 1;
 }
 
@@ -5779,7 +5771,7 @@ sub fail
     my $err  = shift;
     my $code = shift;
     my $des  = shift;
-    my $vars = shift; 
+    my $vars = shift;
     $code .= ":".($des =~ /^xmlrpc\.des\./ ? LJ::Lang::ml($des, $vars) : $des) if $des;
     $$err = $code if (ref $err eq "SCALAR");
     return undef;
@@ -5838,7 +5830,7 @@ sub un_utf8_request {
 # takes:
 # - platform:       wp7 / android / ios
 # - registrationid: argument which we use in communication with notification
-#                   servers, specific for each OS 
+#                   servers, specific for each OS
 # - deviceid:       id of registred device (not use yet)
 #
 # returns: { status => 'OK'} if success
@@ -5854,16 +5846,16 @@ sub registerpush {
     return fail($err, 200)
         unless $u && $req->{platform} && $req->{deviceid};
 
-    my $error = LJ::PushNotification->subscribe($u, $req); 
+    my $error = LJ::PushNotification->subscribe($u, $req);
     return fail($error, 412) if $error;
 
     return { status => 'OK' }
 }
 
-# unregisterpush: deletes subscription on push notification and clears user prop 
+# unregisterpush: deletes subscription on push notification and clears user prop
 #                 with notification servers connection arguments
 #
-# takes: 
+# takes:
 # - platform: wp7 / android / ios
 # - deviceid: id of registred device (not use yet)
 #
@@ -5895,7 +5887,7 @@ sub pushsubscriptions {
     foreach my $event (@{$req->{events}}) {
         if($event->{action} =~ /^(un)?subscribe$/) {
 
-            my $res = eval{ 
+            my $res = eval{
                 LJ::PushNotification->manage(
                     $u,
                     app_name        => $req->{app_name},
@@ -5908,15 +5900,15 @@ sub pushsubscriptions {
 
             push @errors, $@
                 if $@;
-            
+
         } else {
             push @errors, "wrong action '$event->{action}'";
         }
-    } 
+    }
 
     return { status => 'Has errors', errors => join "; ", @errors  }
         if @errors;
-    
+
     return { status => 'OK' };
 
 }
@@ -5981,7 +5973,7 @@ sub getpushlist {
         push @events, \%event;
     }
 
-    return { 
+    return {
         status  => 'OK',
         events  => \@events,
     }
@@ -5995,7 +5987,7 @@ sub geteventsrating {
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'geteventsrating');
 
     my $user_id = $flags->{u} ? $flags->{u}->id : 0;
-    
+
     return fail($err, 200, 'region') unless $req->{region};
 
     return fail($err, 203, 'region') unless $req->{region} =~ /^cyr|noncyr|ua$/;
@@ -6057,17 +6049,17 @@ sub geteventsrating {
             # user data
             posterid     => $row->{userid},
             poster       => $row->{username}
-        } 
+        }
     }
 
     if (my $sp = $res->{selfpromo} && $res->{selfpromo}->get_template_params ) {
 
         my $obj = $sp->{object}->[0];
-        
+
         $obj->{ditemid}   = delete $obj->{post_id} if $obj->{post_id};
         $obj->{journalid} = delete $obj->{journal_id} if $obj->{journal_id};
         LJ::get_aggregated_entry($obj, $entry_opts);
-        
+
         $selfpromo = {
             # selfpromo data
             remaning_time => $obj->{timeleft},
@@ -6112,7 +6104,7 @@ sub getusersrating {
     return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $req->{itemshow} > 100;
 
     $req->{getselfpromo} = 1 unless defined $req->{getselfpromo};
-    
+
     my ($res, @err) = LJ::PersonalStats::Ratings::Journals->get_rating_segment( {
         rating_country   => $req->{region},
         ($req->{sort} ne 'default' ? (sort => $req->{sort}) : ()),
@@ -6122,13 +6114,13 @@ sub getusersrating {
         show_selfpromo   => $req->{getselfpromo},
         filter_selfpromo => $req->{getselfpromo},
     });
-    
+
     return fail($err, 500, $err[0]) unless $res && ref $res && $res->{data} && ref $res->{data};
 
     my (@users, $selfpromo);
 
     my $user_opts = {
-        attrs => [qw(username display_name profile_url journal_base userpic userhead_url name_raw 
+        attrs => [qw(username display_name profile_url journal_base userpic userhead_url name_raw
                      identity_pretty_type identity_value identity_url )],
     };
 
@@ -6136,7 +6128,7 @@ sub getusersrating {
 
         $row->{userid} = delete $row->{journal_id} if  $row->{journal_id};
         LJ::get_aggregated_user($row, $user_opts);
-        
+
         push @users, {
             # rating data
             rating_value     => $row->{value},
@@ -6156,7 +6148,7 @@ sub getusersrating {
             title            => $row->{name_raw},
         }
     }
-           
+
     if (my $sp = $res->{selfpromo} && $res->{selfpromo}->get_template_params ) {
 
         $selfpromo = {
@@ -6770,7 +6762,7 @@ sub editevent
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
     $rq->{'props'}->{'interface'} = "flat";
-    
+
     my $rs = LJ::Protocol::do_request("editevent", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";

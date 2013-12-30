@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 
 package LJ::FBUpload;
-use strict;
 
+use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Config;
+
 LJ::Config->load;
 
 use LJ;
@@ -61,8 +62,8 @@ sub get_challenge {
 # des-caption: => optional image description.
 # des-galname: => gallery to upload image to.
 # info:
-# returns: FB protocol data structure, regardless of FB success or failure. 
-#         It's the callers responsibility to check the structure 
+# returns: FB protocol data structure, regardless of FB success or failure.
+#         It's the callers responsibility to check the structure
 #         for FB return values.
 #         On HTTP failure, returns numeric HTTP error code, and
 #         sets $rv reference with errorstring. Or undef on unrecoverable failure.
@@ -122,7 +123,7 @@ sub do_upload {
         'X-FB-UploadPic.Meta.Filename' => $basename,
         'X-FB-UploadPic.MD5'           => hash($$rawdata),
         'X-FB-User'                    => $u->{'user'},
-        'X-FB-Auth'                    => make_auth( $chal, $u->password ),
+        'X-FB-Auth'                    => make_auth($chal, $u->clean_password),
         ':X-FB-UploadPic.Gallery._size'=> 1,
         'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
         'X-FB-UploadPic.Gallery.0.GalName' => $opts->{'galname'} || 'LJ_emailpost',

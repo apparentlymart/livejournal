@@ -29,6 +29,7 @@ use LJ::User::Userlog;
 use LJ::Response::CachedTemplate;
 use LJ::PersonalStats::DB;
 use LJ::Redis;
+use LJ::Auth::Checker;
 
 # TODO: get rid of Class::Autouse, maybe? it's pretty useless
 # in web context and leads to some nasty bugs otherwise, so probably
@@ -4870,13 +4871,50 @@ sub get_post_ids {
 
 sub password {
     my $u = shift;
+
     return unless $u->is_person;
-    $u->{_password} ||= LJ::MemCache::get_or_set([$u->{userid}, "pw:$u->{userid}"], sub {
-        my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
-        return $dbh->selectrow_array("SELECT password FROM password WHERE userid=?",
-                                     undef, $u->id);
-    });
+
+    $u->{_password} ||= LJ::MemCache::get_or_set(
+        [ $u->{userid}, "pw:$u->{userid}" ],
+        sub {
+            my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
+            return $dbh->selectrow_array("SELECT password FROM password WHERE userid = ?", undef, $u->id);
+        }
+    );
+
     return $u->{_password};
+}
+
+# This is a copy of 'sub password { ... }' for refactoring
+sub clean_password {
+    my $u = shift;
+
+    return unless $u->is_person;
+
+    $u->{_password} ||= LJ::MemCache::get_or_set(
+        [ $u->{userid}, "pw:$u->{userid}" ],
+        sub {
+            my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
+            return $dbh->selectrow_array("SELECT password FROM password WHERE userid = ?", undef, $u->id);
+        }
+    );
+
+    return $u->{_password};
+}
+
+sub has_password {
+    my $u = shift;
+    return $u->clean_password ? 1 : 0;
+}
+
+sub has_the_same_password_as {
+    my ($u, $other) = @_;
+    return $u->clean_password eq $other->clean_password;
+}
+
+sub reset_password {
+    my $u = shift;
+    return LJ::update_user($u, { password => LJ::rand_chars(8) });
 }
 
 sub journaltype {
@@ -8748,53 +8786,11 @@ sub rate_check {
 }
 
 sub login_ip_banned {
-    my ($u, $ip) = @_;
-    return 0 unless $u;
-
-    $ip ||= LJ::get_remote_ip();
-    return 0 unless $ip;
-
-    my $udbr;
-    my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
-    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
-        my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
-                                             "userid=$u->{'userid'} AND ip=INET_ATON(?)",
-                                             undef, $ip);
-        if ($bantime && $bantime > time() - $rateperiod) {
-            return 1;
-        }
-    }
-    return 0;
+    return LJ::Auth::Checker::login_ip_banned(@_);
 }
 
-sub handle_bad_login
-{
-    my ($u, $ip) = @_;
-    return 1 unless $u;
-
-    LJ::run_hook("update_counter", {
-        counter => "wrong_password",
-    });
-
-    $ip ||= LJ::get_remote_ip();
-
-    LJ::run_hook("on_bad_login", {
-        ip  => $ip,
-        u   => $u,
-    });
-    
-    return 1 unless $ip;
-
-    # an IP address is permitted such a rate of failures
-    # until it's banned for a period of time.
-    my $udbh;
-    if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
-        ($udbh = LJ::get_cluster_master($u)))
-    {
-        $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
-                  "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
-    }
-    return 1;
+sub handle_bad_login {
+    return LJ::Auth::Checker::handle_bad_login(@_);
 }
 
 # <LJFUNC>
@@ -9347,11 +9343,8 @@ sub make_journal {
                 return (2, $1);
             }
 
-            my $forceflag = 0;
-            LJ::run_hooks("force_s1", $u, \$forceflag);
-
             # if none of the above match, they fall through to here
-            if ( !$forceflag && $u->{'stylesys'} == 2 ) {
+            if ( $u->{'stylesys'} == 2 ) {
                 return (2, $u->{'s2_style'});
             }
 
@@ -10356,7 +10349,7 @@ sub get_friends {
         mask          => $mask,
         force         => $force,
         with_attr     => 1,
-        memcache_only => 1
+        memcache_only => $memcache_only,
     );
 }
 

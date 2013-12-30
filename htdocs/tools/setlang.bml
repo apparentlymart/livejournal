@@ -5,8 +5,8 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    my $lang = LJ::strip_html($POST{lang});
-    my $returnto = LJ::CleanHTML::canonical_url($POST{returnto});
+    my $lang = LJ::strip_html($POST{lang} || $GET{lang});
+    my $returnto = LJ::CleanHTML::canonical_url($POST{returnto} || $GET{returnto});
 
     if ($lang && $returnto) {
         LJ::set_remote_language($lang);

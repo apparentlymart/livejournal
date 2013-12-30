@@ -10,6 +10,7 @@ use LJ::AntiSpam::Utils;
 use LJ::Admin::Spam::Urls;
 use LJ::AntiSpam::Suspender;
 use LJ::EventLogRecord::NewComment;
+use LJ::Talk;
 
 sub indent {
     my $a = shift;
@@ -161,8 +162,8 @@ sub enter_comment {
         }
 
         my $uniq = LJ::UniqCookie->current_uniq();
-        $talkprop{'uniq'} = $uniq; 
-        $talkprop{'poster_ip_force'} = $ip; 
+        $talkprop{'uniq'} = $uniq;
+        $talkprop{'poster_ip_force'} = $ip;
     }
 
     # remove blank/0 values (defaults)
@@ -255,13 +256,13 @@ my $SC = '/talkpost_do.bml';
 
 sub init {
     my ($form, $remote, $need_captcha, $errret) = @_;
-    my $sth = undef;
 
     my $err = sub {
         my $error = shift;
         push @$errret, $error;
         return undef;
     };
+
     my $bmlerr = sub {
         return $err->(LJ::Lang::ml($_[0]));
     };
@@ -273,7 +274,7 @@ sub init {
     return $bmlerr->('talk.error.nojournal') unless $journalu;
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
 
-    return $err->("Account is locked, unable to post or edit a comment.") if $journalu->{statusvis} eq 'L';
+    return $err->("Account is locked, unable to post or edit a comment.") if $journalu->statusvis eq 'L';
 
     eval {
         LJ::Request->notes("journalid" => $journalu->{'userid'});
@@ -282,7 +283,7 @@ sub init {
     my $dbcr = LJ::get_cluster_def_reader($journalu);
     return $bmlerr->('error.nodb') unless $dbcr;
 
-    my $itemid = $init->{'itemid'}+0;
+    my $itemid = $init->{'itemid'} + 0;
 
     my $item = LJ::Talk::get_journal_item($journalu, $itemid);
 
@@ -334,12 +335,11 @@ sub init {
     my $author_class = LJ::Talk::Author->get_handler($form->{'usertype'});
 
     # whoops, a bogus usertype value. no way.
-    unless ( $author_class && $author_class->enabled ) {
+    unless ($author_class && $author_class->enabled) {
         return $bmlerr->('error.invalidform');
     }
 
-    $up = $author_class->handle_user_input( $form, $remote, $need_captcha,
-                                            $errret, $init );
+    $up = $author_class->handle_user_input($form, $remote, $need_captcha, $errret, $init);
 
     # User is disabled and checks below are not needed
     # return with empty errret (this case is handled correctly by talkpost_do.bml)
@@ -353,23 +353,15 @@ sub init {
     unless ($init->{'used_ecp'}) {
         my $chrp_err;
         if (my $chrp = $form->{'chrp1'}) {
-            my ($c_ditemid, $c_uid, $c_time, $c_chars, $c_res) =
-                split(/\-/, $chrp);
-            my $chal = "$c_ditemid-$c_uid-$c_time-$c_chars";
-            my $secret = LJ::get_secret($c_time);
-            my $res = Digest::MD5::md5_hex($secret . $chal);
-            if ($res ne $c_res) {
-                $chrp_err = "invalid";
-            } elsif ($c_time < time() - 2*60*60) {
-                $chrp_err = "too_old" if $LJ::REQUIRE_TALKHASH_NOTOLD;
-            }
-        } else {
+            $chrp_err = LJ::Talk::check_chrp1($chrp);
+        }
+        else {
             $chrp_err = "missing";
         }
         if ($chrp_err) {
             my $ip = LJ::get_remote_ip();
             if ($LJ::DEBUG{'talkspam'}) {
-                my $ruser = $remote ? $remote->{user} : "[nonuser]";
+                my $ruser = $remote ? $remote->{'user'} : "[nonuser]";
                 print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
             }
             if ($LJ::REQUIRE_TALKHASH) {
@@ -607,15 +599,15 @@ sub init {
 sub require_captcha_test {
     my ($commenter, $journal, $body, $ditemid, $nowrite) = @_;
 
-    ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/" 
+    ## LJSUP-7832: If user is a member of "http://community.livejournal.com/notaspammers/"
     ##             we shouldn't display captcha for him
- 
+
     return if $commenter && LJ::is_friend($LJ::NOTASPAMMERS_COMM_UID, $commenter);
-    
+
     return if $commenter && $commenter->prop('in_whitelist_for_spam');
 
     ## allow some users (our bots) to post without captchas in any rate
-    return if $commenter and 
+    return if $commenter and
               grep { $commenter->username eq $_ } @LJ::NO_RATE_CHECK_USERS;
 
     ## anonymous commenter user =
@@ -650,7 +642,7 @@ sub require_captcha_test {
         $soc_cap = $commenter->get_social_capital();
     }
     return if !$soc_cap || $soc_cap > 15;
- 
+
     ##
     ## 4. Don't show captcha to the owner of the journal, no more checks
     ##
@@ -757,7 +749,7 @@ sub post_comment {
 
         # save its identifying characteristics to protect against duplicates.
         LJ::MemCache::set($memkey, $jtalkid+0, time()+60*10);
-        
+
         # update spam counter if needed
         if ($comment->{state} eq 'B') {
             my $entry = LJ::Entry->new($journalu, jitemid => $item->{itemid});
@@ -792,7 +784,7 @@ sub post_comment {
 # returns 1 on success.  0 on fail (with $$errref set)
 sub edit_comment {
     my ($entryu, $journalu, $comment, $parent, $item, $errref, $remote) = @_;
-    
+
     my $err = sub {
         $$errref = join(": ", @_);
         return 0;
@@ -817,19 +809,19 @@ sub edit_comment {
 
     # set poster IP separately since it has special conditions
     my $opt_logcommentips = $comment_obj->journal->prop('opt_logcommentips');
-    if ($opt_logcommentips eq "A" || 
-        ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/)) 
+    if ($opt_logcommentips eq "A" ||
+        ($opt_logcommentips eq "S" && $comment->{usertype} !~ /^(?:user|cookieuser)$/))
     {
         $comment_obj->set_poster_ip;
     }
-    
+
     ## Save changes if comment is screened now and it wasn't.
     ## Don't save opposite change (screened --> unscreened), because change
     ## may be caused by that edit comment form misses 'state' field.
     if ($comment_obj->state ne $comment->{state} && $comment->{state} =~ /[SB]/) {
         $comment_obj->set_state($comment->{state});
     }
-    
+
     # set subject and body text
     $comment_obj->set_subject_and_body($comment->{subject}, $comment->{body});
 

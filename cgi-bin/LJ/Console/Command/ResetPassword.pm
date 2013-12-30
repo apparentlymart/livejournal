@@ -21,7 +21,7 @@ sub usage { '<user> <reason> [--stock:num]' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "reset_password");
+return LJ::check_priv($remote, "reset_password");
 }
 
 sub execute {
@@ -66,11 +66,9 @@ sub execute {
         );
     }
 
-    my $newpass = LJ::rand_chars(8);
-    my $oldpass = Digest::MD5::md5_hex($u->password . "change");
-    LJ::User::InfoHistory->add( $u, 'passwordreset', $oldpass );
+    LJ::User::InfoHistory->add($u, 'passwordreset', Digest::MD5::md5_hex($u->clean_password . "change"));
 
-    LJ::update_user($u, { password => $newpass, })
+    $u->reset_password()
         or return $self->error("Failed to set new password for $username");
 
     $u->kill_all_sessions;
@@ -84,6 +82,7 @@ sub execute {
 
     my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, "reset_password", $reason);
+
     return $self->print("Password reset for '$username'.");
 }
 

@@ -67,23 +67,46 @@ body<=
 
         my @aliases;
 
-        # unban users
-        if ($POST{unban_user}) {
+        # ban users
+        if ($POST{ban_list}) {
             # first remove any users from the list that are not valid users
-            my @unbanlist = split(/\0/, $POST{unban_user});
-            my $unbanus = LJ::load_userids(@unbanlist);
-            for (my $i = 0; $i < scalar @unbanlist; $i++) {
-                unless ($unbanus->{$unbanlist[$i]}) {
-                    splice(@unbanlist, $i, 1);
-                    $i--;
+            # FIXME: we need load_user_multiple
+            my @banlist;
+            my @cantbanlist;
+        
+            # make sure the user isn't over the max number of bans allowed
+            my $banned = $u->banned_count;
+
+            if ($banned >= ($LJ::MAX_BANS || 5000)) {
+                $submit_msg = "<?errorbar $ML{'.error.toomanybans'} errorbar?>";
+            } else {
+                my @banlist_orig = split(/,/, $POST{ban_list});
+
+                foreach my $banusername (@banlist_orig) {
+                    my $banu = LJ::load_user($banusername);
+
+                    unless ($banu) {
+                        push @cantbanlist, $banusername;
+                    }
+
+                    next unless $banu;
+
+                    push @banlist, $banu;
+
+                    ## set alias for banuser if alias was set, aliases available and banuser is exist
+                    if ($alias_enable && $POST{ban_note}) {
+                        push @aliases, ($banu->id, $POST{ban_note});
+                    }
+                }
+
+                if (@banlist) {
+                    $u->ban_user_multi(\@banlist);
                 }
             }
 
-            # now unban the users
-            if (@unbanlist) {
-                if (my $us = LJ::load_userids(@unbanlist)) {
-                    $u->unban_user_multi([values %$us]);
-                }
+            if (scalar @cantbanlist) {
+                $submit_msg .= "<?errorbar The following usernames are not valid: " .
+                    join(', ', @cantbanlist) . " errorbar?>";
             }
         }
 
@@ -94,38 +117,16 @@ body<=
             }
         }
 
-        # ban users
-        if ($POST{ban_list}) {
+        # unban users
+        if ($POST{unban_user}) {
             # first remove any users from the list that are not valid users
-            # FIXME: we need load_user_multiple
-            my @banlist_orig = split(/,/, $POST{ban_list});
-            my @banlist;
-            my @cantbanlist;
-            foreach my $banusername (@banlist_orig) {
-                my $banu = LJ::load_user($banusername);
-                push @banlist, $banu->id if $banu;
-                push @cantbanlist, $banusername unless $banu;
+            my @unbanlist = split(/\0/, $POST{unban_user});
 
-                ## set alias for banuser if alias was set, aliases available and banuser is exist
-                push @aliases, ($banu->id, $POST{ban_note}) if $alias_enable && $POST{ban_note} && $banu;
-            }
-        
-            # make sure the user isn't over the max number of bans allowed
-            my $banned = LJ::load_rel_user($u, 'B') || [];
-            if (scalar @$banned >= ($LJ::MAX_BANS || 5000)) {
-                $submit_msg = "<?errorbar $ML{'.error.toomanybans'} errorbar?>";
-            } else {
-                # now ban the users
-                if (@banlist) {
-                    if (my $us = LJ::load_userids(@banlist)) {
-                        $u->ban_user_multi([values %$us]);
-                    }
+            # now unban the users
+            if (@unbanlist) {
+                if (my $us = LJ::load_userids(@unbanlist)) {
+                    $u->unban_user_multi([values %$us]);
                 }
-            }
-
-            if (scalar @cantbanlist) {
-                $submit_msg .= "<?errorbar The following usernames are not valid: " .
-                    join(', ', @cantbanlist) . " errorbar?>";
             }
         }
 
@@ -168,10 +169,8 @@ body<=
     $ret .= LJ::form_auth();
     # unban users
     $ret .= "<h2 style='margin-top: 20px;'>$ML{'.header.unban'}</h2>";
-    my $banned = LJ::load_rel_user($u, 'B');
-    if ($banned && @$banned) {
-        my $us = LJ::load_userids(@$banned);
-
+    my $banned = $u->banned_users();
+    if ($banned && %$banned) {
         $ret .= $u->is_community ? "<p>$ML{'.intro.unban.comm'}</p>" : "<p>$ML{'.intro.unban.self'}</p>";
         $ret .= '<table class="userslist-table b-form-changelist" cellspacing="0" cellpadding="0" id="all"><tr><th>';
         $ret .= LJ::html_check({ name => 'all',
@@ -188,8 +187,7 @@ body<=
 
         my $rc = 0;
 
-        foreach my $banuid (@$banned) {
-            my $bu = $us->{$banuid};
+        foreach my $bu (values %$banned) {
             next unless $bu;
 
             my $rstyle = ($rc++ & 1) ? '#efefef' : '#ffffff';

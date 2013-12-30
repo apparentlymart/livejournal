@@ -9,7 +9,7 @@ use LJ::Event::SecurityAttributeChanged;
 ## namespace for user-renaming actions
 
 ##
-## Input: 
+## Input:
 ##      username 'to'
 ##      [optional] user object who wants to take the username 'to'
 ##      [optional] hashref with options
@@ -22,7 +22,7 @@ sub can_reuse_account {
     my $opts = shift || {};
 
     my $tou = LJ::load_user($to);
-    
+
     ## no user - the name can be occupied
     return 1 unless $tou;
 
@@ -34,19 +34,25 @@ sub can_reuse_account {
     if ($tou->is_expunged) {
         # expunged usernames can be moved away. they're already deleted.
         return 1;
-    } elsif ($u && lc($tou->email_raw) eq lc($u->email_raw) && $tou->is_visible && $tou->is_person) {
-        if ($tou->password eq $u->password) {
-            if (!$tou->is_validated || !$u->is_validated) {
-                $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.notvalidated');
-            } else {
+    }
+
+    if ($u && lc($tou->email_raw) eq lc($u->email_raw) && $tou->is_visible && $tou->is_person) {
+        if ($u->has_the_same_password_as($tou)) {
+            if ($u->is_validated && $tou->is_validated) {
                 return 1;
             }
-        } else {
+            else {
+                $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.notvalidated');
+            }
+        }
+        else {
             $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.badpass');
         }
-    } else {
+    }
+    else {
         $opts->{error} = LJ::Lang::ml('/rename/use.bml.error.usernametaken');
     }
+
     return 0;
 }
 
@@ -60,18 +66,17 @@ sub can_reuse_account {
 sub is_one_owner {
     my $u1 = shift;
     my $u2 = shift;
-    
-    return 0 unless ($u1 && $u2);
 
-    if (
-    	lc($u1->email_raw) eq lc($u2->email_raw) && 
-    	$u1->is_visible && $u1->is_person &&
-    	$u2->is_visible && $u2->is_person &&
-    	$u1->password eq $u2->password &&
-    	$u1->is_validated && $u2->is_validated
-    ) {
+    return 0 unless $u1 && $u2;
+
+    if (lc($u1->email_raw) eq lc($u2->email_raw) &&
+        $u1->is_visible && $u1->is_person && $u1->is_validated &&
+        $u2->is_visible && $u2->is_person && $u2->is_validated &&
+        $u1->has_the_same_password_as($u2))
+    {
         return 1;
     }
+
     return 0;
 }
 
@@ -84,7 +89,7 @@ sub is_one_owner {
 ##
 sub get_unused_name {
     my $tempname = shift;
-    
+
     my $exname;
     $tempname ||= "lj_swap_"; # 'ex_lj_swap_00893' is too long - so omit '00'
     $tempname = substr($tempname, 0, 8) if length($tempname) > 8;
@@ -104,13 +109,13 @@ sub get_unused_name {
         }
         # name existed, try and get another
     }
-    return; 
+    return;
 }
 
 ##
-## Input: 
-##      username 'from', 
-##      username 'to', 
+## Input:
+##      username 'from',
+##      username 'to',
 ##      [optional] options hashref
 ## Options:
 ##      renid                   - ID of the row to update in 'renames' table (for old rename tokens only)
@@ -123,8 +128,8 @@ sub get_unused_name {
 ##      nonotify                - If true, no SecurityAttributeChanged ESN
 ##                                event will be emitted when renaming
 ##      $opts->{token} || "[unknown]" will be put into 'renames' DB table if $opts->{renid} is false
-## Output: 
-##      true or false 
+## Output:
+##      true or false
 ##      $opts->{error} is text of error
 ##
 sub basic_rename {
@@ -140,7 +145,7 @@ sub basic_rename {
     my $u = LJ::load_user($from);
     unless ($u) {
         $opts->{error} = "No such user: $from";
-        return;    
+        return;
     }
 
     my $dbh = LJ::get_db_writer();
@@ -169,7 +174,7 @@ sub basic_rename {
         $opts->{error} = "Database error: " . $dbh->errstr;
         return;
     }
-    
+
     ## Done.
     ## From now on, there may be errors but the rename is actually done.
 
@@ -199,7 +204,7 @@ sub basic_rename {
     # tell all web machines to clear their caches for this userid/name mapping
     LJ::procnotify_add("rename_user", { 'userid' => $u->{'userid'},
                                         'user' => $u->{'user'} });
-    
+
     LJ::run_hooks("account_changed", { userid => $u->id() });
 
     ## update or create record in 'renames' table
@@ -215,14 +220,14 @@ sub basic_rename {
         );
     }
     $opts->{error} = $dbh->err if $dbh->err;
-    
+
     $u->kill_session;
 
     unless ($opts->{'nonotify'}) {
         my @date = localtime(time);
-        LJ::Event::SecurityAttributeChanged->new($u ,  { 
-            action       => 'account_renamed', 
-            old_username => $from, 
+        LJ::Event::SecurityAttributeChanged->new($u ,  {
+            action       => 'account_renamed',
+            old_username => $from,
             ip           => $ip,
             datetime     => sprintf("%02d:%02d %02d/%02d/%04d", @date[2,1], $date[3], $date[4]+1, $date[5]+1900),
         })->fire;
@@ -236,26 +241,27 @@ sub basic_rename {
 
             LJ::leave_all_communities($u);
         }
-    
+
         ## "Remove everyone from your Friend Of list"
         if ($opts->{opt_delfriendofs}) {
             $u->remove_all_friendofs();
             $u->remove_all_subscribers();
         }
     }
-    
+
     if ($opts->{preserve_old_username}) {
-        # we need to create an account even in case the user chose to disconnect
+        # we need to create an account even in case the user choose to disconnect
         # the old username; the older username is kept deleted for a while
         # so as to 1) not allow strangers to obtain it right after the rename
         # is complete, and 2) to allow the Billing team to fix it if the user
         # has made a mistake; the Billing team uses rename_redir console command,
         # see /admin/console and cgi-bin/LJ/Console/Command/RenameRedir.pm
-        my $u_old_userid = LJ::create_account({
-            'user' => $from,
+        my $u_old_userid = LJ::create_account( {
+            'user'     => $from,
             'password' => '',
-            'name' => '[renamed acct]',
-        });
+            'name'     => '[renamed acct]',
+        } );
+
         my $u_old_username = LJ::load_userid($u_old_userid);
 
         my $alias_changed = $dbh->do("UPDATE email_aliases SET alias=? WHERE alias=?",
@@ -273,16 +279,16 @@ sub basic_rename {
             }
             if ($alias_changed > 0) {
                 $dbh->do("INSERT INTO email_aliases VALUES (?,?)", undef,
-                     "$u->{'user'}\@$LJ::USER_DOMAIN", 
+                     "$u->{'user'}\@$LJ::USER_DOMAIN",
                      $u->email_raw);
             }
         } else {
             LJ::update_user($u_old_username, { journaltype => $u->{journaltype}, raw => "statusvis='D', statusvisdate=NOW()" });
         }
-    }   
+    }
 
     unless ($opts->{opt_domainru}) {
-       $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->userid); 
+       $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->userid);
     }
 
     return $to;

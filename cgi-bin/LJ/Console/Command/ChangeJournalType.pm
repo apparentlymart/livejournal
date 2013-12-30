@@ -90,7 +90,7 @@ sub execute {
                                            undef, $u->id);
         if ($count) {
             if ($force) {
-                $u->do("UPDATE log2 SET posterid = ? WHERE journalid = ? AND posterid = journalid", undef, $ou->id, $u->id) 
+                $u->do("UPDATE log2 SET posterid = ? WHERE journalid = ? AND posterid = journalid", undef, $ou->id, $u->id)
                     or return $self->error($DBI::errstr);
                 $self->info("$count entries of user '$u->{user}' belong to '$ou->{user}' now");
             } else {
@@ -134,14 +134,14 @@ sub execute {
 
     # update the password
     if ($type eq "community") {
-        $extra{password} = '';
-    } else {
-        $extra{password} = $ou->password;
+        $extra{'password'} = '';
+    }
+    else {
+        $extra{'password'} = $ou->clean_password;
     }
 
-    if ( $extra{password} ne $u->password ) {
-        LJ::User::InfoHistory->add( $u,
-            'password', Digest::MD5::md5_hex( $u->password . 'change' ) );
+    if ($extra{'password'} ne $u->clean_password) {
+        LJ::User::InfoHistory->add($u, 'password', Digest::MD5::md5_hex($u->clean_password . 'change') );
     }
 
     # reset the email address
@@ -162,7 +162,7 @@ sub execute {
     # get the new journaltype
     $extra{journaltype} = $typemap->{$type};
 
-    # we haev update!
+    # we have update!
     LJ::update_user($u, { %extra });
 
     # journaltype, birthday changed

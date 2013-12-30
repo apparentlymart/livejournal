@@ -4,6 +4,7 @@ use strict;
 use Digest::SHA1 qw(sha1 sha1_hex);
 use LWPx::ParanoidAgent;
 use Net::OpenID::Server;
+use LJ::Auth::Secret;
 
 BEGIN {
     $LJ::OPTMOD_OPENID_CONSUMER = $LJ::OPENID_CONSUMER ? eval "use Net::OpenID::Consumer; 1;" : 0;
@@ -55,11 +56,11 @@ sub consumer {
 
 sub server_secret {
     my $time = shift;
-    my ($t2, $secret) = LJ::get_secret($time);
-    die "ASSERT: didn't get t2 (t1=$time)" unless $t2;
-    die "ASSERT: didn't get secret (t2=$t2)" unless $secret;
-    die "ASSERT: time($time) != t2($t2)\n" unless $t2 == $time;
-    return $secret;
+    my $secret = LJ::Auth::Secret->create($time);
+
+    die "ASSERT: didn't get secret (t1=$time)" unless $secret;
+    die "ASSERT: time($time) != t2(" . $secret->ts . ")\n" unless $secret->ts == $time;
+    return $secret->value;
 }
 
 sub is_trusted {
