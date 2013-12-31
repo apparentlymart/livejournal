@@ -2838,12 +2838,12 @@ sub share_contactinfo {
 sub get_social_capital {
     my ($u) = @_;
 
+    my $attr = '_social_capital';
+    return $u->{$attr} if defined $u->{$attr};
+
     if ( $LJ::IS_DEV_SERVER && ( my $getter = $LJ::FAKE_SOCIAL_CAPITAL ) ) {
         return $getter->($u);
     }
-
-    my $attr = '_social_capital';
-    return $u->{$attr} if defined $u->{$attr};
 
     my $key = $u->userid . ":sccap";
     my $soc_capital = LJ::MemCacheProxy::get( $key );
