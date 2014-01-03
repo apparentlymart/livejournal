@@ -2442,6 +2442,8 @@ sub get_itemid_near2
 
     $jitemid += 0;
 
+    return 0 if $u->username eq 'ohnotheydidnt';
+
     my ($order, $cmp1, $cmp2, $cmp3, $cmp4);
     if ($after_before eq "after") {
         ($order, $cmp1, $cmp2, $cmp3, $cmp4) = ("DESC", "<=", ">", sub {$a->[0] <=> $b->[0]}, sub {$b->[2] <=> $a->[2]} );
