@@ -61,11 +61,11 @@ sub find_handler {
 
     my $usescheme = LJ::Request->get_param('usescheme');
 
-    return $class->handler_from_code($usescheme) || $class->handler_from_code('schemius')
-        if LJ::is_enabled('schemius_with_usescheme');
-
     return $class->handler_from_code('schemius')
         if LJ::is_enabled('schemius');
+
+    return $class->handler_from_code($usescheme) || $class->handler_from_code('schemius')
+        if LJ::is_enabled('schemius_with_usescheme');
 
     my @candidate_codes = (
         LJ::Request->notes('bml_use_scheme'),
