@@ -571,8 +571,13 @@ sub foreach_cluster {
     my $opts = shift || {};
     
     foreach my $cluster_id (@LJ::CLUSTERS) {
-        my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, $opts->{verbose});
-        $coderef->($cluster_id, $dbr);
+        if ($opts->{active}) {
+            my $dbh = LJ::get_cluster_master($cluster_id);
+            $coderef->($cluster_id, $dbh);
+        } else {
+            my $dbr = LJ::DBUtil->get_inactive_db($cluster_id, $opts->{verbose});
+            $coderef->($cluster_id, $dbr);
+        }
     }
 }
 

@@ -22,9 +22,9 @@ my $u = LJ::load_user('system');
 
 if ($u) {
     print "Already exists.\nModifying 'system' account...\n";
-    $dbh->do( "UPDATE password SET password=? WHERE userid=?",
-        undef, $pass, $u->userid );
-} else {
+    $u->set_password($pass);
+}
+else {
     print "Creating system account...\n";
     LJ::create_account( {
         'user'     => 'system',

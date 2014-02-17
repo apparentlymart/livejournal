@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'maintainer_remove'}
+sub group  {'community_admin'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -19,10 +20,10 @@ sub description {
 
     my $targetuserid = $self->actiontarget;
     if ( my $targetu = LJ::load_userid($targetuserid) ) {
-        return 'Removed maintainer ' . $targetu->ljuser_display;
+        return LJ::Lang::ml('userlog.action.remove.maintainer', { user => $targetu->ljuser_display } );
     }
 
-    return "Removed maintainer: a bogus user ($targetuserid)";
+    return LJ::Lang::ml( 'userlog.action.remove.maintainer.bogus', { targetuserid => $targetuserid } );
 }
 
 1;

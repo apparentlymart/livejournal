@@ -303,7 +303,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                 // add/remove friend link
                 (function () {
 
-                    if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+                    if ( LJ.Flags.isEnabled('new_friends_and_subscriptions') ) {
 
                         // do not show 'add friend / watch community' links.
                         if (!data.is_person && !data.is_identity) {
@@ -338,7 +338,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
                 }());
 
                 // subscribe/unsubscribe
-                if ( LJ.Flags.isEnabled('friendsAndSubscriptions') && !data.is_identity ) {
+                if ( LJ.Flags.isEnabled('new_friends_and_subscriptions') && !data.is_identity ) {
                     buildObject.headLinks.push({
                         selector: 'a[href=#subscription]',
                         url: '#subscription',
@@ -368,7 +368,8 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
             var linkGroup = [];
 
             // community member
-            if (data.is_logged_in && data.is_comm) {
+            // join/leave community should not be displayed if membership is 'closed'
+            if (data.is_logged_in && data.is_comm && data.membership !== 'closed') {
 
                 // invite has been sent to community maintainer
                 if (data.is_invite_sent) {
@@ -875,7 +876,7 @@ function addAlias(target, ptitle, ljusername, oldalias, callback) {
 
     // Update changing relations functionality to work through relations manager
     // that is declared in `js/relations/relations.js`
-    if ( LJ.Flags.isEnabled('friendsAndSubscriptions') ) {
+    if ( LJ.Flags.isEnabled('new_friends_and_subscriptions') ) {
 
         // redeclare `changeRelation` method to interact with relations manager
         ContextualPopup.changeRelation = function (info, ctxPopupId, action, e) {

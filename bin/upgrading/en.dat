@@ -4626,6 +4626,8 @@ main.intro.different.show=Show multiple posts from the same account
 
 main.intro.different.show.title=Show multiple posts from the same journal or community in Top Entries.
 
+main.intro.discovery=LiveJournal Discovery
+
 main.intro.editors|staleness=1
 main.intro.editors=Editors
 
@@ -4799,6 +4801,8 @@ main.settings=Rating Settings
 main.scrolltop=Scroll to top
 
 main.special.more=Show more entries
+
+main.todaylj.head=LiveJournal Today
 
 main.top.aday=Today
 

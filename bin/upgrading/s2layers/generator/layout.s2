@@ -559,14 +559,14 @@ summary=''>
     }
     println """</td><td class="meta">]</td></tr>""";
 
-"</table>
+"""</table>
 </td>
 </tr>
 </table>
 </td>
 </tr></table>
 </p>
-";
+""";
 }
 
 function Page::print ()
@@ -812,6 +812,17 @@ if (viewer_sees_vbox()) {
 }
 """
 </p>
+""";
+
+if ( viewer_sees_ad_box("yandex.context") ) {
+    var string width = $*box_width + "px";
+    
+    """<div style="width: $width; margin: 30px auto;">""";
+        $this->print_yacontext_slot("", "yandex.context.expressive");
+    """</div>""";
+}
+
+"""
 </div>
 </body>
 </html>

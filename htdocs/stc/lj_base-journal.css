@@ -593,7 +593,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				background-image: url(/img/icons/twitter-16.png?v=29916);
 				}
 			.b-postform-authtype-google .b-postform-login-services-current-pic {
-				background-image: url(/img/icons/google-16.png?v=29916);
+				background-image: url(/img/icons/google-16.png?v=35137);
 				}
 			.b-postform-authtype-openid .b-postform-login-services-current-pic {
 				background-image: url(/img/icons/openid-16.gif?v=17127);
@@ -1021,7 +1021,7 @@ BODY .b-postform-realauth-vkontakte.b-postform-authtype-vkontakte.b-postform-use
 				border: 1px solid transparent !important;
 				border-radius: 3px;
 				background-color: transparent;
-				background-image: url(/img/icons/sharethis.png?v=333);
+				background-image: url(/img/icons/sharethis.png?v=36067);
 				background-position: 0 0;
 				background-repeat: no-repeat;
 				color: #000 !important;

@@ -101,7 +101,7 @@ sub _page_head {
     }
 
     # Ads and control strip
-    my $ad_base_url = LJ::stat_src_to_url('/ad_base.css');
+    my $ad_base_url = '';
     $head_content .= qq(<link rel='stylesheet' );
     $head_content .= qq(href='$ad_base_url' type='text/css' />\n);
 

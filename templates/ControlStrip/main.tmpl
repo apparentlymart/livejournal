@@ -1,5 +1,5 @@
 <TMPL_VAR widget_calendar>
-<TMPL_IF link_mobile><div class="b-message-mobile"><div class="b-message-mobile-wrapper"><TMPL_VAR link_mobile></div></div></TMPL_IF>
+<TMPL_IF link_mobile><div class="b-message-mobile"><div class="b-message-mobile-wrapper"><TMPL_VAR link_mobile><span class="b-message-mobile-close"></span></div></div></TMPL_IF>
 <TMPL_IF remote_is_logged_in>
 <TMPL_IF EXPR="lj_enabled('new_friends_and_subscriptions')">
     <TMPL_INCLUDE name="user2.tmpl">

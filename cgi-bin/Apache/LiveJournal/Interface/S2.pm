@@ -24,7 +24,7 @@ sub handler {
     return error(404, 'Layer not found', "There is no layer with id $id at this site")
         unless $lay;
 
-    LJ::auth_digest(LJ::Request->r);
+    LJ::Auth::Method::Digest::auth_digest(LJ::Request->r);
     my $u = LJ::get_remote();
     unless ($u) {
         # Tell the client how it can authenticate

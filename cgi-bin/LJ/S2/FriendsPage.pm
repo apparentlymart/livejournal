@@ -116,7 +116,6 @@ sub FriendsPage
             $group_name =~ s!/$!!;
 
             if ($group_name) {
-                $group_name    = LJ::durl($group_name); 
                 $common_filter = 0; 
 
                 $p->{'filter_active'} = 1;

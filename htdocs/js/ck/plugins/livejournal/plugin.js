@@ -1179,9 +1179,11 @@
 						fakeElement.attributes['allowTransparency'] = 'true';
 
 						var media = LJ.Media.parse(decodeURIComponent(element.attributes.src));
-						if (media && media.embed) {
-							fakeElement.attributes['lj-cmd'] = 'LJEmbedLink';
-							fakeElement.attributes['data-link'] = element.attributes['data-link'];
+						if (media) {
+              media.done( function () {
+                fakeElement.attributes['lj-cmd'] = 'LJEmbedLink';
+                fakeElement.attributes['data-link'] = element.attributes['data-link'];
+              })
 						}
 
 						return fakeElement;

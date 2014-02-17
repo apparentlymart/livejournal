@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'email_change'}
+sub group  {'security'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -20,7 +21,7 @@ sub description {
     my $extra     = $self->extra_unpacked;
     my $new_email = $extra->{'new'};
 
-    return 'Email address changed to: ' . $self->_format_email($new_email);
+    return LJ::Lang::ml( 'userlog.action.email.change', { new_email => $self->_format_email($new_email) } );
 }
 
 1;

@@ -338,6 +338,7 @@ sub clean {
     my $text_b_link = 0;
 
     my $ljspoilers_open = 0;
+    my $ljquote_open    = 0;
 
     # if we're retrieving a cut tag, then we want to eat everything 
     # until we hit the first cut tag.
@@ -809,10 +810,16 @@ sub clean {
                 $newdata .= "\n<style>\n$style</style>\n";
                 next;
             }
-            elsif ($tag eq "lj-app")
+            elsif ( ($tag eq "lj-app") || ($tag eq "lj-widget") )
             {
                 next TOKEN unless LJ::is_enabled('userapps');
                 my %app_attr = map { $_ => Encode::encode_utf8($attr->{$_}) } keys %$attr;
+
+                if ($tag eq "lj-widget") {
+                    $app_attr{type} = 'widget';
+                    $app_attr{key} = delete $app_attr{name};
+                }
+
                 my $app = LJ::UserApps->get_application( id => delete $app_attr{id}, key => delete $app_attr{key} );
                 next TOKEN unless $app && $app->can_show_restricted;
 
@@ -880,6 +887,16 @@ sub clean {
 
                 $newdata .= $like->html({ 'vkontakte_like_js' => \%vkontakte_like_js});
             }
+            elsif ( $tag eq 'lj-lead' ) {
+                $start_capture->($tag, $token);
+            }
+            elsif ( $tag eq 'lj-quote' ) {
+                $newdata .= qq{User: $attr->{author} src: $attr->{src}}; # TODO
+                $newdata .= qq{<div>};
+                $ljquote_open++;
+                next TOKEN;
+            }
+
 
             # Don't allow any tag with the "set" attribute
             elsif ($tag =~ m/:set$/) {
@@ -1520,6 +1537,9 @@ sub clean {
                     $newdata .= qq{</div></div>};
                     $ljspoilers_open--;
                 }
+            } elsif ( $tag eq 'lj-quote' && $ljquote_open ) {
+                $newdata .= qq{</div>};
+                $ljquote_open--;
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
@@ -1731,6 +1751,10 @@ sub clean {
         $newdata .= qq{</div></div>} x $ljspoilers_open;
     }
 
+    if ($ljquote_open) {
+        $newdata .= qq{</div>} x $ljquote_open;
+    }
+        
     # extra-paranoid check
     1 while $newdata =~ s/<script\b//ig;
 

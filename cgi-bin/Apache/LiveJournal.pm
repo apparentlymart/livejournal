@@ -13,6 +13,7 @@ use File::Spec;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Request;
+use LJ::Auth::Method::Digest;
 use Apache::LiveJournal::Interface::Blogger;
 use Apache::LiveJournal::Interface::AtomAPI;
 use Apache::LiveJournal::Interface::S2;
@@ -37,6 +38,7 @@ use LJ::S2;
 use LJ::TimeUtil;
 use LJ::URI;
 use LJ::Handlers;
+use LJ::SocialScripts;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval { require Compress::Zlib; 1;};
@@ -138,11 +140,11 @@ sub handler
     if (LJ::Request->is_initial_req) {
         LJ::Request->set_handlers(PerlCleanupHandler => [
             "Apache::LiveJournal::db_logger",
-            sub { 
-                %RQ = (); 
+            sub {
+                %RQ = ();
                 LJ::end_request();
                 LJ::run_hooks("clenaup_end_request");
-                alarm(0) if $LJ::SHOW_SLOW_QUERIES; 
+                alarm(0) if $LJ::SHOW_SLOW_QUERIES;
             },
             "Apache::DebateSuicide",
         ]);
@@ -174,7 +176,7 @@ sub handler
                 LJ::Request->header_in('X-Forwarded-For', join(", ", @hosts));
 
                 ## At this point remote IP should be specified
-                warn "No remote IP: " 
+                warn "No remote IP: "
                     . "swlb=" . LJ::Request->header_in('X-Gateway') ." "
                     . "uri=". LJ::Request->hostname . LJ::Request->uri . '?' . LJ::Request->args
                     unless LJ::Request->remote_ip();
@@ -330,7 +332,7 @@ sub blocked_bot
     return LJ::Request::HTTP_PRECONDITION_FAILED;
 }
 
- 
+
 sub trans {
     {
         my $r = shift;
@@ -363,12 +365,12 @@ sub trans {
 
     $host = $LJ::DOMAIN_WEB unless LJ::Request::request->{r}->is_initial_req;
 
-    ## This is a hack for alpha/beta/omega servers to make them 
+    ## This is a hack for alpha/beta/omega servers to make them
     ## send static files (e.g. http://stat.livejournal.com/lanzelot/img/menu/div.gif?v=1)
     ## and LJTimes (e.g. http://stat.livejournal.com/tools/endpoints/lj_times_full_js.bml?lang=ru)
     ## Production static files are served by CDN (http://l-stat.livejournal.com)
-    if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com' 
-        && $uri !~ m!^/(stc|img|js|palimg)! && $uri !~ m!\.bml$!) 
+    if ($LJ::IS_LJCOM_BETA && $host eq 'stat.livejournal.com'
+        && $uri !~ m!^/(stc|img|js|palimg)! && $uri !~ m!\.bml$!)
     {
          $uri = "/stc$uri";
          LJ::Request->uri($uri);
@@ -393,7 +395,7 @@ sub trans {
     LJ::procnotify_check();
     S2::set_domain('LJ');
 
-    ## The following block of code with 'constants' redefinition *** MUST *** be called for any 
+    ## The following block of code with 'constants' redefinition *** MUST *** be called for any
     ## request.
     if ($LJ::IS_SSL) {
         $LJ::IMGPREFIX = '/img';
@@ -416,7 +418,7 @@ sub trans {
     ## JS/CSS file concatenation
     ## skip it for .bml.
     if (
-        ($host eq "stat.$LJ::DOMAIN" 
+        ($host eq "stat.$LJ::DOMAIN"
             and LJ::Request->uri !~ /\.bml$/        ## BML is allowed on stat. domain
             and LJ::Request->uri !~ m|/palimg/|     ## PaletteModify actions are processed by other handler
             and LJ::Request->uri !~ m|^/__api/?|
@@ -558,9 +560,9 @@ sub trans {
     LJ::run_hooks( 'suspicious_handler', \$suspicious_response );
     if ($suspicious_response) {
         LJ::Request->handler('perl-script');
-        LJ::Request->set_handlers( 'PerlHandler' => sub { 
+        LJ::Request->set_handlers( 'PerlHandler' => sub {
             LJ::Lang::current_language(undef);
-            eval { $suspicious_response->output } 
+            eval { $suspicious_response->output }
         } );
         return LJ::Request::OK;
     }
@@ -697,17 +699,20 @@ sub trans {
 
     if ($host=~m!^(?:http://)?([\w-]+)\.\Q$LJ::USER_DOMAIN\E(?:$|/)!xo) {
         my $username = $1;
-        if ($username && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($username)})) {
-            $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
-            return redir($redir_url.$uri);
-        }
-        my $partner_url;
-        unless (LJ::remote_bounce_url()) {
-            LJ::run_hook('override_journal_url', LJ::load_user($username), \$partner_url);
-            return redir($partner_url) if $partner_url;
+        my $canonical_username = LJ::canonical_username($username);
+        unless (grep { $_ eq $canonical_username } @LJ::PROT_DNS_USERNAMES) {
+            if ($username && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($username)})) {
+                $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
+                return redir($redir_url.$uri);
+            }
+            my $partner_url;
+            unless (LJ::remote_bounce_url()) {
+                LJ::run_hook('override_journal_url', LJ::load_user($username), \$partner_url);
+                return redir($partner_url) if $partner_url;
+            }
         }
     }
- 
+
     my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};
@@ -828,7 +833,7 @@ sub trans {
             ## If no remote we can try authtorize by auth_token
             if (LJ::did_post() && !LJ::Auth->check_sessionless_auth_token (
                     $LJ::DOMAIN_WEB."/pics/upload",
-                    auth_token => $post_params{'form_auth'}, 
+                    auth_token => $post_params{'form_auth'},
                     user => $opts->{user})
             ) {
                 LJ::Request->pnotes ('error' => 'ljphoto_members');
@@ -917,8 +922,8 @@ sub trans {
         }
 
         if (LJ::Request->uri eq '/crossdomain.xml') {
-            LJ::Request->handler("perl-script"); 
-            LJ::Request->set_handlers(PerlHandler => \&crossdomain_content); 
+            LJ::Request->handler("perl-script");
+            LJ::Request->set_handlers(PerlHandler => \&crossdomain_content);
             return LJ::Request::OK;
         }
 
@@ -992,7 +997,7 @@ sub trans {
                 $mode = "calendar";
             }
         }
-        elsif ( 
+        elsif (
             $uuri =~ m!
                  /(.*?)           # optional /<viewname>
                  (/.*?)?$         # path extra: /FriendGroup, for example
@@ -1209,7 +1214,7 @@ sub trans {
             LJ::Request->pnotes ('error' => 'e404');
             LJ::Request->pnotes ('remote' => LJ::get_remote());
             return LJ::Request::NOT_FOUND;  # bogus ljconfig
-        } 
+        }
         else {
             my $u = LJ::load_user($user);
             LJ::set_active_journal($u) if $u;
@@ -1883,9 +1888,13 @@ sub journal_content
         }
 
         LJ::Request->print("User-Agent: *\n");
+        
+        # Changes in checklist for this condition
+        # should be reflected in support tool from LJSUP-17649
         if ($u->should_block_robots or !$is_unsuspicious_user) {
             LJ::Request->print("Disallow: /\n");
-        } else {
+        }
+        else {
             LJ::Request->print("Disallow: /data/foaf/\n");
             LJ::Request->print("Disallow: /tag/\n");
             LJ::Request->print("Disallow: /friendstimes\n");
@@ -1895,28 +1904,38 @@ sub journal_content
             for (my $i = 1999; $i <= $year; $i++) {
                 LJ::Request->print("Disallow: /" . $i . "/\n");
             }
-
         }
-        return LJ::Request::OK
+        return LJ::Request::OK;
     }
 
     # handle HTTP digest authentication
-    if ($GET{'auth'} eq 'digest' ||
-        LJ::Request->header_in("Authorization") =~ /^Digest/) {
-        my $res = LJ::auth_digest();
-        unless ($res) {
-            LJ::Request->content_type("text/html");
-            LJ::Request->send_http_header();
-            LJ::Request->print("<b>Digest authentication failed.</b>");
-            return LJ::Request::OK
+    if ($GET{'auth'} eq 'digest' || LJ::Request->header_in("Authorization") =~ /^Digest/) {
+        if ($LJ::AUTH_DIGEST_ALLOWED_URIS{LJ::Request->uri}) {
+            my $auth_ok = LJ::Auth::Method::Digest::auth_digest();
+            if (!defined $auth_ok) {
+                LJ::Request->status(LJ::Request::AUTH_REQUIRED());
+                LJ::Request->content_type("text/html");
+                LJ::Request->send_http_header();
+                LJ::Request->print("You are not allowed to use HTTP digest authentication. You may to enable this on the <a href='$LJ::SITEROOT/manage/auth_digest'>Manage Page</a>");
+                return LJ::Request::OK;
+            }
+            elsif (!$auth_ok) {
+                LJ::Request->content_type("text/html");
+                LJ::Request->send_http_header();
+                LJ::Request->print("<b>Digest authentication failed.</b>");
+                return LJ::Request::OK;
+            }
+        }
+        else {
+            # warn "URI " . LJ::Request->uri . " does not allow auth=digest";
         }
     }
 
     my $criterr = 0;
 
-    my $remote = LJ::get_remote({
+    my $remote = LJ::get_remote( {
         criterr      => \$criterr,
-    });
+    } );
 
     return remote_domsess_bounce() if LJ::remote_bounce_url();
 
@@ -1986,6 +2005,8 @@ sub journal_content
         }
     }
 
+    LJ::SocialScripts::add_to_page();
+
     # if LJ::make_journal() indicated it can't handle the request:
     if ($handle_with_bml) {
         my $args = LJ::Request->args;
@@ -2015,7 +2036,7 @@ sub journal_content
                     } else {
                         $filename = $LJ::HOME. '/htdocs/talkread_v2.bml';
                     }
-                } 
+                }
             } else {
                 if ( $LJ::DISABLED{'new_comments'} ) {
                     $filename = $LJ::HOME. '/htdocs/talkpost.bml';
@@ -2312,9 +2333,9 @@ sub interface_content
 
     # simplified code from 'package BML::Cookie' in Apache/BML.pm
     my $cookie_str = LJ::Request->header_in("Cookie");
-    
+
     # simplified code from BML::decide_language
-    if ($cookie_str && LJ::durl($cookie_str) =~ m{\blangpref=(?:(\w{2,10})/\d+\b|"(\w{2,10})/\d+")}) { 
+    if ($cookie_str && LJ::durl($cookie_str) =~ m{\blangpref=(?:(\w{2,10})/\d+\b|"(\w{2,10})/\d+")}) {
         my $lang = $1 || $2;
         # Attention! LJ::Lang::ml uses BML::ml in web context, so we must do full BML language initialization
         BML::set_language($lang, \&LJ::Lang::get_text);

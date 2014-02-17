@@ -326,6 +326,17 @@ sub url {
     return $url;
 }
 
+sub edit_url {
+    my $self = shift;
+
+    my $journal = $self->journal && $self->journal->username;
+    my $itemid  = $self->ditemid;
+
+    return unless $journal && $itemid;
+
+    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$itemid";
+}
+
 sub mobile_url {
     my $self = shift;
     my $u = $self->{u};    
@@ -448,7 +459,7 @@ sub preload_rows {
 sub absorb_row {
     my ($self, $row) = @_;
 
-    $self->{$_} = $row->{$_} foreach (qw(allowmask posterid eventtime logtime security anum));
+    $self->{$_} = $row->{$_} foreach (qw(allowmask posterid eventtime logtime security anum rlogtime));
     $self->{_loaded_row} = 1;
 }
 
@@ -1730,6 +1741,36 @@ sub metadata_html {
     return $html;
 }
 
+
+sub lead {
+    my ($self) = @_;
+
+    my $lead  = '';
+    my $event = $self->event_raw;
+
+    if ($event =~ /<lj-lead\b.*?>(.+)<\/lj-lead\b\s*>/is) {
+        $lead = $1;
+    }
+
+    return $lead;
+}
+
+sub lead_html {
+    my ($self) = @_;
+    my $lead = $self->lead;
+    
+    if ($lead) {
+        LJ::CleanHTML::clean_event( \$lead, {
+            'journalid'             => $self->journalid,
+            'posterid'              => $self->posterid,
+            'entry_url'             => $self->url,
+        } );
+    }
+
+    return $lead;
+}
+
+
 sub is_sticky {
     my ($self) = @_;
 
@@ -2159,7 +2200,7 @@ sub get_log2_row
     $row = LJ::MemCache::get($memkey);
 
     if ($row) {
-        @$item{'posterid', 'eventtime', 'logtime', 'allowmask', 'ditemid'} = unpack("NNNNN", $row);
+        @$item{'posterid', 'eventtime', 'logtime', 'allowmask', 'ditemid', 'rlogtime'} = unpack("NNNNNN", $row);
         $item->{'security'} = ($item->{'allowmask'} == 0 ? 'private' :
                                ($item->{'allowmask'} == 2**31 ? 'public' : 'usemask'));
         $item->{'journalid'} = $jid;
@@ -2173,7 +2214,7 @@ sub get_log2_row
     my $db = LJ::get_cluster_def_reader($u);
     return undef unless $db;
 
-    my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, " .
+    my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, rlogtime, " .
               "anum FROM log2 WHERE journalid=? AND jitemid=?";
 
     $item = $db->selectrow_hashref($sql, undef, $jid, $jitemid);
@@ -2191,8 +2232,8 @@ sub get_log2_row
 
     # note: this cannot distinguish between security == private and security == usemask with allowmask == 0 (no groups)
     # both should have the same display behavior, but we don't store the security value in memcache
-    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec,
-                $item->{'ditemid'});
+    $row = pack("NNNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec,
+                $item->{'ditemid'}, $item->{'rlogtime'});
     LJ::MemCache::set($memkey, $row);
 
     return $item;

@@ -4,7 +4,11 @@ use warnings;
 
 use base qw( LJ::User::UserlogRecord );
 
-sub action      {'flush_friends_activities_q'}
-sub description {'Flushed the queue of friends activities'}
+sub action {'flush_friends_activities_q'}
+sub group  {'relations'}
+
+sub description {
+    LJ::Lang::ml('userlog.action.flush.friends.activities');
+}
 
 1;

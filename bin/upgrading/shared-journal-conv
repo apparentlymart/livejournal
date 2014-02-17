@@ -7,6 +7,7 @@
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ;
+use LJ::User::InfoHistory;
 
 my $dbh = LJ::get_db_writer()
     or die "Unable to get global master database";
@@ -27,8 +28,7 @@ while (1) {
     # -- so we revalidate our database handles
     LJ::start_request();
     $dbh = LJ::get_db_writer();
-    $dbslo = LJ::get_dbh("slow")
-	or die "cannot connect to slow role";
+    $dbslo = LJ::get_dbh("slow") or die "cannot connect to slow role";
 
     # load user rows from slow
     my $sth = $dbslo->prepare("SELECT * FROM user WHERE journaltype = 'S' LIMIT $limit");
@@ -38,10 +38,9 @@ while (1) {
     # construct user objects
     my %user_rows = (); # uid => $row
     while (my $row = $sth->fetchrow_hashref) {
-	$user_rows{$row->{userid}} = LJ::User->new_from_row($row);
+        $user_rows{$row->{userid}} = LJ::User->new_from_row($row);
     }
     last unless %user_rows;
-
 
     # now update each one
     while (my ($uid, $u) = each %user_rows) {
@@ -50,7 +49,7 @@ while (1) {
             die $dbh->errstr if $dbh->err;
         }
 
-        LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->password . 'change'));
+        LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change);
         LJ::update_user($u, { password => '', journaltype => 'C' });
         LJ::statushistory_add($u, LJ::get_userid("system"), "change_journal_type", "administratively converted to a community");
         $uids_done++;

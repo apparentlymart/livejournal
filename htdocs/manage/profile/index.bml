@@ -764,7 +764,6 @@ body<=
             $ret .= "</td>";
             $ret .= "</table>\n";
         }
-
         }
 
         # Extra

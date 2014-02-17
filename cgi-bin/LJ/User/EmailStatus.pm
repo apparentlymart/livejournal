@@ -19,7 +19,7 @@ sub handle_code {
     my $data = LJ::MemCache::get($cache_key);
     
     unless (defined $data) {
-        $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
+        $dbh = LJ::get_db_reader() or die ('Failed to get db connection');
         $data = $dbh->selectrow_hashref("SELECT * FROM email_status WHERE email = ?",
                     undef,
                     $params{email}
@@ -31,7 +31,7 @@ sub handle_code {
 
     # Address error count is increasing
     if ($params{code} == 5) {
-        $dbh ||= LJ::get_db_writer() or die ('Failed to get db connection');
+        $dbh = LJ::get_db_writer() or die ('Failed to get db connection');
              
         if (!$data->{error_count} || time() - $data->{last_error_time} > $LJ::EMAIL_MAX_FAULTY_PERIOD) {
             $data->{error_count}        = 1;

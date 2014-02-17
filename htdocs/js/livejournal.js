@@ -75,6 +75,25 @@ LiveJournal.initPage = function () {
     });
 
     LiveJournal.initBanner();
+
+    LiveJournal.initMobileLink();
+};
+
+LiveJournal.initMobileLink = function() {
+    $(document.body).on('click', '.b-message-mobile-close', function(event) {
+        var oneWeek = new Date();
+
+        event.preventDefault();
+
+        oneWeek.setDate(oneWeek.getDate() + 7);
+
+        LJ.Cookie.set('hide_mobile_link', 1, {
+            expires: oneWeek,
+            domain: window.location.host.replace('www', '')
+        });
+
+        $(document.body).addClass('p-mobile-msg-off');
+    });
 };
 
 })(jQuery);
@@ -344,13 +363,14 @@ LiveJournal.JSON = JSON;
 LiveJournal.initBanner = function() {
     var slot = jQuery('.common-banner');
 
-    if (!slot.length || Cookie('common_banner_close'))  {
+    if (!slot.length || LJ.Cookie.get('common_banner_close') || !LJ.get('remoteUser'))  {
         return;
     }
 
     // add close handler
-    slot.on('click', '.common-banner-close', function () {
-        var expires = new Date();
+    slot.find('.common-banner-close').show().on('click', function () {
+        var expires = new Date(),
+            height  = slot.height();
 
         // release cookie time: 00:00:01 of tomorrow
         expires.setDate( expires.getDate() + 1 );
@@ -359,11 +379,15 @@ LiveJournal.initBanner = function() {
         expires.setSeconds(1);
 
         slot.remove();
-        Cookie('common_banner_close', '1', {
+
+        LJ.Cookie.set('common_banner_close', '1', {
             expires: expires,
-            domain: Site.siteroot.replace(/^https?:\/\/www\./, ''),
+            domain: LJ.get('siteroot').replace(/^https?:\/\/www\./, ''),
             path: '/'
         });
 
+        if (height > 0) {
+            LJ.Track.event('Banner', 'Close event', 'Size ' + height)
+        }
     });
 };

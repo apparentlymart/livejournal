@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'accountstatus'}
+sub group  {'account'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -26,14 +27,14 @@ sub description {
     my $new_status = $extra->{'new'};
 
     if ( $old_status eq 'V' && $new_status eq 'D' ) {
-        return 'Account deleted';
+        return LJ::Lang::ml('userlog.action.account.deleted');
     }
 
     if ( $old_status eq 'D' && $new_status eq 'V' ) {
-        return 'Account undeleted';
+        return LJ::Lang::ml('userlog.action.account.undeleted');
     }
 
-    return "Account status changed ($old_status to $new_status)";
+    return LJ::Lang::ml('userlog.action.account.statuschange', { old_status => $old_status, new_status => $new_status } );
 }
 
 1;

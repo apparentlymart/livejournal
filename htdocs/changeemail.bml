@@ -82,9 +82,6 @@ body<=
     };
 
     if ($POST{'mode'} eq 'submit' && ($POST{'email'} || $POST{'password'})) {
-        my $password;
-        $password = $POST{'password'} unless $remote->is_identity;
-
         my $email = LJ::trim($POST{'email'});
 
         my @errors = ();
@@ -111,7 +108,7 @@ body<=
             push @errors, $ML{'.error.nospace'};
         }
 
-        if ($POST{'password'} ne $remote->password && !$remote->is_identity) {
+        unless ($remote->is_identity || LJ::Auth::Method::LoginPassword::Clear->check($remote, { password => $POST{'password'} })) {
             push @errors, $ML{'.error.invalidpassword'};
         }
 

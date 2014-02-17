@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 # Internal modules
+use LJ::User::Groups;
 use LJ::RelationService;
 
 #########################
@@ -87,17 +88,17 @@ sub get_groupmask {
 
     if (LJ::is_enabled('new_friends_and_subscriptions')) {
         if (my $groupmask = LJ::RelationService->get_groupmask($journal, $remote)) {
-            return $groupmask;
+            return $groupmask + 0;
         }
 
         if (my $groupmask = LJ::User::Groups->get_groupmask($journal, $remote)) {
-            return $groupmask;
+            return $groupmask + 0;
         }
 
         return 0;
     }
 
-    return LJ::RelationService->get_groupmask($journal, $remote);
+    return LJ::RelationService->get_groupmask($journal, $remote) + 0;
 }
 
 # <LJFUNC>

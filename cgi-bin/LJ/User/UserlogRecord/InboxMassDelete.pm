@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'inbox_massdel'}
+sub group  {'inbox'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -29,7 +30,7 @@ sub description {
     my $method = $extra->{'via'};
     my $view   = $extra->{'view'};
 
-    return "Mass-deleted $count inbox messages via '$method' in '$view'";
+    return LJ::Lang::ml( 'userlog.action.inbox.massdel', { count => $count, method => $method, view => $view } );
 }
 
 1;

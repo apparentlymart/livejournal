@@ -125,6 +125,51 @@ sub execute {
         LJ::set_rel_multi( [$u->id, $ou->id, 'S'], [$u->id, $ou->id, 'P'] );
     }
 
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        if ($type eq 'news') {
+            if ($u->is_personal) {
+                if (my $friends = $u->friends(force => 1)) {
+                    foreach my $friend (values %$friends) {
+                        $friend->subscribe_to_user($u);
+                        $u->remove_friend($friend);
+                    }
+                }
+            }
+
+            if ($u->is_community) {
+                if (my $members = $u->members(force => 1)) {
+                    foreach my $member (values %$members) {
+                        $member->subscribe_to_user($u);
+                        LJ::leave_community($member, $u);
+                    }
+                }
+            }
+        }
+
+        if ($type eq 'person') {
+            if ($u->is_community) {
+                if (my $members = $u->members(force => 1)) {
+                    foreach my $member (values %$members) {
+                        warn $member->user;
+                        $member->subscribe_to_user($u);
+                        LJ::leave_community($member, $u);
+                    }
+                }
+            }
+        }
+
+        if ($type eq 'community') {
+            if ($u->is_personal) {
+                if (my $friends = $u->friends(force => 1)) {
+                    foreach my $friend (values %$friends) {
+                        $friend->subscribe_to_user($u);
+                        LJ::join_community($friend, $u);
+                    }
+                }
+            }
+        }
+    }
+
     LJ::run_hook("change_journal_type", $u);
 
     #############################
@@ -141,7 +186,7 @@ sub execute {
     }
 
     if ($extra{'password'} ne $u->clean_password) {
-        LJ::User::InfoHistory->add($u, 'password', Digest::MD5::md5_hex($u->clean_password . 'change') );
+        LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change);
     }
 
     # reset the email address

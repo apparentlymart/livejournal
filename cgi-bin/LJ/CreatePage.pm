@@ -56,7 +56,7 @@ sub verify_username {
                 $post->{email} eq $u->email_raw &&
                 $post->{password1})
             {
-                if (LJ::login_ip_banned($u)) {
+                if (LJ::Auth::Checker::login_ip_banned($u)) {
                     # brute-force possibly going on
                 }
                 elsif (LJ::Auth::Method::LoginPassword::Clear->check($u, { password => $post->{password1} })) {

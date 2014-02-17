@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'pwd_reset_req'}
+sub group  {'security'}
 
 my %EmailStateMap = (
     'A' => 'current, validated',
@@ -39,8 +40,7 @@ sub description {
     my $time                = $extra->{'time'};
     my $time_display        = scalar gmtime $time;
 
-    return "Requested a password reset email to $email_display; " .
-        "$email_state_display; added on $time_display.";
+    return LJ::Lang::ml( 'userlog.action.password.reset.request', { email_display => $email_display, email_state_display => $email_state_display, time_display => $time_display } );
 }
 
 1;

@@ -11,6 +11,9 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
+    return LJ::Lang::ml('account.status.error.unavailable')
+        unless $remote->is_visible || $remote->is_deleted;
+
     my $authas = $GET{'authas'} || $remote->{'user'};
     my %type = ();
     my $u = LJ::get_authas_user($authas);

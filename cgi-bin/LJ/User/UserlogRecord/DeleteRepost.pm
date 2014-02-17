@@ -4,7 +4,8 @@ use warnings;
 
 use base qw( LJ::User::UserlogRecord );
 
-sub action      {'delete_repost'}
+sub action {'delete_repost'}
+sub group  {'entries'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -19,7 +20,7 @@ sub description {
     my ($self) = @_;
 
     my $jitemid = $self->{'actiontarget'};
-    return "Delete repost $jitemid";
+    return LJ::Lang::ml( 'userlog.action.deleted.repost', { jitemid => $jitemid } );
 }
 
 1;

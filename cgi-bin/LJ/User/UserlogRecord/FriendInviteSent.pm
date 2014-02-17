@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'friend_invite_sent'}
+sub group  {'relations'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -20,7 +21,7 @@ sub description {
     my $extra     = $self->extra_unpacked;
     my $recipient = $extra->{'extra'};
 
-    return "Friend invite sent to $recipient";
+    return LJ::Lang::ml( 'userlog.action.invite.sent', { recipient => $recipient } );
 }
 
 1;

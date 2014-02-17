@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'spam_set'}
+sub group  {'bans'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -19,10 +20,10 @@ sub description {
 
     my $targetuserid = $self->actiontarget;
     if ( my $targetu = LJ::load_userid($targetuserid) ) {
-        return 'Marked ' . $targetu->ljuser_display . ' as spammer';
+        return LJ::Lang::ml('userlog.action.spam.set', { user => $targetu->ljuser_display } );
     }
 
-    return "Marked a bogus user ($targetuserid) as spammer";
+    return LJ::Lang::ml( 'userlog.action.spam.set.bogus', { targetuserid => $targetuserid } );
 }
 
 1;

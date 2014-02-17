@@ -498,7 +498,8 @@ body<=
             # there's no entry. maybe there was a modlog row, but not a modblob row
             # for whatever reason. let's lazy-clean. don't care if it returns a value
             # or not, because they may have legitimately just raced another moderator
-            my $sth = $dbcr->prepare("DELETE FROM modlog WHERE journalid=? AND modid=?");
+            my $dbcw = LJ::get_cluster_master($c);
+            my $sth = $dbcw->prepare("DELETE FROM modlog WHERE journalid=? AND modid=?");
             $sth->execute($c->id, $modid);
 
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";

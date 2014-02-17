@@ -1,71 +1,98 @@
 package LJ::Event::friendedDelayed;
+
 use strict;
-use LJ::FriendQueue;
+use warnings;
+
 use base 'LJ::Event';
 
-use constant BASE_DELAY       => 1800;         # sec X
-use constant DELAY_PER_ACTION => 600;          # sec Y
-use constant DELAY_LIMIT      => 24 * 60 * 60; # sec Z
+# External modules
+use Readonly;
+
+# Internal modules
+use LJ::ExtBlock;
+use LJ::FriendQueue;
+
+Readonly my $BASE_DELAY       => 1800;         # sec X
+Readonly my $DELAY_LIMIT      => 24 * 60 * 60; # sec Z
+Readonly my $DELAY_PER_ACTION => 600;          # sec Y
 
 sub send {
     my ( $class, $action, $tou, $fromu ) = @_;
-
-    die "Wrong action parameter: $action"
-        unless $action =~ /^add|del$/;
-
-    ## 1. create TheSchwartz job
-    ##  1.1. calculate delay
-    ##
-    ## 2. add info to FriendQueue
+    die 'Expected parameter $tou in send()' unless $tou;
+    die 'Expected parameter $fromu in send()' unless $fromu;
+    die "Wrong action parameter: $action" unless $action =~ /^add|del|invite$/;
 
     ## delay values
-    my $systemu = LJ::load_user('system');
-    LJ::load_user_props($systemu, qw/sys_base_friending_notif_delay
-                                     sys_friending_notif_delay
-                                     sys_limit_friending_notif_delay
-                                     /);
-    my $base_delay       = $systemu->prop('sys_base_friending_notif_delay')  || BASE_DELAY;
-    my $delay_per_action = $systemu->prop('sys_friending_notif_delay')       || DELAY_PER_ACTION;
-    my $max_delay        = $systemu->prop('sys_limit_friending_notif_delay') || DELAY_LIMIT;
+    my $params = LJ::ExtBlock->load_by_id('antispam_params');
+    my $values = $params ? LJ::JSON->from_json($params->blocktext) : {};
+    my $reader_weight    = $fromu->get_reader_weight();
 
-    # max_delay is good
-    if ( $fromu->get_reader_weight < 100 ) {
-        ($base_delay, $delay_per_action) = (3 * 60 * 60, 60 * 60 );
+    my $max_delay;
+    my $base_delay;
+    my $delay_per_action;
+
+    if ($action eq 'invite') {
+        $values      ||= {};
+        $values->{i} ||= {};
+
+        $base_delay       = $values->{i}->{delay_time}  || $BASE_DELAY;
+        $delay_per_action = $values->{i}->{add_delay}   || $DELAY_PER_ACTION;
+        $max_delay        = $values->{i}->{delay_limit} || $DELAY_LIMIT;
+
+        if ($reader_weight == 0) {
+            $max_delay        = 72 * 3600;
+            $base_delay       = 12 * 3600;
+            $delay_per_action = 3  * 3600;
+        } elsif ($reader_weight < 100) {
+            $max_delay        = 24 * 3600;
+            $base_delay       = 3  * 3600;
+            $delay_per_action = 1  * 3600;
+        }
+    } else {
+        $values      ||= {};
+        $values->{f} ||= {};
+
+        $base_delay       = $values->{f}->{delay_time}  || $BASE_DELAY;
+        $delay_per_action = $values->{f}->{add_delay}   || $DELAY_PER_ACTION;
+        $max_delay        = $values->{f}->{delay_limit} || $DELAY_LIMIT;
+
+        if ($reader_weight < 100) {
+            $base_delay       = 3 * 3600;
+            $delay_per_action = 1 * 3600;
+        }
     }
 
     ## delay for a job
-    my $actions_in_q = LJ::FriendQueue->count($fromu->userid);
-    my $delay        = (1 + $actions_in_q) * DELAY_PER_ACTION + BASE_DELAY; # sec
+    my $actions_in_q = LJ::FriendQueue->count($fromu);
+    my $delay        = (1 + $actions_in_q) * $delay_per_action + $base_delay; # sec
     my $funcname     = "LJ::Worker::HandleUserFriendingActions";
 
     ## After each user's activities (friend/defriend) we increase the delay.
     ## If the delay exceeded the allowed level (DELAY_LIMIT) than flush all records
     ## and add info about it to log.
-    if ( $delay >= DELAY_LIMIT || $fromu->get_reader_weight == 0 ) {
+    if ($delay >= $max_delay) {
         $funcname = "LJ::Worker::FlushUserFriendingActions";
         $delay    = 0; # flush right now ))
     }
 
-    ##
     my $time = time();
-    my $job = TheSchwartz::Job->new(
+    my $job  = TheSchwartz::Job->new(
         funcname  => $funcname,
         arg       => [$fromu->userid, $time],
         run_after => $time + $delay,
     );
 
-    my $sclient = LJ::theschwartz();
-    $sclient->insert_jobs($job);
+    if (my $sclient = LJ::theschwartz()) {
+        $sclient->insert_jobs($job);
 
-    my $jobid = $job->jobid; ## defined aftere insert_jobs
+        my $jobid = $job->jobid; ## defined aftere insert_jobs
 
-    LJ::FriendQueue->push(
-        userid   => $fromu->userid,
-        friendid => $tou->userid,
-        action   => $action,
-        etime    => $time,
-        jobid    => $jobid,
-    );
+        LJ::FriendQueue->push($fromu, $tou,
+            action   => $action,
+            etime    => $time,
+            jobid    => $jobid,
+        );
+    }
 }
 
 1;

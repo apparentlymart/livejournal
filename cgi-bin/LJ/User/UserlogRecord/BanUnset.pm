@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'ban_unset'}
+sub group  {'bans'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -19,10 +20,10 @@ sub description {
 
     my $targetuserid = $self->actiontarget;
     if ( my $targetu = LJ::load_userid($targetuserid) ) {
-        return 'Unbanned ' . $targetu->ljuser_display;
+        return LJ::Lang::ml( 'userlog.action.unbanned', { 'user' => $targetu->ljuser_display } );
     }
 
-    return "Unbanned a bogus user ($targetuserid)";
+    return LJ::Lang::ml( 'userlog.action.unbanned.bogus', { targetuserid => $targetuserid } );
 }
 
 1;

@@ -5,9 +5,21 @@ use strict;
 LJ::register_hook('head_content', sub {
     my ($headref) = @_;
 
-    LJ::need_res({ 'separate_list' => 1 }, qw{
-        js/ads/axz.min.js
-    });
+    if ($LJ::IS_LJCOM_BETA) {
+        $$headref .= <<RUM_SCRIPT;
+<script>
+var _prum = [['id', '52f0e3dbabe53dcf1b000000'],
+             ['mark', 'firstbyte', (new Date()).getTime()]];
+(function() {
+    var s = document.getElementsByTagName('script')[0]
+      , p = document.createElement('script');
+    p.async = 'async';
+    p.src = '//rum-static.pingdom.net/prum.min.js';
+    s.parentNode.insertBefore(p, s);
+})();
+</script>
+RUM_SCRIPT
+    }
 
     my $journal = LJ::get_active_journal();
     return unless $journal;

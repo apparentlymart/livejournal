@@ -109,7 +109,7 @@ sub make_feed {
     # for consistency, we call ditemids "itemid" in user-facing settings
     my $ditemid = $FORM{itemid} + 0;
 
-    if ( $ditemid ) {
+    if ($ditemid) {
         my $entry = LJ::Entry->new($u, ditemid => $ditemid);
 
         if ( ! $entry || ! $entry->valid || ! $entry->visible_to($remote) ) {
@@ -117,9 +117,9 @@ sub make_feed {
             return undef;
         }
 
-        if (LJ::Entry::Repost->substitute_content($entry, 
+        if (LJ::Entry::Repost->substitute_content($entry,
                                                  { 'original_post_obj' => \$entry,} )) {
-            
+
             if ( ! $entry || ! $entry->valid || ! $entry->visible_to($remote) ) {
                 $opts->{'handler_return'} = 404;
                 return undef;
@@ -128,22 +128,14 @@ sub make_feed {
 
         push @objs, $entry;
     }
-    elsif ( $viewfunc->{'paid_only'} ) {
-        LJ::get_friend_items({
-            'u'             => $u,
-            'remote'        => $remote,
+    elsif ($viewfunc->{'paid_only'} && $u->get_cap('paid')) {
+        @objs = map { $_->{'entry'} } @{ LJ::Journal::FriendsFeed->get_items(
+            'remoteid'      => $remote ? $remote->userid : 0,
+            'userid'        => $u->{'userid'},
             'itemshow'      => 25,
-            'dateformat'    => 'S2',
-            'itemids'       => \@itemids,
-            'entry_objects' => \@objs,
-            'load_props'    => 1,
-            'load_text'     => 1,
-        });
+        ) };
 
-        # available for paid users only
-        unless ( $u->get_cap('paid') ) {
-            @itemids = @objs = ();
-        }
+        # Warning: array @itemids is not filling here, so entries will be outputted without tags.
 
         $journalinfo->{title} .= ' ' . LJ::Lang::ml('feeds.title.friends');
         $journalinfo->{link}  .= 'friends/';
@@ -171,7 +163,7 @@ sub make_feed {
     # whether we actually need to send the feed.
     my $lastmod = 0;
 
-    for my $obj ( @objs ) {
+    for my $obj (@objs) {
         # revtime of the item.
         my $revtime = $obj->prop('revtime');
         $lastmod = $revtime if $revtime > $lastmod;
@@ -214,9 +206,9 @@ sub make_feed {
     foreach my $entry_obj (@objs) {
         next ENTRY if $entry_obj->poster->{'statusvis'} eq 'S';
         next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
-   
+
         next ENTRY if $entry_obj->original_post;
-    
+
         my $ditemid = $entry_obj->{ditemid};
         if ( $LJ::UNICODE && $entry_obj->prop('unknown8bit') ) {
             LJ::item_toutf8(
@@ -399,7 +391,7 @@ sub create_view_rss {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
         my $url  = $entry->url;
-        
+
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$url</guid>\n";
         $ret .= "  <pubDate>" . LJ::TimeUtil->time_to_http($it->{createtime}) . "</pubDate>\n";

@@ -107,8 +107,8 @@ sub expand_entry {
 
 sub _expand_tag {
     my( $class, $journal, $tag, $edit, %opts ) = @_;
-
-    my %attrs = $tag =~ /(\w+)="?(\-?\d+)"?/g;
+    
+    my %attrs = $tag =~ /([\w_\-]+)="?(\-?[\w_\-]+)"?/g;
 
     return '[invalid lj-embed, id is missing]' unless $attrs{id};
 
@@ -355,14 +355,6 @@ sub parse_module_embed {
                 $newstate = REGULAR;
             } else {
                 # continue appending contents to embed buffer
-
-                #LJSUP-15251: Adjust rutube URL to embed code conversion
-                if ($reconstructed =~ qr{http://rutube\.ru/video/(private/)?(\w*)}) {
-                    my $curl = `curl http://rutube.ru/api/video/$2/`;
-                    $curl =~ /"html": "(.*?)",/;
-                    $reconstructed = $1;
-                    $reconstructed =~ s/\\"/"/g;
-                }
 
                 $embed .= $reconstructed;
             }

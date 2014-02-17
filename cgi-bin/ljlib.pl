@@ -879,13 +879,21 @@ sub get_recent_items {
         $posterwhere = '';
     }
 
+    my $time_filter = '';
+    if ( $opts->{time_begin} && $opts->{time_end} ) {
+        my $time_begin = $LJ::EndOfTime - LJ::TimeUtil->mysqldate_to_time($opts->{time_begin});
+        my $time_end   = $LJ::EndOfTime - LJ::TimeUtil->mysqldate_to_time($opts->{time_end});
+        $time_filter = sprintf("AND rlogtime < %s AND rlogtime > %s ",
+            $time_begin, $time_end );
+    }
+
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $after_sql $before_sql $suspend_where
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $time_filter $after_sql $before_sql $suspend_where
     };
 
     if ( $sticky && $show_sticky_on_top ) {
@@ -1400,111 +1408,6 @@ sub load_state_city_for_zip {
     }
 
     return ($zipcity, $zipstate);
-}
-
-# Implement Digest authentication per RFC2617
-# called with Apache's request object
-# modifies outgoing header fields appropriately and returns
-# 1/0 according to whether auth succeeded. If succeeded, also
-# calls LJ::set_remote() to set up internal LJ auth.
-# this routine should be called whenever it's clear the client
-# wants/the server demands digest auth, and if it returns 1,
-# things proceed as usual; if it returns 0, the caller should
-# $r->send_http_header(), output an auth error message in HTTP
-# data and return to apache.
-# Note: Authentication-Info: not sent (optional and nobody supports
-# it anyway). Instead, server nonces are reused within their timeout
-# limits and nonce counts are used to prevent replay attacks.
-
-sub auth_digest {
-
-    my $decline = sub {
-        my $stale = shift;
-
-        my $nonce = LJ::Auth::Challenge->generate(180); # 3 mins timeout
-        my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
-        $authline .= ", stale=\"true\"" if $stale;
-        LJ::Request->header_out("WWW-Authenticate", $authline);
-        LJ::Request->status (LJ::Request::AUTH_REQUIRED ());
-        return 0;
-    };
-
-    unless (LJ::Request->header_in("Authorization")) {
-        return $decline->(0);
-    }
-
-    my $header = LJ::Request->header_in("Authorization");
-
-    # parse it
-    # TODO: could there be "," or " " inside attribute values, requiring
-    # trickier parsing?
-
-    my @vals = split(/[, \s]/, $header);
-    my $authname = shift @vals;
-    my %attrs;
-    foreach (@vals) {
-        if (/^(\S*?)=(\S*)$/) {
-            my ($attr, $value) = ($1,$2);
-            if ($value =~ m/^\"([^\"]*)\"$/) {
-                $value = $1;
-            }
-            $attrs{$attr} = $value;
-        }
-    }
-
-    # sanity checks
-    unless ($authname eq 'Digest' && $attrs{'qop'} eq 'auth' &&
-            $attrs{'realm'} eq 'lj' && (!defined $attrs{'algorithm'} || $attrs{'algorithm'} eq 'MD5')) {
-        return $decline->(0);
-    }
-
-    my %opts;
-    LJ::Auth::Challenge->check($attrs{'nonce'}, \%opts);
-
-    return $decline->(0) unless $opts{'valid'};
-
-    # if the nonce expired, force a new one
-    return $decline->(1) if $opts{'expired'};
-
-    # check the nonce count
-    # be lenient, allowing for error of magnitude 1 (Mozilla has a bug,
-    # it repeats nc=00000001 twice...)
-    # in case the count is off, force a new nonce; if a client's
-    # nonce count implementation is broken and it doesn't send nc= or
-    # always sends 1, this'll at least work due to leniency above
-
-    my $ncount = hex($attrs{'nc'});
-
-    unless (abs($opts{'count'} - $ncount) <= 1) {
-        return $decline->(1);
-    }
-
-    # the username
-    my $user = LJ::canonical_username($attrs{'username'});
-    my $u = LJ::load_user($user);
-
-    return $decline->(0) unless $u;
-
-    # don't allow empty passwords
-
-    return $decline->(0) unless $u->has_password;
-
-    # recalculate the hash and compare to response
-
-    my $a1src = $u->user . ':lj:' . $u->clean_password;
-    my $a1 = Digest::MD5::md5_hex($a1src);
-    my $a2src = LJ::Request->method . ":$attrs{'uri'}";
-    my $a2 = Digest::MD5::md5_hex($a2src);
-    my $hashsrc = "$a1:$attrs{'nonce'}:$attrs{'nc'}:$attrs{'cnonce'}:$attrs{'qop'}:$a2";
-    my $hash = Digest::MD5::md5_hex($hashsrc);
-
-    return $decline->(0)
-        unless $hash eq $attrs{'response'};
-
-    # set the remote
-    LJ::set_remote($u);
-
-    return $u;
 }
 
 # Return challenge info.
@@ -2715,14 +2618,18 @@ sub last_error_code
 sub last_error
 {
     my $err = sub {
-        my $code = shift;
-        return LJ::Lang::ml("ljerror.$code");
+        my ($code, $params) = @_;
+        return LJ::Lang::ml("ljerror.$code", $params);
     };
-    my $des = $err->($LJ::last_error);
-    if ($LJ::last_error eq "db" && $LJ::db_error) {
+
+    my ($code, $params) = ref($LJ::last_error) eq 'ARRAY' ? @$LJ::last_error : ($LJ::last_error, {});
+
+    my $des = $err->($code, $params);
+
+    if ($code eq "db" && $LJ::db_error) {
         $des .= ": $LJ::db_error";
     }
-    return $des || $LJ::last_error;
+    return $des || $code;
 }
 
 sub error
@@ -2733,9 +2640,16 @@ sub error
         $err = "db";
     } elsif ($err eq "db") {
         $LJ::db_error = "";
+    } elsif (my $params = shift) {
+        $err = [$err, $params];
     }
     $LJ::last_error = $err;
     return undef;
+}
+
+sub get_error {
+    LJ::error(@_);
+    LJ::last_error();
 }
 
 *errobj = \&LJ::Error::errobj;

@@ -4,7 +4,11 @@ use warnings;
 
 use base qw( LJ::User::UserlogRecord );
 
-sub action      {'password_change'}
-sub description {'User changed password'}
+sub action {'password_change'}
+sub group  {'security'}
+
+sub description {
+    return LJ::Lang::ml('userlog.action.password.change');
+}
 
 1;

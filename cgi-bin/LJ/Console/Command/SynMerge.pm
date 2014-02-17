@@ -24,10 +24,6 @@ sub can_execute {
 sub execute {
     my ($self, $from_user, $to, $to_user, $using, $url, @args) = @_;
 
-    if (LJ::is_enabled('new_friends_and_subscriptions')) {
-        return $self->error("Sorry it doesn't work now");
-    }
-
     return $self->error("This command takes five arguments. Consult the reference.")
         unless $from_user && $to_user && $url && scalar(@args) == 0;
 
@@ -80,23 +76,33 @@ sub execute {
 
     # 4) make users who befriend 'from_user' now befriend 'to_user'
     #    'force' so we get master db and there's no row limit
-    if (my @ids = $from_u->friendof_uids(force => 1)) {
+    if (LJ::is_enabled('new_friends_and_subscriptions')) {
+        if (my $users = $from_u->subscribers(force => 1)) {
+            foreach my $u (values %$users) {
+                $u->subscribe_to_user($to_u)
+            }
 
-        # update ignore so we don't raise duplicate key errors
-        $dbh->do("UPDATE IGNORE friends SET friendid=? WHERE friendid=?",
-                 undef, $to_u->id, $from_u->id);
-        return $self->error("Database Error: " . $dbh->errstr)
-            if $dbh->err;
+            $from_u->remove_all_subscribers();
+        }
+    } else {
+        if (my @ids = $from_u->friendof_uids(force => 1)) {
 
-        # in the event that some rows in the update above caused a duplicate key error,
-        # we can delete the rows that weren't updated, since they don't need to be
-        # processed anyway
-        $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $from_u->id);
-        return $self->error("Database Error: " . $dbh->errstr)
-            if $dbh->err;
+            # update ignore so we don't raise duplicate key errors
+            $dbh->do("UPDATE IGNORE friends SET friendid=? WHERE friendid=?",
+                     undef, $to_u->id, $from_u->id);
+            return $self->error("Database Error: " . $dbh->errstr)
+                if $dbh->err;
 
-        # clear memcache keys
-        LJ::memcache_kill($_, 'friend') foreach @ids;
+            # in the event that some rows in the update above caused a duplicate key error,
+            # we can delete the rows that weren't updated, since they don't need to be
+            # processed anyway
+            $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $from_u->id);
+            return $self->error("Database Error: " . $dbh->errstr)
+                if $dbh->err;
+
+            # clear memcache keys
+            LJ::memcache_kill($_, 'friend') foreach @ids;
+        }
     }
 
     # log to statushistory

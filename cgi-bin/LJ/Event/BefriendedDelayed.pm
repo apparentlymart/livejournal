@@ -1,5 +1,8 @@
 package LJ::Event::BefriendedDelayed;
+
 use strict;
+use warnings;
+
 use base 'LJ::Event::friendedDelayed';
 
 sub send {

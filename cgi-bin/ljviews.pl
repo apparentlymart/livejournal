@@ -1144,7 +1144,6 @@ sub create_view_lastn
         $lastn_page{'head'} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
     }
 
-    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -1634,7 +1633,7 @@ sub create_view_lastn
     
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
-        $lastn_page{'control_strip'} = $control_strip;
+        $lastn_page{'control_strip'} = $control_strip . LJ::get_ads({location => 'common.banner'});
     }
 
     $$ret = LJ::fill_var_props($vars, 'LASTN_PAGE', \%lastn_page);
@@ -1711,7 +1710,6 @@ sub create_view_friends {
     # Add a friends-specific XRDS reference
     $friends_page{'head'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
 
-    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -2331,7 +2329,7 @@ sub create_view_friends {
     
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
-        $friends_page{'control_strip'} = $control_strip;
+        $friends_page{'control_strip'} = $control_strip . LJ::get_ads({location => 'common.banner'});
     }
 
     $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
@@ -2372,7 +2370,6 @@ sub create_view_calendar
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -2429,7 +2426,7 @@ sub create_view_calendar
     }
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
-        $calendar_page{'control_strip'} = $control_strip;
+        $calendar_page{'control_strip'} = $control_strip . LJ::get_ads({location => 'common.banner'});
     }
 
     my $months = \$calendar_page{'months'};
@@ -2641,7 +2638,6 @@ sub create_view_day
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -3005,7 +3001,7 @@ sub create_view_day
     
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
-        $day_page{'control_strip'} = $control_strip;
+        $day_page{'control_strip'} = $control_strip . LJ::get_ads({location => 'common.banner'});
     }
     if (! $initpagedates)
     {

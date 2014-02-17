@@ -18,16 +18,14 @@ use URI::Escape;
 use Digest::MD5 ();
 use File::Basename ();
 
-*hash = \&Digest::MD5::md5_hex;
-
 # This has bitten us one too many times.
 # Don't let startup continue unless LWP is ok.
 die "* Installed version of LWP is too old! *" if LWP->VERSION < 5.803;
 
 sub make_auth {
-    my ($chal, $password) = @_;
-    return unless $chal && $password;
-    return "crp:$chal:" . hash($chal . hash($password));
+    my ($u, $chal) = @_;
+    return unless $u->has_password && $chal;
+    return "crp:$chal:" . Digest::MD5::md5_hex($chal . $u->password_md5);
 }
 
 sub get_challenge {
@@ -121,9 +119,9 @@ sub do_upload {
         'X-FB-UploadPic.ImageLength'   => $length,
         'Content-Length'               => $length,
         'X-FB-UploadPic.Meta.Filename' => $basename,
-        'X-FB-UploadPic.MD5'           => hash($$rawdata),
+        'X-FB-UploadPic.MD5'           => Digest::MD5::md5_hex($$rawdata),
         'X-FB-User'                    => $u->{'user'},
-        'X-FB-Auth'                    => make_auth($chal, $u->clean_password),
+        'X-FB-Auth'                    => make_auth($u, $chal),
         ':X-FB-UploadPic.Gallery._size'=> 1,
         'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
         'X-FB-UploadPic.Gallery.0.GalName' => $opts->{'galname'} || 'LJ_emailpost',
@@ -219,9 +217,9 @@ sub make_html {
             my ($extension) = ( $image_url =~ /(\w+)$/ );
 
             $scaled_url = $page_url = $image_url;
-            $scaled_url =~ s/\w*original[.]\w+$//;
+            $scaled_url =~ s/original\.\w+$//;
 
-            $scaled_url = $page_url . $width . '.' . $extension;
+            $scaled_url = $scaled_url . $width . '.' . $extension;
         }
         else {
             $page_url = $image_url . '/';

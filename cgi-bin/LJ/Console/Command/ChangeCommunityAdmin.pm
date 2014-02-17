@@ -37,7 +37,7 @@ sub execute {
         unless $unew && $unew->is_person;
 
     return $self->error("New owner's email address isn't validated.")
-        unless $unew->{'status'} eq "A";
+    unless $unew->{'status'} eq "A";
 
     # remove old maintainers' power over it
     LJ::clear_rel($ucomm, '*', 'A');

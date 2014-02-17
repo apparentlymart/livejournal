@@ -123,7 +123,7 @@ sub _create_relation_to_type_f_new {
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$tid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:old:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:new:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOFCOUNT_KEY_PREFIX:old:F:$tid"]);
@@ -188,8 +188,8 @@ sub _create_relation_to_type_f_old {
     LJ::MemCacheProxy::delete([$tid, "friendofs2:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:F:$tid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSOF_KEY_PREFIX:PC:$uid"]);
-    LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOF_KEY_PREFIX:PC:$tid"]);
+    LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:old:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:new:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSCOUNT_KEY_PREFIX:old:F:$tid"]);
@@ -408,19 +408,12 @@ sub _remove_relation_to_type_r {
     return 0 unless $uid;
     return 0 unless $tid;
 
-    my $cidu = $u->clusterid;
-    my $cidt = $target->clusterid;
-
-    return 0 unless $cidu;
-    return 0 unless $cidt;
-
     my $dbhu = LJ::get_cluster_master($u);
     my $dbht = LJ::get_cluster_master($target);
 
     return 0 unless $dbhu;
-    return 0 unless $dbht;
 
-    my $cntu = $dbhu->do(qq[
+    $dbhu->do(qq[
             DELETE FROM
                 subscribers2
             WHERE
@@ -437,18 +430,20 @@ sub _remove_relation_to_type_r {
         return 0;
     }
 
-    my $cntt = $dbht->do(qq[
-            DELETE FROM
-                subscribersleft
-            WHERE
-                subscriptionid = ?
-            AND
-                userid = ?
-        ],
-        undef,
-        $tid,
-        $uid
-    );
+    if ($dbht) {
+        $dbht->do(qq[
+                DELETE FROM
+                    subscribersleft
+                WHERE
+                    subscriptionid = ?
+                AND
+                    userid = ?
+            ],
+            undef,
+            $tid,
+            $uid
+        );
+    }
 
     # Invalidate user cache
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:R:$uid"]);
@@ -936,7 +931,7 @@ sub _find_relation_destinations_type_f_new {
             AND
                 f2.friendid = ?
             AND
-                u.journaltype in ('P', 'Y')
+                u.journaltype in ('P', 'I')
             $sqlimit
         ],
         undef,
@@ -1269,7 +1264,7 @@ sub _find_relation_sources_type_f_new {
             AND
                 f2.userid = ?
             AND
-                u.journaltype in ('P', 'Y')
+                u.journaltype in ('P', 'I')
             $sqlimit
         ],
         undef,
@@ -1703,7 +1698,7 @@ sub _load_relation_destinations_f_new {
                     AND
                         f2.friendid = ?
                     AND
-                        u.journaltype in ('P', 'Y')
+                        u.journaltype in ('P', 'I')
                 ],
                 {
                     Columns => [1,2]
@@ -1997,7 +1992,7 @@ sub _count_relation_destinations_type_f_new {
             AND
                 f2.friendid = ?
             AND
-                u.journaltype in ('P', 'Y')
+                u.journaltype in ('P', 'I')
         ],
         undef,
         $uid,
@@ -2201,7 +2196,7 @@ sub _count_relation_sources_type_f_new {
             AND
                 f2.userid = ?
             AND
-                u.journaltype in ('P', 'Y')
+                u.journaltype in ('P', 'I')
         ],
         undef,
         $uid,
@@ -2390,11 +2385,9 @@ sub _find_relation_attributes_f_new {
             return;
         }
 
-        my @vals = unpack 'NNN', $val;
+        my @vals = unpack 'N', $val;
 
         return {
-            bgcolor   => $vals[2],
-            fgcolor   => $vals[1],
             groupmask => $vals[0]
         };
     }
@@ -2405,7 +2398,7 @@ sub _find_relation_attributes_f_new {
 
     my $row = $dbh->selectrow_hashref(qq[
             SELECT
-                f1.groupmask, f1.fgcolor, f1.bgcolor
+                f1.groupmask
             FROM
                 friends as f1
             LEFT JOIN
@@ -2431,10 +2424,8 @@ sub _find_relation_attributes_f_new {
     );
 
     if ($row) {
-        $val = pack 'NNN', (
-            $row->{groupmask},
-            $row->{fgcolor},
-            $row->{bgcolor}
+        $val = pack 'N', (
+            $row->{groupmask}
         );
     } else {
         $val = 0;

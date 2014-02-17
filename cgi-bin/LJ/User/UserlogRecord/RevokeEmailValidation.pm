@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'revoke_validation'}
+sub group  {'security'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -24,7 +25,7 @@ sub description {
     my $email   = $extra->{'email'};
     my $message = $extra->{'message'};
 
-    return "Validation of $email revoked: $message";
+    return LJ::Lang::ml( 'userlog.action.revoke.validation', { email => $email, message => $message } );
 }
 
 1;

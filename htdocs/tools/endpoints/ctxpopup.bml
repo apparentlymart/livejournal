@@ -176,6 +176,10 @@
     $ret{is_logged_in}  = $remote ? 1 : 0;
 
     if ($u->is_comm) {
+        if (my $row = LJ::get_community_row($u)) {
+            $ret{membership} = $row->{membership};
+        }
+
         $ret{url_joincomm}  = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
         $ret{url_leavecomm} = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
 

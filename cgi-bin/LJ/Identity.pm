@@ -266,8 +266,8 @@ sub unpack_forwhat {
         $returl = "$LJ::SSLROOT/oauth/authorize_token.bml?$params";
         $returl_fail = "$LJ::SSLROOT/login.bml?$params";
         $skip_interstitial = 1;
-    } elsif ($forwhat eq 'ljart') {
-        $returl = "$LJ::SITEROOT/event/create";
+    } elsif (my ($ljart) = $forwhat =~ /^ljart\-(event|institut)$/) {
+        $returl = "$LJ::SITEROOT/$ljart/create";
         $returl_fail = "$LJ::SSLROOT/login.bml";
         $skip_interstitial = 1;
     } else {

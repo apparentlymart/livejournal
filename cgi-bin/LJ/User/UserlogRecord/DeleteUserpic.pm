@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'delete_userpic'}
+sub group  {'userpics'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -20,7 +21,7 @@ sub description {
     my $extra = $self->extra_unpacked;
     my $picid = $extra->{'picid'};
 
-    return "Deleted userpic #$picid";
+    return LJ::Lang::ml( 'userlog.action.deleted.userpic', { picid =>$picid } );
 }
 
 1;

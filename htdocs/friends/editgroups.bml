@@ -128,6 +128,7 @@
     $body .= "<form method='post' name='fg' action='editgroups.bml$getextra' class='lj-widget' data-widget='friendseditgroups'>";
     $body .= LJ::form_auth();
     $body .= "<input type='hidden' name='mode' value='save' />";
+
     for (my $i=1; $i<=30; $i++) {
         my $sort = 255;
         my $name = "";
@@ -145,7 +146,22 @@
         $body .= "<input type='hidden' name='efg_delete_${i}' value='0' />";
         $body .= "<input type='hidden' name='efg_set_${i}_public' value='$public' />";
     }
+
+    my @friends;
+
     for (my $i=1; $i<=$res{'friend_count'}; $i++) {
+        push @friends, {
+            i    => $i,
+            user => $res{"friend_${i}_type"} eq 'identity' ? $res{"friend_${i}_name"} : $res{"friend_${i}_user"}
+        };
+    }
+
+    @friends = sort {
+        $a->{user} cmp $b->{user}
+    } @friends;
+
+    foreach (@friends) {
+        my $i    = $_->{i};
         my $user = $res{"friend_${i}_user"};
 
         my $mask = $res{"friend_${i}_groupmask"} || 1;

@@ -17,6 +17,8 @@ my @SubclassesList = map { __PACKAGE__ . '::' . $_ } qw(
     CommentDelete
     CustomRatingsScreen
     CustomRatingsUnscreen
+    ChangeEntryProp
+    ChangeEntryText
     ChangeSetting
     DeleteDelayedEntry
     DeleteEntry
@@ -72,6 +74,33 @@ foreach my $subclass (@SubclassesList) {
     }
 
     $ActionToSubclassMap{ $subclass->action } = $subclass;
+}
+
+sub get_actions_map {
+    my @actions = @_;
+
+    my %actions_group_map;
+    foreach (values %ActionToSubclassMap) {
+        push @{$actions_group_map{ $_->group() }}, $_->action();
+    }
+
+    return %actions_group_map unless (@actions);
+
+    my %action_to_filter;
+    foreach my $key (keys %actions_group_map) {
+        foreach (@{$actions_group_map{$key}}) {
+            $action_to_filter{$_} = $key;
+        }
+    }
+
+    my %filter_actions;
+    foreach (@actions) {
+        my $key = $action_to_filter{$_};
+        die "Action \"$_\" is not exist" unless $key;
+        push @{$filter_actions{$key}}, $_;
+    }
+
+    return %filter_actions;
 }
 
 sub get_action_list {

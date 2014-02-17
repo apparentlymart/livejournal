@@ -907,7 +907,7 @@ sub delete_post {
     my $post = $args{'post_id'};
     my ($jitemid, $commid) = $post =~ m#^(\d+)-(\d+)$#; ##
 
-    my $dbh = LJ::get_db_reader ();
+    my $dbh = LJ::get_db_writer ();
     my $res = $dbh->do ("UPDATE category_recent_posts SET is_deleted = 1 WHERE journalid = ? AND jitemid = ?", undef, $commid, $jitemid);
 
     ## Need to delete linked keywords from key_map

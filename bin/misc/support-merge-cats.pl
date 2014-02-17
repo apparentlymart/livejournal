@@ -117,6 +117,8 @@ my $tags = get_tags($spcatid_from);
 my $count_tags = scalar(@$tags);
 my $count_tags_moved = 0;
 
+die "Follow should be run with --write param" if !$write;
+
 foreach my $tag (@$tags) {
     my $move_result = move_tag( $tag, $spcatid_to, 'pretend' => !$write );
 

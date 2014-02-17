@@ -516,6 +516,11 @@ sub init {
             $state = 'B';
         }
     }
+    if (LJ::PartnerSite->find_by_journal_username($journalu->{'user'})) {
+        if (LJ::AntiSpam->is_spam($form->{body}, $journalu->{'userid'})) {
+            $state = 'B';
+        }
+    }
 
     my $parent = {
         state     => $parpost->{state},

@@ -489,7 +489,7 @@ sub reject_comm_invite {
     my ($u, $cu) = @_;
 
     if (LJ::is_enabled('new_friends_and_subscriptions')) {
-        return LJ::User::FriendInvites->accept($u, $cu);
+        return LJ::User::FriendInvites->reject($u, $cu);
     }
 
     $u = LJ::want_user($u);
@@ -797,6 +797,12 @@ sub do_join_community {
         warn "Cant load community row [" . $c->user . "]";
     }
 
+
+    my $err = '';
+    unless ($c->can_join_community(\$err, { friend => $u })) {
+        return (0, $err);
+    }
+
     # friend comm -> user
     unless ($c->add_friend($u)) {
         return;
@@ -1032,6 +1038,8 @@ sub comm_join_request {
 
     return unless $aa;
 
+    LJ::User::FriendInvites->send($c, $u, $u);
+
     # if there are older duplicates, invalidate any existing unused authactions of this type
     $dbh->do(qq[
             UPDATE
@@ -1192,6 +1200,8 @@ sub approve_pending_member {
 
     return unless $cnt;
 
+    LJ::User::FriendInvites->accept($c, $u);
+
     LJ::run_hooks('approve_member',{
         users       => [{
             id   => $uid,
@@ -1269,6 +1279,8 @@ sub reject_pending_member {
     }
 
     return unless $cnt;
+
+    LJ::User::FriendInvites->reject($c, $u);
 
     LJ::run_hooks('reject_member', {
         users       => [{

@@ -1190,6 +1190,11 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_};
     }
 
+    # optional opts
+    foreach (qw( prop_discovery )) {
+        $req->{$_} = $POST->{$_} if defined $POST->{$_};
+    } 
+
     if ( length( $POST->{'prop_current_music'} ) > 197 ) {
         my $pos = index( $POST->{'prop_current_music'}, '|' );
 
@@ -1731,39 +1736,37 @@ sub res_includes {
 
         my $site_params = LJ::js_dumper(\%site);
 
-        my $journal_info_json = LJ::JSON->to_json(\%journal_info);
-        my $jsml_out          = LJ::JSON->to_json(\%LJ::JSML);
-        my $jsvar_out         = LJ::JSON->to_json(\%LJ::JSVAR);
+        my $to_json = sub {
+            return 'null' unless $_[0];
+
+            $_[0] = LJ::JSON->to_json($_[0]);
+
+            # LJSUP-12854: Fix escape for Site object
+            $_[0] =~ s{(?<=</s)(?=cript)} {"+"}gi;
+
+            return $_[0];
+        };
+
+        my $journal_info_json = $to_json->(\%journal_info);
+        my $jsml_out          = $to_json->(\%LJ::JSML);
+        my $jsvar_out         = $to_json->(\%LJ::JSVAR);
+        my $remote_info       = $to_json->(get_remote_info());
+        my $journal_info      = $to_json->(get_journal_info());
+        my $entry_info        = $to_json->(get_entry_info());
+        my $branding_info     = $to_json->(get_branding_info());
+
         my $site_version      = LJ::ejs($LJ::CURRENT_VERSION);
-
-        my $remote_info  = get_remote_info();
-        my $journal_info = get_journal_info();
-
-        if ($remote_info) {
-            $remote_info = LJ::JSON->to_json($remote_info);
-        } else {
-            $remote_info = 'null';
-        }
-
-        if ($journal_info) {
-            $journal_info = LJ::JSON->to_json($journal_info);
-        } else {
-            $journal_info = 'null';
-        }
-
-        # LJSUP-12854: Fix escape for Site object
-        $jsml_out  =~ s{(?<=</s)(?=cript)} {"+"}g;
-        $jsvar_out =~ s{(?<=</s)(?=cript)} {"+"}g;
 
         $ret_js .= <<"";
             <script type="text/javascript">
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
                 Site.page = $jsvar_out;
-                Site.page.template = {};
+                Site.page.template = $branding_info;
                 Site.timer = +(new Date());
                 Site.remote = $remote_info;
                 Site.journal = $journal_info;
+                Site.entry = $entry_info;
                 (function(){
                     var p = $site_params, i;
                     for (i in p) Site[i] = p[i];
@@ -1977,10 +1980,10 @@ sub res_includes {
         $ret .= $ret_css;
         foreach my $library (@LJ::CSS_SOURCES_ORDER){ ## add libraries in strict order
             next unless $libs{$library};
-            $tags->("stccss$library",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
+            $tags->("stccss$library",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##>");
         }
-        $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##/>");
-        $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##/>");
+        $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" ##>");
+        $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" ##>");
     }
 
     unless ($opts->{only_css}) {
@@ -2013,7 +2016,7 @@ sub res_includes {
             $ret .= qq{<script type="text/javascript" src="$code"></script>\r\n} unless $opts->{only_css};
         }
         elsif ( $type eq 'css_link' ) {
-            $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" />} unless $opts->{only_js};
+            $ret .= qq{<link rel="stylesheet" type="text/css" href="$code" >} unless $opts->{only_js};
         }
         elsif ( $type eq 'html' ) {
             $ret .= $code unless $opts->{only_css}; ## add raw html to js part
@@ -2086,6 +2089,40 @@ sub get_journal_info {
         is_suspended     => LJ::JSON->to_boolean($journal->is_suspended),
         is_community     => LJ::JSON->to_boolean($journal->is_community),
     };
+}
+
+sub get_entry_info {
+    my $entry = LJ::Entry->new_from_url(LJ::Request->current_page_url());
+    return unless $entry && $entry->valid;
+
+    my $journal = $entry->journal;
+    return unless $journal;
+
+    my $poster = $entry->poster;
+    return unless $poster;
+
+    return {
+        ditemid => $entry->ditemid,
+        title   => $entry->subject_raw,
+        poster  => $poster->user,
+        journal => $journal->user,
+    }
+}
+
+# Discovery times branding 
+sub get_branding_info {
+    my $bodyref = '';
+
+    LJ::run_hooks('ljtimes_rebranding' => {
+        'location' => 'reskining_html',
+        'bodyref'  => \$bodyref,
+    });
+
+    return {} unless $bodyref;
+
+    return {
+        ljlive_branding => $bodyref
+    }
 }
 
 # Returns HTML of a dynamic tag could given passed in data

@@ -350,13 +350,10 @@ sub insert_resources {
 
     my $hc = $page->{head_content};
 
-    my $js_inc = LJ::res_includes({ only_js => 1 }) || '';
-    $js_inc .= LJ::SocialScripts::print_scripts();
-
     my %res = (
         ALL_RES => $hc->subst_header() || '',
 
-        JS_RES => $js_inc,
+        JS_RES => LJ::res_includes({ only_js => 1 }) || '',
     );
 
     $hc->{opts}->{without_js} = 1;
@@ -4217,14 +4214,14 @@ sub UserLite__get_link
     if ($key eq 'add_friend' && defined($remote) && ! LJ::is_friend($remote, $u)) {
         if (LJ::is_enabled('new_friends_and_subscriptions')) {
             if (!$remote->is_mysubscription($u)) {
-                return $button->("$LJ::SITEROOT/users/add?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
+                return $button->("$LJ::SITEROOT/relations/add/?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
             }
         } else {
             return $button->("$LJ::SITEROOT/friends/add.bml?user=$user", "Add $user to friends list", "btn_addfriend.gif?v=17312");
         }
     }
     if ($key eq 'modify_friend' && defined($remote) && LJ::is_enabled('new_friends_and_subscriptions') && $remote->is_subscription($u)) {
-        return $button->("$LJ::SITEROOT/users/add?user=$user", "Modify $user in friends list", "btn_addfriend.gif?v=17312");
+        return $button->("$LJ::SITEROOT/relations/add/?user=$user", "Modify $user in friends list", "btn_addfriend.gif?v=17312");
     }
     if ($key eq 'post_entry') {
         return undef unless $has_journal and LJ::can_use_journal($remote->{'userid'}, $user);
@@ -4416,7 +4413,8 @@ sub _Entry__get_link
         return $null_link unless $remote &&
                                     ( LJ::u_equals( $remote, $journalu ) ||
                                       LJ::u_equals( $remote, $posteru ) ||
-                                      $remote->can_manage($journalu)
+                                      $remote->can_manage($journalu) ||
+                                      $remote->can_edit_others_post($journalu)
                                     );
 
         if ($this->{delayed}) {
@@ -5964,6 +5962,9 @@ sub ljart_artist_specs {
         ljart.create.artist.spec.photographer
         ljart.create.artist.spec.architect
         ljart.create.artist.spec.theoretician
+        ljart.create.artist.spec.producer
+        ljart.create.artist.spec.curator
+        ljart.create.artist.spec.artmanager
     }])}];
 }
 

@@ -176,14 +176,14 @@ sub update {
     $self->{'taglist'} = __extract_tag_list(\$req->{props}->{taglist});
     $req->{'event'}    =~ s/\r\n/\n/g; # compact new-line endings to more comfort chars count near 65535 limit
 
-    $self->journal->do( "UPDATE delayedlog2 SET posterid=?, " .
+    $self->journal->do( "UPDATE delayedlog2 SET " .
                         "subject=?, posttime = ?, " .
                         "security=?, allowmask=?, " .
                         "year=?, month=?, day=?, " .
                         "rlogtime=?, revptime=?, is_sticky=? " .
                         "WHERE journalid=? AND delayedid=?",
                         undef,
-                        $posterid, LJ::text_trim($req->{'subject'}, 30, 0),
+                        LJ::text_trim($req->{'subject'}, 30, 0),
                         $posttime, $security, $allowmask,
                         $req->{year}, $req->{mon}, $req->{day},
                         $rlogtime, $rposttime, $sticky_type, $journalid, $delayedid );
@@ -196,6 +196,21 @@ sub update {
     $self->__set_mark($req);
     my $memcache_key = "delayed_entry:$journalid:$delayedid";
     LJ::MemCache::set($memcache_key, $data_ser, 3600);
+}
+
+sub set_prop {
+    my ($self, $prop, $value) = @_;
+    $self->set_prop_multi({$prop => $value});
+}
+
+sub set_prop_multi {
+    my ($self, $props) = @_;
+    return unless $props && %$props;
+
+    $self->props->{$_} = $props->{$_} foreach keys %$props;
+    
+    $self->update($self->data);
+    return 1;    
 }
 
 sub convert {
@@ -586,6 +601,17 @@ sub url {
     return $url;
 }
 
+sub edit_url {
+    my $self = shift;
+
+    my $journal = $self->journal && $self->journal->username;
+    my $itemid  = $self->delayedid;
+
+    return unless $journal && $itemid;
+
+    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;delayedid=$itemid";
+}
+
 sub statusvis {
     my ($self) = @_;
     my $statusvis = $self->prop("statusvis") || '';
@@ -969,11 +995,16 @@ sub get_entries_by_journal {
         $sql_limit = "LIMIT $skip, $show";
     }
 
+    my $time_filter = '';
+    if ( $opts->{time_begin} && $opts->{time_end} ) {
+        $time_filter = sprintf("AND logtime > \"%s\" AND logtime < \"%s\" ", $opts->{time_begin}, $opts->{time_end} );
+    }
+
     my $sticky_sql = $sticky_on_top ? 'is_sticky ASC, ' : '';
     my $journalid = $journal->userid;
 
     return $dbcr->selectcol_arrayref("SELECT delayedid " .
-                                     "FROM delayedlog2 WHERE journalid=$journalid $sql_poster ".
+                                     "FROM delayedlog2 WHERE journalid=$journalid $sql_poster $time_filter".
                                      "AND finaltime IS NULL " .
                                      "ORDER BY $sticky_sql revptime DESC $sql_limit");
 }
@@ -1163,6 +1194,10 @@ sub __delayed_entry_can_see {
     }
 
     if ($poster->can_moderate($uowner)) {
+        return 1;
+    }
+
+    if ($poster->can_edit_others_post($uowner)) {
         return 1;
     }
 

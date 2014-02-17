@@ -2,6 +2,7 @@ package LJ::User::Rename;
 use strict;
 use warnings;
 
+use LJ::Auth::Method::Digest;
 use LJ::Request;
 use LJ::MemCacheProxy;
 use LJ::Event::SecurityAttributeChanged;
@@ -163,7 +164,8 @@ sub basic_rename {
     my $err;
     if ($to) {
         $err = $actual_rename->($from, $to);
-    } else { # move away destination name as additional rename step
+    }
+    else { # move away destination name as additional rename step
         for my $i (1..3) {
             $to = get_unused_name($from);
             $err = $actual_rename->($from, $to);
@@ -290,6 +292,8 @@ sub basic_rename {
     unless ($opts->{opt_domainru}) {
        $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->userid);
     }
+
+    LJ::Auth::Method::Digest::clear_auth_digest_ha1($u);
 
     return $to;
 }

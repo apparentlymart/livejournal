@@ -4,6 +4,8 @@
  use vars qw(%GET %POST $title $body);
  BML::decl_params(_default => qr/./);
 
+ use LJ::Discovery::Times;
+
  my $dbr = LJ::get_db_reader();
 
  $title = $ML{'.title'};
@@ -255,7 +257,7 @@
 
      $body .= "</td></tr>\n";
      $body .= "<tr><th align='right' valign='top'>$ML{'.security'}</th><td>";
-     $body .= LJ::html_select({name => 'security', selected => defined $memory ? $memory->{'security'} : undef},
+     $body .= LJ::html_select({name => 'security', selected => defined $memory ? $memory->{'security'} : $GET{'security'} || undef},
                               map { ($_, $secopts{$_}) } qw(public friends private));
      if ($memoryu->{'journaltype'} eq "C") {
          $body .= "<br /><small>$ML{'.whocansee.comm'}</small></td></tr><tr><th></th><td>\n";
@@ -351,6 +353,13 @@
                               security => $sec,
                           }, \@kwid);
      LJ::Memories::updated_keywords($memoryu) if $needflush;
+
+     if ($authas eq $LJ::DISCOVERY_COMMUNITY_NAME) {
+        LJ::Discovery::Times->delete_recommend({
+            journalid => $jid,
+            itemid    => $itemid,
+        });
+     }
 
      $title = $ML{'.title.added'};
      $body = LJ::get_ads({ 

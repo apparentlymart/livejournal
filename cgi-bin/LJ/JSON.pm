@@ -107,6 +107,20 @@ sub decode_unknown_type {
     return "$what";
 }
 
+sub clean_after_encode {
+    my ($class, $encoded) = @_;
+
+    unless (Encode::is_utf8($encoded)) {
+        $encoded = Encode::decode('utf8', $encoded);
+    }
+
+    # Perl 5.10 do not understand \x{00ad} sequence as Unicode char in the regexp s/...|\x{00ad}|.../, therefore we used char class.
+    # Dangerous symbols, that were tested on the Chrome and were a reason of its crush: \r \n \x{2028} \x{2029}
+    $encoded =~ s/[\r\n\x{0000}\x{0085}\x{00ad}\x{2028}\x{2029}\x{0600}-\x{0604}\x{070f}\x{17b4}\x{17b5}\x{200c}-\x{200f}\x{202a}-\x{202f}\x{2060}-\x{206f}\x{feff}\x{fff0}-\x{ffff}]//gs;
+
+    return Encode::encode('utf8', $encoded);
+}
+
 package LJ::JSON::XS;
 
 our @ISA;
@@ -120,6 +134,12 @@ sub can_load {
 sub new {
     my ($class) = @_;
     return $class->SUPER::new->latin1;
+}
+
+sub encode {
+    my $class = shift;
+    my $encoded = $class->SUPER::encode(@_);
+    return $class->clean_after_encode($encoded);
 }
 
 sub decode {

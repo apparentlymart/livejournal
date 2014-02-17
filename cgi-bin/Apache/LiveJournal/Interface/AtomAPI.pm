@@ -583,18 +583,9 @@ sub handle {
 
     my $valid_actions = qr{feed|edit|post|upload|categories};
 
-    # let's authenticate.
-    #
-    # if wsse information is supplied, use it.
-    # if not, fall back to digest.
-    my $wsse = LJ::Request->header_in('X-WSSE');
-    my $nonce_dup;
-    my $u = $wsse ? auth_wsse($wsse, \$nonce_dup) : LJ::auth_digest();
+    my $u = LJ::Auth::Method::Digest::auth_digest();
     return respond(401, "Authentication failed for this AtomAPI request.")
         unless $u;
-
-    return respond(401, "Authentication failed for this AtomAPI request.")
-        if $nonce_dup && $action && $action ne 'post';
 
     # service autodiscovery
     # TODO: Add communities?
@@ -670,68 +661,6 @@ sub handle {
     }->{$action}->($remote, $u, $opts);
 
     return LJ::Request::OK;
-}
-
-# Authenticate via the WSSE header.
-# Returns valid $u on success, undef on failure.
-sub auth_wsse
-{
-    my ($wsse, $nonce_dup) = @_;
-    my $fail = sub {
-        my $reason = shift;
-        return undef;
-    };
-    $wsse =~ s/UsernameToken // or return $fail->("no username token");
-
-    # parse credentials into a hash.
-    my %creds;
-    foreach (split /, /, $wsse) {
-        my ($k, $v) = split '=', $_, 2;
-        $v =~ s/^[\'\"]//;
-        $v =~ s/[\'\"]$//;
-        $v =~ s/=$// if $k =~ /passworddigest/i; # strip base64 newline char
-        $creds{ lc($k) } = $v;
-    }
-
-    # invalid create time?  invalid wsse.
-    my $ctime = LJ::ParseFeed::w3cdtf_to_time( $creds{created} ) or
-        return $fail->("no created date");
-
-    # prevent replay attacks.
-    $ctime = LJ::TimeUtil->mysqldate_to_time( $ctime, 'gmt' );
-    return $fail->("replay time skew") if abs(time() - $ctime) > 42300;
-
-    my $u = LJ::load_user( LJ::canonical_username( $creds{'username'} ) )
-        or return $fail->("invalid username [$creds{username}]");
-
-    if (@LJ::MEMCACHE_SERVERS && ref $nonce_dup) {
-        $$nonce_dup = 1
-          unless LJ::MemCache::add( "wsse_auth:$creds{username}:$creds{nonce}", 1, 180 )
-    }
-
-    if (LJ::login_ip_banned($u)) {
-        return $fail->("ip_ratelimiting");
-    }
-
-    # validate hash
-    my $hash = Digest::SHA1::sha1_base64($creds{nonce} . $creds{created} . $u->clean_password);
-
-    # Nokia's WSSE implementation is incorrect as of 1.5, and they
-    # base64 encode their nonce *value*.  If the initial comparison
-    # fails, we need to try this as well before saying it's invalid.
-    if ($hash ne $creds{passworddigest}) {
-
-        $hash = Digest::SHA1::sha1_base64(MIME::Base64::decode_base64($creds{nonce}) . $creds{created} . $u->clean_password);
-
-        if ($hash ne $creds{passworddigest}) {
-            LJ::handle_bad_login($u);
-            return $fail->("hash wrong");
-        }
-    }
-
-    # If we're here, we're valid.
-    LJ::set_remote($u);
-    return $u;
 }
 
 1;

@@ -79,8 +79,17 @@ body<=
 
      my $u = LJ::load_userid($aa->{'userid'});
 
+     my $sm_ids = LJ::load_rel_target($remote, 'S') || [];
+     my $adm_ids = LJ::load_rel_target($remote, 'A') || [];
+
      return "<?p You do not have access to send email validation requests to other people. p?>"
-         unless (LJ::u_equals ($u, $remote) || LJ::check_priv($remote, "siteadmin", "users") || LJ::check_priv($remote, "siteadmin", "*"));
+         unless (
+            LJ::u_equals ($u, $remote)
+            || LJ::check_priv($remote, "siteadmin", "users")
+            || LJ::check_priv($remote, "siteadmin", "*")
+            || (grep { $u->userid == $_ } @$sm_ids)
+            || (grep { $u->userid == $_ } @$adm_ids)
+         );
 
      # verify their email hasn't subsequently changed
      unless ($u && ($u->email_raw eq $aa->{arg1})) {

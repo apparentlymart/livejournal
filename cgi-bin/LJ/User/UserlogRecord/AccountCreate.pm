@@ -4,7 +4,11 @@ use warnings;
 
 use base qw( LJ::User::UserlogRecord );
 
-sub action      {'account_create'}
-sub description {'Account created'}
+sub action {'account_create'}
+sub group  {'account'}
+
+sub description {
+    return LJ::Lang::ml('userlog.action.account.create');
+}
 
 1;

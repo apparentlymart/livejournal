@@ -1,10 +1,13 @@
 package LJ::SiteScheme;
+
 use strict;
 use warnings;
 
-use LJ::Auth::Challenge;
+# Internal modules
 use LJ::Lang qw( ml );
+use LJ::Auth::Challenge;
 use LJ::Widget::SGMessages;
+use LJ::User::FriendInvites;
 
 my %CODE_TO_CLASS_MAP;
 
@@ -56,10 +59,18 @@ sub render_page {
 sub find_handler {
     my ($class) = @_;
 
+    my $usescheme = LJ::Request->get_param('usescheme');
+
+    return $class->handler_from_code($usescheme) || $class->handler_from_code('schemius')
+        if LJ::is_enabled('schemius_with_usescheme');
+
+    return $class->handler_from_code('schemius')
+        if LJ::is_enabled('schemius');
+
     my @candidate_codes = (
         LJ::Request->notes('bml_use_scheme'),
         LJ::run_hook('force_scheme'),
-        LJ::Request->get_param('usescheme'),
+        $usescheme,
         LJ::Request->cookie('BMLschemepref'),
         LJ::run_hook('default_scheme'),
         'lynx',
@@ -109,14 +120,16 @@ sub template_param_breadcrumbs {
 }
 
 sub show_mobile_link {
+    return 0 if LJ::Request->cookie ('hide_mobile_link');
     return 1 if LJ::is_enabled('view_mobile_link_always');
     return 1 if Apache::WURFL->is_mobile;
     return 0;
 }
 
 sub lentaru_branding {
-    my $time_start = 1343332800; # 27.07.2012 00:00 MSK
-    my $time_end   = 1344801599; # 12.08.2012 23:59 MSK
+    return 1 if LJ::is_enabled('show_olympic_games_widget_2014');
+    my $time_start = 1391868000; # 08.02.2014 00:00 MSK
+    my $time_end   = 1393164000; # 23.02.2014 23:59 MSK
 
     return unless time > $time_start && time < $time_end;
 
@@ -251,6 +264,8 @@ sub common_template_params {
     my $remote_ljphoto_url     = '';
     my $remote_can_use_ljphoto = 0;
     my $remote_is_sup          = 0;
+    my $remote_invites_count   = 0;
+    my $remote_usermsg_count   = 0;
 
     if ($remote) {
         my $username = $remote->username;
@@ -267,6 +282,8 @@ sub common_template_params {
             $remote_userpic_url = $upi->url;
         }
 
+        my $inbox = $remote->notification_inbox;
+
         $remote_personal        = $remote->is_personal;
         $remote_identity        = $remote->is_identity;
         $remote_paid            = $remote->get_cap('paid');
@@ -277,11 +294,13 @@ sub common_template_params {
         $remote_recent_url      = $remote->journal_base . '/';
         $remote_friends_url     = $remote->journal_base . '/friends/';
         $remote_can_use_esn     = $remote->can_use_esn;
-        $remote_unread_count    = $remote->notification_inbox->unread_count;
+        $remote_unread_count    = $inbox->unread_count;
+        $remote_usermsg_count   = $inbox->usermsg_recvd_event_count;
         $remote_wallet_link     = LJ::Pay::Wallet->get_wallet_link($remote);
         $remote_ljphoto_url     = $remote->journal_base . '/pics/';
         $remote_can_use_ljphoto = $remote->can_use_ljphoto ? 1 : 0;
         $remote_is_sup          = LJ::SUP->is_remote_sup();
+        $remote_invites_count   = LJ::User::FriendInvites->count_recv_invites($remote);
     }
 
     my $need_loginform = 0;
@@ -389,28 +408,22 @@ sub common_template_params {
 
     ## service page branding (optional)
     ## see also cgi-bin/LJ/Hooks/Homepage.pm
-    my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code }); 
+    my $branding = LJ::run_hook("service_page_branding", { scheme => $class->code });
 
-    if ( lentaru_branding() ) {
-        LJ::need_res(qw{ 
+    my $lentaru_branding = lentaru_branding();
+    if ($lentaru_branding) {
+        LJ::need_res(qw{
             js/jquery/jquery.lj.lentaRu.js
-            stc/widgets/flags.css
-            stc/widgets/olympics.css
-            templates/Widgets/olympics/olympics_bubble.tmpl
         });
 
-        my $json = LJ::MemCache::get('lentaru_olympics_json');
-        if ($json) {
-            LJ::need_var(lentaRu => {result => $json});
-        } else {    
-            my $browser = LWP::UserAgent->new;
-            my $response = $browser->get( 'http://olympic2012.lenta.ru/export/medals-top.json' );
-            if ($response->is_success) {
-                $json = eval { LJ::JSON->from_json($response->decoded_content) };
-                LJ::MemCache::set('lentaru_olympics_json', $json, 1800);
-                LJ::need_var(lentaRu => {result => $json});
-            }
-        }
+        LJ::need_string('olympics.widget.full.standings');
+        LJ::need_res_group('popupus');
+
+        my $json = LJ::API::LentaRu->get_olympics();
+        LJ::need_var(lentaRu => $json->{'result'});
+
+        $lentaru_branding = 0
+            if ref $json->{'result'}->{'result'}->{'team'} ne 'ARRAY';
     }
 
     return {
@@ -458,10 +471,12 @@ sub common_template_params {
         'remote_friends_url'     => $remote_friends_url,
         'remote_can_use_esn'     => $remote_can_use_esn,
         'remote_unread_count'    => $remote_unread_count,
+        'remote_usermsg_count'   => $remote_usermsg_count,
         'remote_wallet_link'     => $remote_wallet_link,
         'remote_ljphoto_url'     => $remote_ljphoto_url,
         'remote_can_use_ljphoto' => $remote_can_use_ljphoto,
         'remote_is_sup'          => $remote_is_sup,
+        'remote_invites_count'   => $remote_invites_count,
 
         'need_loginform'              => $need_loginform,
         'loginform_returnto'          => $loginform_returnto,
@@ -496,9 +511,9 @@ sub common_template_params {
         'ml_copyright_header' => $ml_copyright_header,
 
         'branding'            => $branding,
-        'lentaru_branding'    => lentaru_branding() || undef,
+        'lentaru_branding'    => $lentaru_branding,
         'random_value'        => int(rand(999999999)),
-        
+
         'lj_home'             => $lj_home,
     };
 }

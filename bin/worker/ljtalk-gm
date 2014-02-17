@@ -181,10 +181,10 @@ sub ljtalk_auth_check {
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
     return "ERR:notperson"  unless $u->is_person;
-    return "ERR:nopassword" unless $u->password;
+    return "ERR:nopassword" unless $u->clean_password;
 
     return "ERR:banned" if LJ::login_ip_banned($u, $ip);
-    my $correct = sha1_hex($streamid . $u->password);
+    my $correct = sha1_hex($streamid . $u->clean_password);
     unless ($digest eq $correct) {
         LJ::handle_bad_login($u, $ip);
         return "ERR:badpass";

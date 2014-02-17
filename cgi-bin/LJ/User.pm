@@ -151,7 +151,16 @@ sub create_personal {
                 LJ::statushistory_add($u, $inviter, 'create_from_invite', "Created new account.");
 
 
-                $u->add_friend($inviter);
+                $u->add_friend($inviter, {
+                    nonotify => 1
+                });
+
+                $u->subscribe_to_user(
+                    $inviter,
+                    force => 1,
+                    nonotify => 1
+                );
+
                 LJ::Event::InvitedFriendJoins->new($inviter, $u)->fire;
             }
         }
@@ -162,7 +171,15 @@ sub create_personal {
             : @LJ::INITIAL_FRIENDS;
     foreach my $friend (@initial_friends) {
         if (my $fu = LJ::load_user($friend)) {
-            $u->add_friend($fu);
+            $u->add_friend($fu, {
+                nonotify => 1
+            });
+
+            $u->subscribe_to_user(
+                $fu,
+                force => 1,
+                nonotify => 1
+            );
         }
     }
 
@@ -350,6 +367,8 @@ sub new_from_external_domain {
     $host =~ s/^www\.//;
     $host =~ s/_/-/g if ($host =~ /(.*?)\.?(?:xn--80adlbbiisqhy9a|xn--f1aa)\.xn--p1ai/);
 
+    return undef if $host eq 'livejournal.com';
+
     if (my $user = $LJ::DOMAIN_JOURNALS_REVERSE{$host}) {
         return LJ::load_user($user);
     }
@@ -406,7 +425,9 @@ sub username_from_url {
     }xo; # $LJ::USER_DOMAIN is basically a constant, let Perl know that
 
     if ( $LJ::USER_DOMAIN && $url =~ $user_uri_regex ) {
-        return $1;
+        my $username = $1;
+        my $canonical_username = LJ::canonical_username ($username);
+        return (grep { $_ eq $canonical_username } @LJ::PROT_DNS_USERNAMES) ? undef : $username;
     }
 
 }
@@ -2932,7 +2953,7 @@ sub get_reader_weight {
         journal_id => $u->userid,
     });
 
-    return undef unless $resp;
+    return -1 unless $resp;
 
     $reader_weight = $resp->{reader_weight};
 
@@ -3760,6 +3781,13 @@ sub can_post_to {
     my ($u, $targetu) = @_;
     return unless $u && $targetu;
     return LJ::can_use_journal($u->id, $targetu->user);
+}
+
+sub can_edit_others_post {
+    my ($u, $journal) = @_;
+    return unless $u && $journal;
+    return 0 unless $LJ::ALLOW_EDIT_OTHERS_POST{$journal->username};
+    return $journal->is_member($u);
 }
 
 sub delete_and_purge_completely {
@@ -4869,22 +4897,6 @@ sub get_post_ids {
     }
 }
 
-sub password {
-    my $u = shift;
-
-    return unless $u->is_person;
-
-    $u->{_password} ||= LJ::MemCache::get_or_set(
-        [ $u->{userid}, "pw:$u->{userid}" ],
-        sub {
-            my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
-            return $dbh->selectrow_array("SELECT password FROM password WHERE userid = ?", undef, $u->id);
-        }
-    );
-
-    return $u->{_password};
-}
-
 # This is a copy of 'sub password { ... }' for refactoring
 sub clean_password {
     my $u = shift;
@@ -4902,14 +4914,30 @@ sub clean_password {
     return $u->{_password};
 }
 
+sub password_md5 {
+    my $u = shift;
+
+    my $password = $u->clean_password;
+    return undef unless defined $password;
+
+    return Digest::MD5::md5_hex($password);
+}
+
 sub has_password {
     my $u = shift;
-    return $u->clean_password ? 1 : 0;
+    return $u->password_md5 ? 1 : 0;
 }
 
 sub has_the_same_password_as {
     my ($u, $other) = @_;
-    return $u->clean_password eq $other->clean_password;
+    return $u->password_md5 eq $other->password_md5;
+}
+
+# Used in LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change) before password changing.
+# May be it is more correctly to add InfoHistory inside set_password subroutine?
+sub digest_of_password_change {
+    my $u = shift;
+    return Digest::MD5::md5_hex($u->clean_password . 'change');
 }
 
 sub reset_password {
@@ -7926,6 +7954,9 @@ sub get_uids {
 sub set_password {
     my ($userid, $password) = @_;
 
+    my $u = LJ::load_userid($userid);
+    return unless $u;
+
     my $dbh = LJ::get_db_writer();
     if ($LJ::DEBUG{'write_passwords_to_user_table'}) {
         $dbh->do("UPDATE user SET password=? WHERE userid=?", undef,
@@ -7939,6 +7970,8 @@ sub set_password {
     LJ::MemCache::delete([$userid, "pw:$userid"]);
     my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
     $cache->{'_password'} = $password;
+
+    LJ::Auth::Method::Digest::clear_auth_digest_ha1($u);
 }
 
 sub update_user
@@ -8783,14 +8816,6 @@ sub rate_check {
     }
 
     return 1;
-}
-
-sub login_ip_banned {
-    return LJ::Auth::Checker::login_ip_banned(@_);
-}
-
-sub handle_bad_login {
-    return LJ::Auth::Checker::handle_bad_login(@_);
 }
 
 # <LJFUNC>

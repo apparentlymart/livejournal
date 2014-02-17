@@ -81,7 +81,7 @@ sub get_subjecticons
 sub entry_comment_password_hash {
     my $args = shift;
     croak "Invalid usage of LJ::Talk::entry_comment_password_hash" unless LJ::isu($args->{'poster'});
-    return "ecph-" . Digest::MD5::md5_hex($args->{'itemid'} . $args->{'talkid'} . $args->{'poster'}->clean_password);
+    return "ecph-" . Digest::MD5::md5_hex($args->{'itemid'} . $args->{'talkid'} . $args->{'poster'}->password_md5);
 }
 
 # Returns talkurl with GET args added (don't pass #anchors to this :-)

@@ -74,12 +74,19 @@ sub mysqldate_to_ljtime {
 sub mysqldate_to_time {
     my ($class, $string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
-    my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4, $5, $6);
+    my ($y, $mon, $d, $h, $min, $s) = ($1, $2, $3, $4+0, $5+0, $6+0);
     return undef unless ($d + 0) and ($mon + 0); # '00' is string and is true value
     my $calc = sub {
-        $gmt ?
-            Time::Local::timegm($s, $min, $h, $d, $mon-1, $y) :
-            Time::Local::timelocal($s, $min, $h, $d, $mon-1, $y);
+        my $dt = DateTime->new(
+            year       => $y,
+            month      => $mon,
+            day        => $d,
+            hour       => $h,
+            minute     => $min,
+            second     => $s,
+            time_zone  => $gmt ? 'UTC' : 'local',
+        );
+        return $dt->epoch();
     };
 
     # try to do it.  it'll die if the day is bogus
@@ -157,14 +164,19 @@ sub time_to_w3c {
 sub mysql_time {
     my ($class, $time, $gmt) = @_;
     $time ||= time();
-    my @ltime = $gmt ? gmtime($time) : localtime($time);
+    my $dt = DateTime->from_epoch(
+        epoch     => $time,
+        time_zone => $gmt ? 'UTC' : 'local'
+    );
+
     return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
-                   $ltime[5]+1900,
-                   $ltime[4]+1,
-                   $ltime[3],
-                   $ltime[2],
-                   $ltime[1],
-                   $ltime[0]);
+        $dt->year(),
+        $dt->month(),
+        $dt->day(),
+        $dt->hour(),
+        $dt->minute(),
+        $dt->second(),
+    );
 }
 
 sub alldatepart {

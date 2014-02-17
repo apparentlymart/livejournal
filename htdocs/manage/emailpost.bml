@@ -2,7 +2,7 @@
 title=><?_ml .title _ml?>
 head<=
     <style type="text/css">
-    
+
     fieldset
     {
         border: 1px solid #cdcdcd;
@@ -92,7 +92,7 @@ body<=
             {
                 name  => 'pin',
                 title => $ML{'.help.pinusage.header'},
-                url   => '?mode=help&type=pin', 
+                url   => '?mode=help&type=pin',
                 text  => qq{
                     <?h1 $ML{'.help.pinusage.header'} h1?><br />
 
@@ -103,7 +103,7 @@ body<=
                     $subject
                     $body
                     emailex?></fieldset>
-    
+
                     <fieldset><legend>$ML{'.help.pinusage.insubject.header'}</legend>
                     <?emailex
                     $to
@@ -234,8 +234,8 @@ body<=
             {
                 name  => 'images',
                 title => $ML{'.help.images.header'},
-                url   => '?mode=help&type=images', 
-                subject => 
+                url   => '?mode=help&type=images',
+                subject =>
                 body =>
                 text  => qq{
                     <?h1 $ML{'.help.images.header'} h1?><br />
@@ -287,8 +287,8 @@ body<=
 
                     } . BML::ml('.help.images.layout.text3', {'horizontal' => "horizontal"}) . qq{ p?>
                     <span style='white-space: nowrap;'>
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'> 
-                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'> 
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'>
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'>
                     <img src='$LJ::IMGPREFIX/imageplaceholder3.png?v=4201' width='35' height='35'>
                     </span>
                     <br /><br />
@@ -357,7 +357,7 @@ body<=
             $ret .= "[ &lt;&lt; <a href='$lastt->{url}'>$lastt->{title}</a> ] &nbsp; ";
         }
         if ($topics[$topic->{order} + 1]) {
-            $topic->{order} = -1 if ! $type; 
+            $topic->{order} = -1 if ! $type;
             my $nextt = $topics[$topic->{order} + 1];
             $ret .= "[ <a href='$nextt->{url}'>$nextt->{title}</a> &gt;&gt; ]";
         }
@@ -381,7 +381,7 @@ body<=
             unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
 
         push @errors, BML::ml('.error.invalidpinaccount', {'sitename' => $LJ::SITENAMESHORT})
-            if $pin eq $u->password or $pin eq $u->user;
+            if $pin eq $u->user || LJ::Auth::Method::LoginPassword::Clear->check($u, { password => $pin });
 
         # Check email, add flags if needed.
         my %allowed;
@@ -453,7 +453,7 @@ body<=
 
     my @groups = map { $_->{'name'} } @{ $res->{'friendgroups'} };
     my @userpics = @{ $res->{'pickws'} };
-    
+
     $ret .= "<?p " . BML::ml('.intro', {'aopts' => "href='$LJ::SITEROOT/manage/emailpost.bml?mode=help'"}) . " p?><br />";
 
     unless (LJ::get_cap($u, 'emailpost')) {
@@ -474,7 +474,7 @@ body<=
                 value=>$address[$_], size=>40, maxlength=>80});
         $ret .= '</td><td>';
         $selected = 1 if $addrlist->{$address[$_]}->{'get_errors'};
-        $ret .= '<center>' . 
+        $ret .= '<center>' .
             LJ::html_check({name => "check_$_", selected => $selected})
             . '</center>';
         $ret .= '</td></tr>';

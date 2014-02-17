@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 # Internal modules
+use LJ::Text;
 use LJ::Auth::Challenge;
 use LJ::Widget::Calendar;
 use LJ::Widget::JournalPromoStrip;
@@ -162,7 +163,14 @@ sub render {
             $data_remote->{can_post}         = LJ::check_rel($journal, $remote, 'P');
             $data_remote->{can_manage}       = $remote->can_manage($journal);
             $data_remote->{can_moderate}     = $remote->can_moderate($journal);
+
             $data_journal->{pending_members} = scalar(@$pending_members);
+
+            if (my $row = LJ::get_community_row($journal)) {
+                if ($row->{membership} eq 'closed') {
+                    $data_journal->{is_closed} = 1;
+                }
+            }
         }
     } else {
         $data_remote->{is_logged_in} = 0;
@@ -242,7 +250,7 @@ sub render {
 
     my $mobile_link = '';
 
-    if (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile()) {
+    if (!LJ::Request->cookie ('hide_mobile_link') && (!$LJ::DISABLED{'view_mobile_link_always'} || Apache::WURFL->is_mobile())) {
         my $uri = LJ::Request->uri;
         my $hostname = LJ::Request->hostname;
         my $args = LJ::Request->args;
@@ -289,9 +297,9 @@ sub need_res {
         filterset.submit.subscribe
         filterset.subtitle.filters
         filterset.title.subscribed.community
-        filterset.link.addnewfilter
-        filterset.button.save
     });
+
+    LJ::need_res_group('filters_for');
 
     my $remote  = LJ::get_remote();
     my $journal = LJ::load_user($user);
@@ -536,7 +544,9 @@ sub get_feed_filters_new {
 
     foreach my $g (sort { $filters{$a}->{'name'} cmp $filters{$b}->{'name'} } keys %filters) {
         my $item = {
-            name  => lc($filters{$g}->{name}),
+            name  => LJ::Text->eurl(
+                lc($filters{$g}->{name})
+            ),
             value => $filters{$g}->{name},
         };
 
@@ -612,7 +622,9 @@ sub get_feed_filters_old {
         push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
 
         my $item = {
-            name  => lc($group{$g}->{name}),
+            name  => LJ::Text->eurl(
+                lc($group{$g}->{name})
+            ),
             value => $group{$g}->{name},
         };
 

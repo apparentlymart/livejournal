@@ -75,7 +75,7 @@
     initFilter();
     addLabledPlaceholders();
 
-    if ( LJ.Flags.isEnabled('friendsAndSubscriptions') && !IE7mode ) {
+    if ( LJ.Flags.isEnabled('new_friends_and_subscriptions') && !IE7mode ) {
       // init angular
       angular.bootstrap( $('[data-controlstrip]'), ['Relations.Menu']);
     }

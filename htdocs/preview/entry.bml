@@ -62,6 +62,7 @@
         foreach my $k (keys %{$req{'props'}}) {
             $req{'prop_' . $k } =  $req{'props'}{$k};
         }
+        $up = $delayed_obj->poster;
     }
 
     LJ::need_var( 'preview' => 1);
@@ -74,7 +75,7 @@
     # do first expand_embedded pass with the preview flag to extract
     # embedded content before cleaning and replace with tags
     # the cleaner won't eat
-    LJ::EmbedModule->parse_module_embed($u, \$event, edit => 1);
+    LJ::EmbedModule->parse_module_embed($u, \$event, edit => 1, preview => 1);
     # clean content normally
     LJ::CleanHTML::clean_event(\$event, {
         preformatted => $req{'prop_opt_preformatted'},
@@ -370,6 +371,10 @@
         # prevent BML tags interpretation inside post body
         $ret =~ s/<\?/&lt;?/g;
         $ret =~ s/\?>/?&gt;/g;
+
+        my $before_body_close = "";
+        LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+        $ret =~ s!</body>!$before_body_close</body>!i if $before_body_close;
     }
     return $ret;
 }

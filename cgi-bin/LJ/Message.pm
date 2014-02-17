@@ -145,8 +145,9 @@ sub send {
         # a parent message will be marked as read automatically 
         # and moved from suspicious folder to inbox if needed
         if ($self->parent_msgid) {
-            my $nitem = LJ::NotificationItem->new($self->_orig_u, $self->parent_qid);
-            $nitem->mark_read;
+            if (my $nitem = LJ::NotificationItem->new($self->_orig_u, $self->parent_qid)) {
+                $nitem->mark_read;
+            }
         }
 
         return 1;

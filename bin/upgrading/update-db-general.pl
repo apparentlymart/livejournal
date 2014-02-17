@@ -4829,4 +4829,22 @@ register_alter(sub {
     }
 });
 
+register_alter(sub {
+    unless (index_name("subscribers2", "INDEX:subscriptionid")) {
+        do_alter( 'subscribers2',
+            'ALTER TABLE subscribers2 ' .
+            'ADD INDEX subscriptionid (subscriptionid)'
+        );
+    }
+});
+
+register_alter(sub {
+    unless (index_name("subscribersleft", "INDEX:userid")) {
+        do_alter( 'subscribersleft',
+            'ALTER TABLE subscribersleft ' .
+            'ADD INDEX userid (userid)'
+        );
+    }
+});
+
 1; # return true

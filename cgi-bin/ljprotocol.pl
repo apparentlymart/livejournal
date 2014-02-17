@@ -7,6 +7,7 @@ no warnings 'uninitialized';
 use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Auth::Challenge
+                      LJ::Auth::Checker
                       LJ::Auth::Method::ChallengeResponse
                       LJ::Auth::Method::LoginPassword::Clear
                       LJ::Auth::Method::LoginPassword::MD5
@@ -3130,6 +3131,7 @@ sub editevent {
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
+            !($u && $u->can_edit_others_post($uowner)) && # it is not journal, there all members can edit any posts
             !($u && $u->can_manage($uowner)) && # poster is not admin
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
@@ -3386,14 +3388,16 @@ sub editevent {
                 ($ownerid == $u->{'userid'} ||
                  # community account can delete it (ick)
 
-                 LJ::can_manage_other($posterid, $ownerid)
+                 LJ::can_manage_other($posterid, $ownerid) ||
                  # if user is a community maintainer they can delete
                  # it too (good)
+                 
+                 $u->can_edit_others_post($uowner)
                  ));
 
         ## editing:
         if ($req->{'event'} =~ /\S/) {
-            return fail($err,303) if $posterid != $oldevent->{'posterid'};
+            return fail($err,303) if $posterid != $oldevent->{'posterid'} && !$u->can_edit_others_post($uowner);
             return fail($err,318) if $u->is_readonly;
             return fail($err,319) if $uowner->is_readonly;
         }
@@ -3684,6 +3688,9 @@ sub editevent {
         $req->{'subject'} ne $oldevent->{'subject'}))
     {
         LJ::run_hooks('report_entry_text_update', $ownerid, $itemid);
+        if ( $oldevent->{'posterid'} != $ownerid ) {
+            LJ::User::UserlogRecord::ChangeEntryText->create(LJ::load_userid($ownerid), journalid => $ownerid, jitemid => $itemid );
+        }
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
                     "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
                     $req->{'subject'}, LJ::text_compress($event));
@@ -4428,8 +4435,8 @@ sub getevents {
         my $repost_props = { use_repost_signature => 0 };
 
         if (LJ::Entry::Repost->substitute_content( $entry, $content, $repost_props )) {
-             $evt->{'repost_text'}    = $repost_text;
-             $evt->{'repost_subject'} = $repost_subject;
+             $evt->{'substitute_text'}    = $repost_text;
+             $evt->{'substitute_subject'} = $repost_subject;
              $evt->{'repost_ownerid'} = $final_ownerid;
              $evt->{'repost_itemid'}  = $final_itemid;
              $evt->{'repost_anum'}    = $final_anum;
@@ -4445,6 +4452,14 @@ sub getevents {
              }
         }
 
+        my $substitute_text;
+        LJ::run_hooks('substitute_entry_content', $entry, \$substitute_text, {});
+
+        if ($substitute_text) {
+             $evt->{'substitute_text'}    = $substitute_text;
+             $evt->{'substitute_subject'} = '';
+        }
+
         # now my own post, so need to check for suspended prop
         if ($jposterid != $posterid) {
             next if($entry->is_suspended_for($u));
@@ -4458,7 +4473,6 @@ sub getevents {
         $evt->{"eventtime"}       = $eventtime;
         $evt->{"event_timestamp"} = $event_timestamp;
         $evt->{"logtime"}         = $logtime;
-
 
         if ($sec ne "public") {
             $evt->{'security'}  = $sec;
@@ -4572,9 +4586,9 @@ sub getevents {
 
         my $real_uowner = $uowner;
 
-        if ($evt->{'repost_text'}) {
-            $t->[0] = delete $evt->{'repost_subject'};
-            $t->[1] = delete $evt->{'repost_text'};
+        if ($evt->{'substitute_text'}) {
+            $t->[0] = delete $evt->{'substitute_subject'};
+            $t->[1] = delete $evt->{'substitute_text'};
 
             $evt->{'props'}    = delete $evt->{'repost_props'}
                 unless $req->{'noprops'};
@@ -4836,7 +4850,7 @@ sub editfriends {
         unless ($u->{'journaltype'} eq 'P' ||
                 $u->{'journaltype'} eq 'S' ||
                 $u->{'journaltype'} eq 'I' ||
-                ($u->{'journaltype'} eq "Y" && $u->clean_password)); # actually need $u->has_password
+                ($u->{'journaltype'} eq "Y" && $u->has_password));
 
     # Don't let suspended users add friend
     return $fail->(305, 'xmlrpc.des.suspended_add_friend')
@@ -5699,11 +5713,13 @@ sub authenticate
         }
     };
 
-    if ($u && LJ::login_ip_banned($u)) {
-        return fail($err,402);
-    }
-
     unless ($flags->{'nopassword'} || $flags->{'noauth'}) {
+
+        # check for rate limit of fault login attempts
+        if ($u && LJ::Auth::Checker::login_ip_banned($u)) {
+            return fail($err,402);
+        }
+
         my $auth_ok = $auth_check->();
         unless ($auth_ok) {
             return undef if $$err;

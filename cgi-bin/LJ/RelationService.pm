@@ -97,6 +97,13 @@ sub create_relation_to {
     if ($result) {
         $class->del_cache($uid, $tid, $type);
         LJ::User::Profile->clear_cache($uid, $tid, $type);
+
+        if (LJ::is_enabled('new_friends_and_subscriptions')) {
+            if ($type eq 'F') {
+                $class->del_cache($tid, $uid, $type);
+                LJ::User::Profile->clear_cache($tid, $uid, $type);
+            }
+        }
     }
 
     return $result;
@@ -137,6 +144,12 @@ sub remove_relation_to {
             my $tid = $target->id;
 
             LJ::User::Profile->clear_cache($uid, $tid, $type);
+
+            if (LJ::is_enabled('new_friends_and_subscriptions')) {
+                if ($type eq 'F') {
+                    LJ::User::Profile->clear_cache($tid, $uid, $type);
+                }
+            }
         }
     }
 

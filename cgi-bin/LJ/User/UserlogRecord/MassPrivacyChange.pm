@@ -5,6 +5,7 @@ use warnings;
 use base qw( LJ::User::UserlogRecord );
 
 sub action {'mass_privacy_change'}
+sub group  {'entries'}
 
 sub translate_create_data {
     my ( $class, %data ) = @_;
@@ -28,7 +29,7 @@ sub description {
 
     # TODO: parse out e_unixtime and s_unixtime and display?
     # see: htdocs/editprivacy.bml, LJ::MassPrivacy
-    return "Entry privacy updated (from $s_security to $e_security)";
+    return LJ::Lang::ml( 'userlog.action.mass.privacy', { s_security => $s_security, e_security => $e_security } );
 }
 
 1;

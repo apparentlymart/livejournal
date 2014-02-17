@@ -66,7 +66,7 @@ sub execute {
         );
     }
 
-    LJ::User::InfoHistory->add($u, 'passwordreset', Digest::MD5::md5_hex($u->clean_password . "change"));
+    LJ::User::InfoHistory->add($u, 'passwordreset', $u->digest_of_password_change);
 
     $u->reset_password()
         or return $self->error("Failed to set new password for $username");

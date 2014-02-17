@@ -51,7 +51,7 @@ unless ($args{force}) {
         print "   " . $acct[1]->raw_email . "\n";
         exit 1;
     }
-    unless ($acct[0]->password eq $acct[1]->password) {
+    unless ($acct[0]->has_the_same_password_as($acct[1])) {
         print "Passwords don't match.\n";
         exit 1;
     }
@@ -72,7 +72,6 @@ unless (LJ::User::Rename::basic_rename($from, $dummy_username, $opts)) {
     exit 1;
 }
 
-
 print "Swapping 2/3...\n";
 unless (LJ::User::Rename::basic_rename($to, $from, $opts)) {
     print "Swap failed in the middle, $to -> $from failed: $opts->{error}.\n";
@@ -87,7 +86,6 @@ unless (LJ::User::Rename::basic_rename($dummy_username, $to, $opts)) {
 
 # check for circular 'renamedto' references
 {
-
     # if the fromuser had redirection on, make sure it points to the new $to user
     my $fromu = LJ::load_user($from, 'force');
     LJ::load_user_props($fromu, 'renamedto');
@@ -106,7 +104,3 @@ unless (LJ::User::Rename::basic_rename($dummy_username, $to, $opts)) {
 }
 
 print "Swapped.\n";
-exit 0;
-
-
-

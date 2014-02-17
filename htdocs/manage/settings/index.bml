@@ -163,6 +163,7 @@ body<=
                 LJ::Setting::PingBackComm
                 LJ::Setting::Ratings
                 LJ::Setting::InvisibilityGuests
+                LJ::Setting::AuthDigest
             )],
         },
         history => {
