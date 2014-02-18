@@ -516,6 +516,8 @@ sub common_template_params {
 
         'lj_home'             => $lj_home,
 
+        'lj_domain'           => $LJ::DOMAIN,
+
         'banner_top' => LJ::get_ads({location => 'common.banner'})
     };
 }
