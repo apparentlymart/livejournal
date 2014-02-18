@@ -202,6 +202,8 @@ body<=
         </td></tr></table>
     };
 
+    $body .= LJ::get_ads({location => 'yandex.context.s1'});
+
     return $body;
 }
  _code?>

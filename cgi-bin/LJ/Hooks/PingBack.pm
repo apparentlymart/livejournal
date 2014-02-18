@@ -107,9 +107,6 @@ LJ::register_hook("postpost", sub {
 
     return unless LJ::PingBack->has_user_pingback($journal);
 
-    # check weight
-    return if $journal->get_reader_weight() < _min_reader_weight();
-
     # check security
     return if $security ne 'public';
 
@@ -131,6 +128,9 @@ LJ::register_hook("postpost", sub {
 
     my $poster = $entry->poster;
     my $prop_pingback = ($poster && $poster->prop('pingback')) ? $poster->prop('pingback') : 'O';
+
+    # check weight
+    return if $poster->get_reader_weight() < _min_reader_weight();
     #
     LJ::PingBack->notify(
         uri  => $entry->url,

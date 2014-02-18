@@ -6,6 +6,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 
 use base qw/
     LJ::User::Relations
+    LJ::User::Display
 /;
 
 use Carp;
@@ -1425,11 +1426,6 @@ sub display_name {
     my $id = $u->identity;
     return "[ERR:unknown_identity]" unless $id;
     return LJ::ehtml( $id->display_name($u) );
-}
-
-sub ljuser_display {
-    my ($u, $opts) = @_;
-    return LJ::ljuser($u, $opts);
 }
 
 # class function - load an identity user, but only if they're already known to us
@@ -5212,42 +5208,6 @@ sub lazy_interests_cleanup {
     return 1;
 }
 
-# this will return a hash of information about this user.
-# this is useful for JavaScript endpoints which need to dump
-# JSON data about users.
-sub info_for_js {
-    my $u = shift;
-
-    my %ret = (
-               username         => $u->user,
-               display_username => $u->display_username,
-               display_name     => $u->display_name,
-               userid           => $u->userid,
-               url_journal      => $u->journal_base,
-               url_profile      => $u->profile_url,
-               url_allpics      => $u->allpics_base,
-               is_comm          => $u->is_comm,
-               is_person        => $u->is_person,
-               is_syndicated    => $u->is_syndicated,
-               is_identity      => $u->is_identity,
-               is_shared        => $u->is_shared,
-               );
-    # Without url_message "Send Message" link should not display
-    $ret{url_message} = $u->message_url unless ($u->opt_usermsg eq 'N');
-
-    LJ::run_hook("extra_info_for_js", $u, \%ret);
-
-    my $up = $u->userpic;
-
-    if ($up) {
-        $ret{url_userpic} = $up->url;
-        $ret{userpic_w}   = $up->width;
-        $ret{userpic_h}   = $up->height;
-    }
-
-    return %ret;
-}
-
 sub postreg_completed {
     my $u = shift;
 
@@ -7655,22 +7615,13 @@ sub ljuser_alias {
 
     my $user = shift;
     my $remote = shift;
+
     $remote = LJ::get_remote() unless isu($remote);
-
-    return unless $remote;
-    return unless $remote->get_cap('aliases');
-
-    unless (ref $user eq 'LJ::User') {
-        $user = LJ::load_user($user);
-    }
-
+    $user = LJ::load_user($user) unless isu($user);
+    
     return unless $user;
 
-    if (!$remote->{_aliases}) {
-        my $prop_aliases = LJ::text_uncompress( $remote->prop('aliases') );
-        $remote->{_aliases} = ($prop_aliases) ? LJ::JSON->from_json($prop_aliases) : {};
-    }
-    return $remote->{_aliases}->{ $user->id };
+    return $user->ljuser_alias($remote);
 }
 
 ##
@@ -7773,133 +7724,16 @@ sub get_all_aliases {
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
 
-my $ljuser_tmpl_path = join('/', $ENV{'LJHOME'}, 'templates', 'User');
-my $ljuser_cache     = {};
-
 sub ljuser {
     my ($user, $opts) = @_;
-    my ($u, $username, $journal_url, $striked);
-    my ($journal_name, $journal, $userhead);
-    my ($attrs, $color, $user_alias, %user);
-    my $identity;
-    my $profile_url;
 
-    if ( isu($user) ) {
-        $u = $user;
-        $username = $u->username;
-    } else {
-        $u = LJ::load_user($user);
-        $username = $user;
+    unless ( isu($user) ) {
+        $user = LJ::load_user($user);
     }
 
-    {
-        if ( $u and LJ::isu($u) ) {
-            # Traverse the renames to the final journal
-            unless ( $opts->{'no_follow'} ) {
-                $u = $u->get_renamed_user;
-                $username = $u->username;
-            }
+    return unless $user;
 
-            last if $ljuser_cache->{$username};
-
-            # Mark accounts as deleted that aren't visible, memorial, locked, or
-            # read-only
-            if ( $u->statusvis !~ m![VMLO]! ) {
-               $striked = 1;
-            }
-
-            $journal_name = $username;
-            $journal_url  = $u->journal_base . "/";
-            ($userhead)   = $u->userhead($opts);
-
-            # Identity
-            if ( $u->is_identity ) {
-                $identity  = $u->identity;
-                my $params = $identity ? $identity->ljuser_display_params($u, $opts) : {};
-                $profile_url  = $params->{'profile_url'}  || '';
-                $journal_url  = $params->{'journal_url'}  || $journal_url;
-                $journal_name = $params->{'journal_name'} || $journal_name;
-            }
-
-            $profile_url  = $u->profile_url();
-        } else {
-            $username      = LJ::canonical_username($username);
-
-            last if $ljuser_cache->{$username};
-
-            $journal_url   = join('', $LJ::SITEROOT, '/userinfo.bml?user=', $username);
-            $profile_url ||= $journal_url;
-            $userhead      = 'userinfo.gif?v=17080';
-        }
-
-        LJ::run_hooks( 'override_display_name', $u, \$journal_name );
-        LJ::run_hooks( 'override_profile_url',  $u, \$profile_url );
-        LJ::run_hooks( 'override_journal_url',  $u, \$journal_url );
-    }
-
-    if ( $color = $opts->{'link_color'} ) {
-        unless ( $color =~ /^#(?:[a-f0-9]{3}|[a-f0-9]{6})$/i ) {
-            undef $color;
-        }
-    }
-
-    %user = %{ $ljuser_cache->{$username} ||= {
-        attrs          => $attrs,
-        bold           => 0,
-        side_alias     => 0,
-        inline_css     => 0,
-        username       => $username,
-        journal        => $journal_name,
-        striked        => $striked,
-        journal_url    => $journal_url,
-        profile_url    => $profile_url,
-        userhead_url   => $userhead,
-        noctxpopup     => 0,
-        is_identity    => $identity? 1 : 0,
-    }};
-
-    $user{'noctxpopup'}   = 1                      if $opts->{'noctxpopup'};
-    $user{'bold'}         = 1                      if $opts->{'bold'} or not exists $opts->{'bold'};
-    $user{'inline_css'}   = 1                      if $opts->{'inline_css'};
-    $user{'journal'}      = $opts->{'title'}       if $opts->{'title'};
-    $user{'target'}       = $opts->{'target'}      if $opts->{'target'};
-    $user{'profile_url'} .= '?mode=full'           if $opts->{'full'};
-    $user{'profile_url'}  = $opts->{'profile_url'} if $opts->{'profile_url'};
-    $user{'user_alias'}   = LJ::ehtml(LJ::ljuser_alias($username));
-    $user{'alias'}        = $user{'user_alias'}?   1 : 0;
-    $user{'color'}        = $color;
-
-    if ( $opts->{'side_alias'} and $user{'alias'} ) {
-        $user{'side_alias'} = 1;
-        $user{'alias'}      = 1;
-    }
-
-    # Userhead
-    unless ( $user{'userhead_url'} =~ m!^https?:\/\/! ) {
-        $user{'userhead_url'} = join('',
-            $opts->{'imgroot'} || $LJ::IMGPREFIX,
-            '/', $user{'userhead_url'},
-            '?v=', $LJ::CURRENT_VERSION
-        );
-    }
-
-    # FIXME: try to remove this
-    if ( $opts->{'in_journal'} ) {
-        my $cu = LJ::load_user($opts->{'in_journal'});
-        if ( $cu ) {
-            $user{'attrs'} = join('"', 'data-journal=', $cu->journal_base, '');
-        }
-    }
-
-    if ( $opts->{'raw'} ) {
-        return \%user;
-    } else {
-        return LJ::Response::CachedTemplate->new(
-            path   => $ljuser_tmpl_path,
-            file   => 'Display.tmpl',
-            params => \%user,
-        )->raw_output();
-    }
+    return $user->ljuser_display($opts);
 }
 
 sub set_email {
