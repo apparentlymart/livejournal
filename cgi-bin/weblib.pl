@@ -1598,6 +1598,8 @@ sub res_includes {
     my $site_anyway = $opts->{site_anyway}; # Site anyway
     my $is_mobile   = $opts->{is_mobile};   # m.livejournal.com
 
+    my $no_sitewide_css = $opts->{no_sitewide_css}; # do not include @LJ::SITEWIDE_CSS
+
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
@@ -1611,7 +1613,8 @@ sub res_includes {
     # example: cyr/non-cyr flag changed at settings page
     unless ($only_needed) {
         LJ::run_hooks('sitewide_resources', {
-            is_mobile => $is_mobile
+            is_mobile       => $is_mobile,
+            no_sitewide_css => $no_sitewide_css,
         });
     }
  
