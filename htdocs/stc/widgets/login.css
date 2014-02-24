@@ -1,36 +1,167 @@
-.b-ljform {}
+/* loginform */
 
 .b-loginform {
+    width: 430px;
     border: 1px solid #D9E3E6;
     }
 
-.b-ljform-header {
+/* header */
+
+.b-loginform-header {
     padding: 15px 25px 12px 30px;
     background: #0099cc;
     }
+    .b-loginform H2 {
+        margin: 0;
+        text-transform: uppercase;
+        font-size: 1.389em;
+        font-weight: normal;
+        color: #FFF;
+        }
 
-.b-ljform-body {
+/* body */
+
+.b-loginform-body {
     padding: 30px;
+    font-size: 0.813em;
     }
 
-.b-loginform H2 {
+/* 2 cols */
+
+.b-loginform-col1 {
+    overflow: hidden;
+    display: inline-block;
+    float: left;
+    width: 34%;
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+    }
+    .b-loginform-col1:before {
+        display: inline-block;
+        width: 1px;
+        margin: 0 -3px;
+        content: "";
+        vertical-align: middle;
+        }
+.b-loginform-col2 {
+    margin-left: 32%;
+    text-align: right;
+    }
+
+/* external block */
+
+.b-loginform-external {
+    width: 370px;
+    border-bottom: 1px solid #DAE3E6;
+    }
+    .b-loginform-external:after {
+        display: table;
+        content: " ";
+        clear: both;
+        border-collapse: collapse;
+        }
+.b-loginform-external .b-loginform-col1 {
+    width: 60%;
+    }
+.b-loginform-external .b-loginform-col2 {
+    margin-left: 60%;
+    }
+.b-loginform-social,
+.b-loginform-droplist {
     margin: 0;
-    text-transform: uppercase;
-    font-size: 1.389em;
-    font-weight: normal;
-    color: #FFF;
+    padding: 0;
+    list-style: none;
     }
-.b-ljform-field {
-    margin: 0 0 28px;
+    .b-loginform-social {
+        display: inline-block;
+        height: 30px;
+        }
+    .b-loginform-social-item {
+        position: relative;
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        border-radius: 2px;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-color: #dae3e6;
+        }
+    .b-loginform-drop {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #DAE3E6;
+        border-radius: 2px;
+        -moz-box-sizing: border-box;
+             box-sizing: border-box;
+        background: url("/img/schemius/s-nav-arrow.png") no-repeat scroll 50% 50% rgba(0, 0, 0, 0);
+        }
+    .b-loginform-social-item A {
+        display: block;
+        }
+    .b-loginform-droplist {
+        display: none;
+        height: 30px;
+        padding: 4px 0;
+        border-bottom: 1px solid #DAE3E6;
+        }
+.b-loginform-drop:hover {
+    -webkit-transform: rotateX(180deg);
+    -moz-transform: rotateX(180deg);
+    -ms-transform: rotateX(180deg);
+    -o-transform: rotateX(180deg);
+    transform: rotateX(180deg);
     }
-.b-ljform-row {
+
+/* loginform fields */
+
+.b-loginform-field {
     margin: 0 0 20px;
     }
+.b-loginform-row {
+    margin: 0 0 14px;
+    }
+    .b-loginform-row:after {
+        display: table;
+        content: " ";
+        clear: both;
+        border-collapse: collapse;
+        }
+
+/* form parts */
+
+.b-loginform-link {
+    vertical-align: middle;
+    text-decoration: none !important;
+    color: #26A1D0 !important;
+    }
+.b-loginform-remember {
+    text-transform: lowercase;
+    }
+.b-loginform-create {
+    text-align: right;
+    }
+.b-loginform-error {
+    float: right;
+    color: #D92B2B;
+    }
+.b-loginform-create .b-loginform-link {
+    text-transform: uppercase;
+    }
+
+
+
+/* form */
+
 .b-ljform-label {
+    line-height: 16px;
+    vertical-align: middle;
+    margin: 0 2px;
     padding: 0 10px 0 0;
     text-transform: uppercase;
-    font-size: 16px;
-    color: #829399;
+    font-size: 13px;
+    color: #7A9199;
     }
 .b-ljform-input {
     width: 100%;
@@ -48,18 +179,15 @@
 .b-ljform-checkbox {
     margin: 0;
     }
-.b-ljform-link {
-    color: #26A1D0 !important;
-    text-decoration: none !important;
-    }
 .b-ljform-btn {
     display: inline-block;
-    margin: 5px 0;
-    padding: 15px 5% 13px;
+    margin: -5px 0;
+    padding: 15px 60px 13px;
     border: 0;
     border-radius: 3px;
     box-shadow: 0 2px 0 #008BA8;
     text-transform: uppercase;
+    white-space: nowrap;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -69,65 +197,6 @@
     .b-ljform-btn:hover {
         background: #1AB9D9;
         }
-.b-loginform-remember {
-    text-transform: lowercase;
-    }
-
-.b-loginform-create {
-    text-align: right;
-    }
-
-.b-loginform-create .b-ljform-link {
-    font-size: 16px;
-    text-transform: uppercase;
-    }
-.b-loginform-social,
-.b-loginform-droplist {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    }
-    .b-loginform-social-item {
-        position: relative;
-        display: inline-block;
-        width: 32px;
-        height: 32px;
-        background-position: 0 0;
-        background-repeat: no-repeat;
-        }
-        .b-loginform-social-openid {
-            background-image: url(/img/icons/openid-32.gif);
-            }
-        .b-loginform-social-fb {
-            background-image: url(/img/icons/facebook-32.png);
-            }
-        .b-loginform-social-tw {
-            background-image: url(/img/icons/twitter-32.png);
-            }
-    .b-loginform-drop {
-        position: relative;
-        width: 30px;
-        height: 30px;
-        border: 1px solid #DAE3E6;
-        border-radius: 2px;
-        background: url("/img/schemius/s-nav-arrow.png") no-repeat scroll 50% 50% rgba(0, 0, 0, 0);
-        }
-        .b-loginform-drop-btn {
-            display: block;
-            height: 100%;
-            cursor: pointer;
-
-            }
-    .b-loginform-social-item A {
-        display: block;
-        }
-    .b-loginform-droplist {
-        display: none;
-        position: absolute;
-        }
-
-
 
 /* this is css for the login widget */
 
