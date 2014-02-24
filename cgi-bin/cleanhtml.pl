@@ -891,7 +891,6 @@ sub clean {
                 $start_capture->($tag, $token);
             }
             elsif ( $tag eq 'lj-quote' ) {
-                $newdata .= qq{User: $attr->{author} src: $attr->{src}}; # TODO
                 $newdata .= qq{<div>};
                 $ljquote_open++;
                 next TOKEN;
