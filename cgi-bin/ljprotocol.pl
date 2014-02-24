@@ -13,6 +13,7 @@ use Class::Autouse qw(
                       LJ::Auth::Method::LoginPassword::MD5
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
+                      LJ::EntriesIndex
                       LJ::Entry
                       LJ::Poll
                       LJ::EventLogRecord::NewEntry
@@ -2985,15 +2986,8 @@ sub postevent {
     my $ip = LJ::get_remote_ip();
     my $uniq = LJ::UniqCookie->current_uniq();
 
-    $u->do('INSERT INTO logleft(userid, posttime, journalid, ditemid, ip, uniq, publicitem)
-                     VALUES (?, NOW(), ?, ?, ?, ?, ?)', undef,
-        $posterid,
-        $ownerid,
-        $ditemid,
-        $ip,
-        $uniq,
-        $security eq 'public'
-    ) if $uowner->{'journaltype'} eq 'C';
+    LJ::EntriesIndex::update_index ($u, $ownerid, $ditemid, $ip, $uniq, $security) 
+        if $uowner->{'journaltype'} eq 'C';
 
     ## Counter "new_post" for monitoring
     LJ::run_hook ("update_counter", {
