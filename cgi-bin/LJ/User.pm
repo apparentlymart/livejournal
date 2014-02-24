@@ -4926,7 +4926,7 @@ sub has_password {
 
 sub has_the_same_password_as {
     my ($u, $other) = @_;
-    return $u->password_md5 eq $other->password_md5;
+    return $u->has_password && $other->has_password && $u->password_md5 eq $other->password_md5;
 }
 
 # Used in LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change) before password changing.
@@ -4949,6 +4949,10 @@ sub journaltype {
 sub set_password {
     my ($u, $password) = @_;
     return LJ::set_password($u->id, $password);
+}
+
+sub set_password_is_the_same_as {
+    die "Unimplemented";
 }
 
 sub set_email {
@@ -7795,12 +7799,7 @@ sub set_password {
     return unless $u;
 
     my $dbh = LJ::get_db_writer();
-    if ($LJ::DEBUG{'write_passwords_to_user_table'}) {
-        $dbh->do("UPDATE user SET password=? WHERE userid=?", undef,
-                 $password, $userid);
-    }
-    $dbh->do("REPLACE INTO password (userid, password) VALUES (?, ?)",
-             undef, $userid, $password);
+    $dbh->do("REPLACE INTO password (userid, password) VALUES (?, ?)", undef, $userid, $password);
 
     # update caches
     LJ::memcache_kill($userid, "userid");
@@ -7811,8 +7810,7 @@ sub set_password {
     LJ::Auth::Method::Digest::clear_auth_digest_ha1($u);
 }
 
-sub update_user
-{
+sub update_user {
     my ($arg, $ref) = @_;
     my @uid;
 
