@@ -166,7 +166,7 @@ body<=
 
     # Inbox Nav
     $body .= qq{
-        <table style="width: 100%"><tr><td valign="top" style="padding-right: 12px">};
+        <table style="width: 100%; margin-bottom: 20px;"><tr><td valign="top" style="padding-right: 12px">};
     $body .= LJ::Widget::InboxFolderNav->render( 'page' => 1 );
     $body .= LJ::get_ads({ location => 'bml.inbox' });
 

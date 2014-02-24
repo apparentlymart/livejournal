@@ -7731,9 +7731,12 @@ sub ljuser {
         $user = LJ::load_user($user);
     }
 
-    return unless $user;
+    if ($user) {
+        return $user->ljuser_display($opts);
+    } else {
+        return LJ::User::Display::ljuser_display($user, $opts);
+    }
 
-    return $user->ljuser_display($opts);
 }
 
 sub set_email {

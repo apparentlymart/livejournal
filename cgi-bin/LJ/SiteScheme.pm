@@ -518,7 +518,7 @@ sub common_template_params {
 
         'lj_domain'           => $LJ::DOMAIN,
 
-        'banner_top' => LJ::get_ads({location => 'common.banner'})
+        'banner_top' => LJ::get_ads({location => 'common.banner'}) || '',
     };
 }
 

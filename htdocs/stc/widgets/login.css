@@ -1,11 +1,138 @@
+.b-ljform {}
+
+.b-loginform {
+    border: 1px solid #D9E3E6;
+    }
+
+.b-ljform-header {
+    padding: 15px 25px 12px 30px;
+    background: #0099cc;
+    }
+
+.b-ljform-body {
+    padding: 30px;
+    }
+
+.b-loginform H2 {
+    margin: 0;
+    text-transform: uppercase;
+    font-size: 1.389em;
+    font-weight: normal;
+    color: #FFF;
+    }
+.b-ljform-field {
+    margin: 0 0 28px;
+    }
+.b-ljform-row {
+    margin: 0 0 20px;
+    }
+.b-ljform-label {
+    padding: 0 10px 0 0;
+    text-transform: uppercase;
+    font-size: 16px;
+    color: #829399;
+    }
+.b-ljform-input {
+    width: 100%;
+    height: 48px;
+    padding: 2px 5px;
+    border: 1px solid #DAE3E6;
+    border-radius: 2px;
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+    background-color: #F7F9FA;
+    }
+.b-ljform-input-user {
+    background: #F7F9FA url(/img/userinfo.gif?v=37824) no-repeat 1px 50%;
+    }
+.b-ljform-checkbox {
+    margin: 0;
+    }
+.b-ljform-link {
+    color: #26A1D0 !important;
+    text-decoration: none !important;
+    }
+.b-ljform-btn {
+    display: inline-block;
+    margin: 5px 0;
+    padding: 15px 5% 13px;
+    border: 0;
+    border-radius: 3px;
+    box-shadow: 0 2px 0 #008BA8;
+    text-transform: uppercase;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #009FBF;
+    color: #FFF;
+    }   
+    .b-ljform-btn:hover {
+        background: #1AB9D9;
+        }
+.b-loginform-remember {
+    text-transform: lowercase;
+    }
+
+.b-loginform-create {
+    text-align: right;
+    }
+
+.b-loginform-create .b-ljform-link {
+    font-size: 16px;
+    text-transform: uppercase;
+    }
+.b-loginform-social,
+.b-loginform-droplist {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    }
+    .b-loginform-social-item {
+        position: relative;
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        }
+        .b-loginform-social-openid {
+            background-image: url(/img/icons/openid-32.gif);
+            }
+        .b-loginform-social-fb {
+            background-image: url(/img/icons/facebook-32.png);
+            }
+        .b-loginform-social-tw {
+            background-image: url(/img/icons/twitter-32.png);
+            }
+    .b-loginform-drop {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #DAE3E6;
+        border-radius: 2px;
+        background: url("/img/schemius/s-nav-arrow.png") no-repeat scroll 50% 50% rgba(0, 0, 0, 0);
+        }
+        .b-loginform-drop-btn {
+            display: block;
+            height: 100%;
+            cursor: pointer;
+
+            }
+    .b-loginform-social-item A {
+        display: block;
+        }
+    .b-loginform-droplist {
+        display: none;
+        position: absolute;
+        }
+
+
+
 /* this is css for the login widget */
 
-.appwidget-login h2 {
-    margin: 0 0 8px 0;
-    display: none;
-}
-.appwidget-login form {
-    margin-bottom: 15px;
+.appwidget-login {
+    margin: 15px;
 }
 .appwidget-login fieldset.nostyle {
     margin-bottom: 0.5em !important;
@@ -16,13 +143,6 @@
 }
 .appwidget-login input.text {
     width: 160px;
-}
-.appwidget-login #user {
-    background: #fff url(/img/userinfo.gif?v=17080) no-repeat 1px 50%;
-    padding-left: 18px;
-    font-weight: bold;
-    color: #00C;
-    width: 144px; /* needs to be 16px less than input.text width */
 }
 .appwidget-login fieldset.nostyle,
 .appwidget-login p {

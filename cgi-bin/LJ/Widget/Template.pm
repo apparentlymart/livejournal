@@ -42,8 +42,8 @@ sub render_body {
 
     $template->param(
         is_remote_sup => LJ::SUP->is_remote_sup ? 1 : 0,
-        errors => $class->error_list,
-        form_auth => LJ::form_auth(),
+        form_auth     => LJ::form_auth(),
+        errors        => $class->error_list,
     );
 
     $class->prepare_template_params($template, \%opts);

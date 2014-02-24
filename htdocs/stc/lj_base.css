@@ -1780,6 +1780,15 @@ TD.help .b-helplink {
 
 /* LJ User
 --------------------------------------*/
+/*
+.i-ljuser-type-R => 'redirect'
+.i-ljuser-type-I => 'identity'
+.i-ljuser-type-P => 'personal'
+.i-ljuser-type-S => 'shared'
+.i-ljuser-type-Y => 'syndicated'
+.i-ljuser-type-N => 'news'
+.i-ljuser-type-C => 'community'
+*/
 HTML BODY .i-ljuser {
     position: static !important;
     display: inline !important;

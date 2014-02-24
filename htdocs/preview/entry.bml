@@ -5,6 +5,9 @@
     
     use LJ::SocialScripts;
 
+    use LJ::Entry;
+    use LJ::Discovery::Item;
+
     my $delayed_id = $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
     if (!(LJ::did_post() || $delayed_id)) {
         return "<?requirepost?>";
@@ -111,6 +114,32 @@
     } else {
         $stylesys = 1; $styleid = 0;
     }
+
+    if ($u->username eq $LJ::DISCOVERY_COMMUNITY_NAME) {
+
+        my $entry = LJ::Entry->new($u, jitemid => -1,  row => {});
+        my $props = { map { $_ =~ /^prop_(.+)$/ ? ($1 => $req{$_}) : () } keys %req };
+
+        $entry->handle_prefetched_text($req{'subject'}, $req{'event'});
+        $entry->handle_prefetched_props($props);
+
+        my $discovery_item = LJ::Discovery::Item->new(entry => $entry);
+        my $feed_item = { $discovery_item->params(), content => $discovery_item->content(), };
+        
+        my $template = LJ::HTML::Template->new(
+                                               { use_expr => 1 },
+                                               filename => "templates/Discovery/Item.tmpl"
+        );
+
+        $template->param(
+                         %$feed_item,
+                         #categories => _categories(),
+                         remote     => ( LJ::get_remote() ? 1 : 0 ),
+        );
+
+        return $template->output;
+    }
+
 
     if ($stylesys == 1) {
         # pre-load common strings for little speed and less typing later

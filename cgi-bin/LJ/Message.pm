@@ -13,7 +13,7 @@ use Class::Autouse qw(
 # Internal modules
 use LJ::AntiSpam;
 use LJ::AntiSpam::Utils;
-use LJ::Admin::Spam::Urls;
+use LJ::AntiSpam::RecentUrls;
 use LJ::AntiSpam::Suspender;
 
 my %singletons = (); # journalid-msgid
@@ -101,7 +101,7 @@ sub send {
         );
 
         if (my $body_urls = $parsed_body->{urls}) {
-            LJ::Admin::Spam::Urls::insert(
+            LJ::AntiSpam::RecentUrls::insert(
                 $ou->id,
                 $ru->id,
                 0,
@@ -111,7 +111,7 @@ sub send {
         }
 
         if (my $subject_urls = $parsed_subject->{urls}) {
-            LJ::Admin::Spam::Urls::insert(
+            LJ::AntiSpam::RecentUrls::insert(
                 $ou->id,
                 $ru->id,
                 0,

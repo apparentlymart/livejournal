@@ -7,7 +7,7 @@ use Encode;
 # Internal modules
 use LJ::AntiSpam;
 use LJ::AntiSpam::Utils;
-use LJ::Admin::Spam::Urls;
+use LJ::AntiSpam::RecentUrls;
 use LJ::AntiSpam::Suspender;
 use LJ::EventLogRecord::NewComment;
 use LJ::Talk;
@@ -195,7 +195,7 @@ sub enter_comment {
 
     # record up to $LJ::TALK_MAX_URLS urls from a comment
     if ($LJ::TALK_MAX_URLS && $urls) {
-        LJ::Admin::Spam::Urls::insert(
+        LJ::AntiSpam::RecentUrls::insert(
             $posterid,
             $journalu->{userid},
             $jtalkid,

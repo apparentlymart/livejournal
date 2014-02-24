@@ -2545,7 +2545,7 @@ sub is_open_proxy
 # then it is loaded from memcache/DB, else it falls back to disk.
 sub load_include {
     my $file = shift;
-    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,255}$/;
+    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,80}$/;
 
     # okay, edit from where?
     if ($LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file}) {
@@ -2555,8 +2555,17 @@ sub load_include {
 
         # straight database hit
         my $dbh = LJ::get_db_writer();
-        $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
-                                     "WHERE incname=?", undef, $file);
+        $val = $dbh->selectrow_array(qq(
+                SELECT   inctext 
+                FROM     includetext
+                WHERE    incname=?
+                ORDER BY rev_id DESC
+                LIMIT    1
+            ), 
+            undef, 
+            $file
+        );
+        
         LJ::MemCache::set("includefile:$file", $val, time() + 3600);
         return $val if $val;
     }
@@ -2574,13 +2583,13 @@ sub load_include {
 # if the file is specified in %LJ::FILEEDIT_VIA_DB
 # then it is saved to memcache/DB, else it falls back to disk.
 sub save_include {
-    my ($file, $content) = @_;
-    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,255}$/;
+    my ($file, $content, $adminid) = @_;
+    return unless $file && $file =~ /^[a-zA-Z0-9-_\.]{1,80}$/;
 
     if ($LJ::FILEEDIT_VIA_DB || $LJ::FILEEDIT_VIA_DB{$file}) {
         my $dbh = LJ::get_db_writer();
-        $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
-                   "VALUES (?, ?, UNIX_TIMESTAMP())", undef, $file, $content);
+        $dbh->do("INSERT INTO includetext (incname, inctext, updatetime, adminid) ".
+                   "VALUES (?, ?, UNIX_TIMESTAMP(), ?)", undef, $file, $content, $adminid);
         return 0 if $dbh->err;
         LJ::MemCache::set("includefile:$file", $content, time() + 3600);
         return 1;

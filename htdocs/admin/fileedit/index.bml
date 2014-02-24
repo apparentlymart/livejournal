@@ -111,7 +111,7 @@
 
         $ret .= "<B>Saving:</B> <tt>$file</tt><p>";
 
-        if (LJ::save_include($file, $FORM{'contents'})) {
+        if (LJ::save_include($file, $FORM{'contents'}, $remote->id)) {
             $ret .= "saved.";
         } else {
              $ret .= "<b>Error saving</b>";

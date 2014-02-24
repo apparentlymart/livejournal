@@ -1888,7 +1888,7 @@ sub journal_content
         }
 
         LJ::Request->print("User-Agent: *\n");
-        
+
         # Changes in checklist for this condition
         # should be reflected in support tool from LJSUP-17649
         if ($u->should_block_robots or !$is_unsuspicious_user) {
@@ -1913,16 +1913,20 @@ sub journal_content
         if ($LJ::AUTH_DIGEST_ALLOWED_URIS{LJ::Request->uri}) {
             my $auth_ok = LJ::Auth::Method::Digest::auth_digest();
             if (!defined $auth_ok) {
-                LJ::Request->status(LJ::Request::AUTH_REQUIRED());
+                # LJ::Request->status(LJ::Request::AUTH_REQUIRED());
                 LJ::Request->content_type("text/html");
                 LJ::Request->send_http_header();
-                LJ::Request->print("You are not allowed to use HTTP digest authentication. You may to enable this on the <a href='$LJ::SITEROOT/manage/auth_digest'>Manage Page</a>");
+                LJ::Request->print(
+                    LJ::Lang::get_text(undef, 'auth_digest.message.not_allowed', undef, { url => "$LJ::SITEROOT/manage/auth_digest" })
+                );
                 return LJ::Request::OK;
             }
             elsif (!$auth_ok) {
                 LJ::Request->content_type("text/html");
                 LJ::Request->send_http_header();
-                LJ::Request->print("<b>Digest authentication failed.</b>");
+                LJ::Request->print(
+                    LJ::Lang::get_text(undef, 'auth_digest.message.authentication_failed', undef, undef)
+                );
                 return LJ::Request::OK;
             }
         }

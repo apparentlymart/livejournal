@@ -1,14 +1,85 @@
 package LJ::Widget::Login;
 
 use strict;
-use base qw(LJ::Widget);
+use base qw(LJ::Widget::Template);
 use Carp qw(croak);
 use LJ::Auth::Challenge;
 use LJ::Request;
 
-sub need_res { return 'stc/widgets/login.css' }
-
+# TODO: remove this method after Schemius Project is released.
 sub render_body {
+    my $class = shift;
+
+    if ($LJ::DISABLED{'schemius_with_usescheme'}) {
+        return $class->render_body_old(@_);
+    }
+    else {
+        return $class->SUPER::render_body(@_);
+    }
+}
+
+sub need_res {
+    return 'stc/widgets/login.css';
+}
+
+sub template_filename {
+    return "$ENV{'LJHOME'}/templates/Widgets/login.tmpl";
+}
+
+sub prepare_template_params {
+    my ($class, $template, $opts) = @_;
+
+    my $remote = LJ::get_remote();
+
+    $template->param(
+        remote_is_logged_in => $remote ? 1 : 0,
+    );
+
+    return if $remote;
+
+    my $is_login_page = (LJ::Request->uri eq '/login.bml');
+
+    my $ret = $opts->{'get_ret'} || $opts->{'post_ret'};
+    if (!$ret && $opts->{'ret_cur_page'}) {
+        # use current url as return destination after login, for inline login
+        $ret = $LJ::SITEROOT . LJ::Request->uri;
+    }
+
+    my @get_extra;
+    if ($opts->{'nojs'}) {
+        push @get_extra, [ nojs => 1 ];
+    }
+
+    if (!$is_login_page && $ret && $ret == 1) {
+        push @get_extra, [ ret => 1 ];
+    }
+
+    my $use_ssl_login = $LJ::USE_SSL_LOGIN || $LJ::IS_SSL ? 1 : 0;
+    my $form_siteroot = $use_ssl_login ? $LJ::SSLROOT : $LJ::SITEROOT;
+    my $form_action_url = "$form_siteroot/login.bml" . (@get_extra ? '?' . join '&', map { "$_->[0]=$_->[1]" } @get_extra : '');
+
+    my $ref;
+    if ($is_login_page && $ret && $ret == 1) {
+        $ref = LJ::Request->header_in('Referer');
+    }
+
+    unless ($use_ssl_login) {
+        $template->param(
+            chal => LJ::Auth::Challenge->generate(300), # 5 minute auth token
+        );
+    }
+
+    $template->param(
+        use_ssl_login   => $use_ssl_login,
+        form_action_url => $form_action_url,
+        user            => $opts->{'user'},
+        returnto        => $opts->{'returnto'},
+        ref             => $ref,
+        ret             => $ret,
+    );
+}
+
+sub render_body_old {
     my $class = shift;
     my %opts = @_;
     my $ret;

@@ -1700,45 +1700,19 @@ sub extract_metadata {
     };
     die "cannot get entry image: $@" unless $meta{'image'};
 
+    $meta{'url'} = $self->url;
+
     return \%meta;
 }
 
-# http://ogp.me/, https://dev.twitter.com/docs/cards
 sub metadata_html {
     my ($self) = @_;
 
     my $meta = eval { $self->extract_metadata };
     return '' unless $meta;
 
-    # https://dev.twitter.com/docs/cards/app-installs-and-deep-linking
-    (my $iosScheme .= $self->url) =~ s/^(http)/lj/;
 
-    my %tags = (
-        'og:title'       => $meta->{'title'}       || '(no title)',
-        'og:description' => $meta->{'description'} || '',
-        'og:image'       => $meta->{'image'},
-        'og:type'        => 'website',
-        'og:url'         => $self->url || $LJ::SITEROOT,
-        'twitter:card'   => 'summary',
-        'twitter:site'   => '@livejournal',
-
-        'twitter:app:name:iphone' => 'LiveJournal',
-        "twitter:app:id:iphone"   => '383091547',
-        "twitter:app:url:iphone"  => $iosScheme,
-        "twitter:app:name:ipad"   => 'LiveJournal',
-        "twitter:app:id:ipad"     => '383091547',
-        "twitter:app:url:ipad"    => $iosScheme
-    );
-
-    my $html = '';
-    foreach my $k ( sort keys %tags ) {
-        my $property_ehtml = LJ::ehtml($k);
-        my $content_ehtml  = LJ::ehtml( $tags{$k} );
-        $html .=
-            qq{<meta property="$property_ehtml" content="$content_ehtml" />};
-    }
-
-    return $html;
+    return LJ::metadata_html($meta);
 }
 
 
