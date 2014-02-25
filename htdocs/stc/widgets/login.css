@@ -142,15 +142,23 @@
 .b-loginform-create {
     text-align: right;
     }
-.b-loginform-error {
-    float: right;
-    color: #D92B2B;
-    }
 .b-loginform-create .b-loginform-link {
     text-transform: uppercase;
     }
 
+/* errors */
 
+.b-loginform-error {
+    display: none;
+    float: right;
+    color: #D92B2B;
+    }
+.b-loginform-field-error .b-ljform-input {
+    border: 1px solid #D96C6C;
+    }
+.b-loginform-field-error .b-loginform-error {
+    display: inline;
+    }
 
 /* form */
 

@@ -26,16 +26,12 @@ sub template_filename {
     return "$ENV{'LJHOME'}/templates/Widgets/login.tmpl";
 }
 
-sub prepare_template_params {
-    my ($class, $template, $opts) = @_;
+sub template_params {
+    my ($class, $opts) = @_;
+    $opts ||= {};
 
     my $remote = LJ::get_remote();
-
-    $template->param(
-        remote_is_logged_in => $remote ? 1 : 0,
-    );
-
-    return if $remote;
+    return {} if $remote;
 
     my $is_login_page = (LJ::Request->uri eq '/login.bml');
 
@@ -63,20 +59,26 @@ sub prepare_template_params {
         $ref = LJ::Request->header_in('Referer');
     }
 
-    unless ($use_ssl_login) {
-        $template->param(
-            chal => LJ::Auth::Challenge->generate(300), # 5 minute auth token
-        );
-    }
-
-    $template->param(
-        use_ssl_login   => $use_ssl_login,
+    my $params = {
         form_action_url => $form_action_url,
+        use_ssl_login   => $use_ssl_login,
         user            => $opts->{'user'},
         returnto        => $opts->{'returnto'},
         ref             => $ref,
         ret             => $ret,
-    );
+    };
+
+    unless ($use_ssl_login) {
+        $params->{'chal'} = LJ::Auth::Challenge->generate(300); # 5 minute auth token
+    }
+
+    return $params;
+}
+
+sub prepare_template_params {
+    my ($class, $template, $opts) = @_;
+
+    $template->param( %{ $class->template_params($opts) } );
 }
 
 sub render_body_old {

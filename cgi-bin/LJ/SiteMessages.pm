@@ -85,7 +85,7 @@ use constant AccountMask => {
                                                                                                     { allow_spec_country => 1 } 
                                                                                                    );
 
-                                            return $country eq '1S' || $country eq '6A';
+                                            return $country eq '1S' || $country eq '6A' || $country eq '1R';
                                        }
                     },
 
