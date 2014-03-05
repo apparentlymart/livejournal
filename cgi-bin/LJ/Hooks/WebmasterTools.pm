@@ -6,8 +6,8 @@ LJ::register_hook('head_content', sub {
     my ($headref) = @_;
 
     if (
-        $LJ::IS_LJCOM_BETA
-        || $LJ::SERVER_NAME =~ m{^bil1-ws4[7-9]}
+        LJ::get_remote()
+        && ( $LJ::IS_LJCOM_BETA || $LJ::SERVER_NAME =~ m{^bil1-ws4[7-9]} )
     ) {
         $$headref .= <<RUM_SCRIPT;
 <script>
