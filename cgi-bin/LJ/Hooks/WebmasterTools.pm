@@ -5,7 +5,10 @@ use strict;
 LJ::register_hook('head_content', sub {
     my ($headref) = @_;
 
-    if ($LJ::IS_LJCOM_BETA) {
+    if (
+        $LJ::IS_LJCOM_BETA
+        || $LJ::SERVER_NAME =~ m{^bil1-ws4[7-9]}
+    ) {
         $$headref .= <<RUM_SCRIPT;
 <script>
 var _prum = [['id', '52f0e3dbabe53dcf1b000000'],
