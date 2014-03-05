@@ -4202,6 +4202,12 @@ sub getevents {
             $item{$id} = $dt;
         }
 
+        if ( $req->{'only_count'} ) {
+            return {
+                count => scalar keys %item,
+            };
+        }
+
         my $p_revtime = LJ::get_prop("log", "revtime");
         $sth = $dbcr->prepare("SELECT jitemid, FROM_UNIXTIME(value) ".
                               "FROM logprop2 WHERE journalid=? ".
