@@ -700,7 +700,7 @@ sub trans {
     if ($host=~m!^(?:http://)?([\w-]+)\.\Q$LJ::USER_DOMAIN\E(?:$|/)!xo) {
         my $username = $1;
         my $canonical_username = LJ::canonical_username($username);
-        unless (grep { $_ eq $canonical_username } @LJ::PROT_DNS_USERNAMES) {
+        unless ($LJ::PROT_DNS_USERNAMES{$canonical_username}) {
             if ($username && (my $redir_url = $LJ::DOMAIN_JOURNALS{LJ::canonical_username($username)})) {
                 $redir_url = "http://".$redir_url unless $redir_url =~ m!https?://!;
                 return redir($redir_url.$uri);

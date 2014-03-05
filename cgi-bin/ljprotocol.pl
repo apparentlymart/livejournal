@@ -266,8 +266,9 @@ sub error_message
     my $error = LJ::Lang::ml("xmlrpc.error.$code") || LJ::Lang::get_text(undef, "xmlrpc.error.$code") || "BUG: Unknown error code ($code)!";
     $prefix = LJ::Lang::ml('xmlrpc.client_error') if $code >= 200;
     $prefix = LJ::Lang::ml('xmlrpc.server_error') if $code >= 500;
-    my $totalerror = "$prefix$error";
+    my $totalerror = "$prefix $error";
     $totalerror .= ": $des" if $des;
+    $totalerror =~ s/^\s+//;
     return $totalerror;
 }
 
@@ -732,6 +733,11 @@ sub getcomments {
         }
 
         $item_data->{body} = $item->{body} if($item->{body} && $item->{_loaded});
+
+        if ($req->{get_users_info}){
+            LJ::EmbedModule->expand_lj_user(\$item_data->{body});
+        }
+
         if ($req->{'asxml'}) {
             my $tidy = LJ::Tidy->new();
             $item_data->{body} = $tidy->clean( $item_data->{body} );
@@ -804,7 +810,7 @@ sub getcomments {
     }
 
     if($format eq 'list') {
-        $extra{items} = scalar(@comments);
+        $extra{items} = LJ::Talk::get_replycount($journal, $jitem->{jitemid});
         $itemshow = $extra{items} unless ($itemshow && $itemshow <= $extra{items});
         @comments = splice(@comments, $skip, $itemshow);
         $extra{skip} = $skip;
@@ -1300,6 +1306,7 @@ sub getfriendspage
     my $before = int $req->{before};
     my $before_count = 0;
     my $before_skip = 0;
+    my $is_only_count = $req->{only_count};
     if ($before){
         $before_skip = $skip + 0;
         $skip = 0;
@@ -1320,6 +1327,12 @@ sub getfriendspage
         'skip' => $skip,
         'filter_by_tags' => 1,
     });
+
+    if ( $lastsync && $is_only_count ) {
+        return { 
+            count => scalar grep { $LJ::EndOfTime - $_->{rlogtime} >= $lastsync } @entries,
+        };
+    }
 
     my @attrs = qw/subject_raw event_raw journalid posterid ditemid security reply_count userpic props security/;
 
@@ -1378,9 +1391,9 @@ sub getfriendspage
             $h{original_entry_url} = $original_entry->url;
             $h{repostername} = $repost_entry->journal->username;
             $h{postername} = $original_entry->poster->username;
-	    $h{journalname} = $entry->journal->username;
-	    my $userpic = $original_entry->userpic;
-	    $h{poster_userpic_url} = $userpic && $userpic->url;
+            $h{journalname} = $entry->journal->username;
+            my $userpic = $original_entry->userpic;
+            $h{poster_userpic_url} = $userpic && $userpic->url;
         }
 
 
@@ -1392,7 +1405,21 @@ sub getfriendspage
         ) if $req->{trim_widgets};
 
         LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, get_video_id => 1) if $req->{get_video_ids};
-        LJ::Poll->expand_entry(\$h{event_raw}, getpolls => 1, viewer => $u ) if $req->{get_polls};
+
+        if ( $req->{get_polls} ) {
+            my @polls_id = LJ::Poll->expand_entry(\$h{event_raw}, getpolls => 1, viewer => $u );
+
+            foreach (@polls_id) {
+                my $poll = LJ::Poll->new($_);
+
+                next unless $poll->can_view($u);
+                push @{$h{'polls'}->{$_}}, { $poll->aggr_results() };
+            }
+        }
+
+        if ($req->{get_users_info}){
+            LJ::EmbedModule->expand_lj_user(\$h{event_raw});
+        }
 
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($entry->poster, \$h{event_raw}, edit => 1) if $req->{view} eq 'stored';
@@ -2152,7 +2179,7 @@ sub common_event_validation
             next if $_ eq 'taglist';
 
             # Allow syn_links and syn_ids the full width of the prop, to avoid truncating long URLS
-            if ($_ eq 'syn_link' || $_ eq 'syn_id') {
+            if ($_ eq 'syn_link' || $_ eq 'syn_id' || $_ eq 'discovery') {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP);
             } elsif ( $_ eq 'current_music' || $_ eq 'current_location' ) {
                 $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::CMMAX_PROP);
@@ -4447,7 +4474,9 @@ sub getevents {
         }
 
         my $substitute_text;
-        LJ::run_hooks('substitute_entry_content', $entry, \$substitute_text, {});
+        if (LJ::is_web_context()) {
+            LJ::run_hooks('substitute_entry_content', $entry, \$substitute_text, {});
+        }
 
         if ($substitute_text) {
              $evt->{'substitute_text'}    = $substitute_text;
@@ -4651,7 +4680,21 @@ sub getevents {
         ) if $req->{trim_widgets};
 
         LJ::EmbedModule->expand_entry($real_uowner, \$t->[1], get_video_id => 1) if($req->{get_video_ids});
-        LJ::Poll->expand_entry(\$t->[1], getpolls => 1, viewer => $u) if $req->{get_polls};
+
+        if ( $req->{get_polls} ) {
+            my @polls_id = LJ::Poll->expand_entry(\$t->[1], getpolls => 1, viewer => $u);
+
+            foreach (@polls_id) {
+                my $poll = LJ::Poll->new($_);
+
+                next unless $poll->can_view($u);
+                push @{$evt->{'polls'}->{$_}}, { $poll->aggr_results() };
+            }
+        }
+
+        if ($req->{get_users_info}){
+            LJ::EmbedModule->expand_lj_user(\$t->[1]);
+        }
 
         if ($req->{view}) {
             LJ::EmbedModule->expand_entry($real_uowner, \$t->[1], edit => 1) if $req->{view} eq 'stored';

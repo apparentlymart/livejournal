@@ -7,7 +7,7 @@ use warnings;
 use Carp 'croak';
 use Class::Autouse qw{
     LJ::Event::JournalNewComment
-    LJ::Event::InboxUserMessageRecvd 
+    LJ::Event::InboxUserMessageRecvd
     LJ::Event LJ::NotificationArchive
 };
 
@@ -55,7 +55,7 @@ sub items {
     } &_load];
 
     # optimization:
-    #   now items are defined ... if any are comment 
+    #   now items are defined ... if any are comment
     #   objects we'll instantiate those ahead of time
     #   so that if one has its data loaded they will
     #   all benefit from a coalesced load
@@ -188,13 +188,23 @@ sub unread_count {
 
 # unread message count
 sub unread_message_count {
+
+    my $unread = LJ::MemCacheProxy::get(&_unread_msg_memkey);
+
+    return $unread
+        if defined $unread;
+
     &_load;
 
-    return scalar grep {
+    $unread = grep {
         'N' eq uc $_->{'state'}
     } grep {
         $_->{'etypeid'} == $rmessage_typeid
     } @{ $LJ::REQ_CACHE_INBOX{'events'} };
+
+    LJ::MemCacheProxy::set(&_unread_msg_memkey, $unread, 86400);
+
+    return $unread;
 } # unread_message_count
 
 # unread message count
@@ -214,7 +224,7 @@ sub spam_event_count {
 
     return scalar grep {
         'S' eq $_->{'state'}
-    } @{ $LJ::REQ_CACHE_INBOX{'events'} };   
+    } @{ $LJ::REQ_CACHE_INBOX{'events'} };
 } # spam_event_count
 
 # load the items in this queue
@@ -271,6 +281,11 @@ sub _unread_memkey {
     return [$userid, "inbox:newct:$userid"];
 }
 
+sub _unread_msg_memkey {
+    my $userid = $_[0]->{'userid'};
+    return [$userid, "inbox:newct:msg:$userid"];
+}
+
 sub _bookmark_memkey {
     my $userid = $_[0]->{'userid'};
     return [$userid, "inbox:bookmarks:$userid"];
@@ -317,6 +332,7 @@ sub expire_cache {
     LJ::MemCacheProxy::delete(&_memkey);
     LJ::MemCacheProxy::delete(&_count_memkey);
     LJ::MemCacheProxy::delete(&_unread_memkey);
+    LJ::MemCacheProxy::delete(&_unread_msg_memkey);
     LJ::MemCacheProxy::delete(&_events_memkey);
     LJ::MemCacheProxy::delete(&_bookmark_memkey);
 }
@@ -545,7 +561,7 @@ sub load_bookmarks {
 ## returns array of qid of 'bookmarked' messages
 sub get_bookmarks_ids {
     my $self = $_[0];
-    
+
     &load_bookmarks
         unless $self->{'bookmarks'};
 
@@ -574,9 +590,9 @@ sub add_bookmark {
     $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
 
     if (my ($msgid) = $user->selectrow_array("
-        SELECT arg1 
-        FROM notifyqueue 
-        WHERE userid=? AND qid=? AND etypeid IN (?, ?)", 
+        SELECT arg1
+        FROM notifyqueue
+        WHERE userid=? AND qid=? AND etypeid IN (?, ?)",
         undef, $self->{'userid'}, $qid, $rmessage_typeid, $smessage_typeid)) {
 
         $user->do('INSERT IGNORE INTO usermsgbookmarks (journalid, msgid) VALUES (?, ?)', undef, $self->{'userid'}, $msgid);
@@ -614,9 +630,9 @@ sub remove_bookmark {
     $smessage_typeid ||= LJ::Event::UserMessageSent->etypeid;
 
     if (my ($msgid) = $user->selectrow_array("
-        SELECT arg1 
-        FROM notifyqueue 
-        WHERE userid=? AND qid=? AND etypeid IN (?, ?)", 
+        SELECT arg1
+        FROM notifyqueue
+        WHERE userid=? AND qid=? AND etypeid IN (?, ?)",
         undef, $self->{'userid'}, $qid, $rmessage_typeid, $smessage_typeid)) {
 
         $user->do('DELETE FROM usermsgbookmarks WHERE journalid=? AND msgid=?', undef, $self->{'userid'}, $msgid);
@@ -849,10 +865,10 @@ sub friendplus_event_list {
 }
 
 sub entrycomment_event_list {
-    my @events = qw( 
+    my @events = qw(
                      JournalNewEntry
                      JournalNewRepost
-                     JournalNewComment 
+                     JournalNewComment
                      );
     return @events;
 }

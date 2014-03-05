@@ -1757,7 +1757,7 @@ sub aggr_results {
 
     $self->load_aggregated_results
         unless ref $self->{results} && $self->{results}{counts};
-  
+
     my $results  = $qid ? $self->{results}{counts}{$qid} : $self->{results}{counts};
 
     return $results ? %$results : ();
@@ -2197,7 +2197,10 @@ sub expand_entry {
         return ($viewpoll ? $poll->get_poll_xml(viewer => $opts{viewer}) : $poll->render_new);
     };
 
+    my @polls = $$entryref =~ /<lj-poll-(\d+)>/g;
     $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1, $getpolls)/eg;
+
+    return @polls;
 }
 
 sub process_submission {

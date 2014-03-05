@@ -519,4 +519,71 @@ sub day_compare {
     return DateTime->compare($time1, $time2);
 }
 
+sub time_web {
+    my ($class, $mysql_time, $tz) = @_;
+
+    my ($year, $month, $day, $hour, $min, $sec) = $mysql_time =~ m#(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})#;
+    my $item_datetime = eval {
+        DateTime->new (
+            year => $year,
+            month => $month,
+            day => $day,
+            hour => $hour,
+            minute => $min,
+            second => $sec,
+        );
+    };
+    my $time_now = eval {
+        DateTime->from_epoch(
+            epoch => time(),
+        );
+    };
+
+    if ($tz) {
+        $time_now = eval {
+            DateTime->from_epoch(
+                epoch => time(),
+                time_zone => $tz,
+            );
+        };
+    }
+
+    my $format = "";
+    my $time_now_epoch = $time_now->epoch;
+    my $item_datetime_epoch = $item_datetime ? $item_datetime->epoch : undef;
+
+    if ($time_now->ymd(".") eq $year.".".$month.".".$day) {
+        ## 1. Today (12:34)
+        $format = '%h:%m';
+    }
+    elsif ($item_datetime_epoch && ($time_now_epoch - $item_datetime_epoch < 172800)) {
+        ## 2. Yesterday (yesterday, 12:34)
+        $format = LJ::Lang::ml('date.format.inbox.right.yesterday');
+    }
+    elsif ($item_datetime_epoch && ($time_now_epoch - $item_datetime_epoch > 172800)
+           && ($time_now_epoch - $item_datetime_epoch < 86400 * 7)) {
+        ## 3. Day of week (monday, 12:34)
+        $format = LJ::Lang::ml('date.format.inbox.right.week');
+    }
+    elsif ($item_datetime_epoch && ($time_now_epoch - $item_datetime_epoch > 172800)
+           && ($time_now_epoch - $item_datetime_epoch < 86400 * 365)) {
+        ## 4. Full date (March, 15 12:34)
+        $format = '%B %D, %h:%m';
+    }
+    elsif ($item_datetime_epoch && ($time_now_epoch - $item_datetime_epoch > 86400 * 365)) {
+        ## 5. More year ago (March 15, 2012 12:34)
+        $format = '%B %D, %Y %h:%m';
+    }
+
+    return $format ? $class->format_time($format, {
+            day        => $item_datetime->day,
+            month      => $item_datetime->month,
+            week_day   => lc LJ::Lang::ml(LJ::Lang::day_long_langcode ($item_datetime->day_of_week)),
+            month_name => lc LJ::Lang::ml(LJ::Lang::month_long_langcode ($item_datetime->month )),
+            year       => $item_datetime->year,
+            hour       => sprintf("%02d", $item_datetime->hour),
+            minute     => sprintf("%02d", $item_datetime->min),
+        }) : "";
+}
+
 1;

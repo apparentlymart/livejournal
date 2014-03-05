@@ -36,6 +36,8 @@
 
 .prompt.rename=Rename this custom friends group to:
 
+.redirect.friends.title=title
+
 .saved.header=Saved
 
 .saved.text=Your custom friends groups are now saved.

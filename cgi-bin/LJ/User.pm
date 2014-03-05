@@ -405,6 +405,10 @@ sub username_from_url {
         }
     }
 
+    if (my ($path) = $url =~ m!^\Q$LJ::SITEROOT\E/$LJ::JOURNAL_FROM_URL_RE(?:/|$)!) {
+        return $LJ::JOURNAL_FROM_URL{$path};
+    }
+
     # user subdomains
     my $user_uri_regex = qr{
         # it all starts with a protocol:
@@ -428,7 +432,7 @@ sub username_from_url {
     if ( $LJ::USER_DOMAIN && $url =~ $user_uri_regex ) {
         my $username = $1;
         my $canonical_username = LJ::canonical_username ($username);
-        return (grep { $_ eq $canonical_username } @LJ::PROT_DNS_USERNAMES) ? undef : $username;
+        return $LJ::PROT_DNS_USERNAMES{$canonical_username} ? undef : $username;
     }
 
 }
@@ -4893,11 +4897,14 @@ sub get_post_ids {
     }
 }
 
-# This is a copy of 'sub password { ... }' for refactoring
 sub clean_password {
+    die "Outdated method\n";
+}
+
+sub _get_password_table_value {
     my $u = shift;
 
-    return unless $u->is_person;
+    return undef unless $u->is_person;
 
     $u->{_password} ||= LJ::MemCache::get_or_set(
         [ $u->{userid}, "pw:$u->{userid}" ],
@@ -4910,13 +4917,37 @@ sub clean_password {
     return $u->{_password};
 }
 
+sub _set_password_table_value {
+    my ($u, $password) = @_;
+
+    my $userid = $u->userid;
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO password (userid, password) VALUES (?, ?)", undef, $userid, $password);
+
+    # update caches
+    LJ::memcache_kill($userid, "userid");
+    LJ::MemCache::delete( [ $userid, "pw:$userid" ] );
+
+    if (my $cache = $LJ::REQ_CACHE_USER_ID{$userid}) {
+        delete $cache->{'_password'};
+    }
+
+    LJ::Auth::Method::Digest::clear_auth_digest_ha1($u);
+}
+
 sub password_md5 {
     my $u = shift;
 
-    my $password = $u->clean_password;
+    my $password = $u->_get_password_table_value;
     return undef unless defined $password;
 
-    return Digest::MD5::md5_hex($password);
+    if ($password =~ m{^md5:([0-9a-f]{32})}) {
+        return $1;
+    }
+    else {
+        return Digest::MD5::md5_hex($password);
+    }
 }
 
 sub has_password {
@@ -4933,7 +4964,7 @@ sub has_the_same_password_as {
 # May be it is more correctly to add InfoHistory inside set_password subroutine?
 sub digest_of_password_change {
     my $u = shift;
-    return Digest::MD5::md5_hex($u->clean_password . 'change');
+    return Digest::MD5::md5_hex($u->password_md5 . 'change');
 }
 
 sub reset_password {
@@ -4951,8 +4982,18 @@ sub set_password {
     return LJ::set_password($u->id, $password);
 }
 
-sub set_password_is_the_same_as {
-    die "Unimplemented";
+sub set_password_md5 {
+    my ($u, $password) = @_;
+    $u->_set_password_table_value('md5:' . Digest::MD5::md5_hex($password));
+}
+
+sub copy_password_from {
+    my ($u, $other) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    my ($other_password) = $dbh->selectrow_array('SELECT password FROM password WHERE userid=?', undef, $other->userid);
+
+    $u->_set_password_table_value($other_password);
 }
 
 sub set_email {
@@ -7622,7 +7663,7 @@ sub ljuser_alias {
 
     $remote = LJ::get_remote() unless isu($remote);
     $user = LJ::load_user($user) unless isu($user);
-    
+
     return unless $user;
 
     return $user->ljuser_alias($remote);

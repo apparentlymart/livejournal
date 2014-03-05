@@ -8,8 +8,8 @@
     use LJ::Entry;
     use LJ::Discovery::Item;
 
-    my $delayed_id = $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
-    if (!(LJ::did_post() || $delayed_id)) {
+    my $delayed_id = $GET{'delayed_id'} || $POST{'delayed_id'} || LJ::Request->notes('delayed_id');
+    unless (LJ::did_post() || $delayed_id || $GET{'usejournal'} eq $LJ::DISCOVERY_COMMUNITY_NAME) {
         return "<?requirepost?>";
     }
 
@@ -29,7 +29,7 @@
     ## http://download.microsoft.com/download/6/6/B/66B06981-67F0-4151-B71D-848BEF65F3C7/Developing%20Securely%20with%20Cross%20Site%20Scripting%20Filter%20%20-%20IE8%20Developer%20Series%20Information%20Page.pdf
     LJ::Request->header_out("X-XSS-Protection" => 0);
     
-    my $usejournal = $POST{'usejournal'} || LJ::Request->notes('usejournal');
+    my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || LJ::Request->notes('usejournal');
 
     ### Figure out poster/journal
     my ($u, $up);
@@ -47,7 +47,7 @@
     my $sticky = $POST{'sticky_type'} && LJ::is_enabled('sticky_entries');
 
     ### Set up preview variables
-    my ($ditemid, $anum, $itemid);
+    my ($anum, $itemid);
     my %req = ( 'usejournal' => $POST{'usejournal'}, );
 
     if (!$delayed_id) {
@@ -117,29 +117,52 @@
 
     if ($u->username eq $LJ::DISCOVERY_COMMUNITY_NAME) {
 
-        my $entry = LJ::Entry->new($u, jitemid => -1,  row => {});
-        my $props = { map { $_ =~ /^prop_(.+)$/ ? ($1 => $req{$_}) : () } keys %req };
+        LJ::SocialScripts::add_to_page();
+        LJ::need_journal_res();
+        
+        LJ::need_res(
+                     qw{
+                         js/discovery/main.js
+                         stc/main_v3.css
+                         stc/entryunit_v3.css
+                         stc/discoveryannouncements.css
+                     }
+        );
 
-        $entry->handle_prefetched_text($req{'subject'}, $req{'event'});
-        $entry->handle_prefetched_props($props);
+        LJ::need_res(qw{stc/admin/discovery.css stc/msgsystem.css});
+
+        my $ditemid = $GET{itemid};
+        my $entry;   
+
+        if ($ditemid) {
+            $entry = LJ::Entry->new($u, ditemid => $ditemid);
+        } else {
+            $entry = LJ::Entry->new($u, jitemid => -1,  row => {security => $req{'security'}});
+            my $props = { map { $_ =~ /^prop_(.+)$/ ? ($1 => $req{$_}) : () } keys %req };
+            
+            $entry->handle_prefetched_text($req{'subject'}, $req{'event'});
+            $entry->handle_prefetched_props($props);
+        }
 
         my $discovery_item = LJ::Discovery::Item->new(entry => $entry);
         my $feed_item = { $discovery_item->params(), content => $discovery_item->content(), };
         
-        my $template = LJ::HTML::Template->new(
-                                               { use_expr => 1 },
-                                               filename => "templates/Discovery/Item.tmpl"
+        my $template = LJ::Response::Template->new(
+              'file'            => "templates/Admin/Discovery/preview.tmpl",
+              'use_site_scheme' => 1,
+              'title'           => 'Preview',
         );
 
-        $template->param(
+        $template->params({
                          %$feed_item,
-                         #categories => _categories(),
                          remote     => ( LJ::get_remote() ? 1 : 0 ),
-        );
+                         is_public  => $entry->is_public,
+                         is_delayed => $delayed_id || $entry->is_delayed,
+                         show_menu  => ($delayed_id || $ditemid),
+        });
 
         return $template->output;
     }
-
 
     if ($stylesys == 1) {
         # pre-load common strings for little speed and less typing later

@@ -612,6 +612,17 @@ sub edit_url {
     return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;delayedid=$itemid";
 }
 
+sub preview_url {
+    my $self = shift;
+
+    my $journal = $self->journal && $self->journal->username;
+    my $itemid  = $self->delayedid;
+
+    return unless $journal && $itemid;
+
+    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&amp;delayed_id=$itemid";
+}
+
 sub statusvis {
     my ($self) = @_;
     my $statusvis = $self->prop("statusvis") || '';

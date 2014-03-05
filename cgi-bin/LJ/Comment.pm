@@ -219,15 +219,18 @@ sub absorb_row {
 }
 
 sub url {
-    my ($self, $extra)    = @_;
+    my ($self, $extra) = @_;
+    my @params;
 
     $extra =~ s{^&} {};
 
-    if ($self->state eq 'B') {
-        return $self->make_url(thread => { params => [ $extra, 'mode=showspam' ] });
-    } else {
-        return $self->make_url(thread => { params => [ $extra ] });
-    }
+    push @params, $extra
+        if $extra;
+
+    push @params, 'mode=showspam'
+        if $self->state eq 'B';
+
+    return $self->make_url(thread => { params => \@params });
 }
 
 sub reply_url {

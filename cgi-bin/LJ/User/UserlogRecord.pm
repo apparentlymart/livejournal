@@ -81,7 +81,9 @@ sub get_actions_map {
 
     my %actions_group_map;
     foreach (values %ActionToSubclassMap) {
-        push @{$actions_group_map{ $_->group() }}, $_->action();
+        if ( $_->group() ) {
+            push @{$actions_group_map{ $_->group() }}, $_->action();
+        }
     }
 
     return %actions_group_map unless (@actions);

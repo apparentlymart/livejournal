@@ -662,7 +662,7 @@ sub interstitial_page_content {
                 is_mobile       => $is_mobile ? 1 : 0,
             );
             if ($is_mobile) {
-                $res = LJ::Mob::Response::Template->new(filename => '../../../Entries/AdultContent.tmpl');
+                $res = LJ::Mob::Response::Template->new(filename => '../../Entries/AdultContent.tmpl');
                 $res->template->param (%params);
             } else {
                 $res = LJ::Response::Template->new(file => 'templates/Entries/AdultContent.tmpl.xhtml',

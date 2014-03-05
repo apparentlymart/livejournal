@@ -176,19 +176,6 @@ sub execute {
     # update the user info
     my %extra = ();  # aggregates all the changes we're making
 
-
-    # update the password
-    if ($type eq "community") {
-        $extra{'password'} = '';
-    }
-    else {
-        $extra{'password'} = $ou->clean_password;
-    }
-
-    if ($extra{'password'} ne $u->clean_password) {
-        LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change);
-    }
-
     # reset the email address
     $extra{email} = $ou->email_raw;
     $extra{status} = 'A';
@@ -200,8 +187,7 @@ sub execute {
 
     # record only if it changed
     if ( $ou->email_raw ne $u->email_raw ) {
-        LJ::User::InfoHistory->add( $u,
-            'emailreset', $u->email_raw, $u->email_status );
+        LJ::User::InfoHistory->add($u, 'emailreset', $u->email_raw, $u->email_status);
     }
 
     # get the new journaltype
@@ -209,6 +195,18 @@ sub execute {
 
     # we have update!
     LJ::update_user($u, { %extra });
+
+    # update the password
+    if ($type eq "community") {
+        LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change);
+        $u->set_password('');
+    }
+    else {
+        unless ($u->has_the_same_password_as($ou)) {
+            LJ::User::InfoHistory->add($u, 'password', $u->digest_of_password_change);
+            $u->copy_password_from($ou);
+        }
+    }
 
     # journaltype, birthday changed
     $u->invalidate_directory_record;

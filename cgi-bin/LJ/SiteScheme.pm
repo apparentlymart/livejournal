@@ -295,7 +295,7 @@ sub common_template_params {
         $remote_friends_url     = $remote->journal_base . '/friends/';
         $remote_can_use_esn     = $remote->can_use_esn;
         $remote_unread_count    = $inbox->unread_count;
-        $remote_usermsg_count   = $inbox->usermsg_recvd_event_count;
+        $remote_usermsg_count   = $inbox->unread_message_count;
         $remote_wallet_link     = LJ::Pay::Wallet->get_wallet_link($remote);
         $remote_ljphoto_url     = $remote->journal_base . '/pics/';
         $remote_can_use_ljphoto = $remote->can_use_ljphoto ? 1 : 0;

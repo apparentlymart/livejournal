@@ -539,6 +539,10 @@ SUP.i-new {
     margin: 0 -24px;
     padding: 1.15em 24px;
     }
+.s-schemius .b-massaction {
+    padding-left: 50px;
+    padding-right: 50px;
+    }
 .b-massaction-fixed {
     position: fixed;
     bottom: 0;

@@ -122,30 +122,39 @@ sub create_user {
         unless defined $opts{'email'};
 
     $opts{'friends'} ||= [];
-    
+
     my $u;
 
     if ( $journaltype eq 'P' ) {
         $u = LJ::Test::Mock::User->create_personal(%opts);
-    } elsif ( $journaltype eq 'C' ) {
+    }
+    elsif ( $journaltype eq 'C' ) {
         unless ( defined $opts{'owner'} ) {
             $opts{'owner'} = $class->create_user(
-                %opts, 'journaltype' => 'P', 'user' => undef );
+                %opts,
+                'journaltype' => 'P',
+                'user'        => undef
+            );
         }
         $opts{'membership'} ||= 'open';
         $opts{'postlevel'}  ||= 'members'; 
         $u = LJ::Test::Mock::User->create_community(%opts);
-    } elsif ( $journaltype eq 'Y' ) {
+    }
+    elsif ( $journaltype eq 'Y' ) {
         unless ( defined $opts{'creator'} ) {
             $opts{'creator'} = $class->create_user(
-                %opts, 'journaltype' => 'P', 'user' => undef );
+                %opts,
+                'journaltype' => 'P',
+                'user'        => undef
+            );
         }
 
         $opts{'feedurl'} = "$LJ::SITEROOT/fakerss.xml#"
             unless defined $opts{'feedurl'};
 
         $u = LJ::Test::Mock::User->create_syndicated(%opts);
-    } else {
+    }
+    else {
         die "unknown journaltype $journaltype";
     }
 
@@ -166,7 +175,10 @@ sub create_user {
         push @temp_userids, $u->userid;
     }
 
-    return bless { %$u }, 'LJ::Test::Mock::User';
+    $u = bless { %$u }, 'LJ::Test::Mock::User';
+    $u->set_clean_password($opts{'password'}) if defined $opts{'password'};
+
+    return $u;
 }
 
 

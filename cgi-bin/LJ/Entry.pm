@@ -337,6 +337,17 @@ sub edit_url {
     return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$itemid";
 }
 
+sub preview_url {
+    my $self = shift;
+
+    my $journal = $self->journal && $self->journal->username;
+    my $itemid  = $self->ditemid;
+
+    return unless $journal && $itemid;
+
+    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&amp;itemid=$itemid";
+}
+
 sub mobile_url {
     my $self = shift;
     my $u = $self->{u};    
@@ -1724,6 +1735,7 @@ sub lead {
 
     if ($event =~ /<lj-lead\b.*?>(.+)<\/lj-lead\b\s*>/is) {
         $lead = $1;
+        LJ::CleanHTML::clean_event(\$lead);
     }
 
     return $lead;

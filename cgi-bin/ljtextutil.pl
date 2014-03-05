@@ -907,11 +907,11 @@ sub convert_lj_tags_to_links {
            $name = "#$pollid";
        }
        my $polltext = LJ::Lang::ml('entry.ljpoll', {name=>$name});
-       $args{event} =~ s#<lj-poll-$pollid>#<a href="$LJ::SITEROOT/poll/?id=$pollid" target="_blank" >$polltext</a>#g;
+       $args{event} =~ s|<lj-poll-$pollid>|<a href="$LJ::SITEROOT/poll/?id=$pollid" target="_blank" >$polltext</a>|g;
     }
     
     my $embedtext = LJ::Lang::ml('entry.ljembed');
-    $args{event} =~ s#<lj\-embed[^>]+/>#<a href="$args{embed_url}">$embedtext</a>#g;
+    $args{event} =~ s|<lj\-embed[^>]+/>|<a href="$args{embed_url}">$embedtext</a>|g;
     while ( $args{event} =~ /<lj\s+user="([^>"]+)"\s*\/?>/g ){
         # follow the documentation - no about communites, openid or syndicated, just user
         my $username = $1;
@@ -921,12 +921,12 @@ sub convert_lj_tags_to_links {
             my $html = '<a href="' . $user->profile_url . '" target="_blank"><img src="' 
                 . $LJ::IMGPREFIX . '/userinfo.gif?v=17080" alt=""></a><a href="'
                 . $user->journal_base . '" target="_blank">' . $name . '</a>';
-            $args{event} =~ s#<lj\s+user="$username"\s*\/?>#$html#g;
+            $args{event} =~ s|<lj\s+user="$username"\s*\/?>|$html|g;
         } else {
-            $args{event} =~ s#<lj\s+user="$username"\s*\/?>#$username#g;
+            $args{event} =~ s|<lj\s+user="$username"\s*\/?>|$username|g;
         }
     }
-    $args{event} =~ s#</?lj-cut[^>]*>##g;
+    $args{event} =~ s|</?lj-cut[^>]*>||g;
     
     return $args{event};
 }

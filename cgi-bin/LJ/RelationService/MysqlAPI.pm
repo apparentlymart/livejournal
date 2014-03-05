@@ -74,7 +74,7 @@ sub _create_relation_to_type_f_new {
                 ?, ?, 1
             )
         ],
-        undef, 
+        undef,
         $uid,
         $tid
     );
@@ -91,7 +91,7 @@ sub _create_relation_to_type_f_new {
                 ?, ?, 1
             )
         ],
-        undef, 
+        undef,
         $tid,
         $uid
     );
@@ -128,7 +128,7 @@ sub _create_relation_to_type_f_new {
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:new:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOFCOUNT_KEY_PREFIX:old:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSOFCOUNT_KEY_PREFIX:new:F:$tid"]);
-    
+
     return 1;
 }
 
@@ -159,7 +159,7 @@ sub _create_relation_to_type_f_old {
                 ?, ?, ?, ?, ?
             )
         ],
-        undef, 
+        undef,
         $uid,
         $tid,
         $opts{fgcolor},
@@ -194,7 +194,7 @@ sub _create_relation_to_type_f_old {
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:new:F:$tid:$uid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSCOUNT_KEY_PREFIX:old:F:$tid"]);
     LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSCOUNT_KEY_PREFIX:new:F:$tid"]);
-    
+
     return 1;
 }
 
@@ -319,7 +319,7 @@ sub remove_relation_to {
     my $u      = shift;
     my $target = shift;
     my $type   = shift;
-    
+
     if ( $type eq 'F' ) {
         return $class->_remove_relation_to_type_f($u, $target);
     } elsif ($type eq 'R') {
@@ -560,7 +560,7 @@ sub _remove_all_relations_sources_to_type_other {
         LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELS_KEY_PREFIX:$type:$tid"]);
         LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_REL_KEY_PREFIX:$type:$tid:$uid"]);
         LJ::MemCacheProxy::delete([$tid, "$MEMCACHE_RELSCOUNT_KEY_PREFIX:$type:$tid"]);
-    }   
+    }
 
     return 1;
 }
@@ -602,7 +602,7 @@ sub _remove_relation_to_type_other {
     if ($dbh->err) {
         return 0;
     }
-    
+
     # Update cache
     LJ::_set_rel_memcache($uid, $tid, $type, 0);
 
@@ -736,7 +736,7 @@ sub _is_relation_to_other {
     my $target = shift;
     my $type   = shift;
     my %opts   = @_;
-    
+
     my $uid = $u->id;
     my $tid = $target->id;
 
@@ -769,7 +769,7 @@ sub _is_relation_to_other {
                 type = ?
         ],
         undef,
-        $uid, 
+        $uid,
         $tid,
         $type
     );
@@ -893,9 +893,9 @@ sub _find_relation_destinations_type_f_new {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -988,9 +988,9 @@ sub _find_relation_destinations_type_f_old {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -1026,14 +1026,9 @@ sub _find_relation_destinations_type_f_old {
         return;
     }
 
-    my @uids = @$uids;
+    my $count_for_cache = scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS ? $MAX_COUNT_FOR_CACHE_REL_IDS : scalar @$uids;
 
-    # We cant cache more then 200000 (~ 1MB)
-    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
-        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
-    }
-
-    my $pack = pack 'N*', ($limit, @uids);
+    my $pack = pack 'N*', ($limit, @$uids[0..$count_for_cache-1]);
 
     if ($pack) {
         if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
@@ -1069,9 +1064,9 @@ sub _find_relation_destinations_type_r {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -1139,11 +1134,11 @@ sub _find_relation_destinations_type_other {
 
     my $uids = $dbh->selectcol_arrayref(qq[
             SELECT
-                targetid 
+                targetid
             FROM
-                reluser 
+                reluser
             WHERE
-                userid = ? 
+                userid = ?
             AND
                 type = ?
             ORDER BY
@@ -1207,7 +1202,7 @@ sub _find_relation_sources_type_f_new {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    
+
     my $uid = $u->id;
 
     return unless $uid;
@@ -1226,9 +1221,9 @@ sub _find_relation_sources_type_f_new {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -1302,7 +1297,7 @@ sub _find_relation_sources_type_f_old {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    
+
     my $uid = $u->id;
 
     return unless $uid;
@@ -1321,9 +1316,9 @@ sub _find_relation_sources_type_f_old {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -1360,14 +1355,9 @@ sub _find_relation_sources_type_f_old {
         return;
     }
 
-    my @uids = @$uids;
+    my $count_for_cache = scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS ? $MAX_COUNT_FOR_CACHE_REL_IDS : scalar @$uids;
 
-    # We cant cache more then 200000 (~ 1MB)
-    if (scalar @uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
-        splice @uids, $MAX_COUNT_FOR_CACHE_REL_IDS, scalar @uids;
-    }
-
-    my $pack = pack 'N*', ($limit, @uids);
+    my $pack = pack 'N*', ($limit, @$uids[0..$count_for_cache-1]);
 
     if ($pack) {
         if (length $pack > $MAX_SIZE_FOR_PACK_STRUCT) {
@@ -1384,7 +1374,7 @@ sub _find_relation_sources_type_pc {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    
+
     my $uid = $u->id;
 
     return unless $uid;
@@ -1403,9 +1393,9 @@ sub _find_relation_sources_type_pc {
 
             if ($limit) {
                 if ($slimit >= $limit) {
-                    if (@uids > $limit) {
-                        @uids = @uids[0..$limit-1];
-                    }
+
+                    splice @uids, $limit
+                        if @uids > $limit;
 
                     return \@uids;
                 }
@@ -1489,9 +1479,9 @@ sub _find_relation_sources_type_r {
             # have to truncate it to match the requested limit
 
             if ($slimit >= $limit) {
-                if (scalar @uids > $limit) {
-                    @uids = @uids[0..$limit-1];
-                }
+
+                splice @uids, $limit
+                    if @uids > $limit;
 
                 return \@uids;
             }
@@ -1526,8 +1516,6 @@ sub _find_relation_sources_type_r {
     if ($dbh->err) {
         return;
     }
-
-    my @uids = @$uids;
 
     # We cant cache more then 200000 (~ 1MB)
     if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
@@ -1569,9 +1557,9 @@ sub _find_relation_sources_type_other {
             # have to truncate it to match the requested limit
 
             if ($slimit >= $limit) {
-                if (scalar @uids > $limit) {
-                    @uids = @uids[0..$limit-1];
-                }
+
+                splice @uids, $limit
+                    if @uids > $limit;
 
                 return \@uids;
             }
@@ -1605,8 +1593,6 @@ sub _find_relation_sources_type_other {
         $uid,
         $type
     );
-
-    my @uids = @$uids;
 
     # We cant cache more then 200000 (~ 1MB)
     if (scalar @$uids > $MAX_COUNT_FOR_CACHE_REL_IDS) {
@@ -1784,7 +1770,7 @@ sub _load_relation_destinations_f_old {
                     FROM
                         friends
                     WHERE
-                        userid =? 
+                        userid =?
                 ],
                 {
                     Columns => [1,2,3,4,5]
@@ -2411,7 +2397,7 @@ sub _find_relation_attributes_f_new {
                 f2.friendid = ?
             AND
                 f1.friendid = ?
-            AND 
+            AND
                 f2.userid = ?
         ],
         {
@@ -2472,11 +2458,11 @@ sub _find_relation_attributes_f_old {
 
     my $row = $dbh->selectrow_hashref(qq[
             SELECT
-                groupmask, fgcolor, bgcolor 
+                groupmask, fgcolor, bgcolor
             FROM
                 friends
             WHERE
-                userid = ? 
+                userid = ?
             AND
                 friendid = ?
         ],
@@ -2639,7 +2625,7 @@ sub _update_relation_attributes_f {
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:old:F:$uid:$tid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:new:F:$uid:$tid"]);
-    
+
     return 1;
 }
 
@@ -2691,7 +2677,7 @@ sub delete_and_purge_completely {
     my $class = shift;
     my $u     = shift;
     my %opts  = @_;
-    
+
     return 0 unless $u;
 
     my $uid = $u->id;
@@ -2823,7 +2809,7 @@ sub _filter {
 
     return unless $filters;
     return unless ref $filters eq 'ARRAY';
-    
+
     foreach my $filter (@$filters) {
         my $type   = $filter->{type};
         my $edge   = $filter->{edge};

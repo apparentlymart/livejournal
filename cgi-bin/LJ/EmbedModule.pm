@@ -105,6 +105,35 @@ sub expand_entry {
     $$entryref =~ s/(<lj\-embed[^>]+\/>)/$class->_expand_tag($journal, $1, $opts{edit}, %opts)/ge;
 }
 
+sub expand_lj_user {
+    my ($class, $text_ref) = @_;
+
+    my %type_read_type = (
+        R => 'redirect',
+        I => 'identity',
+        P => 'personal',
+        S => 'shared',
+        Y => 'syndicated',
+        N => 'news',
+        C => 'community',
+    );
+
+    while ( $$text_ref =~ /<lj\s+user="([^>"]+)"\s*\/?>/g ){
+
+        my $username = $1;
+
+        if (my $user = LJ::load_user($username)) {
+
+            my $type = $user->journaltype();
+
+            my $html = "<lj user=\"$username\" type=\"$type_read_type{$type}\">";
+
+            $$text_ref =~ s|<lj\s+user="$username"\s*\/?>|$html|g;
+        }
+
+    }
+}
+
 sub _expand_tag {
     my( $class, $journal, $tag, $edit, %opts ) = @_;
     
