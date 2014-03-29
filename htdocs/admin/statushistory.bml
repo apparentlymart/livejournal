@@ -57,6 +57,10 @@
         push @where, "s.shtype=$qt";
     }
 
+    my $remote_id = $remote->id || 0;
+    push @where, "s.shtype!='ratings_coeff'"
+        unless $LJ::VIEW_RATINGS_SPECIAL{$remote_id};
+    
     my $where = "WHERE " . join(" AND ", @where) . " " if @where;
 
     my $orderby = 'shdate';

@@ -13,7 +13,6 @@
   min-height: 50px;
   margin-left: -3px;
   text-align: left;
-  font-family: 'Arial', sans-serif;
   }
 .b-contextualhover:before,
 .b-contextualhover:after {
@@ -36,7 +35,7 @@
   .b-contextualhover INPUT {
     padding: 0;
     margin: 0;
-    color: #000;
+    color: #475559;
     }
   .b-contextualhover IMG {
     border: none;
@@ -46,43 +45,14 @@
     background: #FFF;
     border-bottom: 0 !important;
     text-decoration: none !important;
-    color: #00C !important;
+    color: #00A3D9 !important;
     }
   .b-contextualhover A:hover,
   .b-contextualhover A:active,
   .b-contextualhover A:focus {
     border-bottom: 0 !important;
     text-decoration: underline !important;
-    color: #00C !important;
-    }
-  .s-lanzelot .b-contextualhover A:link,
-  .s-lanzelot .b-contextualhover A:visited {
-    border-bottom: 0 !important;
-    text-decoration: none !important;
-    color: #3F5F9E !important;
-    }
-  .s-lanzelot .b-contextualhover A:hover,
-  .s-lanzelot .b-contextualhover A:active,
-  .s-lanzelot .b-contextualhover A:focus {
-    border-bottom: 0 !important;
-    text-decoration: underline !important;
-    color: #3F5F9E !important;
-    }
-  .index-page .b-contextualhover A:link,
-  .index-page .b-contextualhover A:visited,
-  .index-page .b-contextualhover A:hover,
-  .index-page .b-contextualhover A:active,
-  .index-page .b-contextualhover A:focus {
-    color: #3F5F9E !important;
-    }
-  .b-contextualhover .alias-unavailable A:link,
-  .b-contextualhover .alias-unavailable A:visited {
-    color: #999 !important;
-    }
-  .b-contextualhover .alias-unavailable A:hover,
-  .b-contextualhover .alias-unavailable A:active,
-  .b-contextualhover .alias-unavailable A:focus {
-    color: #999 !important;
+    color: #0086B3 !important;
     }
   .b-contextualhover P {
     margin-bottom: 3px;

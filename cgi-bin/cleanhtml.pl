@@ -337,8 +337,7 @@ sub clean {
     my $text_a_link = 0;
     my $text_b_link = 0;
 
-    my $ljspoilers_open = 0;
-    my $ljquote_open    = 0;
+    my $ljspoilers_open   = 0;
 
     # if we're retrieving a cut tag, then we want to eat everything 
     # until we hit the first cut tag.
@@ -375,11 +374,11 @@ sub clean {
                 if ($tag eq 'param' && $attr->{name} eq 'allowscriptaccess') {
                     next TOKEN;
                 }
-                if ($tag eq 'embed') {
-                	# LJSUP-15368: don't delete allowScriptAccess from trusted sites
-                	# probably it's must placed in transform_embed hook...
+                if ($tag eq 'embed' && keys %$attr) {
+                    # LJSUP-15368: don't delete allowScriptAccess from trusted sites
+                    # probably it's must placed in transform_embed hook...
                     my $site = $attr->{src};
-                    $site =~ m{http://(?:[\w\-]+\.)*([\w\-]+\.\w*)}; #get site url from src
+                    $site =~ m{(?:https?:)?//(?:[\w\-]+\.)*([\w\-]+\.\w*)}; #get site url from src
                     $site = $1;
                     unless ( grep($_ eq 'allowScriptAccess', @{$LJ::WHITELIST_VIDEO_HOSTS{$site}->{'other_whitelist'}}) ) {
                         delete $attr->{allowscriptaccess};
@@ -888,14 +887,63 @@ sub clean {
                 $newdata .= $like->html({ 'vkontakte_like_js' => \%vkontakte_like_js});
             }
             elsif ( $tag eq 'lj-lead' ) {
-                $start_capture->($tag, $token);
+                next TOKEN if $opencount{'lj-lead'};
+
+                $newdata .= qq{<div class="b-journalpreamble">};
+                $opencount{'lj-lead'}++;
             }
             elsif ( $tag eq 'lj-quote' ) {
-                $newdata .= qq{<div>};
-                $ljquote_open++;
-                next TOKEN;
+                $newdata .= qq{<div class="b-journalblockquote">};
+                $opencount{'lj-quote'}++;
             }
+            elsif ( $tag eq 'lj-quote-cite' ) {
+                next TOKEN if !$opencount{'lj-quote'} || $opencount{'lj-quote-cite'};
 
+                $newdata .= qq{<cite class="b-journalblockquote-author">};
+                $opencount{'lj-quote-cite'}++;
+            }
+            elsif ( $tag eq 'lj-gallery' ) {
+                next TOKEN if $opencount{'lj-gallery'};
+                $opencount{'lj-gallery'}->{width}  = $attr->{width};
+                $opencount{'lj-gallery'}->{height} = $attr->{height};
+                $newdata .= $token->[4];
+            }
+            elsif ( $tag eq 'lj-gallery-item' ) {
+                next TOKEN unless $opencount{'lj-gallery'};
+
+                my $src = $attr->{src};
+                my $width = $opencount{'lj-gallery'}->{width} ? qq{width="$opencount{'lj-gallery'}->{width}"} : '';
+                my $height = $opencount{'lj-gallery'}->{height} ? qq{height="$opencount{'lj-gallery'}->{height}"} : '';
+
+                $newdata .= qq{<lj-gallery-item><img src="$src" $width $height><lj-gallery-item-capture>};
+            }
+            elsif ( $tag eq 'lj-image' ) {
+                $opencount{'lj-image-a'} = 0;
+
+                my $src  = $attr->{src};
+                my $href = $attr->{href};
+
+                my $height = $attr->{height};
+                my $width  = $attr->{width};
+
+                my $style = '';
+
+                if ($width || $height) {
+                    $width  = "width: ${width}px;" if $width;
+                    $height = "height: ${height}px;" if $height;
+                    $style = qq{style="$width $height"};
+                }
+
+                my $img = qq{<img $style class="b-journalpicture-image" src="$src">};
+                if ($href) {
+                    $img = qq{<a href="$href">$img</a>};
+                }
+
+                $img = qq{<figure class="b-journalpicture">$img<figcaption class="b-journalpicture-caption">};
+
+                $opencount{'lj-image'}++;
+                $newdata .= $img;
+            }
 
             # Don't allow any tag with the "set" attribute
             elsif ($tag =~ m/:set$/) {
@@ -1536,9 +1584,36 @@ sub clean {
                     $newdata .= qq{</div></div>};
                     $ljspoilers_open--;
                 }
-            } elsif ( $tag eq 'lj-quote' && $ljquote_open ) {
+            } elsif ( $tag eq 'lj-quote' ) {
+                next TOKEN unless $opencount{'lj-quote'};
+
+                if ($opencount{'lj-quote-block'}) {
+                    $newdata .= qq{</blockquote>}; 
+                    $opencount{'lj-quote-block'}--;
+                }
                 $newdata .= qq{</div>};
-                $ljquote_open--;
+                $opencount{'lj-quote'}--;
+            } elsif ( $tag eq 'lj-quote-cite' ) {
+                next TOKEN unless $opencount{'lj-quote-cite'};
+
+                $newdata .= qq{</cite>};
+                $opencount{'lj-quote-cite'}--;
+
+                $newdata .= qq{<blockquote class="b-journalblockquote-quote">};
+                $opencount{'lj-quote-block'}++;
+            } elsif ( $tag eq 'lj-lead' ) {
+                next TOKEN unless $opencount{'lj-lead'};
+
+                $newdata .= qq{</div>};
+                $opencount{'lj-lead'}--;
+            } elsif ( $tag eq 'lj-gallery' ) {
+                next TOKEN unless $opencount{'lj-gallery'};
+                undef $opencount{'lj-gallery'};
+                $newdata .= qq{</lj-gallery>};
+            } elsif ( $tag eq 'lj-gallery-item' ) {
+                $newdata .= qq{</lj-gallery-item-capture></lj-gallery-item>};
+            } elsif ( $tag eq 'lj-image' ) {
+                $newdata .= qq{</figcaption></figure>};
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
@@ -1750,8 +1825,20 @@ sub clean {
         $newdata .= qq{</div></div>} x $ljspoilers_open;
     }
 
-    if ($ljquote_open) {
-        $newdata .= qq{</div>} x $ljquote_open;
+    if ($opencount{'lj-quote-cite'}) {
+        $newdata .= qq{</cite>} x $opencount{'lj-quote-cite'};
+    }
+
+    if ($opencount{'lj-quote-block'}) {
+        $newdata .= qq{</blockquote>} x $opencount{'lj-quote-block'};
+    }
+
+    if ($opencount{'lj-quote'}) {
+        $newdata .= qq{</div>} x $opencount{'lj-quote'};
+    }
+
+    if ($opencount{'lj-lead'}) {
+        $newdata .= qq{</div>} x $opencount{'lj-lead'};
     }
         
     # extra-paranoid check

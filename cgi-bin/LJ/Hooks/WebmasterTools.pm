@@ -5,9 +5,28 @@ use strict;
 LJ::register_hook('head_content', sub {
     my ($headref) = @_;
 
+    $LJ::HEAD_CONTENT_SHOWN++;
+
+    if (LJ::get_remote() && $LJ::SERVER_NAME eq "bil1-ws49") {
+        $$headref .= <<RUM_SCRIPT_HP;
+<script> 
+var _prum = [['id', '531ed87eabe53dce7b069f59'], 
+             ['mark', 'firstbyte', (new Date()).getTime()]]; 
+(function() { 
+    var s = document.getElementsByTagName('script')[0] 
+      , p = document.createElement('script'); 
+    p.async = 'async'; 
+    p.src = '//rum-static.pingdom.net/prum.min.js'; 
+    s.parentNode.insertBefore(p, s); 
+})(); 
+</script> 
+RUM_SCRIPT_HP
+    }
+
     if (
+        !($LJ::HEAD_CONTENT_SHOWN % 10) &&
         LJ::get_remote()
-        && ( $LJ::IS_LJCOM_BETA || $LJ::SERVER_NAME =~ m{^bil1-ws4[7-9]} )
+        && ( $LJ::IS_LJCOM_BETA || $LJ::SERVER_NAME =~ m{^bil1-ws50} )
     ) {
         $$headref .= <<RUM_SCRIPT;
 <script>

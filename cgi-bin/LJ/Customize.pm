@@ -498,6 +498,10 @@ sub save_s2_props {
     }
 
     if (LJ::S2::layer_compile_user($layer, \%override)) {
+        if ($opts{check_params}) {
+            my $prop_value = ref $override{"view_entry_disabled"} eq "ARRAY" ? $override{"view_entry_disabled"}[1] : 0;
+            LJ::MemCache::set ([$u->userid, "s2prop:".$u->userid.":view_entry_disabled"], $prop_value, 3600);
+        }
         # saved
     } else {
         my $error = LJ::last_error();

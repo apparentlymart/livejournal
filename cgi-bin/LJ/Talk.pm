@@ -1397,6 +1397,18 @@ sub load_comments_tree
     my $post_count = 0;
     my $flat = $opts->{'flat'};
 
+    # with a wrong thread number, silently default to the whole page
+    my $thread = $opts->{'thread'}+0;
+    $thread = 0 unless $posts->{$thread};
+
+    my %thread_talkids = ();
+
+    foreach my $post (@$posts{ sort { $a <=> $b } keys %$posts }) {
+        my ($talkid, $parenttalkid, $state, $posterid) = @$post{ qw{ talkid parenttalkid state posterid } };
+
+        $thread_talkids{$talkid} = $parenttalkid if $thread && ($thread == $talkid || $thread == $parenttalkid || $thread_talkids{$parenttalkid});
+    }
+
     {
         my %showable_children;  # $id -> $count
 
@@ -1429,6 +1441,8 @@ sub load_comments_tree
                 $should_show = 0 if $state eq 'B' && !($remote && $remote_userid == $posterid);
             }
 
+            $thread_talkids{$talkid} = $parenttalkid if $thread && ($thread == $talkid || $thread == $parenttalkid || grep { $talkid == $_ } values %thread_talkids);
+
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
@@ -1454,11 +1468,14 @@ sub load_comments_tree
                 unshift @{ $children{$parenttalkid} }, $talkid;
             }
         }
+
     }
 
-    # with a wrong thread number, silently default to the whole page
-    my $thread = $opts->{'thread'}+0;
-    $thread = 0 unless $posts->{$thread};
+    if ($thread && keys %thread_talkids) {
+        foreach my $post (keys %$posts) {
+            delete $posts->{$post} unless defined $thread_talkids{$post};
+        }
+    }
 
     unless ($thread || $children{$thread}) {
         $opts->{'out_error'} = "noposts";
@@ -1687,9 +1704,9 @@ sub load_comments
         }
     }
 
-    my $thread = $opts->{'thread'}+0;
     my $visible_parents = int $opts->{'visible_parents'};
 
+    my $thread = $opts->{'thread'}+0;
     if ( $thread and $visible_parents ) {
         my $parents = $opts->{'parents_counter'};
         my $go_up_to = $opts->{'parents_talkid'};

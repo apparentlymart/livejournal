@@ -31,6 +31,8 @@ use LJ::AccessLogSink::Database;
 use LJ::AccessLogSink::DInsertd;
 use LJ::AccessLogSink::DBIProfile;
 
+use LJ::NYTProf::Interface;
+
 use LJ::Blob;
 use LJ::ModuleCheck;
 use LJ::Router;
@@ -46,6 +48,9 @@ BEGIN {
     require 'ljviews.pl';
     require 'ljprotocol.pl';
     $SIG{__WARN__} = sub { LJ::Handlers::warn_handler(@_) };
+
+
+    LJ::NYTProf::Interface::init();
 }
 
 my %RQ;       # per-request data
@@ -91,6 +96,8 @@ sub handler
     LJ::Request->free();
     LJ::Request->init($r);
     LJ::Request->start_request();
+
+    LJ::NYTProf::Interface::start_profile_request();
 
     if ($LJ::SHOW_SLOW_QUERIES) {
         my $method = LJ::Request->method;
@@ -140,6 +147,7 @@ sub handler
     if (LJ::Request->is_initial_req) {
         LJ::Request->set_handlers(PerlCleanupHandler => [
             "Apache::LiveJournal::db_logger",
+            "LJ::NYTProf::Interface::finish_profile_request",
             sub {
                 %RQ = ();
                 LJ::end_request();

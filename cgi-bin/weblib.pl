@@ -1727,6 +1727,7 @@ sub res_includes {
                 pics_production          => LJ::is_enabled('pics_production'),
                 v                        => stc_0_modtime($now),
                 country                  => $country,
+                counterprefix            => "$LJ::LJCOUNTER_URI_BASE",
                 %comm_access,
         );
         $site{default_copyright} = $default_copyright if LJ::is_enabled('default_copyright', $remote);
@@ -1756,7 +1757,7 @@ sub res_includes {
         my $remote_info       = $to_json->(get_remote_info());
         my $journal_info      = $to_json->(get_journal_info());
         my $entry_info        = $to_json->(get_entry_info());
-        my $branding_info     = $to_json->(get_branding_info());
+        my $ljlive_info       = $to_json->(get_ljlive_info());
 
         my $site_version      = LJ::ejs($LJ::CURRENT_VERSION);
 
@@ -1765,7 +1766,8 @@ sub res_includes {
                 Site = window.Site || {};
                 Site.ml_text = $jsml_out;
                 Site.page = $jsvar_out;
-                Site.page.template = $branding_info;
+                Site.page.template = {};
+                Site.page.ljlive = $ljlive_info;
                 Site.timer = +(new Date());
                 Site.remote = $remote_info;
                 Site.journal = $journal_info;
@@ -2113,7 +2115,7 @@ sub get_entry_info {
 }
 
 # Discovery times branding 
-sub get_branding_info {
+sub get_ljlive_info {
     my $bodyref = '';
 
     LJ::run_hooks('ljtimes_rebranding' => {
@@ -2121,10 +2123,9 @@ sub get_branding_info {
         'bodyref'  => \$bodyref,
     });
 
-    return {} unless $bodyref;
-
     return {
-        ljlive_branding => $bodyref
+        ($bodyref ? (branding_template => $bodyref) : ()),
+        is_enabled => LJ::JSON->to_boolean(LJ::Discovery::Times->is_enabled), 
     }
 }
 

@@ -570,6 +570,9 @@ class Page
 
     var User journal "User whose journal is being viewed";
     var readonly string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
+    var readonly string journal_facebook_link "Url to linked Facebook account";
+    var readonly string journal_twitter_link "Url to linked Twitter account";
+    var readonly string journal_vkontakte_link "Url to linked Vkontakte account";
     var readonly string base_url "The base URL of the journal being viewed.";
     var readonly string{} view_url
     "Links to top-level views where id equals the name of the view being linked to.

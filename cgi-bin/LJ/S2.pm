@@ -196,7 +196,7 @@ sub make_journal
     return $page if $page && ref $page ne 'HASH';
 
     if ( $entry =~ /::/ && !$page ) {
-        # object methods 
+        # object methods
         my $url = 'http://' . LJ::Request->hostname . LJ::Request->uri;
         if ( my $args = LJ::Request->args ) {
             $url .= '?' . $args;
@@ -204,7 +204,7 @@ sub make_journal
 
         my $opts_keys = join( q{, }, sort keys %$opts );
 
-        die "no page object for $entry, url=$url, opts keys=$opts_keys " . 
+        die "no page object for $entry, url=$url, opts keys=$opts_keys " .
             '(check Perl constructor in the relevant LJ::S2::*Page ' .
             'class first)';
     }
@@ -482,7 +482,7 @@ sub load_layers {
     }
 
     # figure out who owns what we need
-    my $us = LJ::S2::get_layer_owners(@from_db); 
+    my $us = LJ::S2::get_layer_owners(@from_db);
     # break it down by cluster
     my %bycluster; # cluster => [ lid, lid, ... ]
     foreach my $lid (@from_db) {
@@ -743,7 +743,7 @@ sub get_style
     }
 
     my $have_style = 0;
-    
+
     if ($verify && $styleid) {
         #my $dbr = LJ::S2::get_s2_reader();       LJSVD375
         my $dbr = LJ::get_db_writer();
@@ -1346,8 +1346,8 @@ sub set_style_layers
             }
         }
     }
-
     set_style_layers_raw($u, $styleid, %newlay);
+
 }
 
 # just set in user cluster, not merging with global
@@ -1818,7 +1818,7 @@ sub can_use_prop
 {
     my ($u, $uniq, $prop, $prop_desc) = @_;  # $uniq = redist_uniq value
     my $user_basic =  LJ::run_hook("user_is_basic", $u);
-    if ( $prop eq 'old_s1' && $user_basic) 
+    if ( $prop eq 'old_s1' && $user_basic)
     {
         $$prop_desc = LJ::Lang::ml("comment.classic.not.available");
         return 0;
@@ -1962,7 +1962,7 @@ sub Tag
 {
     my ($u, $kwid, $kw) = @_;
     return undef unless $u && $kwid && defined $kw;
-    
+
     my $t = {
         _type => 'Tag',
         name => LJ::ehtml($kw),
@@ -2006,13 +2006,13 @@ sub Entry
     };
 
     foreach (qw(subject text journal poster new_day end_day
-                comments userpic permalink_url itemid tags delayedid 
+                comments userpic permalink_url itemid tags delayedid
                 real_journalid real_itemid )) {
         $e->{$_} = $arg->{$_};
     }
 
     foreach (qw(event event_town event_location event_paid event_users
-                event_price event_type event_image event_desc 
+                event_price event_type event_image event_desc
                 portfolio portfolio_thumbnail)) {
         $e->{$_} = LJ::ehtml($arg->{'props'}->{"ljart_$_"});
     }
@@ -2169,16 +2169,16 @@ sub Entry
         }
 
         LJ::run_hooks( 'blocked_entry_content', $entry, {
-            text     => \$e->{'text'}, 
+            text     => \$e->{'text'},
             subject  => \$e->{'subject'},
             tags     => \$e->{'tags'},
             metadata => \$e->{'metadata'},
         });
 
      } else {
-        my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u}, 
+        my $entry = LJ::DelayedEntry->get_entry_by_id( $e->{journal}->{_u},
                                                        $e->{delayedid} );
-        
+
         if ( $entry->is_sticky || $arg->{'sticky_type'}) {
             $e->{'sticky'} = 1;
             $e->{'sticky_icon'} = Image_std("sticky-entry");
@@ -2241,6 +2241,12 @@ sub Page
     $up = LJ::load_userid($opts->{ljentry}->{posterid})
         if $opts->{ljentry};
 
+    $u->preload_props(qw{
+        facebook_link
+        twitter_link
+        vkontakte_link
+    });
+
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
@@ -2249,6 +2255,9 @@ sub Page
         'args' => \%args,
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
+        'journal_facebook_link' => $u->{'facebook_link'},
+        'journal_twitter_link' => $u->{'twitter_link'},
+        'journal_vkontakte_link' => $u->{'vkontakte_link'},
         'time' => DateTime_unix(time),
         'base_url' => $base_url,
         'stylesheet_url' => "$base_url/res/$styleid/stylesheet?$stylemodtime",
@@ -2448,7 +2457,7 @@ sub Event
     $u->preload_props(qw{
         ljart_event
         ljart_event_location
-        ljart_event_town 
+        ljart_event_town
         ljart_event_type
         ljart_event_paid
         ljart_event_price
@@ -2460,7 +2469,7 @@ sub Event
     $o->{'default_pic'} = Image_userpic($u, $u->{'defaultpicid'});
     $o->{'event'}           = $u->{'ljart_event'};
     $o->{'event_location'}  = $u->{'ljart_event_location'};
-    $o->{'event_town'}      = $u->{'ljart_event_town'}; 
+    $o->{'event_town'}      = $u->{'ljart_event_town'};
     $o->{'event_type'}      = $u->{'ljart_event_type'};
     $o->{'event_paid'}      = $u->{'ljart_event_paid'};
     $o->{'event_price'}     = $u->{'ljart_event_price'};
@@ -2484,7 +2493,7 @@ sub Institution
     $o->{'_type'}                   = "Institution";
     $o->{'default_pic'}             = Image_userpic($u, $u->{'defaultpicid'});
     $o->{'institution'}             = $u->{'ljart_institut'};
-    $o->{'institution_type'}        = $u->{'ljart_institut_type'}; 
+    $o->{'institution_type'}        = $u->{'ljart_institut_type'};
     $o->{'institution_designation'} = $u->{'ljart_institut_designation'};
 
     return $o;
@@ -2500,13 +2509,13 @@ sub Person
     );
 
     for my $field (qw{ name specialization town photo }) {
-        $o->{"person_$field"} = $row->{$field};    
+        $o->{"person_$field"} = $row->{$field};
     }
 
     $o->{'person_ml_specialization'} = LJ::Lang::ml('ljart.create.artist.spec.' . $row->{'specialization'});
 
     return $o;
-}    
+}
 
 sub UserLink
 {
@@ -2515,11 +2524,11 @@ sub UserLink
     # a dash means pass to s2 as blank so it will just insert a blank line
     $link->{'title'} = '' if $link->{'title'} eq "-";
     my $attributes_text = '';
-    
+
     if ($options && $options->{attributes}) {
         my $attr_data = $options->{attributes};
         my @attr = keys %{$options->{attributes}};
-        $attributes_text = join(' ', 
+        $attributes_text = join(' ',
                             map { "$_=\"" .  $attr_data->{$_} . "\"" } @attr);
     }
 
@@ -2949,7 +2958,7 @@ sub viewer_is_owner
     if ($LJ::S2::CURR_PAGE->{'_u'}->{'journaltype'} eq 'C') {
         return LJ::check_rel( $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}, $remote->{'userid'}, 'S');
     } else {
-        return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'}; 
+        return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
     }
 }
 
@@ -3206,9 +3215,9 @@ sub journal_current_datetime {
     $hour = $neg ? "-$hour" : "$hour";
     $timezone = $hour . $partial_hour;
 
-    return $u->{'__cached_s2_tz_' . $timezone} 
+    return $u->{'__cached_s2_tz_' . $timezone}
         if $u->{'__cached_s2_tz_' . $timezone};
-    
+
     my $now = DateTime->now( time_zone => $timezone );
     $ret->{year} = $now->year;
     $ret->{month} = $now->month;
@@ -4275,13 +4284,13 @@ sub EntryLite__get_link
 *Entry__get_link = \&EntryLite__get_link;
 *Comment__get_link = \&EntryLite__get_link;
 
-# return list of communities, 
+# return list of communities,
 # where user is member and community is ljart event
 sub Person__get_events
 {
     my ($ctx, $this) = @_;
 
-    my $u = $this->{'_u'}; 
+    my $u = $this->{'_u'};
     return unless $u;
 
     my $list = LJ::MemCache::get('ljart:s2:artist:events:uid:'.$u->userid);
@@ -4290,22 +4299,22 @@ sub Person__get_events
     my @friendof_uids = $u->friendof_uids();
 
     my $rel_user = LJ::load_rel_user($u, 'B');
-    my %rel_user_hash = map {$_ => 1} @$rel_user; 
- 
+    my %rel_user_hash = map {$_ => 1} @$rel_user;
+
     @friendof_uids = grep { !$rel_user_hash{$_} } @friendof_uids;
 
     my $friendof_users = LJ::load_userids(@friendof_uids);
 
-    @$list = map  { LJ::S2::Event($_) } 
-             grep { 
-                    $_ && ( 
-                        $_->{journaltype} eq "C" || 
-                        $_->{journaltype} eq "S" || 
-                        $_->{journaltype} eq "N" 
+    @$list = map  { LJ::S2::Event($_) }
+             grep {
+                    $_ && (
+                        $_->{journaltype} eq "C" ||
+                        $_->{journaltype} eq "S" ||
+                        $_->{journaltype} eq "N"
                     ) && !(
-                        $_->{statusvis} eq 'X' || 
+                        $_->{statusvis} eq 'X' ||
                         $_->{clusterid} == 0
-                    ) && 
+                    ) &&
                     $_->prop('ljart_event')
                   }
              map  { $friendof_users->{$_} } @friendof_uids;
@@ -4367,7 +4376,7 @@ sub _Entry__get_link
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
     my $real_user = $this->{'real_journalid'} ? LJ::want_user($this->{'real_journalid'}) : undef;
 
-    my $entry = $this->{'_cache_entry_obj'}; 
+    my $entry = $this->{'_cache_entry_obj'};
     if (!$entry) {
         $entry = LJ::Entry->new($journalu, ditemid => $this->{'itemid'});
         $this->{'_cache_entry_obj'} = $entry;
@@ -4385,9 +4394,9 @@ sub _Entry__get_link
             unless (LJ::u_equals($remote, $real_user)) {
                 my $link = $entry->prop('repost_link');
                 my ($journalid, $jitemid) = split(/:/, $link);
-            
+
                 return $null_link unless int($journalid);
-                my $reposted_entry = LJ::Entry->new(int($journalid), 
+                my $reposted_entry = LJ::Entry->new(int($journalid),
                                                     jitemid => int($jitemid));
 
                 my $link = LJ::S2::Link($reposted_entry->url,
@@ -4432,7 +4441,7 @@ sub _Entry__get_link
     if ($key eq "edit_tags") {
         return $null_link if (LJ::is_enabled('entry_reference') && $this->{'real_itemid'});
 
-        return $null_link 
+        return $null_link
             unless $remote && LJ::Tags::can_add_entry_tags( $remote, $entry );
 
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
@@ -4447,7 +4456,7 @@ sub _Entry__get_link
 
         my $attrs  = $entry->sharing_attributes();
 
-        my $blocked = LJ::RegionBlockedContent::blocked_entry_content($entry) || 
+        my $blocked = LJ::RegionBlockedContent::blocked_entry_content($entry) ||
                       LJ::RegionBlockedContent::region_block($entry);
 
         my $link_text  = $ctx->[S2::PROPS]->{'text_share'};
@@ -4476,7 +4485,7 @@ sub _Entry__get_link
         my $post_id = $entry->journalid . ':' . $entry->ditemid;
         my $entry_url = LJ::eurl($entry->url);
         my $entry_title = LJ::eurl($entry->subject_text);
-        my $hashtags = $entry->twitter_hashtags; 
+        my $hashtags = $entry->twitter_hashtags;
         my $link = LJ::S2::Link("http://twitter.com/share?url=$entry_url&text=$entry_title&hashtags=$hashtags", $ctx->[S2::PROPS]->{"text_share_twitter"}, LJ::S2::Image("$LJ::IMGPREFIX/twitter.gif", 24, 24));
         return $link;
     } elsif ($key eq "share_email") {
@@ -4548,18 +4557,18 @@ sub _Entry__get_link
 
     my $__get_newentry_info = sub {
         my $newentry_etypeid = 'LJ::Event::JournalNewEntry'->etypeid;
-            
+
         my $newentry_sub = $this->{__newentry_sub}->{$journalu->id};
-        if ($remote && !$newentry_sub) { 
+        if ($remote && !$newentry_sub) {
             ($newentry_sub) = $remote->has_subscription( journalid      => $journalu->id,
                                                         event          => "JournalNewEntry",
                                                         require_active => 1,);
-    
+
             $this->{__newentry_sub}->{$journalu->id} = $newentry_sub;
         }
-    
+
         my $newentry_auth_token;
-    
+
         if ($newentry_sub) {
             $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
                                                              subid     => $newentry_sub->id,
@@ -4570,14 +4579,14 @@ sub _Entry__get_link
                                                              action    => 'addsub',
                                                              etypeid   => $newentry_etypeid,);
         }
-        
+
         return ($newentry_sub, $newentry_auth_token);
     };
 
     if ($key eq "watch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
-        
+
         return $null_link if $remote->has_subscription(
                                                        journal => $journalu,
                                                        event   => "JournalNewComment",
@@ -4641,7 +4650,7 @@ sub _Entry__get_link
                                           'lj_newentry_subid'   => $newentry_sub ? $newentry_sub->id : 0,
                                           'class'               => 'TrackButton'));
     }
-    
+
     return $null_link;
 }
 
@@ -4728,7 +4737,7 @@ sub Entry__get_lj_embeds
 
     return [] unless $entry;
 
-    my @embeds = $entry->event_text() =~ m/(<lj\-embed\sid="\d+"\s*?\/>)/g; 
+    my @embeds = $entry->event_text() =~ m/(<lj\-embed\sid="\d+"\s*?\/>)/g;
 
     return \@embeds;
 }
@@ -4939,14 +4948,14 @@ sub Entry__print_ebox {
 
 sub Entry__get_cutted_text {
     my ($ctx, $this) = @_;
-    
+
     my $text = $this->{'text'};
     my $url  = $this->{'permalink_url'};
-    
+
     my $journal = $this->{'journal'};
     my $poster  = $this->{'poster'};
 
-    LJ::CleanHTML::clean_event( \$text, { 
+    LJ::CleanHTML::clean_event( \$text, {
         'cuturl'                => $url,
         'entry_url'             => $url,
         'ljcut_disable'         => 0,
@@ -5113,7 +5122,7 @@ sub Page__get_latest_month
 
 sub Page__get_entry_by_id {
     my ( $ctx, $this, $entry_id ) = @_;
-    my $journal = $this->{'_u'}; 
+    my $journal = $this->{'_u'};
 
     my $remote = LJ::get_remote();
     my $entry = LJ::Entry->new($journal, ditemid => $entry_id);
@@ -5155,9 +5164,9 @@ sub Page__get_entry_by_id {
 
 sub Page__get_entries_by_ids {
    my ( $ctx, $this, $ref_list_ids ) = @_;
-      
+
    my %ret;
-            
+
    if (ref $ref_list_ids eq 'ARRAY') {
        for my $entry_id (@$ref_list_ids) {
            if (my $entry = Page__get_entry_by_id($ctx, $this, $entry_id)) {
@@ -5169,7 +5178,7 @@ sub Page__get_entries_by_ids {
    }
    return \%ret;
 }
- 
+
 sub Page__get_last_entries {
     my ( $ctx, $this, $ljuser, $count ) = @_;
 
@@ -5267,15 +5276,15 @@ sub Page__get_entries_by_tag_lite {
     my $journalid = $journal->userid;
 
     my $itemids = $dbc->selectcol_arrayref('
-        SELECT 
+        SELECT
             jitemid
-        FROM 
+        FROM
             logtagsrecent
         WHERE
-            kwid=? 
-        AND 
-            journalid=? 
-        LIMIT ?', 
+            kwid=?
+        AND
+            journalid=?
+        LIMIT ?',
     undef, $tagid, $journalid, $count);
 
     my %logprops = ();
@@ -5296,7 +5305,7 @@ sub Page__get_entries_by_tag_lite {
 
         $entry->handle_prefetched_props($logprops{$itemid});
         $entry->handle_prefetched_tags($tags->{ $journalid.' '.$itemid });
-        
+
         if ($preload_text) {
             $entry->handle_prefetched_text( $texts->{ $entry->{jitemid} }->[0], $texts->{ $entry->{jitemid} }->[1] );
         }
@@ -5876,7 +5885,7 @@ sub Page__viewer_sees_journalpromo {
     return 0 if $LJ::S2::CURR_PAGE->{'view'} !~ /^recent|tag|entry|day$/;
 
     my $opts;
-    
+
     $opts->{'remote'} = LJ::get_remote();
     $opts->{'journal'} = $LJ::S2::CURR_PAGE->{'journal'}->{'_u'};
 
@@ -5885,7 +5894,7 @@ sub Page__viewer_sees_journalpromo {
 
     if ($@) {
         warn "Error when Page::viewer_sees_journalpromo() try to call LJ::Widget::JournalPromo->is_visible() from LJ::S2:\n$@\n";
-        return 0;   
+        return 0;
     }
     return $ret;
 }
@@ -5893,7 +5902,7 @@ sub Page__viewer_sees_journalpromo {
 sub Page__is_journalpromo {
 
     return 0 if $LJ::REQ_GLOBAL{'journalpromo_showed'};
-    
+
     return Page__viewer_sees_journalpromo(@_);
 }
 
@@ -5901,12 +5910,12 @@ sub Page__journalpromo {
     my ($ctx, $this) = @_;
 
     my $opts;
-    
+
     $opts->{'remote'} = LJ::get_remote();
     $opts->{'journal'} = $LJ::S2::CURR_PAGE->{'journal'}->{'_u'};
 
     my $ret = '';
-    
+
     eval { $ret = "LJ::Widget::JournalPromo"->render(%$opts); };
 
     if ($@) {
@@ -5923,7 +5932,7 @@ sub Page__render_journalpromo {
     return 0 if $LJ::S2::CURR_PAGE->{'view'} !~ /^recent|tag|entry|day$/;
 
     return 0 if $LJ::REQ_GLOBAL{'journalpromo_showed'}++;
-    
+
     my $rendered = Page__journalpromo($ctx, $this);
     $S2::pout->($rendered);
 
@@ -5985,7 +5994,7 @@ sub get_remote_ljart_town {
 
 sub get_ljart_artists {
 
-    my $dbh = LJ::get_db_reader() 
+    my $dbh = LJ::get_db_reader()
         or return;
 
     my $userids = $dbh->selectcol_arrayref('SELECT userid FROM ljart_artist');

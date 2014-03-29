@@ -23,6 +23,90 @@ use LJ::RelationService::Const;
 
 require 'ljdb.pl';
 
+sub load_friendsfriends_status {
+    my $class       = shift;
+    my $userid      = shift;
+    my $friends_ids = shift;
+    
+    my $friends_status_mc_key = [$userid, "friendsfriends_status2:".$userid];
+    my $friends_status_mc = LJ::MemCache::get($friends_status_mc_key);
+    unless ($friends_status_mc) {
+        my $dbr = LJ::get_db_reader('slow');
+        my $friends_status_db;
+        if (@$friends_ids) {
+            $friends_status_db = $dbr->selectall_arrayref ("SELECT userid, statusvis, journaltype, clusterid FROM user WHERE userid IN (".join (",", @$friends_ids).")", { Slice => {} });
+        } else {
+            $friends_status_db = [];
+        }
+        my $packed_friends_list = pack "(IA1A1s)*", map { $_->{'userid'}, $_->{'statusvis'}, $_->{'journaltype'}, $_->{'clusterid'} } @$friends_status_db;
+        if (length $packed_friends_list > 950 * 1024) {
+            warn "[FriendsFriendsStatus] Too big packed data (" . (length $packed_friends_list) . "). Will read from DB next time";
+        } else {
+            LJ::MemCache::set($friends_status_mc_key, $packed_friends_list, 3600);
+        }
+        $friends_status_mc = $packed_friends_list;
+    }
+
+    my @t_friends_status = unpack "(IA1A1s)*", $friends_status_mc;
+    my $friends_status = {};
+    while (@t_friends_status) {
+        my $userid         = shift @t_friends_status;
+        my $statusvis      = shift @t_friends_status;
+        my $journaltype    = shift @t_friends_status;
+        my $clusterid      = shift @t_friends_status;
+        $friends_status->{$userid} = {
+            userid      => $userid,
+            statusvis   => $statusvis,
+            journaltype => $journaltype,
+            clusterid   => $clusterid,
+        };
+    }
+
+    return $friends_status;
+}
+
+sub load_friends_status {
+    my $class       = shift;
+    my $userid      = shift;
+    my $friends_ids = shift;
+    
+    my $friends_status_mc_key = [$userid, "friends_status2:".$userid];
+    my $friends_status_mc = LJ::MemCache::get($friends_status_mc_key);
+    unless ($friends_status_mc) {
+        my $dbr = LJ::get_db_reader('slow');
+        my $friends_status_db;
+        if (@$friends_ids) {
+            $friends_status_db = $dbr->selectall_arrayref ("SELECT userid, statusvis, journaltype, clusterid FROM user WHERE userid IN (".join (",", @$friends_ids).")", { Slice => {} });
+        } else {
+            $friends_status_db = [];
+        }
+        my $packed_friends_list = pack "(IA1A1s)*", map { $_->{'userid'}, $_->{'statusvis'}, $_->{'journaltype'}, $_->{'clusterid'} } @$friends_status_db;
+        if (length $packed_friends_list > 950 * 1024) {
+            warn "[FriendsStatus] Too big packed data (" . (length $packed_friends_list) . "). Will read from DB next time";
+        } else {
+            LJ::MemCache::set($friends_status_mc_key, $packed_friends_list, 3600);
+        }
+        $friends_status_mc = $packed_friends_list;
+    }
+
+    my @t_friends_status = unpack "(IA1A1s)*", $friends_status_mc;
+    my $friends_status = {};
+    while (@t_friends_status) {
+        my $userid         = shift @t_friends_status;
+        my $statusvis      = shift @t_friends_status;
+        my $journaltype    = shift @t_friends_status;
+        my $clusterid      = shift @t_friends_status;
+        $friends_status->{$userid} = {
+            userid      => $userid,
+            statusvis   => $statusvis,
+            journaltype => $journaltype,
+            clusterid   => $clusterid,
+        };
+    }
+
+    return $friends_status;
+}
+
 sub create_relation_to {
     my $class  = shift;
     my $u      = shift;
@@ -108,6 +192,7 @@ sub _create_relation_to_type_f_new {
     }
 
     # Invalidate user memcache
+    LJ::MemCacheProxy::delete([$uid, "friends_status:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
@@ -172,6 +257,7 @@ sub _create_relation_to_type_f_old {
     }
 
     # Invalidate user memcache
+    LJ::MemCacheProxy::delete([$uid, "friends_status:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
@@ -369,6 +455,7 @@ sub _remove_relation_to_type_f {
     }
 
     # Invalidate user memcache
+    LJ::MemCacheProxy::delete([$uid, "friends_status:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends2:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELS_KEY_PREFIX:F:$uid"]);
@@ -2621,6 +2708,7 @@ sub _update_relation_attributes_f {
     }
 
     # invalidate memcache of friends
+    LJ::MemCacheProxy::delete([$uid, "friends_status:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "friends:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_RELSFULL_KEY_PREFIX:F:$uid"]);
     LJ::MemCacheProxy::delete([$uid, "$MEMCACHE_REL_KEY_PREFIX:old:F:$uid:$tid"]);

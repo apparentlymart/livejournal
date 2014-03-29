@@ -123,6 +123,7 @@
         LJ::need_res(
                      qw{
                          js/discovery/main.js
+                         js/discovery/directives.js
                          stc/main_v3.css
                          stc/entryunit_v3.css
                          stc/discoveryannouncements.css

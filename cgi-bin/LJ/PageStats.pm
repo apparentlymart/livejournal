@@ -366,7 +366,7 @@ sub comments_style {
 
     my $comments_style = 's1';
 
-    my ($ctx, $stylesys, $styleid);
+    my ($stylesys, $styleid);
 
     if ($remote && ($stylemine || $remote->opt_stylealwaysmine || $remote->opt_commentsstylemine)) {
         $style_u = $remote;
@@ -387,11 +387,23 @@ sub comments_style {
     }
 
     if ( $stylesys == 2 ) {
-        $ctx = LJ::S2::s2_context('UNUSED', $styleid);
-        $LJ::S2::CURR_CTX = $ctx;
+        my $style = LJ::Customize->verify_and_load_style ($journal);
+        my $prop_value = undef;
+        unless ($style) {
+            my $ctx = LJ::S2::s2_context('UNUSED', $styleid);
+            $LJ::S2::CURR_CTX = $ctx;
+            $prop_value = $ctx->[S2::PROPS]->{'view_entry_disabled'};
+            warn "Style probably corrupted. User: " . $journal->username;
+        } else {
+            $prop_value = LJ::MemCache::get_or_set (
+                [$journal->userid, "s2prop:".$journal->userid.":view_entry_disabled"],
+                sub { return LJ::Customize->get_s2_prop_values ("view_entry_disabled", $journal, $style); },
+                3600
+            );
+        }
 
-        $comments_style = 's2' if (not $ctx->[S2::PROPS()]->{'view_entry_disabled'} and
-                       LJ::get_cap($style_u, "s2viewentry")) || $LJ::JOURNALS_WITH_FIXED_STYLE{$journal->user};
+        $comments_style = 's2'
+            if (not $prop_value and LJ::get_cap($journal, "s2viewentry")) || $LJ::JOURNALS_WITH_FIXED_STYLE{$journal->user};
     }
 
     if ( $format eq 'light' ) {

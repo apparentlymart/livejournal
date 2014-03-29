@@ -334,7 +334,7 @@ sub edit_url {
 
     return unless $journal && $itemid;
 
-    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$itemid";
+    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&itemid=$itemid";
 }
 
 sub preview_url {
@@ -345,7 +345,7 @@ sub preview_url {
 
     return unless $journal && $itemid;
 
-    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&amp;itemid=$itemid";
+    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&itemid=$itemid";
 }
 
 sub mobile_url {
@@ -1733,9 +1733,8 @@ sub lead {
     my $lead  = '';
     my $event = $self->event_raw;
 
-    if ($event =~ /<lj-lead\b.*?>(.+)<\/lj-lead\b\s*>/is) {
+    if ($event =~ /<lj-lead\b.*?>(.+?)<\/lj-lead\b\s*>/is) {
         $lead = $1;
-        LJ::CleanHTML::clean_event(\$lead);
     }
 
     return $lead;

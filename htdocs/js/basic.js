@@ -1455,7 +1455,7 @@ LJ.siteMessage = (function ($) {
     get: function () {
       var that = this;
 
-      LJ.Api.call('sitemessage.get_message', { locale: Site.locale, country: Site.country, username: LJ.get('current_journal.username') }, function (data) {
+      LJ.Api.call('sitemessage.get_message', { locale: Site.locale, country: Site.country }, function (data) {
         if (!data.error) {
           that.show(data.message);
         }

@@ -609,7 +609,7 @@ sub edit_url {
 
     return unless $journal && $itemid;
 
-    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;delayedid=$itemid";
+    return "$LJ::SITEROOT/editjournal.bml?journal=$journal&delayedid=$itemid";
 }
 
 sub preview_url {
@@ -620,7 +620,7 @@ sub preview_url {
 
     return unless $journal && $itemid;
 
-    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&amp;delayed_id=$itemid";
+    return "$LJ::SITEROOT/preview/entry.bml?usejournal=$journal&delayed_id=$itemid";
 }
 
 sub statusvis {

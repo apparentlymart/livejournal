@@ -91,6 +91,8 @@ sub find_handler {
 
 sub handler_from_code {
     my ( $class, $code ) = @_;
+
+    return undef unless $code;
     return $CODE_TO_CLASS_MAP{$code};
 }
 

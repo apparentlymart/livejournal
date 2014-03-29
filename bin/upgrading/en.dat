@@ -4583,6 +4583,12 @@ main.editors.more=Show more entries
 main.editors.recommends|staleness=1
 main.editors.recommends=LiveJournal Recommends
 
+main.editors.ua.description|staleness=1
+main.editors.ua.description=Ukraine. Description
+
+main.editors.ua.title|staleness=1
+main.editors.ua.title=Ukraine
+
 main.featured.ljmaps.title|staleness=1
 main.featured.ljmaps.title=LiveJournal Maps
 
@@ -4738,6 +4744,9 @@ main.menu.categories=Categories
 
 main.menu.editors|staleness=1
 main.menu.editors=Editors
+
+main.menu.editors.ua|staleness=1
+main.menu.editors.ua=Ukraine
 
 main.menu.latest=Latest
 

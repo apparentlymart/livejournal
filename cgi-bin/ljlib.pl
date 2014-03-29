@@ -864,6 +864,12 @@ sub get_recent_items {
         $before_sql = "AND jitemid < $beforeid";
     }
 
+    my $exclude_sql = '';
+    my $excludeid = $opts->{'excludeid'} + 0;
+    if ($excludeid) {
+        $exclude_sql = "AND jitemid != $excludeid";
+    }
+
     my $posterwhere;
     if ($opts->{'posterid'} && $opts->{'posterid'} =~ /^(\d+)$/) {
         $posterwhere = " AND posterid=$1";
@@ -881,9 +887,10 @@ sub get_recent_items {
 
     my $time_filter = '';
     if ( $opts->{time_begin} && $opts->{time_end} ) {
+        my $time_what  = $opts->{time_limitby} &&  $opts->{time_limitby} eq 'eventtime' ? 'revttime' : 'rlogtime';
         my $time_begin = $LJ::EndOfTime - LJ::TimeUtil->mysqldate_to_time($opts->{time_begin});
         my $time_end   = $LJ::EndOfTime - LJ::TimeUtil->mysqldate_to_time($opts->{time_end});
-        $time_filter = sprintf("AND rlogtime < %s AND rlogtime > %s ",
+        $time_filter = sprintf("AND $time_what < %s AND $time_what > %s ",
             $time_begin, $time_end );
     }
 
@@ -893,7 +900,7 @@ sub get_recent_items {
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2
-        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $time_filter $after_sql $before_sql $suspend_where
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere $posterwhere $time_filter $after_sql $before_sql $exclude_sql $suspend_where
     };
 
     if ( $sticky && $show_sticky_on_top ) {
@@ -1613,6 +1620,7 @@ sub __clean_singletons {
     LJ::RelationService->reset_singletons;
     LJ::UniqCookie->clear_request_cache;
     LJ::PushNotification::Storage->clear_data();
+    LJ::API::RateLimiter->reset_singleton();
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between

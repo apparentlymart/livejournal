@@ -578,7 +578,7 @@ sub time_web {
     return $format ? $class->format_time($format, {
             day        => $item_datetime->day,
             month      => $item_datetime->month,
-            week_day   => lc LJ::Lang::ml(LJ::Lang::day_long_langcode ($item_datetime->day_of_week)),
+            week_day   => lc LJ::Lang::ml(LJ::Lang::day_long_langcode ($item_datetime->local_day_of_week)),
             month_name => lc LJ::Lang::ml(LJ::Lang::month_long_langcode ($item_datetime->month )),
             year       => $item_datetime->year,
             hour       => sprintf("%02d", $item_datetime->hour),

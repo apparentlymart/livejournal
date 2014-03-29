@@ -226,8 +226,13 @@ my %HANDLERS = (
     resetpushcounter  => \&resetpushcounter,
     getpushlist       => \&getpushlist,
 
-    !$LJ::DISABLED{'xmlrpc_ratings'} ? (geteventsrating => \&geteventsrating) : (),
-    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getusersrating => \&getusersrating) : (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (geteventsrating        => \&geteventsrating)       : (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getusersrating         => \&getusersrating)        : (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getratingcategories    => \&getratingcategories)   : (),
+
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getdiscoveryfeed       => \&getdiscoveryfeed)      : (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getdiscoverycategories => \&getdiscoverycategories): (),
+    !$LJ::DISABLED{'xmlrpc_ratings'} ? (getdiscoveryitem       => \&getdiscoveryitem)      : (),
 );
 
 sub translate
@@ -276,6 +281,21 @@ sub do_request
 {
     # get the request and response hash refs
     my ($method, $req, $err, $flags) = @_;
+
+    # xmlrpc rate limit
+    my @limited_methods = qw(getevents);
+    if (
+        ( grep { $method eq $_ } @limited_methods )        # Only for specified methods.
+        && !$flags->{noauth}                               # Only for external calls.
+        && ( $req->{'props'}->{'interface'} eq 'xml-rpc' ) # Only for xml-rpc calls.
+        && LJ::Request->is_inited()                        # Only in web context.
+    ) {
+        $flags->{is_use_limits} = 1;
+        my $rate_limiter = LJ::API::RateLimiter->new(LJ::Request->request);
+
+        return fail($err,402) unless $rate_limiter->rate_point("xmlrpc.$method");
+    }
+    #-----------------#
 
     if (ref $req eq "HASH") {
 
@@ -1515,6 +1535,7 @@ sub getinbox
         UserMessageSent      => 19,
         UserNewComment       => 20,
         UserNewEntry         => 21,
+        CommentReply         => 22,
     );
     my %number_type = reverse %type_number;
 
@@ -3433,7 +3454,7 @@ sub editevent {
         ){
             my $qsecurity = $uowner->quote('private');
             my $dberr;
-            LJ::run_hooks('report_entry_update', $ownerid, $itemid);
+            LJ::run_hooks('report_entry_update', $ownerid, $itemid, { write_to_userlog => 1 } );
             $uowner->log2_do(\$dberr, "UPDATE log2 SET security=$qsecurity " .
                                        "WHERE journalid=$ownerid AND jitemid=$itemid");
             return fail($err,501,$dberr) if $dberr;
@@ -3666,7 +3687,7 @@ sub editevent {
 
         my $qsecurity = $uowner->quote($security);
         my $dberr;
-        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid, { write_to_userlog => 1 } );
         $uowner->log2_do(\$dberr, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                          "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                          "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
@@ -3807,7 +3828,7 @@ sub editevent {
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
         my $dberr;
-        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid, { write_to_userlog => 1 } );
         $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
                          "journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -3816,7 +3837,7 @@ sub editevent {
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
         my $dberr;
-        LJ::run_hooks('report_entry_update', $ownerid, $itemid);
+        LJ::run_hooks('report_entry_update', $ownerid, $itemid, { write_to_userlog => 1 } );
         $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
                          "WHERE journalid=$ownerid AND jitemid=$itemid");
         return fail($err,501,$dberr) if $dberr;
@@ -4170,28 +4191,28 @@ sub getevents {
         # broken client loop prevention
         # TODO: Just add rate limits here instead of that old stuff
         my $u_req = ($u ? $u : $uowner);
-        if ($req->{'lastsync'}) {
-            my $pname = "rl_syncitems_getevents_loop";
-            LJ::load_user_props($u_req, $pname);
+        # if ($req->{'lastsync'}) {
+        #     my $pname = "rl_syncitems_getevents_loop";
+        #     LJ::load_user_props($u_req, $pname);
 
-            # format is:  time/date/time/date/time/date/... so split
-            # it into a hash, then delete pairs that are older than an hour
-            my %reqs = split(m!/!, $u_req->{$pname});
+        #     # format is:  time/date/time/date/time/date/... so split
+        #     # it into a hash, then delete pairs that are older than an hour
+        #     my %reqs = split(m!/!, $u_req->{$pname});
 
-            foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
-            my $count = grep { $_ eq $date } values %reqs;
-            $reqs{$now} = $date;
+        #     foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
+        #     my $count = grep { $_ eq $date } values %reqs;
+        #     $reqs{$now} = $date;
 
-            if ($count >= 2) {
-                # 2 prior, plus this one = 3 repeated requests for same synctime.
-                # their client is busted.  (doesn't understand syncitems semantics)
-                return fail($err,406);
-            }
+        #     if ($count >= 2) {
+        #         # 2 prior, plus this one = 3 repeated requests for same synctime.
+        #         # their client is busted.  (doesn't understand syncitems semantics)
+        #         return fail($err,406);
+        #     }
 
-            $u_req->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
-                                               sort { $b <=> $a }
-                                               keys %reqs ) );
-        }
+        #     $u_req->set_prop( $pname => join( '/', map { $_ => $reqs{$_} }
+        #                                        sort { $b <=> $a }
+        #                                        keys %reqs ) );
+        # }
 
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
@@ -4251,9 +4272,14 @@ sub getevents {
         my $itemshow   = $req->{'howmany'};
         my $itemselect = $itemshow + $skip;
 
+        $orderby = "ORDER BY jitemid";
+        unless ($sort_order eq 'default') {
+            $orderby .= ' '.uc($sort_order);
+        }
+
         my %item;
         $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
-                              "journalid=? AND logtime < ? $secwhere LIMIT $itemselect");
+                              "journalid=? AND logtime < ? $secwhere $orderby LIMIT $itemselect");
         $sth->execute($ownerid, $before);
 
         while (my ($id, $dt) = $sth->fetchrow_array) {
@@ -4273,11 +4299,6 @@ sub getevents {
         }
 
         my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
-
-        $orderby = "ORDER BY jitemid";
-        unless ($sort_order eq 'default') {
-            $orderby .= ' '.uc($sort_order);
-        }
 
         if (@ids > $skip) {
             @ids = @ids[$skip..(@ids-1)];
@@ -4514,6 +4535,11 @@ sub getevents {
         if ($jposterid != $final_ownerid) {
             my $uposter = LJ::load_userid($jposterid);
             $evt->{'poster'} = $uposter->username;
+            $evt->{'poster_id'} = $uposter->id;
+
+            if ( my $userpic = $uposter->userpic() ) {
+                $evt->{'poster_userpic_url'} = $userpic->url();
+            }
 
             if ($uposter->identity) {
                 my $i = $uposter->identity;
@@ -4759,6 +4785,8 @@ sub getevents {
     if ($req->{'noprops'}) {
         foreach(@$events) { delete $_->{'props'}; }
     }
+
+    $res->{lastsync} = LJ::TimeUtil->mysql_time();
 
     return $res;
 }
@@ -5735,9 +5763,10 @@ sub authenticate
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
         elsif ($auth_meth eq "oauth"){
-            my $rate_limiter = LJ::Request->is_inited ?
-                LJ::API::RateLimiter->new(LJ::Request->request) :
-                LJ::API::RateLimiter->new();
+            my $rate_limiter =
+                LJ::Request->is_inited ?
+                    LJ::API::RateLimiter->new(LJ::Request->request) :
+                    LJ::API::RateLimiter->new();
 
             my $oauth = LJ::OAuth->new(rate_limiter => $rate_limiter);
 
@@ -5792,6 +5821,29 @@ sub authenticate
 sub authorize
 {
     my ($req, $err, $flags, $method) = @_;
+
+    ### Use rate limits.
+    if ( $flags->{is_use_limits} ) {
+
+        my $rate_limiter = LJ::API::RateLimiter->new();
+
+        if ( my $user = $flags->{u} ) {
+
+            if ( !$rate_limiter->rate_point( "xmlrpc.$method.user", [ $user->user ] ) ) {
+                return fail($err,402);
+            }
+
+        } else {
+
+            my $ip = LJ::get_remote_ip();
+
+            if ( !$rate_limiter->rate_point( "xmlrpc.$method.anonym", [ $ip ] ) ) {
+                return fail($err,402);
+            }
+
+        }
+    }
+    #---------------------------#
 
     my $auth_method = $req->{'auth_method'};
 
@@ -6045,101 +6097,105 @@ sub geteventsrating {
     $flags->{allow_anonymous} = 1;
     return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'geteventsrating');
 
-    my $user_id = $flags->{u} ? $flags->{u}->id : 0;
+    # unpacking parameters
+    my $category      =        $req->{category    };
+    my $item_show     =        $req->{itemshow    } || 30;
+    my $region        = exists $req->{region      } ? $req->{region}      : 'cyr';
+    my $sort          = exists $req->{sort        } ? $req->{sort}        : 'hits';
+    my $skip          = exists $req->{skip        } ? $req->{skip}        : 0;
+    my $is_show_promo =        $req->{show_promo  };
 
-    return fail($err, 200, 'region') unless $req->{region};
+    my $user_id       = $flags->{u} ? $flags->{u}->id : 0;
+    #----------------------#
 
-    return fail($err, 203, 'region') unless $req->{region} =~ /^cyr|noncyr|ua$/;
+    # searching errors
+    my @er = ($err, 203);
 
-    return fail($err, 203, 'sort') if $req->{sort} &&  $req->{sort} !~ /^hits|visitors|default$/;
+    return fail( @er, 'sort')        if $sort        !~ m{^( hits | visitors )$}x;
+    return fail( @er, 'region')      if $region      !~ m{^( cyr  | noncyr   | ua )$}x;
 
-    foreach my $p (qw(skip itemshow user_id)){
-        return fail($err, 203, 'xmlrpc.des.non_arifmetic', {'param'=>$p, 'value'=>$req->{$p}}) if ($req->{$p} && $req->{$p} =~ /\D/);
-        $req->{$p} += 0;
-    }
+    push @er, 'xmlrpc.des.non_arifmetic';
 
-    return fail($err, 209, 'xmlrpc.des.bad_value', {'param'=>'itemshow'}) if $req->{itemshow} > 100;
+    return fail( @er, { param => 'skip',     value => $skip      }) if $skip      =~ m{\D};
+    return fail( @er, { param => 'itemshow', value => $item_show }) if $item_show =~ m{\D};
+    return fail( @er, { param => 'user_id',  value => $user_id   }) if $user_id   =~ m{\D};
 
-    $req->{getselfpromo} = 1 unless defined $req->{getselfpromo};
+    return fail( $err, 209, 'xmlrpc.des.bad_value', {param => 'itemshow'} ) if $item_show > 100;
+    #----------------------#
 
-    my ($res, @err) = LJ::PersonalStats::Ratings::Posts->get_rating_segment( {
-        rating_country   => $req->{region},
-        ($req->{sort} ne 'default' ? (sort => $req->{sort}) : ()),
-        offset           => $req->{skip} || 0,
-        length           => $req->{itemshow} || 30,
-        show_selfpromo   => $req->{getselfpromo},
-        filter_selfpromo => $req->{getselfpromo},
-        user_id          => $user_id,
-    });
+    my $answer;
 
-    return fail($err, 500, $err[0]) unless $res && ref $res && $res->{data} && ref $res->{data};
+    my $rating = LJ::PersonalStats::Ratings::Posts::Top->new( {
+        homepage_v2          => 1,
+        category_id          => $category,
+        country              => $region,
+        sort                 => $sort,
+        skip                 => $skip,
+        length               => $item_show,
+        filter_commpromo     => 1,
+        filter_selfpromo     => 1,
+        filter_featured      => 0,
+        filter_blacklist     => 0,
+        filter_readlist      => 0,
+        unique_journals      => 0,
+        do_not_load_data     => 0,
+        do_not_include_promo => !$is_show_promo,
+    } );
 
-    my (@events, $selfpromo);
+    $answer->{posts} = $rating->ajax_output();
 
-    my $entry_opts = {
-        attrs         => [qw(ditemid subject_raw event_raw)],
-        remote_id     => $user_id,
-        map { $_ => $req->{$_} } qw(trim_widgets img_length get_video_ids get_polls asxml parseljtags),
-    };
+    my $selfpromo;
+    if (
+        $rating->selfpromo()
+        &&( my $sp = $rating->selfpromo()->current_promoted_object() )
+    ) {
 
-    my $user_opts = {
-        attrs => [qw(userid username)],
-    };
-
-    foreach my $row (@{$res->{data}}) {
-        $row->{ditemid}   = delete $row->{post_id} if $row->{post_id};
-        $row->{journalid} = delete $row->{journal_id} if $row->{journal_id};
-        LJ::get_aggregated_entry($row, $entry_opts);
-
-        $row->{userid} = delete $row->{journalid} if  $row->{journalid};
-
-        LJ::get_aggregated_user($row, $user_opts);
-
-        push @events, {
-            # rating data
-            position     => $row->{position},
-            delta        => $row->{delta},
-            isnew        => $row->{is_new} || 0,
-            was_in_promo => $row->{was_in_promo} || 0,
-            # entry data
-            ditemid      => $row->{ditemid},
-            subject      => $row->{subject_raw},
-            event        => $row->{event_raw},
-            # user data
-            posterid     => $row->{userid},
-            poster       => $row->{username}
-        }
-    }
-
-    if (my $sp = $res->{selfpromo} && $res->{selfpromo}->get_template_params ) {
-
-        my $obj = $sp->{object}->[0];
-
-        $obj->{ditemid}   = delete $obj->{post_id} if $obj->{post_id};
-        $obj->{journalid} = delete $obj->{journal_id} if $obj->{journal_id};
-        LJ::get_aggregated_entry($obj, $entry_opts);
+        my $entry = $sp->object();
+        my $poster = $entry->poster();
 
         $selfpromo = {
-            # selfpromo data
-            remaning_time => $obj->{timeleft},
-            price         => $obj->{buyout},
             # entry data
-            ditemid       => $obj->{ditemid},
-            subject       => $obj->{subject_raw},
-            event         => $obj->{event_raw},
+            ditemid   => $entry->ditemid(),
+            subject   => $entry->subject_raw(),
+            body      => $entry->event_raw(),
+            url       => $entry->url(),
+
             # user data
-            posterid      => $obj->{journalid},
-            poster        => $obj->{username},
+            poster_id       => $poster->id(),
+            poster_name     => $poster->name(),
+            poster_journal  => $poster->journal_url(),
         };
+
+        $answer->{selfpromo} = $selfpromo;
     }
 
-    return {
-        status => 'OK',
-        skip   => $req->{skip} || 0,
-        region => $req->{region},
-        events => \@events,
-        ($req->{getselfpromo} ? (selfpromo => $selfpromo) : ())
-    };
+    my $commpromo;
+    if (
+        $rating->commpromo()
+        &&( my $cp = $rating->commpromo()->promoted_object() ) 
+    ) {
+        my $entry = $cp->object();
+        my $poster = $entry->poster();
+
+        $commpromo = {
+            # entry data
+            ditemid   => $entry->ditemid(),
+            subject   => $entry->subject_raw(),
+            body      => $entry->event_raw(),
+            url       => $entry->url(),
+
+            # user data
+            poster_id       => $poster->id(),
+            poster_name     => $poster->name(),
+            poster_journal  => $poster->journal_url(),
+        };
+
+        $answer->{commpromo} = $commpromo;
+    }
+
+    $answer->{status} = 'OK';
+
+    return $answer;
 }
 
 sub getusersrating {
@@ -6243,6 +6299,95 @@ sub getusersrating {
         users => \@users,
         ($req->{getselfpromo} ? (selfpromo => $selfpromo) : ())
     };
+}
+
+sub getratingcategories {
+    my ($req, $err, $flags) = @_;
+
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getratingcategories');
+
+    my $categories = LJ::HomePage::Category->get_all_categories();
+    @$categories = map { $_->get_template_params } @$categories;
+
+    my @result = ();
+    foreach (@$categories) {
+        if ( $_->{is_visible} ) {
+            push @result, {
+                'name' => $_->{name},
+                'id'   => $_->{id  },
+            };
+        }
+    }
+
+    return \@result;
+}
+
+###################################################################
+#################################        Discovery functions     ##
+###################################################################
+
+sub getdiscoveryfeed {
+    my ($req, $err, $flags) = @_;
+
+    # my @discovery_feeds = LJ::Discovery::Feed->get_items(
+    #     category => $category,
+    #     itemshow => $item_show,
+    # );
+
+    # my @posts;
+    # foreach my $item (@discovery_feeds) {
+
+    #     my $entry = LJ::Discovery::Item->get(
+    #         url => $item->{url},
+    #     )->entry();
+
+    #     my $poster = $entry->poster();
+
+    #     push @{ $answer->{posts} }, {
+    #         # entry data
+    #         ditemid   => $entry->ditemid(),
+    #         subject   => $entry->subject_raw(),
+    #         body      => $entry->event_raw(),
+    #         url       => $entry->url(),
+
+    #         # user data
+    #         poster_id       => $poster->id(),
+    #         poster_name     => $poster->name(),
+    #         poster_journal  => $poster->journal_url(),
+    #     };
+    # }
+
+    # my @announces = LJ::Discovery::Announce->get_items();
+
+    # $answer->{announces} = \@announces;
+
+    return {};
+}
+
+sub getdiscoverycategories {
+    my ($req, $err, $flags) = @_;
+
+    $flags->{allow_anonymous} = 1;
+    return undef unless authenticate($req, $err, $flags) && authorize($req, $err, $flags, 'getdiscoverycategories');
+
+    my @categories = LJ::Discovery::Category->list();
+
+    my @result = ();
+    foreach (@categories) {
+        push @result, {
+            'name' => $_->{name},
+            'id'   => $_->{id  },
+        };
+    }
+
+    return \@result;
+}
+
+sub getdiscoveryitem {
+    my ($req, $err, $flags) = @_;
+
+    return {};
 }
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol

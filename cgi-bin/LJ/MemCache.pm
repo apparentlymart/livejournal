@@ -161,6 +161,8 @@ use Carp qw();
 use IO::Handle qw();
 use Data::Dumper qw();
 use String::CRC32 qw();
+use Errno qw( EINPROGRESS EWOULDBLOCK EISCONN );
+use AnyEvent;
 
 # Internal modules
 use LJ::MemCache::PP;
@@ -169,9 +171,21 @@ use LJ::RequestStatistics;
 
 ### VARIABLES ###
 
+my $HAVE_ZLIB = 0;
+BEGIN {
+   $HAVE_ZLIB = eval "use Compress::Zlib (); 1;";
+}
+
+my $HAVE_XS = eval "use Cache::Memcached::GetParserXS; 1;";
+my $parser_class = $HAVE_XS ? "Cache::Memcached::GetParserXS" : "Cache::Memcached::GetParser";
+
+# flag definitions
+use constant F_STORABLE => 1;
+use constant F_COMPRESS => 2;
+
 my @handlers = qw(
-    LJ::MemCache::Fast
     LJ::MemCache::PP
+    LJ::MemCache::Fast
 );
 my $used_handler;
 
@@ -316,6 +330,130 @@ sub gets {
 
 sub can_gets {
     return $used_handler->can_gets;
+}
+
+sub get_multi_async {
+    return {} if $GET_DISABLED;
+
+    my @keys = @_;
+
+    my (%connections, %keys_map) = ();
+
+    my $get_server_ipport = sub {
+        my ($key) = @_;
+        my $hashval    = ref $key eq 'ARRAY' ? int $key->[0] : _hashfunc($key);
+        my $num_server = $hashval % scalar(@LJ::MEMCACHE_SERVERS);
+
+        return $LJ::MEMCACHE_SERVERS[$num_server];
+    };
+
+    foreach my $key (@keys) {
+        my $s_num = $get_server_ipport->($key);
+
+        unless ( exists $keys_map{$s_num} ) {
+            $keys_map{$s_num} = [];
+            $connections{$s_num} = LJ::MemCache::PP->new ({
+                servers =>  [ $s_num ],
+            });
+        }
+
+        my $key_normal = ref $key eq 'ARRAY' ? $key->[1]
+                                             : $key;
+
+        push @{ $keys_map{$s_num} }, $key_normal;
+    }
+
+
+    my $ret = {};
+    my $finalize = sub {
+        my $map = $_[0];
+        $map = {@_} unless ref $map;
+
+        while (my ($k, $flags) = each %$map) {
+
+            # remove trailing \r\n
+            chop $ret->{$k}; chop $ret->{$k};
+
+            $ret->{$k} = Compress::Zlib::memGunzip($ret->{$k})
+                if $HAVE_ZLIB && $flags & F_COMPRESS;
+            if ($flags & F_STORABLE) {
+                # wrapped in eval in case a perl 5.6 Storable tries to
+                # unthaw data from a perl 5.8 Storable.  (5.6 is stupid
+                # and dies if the version number changes at all.  in 5.8
+                # they made it only die if it unencounters a new feature)
+                eval {
+                    $ret->{$k} = Storable::thaw($ret->{$k});
+                };
+                # so if there was a problem, just treat it as a cache miss.
+                if ($@) {
+                    delete $ret->{$k};
+                }
+           }
+       }
+    };
+
+    my $write_sock = sub {
+        my ($cid, $buffer) = @_;
+
+        my $sock = $connections{$cid}->get_sock;
+
+        while (1) {
+            my $res = send $sock, $$buffer, 0;
+            return 0
+                if !defined $res and $!==EWOULDBLOCK;
+            unless ($res > 0) {
+                ## Socket died (the same behaviour as in Cache::Memcached)
+                close $sock;
+                delete $connections{$cid};
+                return 0;
+            }
+            if ($res == length($$buffer)) { # all sent
+                return 1;
+            } else { # we only succeeded in sending some of it
+                substr($$buffer, 0, $res, ''); # delete the part we sent
+            }
+        }
+
+        return 0;
+    };
+
+    foreach my $cid (keys %connections) {
+        my $request = "get ".(join " ", @{ $keys_map{$cid} })."\r\n";
+        my ($win, $wout, $nfound);
+        while (1) {
+            $win = '';
+            vec($win, fileno($connections{$cid}->get_sock), 1) = 1;
+            $nfound = select(undef, $wout = $win, undef, 1); # 1 - select_timeout
+            last unless $nfound;
+            if (vec($wout, fileno($connections{$cid}->get_sock), 1)) {
+                last if $write_sock->($cid, \$request);
+            }
+        }
+    }
+
+    my $tmp = [];
+    my $cv = AnyEvent->condvar();
+    foreach my $conn (values %connections) {
+        $cv->begin;
+
+        my $mc_watcher; $mc_watcher = AnyEvent->io (
+            fh   => $conn->get_sock,
+            poll => 'r',
+            cb   => sub {
+                my $parser = $parser_class->new ($ret, 0, $finalize );
+                while (!$parser->parse_from_sock ($conn->get_sock)) {};
+                push @$tmp, %$ret;
+                undef $mc_watcher;
+                $ret = {};
+                $cv->end;
+            },
+        );
+    }
+    $cv->recv;
+
+    my %output = @$tmp;
+
+    return \%output;
 }
 
 sub get_multi {
