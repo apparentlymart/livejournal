@@ -283,9 +283,8 @@ sub do_request
     my ($method, $req, $err, $flags) = @_;
 
     # xmlrpc rate limit
-    my @limited_methods = qw(getevents);
     if (
-        ( grep { $method eq $_ } @limited_methods )        # Only for specified methods.
+        ( grep { $method eq $_ } @LJ::API_RATE_LIMIT_LIMITED_METHODS ) # Only for specified methods.
         && !$flags->{noauth}                               # Only for external calls.
         && ( $req->{'props'}->{'interface'} eq 'xml-rpc' ) # Only for xml-rpc calls.
         && LJ::Request->is_inited()                        # Only in web context.
