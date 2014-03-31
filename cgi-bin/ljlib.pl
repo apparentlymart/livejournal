@@ -487,7 +487,7 @@ sub get_timeupdate_multi {
     return {} unless @uids;
 
     my @memkeys = map { [$_, "tu:$_"] } @uids;
-    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+    my $mem = LJ::MemCache::get_multi_async(@memkeys) || {};
 
     my @need;
     my %timeupdate; # uid => timeupdate
