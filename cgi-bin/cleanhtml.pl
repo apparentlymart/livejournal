@@ -926,6 +926,8 @@ sub clean {
                 my $height = $attr->{height};
                 my $width  = $attr->{width};
 
+                my $center  = defined $attr->{center} ? 'b-journalpicture-alignment' : '';
+
                 my $style = '';
 
                 if ($width || $height) {
@@ -939,7 +941,7 @@ sub clean {
                     $img = qq{<a href="$href">$img</a>};
                 }
 
-                $img = qq{<figure class="b-journalpicture">$img<figcaption class="b-journalpicture-caption">};
+                $img = qq{<figure class="b-journalpicture b-journalpicture-alignment">$img<figcaption class="b-journalpicture-caption">};
 
                 $opencount{'lj-image'}++;
                 $newdata .= $img;
