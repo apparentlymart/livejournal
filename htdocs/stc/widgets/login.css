@@ -157,6 +157,7 @@
         display: inline-block;
         width: 30px;
         height: 30px;
+        margin-right: 10px;
         vertical-align: middle;
         cursor: pointer;
         border-radius: 2px;
@@ -207,6 +208,7 @@
         position: relative;
         width: 30px;
         height: 30px;
+        margin-right: 0;
         border: 1px solid #DAE3E6;
         border-radius: 2px;
         -moz-box-sizing: border-box;
