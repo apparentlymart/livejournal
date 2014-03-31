@@ -251,6 +251,7 @@ sub make_feed {
                     'journalid'    => $u->userid,
                     'posterid'     => $entry_obj->{'posterid'},
                     'entry_url'    => $entry_obj->url,
+                    'textonly'     => 1,
                 }
             );
 
