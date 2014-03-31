@@ -126,6 +126,7 @@
 /* Login form external block */
 
 .b-loginform-external {
+    padding: 0 0 3px;
     border-bottom: 1px solid #DAE3E6;
     }
     .b-loginform-external:after {
@@ -135,10 +136,7 @@
         border-collapse: collapse;
         }
 .b-loginform-external .b-loginform-col1 {
-    width: 60%;
-    }
-.b-loginform-external .b-loginform-col2 {
-    margin-left: 60%;
+    width: 100%;
     }
 .b-loginform-social,
 .b-loginform-droplist {
@@ -147,8 +145,11 @@
     list-style: none;
     }
     .b-loginform-social {
+        float: right;
         display: inline-block;
         height: 30px;
+        vertical-align: top;
+        white-space: nowrap;
         }
     .b-loginform-social-item {
         overflow: hidden;
@@ -156,36 +157,52 @@
         display: inline-block;
         width: 30px;
         height: 30px;
+        vertical-align: middle;
         cursor: pointer;
         border-radius: 2px;
-        background-position: 50% 50%;
-        background-repeat: no-repeat;
-        background-color: #dae3e6;
         }
-        .b-loginform-social-google {
-            background-image: url(/img/social-icons/google.svg);
+        .b-loginform-social-link {
+            background-image: url(/img/social-icons/social-icons.svg?v=2);
+            background-repeat: no-repeat;
+            background-color: #005673;
+            }
+        .b-loginform-social-google .b-loginform-social-link {
+            background-position: -80px 0;
+            }
+        .b-loginform-social-mail .b-loginform-social-link {
+            background-position: 0 -40px;
+            }
+        .b-loginform-social-vk .b-loginform-social-link {
+            background-position: -120px 0;
+            }      
+        .b-loginform-social-openid .b-loginform-social-link {
+            background-position: -160px 0;
+            }
+        .b-loginform-social-fb .b-loginform-social-link {
+            background-position: 0 0;
+            }
+        .b-loginform-social-tw .b-loginform-social-link {
+            background-position: -40px 0;
+            }
+        .b-loginform-social-google .b-loginform-social-link:hover {
             background-color: #DD4B39;
             }
-        .b-loginform-social-mail {
-            background-image: url(/img/social-icons/mailru.svg);
+        .b-loginform-social-mail .b-loginform-social-link:hover {
             background-color: #0857a6;
             }
-        .b-loginform-social-vk {
-            background-image: url(/img/social-icons/vkontakte.svg);
+        .b-loginform-social-vk .b-loginform-social-link:hover {
             background-color: #45668E;
-            }      
-        .b-loginform-social-openid {
-            background-image: url(/img/social-icons/openid.svg);
+            }
+        .b-loginform-social-openid .b-loginform-social-link:hover {
             background-color: #F78C40;
             }
-        .b-loginform-social-fb {
-            background-image: url(/img/social-icons/facebook.svg);
+        .b-loginform-social-fb .b-loginform-social-link:hover {
             background-color: #3B5998;
-            }
-        .b-loginform-social-tw {
-            background-image: url(/img/social-icons/twitter.svg);
+            }  
+        .b-loginform-social-tw .b-loginform-social-link:hover {
             background-color: #00ACEE;
             }
+
     .b-loginform-drop {
         position: relative;
         width: 30px;
@@ -219,10 +236,10 @@
         height: 30px;
         }
     .b-loginform-droplist {
+        clear: both;
         opacity: 0;
         height: 0;
         padding: 4px 0;
-        border-top: 1px solid #DAE3E6;
         -moz-user-select: none;
         -khtml-user-select: none;
         user-select: none;
@@ -278,6 +295,7 @@
     }
 .b-loginform-create {
     text-align: right;
+    margin: 10px 0 0;
     }
 .b-loginform-create .b-loginform-link {
     text-transform: uppercase;
@@ -306,6 +324,10 @@
     font-size: 13px;
     color: #7A9199;
     }
+.b-loginform-external-label {
+    float: left;
+    padding: 6px 10px 0 0;
+    } 
 .b-input {
     width: 100%;
     height: 48px;
@@ -362,7 +384,22 @@
         margin-left: 0;
         margin-right: 0;
         text-align: left;
-        }      
+        }  
+    .b-loginform-external-label {
+        display: block;
+        float: none;
+        }    
+    .b-loginform-social, 
+    .b-loginform-droplist {
+        float: none;
+        display: inline-block;
+        vertical-align: middle;
+        opacity: 1;
+        height: auto;
+        }
+    .b-loginform-drop {
+        display: none;
+        }
     .b-loginform-error {
         float: none;
         }
