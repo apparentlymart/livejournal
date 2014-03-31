@@ -352,25 +352,9 @@
 .b-ljform-checkbox {
     margin: 0;
     }
-.b-ljform-btn {
-    display: inline-block;
-    margin: -5px 0;
-    padding: 15px 60px 13px;
-    border: 0;
-    border-radius: 3px;
-    box-shadow: 0 2px 0 #008BA8;
-    text-transform: uppercase;
-    white-space: nowrap;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: #009FBF;
-    color: #FFF;
-    }   
-    .b-ljform-btn:hover {
-        background: #1AB9D9;
-        }
-
+.b-loginform-submit .b-flatbutton {
+    background-color: #09C;
+    }
 
 @media (max-width: 480px) {
 
